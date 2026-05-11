@@ -16,7 +16,6 @@ namespace Application.Features.Bookings.Commands.ConfirmBooking
         IBookingReadRepository bookingReadRepository,
         IBookingInsertRepository bookingInsertRepository,
         ILeadReadRepository leadReadRepository,
-        ILeadInsertRepository leadInsertRepository,
         ILeadUpdateRepository leadUpdateRepository,
         ILeadActivityInsertRepository leadActivityInsertRepository,
         IUnitOfWork unitOfWork,

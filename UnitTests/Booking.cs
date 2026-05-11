@@ -125,7 +125,6 @@ public class Booking
             _bookingReadRepoMock.Object,
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
-            _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
@@ -158,7 +157,6 @@ public class Booking
             _bookingReadRepoMock.Object,
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
-            _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
@@ -189,7 +187,6 @@ public class Booking
             _bookingReadRepoMock.Object,
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
-            _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
@@ -210,7 +207,6 @@ public class Booking
             _bookingReadRepoMock.Object,
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
-            _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
@@ -265,3 +261,5 @@ public class Booking
     #pragma warning restore IDE0079 
     #pragma warning restore CRR0035
 }
+
+

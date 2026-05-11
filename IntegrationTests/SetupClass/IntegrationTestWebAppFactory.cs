@@ -11,7 +11,6 @@ using Infrastructure.Repositories;
 using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Services;
 using Infrastructure.Services.HR;
-using Infrastructure.Repositories.MediaFile.File;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

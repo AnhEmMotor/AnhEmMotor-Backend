@@ -12,6 +12,8 @@ using FluentAssertions;
 using FluentValidation.TestHelper;
 using Moq;
 using SupplierEntity = Domain.Entities.Supplier;
+using UnitTests.Models;
+
 
 namespace UnitTests;
 
@@ -683,33 +685,7 @@ public class Supplier
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 
-    public class TestEntity : BaseEntity
-    {
-        public int Id { get; set; }
-    }
 
-    public class TestResponse
-    {
-        public int Id { get; set; }
-
-        public DateTimeOffset? CreatedAt { get; set; }
-
-        public DateTimeOffset? UpdatedAt { get; set; }
-
-        public DateTimeOffset? DeletedAt { get; set; }
-    }
-
-    public class TestResponseNoAudit
-    {
-        public int Id { get; set; }
-    }
-
-    public class TestResponseWrongType
-    {
-        public int Id { get; set; }
-
-        public string? CreatedAt { get; set; }
-    }
 
     [Fact(DisplayName = "SUP_061 - Gán CreatedAt thành công")]
     public void SUP_061_Apply_CreatedAt_Success()

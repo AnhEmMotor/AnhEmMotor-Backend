@@ -131,7 +131,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Permissions.Banners.Create"],
+            ["Domain.Constants.Permission.Permissions.Banners.Create"],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -169,7 +169,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Permissions.Banners.Create"],
+            ["Domain.Constants.Permission.Permissions.Banners.Create"],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -284,7 +284,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Permissions.Banners.Update"],
+            ["Domain.Constants.Permission.Permissions.Banners.Update"],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -327,7 +327,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Permissions.Banners.Update", "Permissions.Banners.View"],
+            ["Domain.Constants.Permission.Permissions.Banners.Update", "Domain.Constants.Permission.Permissions.Banners.View"],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -350,3 +350,4 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         auditResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }
+

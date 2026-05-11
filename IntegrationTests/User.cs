@@ -70,7 +70,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             adminUsername,
             "AdminPass123!",
-            [PermissionsList.Users.Edit, PermissionsList.Users.Delete],
+            [Domain.Constants.Permission.Permissions.Users.Edit, Domain.Constants.Permission.Permissions.Users.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -117,7 +117,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Users.Edit],
+            [Domain.Constants.Permission.Permissions.Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -151,7 +151,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Users.Edit],
+            [Domain.Constants.Permission.Permissions.Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -195,7 +195,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Users.Edit],
+            [Domain.Constants.Permission.Permissions.Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -552,7 +552,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Users.View],
+            [Domain.Constants.Permission.Permissions.Users.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -569,7 +569,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.Permissions.Should().NotBeNullOrEmpty();
-        content.Permissions!.Should().Contain(PermissionsList.Users.View);
+        content.Permissions!.Should().Contain(Domain.Constants.Permission.Permissions.Users.View);
     }
 
     [Fact(DisplayName = "USER_054 - Verify Status field cho Active user")]
@@ -1273,7 +1273,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             adminUsername,
             password,
-            [PermissionsList.Users.Edit],
+            [Domain.Constants.Permission.Permissions.Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1336,4 +1336,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
+
+
 

@@ -189,7 +189,6 @@ public class Lead
             _bookingReadRepoMock.Object,
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
-            _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
@@ -212,7 +211,6 @@ public class Lead
             _bookingReadRepoMock.Object,
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
-            _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
@@ -495,3 +493,5 @@ public class Lead
         lead.Score.Should().Be(0);
     }
 }
+
+

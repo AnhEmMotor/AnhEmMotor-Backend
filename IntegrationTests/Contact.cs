@@ -113,7 +113,7 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             "Password123!",
-            [PermissionsList.Contacts.Reply],
+            [Domain.Constants.Permission.Permissions.Contacts.Reply],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -272,3 +272,5 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         contact!.Subject.Should().Be("Cần tư vấn xe SH");
     }
 }
+
+

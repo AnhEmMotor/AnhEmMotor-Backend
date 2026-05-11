@@ -57,13 +57,13 @@ public class PermissionAndRole
                 {
                     new()
                     {
-                        ID = PermissionsList.Brands.View,
+                        ID = Domain.Constants.Permission.Permissions.Brands.View,
                         DisplayName = "View Brands",
                         Description = "Xem danh sách thương hiệu"
                     },
                     new()
                     {
-                        ID = PermissionsList.Brands.Create,
+                        ID = Domain.Constants.Permission.Permissions.Brands.Create,
                         DisplayName = "Create Brand",
                         Description = "Tạo thương hiệu mới"
                     }
@@ -75,7 +75,7 @@ public class PermissionAndRole
                 {
                     new()
                     {
-                        ID = PermissionsList.Products.View,
+                        ID = Domain.Constants.Permission.Permissions.Products.View,
                         DisplayName = "View Products",
                         Description = "Xem danh sách sản phẩm"
                     }
@@ -87,7 +87,7 @@ public class PermissionAndRole
                 {
                     new()
                     {
-                        ID = PermissionsList.Roles.View,
+                        ID = Domain.Constants.Permission.Permissions.Roles.View,
                         DisplayName = "View Roles",
                         Description = "Xem danh sách vai trò"
                     }
@@ -114,7 +114,7 @@ public class PermissionAndRole
             Email = "test@test.com",
             Roles = ["Manager"],
             Permissions =
-                [PermissionsList.Brands.View, PermissionsList.Brands.Create, PermissionsList.Products.View, PermissionsList.Products.Create]
+                [Domain.Constants.Permission.Permissions.Brands.View, Domain.Constants.Permission.Permissions.Brands.Create, Domain.Constants.Permission.Permissions.Products.View, Domain.Constants.Permission.Permissions.Products.Create]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMyPermissionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
@@ -146,7 +146,7 @@ public class PermissionAndRole
             Email = "target@test.com",
             Roles = ["Staff"],
             Permissions =
-                [PermissionsList.Products.View, PermissionsList.Brands.View, PermissionsList.Files.View, PermissionsList.Files.Upload, PermissionsList.Suppliers.View]
+                [Domain.Constants.Permission.Permissions.Products.View, Domain.Constants.Permission.Permissions.Brands.View, Domain.Constants.Permission.Permissions.Files.View, Domain.Constants.Permission.Permissions.Files.Upload, Domain.Constants.Permission.Permissions.Suppliers.View]
         };
         _mediatorMock.Setup(
             m => m.Send(It.Is<GetUserPermissionsByIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
@@ -178,12 +178,12 @@ public class PermissionAndRole
         var roleId = Guid.NewGuid();
         var expectedPermissions = new List<string>
         {
-            PermissionsList.Brands.View,
-            PermissionsList.Brands.Create,
-            PermissionsList.Products.View,
-            PermissionsList.Products.Create,
-            PermissionsList.Files.View,
-            PermissionsList.Suppliers.View
+            Domain.Constants.Permission.Permissions.Brands.View,
+            Domain.Constants.Permission.Permissions.Brands.Create,
+            Domain.Constants.Permission.Permissions.Products.View,
+            Domain.Constants.Permission.Permissions.Products.Create,
+            Domain.Constants.Permission.Permissions.Files.View,
+            Domain.Constants.Permission.Permissions.Suppliers.View
         };
         _mediatorMock.Setup(
             m => m.Send(It.Is<GetRolePermissionsQuery>(q => q.RoleId == roleId), It.IsAny<CancellationToken>()))
@@ -237,7 +237,7 @@ public class PermissionAndRole
         {
             RoleName = "NewRole",
             Description = "Test Role",
-            Permissions = [PermissionsList.Brands.View, PermissionsList.Products.View]
+            Permissions = [Domain.Constants.Permission.Permissions.Brands.View, Domain.Constants.Permission.Permissions.Products.View]
         };
         var expectedResponse = new RoleCreateResponse
         {
@@ -265,7 +265,7 @@ public class PermissionAndRole
         {
             RoleName = "Admin",
             Description = "Duplicate",
-            Permissions = [PermissionsList.Brands.View]
+            Permissions = [Domain.Constants.Permission.Permissions.Brands.View]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("Role name already exists"));
@@ -458,7 +458,7 @@ public class PermissionAndRole
     public async Task UpdateRole_NewPermission_ReturnsOk()
     {
         var roleId = Guid.NewGuid();
-        var request = new UpdateRoleCommand { RoleId = roleId, Permissions = [PermissionsList.News.Create] };
+        var request = new UpdateRoleCommand { RoleId = roleId, Permissions = [Domain.Constants.Permission.Permissions.News.Create] };
         var expectedResponse = new PermissionRoleUpdateResponse { Message = "Role updated successfully" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PermissionRoleUpdateResponse>.Success(expectedResponse));
@@ -466,3 +466,5 @@ public class PermissionAndRole
         result.Should().BeOfType<OkObjectResult>();
     }
 }
+
+

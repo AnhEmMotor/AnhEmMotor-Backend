@@ -194,7 +194,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Users.View],
+            [Domain.Constants.Permission.Permissions.Users.View],
             CancellationToken.None,
             email: "manager@example.com",
             roleName: "Manager")
@@ -281,3 +281,5 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     }
     #pragma warning restore CRR0035
 }
+
+

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Reflection;
 using WebAPI.Controllers.V1;
-using static Domain.Constants.Permission.PermissionsList;
+using Domain.Constants.Permission.Permissions;
 
 namespace ControllerTests;
 
@@ -110,3 +110,4 @@ public class MediaFile
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
+

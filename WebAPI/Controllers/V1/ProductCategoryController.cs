@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
+using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -79,7 +79,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin danh mục sản phẩm theo Id.
     /// </summary>
-    [HttpGet("{id:int}", Name = RouteNames.ProductCategory.GetById)]
+    [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.ProductCategory.GetById)]
     [HasPermission(ProductCategories.View)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -104,7 +104,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
-            RouteNames.ProductCategory.GetById,
+            Domain.Constants.RouteNames.ProductCategory.GetById,
             new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
@@ -186,3 +186,5 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
+
+

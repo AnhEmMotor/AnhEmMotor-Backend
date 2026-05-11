@@ -8,7 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
+using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -75,3 +75,4 @@ public class EmployeeController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
+

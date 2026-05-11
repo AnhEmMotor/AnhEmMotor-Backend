@@ -5,7 +5,6 @@ using Domain.Constants.Order;
 using Domain.Constants.Permission;
 using Domain.Entities;
 using Domain.Entities.HR;
-using Domain.Entities.HR;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
@@ -48,7 +47,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             "admin",
             "AdminPass123!",
-            [PermissionsList.HR.Create],
+            [Domain.Constants.Permission.Permissions.HR.Create],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -233,7 +232,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"sales_{uniqueId}",
             "Password123!",
-            [PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus],
+            [Domain.Constants.Permission.Permissions.Outputs.Create, Domain.Constants.Permission.Permissions.Outputs.ChangeStatus],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -346,7 +345,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"admin_hr07_{uniqueId}",
             "Password123!",
-            [PermissionsList.HR.Edit, PermissionsList.HR.View, PermissionsList.Payroll.Approve, PermissionsList.Payroll.View],
+            [Domain.Constants.Permission.Permissions.HR.Edit, Domain.Constants.Permission.Permissions.HR.View, Domain.Constants.Permission.Permissions.Payroll.Approve, Domain.Constants.Permission.Permissions.Payroll.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -406,3 +405,5 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         updatedRecord.PaidAt.Should().NotBeNull();
     }
 }
+
+

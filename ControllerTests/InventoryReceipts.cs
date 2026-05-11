@@ -53,7 +53,7 @@ public class InventoryReceipts
             Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.Create"));
+            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Domain.Constants.Permission.Permissions.Inputs.Create"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CreateInputAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -64,7 +64,7 @@ public class InventoryReceipts
     {
         var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputsListQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.View"));
+            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Domain.Constants.Permission.Permissions.Inputs.View"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetInputsAsync(sieveModel, CancellationToken.None))
             .ConfigureAwait(true);
@@ -75,7 +75,7 @@ public class InventoryReceipts
     {
         int inputId = 1;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputByIdQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.View"));
+            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Domain.Constants.Permission.Permissions.Inputs.View"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetInputByIdAsync(inputId, CancellationToken.None))
             .ConfigureAwait(true);
@@ -87,7 +87,7 @@ public class InventoryReceipts
         int inputId = 1;
         var request = new UpdateInputCommand { Notes = "Updated", SupplierId = 2, Products = [] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInputCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.Edit"));
+            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Domain.Constants.Permission.Permissions.Inputs.Edit"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateInputAsync(inputId, request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -111,7 +111,7 @@ public class InventoryReceipts
         var request = new UpdateInputStatusCommand { StatusId = "finished" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInputStatusCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(
-                new UnauthorizedAccessException("User does not have permission Permissions.Inputs.ChangeStatus"));
+                new UnauthorizedAccessException("User does not have permission Domain.Constants.Permission.Permissions.Inputs.ChangeStatus"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateInputStatusAsync(inputId, request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -132,7 +132,7 @@ public class InventoryReceipts
     {
         int inputId = 1;
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteInputCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.Delete"));
+            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Domain.Constants.Permission.Permissions.Inputs.Delete"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.DeleteInputAsync(inputId, CancellationToken.None))
             .ConfigureAwait(true);
@@ -163,7 +163,7 @@ public class InventoryReceipts
     {
         int inputId = 1;
         _mediatorMock.Setup(m => m.Send(It.IsAny<CloneInputCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.Create"));
+            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Domain.Constants.Permission.Permissions.Inputs.Create"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CloneInputAsync(inputId, CancellationToken.None))
             .ConfigureAwait(true);
@@ -290,7 +290,7 @@ public class InventoryReceipts
     public async Task GetInputStatuses_MissingPermission_ThrowsUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.View"));
+            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Domain.Constants.Permission.Permissions.Inputs.View"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetInputStatusesAsync(CancellationToken.None))
             .ConfigureAwait(true);
@@ -328,3 +328,4 @@ public class InventoryReceipts
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
+

@@ -40,7 +40,7 @@ public class CommissionController(ISender mediator) : ApiController
     /// <param name="year">The year.</param>
     /// <param name="ct">The cancellation token.</param>
     [HttpGet("payroll-summary")]
-    [HasPermission(PermissionsList.Payroll.View)]
+    [HasPermission(Domain.Constants.Permission.Permissions.Payroll.View)]
     [ProducesResponseType(typeof(List<PayrollResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPayrollSummaryAsync(
         [FromQuery] int month,
@@ -57,7 +57,7 @@ public class CommissionController(ISender mediator) : ApiController
     /// <param name="command">The approve payroll command.</param>
     /// <param name="ct">The cancellation token.</param>
     [HttpPost("approve-payroll")]
-    [HasPermission(PermissionsList.Payroll.Approve)]
+    [HasPermission(Domain.Constants.Permission.Permissions.Payroll.Approve)]
     public async Task<IActionResult> ApprovePayrollAsync([FromBody] ApprovePayrollCommand command, CancellationToken ct)
     {
         var result = await mediator.Send(command, ct).ConfigureAwait(true);
@@ -66,3 +66,5 @@ public class CommissionController(ISender mediator) : ApiController
         return Ok();
     }
 }
+
+

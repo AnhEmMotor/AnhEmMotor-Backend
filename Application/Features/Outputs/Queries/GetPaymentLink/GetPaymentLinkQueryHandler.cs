@@ -7,6 +7,7 @@ using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants.Order;
 using Domain.Constants.Permission;
+using Permissions = Domain.Constants.Permission.Permissions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -52,7 +53,7 @@ namespace Application.Features.Outputs.Queries.GetPaymentLink
                         roleIds,
                         cancellationToken)
                         .ConfigureAwait(false);
-                    if (userPermissions != null && userPermissions.Contains(PermissionsList.Outputs.Edit))
+                    if (userPermissions != null && userPermissions.Contains(Domain.Constants.Permission.Permissions.Outputs.Edit))
                     {
                         hasEditPermission = true;
                     }
@@ -133,3 +134,4 @@ namespace Application.Features.Outputs.Queries.GetPaymentLink
         }
     }
 }
+

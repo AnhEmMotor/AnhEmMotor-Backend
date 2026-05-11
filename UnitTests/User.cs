@@ -558,7 +558,7 @@ public class User
         var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
         var roles = new List<string> { "Manager" };
         var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
-        var permissionNames = new List<string> { PermissionsList.Brands.View, PermissionsList.Products.View };
+        var permissionNames = new List<string> { Domain.Constants.Permission.Permissions.Brands.View, Domain.Constants.Permission.Permissions.Products.View };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
@@ -572,8 +572,8 @@ public class User
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.Permissions.Should().BeAssignableTo<IList<string>>();
-        result.Value.Permissions.Should().Contain(PermissionsList.Brands.View);
-        result.Value.Permissions.Should().Contain(PermissionsList.Products.View);
+        result.Value.Permissions.Should().Contain(Domain.Constants.Permission.Permissions.Brands.View);
+        result.Value.Permissions.Should().Contain(Domain.Constants.Permission.Permissions.Products.View);
         result.Value.Permissions.Should().NotContainNulls();
     }
 
@@ -585,7 +585,7 @@ public class User
         var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
         var roles = new List<string> { "Manager" };
         var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
-        var permissionNames = new List<string> { PermissionsList.Suppliers.View, PermissionsList.Files.Upload };
+        var permissionNames = new List<string> { Domain.Constants.Permission.Permissions.Suppliers.View, Domain.Constants.Permission.Permissions.Files.Upload };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
@@ -599,8 +599,8 @@ public class User
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.Permissions.Should().BeAssignableTo<IList<string>>();
-        result.Value.Permissions.Should().Contain(PermissionsList.Suppliers.View);
-        result.Value.Permissions.Should().Contain(PermissionsList.Files.Upload);
+        result.Value.Permissions.Should().Contain(Domain.Constants.Permission.Permissions.Suppliers.View);
+        result.Value.Permissions.Should().Contain(Domain.Constants.Permission.Permissions.Files.Upload);
     }
 
     [Fact(DisplayName = "USR_PERM_003 - Ki?m tra d?nh d?ng response getUserPermissionsById (Contract)")]
@@ -614,4 +614,6 @@ public class User
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
+
+
 

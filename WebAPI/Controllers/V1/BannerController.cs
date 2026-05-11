@@ -29,7 +29,7 @@ public class BannerController(ISender sender) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
     [HttpPost]
-    [HasPermission("Permissions.Banners.Create")]
+    [HasPermission("Domain.Constants.Permission.Permissions.Banners.Create")]
     [SwaggerOperation(Summary = "Thêm banner mới")]
     public async Task<IActionResult> CreateAsync(
         [FromBody] CreateBannerCommand command,
@@ -47,7 +47,7 @@ public class BannerController(ISender sender) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPut("{id}")]
-    [HasPermission("Permissions.Banners.Update")]
+    [HasPermission("Domain.Constants.Permission.Permissions.Banners.Update")]
     [SwaggerOperation(Summary = "Cập nhật banner")]
     public async Task<IActionResult> UpdateAsync(
         int id,
@@ -67,7 +67,7 @@ public class BannerController(ISender sender) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả xóa</returns>
     [HttpDelete("{id}")]
-    [HasPermission("Permissions.Banners.Delete")]
+    [HasPermission("Domain.Constants.Permission.Permissions.Banners.Delete")]
     [SwaggerOperation(Summary = "Xóa banner")]
     public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
@@ -108,7 +108,7 @@ public class BannerController(ISender sender) : ApiController
     /// <returns>Danh sách banner</returns>
     /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet]
-    [HasPermission("Permissions.Banners.View")]
+    [HasPermission("Domain.Constants.Permission.Permissions.Banners.View")]
     [SwaggerOperation(Summary = "Lấy toàn bộ danh sách banner")]
     public async Task<IActionResult> GetListAsync(CancellationToken cancellationToken)
     {
@@ -123,7 +123,7 @@ public class BannerController(ISender sender) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Danh sách lịch sử</returns>
     [HttpGet("{id}/audit")]
-    [HasPermission("Permissions.Banners.View")]
+    [HasPermission("Domain.Constants.Permission.Permissions.Banners.View")]
     [SwaggerOperation(Summary = "Lấy lịch sử thay đổi của banner")]
     public async Task<IActionResult> GetAuditLogsAsync(int id, CancellationToken cancellationToken)
     {
@@ -131,3 +131,4 @@ public class BannerController(ISender sender) : ApiController
         return HandleResult(result);
     }
 }
+

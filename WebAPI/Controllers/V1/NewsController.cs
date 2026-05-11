@@ -33,7 +33,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
     [HttpPost]
-    [HasPermission("Permissions.News.Create")]
+    [HasPermission("Domain.Constants.Permission.Permissions.News.Create")]
     [SwaggerOperation(Summary = "Tạo bài viết mới")]
     public async Task<IActionResult> CreateAsync(
         [FromBody] CreateNewsCommand command,
@@ -69,7 +69,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPut("{id}")]
-    [HasPermission("Permissions.News.Update")]
+    [HasPermission("Domain.Constants.Permission.Permissions.News.Update")]
     [SwaggerOperation(Summary = "Cập nhật bài viết")]
     public async Task<IActionResult> UpdateAsync(
         int id,
@@ -89,7 +89,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả xóa</returns>
     [HttpDelete("{id}")]
-    [HasPermission("Permissions.News.Delete")]
+    [HasPermission("Domain.Constants.Permission.Permissions.News.Delete")]
     [SwaggerOperation(Summary = "Xóa bài viết")]
     public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
@@ -121,7 +121,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPatch("{id}/status")]
-    [HasPermission("Permissions.News.Update")]
+    [HasPermission("Domain.Constants.Permission.Permissions.News.Update")]
     [SwaggerOperation(Summary = "Cập nhật trạng thái hiển thị bài viết")]
     public async Task<IActionResult> UpdateStatusAsync(
         int id,
@@ -134,4 +134,5 @@ public class NewsController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
+
 

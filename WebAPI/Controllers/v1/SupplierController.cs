@@ -23,7 +23,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
+using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -78,7 +78,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="id">Mã nhà cung c?p c?n l?y thông tin.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpGet("{id:int}", Name = RouteNames.Supplier.GetById)]
+    [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.Supplier.GetById)]
     [HasPermission(Suppliers.View)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -125,7 +125,7 @@ public class SupplierController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateSupplierCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, RouteNames.Supplier.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
+        return HandleCreated(result, Domain.Constants.RouteNames.Supplier.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>
@@ -280,3 +280,5 @@ public class SupplierController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
+
+

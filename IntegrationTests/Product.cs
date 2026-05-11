@@ -66,7 +66,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -124,7 +124,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -187,7 +187,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -257,7 +257,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -331,7 +331,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -383,7 +383,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View, PermissionsList.Inputs.View],
+            [Domain.Constants.Permission.Permissions.Products.View, Domain.Constants.Permission.Permissions.Inputs.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -436,7 +436,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -490,7 +490,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Edit],
+            [Domain.Constants.Permission.Permissions.Inputs.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -547,7 +547,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Outputs.Create],
+            [Domain.Constants.Permission.Permissions.Outputs.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -604,7 +604,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -675,7 +675,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.Create],
+            [Domain.Constants.Permission.Permissions.Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -746,7 +746,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.Create],
+            [Domain.Constants.Permission.Permissions.Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -816,7 +816,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -887,7 +887,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -943,7 +943,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.Create],
+            [Domain.Constants.Permission.Permissions.Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -994,7 +994,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.ChangeStatus],
+            [Domain.Constants.Permission.Permissions.Products.ChangeStatus],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -1062,7 +1062,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.ChangeStatus],
+            [Domain.Constants.Permission.Permissions.Products.ChangeStatus],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -1129,7 +1129,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.Create],
+            [Domain.Constants.Permission.Permissions.Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -1198,7 +1198,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.Create],
+            [Domain.Constants.Permission.Permissions.Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -1248,7 +1248,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.Create],
+            [Domain.Constants.Permission.Permissions.Products.Create],
             CancellationToken.None,
             $"u_{uniqueId}@x.com")
             .ConfigureAwait(true);
@@ -1298,7 +1298,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Products.Edit],
+            [Domain.Constants.Permission.Permissions.Products.View, Domain.Constants.Permission.Permissions.Products.Create, Domain.Constants.Permission.Permissions.Products.Edit],
             CancellationToken.None,
             $"u_{uniqueId}@x.com")
             .ConfigureAwait(true);
@@ -1347,7 +1347,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Products.Edit],
+            [Domain.Constants.Permission.Permissions.Products.View, Domain.Constants.Permission.Permissions.Products.Create, Domain.Constants.Permission.Permissions.Products.Edit],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);
@@ -1419,7 +1419,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);
@@ -1471,7 +1471,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);
@@ -1565,7 +1565,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);
@@ -1629,7 +1629,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);
@@ -1691,7 +1691,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);
@@ -1721,7 +1721,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Edit],
+            [Domain.Constants.Permission.Permissions.Inputs.Edit],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);
@@ -2179,7 +2179,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View, PermissionsList.Inputs.View],
+            [Domain.Constants.Permission.Permissions.Products.View, Domain.Constants.Permission.Permissions.Inputs.View],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);
@@ -2280,7 +2280,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -2326,7 +2326,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -2408,7 +2408,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -2482,7 +2482,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -2676,7 +2676,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.View, PermissionsList.Products.Edit],
+            [Domain.Constants.Permission.Permissions.Products.View, Domain.Constants.Permission.Permissions.Products.Edit],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2792,7 +2792,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"user_{uniqueIdAuth}",
             "Password123!",
-            [PermissionsList.Products.Create, PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.Create, Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -2821,7 +2821,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [PermissionsList.Products.Create],
+            [Domain.Constants.Permission.Permissions.Products.Create],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -2888,7 +2888,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [PermissionsList.Products.Create],
+            [Domain.Constants.Permission.Permissions.Products.Create],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -2939,7 +2939,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [PermissionsList.Products.Create],
+            [Domain.Constants.Permission.Permissions.Products.Create],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -2987,7 +2987,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [PermissionsList.Products.Edit],
+            [Domain.Constants.Permission.Permissions.Products.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -3038,7 +3038,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [PermissionsList.Products.Edit],
+            [Domain.Constants.Permission.Permissions.Products.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -3088,7 +3088,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [PermissionsList.Products.Edit],
+            [Domain.Constants.Permission.Permissions.Products.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -3140,7 +3140,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -3269,7 +3269,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             "Password123!",
-            [PermissionsList.Products.Edit],
+            [Domain.Constants.Permission.Permissions.Products.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -3324,7 +3324,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             "Password123!",
-            [PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -3375,7 +3375,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"u_{uniqueId}",
             "Pass123!",
-            [PermissionsList.Products.Create, PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.Create, Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -3422,7 +3422,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"u_{uniqueId}",
             "Pass123!",
-            [PermissionsList.Products.Edit, PermissionsList.Products.View],
+            [Domain.Constants.Permission.Permissions.Products.Edit, Domain.Constants.Permission.Permissions.Products.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -3481,7 +3481,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"u_{uniqueId}",
             "Pass123!",
-            [PermissionsList.Products.Edit],
+            [Domain.Constants.Permission.Permissions.Products.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -3522,7 +3522,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             $"u_{uniqueId}",
             "Pass123!",
-            [PermissionsList.Products.Edit],
+            [Domain.Constants.Permission.Permissions.Products.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -3553,3 +3553,5 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
     #pragma warning restore CRR0035
 }
+
+

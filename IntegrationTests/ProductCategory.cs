@@ -54,7 +54,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [Domain.Constants.Permission.Permissions.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -107,7 +107,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [Domain.Constants.Permission.Permissions.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -160,7 +160,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [Domain.Constants.Permission.Permissions.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -218,7 +218,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [Domain.Constants.Permission.Permissions.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -266,7 +266,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [Domain.Constants.Permission.Permissions.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -301,7 +301,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [Domain.Constants.Permission.Permissions.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -353,7 +353,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [Domain.Constants.Permission.Permissions.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -408,7 +408,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [Domain.Constants.Permission.Permissions.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -455,7 +455,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [Domain.Constants.Permission.Permissions.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -482,7 +482,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [Domain.Constants.Permission.Permissions.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -523,7 +523,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Create],
+            [Domain.Constants.Permission.Permissions.ProductCategories.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -560,7 +560,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Edit],
+            [Domain.Constants.Permission.Permissions.ProductCategories.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -607,7 +607,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [Domain.Constants.Permission.Permissions.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -658,7 +658,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [Domain.Constants.Permission.Permissions.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -719,7 +719,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [Domain.Constants.Permission.Permissions.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -778,7 +778,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [Domain.Constants.Permission.Permissions.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -834,7 +834,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [Domain.Constants.Permission.Permissions.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -890,7 +890,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [Domain.Constants.Permission.Permissions.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -935,3 +935,5 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     }
     #pragma warning restore CRR0035
 }
+
+

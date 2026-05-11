@@ -48,7 +48,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Settings.View],
+            [Domain.Constants.Permission.Permissions.Settings.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -159,7 +159,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Settings.View],
+            [Domain.Constants.Permission.Permissions.Settings.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -191,7 +191,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Settings.Edit],
+            [Domain.Constants.Permission.Permissions.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -256,7 +256,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Settings.Edit],
+            [Domain.Constants.Permission.Permissions.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -306,7 +306,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Settings.View],
+            [Domain.Constants.Permission.Permissions.Settings.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -368,7 +368,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Settings.Edit],
+            [Domain.Constants.Permission.Permissions.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -416,7 +416,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Settings.Edit],
+            [Domain.Constants.Permission.Permissions.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -464,7 +464,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Settings.Edit],
+            [Domain.Constants.Permission.Permissions.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -506,7 +506,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PermissionsList.Settings.Edit],
+            [Domain.Constants.Permission.Permissions.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -539,3 +539,5 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
+
+

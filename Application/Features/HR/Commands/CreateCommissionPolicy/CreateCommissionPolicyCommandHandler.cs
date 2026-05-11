@@ -8,7 +8,6 @@ using System;
 using System.Text.Json;
 using Application.Interfaces.Repositories.HR.CommissionPolicy;
 using Domain.Entities;
-using Domain.Entities.HR;
 
 namespace Application.Features.HR.Commands.CreateCommissionPolicy
 {

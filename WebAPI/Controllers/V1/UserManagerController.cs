@@ -19,7 +19,7 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
+using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -229,3 +229,4 @@ public class UserManagerController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
+

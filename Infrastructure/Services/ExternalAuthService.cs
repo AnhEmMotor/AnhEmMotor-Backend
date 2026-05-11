@@ -4,6 +4,8 @@ using Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
+using Infrastructure.Services.Models;
+
 
 namespace Infrastructure.Services;
 
@@ -86,48 +88,5 @@ public class ExternalAuthService(IHttpClientFactory httpClientFactory, IConfigur
         }
     }
 
-    private class GoogleUserResponse
-    {
-        [JsonPropertyName("email")]
-        public string Email { get; set; } = string.Empty;
 
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
-
-        [JsonPropertyName("picture")]
-        public string? Picture { get; set; }
-
-        [JsonPropertyName("sub")]
-        public string Subject { get; set; } = string.Empty;
-
-        [JsonPropertyName("aud")]
-        public string Audience { get; set; } = string.Empty;
-    }
-
-    private class FacebookUserResponse
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; set; } = string.Empty;
-
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
-
-        [JsonPropertyName("email")]
-        public string Email { get; set; } = string.Empty;
-
-        [JsonPropertyName("picture")]
-        public FacebookPicture? Picture { get; set; }
-    }
-
-    private class FacebookPicture
-    {
-        [JsonPropertyName("data")]
-        public FacebookPictureData? Data { get; set; }
-    }
-
-    private class FacebookPictureData
-    {
-        [JsonPropertyName("url")]
-        public string? Url { get; set; }
-    }
 }

@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
+using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -79,7 +79,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <summary>
     /// L?y thông tin c?a thuong hi?u du?c ch?n.
     /// </summary>
-    [HttpGet("{id:int}", Name = RouteNames.Brands.GetById)]
+    [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.Brands.GetById)]
     [HasPermission(Brands.View)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -102,7 +102,7 @@ public class BrandController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateBrandCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, RouteNames.Brands.GetById, new { id = result.IsSuccess ? result.Value.Id : 0 });
+        return HandleCreated(result, Domain.Constants.RouteNames.Brands.GetById, new { id = result.IsSuccess ? result.Value.Id : 0 });
     }
 
     /// <summary>
@@ -182,3 +182,5 @@ public class BrandController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
+
+

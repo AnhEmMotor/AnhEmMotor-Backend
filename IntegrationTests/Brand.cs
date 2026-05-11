@@ -51,7 +51,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Brands.Create],
+            [Domain.Constants.Permission.Permissions.Brands.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -147,7 +147,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Brands.View],
+            [Domain.Constants.Permission.Permissions.Brands.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -188,7 +188,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Brands.Edit],
+            [Domain.Constants.Permission.Permissions.Brands.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -226,7 +226,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Brands.Delete],
+            [Domain.Constants.Permission.Permissions.Brands.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -262,7 +262,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Brands.Delete],
+            [Domain.Constants.Permission.Permissions.Brands.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -298,7 +298,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Brands.Delete],
+            [Domain.Constants.Permission.Permissions.Brands.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -338,7 +338,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Brands.Delete],
+            [Domain.Constants.Permission.Permissions.Brands.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -378,7 +378,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Brands.Delete],
+            [Domain.Constants.Permission.Permissions.Brands.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -415,7 +415,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Brands.Create],
+            [Domain.Constants.Permission.Permissions.Brands.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -448,7 +448,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Brands.Edit],
+            [Domain.Constants.Permission.Permissions.Brands.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -479,3 +479,5 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     }
     #pragma warning restore CRR0035
 }
+
+

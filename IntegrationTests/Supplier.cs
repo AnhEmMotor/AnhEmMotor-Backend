@@ -52,7 +52,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -116,7 +116,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -171,7 +171,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -238,7 +238,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -309,7 +309,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -386,7 +386,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -450,7 +450,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -506,7 +506,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -553,7 +553,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -577,7 +577,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.Delete],
+            [Domain.Constants.Permission.Permissions.Suppliers.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -643,7 +643,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.Delete],
+            [Domain.Constants.Permission.Permissions.Suppliers.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -724,7 +724,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.Delete],
+            [Domain.Constants.Permission.Permissions.Suppliers.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -788,7 +788,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.Edit],
+            [Domain.Constants.Permission.Permissions.Suppliers.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -864,7 +864,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -954,7 +954,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1052,7 +1052,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Domain.Constants.Permission.Permissions.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1126,3 +1126,5 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
 
     #pragma warning restore CRR0035
 }
+
+

@@ -32,7 +32,7 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
+using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -189,7 +189,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// <summary>
     /// L?y thông tin chi ti?t c?a don hàng.
     /// </summary>
-    [HttpGet("{id:int}", Name = RouteNames.SaleOrders.GetById)]
+    [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.SaleOrders.GetById)]
     [HasPermission(Outputs.View)]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -219,7 +219,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
-            RouteNames.SaleOrders.GetById,
+            Domain.Constants.RouteNames.SaleOrders.GetById,
             new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
@@ -242,7 +242,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
-            RouteNames.SaleOrders.GetById,
+            Domain.Constants.RouteNames.SaleOrders.GetById,
             new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
@@ -409,3 +409,5 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
+
+

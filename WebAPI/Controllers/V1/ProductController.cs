@@ -52,7 +52,7 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
+using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -242,7 +242,7 @@ public class ProductController(ISender sender) : ApiController
     /// <summary>
     /// Lấy thông tin chi tiết sản phẩm theo Id (dành cho người quản lý)
     /// </summary>
-    [HttpGet("{id:int}/for-manager", Name = RouteNames.Product.GetVarientByIdForManager)]
+    [HttpGet("{id:int}/for-manager", Name = Domain.Constants.RouteNames.Product.GetVarientByIdForManager)]
     [HasPermission(Products.View)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -301,7 +301,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
-            RouteNames.Product.GetVarientByIdForManager,
+            Domain.Constants.RouteNames.Product.GetVarientByIdForManager,
             new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
@@ -697,3 +697,5 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 }
+
+

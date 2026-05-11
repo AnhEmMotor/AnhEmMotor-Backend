@@ -52,7 +52,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Leads.View],
+            [Domain.Constants.Permission.Permissions.Leads.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -120,7 +120,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Bookings.Confirm],
+            [Domain.Constants.Permission.Permissions.Bookings.Confirm],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -402,7 +402,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"sales_{uniqueId}",
             "Password123!",
-            [PermissionsList.Leads.View],
+            [Domain.Constants.Permission.Permissions.Leads.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -435,7 +435,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"sales_{uniqueId}",
             "Password123!",
-            [PermissionsList.Leads.View],
+            [Domain.Constants.Permission.Permissions.Leads.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -468,7 +468,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"sales_{uniqueId}",
             "Password123!",
-            [PermissionsList.Leads.View],
+            [Domain.Constants.Permission.Permissions.Leads.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -501,7 +501,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"admin_{uniqueId}",
             "Password123!",
-            [PermissionsList.Leads.Edit],
+            [Domain.Constants.Permission.Permissions.Leads.Edit],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -548,7 +548,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"admin_lead_039_{uniqueId}",
             "Password123!",
-            [PermissionsList.Leads.View, PermissionsList.Leads.Create, PermissionsList.Leads.Edit, PermissionsList.Leads.Delete],
+            [Domain.Constants.Permission.Permissions.Leads.View, Domain.Constants.Permission.Permissions.Leads.Create, Domain.Constants.Permission.Permissions.Leads.Edit, Domain.Constants.Permission.Permissions.Leads.Delete],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -589,7 +589,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             "admin_lead_dup",
             "Password123!",
-            [PermissionsList.Leads.View],
+            [Domain.Constants.Permission.Permissions.Leads.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -633,7 +633,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"admin_lead_039_2_{uniqueId}",
             "Password123!",
-            [PermissionsList.Leads.Edit],
+            [Domain.Constants.Permission.Permissions.Leads.Edit],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -664,7 +664,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"admin_lead_040_{uniqueId}",
             "Password123!",
-            [PermissionsList.Leads.Edit],
+            [Domain.Constants.Permission.Permissions.Leads.Edit],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -707,7 +707,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"admin_lead_042_{uniqueId}",
             "Password123!",
-            [PermissionsList.Leads.View],
+            [Domain.Constants.Permission.Permissions.Leads.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -741,7 +741,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             "admin",
             "Password123!",
-            [PermissionsList.Leads.Delete],
+            [Domain.Constants.Permission.Permissions.Leads.Delete],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -764,3 +764,5 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
     }
 }
+
+

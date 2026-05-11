@@ -66,7 +66,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             "StrongPass1@",
-            [PermissionsList.Statistical.View],
+            [Domain.Constants.Permission.Permissions.Statistical.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var token = (await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1054,3 +1054,5 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         content!.TodayActivities.Should().NotBeNull();
     }
 }
+
+

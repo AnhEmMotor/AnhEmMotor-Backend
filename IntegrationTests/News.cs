@@ -150,7 +150,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Permissions.News.Create"],
+            ["Domain.Constants.Permission.Permissions.News.Create"],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -200,7 +200,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Permissions.News.Create"],
+            ["Domain.Constants.Permission.Permissions.News.Create"],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -244,7 +244,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Permissions.News.Update"],
+            ["Domain.Constants.Permission.Permissions.News.Update"],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -284,7 +284,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                 _factory.Services,
                 $"author_{uniqueId}",
                 "Password123!",
-                ["Permissions.News.Create"],
+                ["Domain.Constants.Permission.Permissions.News.Create"],
                 TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             authorId = user.Id;
@@ -296,7 +296,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"admin_{uniqueId}",
             "Password123!",
-            ["Permissions.News.Update"],
+            ["Domain.Constants.Permission.Permissions.News.Update"],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -333,7 +333,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Permissions.News.Delete"],
+            ["Domain.Constants.Permission.Permissions.News.Delete"],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -412,3 +412,4 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .BeTrue();
     }
 }
+

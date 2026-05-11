@@ -2,6 +2,8 @@ using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Infrastructure.Seeders.Models;
+
 
 namespace Infrastructure.Seeders;
 
@@ -54,10 +56,5 @@ public static class ProductCategorySeeder
         }
     }
 
-    private class CategorySeedModel
-    {
-        public string? Name { get; set; }
 
-        public string? Group { get; set; }
-    }
 }
