@@ -7,9 +7,11 @@ using Application.Features.Leads.Commands.AddLeadActivity;
 using Application.Features.Leads.Queries.GetLeads;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Booking;
-using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Repositories.Lead.Lead;
+using Application.Interfaces.Repositories.Lead.LeadActivity;
 using Application.Interfaces.Services;
 using Domain.Entities;
+using Domain.Entities.HR;
 using FluentAssertions;
 using Moq;
 using System;
@@ -27,7 +29,7 @@ public class Lead
     private readonly Mock<IBookingInsertRepository> _bookingInsertRepoMock;
     private readonly Mock<IBookingReadRepository> _bookingReadRepoMock;
     private readonly Mock<INotificationService> _notificationServiceMock;
-    private readonly Mock<ILeadWriteRepository> _leadWriteRepoMock;
+    private readonly Mock<ILeadUpdateRepository> _leadUpdateRepoMock;
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
@@ -39,7 +41,7 @@ public class Lead
         _bookingInsertRepoMock = new Mock<IBookingInsertRepository>();
         _bookingReadRepoMock = new Mock<IBookingReadRepository>();
         _notificationServiceMock = new Mock<INotificationService>();
-        _leadWriteRepoMock = new Mock<ILeadWriteRepository>();
+        _leadUpdateRepoMock = new Mock<ILeadUpdateRepository>();
         _emailServiceMock = new Mock<IEmailService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
@@ -75,12 +77,13 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         existingLead.Score.Should().Be(80);
-        _leadInsertRepoMock.Verify(x => x.Update(existingLead), Times.Once);
+        _leadUpdateRepoMock.Verify(x => x.Update(existingLead), Times.Once);
     }
 
     [Fact(DisplayName = "LEAD_009 - Khởi tạo điểm Score mặc định cho Lead mới")]
@@ -93,6 +96,7 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -110,6 +114,7 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -135,6 +140,7 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -163,6 +169,7 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -183,6 +190,7 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
             _emailServiceMock.Object);
@@ -205,12 +213,13 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
             _emailServiceMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         lead.Status.Should().Be("TestDriving");
-        _leadInsertRepoMock.Verify(x => x.Update(lead), Times.Once);
+        _leadUpdateRepoMock.Verify(x => x.Update(lead), Times.Once);
     }
 
     [Fact(DisplayName = "LEAD_015 - Mapping dữ liệu LeadResponse từ thực thể Lead")]
@@ -268,6 +277,7 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -293,6 +303,7 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -344,6 +355,7 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -362,12 +374,13 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         existingLead.Score.Should().Be(60);
-        _leadInsertRepoMock.Verify(x => x.Update(existingLead), Times.Once);
+        _leadUpdateRepoMock.Verify(x => x.Update(existingLead), Times.Once);
     }
 
     [Fact(DisplayName = "LEAD_030 - Kiểm tra giá trị Score mặc định của thực thể")]
@@ -397,6 +410,7 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -421,6 +435,7 @@ public class Lead
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -436,7 +451,7 @@ public class Lead
     {
         var lead = new LeadEntity { Id = 1, Score = 0 };
         _leadReadRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(lead);
-        var handler = new AddLeadActivityCommandHandler(_leadWriteRepoMock.Object, _leadReadRepoMock.Object);
+        var handler = new AddLeadActivityCommandHandler(_leadUpdateRepoMock.Object, _leadReadRepoMock.Object);
         var actions = new[]
         {
             new { Type = "TestDrive", Desc = "Khách lái thử xe" },
@@ -456,7 +471,7 @@ public class Lead
     {
         var lead = new LeadEntity { Id = 1, Score = 5 };
         _leadReadRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(lead);
-        var handler = new AddLeadActivityCommandHandler(_leadWriteRepoMock.Object, _leadReadRepoMock.Object);
+        var handler = new AddLeadActivityCommandHandler(_leadUpdateRepoMock.Object, _leadReadRepoMock.Object);
         for (int i = 0; i < 5; i++)
         {
             var command = new AddLeadActivityCommand(1, "Phone Call", "Khách không nghe máy (missed)");

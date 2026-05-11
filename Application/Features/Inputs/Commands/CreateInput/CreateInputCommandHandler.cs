@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -35,11 +35,11 @@ public sealed class CreateInputCommandHandler(
                 .ConfigureAwait(false);
             if (supplier is null)
             {
-                return Error.NotFound($"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa.", "SupplierId");
+                return Error.NotFound($"Nh� cung c?p {request.SupplierId} kh�ng t?n t?i ho?c d� b? x�a.", "SupplierId");
             }
             if (string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
             {
-                return Error.BadRequest($"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'.", "SupplierId");
+                return Error.BadRequest($"Nh� cung c?p {supplier.Name} kh�ng ? tr?ng th�i 'active'.", "SupplierId");
             }
         }
         foreach (var product in request.Products)
@@ -54,7 +54,7 @@ public sealed class CreateInputCommandHandler(
                 var variant = variants.FirstOrDefault();
                 if (variant is null)
                 {
-                    return Error.BadRequest($"Sản phẩm {product.ProductId} không tồn tại hoặc đã bị xóa.", "Products");
+                    return Error.BadRequest($"S?n ph?m {product.ProductId} kh�ng t?n t?i ho?c d� b? x�a.", "Products");
                 }
             }
         }

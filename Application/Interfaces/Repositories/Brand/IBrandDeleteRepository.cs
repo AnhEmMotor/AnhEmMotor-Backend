@@ -1,4 +1,4 @@
-﻿using BrandEntity = Domain.Entities.Brand;
+using BrandEntity = Domain.Entities.Brand;
 
 namespace Application.Interfaces.Repositories.Brand
 {

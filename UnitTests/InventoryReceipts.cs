@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.UpdateInput;
@@ -21,7 +21,7 @@ public class InventoryReceipts
 {
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "INPUT_007 - Tạo phiếu nhập với Quantity là số âm")]
+    [Fact(DisplayName = "INPUT_007 - T?o phi?u nh?p v?i Quantity l� s? �m")]
     public void CreateInputProductValidator_NegativeQuantity_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
@@ -30,7 +30,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.Count);
     }
 
-    [Fact(DisplayName = "INPUT_008 - Tạo phiếu nhập với Quantity là 0")]
+    [Fact(DisplayName = "INPUT_008 - T?o phi?u nh?p v?i Quantity l� 0")]
     public void CreateInputProductValidator_ZeroQuantity_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
@@ -39,7 +39,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.Count);
     }
 
-    [Fact(DisplayName = "INPUT_010 - Tạo phiếu nhập với InputPrice là số âm")]
+    [Fact(DisplayName = "INPUT_010 - T?o phi?u nh?p v?i InputPrice l� s? �m")]
     public void CreateInputProductValidator_NegativeInputPrice_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
@@ -48,7 +48,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.InputPrice);
     }
 
-    [Fact(DisplayName = "INPUT_011 - Tạo phiếu nhập với InputPrice vượt quá số chữ số thập phân cho phép")]
+    [Fact(DisplayName = "INPUT_011 - T?o phi?u nh?p v?i InputPrice vu?t qu� s? ch? s? th?p ph�n cho ph�p")]
     public void CreateInputProductValidator_ExcessiveDecimalPlaces_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
@@ -57,7 +57,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.InputPrice);
     }
 
-    [Fact(DisplayName = "INPUT_014 - Tạo phiếu nhập với danh sách Products rỗng")]
+    [Fact(DisplayName = "INPUT_014 - T?o phi?u nh?p v?i danh s�ch Products r?ng")]
     public void CreateInputValidator_EmptyProductsList_ReturnsValidationError()
     {
         var validator = new CreateInputCommandValidator();
@@ -66,7 +66,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.Products);
     }
 
-    [Fact(DisplayName = "INPUT_015 - Tạo phiếu nhập với SupplierId null")]
+    [Fact(DisplayName = "INPUT_015 - T?o phi?u nh?p v?i SupplierId null")]
     public void CreateInputValidator_NullSupplierId_ReturnsValidationError()
     {
         var validator = new CreateInputCommandValidator();
@@ -80,7 +80,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.SupplierId);
     }
 
-    [Fact(DisplayName = "INPUT_030 - Cập nhật trạng thái phiếu nhập với transition không hợp lệ")]
+    [Fact(DisplayName = "INPUT_030 - C?p nh?t tr?ng th�i phi?u nh?p v?i transition kh�ng h?p l?")]
     public void UpdateInputStatus_InvalidTransition_ThrowsException()
     {
         var currentStatus = Domain.Constants.Input.InputStatus.Finish;
@@ -89,7 +89,7 @@ public class InventoryReceipts
         isAllowed.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "INPUT_048 - Validator kiểm tra CreateInputRequest với Notes quá dài")]
+    [Fact(DisplayName = "INPUT_048 - Validator ki?m tra CreateInputRequest v?i Notes qu� d�i")]
     public void CreateInputValidator_NotesTooLong_ReturnsValidationError()
     {
         var validator = new CreateInputCommandValidator();
@@ -104,7 +104,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.Notes);
     }
 
-    [Fact(DisplayName = "INPUT_049 - Validator kiểm tra CreateInputProductCommand với ProductId null")]
+    [Fact(DisplayName = "INPUT_049 - Validator ki?m tra CreateInputProductCommand v?i ProductId null")]
     public void CreateInputProductValidator_NullProductId_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
@@ -113,7 +113,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.ProductId);
     }
 
-    [Fact(DisplayName = "INPUT_050 - Validator kiểm tra UpdateInputRequest với Products chứa Quantity âm")]
+    [Fact(DisplayName = "INPUT_050 - Validator ki?m tra UpdateInputRequest v?i Products ch?a Quantity �m")]
     public void UpdateInputProductValidator_NegativeQuantity_ReturnsValidationError()
     {
         var validator = new UpdateInputInfoCommandValidator();
@@ -122,7 +122,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.Count);
     }
 
-    [Fact(DisplayName = "INPUT_051 - Validator kiểm tra UpdateInputStatusRequest với StatusId không hợp lệ")]
+    [Fact(DisplayName = "INPUT_051 - Validator ki?m tra UpdateInputStatusRequest v?i StatusId kh�ng h?p l?")]
     public void UpdateInputStatusValidator_InvalidStatusId_ReturnsValidationError()
     {
         var statusId = "invalid_status";
@@ -130,7 +130,7 @@ public class InventoryReceipts
         isValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "INPUT_053 - Handler xử lý CreateInput ném ngoại lệ khi DB connection fail")]
+    [Fact(DisplayName = "INPUT_053 - Handler x? l� CreateInput n�m ngo?i l? khi DB connection fail")]
     public async Task CreateInputHandler_DbConnectionFails_ThrowsException()
     {
         var mockInsertRepo = new Mock<IInputInsertRepository>();
@@ -152,7 +152,7 @@ public class InventoryReceipts
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "INPUT_054 - Handler xử lý UpdateInput ném ngoại lệ khi không tìm thấy Input")]
+    [Fact(DisplayName = "INPUT_054 - Handler x? l� UpdateInput n�m ngo?i l? khi kh�ng t�m th?y Input")]
     public async Task UpdateInputHandler_InputNotFound_ThrowsException()
     {
         var mockReadRepo = new Mock<IInputReadRepository>();
@@ -172,7 +172,7 @@ public class InventoryReceipts
         result.Error?.Code.Should().Be("NotFound");
     }
 
-    [Fact(DisplayName = "INPUT_055 - Handler xử lý UpdateInputStatus kiểm tra transition hợp lệ")]
+    [Fact(DisplayName = "INPUT_055 - Handler x? l� UpdateInputStatus ki?m tra transition h?p l?")]
     public void InputStatusTransitions_WorkingToFinished_IsAllowed()
     {
         var currentStatus = Domain.Constants.Input.InputStatus.Working;
@@ -181,7 +181,7 @@ public class InventoryReceipts
         isAllowed.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "INPUT_056 - Handler xử lý DeleteInput kiểm tra trạng thái trước khi xóa")]
+    [Fact(DisplayName = "INPUT_056 - Handler x? l� DeleteInput ki?m tra tr?ng th�i tru?c khi x�a")]
     public void InputStatus_FinishedInput_CannotDelete()
     {
         var statusId = Domain.Constants.Input.InputStatus.Finish;
@@ -189,7 +189,7 @@ public class InventoryReceipts
         cannotDelete.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "INPUT_059 - Kiểm tra Domain.Constants.InputStatus.IsValid với giá trị hợp lệ")]
+    [Fact(DisplayName = "INPUT_059 - Ki?m tra Domain.Constants.InputStatus.IsValid v?i gi� tr? h?p l?")]
     public void InputStatus_ValidStatuses_ReturnsTrue()
     {
         Domain.Constants.Input.InputStatus.IsValid(Domain.Constants.Input.InputStatus.Working).Should().BeTrue();
@@ -197,7 +197,7 @@ public class InventoryReceipts
         Domain.Constants.Input.InputStatus.IsValid(Domain.Constants.Input.InputStatus.Cancel).Should().BeTrue();
     }
 
-    [Fact(DisplayName = "INPUT_060 - Kiểm tra Domain.Constants.InputStatus.IsValid với giá trị không hợp lệ")]
+    [Fact(DisplayName = "INPUT_060 - Ki?m tra Domain.Constants.InputStatus.IsValid v?i gi� tr? kh�ng h?p l?")]
     public void InputStatus_InvalidStatus_ReturnsFalse()
     {
         var invalidStatus = "invalid";
@@ -205,7 +205,7 @@ public class InventoryReceipts
         isValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "INPUT_061 - Kiểm tra Domain.Constants.InputStatus.IsCanEdit với trạng thái working")]
+    [Fact(DisplayName = "INPUT_061 - Ki?m tra Domain.Constants.InputStatus.IsCanEdit v?i tr?ng th�i working")]
     public void InputStatus_WorkingStatus_CanEdit()
     {
         var statusId = Domain.Constants.Input.InputStatus.Working;
@@ -213,7 +213,7 @@ public class InventoryReceipts
         canEdit.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "INPUT_062 - Kiểm tra Domain.Constants.InputStatus.IsCanEdit với trạng thái finished")]
+    [Fact(DisplayName = "INPUT_062 - Ki?m tra Domain.Constants.InputStatus.IsCanEdit v?i tr?ng th�i finished")]
     public void InputStatus_FinishedStatus_CannotEdit()
     {
         var statusId = Domain.Constants.Input.InputStatus.Finish;
@@ -221,7 +221,7 @@ public class InventoryReceipts
         canEdit.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "INPUT_063 - Kiểm tra Domain.Constants.InputStatus.IsCannotDelete với trạng thái finished")]
+    [Fact(DisplayName = "INPUT_063 - Ki?m tra Domain.Constants.InputStatus.IsCannotDelete v?i tr?ng th�i finished")]
     public void InputStatus_FinishedStatus_CannotDelete()
     {
         var statusId = Domain.Constants.Input.InputStatus.Finish;
@@ -229,7 +229,7 @@ public class InventoryReceipts
         cannotDelete.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "INPUT_064 - Validator kiểm tra SupplierId với giá trị âm")]
+    [Fact(DisplayName = "INPUT_064 - Validator ki?m tra SupplierId v?i gi� tr? �m")]
     public void CreateInputValidator_NegativeSupplierId_ReturnsValidationError()
     {
         var validator = new CreateInputCommandValidator();
@@ -243,7 +243,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.SupplierId);
     }
 
-    [Fact(DisplayName = "INPUT_065 - Cập nhật phiếu nhập với danh sách Products trùng ProductId")]
+    [Fact(DisplayName = "INPUT_065 - C?p nh?t phi?u nh?p v?i danh s�ch Products tr�ng ProductId")]
     public void UpdateInputValidator_DuplicateProductIds_ReturnsValidationError()
     {
         var validator = new UpdateInputCommandValidator();
@@ -264,7 +264,7 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.Products);
     }
 
-    [Fact(DisplayName = "INPUT_075 - Mapster mapping tính TotalPayable chính xác dựa trên sum(Count * InputPrice)")]
+    [Fact(DisplayName = "INPUT_075 - Mapster mapping t�nh TotalPayable ch�nh x�c d?a tr�n sum(Count * InputPrice)")]
     public void InputMappingConfig_CalculatesTotalPayableCorrectly()
     {
         var config = new TypeAdapterConfig();

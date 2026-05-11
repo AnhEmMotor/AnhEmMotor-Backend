@@ -12,14 +12,12 @@ namespace UnitTests;
 public class Banner
 {
     private readonly Mock<IBannerInsertRepository> _bannerInsertRepoMock;
-    private readonly Mock<IBannerAuditRepository> _bannerAuditRepoMock;
     private readonly Mock<IHttpTokenAccessorService> _tokenAccessorMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
     public Banner()
     {
         _bannerInsertRepoMock = new Mock<IBannerInsertRepository>();
-        _bannerAuditRepoMock = new Mock<IBannerAuditRepository>();
         _tokenAccessorMock = new Mock<IHttpTokenAccessorService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
@@ -75,7 +73,6 @@ public class Banner
         };
         var handler = new CreateBannerCommandHandler(
             _bannerInsertRepoMock.Object,
-            _bannerAuditRepoMock.Object,
             _tokenAccessorMock.Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -129,7 +126,6 @@ public class Banner
         var command = new CreateBannerCommand { Title = "Title", ImageUrl = "http://img.com", LinkUrl = null };
         var handler = new CreateBannerCommandHandler(
             _bannerInsertRepoMock.Object,
-            _bannerAuditRepoMock.Object,
             _tokenAccessorMock.Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);

@@ -9,8 +9,8 @@ namespace Application.Features.Banners.Commands.UpdateBanner;
 
 public sealed class UpdateBannerCommandHandler(
     IBannerReadRepository bannerReadRepository,
+    IBannerInsertRepository bannerInsertRepository,
     IBannerUpdateRepository bannerUpdateRepository,
-    IBannerAuditRepository bannerAuditRepository,
     IHttpTokenAccessorService tokenAccessorService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateBannerCommand, Result<Unit>>
 {
@@ -33,7 +33,7 @@ public sealed class UpdateBannerCommandHandler(
         banner.DisplayOrder = request.DisplayOrder;
         bannerUpdateRepository.Update(banner);
         var action = oldStatus != banner.IsActive ? (banner.IsActive ? "Resume" : "Pause") : "Update";
-        bannerAuditRepository.AddLog(
+        bannerInsertRepository.AddLog(
             new BannerAuditLog
             {
                 Banner = banner,

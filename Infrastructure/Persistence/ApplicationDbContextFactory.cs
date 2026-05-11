@@ -1,4 +1,4 @@
-﻿using Infrastructure.DBContexts;
+using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +22,7 @@ namespace Infrastructure.Persistence
             var connectionString = configuration.GetConnectionString("StringConnection");
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new InvalidOperationException("Không tìm thấy ConnectionString 'StringConnection'.");
+                throw new InvalidOperationException("Kh�ng t�m th?y ConnectionString 'StringConnection'.");
             }
             var builder = new DbContextOptionsBuilder<ApplicationDBContext>();
             builder.UseSqlServer(connectionString, b => b.MigrationsAssembly("Infrastructure"));

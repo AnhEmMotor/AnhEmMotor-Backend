@@ -9,7 +9,6 @@ namespace Application.Features.Banners.Commands.CreateBanner;
 
 public sealed class CreateBannerCommandHandler(
     IBannerInsertRepository bannerInsertRepository,
-    IBannerAuditRepository bannerAuditRepository,
     IHttpTokenAccessorService tokenAccessorService,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateBannerCommand, Result<int>>
 {
@@ -30,7 +29,7 @@ public sealed class CreateBannerCommandHandler(
             DisplayOrder = request.DisplayOrder
         };
         bannerInsertRepository.Add(banner);
-        bannerAuditRepository.AddLog(
+        bannerInsertRepository.AddLog(
             new BannerAuditLog
             {
                 Banner = banner,

@@ -1,5 +1,6 @@
 using Application.ApiContracts.Vehicle.Responses;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.VehicleType.VehicleType;
 using Asp.Versioning;
 using Domain.Entities;
 using Domain.Primitives;
@@ -12,13 +13,13 @@ namespace WebAPI.Controllers.V1
     /// <summary>
     /// Controller for managing vehicle types.
     /// </summary>
-    /// <param name="repository">The vehicle type repository.</param>
-    /// <param name="paginator">The sieve paginator.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     public class VehicleTypeController(
-        IVehicleTypeRepository repository,
+        IVehicleTypeReadRepository readRepository,
+        IVehicleTypeInsertRepository insertRepository,
+        IVehicleTypeUpdateRepository updateRepository,
+        IVehicleTypeDeleteRepository deleteRepository,
         IUnitOfWork unitOfWork) : ApiController
     {
         /// <summary>
@@ -32,7 +33,7 @@ namespace WebAPI.Controllers.V1
             [FromQuery] SieveModel sieveModel,
             CancellationToken cancellationToken)
         {
-            var result = await repository.GetPagedAsync<VehicleTypeResponse>(
+            var result = await readRepository.GetPagedAsync<VehicleTypeResponse>(
                 sieveModel,
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(true);
@@ -48,7 +49,7 @@ namespace WebAPI.Controllers.V1
         [HttpGet("{id}")]
         public async Task<ActionResult<VehicleTypeResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var item = await repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(true);
+            var item = await readRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(true);
             if (item == null)
                 return NotFound();
             return Ok(
@@ -75,7 +76,7 @@ namespace WebAPI.Controllers.V1
             [FromBody] VehicleType vehicleType,
             CancellationToken cancellationToken)
         {
-            repository.Add(vehicleType);
+            insertRepository.Add(vehicleType);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
             return Ok();
         }
@@ -95,7 +96,7 @@ namespace WebAPI.Controllers.V1
         {
             if (id != vehicleType.Id)
                 return BadRequest();
-            repository.Update(vehicleType);
+            updateRepository.Update(vehicleType);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
             return Ok();
         }
@@ -109,10 +110,10 @@ namespace WebAPI.Controllers.V1
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            var item = await repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(true);
+            var item = await readRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(true);
             if (item == null)
                 return NotFound();
-            repository.Remove(item);
+            deleteRepository.Remove(item);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
             return Ok();
         }

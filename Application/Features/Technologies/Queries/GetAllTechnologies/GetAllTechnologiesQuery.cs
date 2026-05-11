@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Technology.Responses;
+using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
 using MediatR;
 using System;

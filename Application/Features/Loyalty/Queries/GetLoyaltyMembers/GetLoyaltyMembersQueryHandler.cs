@@ -1,6 +1,6 @@
-﻿using Application.ApiContracts.Loyalty.Responses;
+using Application.ApiContracts.Loyalty.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Repositories.Lead.Lead;
 using MediatR;
 using System;
 

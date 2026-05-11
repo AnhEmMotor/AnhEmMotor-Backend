@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Features.Inputs.Commands.CloneInput;
@@ -43,7 +43,7 @@ public class InventoryReceipts
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "INPUT_003 - Tạo phiếu nhập thiếu quyền Create")]
+    [Fact(DisplayName = "INPUT_003 - T?o phi?u nh?p thi?u quy?n Create")]
     public async Task CreateInput_MissingPermission_ReturnsForbidden()
     {
         var request = new CreateInputCommand
@@ -59,7 +59,7 @@ public class InventoryReceipts
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "INPUT_019 - Lấy danh sách phiếu nhập thiếu quyền View")]
+    [Fact(DisplayName = "INPUT_019 - L?y danh s�ch phi?u nh?p thi?u quy?n View")]
     public async Task GetInputs_MissingPermission_ReturnsForbidden()
     {
         var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
@@ -93,7 +93,7 @@ public class InventoryReceipts
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "INPUT_027 - C?p nh?t phi?u nh?p kh�ng t?n t?i")]
+    [Fact(DisplayName = "INPUT_027 - C?p nh?t phi?u nh?p kh?ng t?n t?i")]
     public async Task UpdateInput_NotFound_ReturnsNotFound()
     {
         int inputId = 9999;
@@ -104,7 +104,7 @@ public class InventoryReceipts
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact(DisplayName = "INPUT_031 - C?p nh?t tr?ng th�i phi?u nh?p thi?u quy?n ChangeStatus")]
+    [Fact(DisplayName = "INPUT_031 - C?p nh?t tr?ng th?i phi?u nh?p thi?u quy?n ChangeStatus")]
     public async Task UpdateInputStatus_MissingPermission_ReturnsForbidden()
     {
         int inputId = 1;
@@ -117,7 +117,7 @@ public class InventoryReceipts
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "INPUT_035 - X�a phi?u nh?p ? tr?ng th�i finished (kh�ng cho ph�p)")]
+    [Fact(DisplayName = "INPUT_035 - X?a phi?u nh?p ? tr?ng th?i finished (kh?ng cho ph?p)")]
     public async Task DeleteInput_FinishedStatus_ReturnsBadRequest()
     {
         int inputId = 1;
@@ -127,7 +127,7 @@ public class InventoryReceipts
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact(DisplayName = "INPUT_036 - X�a phi?u nh?p thi?u quy?n Delete")]
+    [Fact(DisplayName = "INPUT_036 - X?a phi?u nh?p thi?u quy?n Delete")]
     public async Task DeleteInput_MissingPermission_ReturnsForbidden()
     {
         int inputId = 1;
@@ -138,7 +138,7 @@ public class InventoryReceipts
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "INPUT_037 - X�a phi?u nh?p kh�ng t?n t?i")]
+    [Fact(DisplayName = "INPUT_037 - X?a phi?u nh?p kh?ng t?n t?i")]
     public async Task DeleteInput_NotFound_ReturnsNotFound()
     {
         int inputId = 9999;
@@ -148,7 +148,7 @@ public class InventoryReceipts
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact(DisplayName = "INPUT_040 - Kh�i ph?c phi?u nh?p chua b? x�a")]
+    [Fact(DisplayName = "INPUT_040 - Kh?i ph?c phi?u nh?p chua b? x?a")]
     public async Task RestoreInput_NotDeleted_ReturnsBadRequest()
     {
         int inputId = 1;
@@ -169,7 +169,7 @@ public class InventoryReceipts
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "INPUT_045 - Clone phi?u nh?p kh�ng t?n t?i")]
+    [Fact(DisplayName = "INPUT_045 - Clone phi?u nh?p kh?ng t?n t?i")]
     public async Task CloneInput_NotFound_ReturnsNotFound()
     {
         int inputId = 9999;
@@ -179,7 +179,7 @@ public class InventoryReceipts
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact(DisplayName = "INPUT_C_001 - X�a nhi?u phi?u nh?p v?i danh s�ch r?ng")]
+    [Fact(DisplayName = "INPUT_C_001 - X?a nhi?u phi?u nh?p v?i danh s?ch r?ng")]
     public async Task DeleteManyInputs_EmptyList_ReturnsBadRequest()
     {
         var request = new DeleteManyInputsCommand { Ids = [] };
@@ -190,7 +190,7 @@ public class InventoryReceipts
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "INPUT_C_002 - C?p nh?t tr?ng th�i nhi?u phi?u nh?p v?i danh s�ch r?ng")]
+    [Fact(DisplayName = "INPUT_C_002 - C?p nh?t tr?ng th?i nhi?u phi?u nh?p v?i danh s?ch r?ng")]
     public async Task UpdateManyInputStatus_EmptyList_ReturnsBadRequest()
     {
         var request = new UpdateManyInputStatusCommand { Ids = [], StatusId = "finished" };
@@ -201,7 +201,7 @@ public class InventoryReceipts
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "INPUT_C_003 - Kh�i ph?c nhi?u phi?u nh?p v?i danh s�ch r?ng")]
+    [Fact(DisplayName = "INPUT_C_003 - Kh?i ph?c nhi?u phi?u nh?p v?i danh s?ch r?ng")]
     public async Task RestoreManyInputs_EmptyList_ReturnsBadRequest()
     {
         var request = new RestoreManyInputsCommand { Ids = [] };
@@ -212,7 +212,7 @@ public class InventoryReceipts
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "INPUT_C_004 - L?y danh s�ch phi?u nh?p d� x�a v?i ph�n trang")]
+    [Fact(DisplayName = "INPUT_C_004 - L?y danh s?ch phi?u nh?p d? x?a v?i ph?n trang")]
     public async Task GetDeletedInputs_ValidRequest_ReturnsSuccess()
     {
         var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
@@ -225,7 +225,7 @@ public class InventoryReceipts
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
     }
 
-    [Fact(DisplayName = "INPUT_C_005 - L?y danh s�ch phi?u nh?p theo SupplierId h?p l?")]
+    [Fact(DisplayName = "INPUT_C_005 - L?y danh s?ch phi?u nh?p theo SupplierId h?p l?")]
     public async Task GetInputsBySupplierId_ValidSupplierId_ReturnsSuccess()
     {
         int supplierId = 1;
@@ -270,7 +270,7 @@ public class InventoryReceipts
         _mediatorMock.Verify(m => m.Send(It.IsAny<UpdateInputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "INPUT_C_008 - C?p nh?t tr?ng th�i phi?u nh?p h?p l?")]
+    [Fact(DisplayName = "INPUT_C_008 - C?p nh?t tr?ng th?i phi?u nh?p h?p l?")]
     public async Task UpdateInputStatus_ValidRequest_CallsMediator()
     {
         int inputId = 1;
@@ -286,7 +286,7 @@ public class InventoryReceipts
             Times.Once);
     }
 
-    [Fact(DisplayName = "INPUT_072 - L?y danh s�ch tr?ng th�i phi?u nh?p khi thi?u quy?n tr? 403")]
+    [Fact(DisplayName = "INPUT_072 - L?y danh s?ch tr?ng th?i phi?u nh?p khi thi?u quy?n tr? 403")]
     public async Task GetInputStatuses_MissingPermission_ThrowsUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()))
@@ -296,14 +296,14 @@ public class InventoryReceipts
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "INPUT_073 - Controller g?i MediatR d�ng 1 l?n khi l?y danh s�ch tr?ng th�i phi?u nh?p")]
+    [Fact(DisplayName = "INPUT_073 - Controller g?i MediatR d?ng 1 l?n khi l?y danh s?ch tr?ng th?i phi?u nh?p")]
     public async Task GetInputStatuses_ValidRequest_CallsMediatorOnce()
     {
         var expectedStatuses = new Dictionary<string, string>
         {
             { InputStatus.Working, "Phi?u t?m" },
-            { InputStatus.Finish, "Ho�n th�nh" },
-            { InputStatus.Cancel, "�� hu?" },
+            { InputStatus.Finish, "Ho?n th?nh" },
+            { InputStatus.Cancel, "?? hu?" },
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
@@ -314,7 +314,7 @@ public class InventoryReceipts
             Times.Once);
     }
 
-    [Fact(DisplayName = "INPUT_074 - Controller tr? d�ng d? li?u t? Handler khi l?y tr?ng th�i phi?u nh?p")]
+    [Fact(DisplayName = "INPUT_074 - Controller tr? d?ng d? li?u t? Handler khi l?y tr?ng th?i phi?u nh?p")]
     public async Task GetInputStatuses_ValidRequest_ReturnsExpectedData()
     {
         var expectedStatuses = new Dictionary<string, string> { { InputStatus.Working, "Phi?u t?m" } };

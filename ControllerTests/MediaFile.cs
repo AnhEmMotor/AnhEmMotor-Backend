@@ -1,4 +1,4 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
 using FluentAssertions;
 using Infrastructure.Authorization.Attribute;
@@ -28,13 +28,13 @@ public class MediaFile
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "MF_006 - Tải lên ảnh thất bại khi chưa đăng nhập")]
+    [Fact(DisplayName = "MF_006 - T?i l�n ?nh th?t b?i khi chua dang nh?p")]
     public void UploadImage_NotAuthenticated_Unauthorized()
     {
         var method = typeof(MediaFileController).GetMethod("UploadProductImageAsync");
         var hasAuthorize = method!.GetCustomAttributes(typeof(AuthorizeAttribute), true).Length != 0 ||
             typeof(MediaFileController).GetCustomAttributes(typeof(AuthorizeAttribute), true).Length != 0;
-        hasAuthorize.Should().BeTrue("API này phải yêu cầu đăng nhập (Authorize)");
+        hasAuthorize.Should().BeTrue("API n�y ph?i y�u c?u dang nh?p (Authorize)");
     }
 
     [Fact(DisplayName = "MF_005: UploadImageAsync has RequiresAnyPermissions with Edit/Create permissions")]

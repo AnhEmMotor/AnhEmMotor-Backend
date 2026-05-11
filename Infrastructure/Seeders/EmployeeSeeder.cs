@@ -24,16 +24,16 @@ public static class EmployeeSeeder
             ("pham.thi.d@anhemmotor.com", "Phạm Thị D", "Chuyên viên Tư vấn", 14000000),
             ("hoang.van.e@anhemmotor.com", "Hoàng Văn E", "Kỹ thuật viên", 12000000)
         };
-        foreach (var emp in employeesToSeed)
+        foreach (var (Email, FullName, JobTitle, Salary) in employeesToSeed)
         {
-            var user = await userManager.FindByEmailAsync(emp.Email).ConfigureAwait(false);
+            var user = await userManager.FindByEmailAsync(Email).ConfigureAwait(false);
             if (user == null)
             {
                 user = new ApplicationUser
                 {
-                    UserName = emp.Email,
-                    Email = emp.Email,
-                    FullName = emp.FullName,
+                    UserName = Email,
+                    Email = Email,
+                    FullName = FullName,
                     Status = UserStatus.Active,
                     EmailConfirmed = true
                 };
@@ -49,8 +49,8 @@ public static class EmployeeSeeder
                 profile = new EmployeeProfile
                 {
                     UserId = user.Id,
-                    JobTitle = emp.JobTitle,
-                    BaseSalary = emp.Salary,
+                    JobTitle = JobTitle,
+                    BaseSalary = Salary,
                     IdentityNumber = $"031{new Random().Next(10000000, 99999999)}",
                     Address = "Biên Hòa, Đồng Nai",
                     ContractDate = DateTime.UtcNow.AddMonths(-new Random().Next(1, 24)),

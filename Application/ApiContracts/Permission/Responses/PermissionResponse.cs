@@ -1,4 +1,4 @@
-﻿namespace Application.ApiContracts.Permission.Responses
+namespace Application.ApiContracts.Permission.Responses
 {
     public class PermissionResponse
     {

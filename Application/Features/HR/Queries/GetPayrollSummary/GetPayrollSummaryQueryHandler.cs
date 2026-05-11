@@ -1,7 +1,8 @@
 using Application.ApiContracts.HR.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.HR;
-using Domain.Entities.HR;
+using Application.Interfaces.Repositories.HR.Employee;
+using Application.Interfaces.Repositories.HR.Employee;
+using Domain.Entities;
 using MediatR;
 using System.Linq;
 

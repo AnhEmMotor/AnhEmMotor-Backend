@@ -1,7 +1,7 @@
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.LocalFile;
-using Application.Interfaces.Repositories.MediaFile;
+using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Domain.Constants;
 using Domain.Primitives;
 using MediatR;
@@ -10,7 +10,7 @@ namespace Application.Features.Files.Queries.GetDeletedFilesList;
 
 public sealed class GetDeletedFilesListQueryHandler(
     IMediaFileReadRepository repository,
-    IFileStorageService fileStorageService) : IRequestHandler<GetDeletedFilesListQuery, Result<PagedResult<MediaFileResponse>>>
+    IFileReadService fileReadService) : IRequestHandler<GetDeletedFilesListQuery, Result<PagedResult<MediaFileResponse>>>
 {
     public async Task<Result<PagedResult<MediaFileResponse>>> Handle(
         GetDeletedFilesListQuery request,
@@ -29,7 +29,7 @@ public sealed class GetDeletedFilesListQueryHandler(
         {
             if (!string.IsNullOrEmpty(item.StoragePath))
             {
-                item.PublicUrl = fileStorageService.GetPublicUrl(item.StoragePath);
+                item.PublicUrl = fileReadService.GetPublicUrl(item.StoragePath);
             }
         }
         return result;

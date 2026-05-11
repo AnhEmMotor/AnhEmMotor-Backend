@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Supplier.Responses;
+using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
@@ -36,7 +36,7 @@ public class Supplier
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "SUP_046 - Tạo Supplier thành công qua API")]
+    [Fact(DisplayName = "SUP_046 - T?o Supplier th�nh c�ng qua API")]
     public async Task CreateSupplier_Success_ReturnsCreatedSupplier()
     {
         var request = new CreateSupplierCommand { Name = "API Supplier", Phone = "0123456789", Address = "API Street" };
@@ -60,7 +60,7 @@ public class Supplier
         response.StatusId.Should().Be("active");
     }
 
-    [Fact(DisplayName = "SUP_047 - Tạo Supplier thất bại khi không có quyền")]
+    [Fact(DisplayName = "SUP_047 - T?o Supplier th?t b?i khi kh�ng c� quy?n")]
     public async Task CreateSupplier_NoPermission_ReturnsForbidden()
     {
         var request = new CreateSupplierCommand { Name = "No Permission", Phone = "0123456789", Address = "123 Street" };
@@ -71,7 +71,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_048 - Tạo Supplier thất bại khi chưa đăng nhập")]
+    [Fact(DisplayName = "SUP_048 - T?o Supplier th?t b?i khi chua dang nh?p")]
     public async Task CreateSupplier_Unauthorized_ReturnsUnauthorized()
     {
         var request = new CreateSupplierCommand { Name = "Unauthorized", Phone = "0123456789", Address = "123 Street" };
@@ -82,7 +82,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_049 - Lấy danh sách Supplier thành công với quyền View Supplier")]
+    [Fact(DisplayName = "SUP_049 - L?y danh s�ch Supplier th�nh c�ng v?i quy?n View Supplier")]
     public async Task GetSuppliers_WithViewPermission_ReturnsSupplierList()
     {
         var sieveModel = new SieveModel();
@@ -102,7 +102,7 @@ public class Supplier
         response.Items.First().TotalInput.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "SUP_050 - Lấy danh sách Supplier for-input chỉ trả về active")]
+    [Fact(DisplayName = "SUP_050 - L?y danh s�ch Supplier for-input ch? tr? v? active")]
     public async Task GetSuppliersForInput_ReturnsOnlyActiveSuppliers()
     {
         var sieveModel = new SieveModel();
@@ -123,7 +123,7 @@ public class Supplier
     }
 
     [Fact(
-        DisplayName = "SUP_051 - Lấy danh sách Supplier thành công khi không có quyền (chỉ active, không có TotalInputValue)")]
+        DisplayName = "SUP_051 - L?y danh s�ch Supplier th�nh c�ng khi kh�ng c� quy?n (ch? active, kh�ng c� TotalInputValue)")]
     public async Task GetSuppliers_NoPermission_ReturnsOnlyActiveWithoutTotalInput()
     {
         var sieveModel = new SieveModel();
@@ -142,7 +142,7 @@ public class Supplier
         response.Items.Should().OnlyContain(s => s.TotalInput == null);
     }
 
-    [Fact(DisplayName = "SUP_052 - Lấy chi tiết Supplier thành công với quyền View Supplier")]
+    [Fact(DisplayName = "SUP_052 - L?y chi ti?t Supplier th�nh c�ng v?i quy?n View Supplier")]
     public async Task GetSupplierById_WithViewPermission_ReturnsSupplierWithTotalInput()
     {
         var expectedResponse = new SupplierResponse
@@ -161,7 +161,7 @@ public class Supplier
         response.TotalInput.Should().Be(5000000);
     }
 
-    [Fact(DisplayName = "SUP_053 - Lấy chi tiết Supplier thành công khi không có quyền (chỉ active)")]
+    [Fact(DisplayName = "SUP_053 - L?y chi ti?t Supplier th�nh c�ng khi kh�ng c� quy?n (ch? active)")]
     public async Task GetSupplierById_NoPermission_ReturnsActiveSupplierWithTotalInput()
     {
         var expectedResponse = new SupplierResponse
@@ -180,7 +180,7 @@ public class Supplier
         response.TotalInput.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "SUP_054 - Lấy chi tiết Supplier thất bại khi không có quyền và Supplier không active")]
+    [Fact(DisplayName = "SUP_054 - L?y chi ti?t Supplier th?t b?i khi kh�ng c� quy?n v� Supplier kh�ng active")]
     public async Task GetSupplierById_NoPermissionAndInactive_ReturnsForbidden()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
@@ -190,7 +190,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_055 - Cập nhật Supplier thất bại khi không có quyền")]
+    [Fact(DisplayName = "SUP_055 - C?p nh?t Supplier th?t b?i khi kh�ng c� quy?n")]
     public async Task UpdateSupplier_NoPermission_ReturnsForbidden()
     {
         var request = new UpdateSupplierCommand { Name = "Updated" };
@@ -201,7 +201,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_056 - Xóa Supplier thất bại khi không có quyền")]
+    [Fact(DisplayName = "SUP_056 - X�a Supplier th?t b?i khi kh�ng c� quy?n")]
     public async Task DeleteSupplier_NoPermission_ReturnsForbidden()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteSupplierCommand>(), It.IsAny<CancellationToken>()))
@@ -211,7 +211,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_057 - Lấy danh sách deleted Supplier thất bại khi không có quyền")]
+    [Fact(DisplayName = "SUP_057 - L?y danh s�ch deleted Supplier th?t b?i khi kh�ng c� quy?n")]
     public async Task GetDeletedSuppliers_NoPermission_ReturnsForbidden()
     {
         var sieveModel = new SieveModel();
@@ -222,7 +222,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_058 - Xóa nhiều Supplier với một phần thành công và một phần thất bại")]
+    [Fact(DisplayName = "SUP_058 - X�a nhi?u Supplier v?i m?t ph?n th�nh c�ng v� m?t ph?n th?t b?i")]
     public async Task DeleteManySuppliers_PartialFailure_ReturnsError()
     {
         var request = new DeleteManySuppliersCommand { Ids = [1, 2, 3] };
@@ -233,7 +233,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_059 - Khôi phục Supplier thất bại khi không có quyền")]
+    [Fact(DisplayName = "SUP_059 - Kh�i ph?c Supplier th?t b?i khi kh�ng c� quy?n")]
     public async Task RestoreSupplier_NoPermission_ReturnsForbidden()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreSupplierCommand>(), It.IsAny<CancellationToken>()))
@@ -243,7 +243,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_060 - Cập nhật trạng thái nhiều Supplier thất bại khi không có quyền")]
+    [Fact(DisplayName = "SUP_060 - C?p nh?t tr?ng th�i nhi?u Supplier th?t b?i khi kh�ng c� quy?n")]
     public async Task UpdateManySupplierStatus_NoPermission_ReturnsForbidden()
     {
         var request = new UpdateManySupplierStatusCommand { Ids = [1, 2], StatusId = "inactive" };

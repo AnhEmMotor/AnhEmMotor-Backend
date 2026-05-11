@@ -1,7 +1,8 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Booking;
-using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Repositories.Lead.Lead;
+using Application.Interfaces.Repositories.Lead.LeadActivity;
 using Application.Interfaces.Services;
 using Domain.Constants.Booking;
 using Domain.Constants.Lead;
@@ -14,6 +15,7 @@ public class CreateBookingCommandHandler(
     IBookingInsertRepository bookingInsertRepository,
     ILeadReadRepository leadReadRepository,
     ILeadInsertRepository leadInsertRepository,
+    ILeadUpdateRepository leadUpdateRepository,
     ILeadActivityInsertRepository leadActivityInsertRepository,
     INotificationService notificationService,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateBookingCommand, Result<int>>
@@ -46,7 +48,7 @@ public class CreateBookingCommandHandler(
         } else
         {
             lead.Score += 30;
-            leadInsertRepository.Update(lead);
+            leadUpdateRepository.Update(lead);
             leadActivityInsertRepository.Add(
                 new LeadActivity
                 {

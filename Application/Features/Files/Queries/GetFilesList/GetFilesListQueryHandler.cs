@@ -1,7 +1,7 @@
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.MediaFile;
-using Application.Interfaces.Repositories.LocalFile;
+using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Domain.Primitives;
 using MediatR;
 
@@ -9,7 +9,7 @@ namespace Application.Features.Files.Queries.GetFilesList;
 
 public sealed class GetFilesListQueryHandler(
     IMediaFileReadRepository repository,
-    IFileStorageService fileStorageService) : IRequestHandler<GetFilesListQuery, Result<PagedResult<MediaFileResponse>>>
+    IFileReadService fileReadService) : IRequestHandler<GetFilesListQuery, Result<PagedResult<MediaFileResponse>>>
 {
     public async Task<Result<PagedResult<MediaFileResponse>>> Handle(
         GetFilesListQuery request,
@@ -27,7 +27,7 @@ public sealed class GetFilesListQueryHandler(
         {
             if (!string.IsNullOrEmpty(item.StoragePath))
             {
-                item.PublicUrl = fileStorageService.GetPublicUrl(item.StoragePath);
+                item.PublicUrl = fileReadService.GetPublicUrl(item.StoragePath);
             }
         }
         return result;

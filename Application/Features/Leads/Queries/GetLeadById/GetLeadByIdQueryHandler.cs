@@ -1,6 +1,6 @@
-Ôªøusing Application.ApiContracts.Leads.Responses;
+using Application.ApiContracts.Leads.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Repositories.Lead.Lead;
 using MediatR;
 using System;
 
@@ -12,7 +12,7 @@ namespace Application.Features.Leads.Queries.GetLeadById
         {
             var lead = await leadReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
             if (lead == null)
-                return Result<LeadResponse>.Failure("Kh√¥ng t√¨m th·∫•y kh√°ch h√†ng.");
+                return Result<LeadResponse>.Failure("KhÙng tÏm th?y kh·ch h‡ng.");
             return Result<LeadResponse>.Success(
                 new LeadResponse
                 {

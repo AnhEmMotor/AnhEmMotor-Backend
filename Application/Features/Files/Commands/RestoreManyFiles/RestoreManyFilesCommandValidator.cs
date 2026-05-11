@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using System;
 
 namespace Application.Features.Files.Commands.RestoreManyFiles;

@@ -7,7 +7,7 @@ namespace Application.Interfaces.Repositories.Brand
 {
     public interface IBrandReadRepository
     {
-        public Task<Domain.Primitives.PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
             SieveModel sieveModel,
             DataFetchMode mode = DataFetchMode.ActiveOnly,
             CancellationToken cancellationToken = default);

@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Auth.Responses;
+using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Features.Auth.Commands.GoogleLogin;
 using Application.Features.Auth.Commands.Login;
@@ -33,7 +33,7 @@ public class Auth
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH1: Thiếu Password")]
+    [Fact(DisplayName = "AUTH_REG_002 - �ang k� th?t b?i (Validation) - TH1: Thi?u Password")]
     public async Task AUTH_REG_002_1_Register_MissingPassword()
     {
         var request = new RegisterCommand
@@ -49,7 +49,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH2: Thiếu Email và Username")]
+    [Fact(DisplayName = "AUTH_REG_002 - �ang k� th?t b?i (Validation) - TH2: Thi?u Email v� Username")]
     public async Task AUTH_REG_002_2_Register_MissingEmailAndUsername()
     {
         var request = new RegisterCommand
@@ -65,7 +65,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH3: Thiếu FullName")]
+    [Fact(DisplayName = "AUTH_REG_002 - �ang k� th?t b?i (Validation) - TH3: Thi?u FullName")]
     public async Task AUTH_REG_002_3_Register_MissingFullName()
     {
         var request = new RegisterCommand
@@ -81,7 +81,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_LOG_002 - Đăng nhập sai thông tin")]
+    [Fact(DisplayName = "AUTH_LOG_002 - �ang nh?p sai th�ng tin")]
     public async Task AUTH_LOG_002_Login_Fail_WrongCreds()
     {
         var request = new LoginCommand { UsernameOrEmail = "user", Password = "wrong" };
@@ -92,7 +92,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_MGR_002 - Manager Login Fail (Quyền)")]
+    [Fact(DisplayName = "AUTH_MGR_002 - Manager Login Fail (Quy?n)")]
     public async Task AUTH_MGR_002_Login_Manager_Fail_Forbidden()
     {
         var request = new LoginForManagerCommand { UsernameOrEmail = "staff", Password = "123" };
@@ -103,7 +103,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_OUT_001 - Đăng xuất")]
+    [Fact(DisplayName = "AUTH_OUT_001 - �ang xu?t")]
     public async Task AUTH_OUT_001_Logout_Success()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()))
@@ -113,7 +113,7 @@ public class Auth
         _mediatorMock.Verify(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "AUTH_022 - Google Login API - Thành công (200)")]
+    [Fact(DisplayName = "AUTH_022 - Google Login API - Th�nh c�ng (200)")]
     public async Task AUTH_022_GoogleLogin_Api_Success()
     {
         var command = new GoogleLoginCommand { IdToken = "valid_token" };

@@ -1,24 +1,27 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.HR;
 using Domain.Entities.HR;
 using Domain.Constants.HR.CommissionPolicy;
 using Mapster;
 using MediatR;
 using System;
 using System.Text.Json;
+using Application.Interfaces.Repositories.HR.CommissionPolicy;
+using Domain.Entities;
+using Domain.Entities.HR;
 
 namespace Application.Features.HR.Commands.CreateCommissionPolicy
 {
     public sealed class CreateCommissionPolicyCommandHandler(
-        ICommissionPolicyRepository policyRepository,
+        ICommissionPolicyReadRepository readRepository,
+        ICommissionPolicyInsertRepository insertRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<CreateCommissionPolicyCommand, Result<int>>
     {
         public async Task<Result<int>> Handle(
             CreateCommissionPolicyCommand request,
             CancellationToken cancellationToken)
         {
-            var existingPolicy = await policyRepository.GetExistingPolicyAsync(
+            var existingPolicy = await readRepository.GetExistingPolicyAsync(
                 request.ProductId,
                 request.CategoryId,
                 request.EffectiveDate,
@@ -32,7 +35,7 @@ namespace Application.Features.HR.Commands.CreateCommissionPolicy
             }
 
             var policy = request.Adapt<CommissionPolicy>();
-            policyRepository.Add(policy);
+            insertRepository.Add(policy);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             var auditLog = new CommissionPolicyAuditLog
@@ -47,7 +50,7 @@ namespace Application.Features.HR.Commands.CreateCommissionPolicy
                 ChangedAt = DateTime.UtcNow
             };
 
-            policyRepository.AddAuditLog(auditLog);
+            insertRepository.AddAuditLog(auditLog);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             return policy.Id;

@@ -1,7 +1,7 @@
 using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Technology;
+using Application.Interfaces.Repositories.TechnologyCategory.TechnologyCategory;
 using Domain.Entities;
 using Mapster;
 using MediatR;
@@ -9,7 +9,7 @@ using MediatR;
 namespace Application.Features.Technologies.Commands.CreateTechnologyCategory;
 
 public sealed class CreateTechnologyCategoryCommandHandler(
-    ITechnologyCategoryUpdateRepository categoryRepository,
+    ITechnologyCategoryInsertRepository categoryRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateTechnologyCategoryCommand, Result<TechnologyCategoryResponse>>
 {
     public async Task<Result<TechnologyCategoryResponse>> Handle(

@@ -1,12 +1,12 @@
-﻿using Application.Common.Models;
-using Application.Interfaces.Repositories.Lead;
+using Application.Common.Models;
+using Application.Interfaces.Repositories.Lead.Lead;
 using MediatR;
 using System;
 
 namespace Application.Features.Leads.Commands.UpdateLead
 {
     public class UpdateLeadCommandHandler(
-        ILeadWriteRepository leadWriteRepository,
+        ILeadUpdateRepository leadUpdateRepository,
         ILeadReadRepository leadReadRepository) : IRequestHandler<UpdateLeadCommand, Result<int>>
     {
         public async Task<Result<int>> Handle(UpdateLeadCommand request, CancellationToken cancellationToken)
@@ -48,7 +48,7 @@ namespace Application.Features.Leads.Commands.UpdateLead
             }
             lead.InterestedVehicle = request.InterestedVehicle;
             lead.Score = request.Score;
-            await leadWriteRepository.UpdateAsync(lead, cancellationToken).ConfigureAwait(false);
+            await leadUpdateRepository.UpdateAsync(lead, cancellationToken).ConfigureAwait(false);
             return lead.Id;
         }
     }

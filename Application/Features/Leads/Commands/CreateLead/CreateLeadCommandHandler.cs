@@ -1,5 +1,5 @@
-﻿using Application.Common.Models;
-using Application.Interfaces.Repositories.Lead;
+using Application.Common.Models;
+using Application.Interfaces.Repositories.Lead.Lead;
 using Domain.Entities;
 using MediatR;
 using System;
@@ -7,7 +7,7 @@ using System;
 namespace Application.Features.Leads.Commands.CreateLead
 {
     public class CreateLeadCommandHandler(
-        ILeadWriteRepository leadWriteRepository,
+        ILeadInsertRepository leadInsertRepository,
         ILeadReadRepository leadReadRepository) : IRequestHandler<CreateLeadCommand, Result<int>>
     {
         public async Task<Result<int>> Handle(CreateLeadCommand request, CancellationToken cancellationToken)
@@ -32,7 +32,7 @@ namespace Application.Features.Leads.Commands.CreateLead
                 Birthday = request.Birthday,
                 Gender = request.Gender
             };
-            await leadWriteRepository.AddAsync(lead, cancellationToken).ConfigureAwait(false);
+            await leadInsertRepository.AddAsync(lead, cancellationToken).ConfigureAwait(false);
             return lead.Id;
         }
     }

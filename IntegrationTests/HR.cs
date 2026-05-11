@@ -5,6 +5,7 @@ using Domain.Constants.Order;
 using Domain.Constants.Permission;
 using Domain.Entities;
 using Domain.Entities.HR;
+using Domain.Entities.HR;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;

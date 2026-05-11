@@ -1,4 +1,4 @@
-using Domain.Entities.HR;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.HR.Queries.GetCommissionRecords;

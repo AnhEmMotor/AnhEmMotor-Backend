@@ -1,7 +1,7 @@
 using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Technology;
+using Application.Interfaces.Repositories.Technology.Technology;
 using Domain.Entities;
 using Mapster;
 using MediatR;
@@ -10,7 +10,7 @@ namespace Application.Features.Technologies.Commands.CreateTechnology;
 
 public sealed class CreateTechnologyCommandHandler(
     ITechnologyReadRepository readRepository,
-    ITechnologyUpdateRepository updateRepository,
+    ITechnologyInsertRepository insertRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateTechnologyCommand, Result<TechnologyResponse>>
 {
     public async Task<Result<TechnologyResponse>> Handle(
@@ -26,7 +26,7 @@ public sealed class CreateTechnologyCommandHandler(
             DefaultDescription = request.DefaultDescription,
             DefaultImageUrl = request.DefaultImageUrl
         };
-        updateRepository.Add(tech);
+        insertRepository.Add(tech);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var result = await readRepository.GetByIdAsync(tech.Id, cancellationToken).ConfigureAwait(false);
         return result!.Adapt<TechnologyResponse>();

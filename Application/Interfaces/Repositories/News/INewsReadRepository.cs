@@ -1,4 +1,3 @@
-using Application.Common.Models;
 using Domain.Primitives;
 using Domain.Constants;
 using Sieve.Models;
@@ -8,7 +7,7 @@ namespace Application.Interfaces.Repositories.News
 {
     public interface INewsReadRepository
     {
-        public Task<Domain.Primitives.PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
             SieveModel sieveModel,
             DataFetchMode mode = DataFetchMode.ActiveOnly,
             Expression<Func<Domain.Entities.News, bool>>? filter = null,

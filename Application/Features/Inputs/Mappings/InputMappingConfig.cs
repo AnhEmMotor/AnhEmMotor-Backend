@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.ApiContracts.Supplier.Responses;
 using Application.Features.Inputs.Commands.CreateInput;

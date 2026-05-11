@@ -1,8 +1,8 @@
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.LocalFile;
-using Application.Interfaces.Repositories.MediaFile;
+using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Mapster;
 using MediatR;
 using MediaFileEntity = Domain.Entities.MediaFile;
@@ -10,7 +10,8 @@ using MediaFileEntity = Domain.Entities.MediaFile;
 namespace Application.Features.Files.Commands.UploadNewsImage;
 
 public sealed class UploadNewsImageCommandHandler(
-    IFileStorageService fileStorageService,
+    IFileReadService fileReadService,
+    IFileInsertService fileInsertService,
     IMediaFileInsertRepository insertRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UploadNewsImageCommand, Result<MediaFileResponse>>
 {
@@ -32,7 +33,7 @@ public sealed class UploadNewsImageCommandHandler(
         {
             return Result<MediaFileResponse>.Failure("File size exceeds 10MB limit");
         }
-        var saveResult = await fileStorageService.SaveFileAsync(request.FileContent, cancellationToken, "news")
+        var saveResult = await fileInsertService.SaveFileAsync(request.FileContent, cancellationToken, "news")
             .ConfigureAwait(false);
         if (saveResult.IsFailure)
         {
@@ -51,7 +52,7 @@ public sealed class UploadNewsImageCommandHandler(
         insertRepository.Add(mediaFile);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var response = mediaFile.Adapt<MediaFileResponse>();
-        response.PublicUrl = fileStorageService.GetPublicUrl(savedFile.StoragePath);
+        response.PublicUrl = fileReadService.GetPublicUrl(savedFile.StoragePath);
         return response;
     }
 }

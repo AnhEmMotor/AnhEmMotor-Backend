@@ -1,27 +1,31 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.HR;
+using Domain.Entities;
 using Domain.Entities.HR;
 using Domain.Constants.HR.CommissionPolicy;
 using Mapster;
 using MediatR;
 using System;
 using System.Text.Json;
+using Application.Interfaces.Repositories.HR.CommissionPolicy;
 
 namespace Application.Features.HR.Commands.UpdateCommissionPolicy
 {
     public sealed class UpdateCommissionPolicyCommandHandler(
-        ICommissionPolicyRepository policyRepository,
+        ICommissionPolicyReadRepository readRepository,
+        ICommissionPolicyUpdateRepository updateRepository,
+        ICommissionPolicyInsertRepository insertRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<UpdateCommissionPolicyCommand, Result>
     {
         public async Task<Result> Handle(UpdateCommissionPolicyCommand request, CancellationToken cancellationToken)
         {
-            var policy = await policyRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+            var policy = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
             if (policy == null)
                 return Result.Failure("Không tìm thấy chính sách.");
 
             var oldSnapshot = JsonSerializer.Serialize(policy);
             request.Adapt(policy);
+            updateRepository.Update(policy);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             var auditLog = new CommissionPolicyAuditLog
@@ -37,7 +41,7 @@ namespace Application.Features.HR.Commands.UpdateCommissionPolicy
                 ChangedAt = DateTime.UtcNow
             };
 
-            policyRepository.AddAuditLog(auditLog);
+            insertRepository.AddAuditLog(auditLog);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();
         }

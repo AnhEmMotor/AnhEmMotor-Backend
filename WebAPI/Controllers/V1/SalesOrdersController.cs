@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Output.Responses;
+using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Features.Outputs.Commands.CancelOrderByBuyer;
 using Application.Features.Outputs.Commands.CreateOutput;
@@ -37,16 +37,16 @@ using static Domain.Constants.Permission.PermissionsList;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Quản lý đơn hàng/phiếu xuất.
+/// Qu?n l� don h�ng/phi?u xu?t.
 /// </summary>
 [ApiVersion("1.0")]
-[SwaggerTag("Quản lý đơn hàng/phiếu xuất")]
+[SwaggerTag("Qu?n l� don h�ng/phi?u xu?t")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SalesOrdersController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Lấy danh sách đơn hàng của khách hàng hiện tại (dựa trên JWT token).
+    /// L?y danh s�ch don h�ng c?a kh�ch h�ng hi?n t?i (d?a tr�n JWT token).
     /// </summary>
     [HttpGet("my-purchases")]
     [ProducesResponseType(typeof(PagedResult<MyOrderResponse>), StatusCodes.Status200OK)]
@@ -65,7 +65,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
                         [new ErrorDetail
                             {
                                 Field = "Authorization",
-                                Message = "Không thể lấy thông tin người dùng từ token."
+                                Message = "Kh�ng th? l?y th�ng tin ngu?i d�ng t? token."
                             }]
                 });
         }
@@ -75,7 +75,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách đơn hàng của id khách hàng (chỉ cho phép vào khi có quyền xem đơn hàng).
+    /// L?y danh s�ch don h�ng c?a id kh�ch h�ng (ch? cho ph�p v�o khi c� quy?n xem don h�ng).
     /// </summary>
     [HttpGet("get-purchases/{id:Guid}")]
     [HasPermission(Outputs.View)]
@@ -92,7 +92,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách đơn hàng (có phân trang, lọc, sắp xếp).
+    /// L?y danh s�ch don h�ng (c� ph�n trang, l?c, s?p x?p).
     /// </summary>
     [HttpGet]
     [HasPermission(Outputs.View)]
@@ -107,7 +107,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách đơn hàng đã bị xóa (có phân trang, lọc, sắp xếp).
+    /// L?y danh s�ch don h�ng d� b? x�a (c� ph�n trang, l?c, s?p x?p).
     /// </summary>
     [HttpGet("deleted")]
     [HasPermission(Outputs.View)]
@@ -122,7 +122,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách trạng thái đơn hàng.
+    /// L?y danh s�ch tr?ng th�i don h�ng.
     /// </summary>
     [HttpGet("status")]
     [RequiresAnyPermissions(Outputs.View, Outputs.Create, Outputs.Edit)]
@@ -135,7 +135,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy bản đồ tên hiển thị nội bộ của trạng thái đơn hàng (Tiếng Việt).
+    /// L?y b?n d? t�n hi?n th? n?i b? c?a tr?ng th�i don h�ng (Ti?ng Vi?t).
     /// </summary>
     [HttpGet("status-map")]
     [Authorize]
@@ -148,7 +148,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy sơ đồ chuyển đổi trạng thái đơn hàng.
+    /// L?y so d? chuy?n d?i tr?ng th�i don h�ng.
     /// </summary>
     [HttpGet("transition-map")]
     [RequiresAnyPermissions(Outputs.Create, Outputs.Edit)]
@@ -161,7 +161,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
+    /// L?y danh s�ch tr?ng th�i don h�ng b? kh�a kh�ng cho ph�p s?a th�ng tin chi ti?t.
     /// </summary>
     [HttpGet("locked-statuses")]
     [Authorize]
@@ -174,7 +174,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách các mã trạng thái có thể hủy đơn hàng trực tiếp.
+    /// L?y danh s�ch c�c m� tr?ng th�i c� th? h?y don h�ng tr?c ti?p.
     /// </summary>
     [HttpGet("cancellable-statuses")]
     [Authorize]
@@ -187,7 +187,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy thông tin chi tiết của đơn hàng.
+    /// L?y th�ng tin chi ti?t c?a don h�ng.
     /// </summary>
     [HttpGet("{id:int}", Name = RouteNames.SaleOrders.GetById)]
     [HasPermission(Outputs.View)]
@@ -201,7 +201,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tạo đơn hàng mới (dành cho người có quyền tạo đơn hàng).
+    /// T?o don h�ng m?i (d�nh cho ngu?i c� quy?n t?o don h�ng).
     /// </summary>
     [HttpPost("by-manager")]
     [HasPermission(Outputs.Create)]
@@ -224,7 +224,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
+    /// T?o don h�ng m?i (d�nh cho c�c t�i kho?n d� dang nh?p).
     /// </summary>
     [HttpPost]
     [Authorize]
@@ -247,7 +247,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật đơn hàng (Cho phép sửa đơn hàng do chính mình tạo ra)
+    /// C?p nh?t don h�ng (Cho ph�p s?a don h�ng do ch�nh m�nh t?o ra)
     /// </summary>
     [HttpPut("{id:int}")]
     [Authorize]
@@ -270,7 +270,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Hủy đơn hàng (Dành cho người sở hữu đơn hàng).
+    /// H?y don h�ng (D�nh cho ngu?i s? h?u don h�ng).
     /// </summary>
     [HttpPatch("{id:int}/cancel-my-order")]
     [Authorize]
@@ -291,8 +291,8 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa
-    /// đơn hàng)
+    /// C?p nh?t don h�ng (Cho ph�p s?a t?t c? don h�ng, nhung ch? cho ph�p c?p nh?t khi v� ch? khi c� quy?n ch?nh s?a
+    /// don h�ng)
     /// </summary>
     [HttpPut("for-manager/{id:int}")]
     [HasPermission(Outputs.Edit)]
@@ -315,7 +315,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật trạng thái của đơn hàng.
+    /// C?p nh?t tr?ng th�i c?a don h�ng.
     /// </summary>
     [HttpPatch("{id:int}/status")]
     [HasPermission(Outputs.ChangeStatus)]
@@ -338,7 +338,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật trạng thái của nhiều đơn hàng cùng lúc.
+    /// C?p nh?t tr?ng th�i c?a nhi?u don h�ng c�ng l�c.
     /// </summary>
     [HttpPatch("status")]
     [HasPermission(Outputs.ChangeStatus)]
@@ -354,7 +354,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xóa đơn hàng.
+    /// X�a don h�ng.
     /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -367,7 +367,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xóa nhiều đơn hàng cùng lúc.
+    /// X�a nhi?u don h�ng c�ng l�c.
     /// </summary>
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -382,7 +382,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Khôi phục đơn hàng đã bị xóa.
+    /// Kh�i ph?c don h�ng d� b? x�a.
     /// </summary>
     [HttpPost("{id:int}/restore")]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
@@ -395,7 +395,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Khôi phục nhiều đơn hàng đã bị xóa cùng lúc.
+    /// Kh�i ph?c nhi?u don h�ng d� b? x�a c�ng l�c.
     /// </summary>
     [HttpPost("restore")]
     [ProducesResponseType(typeof(List<OutputItemResponse>), StatusCodes.Status200OK)]

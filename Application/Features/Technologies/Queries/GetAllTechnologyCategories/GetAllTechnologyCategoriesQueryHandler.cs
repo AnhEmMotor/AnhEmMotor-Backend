@@ -1,6 +1,6 @@
 using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Technology;
+using Application.Interfaces.Repositories.TechnologyCategory.TechnologyCategory;
 using Mapster;
 using MediatR;
 

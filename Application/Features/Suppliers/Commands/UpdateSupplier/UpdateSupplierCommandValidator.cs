@@ -1,4 +1,4 @@
-﻿using Application.Common.Validators;
+using Application.Common.Validators;
 using FluentValidation;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplier;

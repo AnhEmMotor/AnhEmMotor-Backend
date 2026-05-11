@@ -1,6 +1,6 @@
 using Application.ApiContracts.HR.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.HR;
+using Application.Interfaces.Repositories.HR.Employee;
 using MediatR;
 using System.Linq;
 

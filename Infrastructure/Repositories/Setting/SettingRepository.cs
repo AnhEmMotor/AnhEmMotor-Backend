@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories.Setting;
+using Application.Interfaces.Repositories.Setting;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using SettingEntity = Domain.Entities.Setting;

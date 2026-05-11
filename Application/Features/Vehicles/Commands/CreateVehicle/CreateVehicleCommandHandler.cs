@@ -1,7 +1,7 @@
 using Application.ApiContracts.Vehicle.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;

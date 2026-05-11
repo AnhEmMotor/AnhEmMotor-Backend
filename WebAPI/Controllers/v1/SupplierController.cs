@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Supplier.Responses;
+using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
 using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Suppliers.Commands.CreateSupplier;
@@ -28,18 +28,18 @@ using static Domain.Constants.Permission.PermissionsList;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Quản lý danh sách nhà cung cấp.
+/// Qu?n l� danh s�ch nh� cung c?p.
 /// </summary>
 [ApiVersion("1.0")]
-[SwaggerTag("Quản lý danh sách nhà cung cấp")]
+[SwaggerTag("Qu?n l� danh s�ch nh� cung c?p")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SupplierController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp).
+    /// L?y danh s�ch nh� cung c?p (c� ph�n trang, l?c, s?p x?p).
     /// </summary>
-    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="sieveModel">C�c th�ng tin ph�n trang, l?c, s?p x?p theo quy t?c c?a Sieve.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet]
@@ -55,9 +55,9 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách nhà cung cấp đã bị xoá (có phân trang, lọc, sắp xếp).
+    /// L?y danh s�ch nh� cung c?p d� b? xo� (c� ph�n trang, l?c, s?p x?p).
     /// </summary>
-    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="sieveModel">C�c th�ng tin ph�n trang, l?c, s?p x?p theo quy t?c c?a Sieve.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("deleted")]
@@ -73,9 +73,9 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy thông tin của nhà cung cấp được chọn.
+    /// L?y th�ng tin c?a nh� cung c?p du?c ch?n.
     /// </summary>
-    /// <param name="id">Mã nhà cung cấp cần lấy thông tin.</param>
+    /// <param name="id">M� nh� cung c?p c?n l?y th�ng tin.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("{id:int}", Name = RouteNames.Supplier.GetById)]
@@ -90,10 +90,10 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy lịch sử nhập hàng của nhà cung cấp.
+    /// L?y l?ch s? nh?p h�ng c?a nh� cung c?p.
     /// </summary>
-    /// <param name="id">Id nhà cung cấp.</param>
-    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp.</param>
+    /// <param name="id">Id nh� cung c?p.</param>
+    /// <param name="sieveModel">C�c th�ng tin ph�n trang, l?c, s?p x?p.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("{id:int}/purchase-history")]
@@ -111,9 +111,9 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tạo nhà cung cấp mới.
+    /// T?o nh� cung c?p m?i.
     /// </summary>
-    /// <param name="request">Thông tin nhà cung cấp cần tạo.</param>
+    /// <param name="request">Th�ng tin nh� cung c?p c?n t?o.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost]
@@ -129,10 +129,10 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và sửa phiếu
-    /// bán hàng).
+    /// L?y danh s�ch nh� cung c?p (c� ph�n trang, l?c, s?p x?p - ch? du?c v�o khi ngu?i d�ng c� quy?n th�m v� s?a phi?u
+    /// b�n h�ng).
     /// </summary>
-    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="sieveModel">C�c th�ng tin ph�n trang, l?c, s?p x?p theo quy t?c c?a Sieve.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("for-input")]
@@ -148,10 +148,10 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật thông tin nhà cung cấp.
+    /// C?p nh?t th�ng tin nh� cung c?p.
     /// </summary>
-    /// <param name="id">Id nhà cung cấp cần cập nhật.</param>
-    /// <param name="request">Thông tin nhà cung cấp cần cập nhật.</param>
+    /// <param name="id">Id nh� cung c?p c?n c?p nh?t.</param>
+    /// <param name="request">Th�ng tin nh� cung c?p c?n c?p nh?t.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPut("{id:int}")]
@@ -169,10 +169,10 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật trạng thái của nhà cung cấp.
+    /// C?p nh?t tr?ng th�i c?a nh� cung c?p.
     /// </summary>
-    /// <param name="id">Id nhà cung cấp cần cập nhật trạng thái.</param>
-    /// <param name="request">Trạng thái mới.</param>
+    /// <param name="id">Id nh� cung c?p c?n c?p nh?t tr?ng th�i.</param>
+    /// <param name="request">Tr?ng th�i m?i.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPatch("{id:int}/status")]
@@ -190,9 +190,9 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xoá nhà cung cấp.
+    /// Xo� nh� cung c?p.
     /// </summary>
-    /// <param name="id">Id của nhà cung cấp cần xoá.</param>
+    /// <param name="id">Id c?a nh� cung c?p c?n xo�.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpDelete("{id:int}")]
@@ -207,9 +207,9 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Khôi phục lại nhà cung cấp đã xoá.
+    /// Kh�i ph?c l?i nh� cung c?p d� xo�.
     /// </summary>
-    /// <param name="id">Id của nhà cung cấp cần khôi phục</param>
+    /// <param name="id">Id c?a nh� cung c?p c?n kh�i ph?c</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("restore/{id:int}")]
@@ -224,9 +224,9 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xoá nhiều nhà cung cấp cùng lúc.
+    /// Xo� nhi?u nh� cung c?p c�ng l�c.
     /// </summary>
-    /// <param name="request">Danh sách Id nhà cung cấp cần xoá.</param>
+    /// <param name="request">Danh s�ch Id nh� cung c?p c?n xo�.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpDelete("delete-many")]
@@ -243,9 +243,9 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Khôi phục nhiều nhà cung cấp đã xoá cùng lúc.
+    /// Kh�i ph?c nhi?u nh� cung c?p d� xo� c�ng l�c.
     /// </summary>
-    /// <param name="request">Danh sách Id nhà cung cấp cần khôi phục.</param>
+    /// <param name="request">Danh s�ch Id nh� cung c?p c?n kh�i ph?c.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("restore-many")]
@@ -262,9 +262,9 @@ public class SupplierController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật trạng thái của nhiều nhà cung cấp cùng lúc.
+    /// C?p nh?t tr?ng th�i c?a nhi?u nh� cung c?p c�ng l�c.
     /// </summary>
-    /// <param name="request">Danh sách Id nhà cung cấp và trạng thái mới.</param>
+    /// <param name="request">Danh s�ch Id nh� cung c?p v� tr?ng th�i m?i.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPatch("update-status-many")]

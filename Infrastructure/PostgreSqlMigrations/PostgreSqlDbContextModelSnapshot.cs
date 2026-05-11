@@ -1,4 +1,4 @@
-﻿using Infrastructure.DBContexts;
+using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;

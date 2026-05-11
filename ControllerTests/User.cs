@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.Users.Commands.ChangePassword;
@@ -44,7 +44,7 @@ public class User
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "USER_036 - Controller - GET /api/v1/User/me gọi đúng Query")]
+    [Fact(DisplayName = "USER_036 - Controller - GET /api/v1/User/me g?i d�ng Query")]
     public async Task GetCurrentUser_CallsCorrectQuery_ReturnsOk()
     {
         var expectedResponse = new UserResponse
@@ -72,7 +72,7 @@ public class User
         _mediatorMock.Verify(m => m.Send(It.IsAny<GetCurrentUserQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "USER_037 - Controller - GET /api/v1/User/me xử lý exception")]
+    [Fact(DisplayName = "USER_037 - Controller - GET /api/v1/User/me x? l� exception")]
     public async Task GetCurrentUser_HandlesException_ThrowsUnauthorizedException()
     {
         var userId = Guid.NewGuid();
@@ -90,7 +90,7 @@ public class User
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "USER_038 - Controller - PUT /api/v1/User/me gọi đúng Command")]
+    [Fact(DisplayName = "USER_038 - Controller - PUT /api/v1/User/me g?i d�ng Command")]
     public async Task UpdateCurrentUser_CallsCorrectCommand_ReturnsOk()
     {
         var userId = Guid.NewGuid();
@@ -121,7 +121,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_039 - Controller - PUT /api/v1/User/me với body null hoặc rỗng")]
+    [Fact(DisplayName = "USER_039 - Controller - PUT /api/v1/User/me v?i body null ho?c r?ng")]
     public async Task UpdateCurrentUser_EmptyBody_CallsMediator()
     {
         var request = new UpdateCurrentUserCommand();
@@ -135,7 +135,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_040 - Controller - PUT /api/v1/User/me xử lý ValidationException")]
+    [Fact(DisplayName = "USER_040 - Controller - PUT /api/v1/User/me x? l� ValidationException")]
     public async Task UpdateCurrentUser_ValidationException_ThrowsValidationException()
     {
         var request = new UpdateCurrentUserCommand { PhoneNumber = "invalid" };
@@ -145,7 +145,7 @@ public class User
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_041 - Controller - POST /api/v1/User/change-password gọi đúng Command")]
+    [Fact(DisplayName = "USER_041 - Controller - POST /api/v1/User/change-password g?i d�ng Command")]
     public async Task ChangePassword_CallsCorrectCommand_ReturnsOk()
     {
         var userId = Guid.NewGuid();
@@ -174,7 +174,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_042 - Controller - POST /api/v1/User/change-password với body thiếu trường")]
+    [Fact(DisplayName = "USER_042 - Controller - POST /api/v1/User/change-password v?i body thi?u tru?ng")]
     public async Task ChangePassword_MissingField_ThrowsValidationException()
     {
         var request = new ChangePasswordCommand { CurrentPassword = "Old", NewPassword = string.Empty };
@@ -185,7 +185,7 @@ public class User
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_043 - Controller - POST /api/v1/User/change-password xử lý UnauthorizedException")]
+    [Fact(DisplayName = "USER_043 - Controller - POST /api/v1/User/change-password x? l� UnauthorizedException")]
     public async Task ChangePassword_UnauthorizedException_ThrowsUnauthorizedException()
     {
         var request = new ChangePasswordCommand { CurrentPassword = "Wrong", NewPassword = "New" };
@@ -196,7 +196,7 @@ public class User
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "USER_044 - Controller - POST /api/v1/User/delete-account gọi đúng Command")]
+    [Fact(DisplayName = "USER_044 - Controller - POST /api/v1/User/delete-account g?i d�ng Command")]
     public async Task DeleteAccount_CallsCorrectCommand_ReturnsOk()
     {
         var expectedResponse = new DeleteAccountByUserReponse { Message = "Account deleted successfully" };
@@ -211,7 +211,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_045 - Controller - POST /api/v1/User/delete-account xử lý ForbiddenException")]
+    [Fact(DisplayName = "USER_045 - Controller - POST /api/v1/User/delete-account x? l� ForbiddenException")]
     public async Task DeleteAccount_ForbiddenException_ReturnsForbiddenObjectResult()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteCurrentUserAccountCommand>(), It.IsAny<CancellationToken>()))
@@ -221,7 +221,7 @@ public class User
         objectResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
     }
 
-    [Fact(DisplayName = "USER_046 - Controller - POST /api/v1/User/{userId}/restore gọi đúng Command")]
+    [Fact(DisplayName = "USER_046 - Controller - POST /api/v1/User/{userId}/restore g?i d�ng Command")]
     public async Task RestoreAccount_CallsCorrectCommand_ReturnsOk()
     {
         var userId = Guid.NewGuid();
@@ -237,7 +237,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_047 - Controller - POST /api/v1/User/{userId}/restore với userId không hợp lệ")]
+    [Fact(DisplayName = "USER_047 - Controller - POST /api/v1/User/{userId}/restore v?i userId kh�ng h?p l?")]
     public async Task RestoreAccount_InvalidGuid_ModelBindingFail()
     {
         var userId = Guid.Empty;
@@ -247,7 +247,7 @@ public class User
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_048 - Controller - POST /api/v1/User/{userId}/restore xử lý NotFoundException")]
+    [Fact(DisplayName = "USER_048 - Controller - POST /api/v1/User/{userId}/restore x? l� NotFoundException")]
     public async Task RestoreAccount_NotFoundException_ThrowsNotFoundException()
     {
         var userId = Guid.NewGuid();
@@ -257,7 +257,7 @@ public class User
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_049 - Controller - POST /api/v1/User/{userId}/restore xử lý BadRequestException")]
+    [Fact(DisplayName = "USER_049 - Controller - POST /api/v1/User/{userId}/restore x? l� BadRequestException")]
     public async Task RestoreAccount_BadRequestException_ThrowsBadRequestException()
     {
         var userId = Guid.NewGuid();
@@ -267,7 +267,7 @@ public class User
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_050 - Controller - Kiểm tra Authorization Attribute trên các endpoints")]
+    [Fact(DisplayName = "USER_050 - Controller - Ki?m tra Authorization Attribute tr�n c�c endpoints")]
     public void Controller_HasAuthorizeAttribute_AllEndpointsProtected()
     {
         var controllerType = typeof(UserController);

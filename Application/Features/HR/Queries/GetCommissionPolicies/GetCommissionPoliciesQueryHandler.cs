@@ -1,10 +1,11 @@
-using Application.Interfaces.Repositories.HR;
+using Application.Interfaces.Repositories.HR.CommissionPolicy;
+using Domain.Entities;
 using Domain.Entities.HR;
 using MediatR;
 
 namespace Application.Features.HR.Queries.GetCommissionPolicies;
 
-public class GetCommissionPoliciesQueryHandler(ICommissionPolicyRepository repository) : IRequestHandler<GetCommissionPoliciesQuery, List<CommissionPolicy>>
+public class GetCommissionPoliciesQueryHandler(ICommissionPolicyReadRepository repository) : IRequestHandler<GetCommissionPoliciesQuery, List<CommissionPolicy>>
 {
     public Task<List<CommissionPolicy>> Handle(GetCommissionPoliciesQuery request, CancellationToken cancellationToken)
     {

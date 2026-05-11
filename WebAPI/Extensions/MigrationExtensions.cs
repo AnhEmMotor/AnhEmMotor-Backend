@@ -56,9 +56,7 @@ public static class MigrationExtensions
                 await ProductDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await NewsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await Infrastructure.Data.Seeders.TechnologySeeder
-                    .SeedAsync(dbContext, cancellationToken)
-                    .ConfigureAwait(false);
+                await TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await new VehicleTypeSeeder(dbContext).SeedAsync(cancellationToken).ConfigureAwait(false);
                 await TechnologyDataMigrationSeeder.MigrateExistingHighlightsAsync(dbContext, cancellationToken)
                     .ConfigureAwait(false);

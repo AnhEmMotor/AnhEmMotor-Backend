@@ -1,4 +1,4 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Entities;
@@ -19,7 +19,7 @@ namespace Application.Features.Products.Commands.SetProductCompatibility
             var product = await readRepository.GetByIdWithDetailsAsync(request.ProductId, cancellationToken)
                 .ConfigureAwait(false);
             if (product == null)
-                return Result<Unit>.Failure(Error.NotFound("Sản phẩm không tồn tại."));
+                return Result<Unit>.Failure(Error.NotFound("S?n ph?m kh�ng t?n t?i."));
             product.CompatibleWith.Clear();
             foreach (var vId in request.CompatibleVehicleIds.Distinct())
             {

@@ -1,5 +1,5 @@
-using Application.Interfaces.Repositories.HR;
-using Domain.Entities.HR;
+using Application.Interfaces.Repositories.HR.Employee;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.HR.Queries.GetCommissionRecords;

@@ -1,4 +1,4 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace WebAPI.Middleware;

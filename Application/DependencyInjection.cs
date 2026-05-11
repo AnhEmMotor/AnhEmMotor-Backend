@@ -1,4 +1,4 @@
-﻿using Application.Behaviors;
+using Application.Behaviors;
 using Application.Sieve;
 using FluentValidation;
 using Mapster;

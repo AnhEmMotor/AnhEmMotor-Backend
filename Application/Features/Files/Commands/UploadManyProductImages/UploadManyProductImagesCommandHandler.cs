@@ -1,8 +1,8 @@
-﻿using Application.ApiContracts.File.Responses;
+using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.LocalFile;
-using Application.Interfaces.Repositories.MediaFile;
+using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Mapster;
 using MediatR;
 using MediaFileEntity = Domain.Entities.MediaFile;
@@ -10,7 +10,8 @@ using MediaFileEntity = Domain.Entities.MediaFile;
 namespace Application.Features.Files.Commands.UploadManyProductImages;
 
 public sealed class UploadManyProductImagesCommandHandler(
-    IFileStorageService fileStorageService,
+    IFileReadService fileReadService,
+    IFileInsertService fileInsertService,
     IMediaFileInsertRepository insertRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UploadManyProductImagesCommand, Result<List<MediaFileResponse>>>
 {
@@ -45,7 +46,7 @@ public sealed class UploadManyProductImagesCommandHandler(
             {
                 return Result<List<MediaFileResponse>>.Failure($"File {fileDto.FileName} exceeds 10MB limit");
             }
-            var saveResult = await fileStorageService.SaveFileAsync(fileDto.FileContent, cancellationToken, "products")
+            var saveResult = await fileInsertService.SaveFileAsync(fileDto.FileContent, cancellationToken, "products")
                 .ConfigureAwait(false);
             if (saveResult.IsFailure)
             {
@@ -69,7 +70,7 @@ public sealed class UploadManyProductImagesCommandHandler(
         var responses = mediaFiles.Adapt<List<MediaFileResponse>>();
         foreach (var response in responses)
         {
-            response.PublicUrl = fileStorageService.GetPublicUrl(response.StoragePath!);
+            response.PublicUrl = fileReadService.GetPublicUrl(response.StoragePath!);
         }
         return responses;
     }

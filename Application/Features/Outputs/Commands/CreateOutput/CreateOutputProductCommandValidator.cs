@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Output.Requests;
+using Application.ApiContracts.Output.Requests;
 using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.CreateOutput

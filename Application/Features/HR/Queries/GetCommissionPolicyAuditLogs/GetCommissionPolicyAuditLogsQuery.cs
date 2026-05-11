@@ -1,3 +1,4 @@
+using Domain.Entities;
 using Domain.Entities.HR;
 using MediatR;
 

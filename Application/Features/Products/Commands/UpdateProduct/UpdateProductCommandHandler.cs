@@ -10,6 +10,7 @@ using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
 using Domain.Entities;

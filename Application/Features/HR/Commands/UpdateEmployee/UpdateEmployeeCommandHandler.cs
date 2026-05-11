@@ -1,6 +1,6 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.HR;
+using Application.Interfaces.Repositories.HR.Employee;
 using MediatR;
 using System;
 
@@ -17,7 +17,7 @@ namespace Application.Features.HR.Commands.UpdateEmployee
                 .ConfigureAwait(false);
             if (employee == null)
             {
-                return Result<int>.Failure("Không tìm thấy hồ sơ nhân sự.");
+                return Result<int>.Failure("Kh�ng t�m th?y h? so nh�n s?.");
             }
             employee.IdentityNumber = request.IdentityNumber.Trim();
             employee.Address = request.Address.Trim();

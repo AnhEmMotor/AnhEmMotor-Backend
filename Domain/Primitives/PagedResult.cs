@@ -1,4 +1,4 @@
-﻿namespace Domain.Primitives
+namespace Domain.Primitives
 {
     public class PagedResult<T>(List<T>? items, long? totalCount, int? pageNumber, int? pageSize)
     {

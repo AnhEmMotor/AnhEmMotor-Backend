@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.Input.Requests;
 using FluentValidation;
 
 namespace Application.Features.Inputs.Commands.UpdateInput

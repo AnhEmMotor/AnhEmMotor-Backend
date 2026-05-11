@@ -1,7 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.HR;
-using Domain.Entities.HR;
+using Application.Interfaces.Repositories.HR.Employee;
+using Domain.Entities;
 using MediatR;
 using System;
 using System.Linq;

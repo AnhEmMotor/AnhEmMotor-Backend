@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Auth.Responses;
+using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Interfaces.Repositories.User;
 using Application.Sieve;

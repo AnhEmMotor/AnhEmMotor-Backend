@@ -1,6 +1,6 @@
-﻿using Application.ApiContracts.Leads.Responses;
+using Application.ApiContracts.Leads.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Repositories.Lead.Lead;
 using MediatR;
 using System;
 
@@ -15,12 +15,12 @@ namespace Application.Features.Leads.Queries.GetLeadPipeline
             var leads = await leadRepository.GetAllLeadsWithActivitiesAsync(cancellationToken).ConfigureAwait(false);
             var statuses = new[]
             {
-                new { Key = "New", Display = "Mới" },
-                new { Key = "Consulting", Display = "Đang tư vấn" },
-                new { Key = "TestDriving", Display = "Đang lái thử" },
-                new { Key = "Deposited", Display = "Đã đặt cọc" },
-                new { Key = "Paperwork", Display = "Đang chờ giấy tờ" },
-                new { Key = "Delivered", Display = "Đã giao xe" }
+                new { Key = "New", Display = "M?i" },
+                new { Key = "Consulting", Display = "�ang tu v?n" },
+                new { Key = "TestDriving", Display = "�ang l�i th?" },
+                new { Key = "Deposited", Display = "�� d?t c?c" },
+                new { Key = "Paperwork", Display = "�ang ch? gi?y t?" },
+                new { Key = "Delivered", Display = "�� giao xe" }
             };
             var result = statuses.Select(
                 s => new LeadPipelineGroupResponse

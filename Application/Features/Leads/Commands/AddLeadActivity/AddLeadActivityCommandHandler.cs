@@ -1,14 +1,14 @@
-using Application.Interfaces.Repositories.Lead;
 using Domain.Entities;
 using Domain.Constants.Lead;
 using Mapster;
 using MediatR;
 using System;
+using Application.Interfaces.Repositories.Lead.Lead;
 
 namespace Application.Features.Leads.Commands.AddLeadActivity
 {
     public class AddLeadActivityCommandHandler(
-        ILeadWriteRepository leadWriteRepository,
+        ILeadUpdateRepository leadUpdateRepository,
         ILeadReadRepository leadReadRepository) : IRequestHandler<AddLeadActivityCommand, int>
     {
         public async Task<int> Handle(AddLeadActivityCommand request, CancellationToken cancellationToken)
@@ -39,7 +39,7 @@ namespace Application.Features.Leads.Commands.AddLeadActivity
             if (lead.Score > 100)
                 lead.Score = 100;
             lead.Activities.Add(activity);
-            await leadWriteRepository.UpdateAsync(lead, cancellationToken).ConfigureAwait(false);
+            await leadUpdateRepository.UpdateAsync(lead, cancellationToken).ConfigureAwait(false);
             return activity.Id;
         }
     }

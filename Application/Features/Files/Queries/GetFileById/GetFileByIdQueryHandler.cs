@@ -1,14 +1,13 @@
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.LocalFile;
-using Application.Interfaces.Repositories.MediaFile;
-
+using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.Files.Queries.GetFileById;
 
-public sealed class GetFileByIdQueryHandler(IMediaFileReadRepository repository, IFileStorageService fileStorageService) : IRequestHandler<GetFileByIdQuery, Result<MediaFileResponse?>>
+public sealed class GetFileByIdQueryHandler(IMediaFileReadRepository repository, IFileReadService fileReadService) : IRequestHandler<GetFileByIdQuery, Result<MediaFileResponse?>>
 {
     public async Task<Result<MediaFileResponse?>> Handle(GetFileByIdQuery request, CancellationToken cancellationToken)
     {
@@ -20,7 +19,7 @@ public sealed class GetFileByIdQueryHandler(IMediaFileReadRepository repository,
         var response = file.Adapt<MediaFileResponse>();
         if (!string.IsNullOrEmpty(file.StoragePath))
         {
-            response.PublicUrl = fileStorageService.GetPublicUrl(file.StoragePath);
+            response.PublicUrl = fileReadService.GetPublicUrl(file.StoragePath);
         }
         return response;
     }

@@ -696,4 +696,4 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
-}
+}

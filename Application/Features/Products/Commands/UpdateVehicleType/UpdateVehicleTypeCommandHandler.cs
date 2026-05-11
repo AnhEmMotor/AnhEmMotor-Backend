@@ -1,4 +1,4 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using MediatR;
@@ -15,7 +15,7 @@ namespace Application.Features.Products.Commands.UpdateVehicleType
         {
             var product = await readRepository.GetByIdAsync(request.ProductId, cancellationToken).ConfigureAwait(false);
             if (product == null)
-                return Result<Unit>.Failure(Error.NotFound("Sản phẩm không tồn tại."));
+                return Result<Unit>.Failure(Error.NotFound("S?n ph?m kh�ng t?n t?i."));
             product.VehicleTypeId = request.VehicleTypeId;
             updateRepository.Update(product);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
