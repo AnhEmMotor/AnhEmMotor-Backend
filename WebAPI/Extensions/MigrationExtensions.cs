@@ -66,7 +66,6 @@ public static class MigrationExtensions
                     roleManager,
                     userManager,
                     configuration,
-                    logger,
                     cancellationToken)
                     .ConfigureAwait(false);
                 await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);

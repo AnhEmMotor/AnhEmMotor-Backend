@@ -3,27 +3,23 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.BackgroundJobs
 {
-    public class BannerExpiryWorker(IServiceProvider serviceProvider, ILogger<BannerExpiryWorker> logger) : BackgroundService
+    public class BannerExpiryWorker(IServiceProvider serviceProvider) : BackgroundService
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            logger.LogInformation("Banner Expiry Worker is starting.");
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
                     await UpdateBannerStatusesAsync(stoppingToken).ConfigureAwait(false);
-                } catch (Exception ex)
+                } catch
                 {
-                    logger.LogError(ex, "Error occurred while updating banner statuses.");
                 }
                 await Task.Delay(TimeSpan.FromHours(1), stoppingToken).ConfigureAwait(false);
             }
-            logger.LogInformation("Banner Expiry Worker is stopping.");
         }
 
         private async Task UpdateBannerStatusesAsync(CancellationToken cancellationToken)
@@ -37,9 +33,6 @@ namespace Infrastructure.BackgroundJobs
                 .ConfigureAwait(false);
             if (expiredBanners.Any())
             {
-                logger.LogInformation(
-                    "Found {Count} expired banners. Updating status to inactive.",
-                    expiredBanners.Count);
                 foreach (var banner in expiredBanners)
                 {
                     banner.IsActive = false;

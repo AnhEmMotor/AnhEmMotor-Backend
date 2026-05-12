@@ -4,7 +4,6 @@ using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Seeders;
 
@@ -15,7 +14,6 @@ public static class ProtectedEntitiesSeeder
         RoleManager<ApplicationRole> roleManager,
         UserManager<ApplicationUser> userManager,
         IConfiguration configuration,
-        ILogger logger,
         CancellationToken cancellationToken)
     {
         var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
@@ -83,14 +81,7 @@ public static class ProtectedEntitiesSeeder
                     user = newUser;
                 } else
                 {
-                    foreach (var error in result.Errors)
-                    {
-                        logger.LogError(
-                            "Error creating protected user {Email}: {ErrorDescription}",
-                            email,
-                            error.Description);
-                    }
-                    throw new Exception($"Failed to create protected user {email}. See logs for details.");
+                    throw new Exception($"Failed to create protected user {email}.");
                 }
             }
             if (user != null && superRoles.Count > 0)
@@ -100,7 +91,6 @@ public static class ProtectedEntitiesSeeder
                 if (!isInRole)
                 {
                     await userManager.AddToRoleAsync(user, roleName).ConfigureAwait(false);
-                    logger.LogInformation("Assigned SuperRole {Role} to user {Email}", roleName, email);
                 }
             }
         }

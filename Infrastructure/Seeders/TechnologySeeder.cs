@@ -12,7 +12,7 @@ public static class TechnologySeeder
         foreach (var name in categoryNames)
         {
             if (!await context.TechnologyCategories
-                .AnyAsync(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase), cancellationToken)
+                .AnyAsync(c => c.Name.ToLower() == name.ToLower(), cancellationToken)
                 .ConfigureAwait(false))
             {
                 context.TechnologyCategories.Add(new TechnologyCategory { Name = name });
@@ -24,17 +24,17 @@ public static class TechnologySeeder
             .ConfigureAwait(false);
         var honda = await context.Brands
             .FirstOrDefaultAsync(
-                b => string.Equals(b.Name, "Honda", StringComparison.OrdinalIgnoreCase),
+                b => b.Name != null && b.Name.ToLower() == "honda",
                 cancellationToken)
             .ConfigureAwait(false);
         var yamaha = await context.Brands
             .FirstOrDefaultAsync(
-                b => string.Equals(b.Name, "Yamaha", StringComparison.OrdinalIgnoreCase),
+                b => b.Name != null && b.Name.ToLower() == "yamaha",
                 cancellationToken)
             .ConfigureAwait(false);
         var piaggio = await context.Brands
             .FirstOrDefaultAsync(
-                b => string.Equals(b.Name, "Piaggio", StringComparison.OrdinalIgnoreCase),
+                b => b.Name != null && b.Name.ToLower() == "piaggio",
                 cancellationToken)
             .ConfigureAwait(false);
         if (piaggio == null)
@@ -62,7 +62,7 @@ public static class TechnologySeeder
         {
             var exists = await context.Technologies
                 .AnyAsync(
-                    t => string.Equals(t.Name, data.Name, StringComparison.OrdinalIgnoreCase) &&
+                    t => t.Name.ToLower() == data.Name.ToLower() &&
                         t.BrandId == (data.Brand != null ? data.Brand.Id : null),
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -85,7 +85,7 @@ public static class TechnologySeeder
             {
                 var tech = await context.Technologies
                     .FirstOrDefaultAsync(
-                        t => string.Equals(t.Name, data.Name, StringComparison.OrdinalIgnoreCase) &&
+                        t => t.Name.ToLower() == data.Name.ToLower() &&
                             t.BrandId == (data.Brand != null ? data.Brand.Id : null),
                         cancellationToken)
                     .ConfigureAwait(false);
