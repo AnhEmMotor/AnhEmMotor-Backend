@@ -1,8 +1,6 @@
-using Domain.Entities.HR;
-
 using Domain.Entities;
 
-namespace Application.Interfaces.Repositories.HR.Employee;
+namespace Application.Interfaces.Repositories.HR.Commission;
 
 public interface ICommissionReadRepository
 {
@@ -12,7 +10,7 @@ public interface ICommissionReadRepository
         CommissionStatus status,
         int? employeeId = null,
         CancellationToken cancellationToken = default);
-    
+
     public Task<List<CommissionRecord>> GetRecordsByEmployeeIdAsync(
         int employeeId,
         CancellationToken cancellationToken = default);

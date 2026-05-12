@@ -17,7 +17,7 @@ using Application.Features.Permissions.Queries.GetAllRoles;
 using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using FluentAssertions;
 using FluentValidation;
@@ -55,42 +55,22 @@ public class PermissionAndRole
                 "Brands",
                 new List<PermissionResponse>
                 {
-                    new()
-                    {
-                        ID = Domain.Constants.Permission.Permissions.Brands.View,
-                        DisplayName = "View Brands",
-                        Description = "Xem danh sách thương hiệu"
-                    },
-                    new()
-                    {
-                        ID = Domain.Constants.Permission.Permissions.Brands.Create,
-                        DisplayName = "Create Brand",
-                        Description = "Tạo thương hiệu mới"
-                    }
+                    new() { ID = Brands.View, DisplayName = "View Brands", Description = "Xem danh sách thương hiệu" },
+                    new() { ID = Brands.Create, DisplayName = "Create Brand", Description = "Tạo thương hiệu mới" }
                 }
             },
             {
                 "Products",
                 new List<PermissionResponse>
                 {
-                    new()
-                    {
-                        ID = Domain.Constants.Permission.Permissions.Products.View,
-                        DisplayName = "View Products",
-                        Description = "Xem danh sách sản phẩm"
-                    }
+                    new() { ID = Products.View, DisplayName = "View Products", Description = "Xem danh sách sản phẩm" }
                 }
             },
             {
                 "Roles",
                 new List<PermissionResponse>
                 {
-                    new()
-                    {
-                        ID = Domain.Constants.Permission.Permissions.Roles.View,
-                        DisplayName = "View Roles",
-                        Description = "Xem danh sách vai trò"
-                    }
+                    new() { ID = Roles.View, DisplayName = "View Roles", Description = "Xem danh sách vai trò" }
                 }
             }
         };
@@ -113,8 +93,7 @@ public class PermissionAndRole
             UserName = "testuser",
             Email = "test@test.com",
             Roles = ["Manager"],
-            Permissions =
-                [Domain.Constants.Permission.Permissions.Brands.View, Domain.Constants.Permission.Permissions.Brands.Create, Domain.Constants.Permission.Permissions.Products.View, Domain.Constants.Permission.Permissions.Products.Create]
+            Permissions = [Brands.View, Brands.Create, Products.View, Products.Create]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMyPermissionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
@@ -145,8 +124,7 @@ public class PermissionAndRole
             UserName = "targetuser",
             Email = "target@test.com",
             Roles = ["Staff"],
-            Permissions =
-                [Domain.Constants.Permission.Permissions.Products.View, Domain.Constants.Permission.Permissions.Brands.View, Domain.Constants.Permission.Permissions.Files.View, Domain.Constants.Permission.Permissions.Files.Upload, Domain.Constants.Permission.Permissions.Suppliers.View]
+            Permissions = [Products.View, Brands.View, Files.View, Files.Upload, Suppliers.View]
         };
         _mediatorMock.Setup(
             m => m.Send(It.Is<GetUserPermissionsByIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
@@ -178,12 +156,12 @@ public class PermissionAndRole
         var roleId = Guid.NewGuid();
         var expectedPermissions = new List<string>
         {
-            Domain.Constants.Permission.Permissions.Brands.View,
-            Domain.Constants.Permission.Permissions.Brands.Create,
-            Domain.Constants.Permission.Permissions.Products.View,
-            Domain.Constants.Permission.Permissions.Products.Create,
-            Domain.Constants.Permission.Permissions.Files.View,
-            Domain.Constants.Permission.Permissions.Suppliers.View
+            Brands.View,
+            Brands.Create,
+            Products.View,
+            Products.Create,
+            Files.View,
+            Suppliers.View
         };
         _mediatorMock.Setup(
             m => m.Send(It.Is<GetRolePermissionsQuery>(q => q.RoleId == roleId), It.IsAny<CancellationToken>()))
@@ -237,7 +215,7 @@ public class PermissionAndRole
         {
             RoleName = "NewRole",
             Description = "Test Role",
-            Permissions = [Domain.Constants.Permission.Permissions.Brands.View, Domain.Constants.Permission.Permissions.Products.View]
+            Permissions = [Brands.View, Products.View]
         };
         var expectedResponse = new RoleCreateResponse
         {
@@ -265,7 +243,7 @@ public class PermissionAndRole
         {
             RoleName = "Admin",
             Description = "Duplicate",
-            Permissions = [Domain.Constants.Permission.Permissions.Brands.View]
+            Permissions = [Brands.View]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("Role name already exists"));
@@ -458,7 +436,11 @@ public class PermissionAndRole
     public async Task UpdateRole_NewPermission_ReturnsOk()
     {
         var roleId = Guid.NewGuid();
-        var request = new UpdateRoleCommand { RoleId = roleId, Permissions = [Domain.Constants.Permission.Permissions.News.Create] };
+        var request = new UpdateRoleCommand
+        {
+            RoleId = roleId,
+            Permissions = [Domain.Constants.Permission.Permissions.News.Create]
+        };
         var expectedResponse = new PermissionRoleUpdateResponse { Message = "Role updated successfully" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PermissionRoleUpdateResponse>.Success(expectedResponse));
@@ -466,5 +448,4 @@ public class PermissionAndRole
         result.Should().BeOfType<OkObjectResult>();
     }
 }
-
 

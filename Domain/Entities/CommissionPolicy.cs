@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Domain.Entities.HR;
+namespace Domain.Entities;
 
 [Table("CommissionPolicy")]
 public class CommissionPolicy : BaseEntity

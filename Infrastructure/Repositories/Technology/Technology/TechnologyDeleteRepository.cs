@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.Technology.Technology;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 using TechnologyEntity = Domain.Entities.Technology;
 

@@ -1,3 +1,4 @@
+
 namespace Domain.Constants.Permission.Permissions;
 
 public static class Brands

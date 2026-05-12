@@ -9,9 +9,7 @@ public class FileDeleteService : IFileDeleteService
 {
     private readonly string _uploadFolder;
 
-    public FileDeleteService(
-        IWebHostEnvironment environment,
-        IOptions<LocalFileStorageOptions> options)
+    public FileDeleteService(IWebHostEnvironment environment, IOptions<LocalFileStorageOptions> options)
     {
         var configPath = options.Value.UploadPath;
         if (!string.IsNullOrEmpty(configPath))

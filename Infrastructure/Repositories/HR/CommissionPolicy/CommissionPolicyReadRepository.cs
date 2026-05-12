@@ -1,6 +1,5 @@
 using Application.Interfaces.Repositories.HR.CommissionPolicy;
 using Domain.Entities;
-using Domain.Entities.HR;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +7,7 @@ namespace Infrastructure.Repositories.HR.CommissionPolicy;
 
 public class CommissionPolicyReadRepository(ApplicationDBContext context) : ICommissionPolicyReadRepository
 {
-    public Task<List<Domain.Entities.HR.CommissionPolicy>> GetPoliciesAsync(CancellationToken cancellationToken = default)
+    public Task<List<Domain.Entities.CommissionPolicy>> GetPoliciesAsync(CancellationToken cancellationToken = default)
     {
         return context.CommissionPolicies
             .Include(p => p.Category)
@@ -27,12 +26,12 @@ public class CommissionPolicyReadRepository(ApplicationDBContext context) : ICom
             .ToListAsync(cancellationToken);
     }
 
-    public Task<Domain.Entities.HR.CommissionPolicy?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public Task<Domain.Entities.CommissionPolicy?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return context.CommissionPolicies.FindAsync([id], cancellationToken).AsTask();
     }
 
-    public Task<Domain.Entities.HR.CommissionPolicy?> GetExistingPolicyAsync(
+    public Task<Domain.Entities.CommissionPolicy?> GetExistingPolicyAsync(
         int? productId,
         int? categoryId,
         DateTimeOffset effectiveDate,
@@ -40,7 +39,6 @@ public class CommissionPolicyReadRepository(ApplicationDBContext context) : ICom
     {
         var startDate = effectiveDate.AddDays(-7);
         var endDate = effectiveDate.AddDays(7);
-        
         return context.CommissionPolicies
             .Where(
                 p => p.IsActive &&

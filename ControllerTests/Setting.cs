@@ -4,11 +4,9 @@ using Application.Features.Settings.Queries.GetAllSettings;
 using FluentAssertions;
 
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Reflection;
 using WebAPI.Controllers.V1;
 
 namespace ControllerTests;

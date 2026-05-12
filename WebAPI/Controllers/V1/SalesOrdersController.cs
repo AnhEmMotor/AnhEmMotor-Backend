@@ -21,7 +21,8 @@ using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -32,7 +33,6 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
-using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -189,7 +189,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// <summary>
     /// L?y thông tin chi ti?t c?a don hàng.
     /// </summary>
-    [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.SaleOrders.GetById)]
+    [HttpGet("{id:int}", Name = SaleOrders.GetById)]
     [HasPermission(Outputs.View)]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -217,10 +217,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            Domain.Constants.RouteNames.SaleOrders.GetById,
-            new { id = result.IsSuccess ? result.Value?.Id : 0 });
+        return HandleCreated(result, SaleOrders.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>
@@ -240,10 +237,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
             BuyerId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            Domain.Constants.RouteNames.SaleOrders.GetById,
-            new { id = result.IsSuccess ? result.Value?.Id : 0 });
+        return HandleCreated(result, SaleOrders.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>
@@ -409,5 +403,4 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-
 

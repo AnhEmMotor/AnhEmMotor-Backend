@@ -1,5 +1,6 @@
 using Application.ApiContracts.HR.Responses;
 using Application.Common.Models;
+using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.HR.Employee;
 using Domain.Entities;
 using MediatR;
@@ -17,11 +18,10 @@ public sealed class GetPayrollSummaryQueryHandler(
     {
         var employees = await employeeRepository.GetAllWithUsersAsync(cancellationToken).ConfigureAwait(false);
         var result = new List<PayrollResponse>();
-
         foreach (var emp in employees)
         {
-            var commissions = await commissionRepository.GetRecordsByEmployeeIdAsync(emp.Id, cancellationToken).ConfigureAwait(false);
-            
+            var commissions = await commissionRepository.GetRecordsByEmployeeIdAsync(emp.Id, cancellationToken)
+                .ConfigureAwait(false);
             result.Add(
                 new PayrollResponse
                 {
@@ -30,11 +30,11 @@ public sealed class GetPayrollSummaryQueryHandler(
                     JobTitle = emp.JobTitle,
                     BaseSalary = emp.BaseSalary,
                     PendingCommission = commissions.Where(c => c.Status == CommissionStatus.Pending).Sum(c => c.Amount),
-                    ConfirmedCommission = commissions.Where(c => c.Status == CommissionStatus.Confirmed).Sum(c => c.Amount),
+                    ConfirmedCommission =
+                        commissions.Where(c => c.Status == CommissionStatus.Confirmed).Sum(c => c.Amount),
                     PaidCommission = commissions.Where(c => c.Status == CommissionStatus.Paid).Sum(c => c.Amount)
                 });
         }
-
         return Result<List<PayrollResponse>>.Success(result);
     }
 }

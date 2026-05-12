@@ -9,9 +9,7 @@ using System.Linq;
 
 namespace Application.Features.Outputs.Queries.GetOutputsList;
 
-public sealed class GetOutputsListQueryHandler(
-    IOutputReadRepository repository,
-    ISettingRepository settingRepository) : IRequestHandler<GetOutputsListQuery, Result<PagedResult<OutputItemResponse>>>
+public sealed class GetOutputsListQueryHandler(IOutputReadRepository repository, ISettingRepository settingRepository) : IRequestHandler<GetOutputsListQuery, Result<PagedResult<OutputItemResponse>>>
 {
     public async Task<Result<PagedResult<OutputItemResponse>>> Handle(
         GetOutputsListQuery request,

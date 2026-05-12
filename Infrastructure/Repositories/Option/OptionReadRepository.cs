@@ -1,8 +1,7 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Option;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -26,6 +25,7 @@ public class OptionReadRepository(ApplicationDBContext context, ISievePaginator 
         }
         return paginator.ApplyAsync<OptionEntity, TResponse>(query, sieveModel, mode, cancellationToken);
     }
+
     internal IQueryable<OptionEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<OptionEntity>(mode);

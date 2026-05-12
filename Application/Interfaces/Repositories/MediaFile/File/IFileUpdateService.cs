@@ -1,3 +1,4 @@
+
 namespace Application.Interfaces.Repositories.MediaFile.File;
 
 public interface IFileUpdateService

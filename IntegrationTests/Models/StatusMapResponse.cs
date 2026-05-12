@@ -1,3 +1,4 @@
+
 namespace IntegrationTests.Models;
 
 public class StatusMapResponse

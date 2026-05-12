@@ -1,5 +1,5 @@
-using Domain.Entities.HR;
 using Domain.Constants.HR.CommissionPolicy;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;

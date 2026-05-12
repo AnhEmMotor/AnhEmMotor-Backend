@@ -1,4 +1,3 @@
-using Application.Common.Models;
 using Application.Interfaces.Repositories.Technology.Technology;
 using Domain.Constants;
 using Domain.Primitives;
@@ -12,8 +11,7 @@ using TechnologyEntity = Domain.Entities.Technology;
 
 namespace Infrastructure.Repositories.Technology.Technology;
 
-public class TechnologyReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor)
-    : ITechnologyReadRepository
+public class TechnologyReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor) : ITechnologyReadRepository
 {
     public async Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
@@ -26,10 +24,8 @@ public class TechnologyReadRepository(ApplicationDBContext context, ISieveProces
             query = query.Where(x => x.DeletedAt == null);
         else if (mode == DataFetchMode.DeletedOnly)
             query = query.Where(x => x.DeletedAt != null);
-
         if (filter != null)
             query = query.Where(filter);
-
         var totalItems = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         query = sieveProcessor.Apply(sieveModel, query);
         var items = await query.ProjectToType<TResponse>().ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -46,7 +42,6 @@ public class TechnologyReadRepository(ApplicationDBContext context, ISieveProces
             query = query.Where(x => x.DeletedAt == null);
         else if (mode == DataFetchMode.DeletedOnly)
             query = query.Where(x => x.DeletedAt != null);
-
         return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
@@ -60,12 +55,15 @@ public class TechnologyReadRepository(ApplicationDBContext context, ISieveProces
             query = query.Where(x => x.CategoryId == categoryId);
         if (brandId.HasValue)
             query = query.Where(x => x.BrandId == brandId);
-
         return query.ToListAsync(cancellationToken);
     }
 
     public Task<List<TechnologyEntity>> GetAllWithCategoryAsync(CancellationToken cancellationToken = default)
     {
-        return context.Technologies.Include(x => x.Category).AsNoTracking().Where(x => x.DeletedAt == null).ToListAsync(cancellationToken);
+        return context.Technologies
+            .Include(x => x.Category)
+            .AsNoTracking()
+            .Where(x => x.DeletedAt == null)
+            .ToListAsync(cancellationToken);
     }
 }

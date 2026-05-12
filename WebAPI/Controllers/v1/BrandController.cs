@@ -10,7 +10,7 @@ using Application.Features.Brands.Queries.GetBrandById;
 using Application.Features.Brands.Queries.GetBrandsList;
 using Application.Features.Brands.Queries.GetDeletedBrandsList;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -102,7 +101,10 @@ public class BrandController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateBrandCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, Domain.Constants.RouteNames.Brands.GetById, new { id = result.IsSuccess ? result.Value.Id : 0 });
+        return HandleCreated(
+            result,
+            Domain.Constants.RouteNames.Brands.GetById,
+            new { id = result.IsSuccess ? result.Value.Id : 0 });
     }
 
     /// <summary>
@@ -182,5 +184,4 @@ public class BrandController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-
 

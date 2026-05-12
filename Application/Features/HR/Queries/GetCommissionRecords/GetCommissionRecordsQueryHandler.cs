@@ -1,4 +1,4 @@
-using Application.Interfaces.Repositories.HR.Employee;
+using Application.Interfaces.Repositories.HR.Commission;
 using Domain.Entities;
 using MediatR;
 

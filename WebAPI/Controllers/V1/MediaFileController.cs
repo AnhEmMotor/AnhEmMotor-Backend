@@ -13,7 +13,8 @@ using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
 using Application.Features.Files.Queries.ViewImage;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -21,7 +22,6 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -67,7 +67,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin của tệp media được chọn.
     /// </summary>
-    [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.MediaFile.GetById)]
+    [HttpGet("{id:int}", Name = MediaFile.GetById)]
     [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -90,10 +90,7 @@ public class MediaFileController(IMediator mediator) : ApiController
         ArgumentNullException.ThrowIfNull(file);
         var command = new UploadProductImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            Domain.Constants.RouteNames.MediaFile.GetById,
-            new { id = result.IsSuccess ? result.Value.Id : null });
+        return HandleCreated(result, MediaFile.GetById, new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
     /// <summary>
@@ -108,10 +105,7 @@ public class MediaFileController(IMediator mediator) : ApiController
         ArgumentNullException.ThrowIfNull(file);
         var command = new UploadNewsImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            Domain.Constants.RouteNames.MediaFile.GetById,
-            new { id = result.IsSuccess ? result.Value.Id : null });
+        return HandleCreated(result, MediaFile.GetById, new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
     /// <summary>
@@ -126,10 +120,7 @@ public class MediaFileController(IMediator mediator) : ApiController
         ArgumentNullException.ThrowIfNull(file);
         var command = new UploadBannerImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            Domain.Constants.RouteNames.MediaFile.GetById,
-            new { id = result.IsSuccess ? result.Value.Id : null });
+        return HandleCreated(result, MediaFile.GetById, new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
     /// <summary>
@@ -240,5 +231,4 @@ public class MediaFileController(IMediator mediator) : ApiController
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }
-
 

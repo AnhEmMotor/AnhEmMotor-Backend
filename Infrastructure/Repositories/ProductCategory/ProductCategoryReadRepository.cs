@@ -1,8 +1,7 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -20,6 +19,7 @@ public class ProductCategoryReadRepository(ApplicationDBContext context, ISieveP
         var query = GetQueryable(mode);
         return paginator.ApplyAsync<CategoryEntity, TResponse>(query, sieveModel, mode, cancellationToken);
     }
+
     public Task<bool> ExistsByNameAsync(
         string name,
         CancellationToken cancellationToken,

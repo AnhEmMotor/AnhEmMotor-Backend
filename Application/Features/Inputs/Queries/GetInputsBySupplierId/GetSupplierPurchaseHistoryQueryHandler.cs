@@ -1,11 +1,9 @@
 using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
-using Domain.Primitives;
 using Domain.Constants;
+using Domain.Primitives;
 using MediatR;
-using InputEntity = Domain.Entities.Input;
 
 namespace Application.Features.Inputs.Queries.GetInputsBySupplierId;
 

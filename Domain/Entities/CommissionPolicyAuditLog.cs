@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Entities.HR;
 
 namespace Domain.Entities;
 
@@ -17,7 +16,7 @@ public class CommissionPolicyAuditLog : BaseEntity
     public int PolicyId { get; set; }
 
     [ForeignKey("PolicyId")]
-    public Domain.Entities.HR.CommissionPolicy Policy { get; set; } = null!;
+    public CommissionPolicy Policy { get; set; } = null!;
 
     /// <summary>
     /// Hành động: Created, Updated, Archived

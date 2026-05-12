@@ -1,8 +1,7 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -26,6 +25,7 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
         }
         return paginator.ApplyAsync<InputEntity, TResponse>(query, sieveModel, mode, cancellationToken);
     }
+
     internal IQueryable<InputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = context.InputReceipts.IgnoreQueryFilters();
@@ -106,13 +106,13 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
             .ContinueWith(t => t.Result, cancellationToken);
     }
 
-    public async Task<IEnumerable<InputEntity>> GetBySupplierIdAsync(
+    public Task<List<InputEntity>> GetBySupplierIdAsync(
         int supplierId,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-        return await query
+        return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.Product)

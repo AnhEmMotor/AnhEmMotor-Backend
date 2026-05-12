@@ -1,7 +1,5 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Domain.Constants;
-using Domain.Entities;
+using Domain.Primitives;
 using Sieve.Models;
 using System.Linq.Expressions;
 

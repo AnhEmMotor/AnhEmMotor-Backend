@@ -1,9 +1,8 @@
 using Domain.Entities;
 using Infrastructure.DBContexts;
+using Infrastructure.Seeders.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Infrastructure.Seeders.Models;
-
 
 namespace Infrastructure.Seeders;
 
@@ -55,6 +54,4 @@ public static class ProductCategorySeeder
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
-
-
 }

@@ -1,6 +1,5 @@
 using Domain.Entities;
-using Domain.Entities.HR;
-using CommissionPolicyEntity = Domain.Entities.HR.CommissionPolicy;
+using CommissionPolicyEntity = Domain.Entities.CommissionPolicy;
 
 namespace Application.Interfaces.Repositories.HR.CommissionPolicy;
 

@@ -44,6 +44,8 @@ using Application.Features.Technologies.Queries.GetAllTechnologies;
 using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
 using Asp.Versioning;
 using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -52,7 +54,6 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 using WebAPI.Controllers.Base;
-using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -242,7 +243,7 @@ public class ProductController(ISender sender) : ApiController
     /// <summary>
     /// Lấy thông tin chi tiết sản phẩm theo Id (dành cho người quản lý)
     /// </summary>
-    [HttpGet("{id:int}/for-manager", Name = Domain.Constants.RouteNames.Product.GetVarientByIdForManager)]
+    [HttpGet("{id:int}/for-manager", Name = Product.GetVarientByIdForManager)]
     [HasPermission(Products.View)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -301,7 +302,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
-            Domain.Constants.RouteNames.Product.GetVarientByIdForManager,
+            Product.GetVarientByIdForManager,
             new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
@@ -697,5 +698,4 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 }
-
 

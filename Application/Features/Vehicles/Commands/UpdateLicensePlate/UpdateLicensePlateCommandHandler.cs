@@ -2,7 +2,6 @@ using Application.ApiContracts.Vehicle.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Vehicle;
-using Domain.Constants;
 using Mapster;
 using MediatR;
 
@@ -17,8 +16,7 @@ public sealed class UpdateLicensePlateCommandHandler(
         UpdateLicensePlateCommand request,
         CancellationToken cancellationToken)
     {
-        var vehicle = await readRepository.GetByIdAsync(request.Id, cancellationToken)
-            .ConfigureAwait(false);
+        var vehicle = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (vehicle == null)
         {
             return Result<VehicleResponse?>.Failure(Error.NotFound($"Vehicle with ID {request.Id} not found."));

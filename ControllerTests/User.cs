@@ -1,7 +1,6 @@
 ﻿using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
-using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.Users.Commands.ChangePassword;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
@@ -11,12 +10,10 @@ using Application.Interfaces.Services;
 using Domain.Constants;
 using FluentAssertions;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
-using System.Reflection;
 using System.Security.Claims;
 
 using WebAPI.Controllers.V1;
@@ -267,6 +264,6 @@ public class User
         var result = await _controller.RestoreUserAccountAsync(userId, CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<BadRequestObjectResult>();
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

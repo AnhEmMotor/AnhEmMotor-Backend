@@ -16,7 +16,8 @@ using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Inputs.Queries.GetInputsList;
 using Application.Features.Inputs.Queries.GetInputStatusList;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -26,7 +27,6 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
-using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -85,7 +85,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// <summary>
     /// L?y thông tin chi ti?t c?a phi?u nh?p.
     /// </summary>
-    [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.InventoryReceipts.GetById)]
+    [HttpGet("{id:int}", Name = InventoryReceipts.GetById)]
     [HasPermission(Inputs.View)]
     [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -125,10 +125,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateInputCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            Domain.Constants.RouteNames.InventoryReceipts.GetById,
-            new { id = result.IsSuccess ? result.Value?.Id : null });
+        return HandleCreated(result, InventoryReceipts.GetById, new { id = result.IsSuccess ? result.Value?.Id : null });
     }
 
     /// <summary>
@@ -143,10 +140,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var command = new CloneInputCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            Domain.Constants.RouteNames.InventoryReceipts.GetById,
-            new { id = result.IsSuccess ? result.Value?.Id : null });
+        return HandleCreated(result, InventoryReceipts.GetById, new { id = result.IsSuccess ? result.Value?.Id : null });
     }
 
     /// <summary>
@@ -288,5 +282,4 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-
 

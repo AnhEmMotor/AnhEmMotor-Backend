@@ -1,12 +1,11 @@
-using Application.Interfaces.Repositories.HR.Employee;
-using Domain.Entities.HR;
+using Application.Interfaces.Repositories.HR.Commission;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+
 using System.Linq;
 
-using Domain.Entities;
-
-namespace Infrastructure.Repositories.HR;
+namespace Infrastructure.Repositories.HR.Commission;
 
 public class CommissionReadRepository(ApplicationDBContext context) : ICommissionReadRepository
 {
@@ -36,8 +35,6 @@ public class CommissionReadRepository(ApplicationDBContext context) : ICommissio
         int employeeId,
         CancellationToken cancellationToken = default)
     {
-        return context.CommissionRecords
-            .Where(r => r.EmployeeProfileId == employeeId)
-            .ToListAsync(cancellationToken);
+        return context.CommissionRecords.Where(r => r.EmployeeProfileId == employeeId).ToListAsync(cancellationToken);
     }
 }

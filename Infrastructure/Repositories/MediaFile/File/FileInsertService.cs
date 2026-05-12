@@ -69,7 +69,11 @@ public class FileInsertService : IFileInsertService
                 ? storageFileName
                 : Path.Combine(subFolder, storageFileName).Replace("\\", "/");
             var fullPath = Path.Combine(_uploadFolder, relativePath);
-            using var compressedStream = await _fileUpdateService.CompressImageAsync(file, 75, DefaultMaxWidth, cancellationToken)
+            using var compressedStream = await _fileUpdateService.CompressImageAsync(
+                file,
+                75,
+                DefaultMaxWidth,
+                cancellationToken)
                 .ConfigureAwait(false);
             var compressedSize = compressedStream.Length;
             using var fileStream = new FileStream(fullPath, FileMode.Create);

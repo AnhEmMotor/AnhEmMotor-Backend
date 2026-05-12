@@ -1,13 +1,12 @@
 using Application.Interfaces.Repositories.HR.CommissionPolicy;
 using Domain.Entities;
-using Domain.Entities.HR;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.HR.CommissionPolicy;
 
 public class CommissionPolicyInsertRepository(ApplicationDBContext context) : ICommissionPolicyInsertRepository
 {
-    public void Add(Domain.Entities.HR.CommissionPolicy policy)
+    public void Add(Domain.Entities.CommissionPolicy policy)
     {
         context.CommissionPolicies.Add(policy);
     }

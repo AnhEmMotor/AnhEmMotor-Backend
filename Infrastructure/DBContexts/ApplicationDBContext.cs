@@ -1,6 +1,5 @@
 using Domain.Constants;
 using Domain.Entities;
-using Domain.Entities.HR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

@@ -1,5 +1,3 @@
-using Domain.Entities.HR;
-
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories.HR.Employee;

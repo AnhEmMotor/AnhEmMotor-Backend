@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.TechnologyCategory.TechnologyCategory;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.TechnologyCategory.TechnologyCategory;

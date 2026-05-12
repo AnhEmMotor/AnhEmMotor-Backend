@@ -14,7 +14,8 @@ using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -23,7 +24,6 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -78,7 +78,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="id">Mã nhà cung c?p c?n l?y thông tin.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.Supplier.GetById)]
+    [HttpGet("{id:int}", Name = Supplier.GetById)]
     [HasPermission(Suppliers.View)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -125,7 +125,7 @@ public class SupplierController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateSupplierCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, Domain.Constants.RouteNames.Supplier.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
+        return HandleCreated(result, Supplier.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>
@@ -280,5 +280,4 @@ public class SupplierController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-
 

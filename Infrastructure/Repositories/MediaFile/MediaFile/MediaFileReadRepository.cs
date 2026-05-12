@@ -1,13 +1,12 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using System.Linq.Expressions;
 using MediaFileEntity = Domain.Entities.MediaFile;
-using Application.Interfaces.Repositories.MediaFile.MediaFile;
 
 namespace Infrastructure.Repositories.MediaFile.MediaFile;
 
@@ -26,6 +25,7 @@ public class MediaFileReadRepository(ApplicationDBContext context, ISievePaginat
         }
         return paginator.ApplyAsync<MediaFileEntity, TResponse>(query, sieveModel, mode, cancellationToken);
     }
+
     public Task<IEnumerable<MediaFileEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)

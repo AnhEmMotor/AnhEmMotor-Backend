@@ -1,8 +1,7 @@
-using Application.Common.Models;
 using Domain.Constants;
 using Domain.Primitives;
-using SieveModel = global::Sieve.Models.SieveModel;
 using System.Linq.Expressions;
+using SieveModel = global::Sieve.Models.SieveModel;
 
 namespace Application.Interfaces.Repositories.Vehicle;
 

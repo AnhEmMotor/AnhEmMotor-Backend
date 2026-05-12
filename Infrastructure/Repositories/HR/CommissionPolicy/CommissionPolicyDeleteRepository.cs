@@ -5,7 +5,7 @@ namespace Infrastructure.Repositories.HR.CommissionPolicy;
 
 public class CommissionPolicyDeleteRepository(ApplicationDBContext context) : ICommissionPolicyDeleteRepository
 {
-    public void Remove(Domain.Entities.HR.CommissionPolicy policy)
+    public void Remove(Domain.Entities.CommissionPolicy policy)
     {
         context.CommissionPolicies.Remove(policy);
     }

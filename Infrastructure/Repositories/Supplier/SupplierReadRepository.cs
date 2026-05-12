@@ -1,9 +1,8 @@
 using Application.ApiContracts.Supplier.Responses;
-using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -62,7 +61,11 @@ public class SupplierReadRepository(ApplicationDBContext context, ISievePaginato
         CancellationToken cancellationToken = default)
     {
         var query = GetQueryableWithTotalInput(mode);
-        return paginator.ApplyAsync<SupplierWithTotalInputResponse, TResponse>(query, sieveModel, mode, cancellationToken);
+        return paginator.ApplyAsync<SupplierWithTotalInputResponse, TResponse>(
+            query,
+            sieveModel,
+            mode,
+            cancellationToken);
     }
 
     public Task<SupplierWithTotalInputResponse?> GetByIdWithTotalInputAsync(

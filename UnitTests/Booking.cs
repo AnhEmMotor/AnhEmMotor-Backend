@@ -255,4 +255,3 @@ public class Booking
     #pragma warning restore CRR0035
 }
 
-

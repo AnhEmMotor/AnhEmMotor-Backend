@@ -1,8 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Services.HR;
-using Domain.Entities;
-using Domain.Entities.HR;
 using Domain.Constants.HR.CommissionPolicy;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 
-namespace Infrastructure.Services.HR;
+namespace Infrastructure.Services;
 
 public class CommissionService(ApplicationDBContext context) : ICommissionService
 {

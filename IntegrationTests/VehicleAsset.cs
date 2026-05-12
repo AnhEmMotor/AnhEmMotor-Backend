@@ -1,4 +1,5 @@
 using Application.ApiContracts.Vehicle.Responses;
+using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
@@ -6,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Domain.Primitives;
 using LeadEntity = Domain.Entities.Lead;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
 using ProductEntity = Domain.Entities.Product;
@@ -197,7 +197,9 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var v2 = new VehicleEntity { LeadId = lead.Id, VinNumber = "OTHER", EngineNumber = "E2" };
         db.Vehicles.AddRange(v1, v2);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var response = await _client.GetAsync($"/api/v1/vehicle?Filters=search@={vin}", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync(
+            $"/api/v1/vehicle?Filters=search@={vin}",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var pagedResult = await response!.Content

@@ -1,6 +1,5 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Domain.Constants;
+using Domain.Primitives;
 using Sieve.Models;
 using System.Linq.Expressions;
 using OutputEntity = Domain.Entities.Output;
@@ -36,5 +35,7 @@ public interface IOutputReadRepository
 
     public Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken);
 
-    public Task<List<OutputEntity>> GetExpiredOrdersAsync(DateTimeOffset expirationThreshold, CancellationToken cancellationToken);
+    public Task<List<OutputEntity>> GetExpiredOrdersAsync(
+        DateTimeOffset expirationThreshold,
+        CancellationToken cancellationToken);
 }

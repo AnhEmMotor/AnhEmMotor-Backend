@@ -1,8 +1,7 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -20,6 +19,7 @@ public class BrandReadRepository(ApplicationDBContext context, ISievePaginator p
         var query = GetQueryable(mode);
         return paginator.ApplyAsync<BrandEntity, TResponse>(query, sieveModel, mode, cancellationToken);
     }
+
     public Task<IEnumerable<BrandEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)

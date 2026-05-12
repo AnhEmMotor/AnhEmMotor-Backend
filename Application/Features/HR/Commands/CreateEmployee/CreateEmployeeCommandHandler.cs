@@ -3,7 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Employee;
 using Application.Interfaces.Repositories.User;
 using Domain.Entities;
-using Domain.Entities.HR;
 using MediatR;
 using System;
 

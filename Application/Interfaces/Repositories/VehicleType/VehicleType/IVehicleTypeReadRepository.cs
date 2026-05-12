@@ -1,9 +1,7 @@
-using Application.Common.Models;
 using Domain.Constants;
-using VehicleTypeEntity = Domain.Entities.VehicleType;
 using Domain.Primitives;
-using SieveModel = Sieve.Models.SieveModel;
 using System.Linq.Expressions;
+using SieveModel = Sieve.Models.SieveModel;
 
 namespace Application.Interfaces.Repositories.VehicleType.VehicleType;
 

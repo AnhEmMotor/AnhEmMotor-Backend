@@ -1,5 +1,3 @@
-
-using Application.ApiContracts.Leads.Responses;
 using Application.Common.Helper;
 using Application.Features.Bookings.Commands.ConfirmBooking;
 using Application.Features.Bookings.Commands.CreateBooking;
@@ -11,7 +9,6 @@ using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Lead.LeadActivity;
 using Application.Interfaces.Services;
 using Domain.Entities;
-using Domain.Entities.HR;
 using FluentAssertions;
 using Moq;
 using System;
@@ -423,5 +420,4 @@ public class Lead
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
-
 

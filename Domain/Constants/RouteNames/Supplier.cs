@@ -1,3 +1,4 @@
+
 namespace Domain.Constants.RouteNames;
 
 public static class Supplier

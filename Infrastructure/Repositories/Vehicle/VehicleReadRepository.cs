@@ -1,4 +1,3 @@
-using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
@@ -48,9 +47,7 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
 
     public Task<Domain.Entities.Vehicle?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return context.Vehicles
-            .Include(v => v.Lead)
-            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+        return context.Vehicles.Include(v => v.Lead).FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
     }
 
     public Task<bool> ExistsByVinAsync(string vin, CancellationToken cancellationToken = default)

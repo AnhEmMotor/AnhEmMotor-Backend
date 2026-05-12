@@ -10,7 +10,8 @@ using Application.Features.ProductCategories.Queries.GetDeletedProductCategories
 using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -19,7 +20,6 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using Domain.Constants.Permission.Permissions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -79,7 +79,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin danh mục sản phẩm theo Id.
     /// </summary>
-    [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.ProductCategory.GetById)]
+    [HttpGet("{id:int}", Name = ProductCategory.GetById)]
     [HasPermission(ProductCategories.View)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -102,10 +102,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateProductCategoryCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            Domain.Constants.RouteNames.ProductCategory.GetById,
-            new { id = result.IsSuccess ? result.Value.Id : null });
+        return HandleCreated(result, ProductCategory.GetById, new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
     /// <summary>
@@ -186,5 +183,4 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-
 

@@ -7,7 +7,7 @@ using Application.Features.Inputs.Commands.UpdateInput;
 using Application.Features.Inputs.Commands.UpdateInputNotes;
 using Application.Features.Inputs.Commands.UpdateInputStatus;
 using Application.Features.Inputs.Commands.UpdateManyInputStatus;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
@@ -65,7 +65,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -179,7 +179,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -279,7 +279,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -316,7 +316,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -353,7 +353,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -439,7 +439,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -524,7 +524,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -558,7 +558,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -595,7 +595,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -686,7 +686,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -787,7 +787,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -816,7 +816,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Edit],
+            [Inputs.Edit],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -939,7 +939,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Edit],
+            [Inputs.Edit],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1051,7 +1051,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Edit],
+            [Inputs.Edit],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1163,7 +1163,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.ChangeStatus],
+            [Inputs.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1271,7 +1271,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.ChangeStatus],
+            [Inputs.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1374,7 +1374,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.ChangeStatus],
+            [Inputs.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1489,7 +1489,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.ChangeStatus],
+            [Inputs.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1594,7 +1594,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Delete],
+            [Inputs.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1690,7 +1690,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Delete],
+            [Inputs.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1793,7 +1793,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Delete],
+            [Inputs.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1891,7 +1891,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Delete],
+            [Inputs.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1995,7 +1995,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2094,7 +2094,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2216,7 +2216,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Suppliers.View, Domain.Constants.Permission.Permissions.Inputs.View],
+            [Suppliers.View, Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2296,7 +2296,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Create, Domain.Constants.Permission.Permissions.Inputs.View, Domain.Constants.Permission.Permissions.Inputs.Delete],
+            [Inputs.Create, Inputs.View, Inputs.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2383,7 +2383,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2462,7 +2462,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Edit, Domain.Constants.Permission.Permissions.Inputs.ChangeStatus],
+            [Inputs.Edit, Inputs.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2576,7 +2576,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2645,7 +2645,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2689,7 +2689,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Inputs.Edit],
+            [Inputs.Edit],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2754,5 +2754,4 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
     }
     #pragma warning restore CRR0035
 }
-
 

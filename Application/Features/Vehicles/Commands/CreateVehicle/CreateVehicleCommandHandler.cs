@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.Vehicle;
-using Domain.Constants;
 using Domain.Entities;
 using Mapster;
 using MediatR;
@@ -22,8 +21,7 @@ public sealed class CreateVehicleCommandHandler(
         CreateVehicleCommand request,
         CancellationToken cancellationToken)
     {
-        var leadExists = await leadReadRepository.ExistsAsync(request.LeadId, cancellationToken)
-            .ConfigureAwait(false);
+        var leadExists = await leadReadRepository.ExistsAsync(request.LeadId, cancellationToken).ConfigureAwait(false);
         if (!leadExists)
         {
             return Result<VehicleResponse?>.Failure(
@@ -46,7 +44,9 @@ public sealed class CreateVehicleCommandHandler(
         {
             return Result<VehicleResponse?>.Failure(Error.BadRequest("VIN already exists.", "VinNumber"));
         }
-        var isEngineExists = await readRepository.ExistsByEngineNumberAsync(request.EngineNumber.Trim(), cancellationToken)
+        var isEngineExists = await readRepository.ExistsByEngineNumberAsync(
+            request.EngineNumber.Trim(),
+            cancellationToken)
             .ConfigureAwait(false);
         if (isEngineExists)
         {

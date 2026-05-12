@@ -3,7 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.Vehicle;
-using Domain.Constants;
 using FluentAssertions;
 using Moq;
 
@@ -35,7 +34,6 @@ public class VehicleAsset
         _readRepoMock.Setup(x => x.ExistsByVinAsync("VIN001", It.IsAny<CancellationToken>())).ReturnsAsync(false);
         _readRepoMock.Setup(x => x.ExistsByEngineNumberAsync(engineNumber, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-
         var handler = new CreateVehicleCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
@@ -59,7 +57,6 @@ public class VehicleAsset
     {
         _leadReadRepoMock.Setup(x => x.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _productReadRepoMock.Setup(x => x.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-
         var handler = new CreateVehicleCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,

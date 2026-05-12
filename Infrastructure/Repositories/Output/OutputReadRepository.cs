@@ -1,9 +1,9 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
 using Domain.Constants.Input;
+using Domain.Constants.Order;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -27,6 +27,7 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         }
         return paginator.ApplyAsync<OutputEntity, TResponse>(query, sieveModel, mode, cancellationToken);
     }
+
     internal IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = context.OutputOrders.IgnoreQueryFilters();
@@ -121,13 +122,15 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         return currentStock;
     }
 
-    public Task<List<OutputEntity>> GetExpiredOrdersAsync(DateTimeOffset expirationThreshold, CancellationToken cancellationToken)
+    public Task<List<OutputEntity>> GetExpiredOrdersAsync(
+        DateTimeOffset expirationThreshold,
+        CancellationToken cancellationToken)
     {
         return GetQueryable()
             .Where(
-                o => (o.StatusId == Domain.Constants.Order.OrderStatus.Pending || o.StatusId == Domain.Constants.Order.OrderStatus.WaitingDeposit) &&
+                o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
                     !string.IsNullOrEmpty(o.PaymentMethod) &&
-                    o.PaymentMethod != Domain.Constants.Order.PaymentMethod.COD &&
+                    o.PaymentMethod != PaymentMethod.COD &&
                     (o.PaymentExpiredAt.HasValue
                         ? o.PaymentExpiredAt.Value < DateTimeOffset.UtcNow
                         : o.CreatedAt < expirationThreshold))

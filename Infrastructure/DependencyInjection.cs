@@ -1,4 +1,3 @@
-using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
@@ -7,12 +6,11 @@ using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
 using Infrastructure.BackgroundJobs;
+using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
-using Infrastructure.Services;
-using Infrastructure.Services.HR;
-using Infrastructure.Configurations.Options;
 using Infrastructure.Repositories.MediaFile.File;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -59,7 +57,6 @@ public static class DependencyInjection
                                 .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
                 });
         }
-
         services.AddIdentity<ApplicationUser, ApplicationRole>(
             options =>
             {

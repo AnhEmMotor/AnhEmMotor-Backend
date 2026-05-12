@@ -1,5 +1,5 @@
 using Application.ApiContracts.File.Responses;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
@@ -49,7 +49,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.Create],
+            [Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -92,7 +92,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.Create],
+            [Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -134,7 +134,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.Edit],
+            [Products.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -185,7 +185,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.Edit, Domain.Constants.Permission.Permissions.Products.Create],
+            [Products.Edit, Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -241,7 +241,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.Edit],
+            [Products.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -292,7 +292,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.Edit, Domain.Constants.Permission.Permissions.Products.Create],
+            [Products.Edit, Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -350,7 +350,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.Create, Domain.Constants.Permission.Permissions.Products.View],
+            [Products.Create, Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -387,7 +387,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.Create, Domain.Constants.Permission.Permissions.Products.View],
+            [Products.Create, Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -424,7 +424,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.Edit],
+            [Products.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -474,7 +474,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.View],
+            [Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -518,7 +518,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.View],
+            [Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -578,7 +578,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.View],
+            [Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -652,7 +652,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Products.View],
+            [Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -686,5 +686,4 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
     }
     #pragma warning restore CRR0035
 }
-
 

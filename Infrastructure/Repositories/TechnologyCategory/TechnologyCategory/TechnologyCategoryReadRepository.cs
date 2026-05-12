@@ -1,7 +1,5 @@
-using Application.Common.Models;
 using Application.Interfaces.Repositories.TechnologyCategory.TechnologyCategory;
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Mapster;
@@ -12,8 +10,7 @@ using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories.TechnologyCategory.TechnologyCategory;
 
-public class TechnologyCategoryReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor)
-    : ITechnologyCategoryReadRepository
+public class TechnologyCategoryReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor) : ITechnologyCategoryReadRepository
 {
     public async Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
@@ -26,10 +23,8 @@ public class TechnologyCategoryReadRepository(ApplicationDBContext context, ISie
             query = query.Where(x => x.DeletedAt == null);
         else if (mode == DataFetchMode.DeletedOnly)
             query = query.Where(x => x.DeletedAt != null);
-
         if (filter != null)
             query = query.Where(filter);
-
         var totalItems = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         query = sieveProcessor.Apply(sieveModel, query);
         var items = await query.ProjectToType<TResponse>().ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -38,6 +33,9 @@ public class TechnologyCategoryReadRepository(ApplicationDBContext context, ISie
 
     public Task<List<Domain.Entities.TechnologyCategory>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return context.TechnologyCategories.AsNoTracking().Where(x => x.DeletedAt == null).ToListAsync(cancellationToken);
+        return context.TechnologyCategories
+            .AsNoTracking()
+            .Where(x => x.DeletedAt == null)
+            .ToListAsync(cancellationToken);
     }
 }

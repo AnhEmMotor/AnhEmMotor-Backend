@@ -2,9 +2,8 @@ using Application.Features.HR.Commands.CreateCommissionPolicy;
 using Application.Features.HR.Commands.CreateEmployee;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Domain.Constants.Order;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
-using Domain.Entities.HR;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
@@ -232,7 +231,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"sales_{uniqueId}",
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Outputs.Create, Domain.Constants.Permission.Permissions.Outputs.ChangeStatus],
+            [Outputs.Create, Outputs.ChangeStatus],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -405,5 +404,4 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         updatedRecord.PaidAt.Should().NotBeNull();
     }
 }
-
 

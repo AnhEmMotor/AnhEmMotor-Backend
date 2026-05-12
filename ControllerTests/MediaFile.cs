@@ -1,15 +1,13 @@
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
-using FluentAssertions;
+using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Reflection;
 using WebAPI.Controllers.V1;
-using Domain.Constants.Permission.Permissions;
 
 namespace ControllerTests;
 
@@ -25,8 +23,6 @@ public class MediaFile
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
-
-    
 
     [Fact(DisplayName = "MF_005: UploadImageAsync has RequiresAnyPermissions with Edit/Create permissions")]
     public void UploadImageAsync_HasCorrectPermissionsAttribute()

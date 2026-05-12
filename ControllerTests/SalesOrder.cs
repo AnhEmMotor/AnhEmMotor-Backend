@@ -320,7 +320,9 @@ public class SalesOrder
     public async Task GetOutputStatuses_MissingPermission_ThrowsUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Domain.Constants.Permission.Permissions.Outputs.View"));
+            .ThrowsAsync(
+                new UnauthorizedAccessException(
+                    "User does not have permission Domain.Constants.Permission.Permissions.Outputs.View"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetOutputStatusesAsync(CancellationToken.None))
             .ConfigureAwait(true);

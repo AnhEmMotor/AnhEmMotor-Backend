@@ -2,7 +2,7 @@ using Application.ApiContracts.Auth.Responses;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Register;
 using Domain.Constants;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -194,7 +194,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Users.View],
+            [Users.View],
             CancellationToken.None,
             email: "manager@example.com",
             roleName: "Manager")
@@ -281,5 +281,4 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     }
     #pragma warning restore CRR0035
 }
-
 

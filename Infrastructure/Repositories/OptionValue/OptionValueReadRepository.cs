@@ -1,8 +1,7 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.OptionValue;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -26,6 +25,7 @@ namespace Infrastructure.Repositories.OptionValue
             }
             return paginator.ApplyAsync<OptionValueEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
+
         public Task<List<OptionValueEntity>> GetByIdAsync(List<int> optionValueIds, CancellationToken cancellationToken)
         {
             return context.OptionValues

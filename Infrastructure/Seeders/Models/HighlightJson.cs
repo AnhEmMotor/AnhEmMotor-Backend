@@ -1,3 +1,4 @@
+
 namespace Infrastructure.Seeders.Models;
 
 public class HighlightJson

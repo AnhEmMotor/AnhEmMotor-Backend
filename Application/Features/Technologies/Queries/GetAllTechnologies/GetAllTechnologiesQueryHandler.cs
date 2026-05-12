@@ -15,8 +15,8 @@ public sealed class GetAllTechnologiesQueryHandler(ITechnologyReadRepository tec
         var techs = await technologyRepository.GetTechnologiesAsync(
             request.CategoryId,
             request.BrandId,
-            cancellationToken).ConfigureAwait(false);
-
+            cancellationToken)
+            .ConfigureAwait(false);
         return techs.Adapt<List<TechnologyResponse>>();
     }
 }

@@ -1,9 +1,8 @@
 using Domain.Entities;
 using Infrastructure.DBContexts;
+using Infrastructure.Seeders.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using Infrastructure.Seeders.Models;
-
 
 namespace Infrastructure.Seeders
 {
@@ -86,7 +85,5 @@ namespace Infrastructure.Seeders
             }
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-
-
     }
 }

@@ -1,6 +1,8 @@
+
 namespace Application.Common.Models;
 
 #pragma warning disable CRR0047
+#pragma warning disable CRR0048
 public class Result<T> : Result
 {
     private readonly T? _value;
@@ -45,3 +47,4 @@ public class Result<T> : Result
     public static implicit operator Result<T>(List<Error> errors) => Failure(errors);
 }
 #pragma warning restore CRR0047
+#pragma warning restore CRR0048

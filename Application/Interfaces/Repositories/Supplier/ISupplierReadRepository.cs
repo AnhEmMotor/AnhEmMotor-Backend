@@ -1,7 +1,6 @@
 using Application.ApiContracts.Supplier.Responses;
-using Application.Common.Models;
-using Domain.Primitives;
 using Domain.Constants;
+using Domain.Primitives;
 using Sieve.Models;
 using SupplierEntity = Domain.Entities.Supplier;
 

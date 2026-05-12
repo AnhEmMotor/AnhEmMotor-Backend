@@ -3,7 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Vehicle;
-using Domain.Constants;
 using Mapster;
 using MediatR;
 
@@ -26,8 +25,7 @@ public sealed class TransferOwnershipCommandHandler(
             return Result<VehicleResponse?>.Failure(
                 Error.NotFound($"Lead with ID {request.NewLeadId} not found.", "NewLeadId"));
         }
-        var vehicle = await readRepository.GetByIdAsync(request.Id, cancellationToken)
-            .ConfigureAwait(false);
+        var vehicle = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (vehicle == null)
         {
             return Result<VehicleResponse?>.Failure(Error.NotFound($"Vehicle with ID {request.Id} not found."));

@@ -7,7 +7,7 @@ using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Interfaces.Services;
 using Domain.Constants;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -72,7 +72,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             adminUsername,
             "AdminPass123!",
-            [Domain.Constants.Permission.Permissions.Users.Edit, Domain.Constants.Permission.Permissions.Users.Delete],
+            [Users.Edit, Users.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -119,7 +119,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Users.Edit],
+            [Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -153,7 +153,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Users.Edit],
+            [Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -197,7 +197,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Users.Edit],
+            [Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -554,7 +554,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Users.View],
+            [Users.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -571,7 +571,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.Permissions.Should().NotBeNullOrEmpty();
-        content.Permissions!.Should().Contain(Domain.Constants.Permission.Permissions.Users.View);
+        content.Permissions!.Should().Contain(Users.View);
     }
 
     [Fact(DisplayName = "USER_054 - Verify Status field cho Active user")]
@@ -1275,7 +1275,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             adminUsername,
             password,
-            [Domain.Constants.Permission.Permissions.Users.Edit],
+            [Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1322,8 +1322,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         updatedUser!.AvatarUrl.Should().Be(avatarUrl.Trim('\"'));
     }
 
-
-
     [Fact(DisplayName = "USER_073 - Admin tạo tài khoản người dùng hợp lệ")]
     public async Task CreateUser_Admin_ValidData_ReturnsCreated()
     {
@@ -1341,7 +1339,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             adminUsername,
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Users.Create],
+            [Users.Create],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1391,7 +1389,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             adminUsername,
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Users.Create],
+            [Users.Create],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1436,7 +1434,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             adminUsername,
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Users.Create],
+            [Users.Create],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1510,6 +1508,4 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
-
-
 

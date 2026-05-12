@@ -3,7 +3,6 @@ using Application.Features.HR.Commands.ApprovePayroll;
 using Application.Features.HR.Queries.GetCommissionRecords;
 using Application.Features.HR.Queries.GetPayrollSummary;
 using Asp.Versioning;
-using Domain.Constants.Permission;
 using Domain.Entities;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -66,5 +65,4 @@ public class CommissionController(ISender mediator) : ApiController
         return Ok();
     }
 }
-
 

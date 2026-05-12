@@ -1,9 +1,9 @@
-using Domain.Entities;
+using Application.Interfaces.Repositories.Lead.Lead;
 using Domain.Constants.Lead;
+using Domain.Entities;
 using Mapster;
 using MediatR;
 using System;
-using Application.Interfaces.Repositories.Lead.Lead;
 
 namespace Application.Features.Leads.Commands.AddLeadActivity
 {
@@ -26,10 +26,12 @@ namespace Application.Features.Leads.Commands.AddLeadActivity
                     scoreDelta = -10;
                 else
                     scoreDelta = 10;
-            } else if (type.Contains(LeadActivityKeywords.TestDriveEn) || type.Contains(LeadActivityKeywords.TestDriveVi))
+            } else if (type.Contains(LeadActivityKeywords.TestDriveEn) ||
+                type.Contains(LeadActivityKeywords.TestDriveVi))
             {
                 scoreDelta = 20;
-            } else if (desc.Contains(LeadActivityKeywords.InstallmentVi) || desc.Contains(LeadActivityKeywords.InstallmentEn))
+            } else if (desc.Contains(LeadActivityKeywords.InstallmentVi) ||
+                desc.Contains(LeadActivityKeywords.InstallmentEn))
             {
                 scoreDelta = 30;
             }

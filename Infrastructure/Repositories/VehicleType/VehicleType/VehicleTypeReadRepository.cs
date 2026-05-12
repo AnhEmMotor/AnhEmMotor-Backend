@@ -1,13 +1,11 @@
-using Application.Common.Models;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.VehicleType.VehicleType;
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using System.Linq.Expressions;
-using Application.Interfaces.Repositories;
 
 namespace Infrastructure.Repositories.VehicleType.VehicleType;
 
@@ -58,6 +56,7 @@ public class VehicleTypeReadRepository(ApplicationDBContext context, ISievePagin
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<Domain.Entities.VehicleType>(mode).FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return context.GetQuery<Domain.Entities.VehicleType>(mode)
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 }

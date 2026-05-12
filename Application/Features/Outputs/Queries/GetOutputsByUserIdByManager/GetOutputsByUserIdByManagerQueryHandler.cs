@@ -1,8 +1,8 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Output;
-using Domain.Primitives;
 using Domain.Constants;
+using Domain.Primitives;
 using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;

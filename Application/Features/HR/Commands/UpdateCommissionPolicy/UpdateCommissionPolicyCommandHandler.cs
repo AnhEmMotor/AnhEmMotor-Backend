@@ -1,13 +1,12 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Domain.Entities;
-using Domain.Entities.HR;
+using Application.Interfaces.Repositories.HR.CommissionPolicy;
 using Domain.Constants.HR.CommissionPolicy;
+using Domain.Entities;
 using Mapster;
 using MediatR;
 using System;
 using System.Text.Json;
-using Application.Interfaces.Repositories.HR.CommissionPolicy;
 
 namespace Application.Features.HR.Commands.UpdateCommissionPolicy
 {
@@ -22,12 +21,10 @@ namespace Application.Features.HR.Commands.UpdateCommissionPolicy
             var policy = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
             if (policy == null)
                 return Result.Failure("Không tìm thấy chính sách.");
-
             var oldSnapshot = JsonSerializer.Serialize(policy);
             request.Adapt(policy);
             updateRepository.Update(policy);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             var auditLog = new CommissionPolicyAuditLog
             {
                 PolicyId = policy.Id,
@@ -40,7 +37,6 @@ namespace Application.Features.HR.Commands.UpdateCommissionPolicy
                     $"Cập nhật định mức: {policy.Name}. Giá trị mới: {policy.Value}{(string.Compare(policy.Type, CommissionPolicyType.Percentage) == 0 ? "%" : "đ")}",
                 ChangedAt = DateTime.UtcNow
             };
-
             insertRepository.AddAuditLog(auditLog);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();

@@ -1,6 +1,5 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Domain.Constants;
+using Domain.Primitives;
 using Sieve.Models;
 using System.Linq.Expressions;
 using OptionEntity = Domain.Entities.Option;

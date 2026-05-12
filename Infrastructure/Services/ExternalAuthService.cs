@@ -1,11 +1,9 @@
 using Application.ApiContracts.Auth.Requests;
 using Application.Common.Models;
 using Application.Interfaces.Services;
+using Infrastructure.Services.Models;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
-using System.Text.Json.Serialization;
-using Infrastructure.Services.Models;
-
 
 namespace Infrastructure.Services;
 
@@ -87,6 +85,4 @@ public class ExternalAuthService(IHttpClientFactory httpClientFactory, IConfigur
             return Error.Failure("An error occurred while validating Facebook token.");
         }
     }
-
-
 }

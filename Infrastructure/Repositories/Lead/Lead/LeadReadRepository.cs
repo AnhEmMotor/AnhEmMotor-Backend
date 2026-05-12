@@ -1,12 +1,11 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Lead.Lead;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using System.Linq.Expressions;
-using Application.Interfaces.Repositories.Lead.Lead;
 
 namespace Infrastructure.Repositories.Lead.Lead;
 
@@ -25,6 +24,7 @@ public class LeadReadRepository(ApplicationDBContext context, ISievePaginator pa
         }
         return paginator.ApplyAsync<Domain.Entities.Lead, TResponse>(query, sieveModel, mode, cancellationToken);
     }
+
     public Task<Domain.Entities.Lead?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return context.Leads.Include(l => l.Activities).FirstOrDefaultAsync(l => l.Id == id, cancellationToken);

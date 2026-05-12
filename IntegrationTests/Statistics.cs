@@ -1,6 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Domain.Constants.Order;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -66,7 +66,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             "StrongPass1@",
-            [Domain.Constants.Permission.Permissions.Statistical.View],
+            [Statistical.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var token = (await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1054,5 +1054,4 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         content!.TodayActivities.Should().NotBeNull();
     }
 }
-
 

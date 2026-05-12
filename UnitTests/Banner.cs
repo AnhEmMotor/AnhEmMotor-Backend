@@ -1,9 +1,7 @@
-using Application.ApiContracts.Banner.Responses;
 using Application.Features.Banners.Commands.CreateBanner;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Banner;
 using Application.Interfaces.Services;
-using FluentAssertions;
 using Moq;
 using System;
 

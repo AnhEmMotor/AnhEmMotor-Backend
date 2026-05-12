@@ -1,5 +1,4 @@
 using Application.Features.UserManager.Commands.ChangePasswordByManager;
-using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Domain.Constants;
 using FluentAssertions;

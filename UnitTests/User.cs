@@ -1,5 +1,4 @@
-﻿using Application.ApiContracts.Permission.Responses;
-using Application.Features.Permissions.Queries.GetMyPermissions;
+﻿using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.Users.Commands.ChangePassword;
@@ -10,7 +9,7 @@ using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
@@ -559,7 +558,7 @@ public class User
         var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
         var roles = new List<string> { "Manager" };
         var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
-        var permissionNames = new List<string> { Domain.Constants.Permission.Permissions.Brands.View, Domain.Constants.Permission.Permissions.Products.View };
+        var permissionNames = new List<string> { Brands.View, Products.View };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
@@ -573,8 +572,8 @@ public class User
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.Permissions.Should().BeAssignableTo<IList<string>>();
-        result.Value.Permissions.Should().Contain(Domain.Constants.Permission.Permissions.Brands.View);
-        result.Value.Permissions.Should().Contain(Domain.Constants.Permission.Permissions.Products.View);
+        result.Value.Permissions.Should().Contain(Brands.View);
+        result.Value.Permissions.Should().Contain(Products.View);
         result.Value.Permissions.Should().NotContainNulls();
     }
 
@@ -586,7 +585,7 @@ public class User
         var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
         var roles = new List<string> { "Manager" };
         var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
-        var permissionNames = new List<string> { Domain.Constants.Permission.Permissions.Suppliers.View, Domain.Constants.Permission.Permissions.Files.Upload };
+        var permissionNames = new List<string> { Suppliers.View, Files.Upload };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
@@ -600,8 +599,8 @@ public class User
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.Permissions.Should().BeAssignableTo<IList<string>>();
-        result.Value.Permissions.Should().Contain(Domain.Constants.Permission.Permissions.Suppliers.View);
-        result.Value.Permissions.Should().Contain(Domain.Constants.Permission.Permissions.Files.Upload);
+        result.Value.Permissions.Should().Contain(Suppliers.View);
+        result.Value.Permissions.Should().Contain(Files.Upload);
     }
 
     [Fact(DisplayName = "USER_079 - Kiểm tra độ mạnh của mật khẩu (Validation)")]
@@ -619,9 +618,7 @@ public class User
         result.IsValid.Should().BeFalse();
         result.Errors.Should().Contain(e => string.Compare(e.PropertyName, "Password") == 0);
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }
-
-
 

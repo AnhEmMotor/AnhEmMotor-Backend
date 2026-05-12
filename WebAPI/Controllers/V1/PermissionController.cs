@@ -11,8 +11,8 @@ using Application.Features.Permissions.Queries.GetPermissionStructure;
 using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Asp.Versioning;
-using Domain.Constants;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -38,7 +38,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// L?y t?t c? các permissions có trong h? th?ng v?i mô t?
     /// </summary>
     [HttpGet("permissions")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Roles.View)]
+    [HasPermission(Roles.View)]
     [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllPermissionsAsync(CancellationToken cancellationToken)
     {
@@ -50,7 +50,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// L?y c?u trúc quy?n h?n (Nhóm, Xung d?t, Ph? thu?c)
     /// </summary>
     [HttpGet("structure")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Roles.View)]
+    [HasPermission(Roles.View)]
     [ProducesResponseType(typeof(PermissionStructureResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPermissionStructureAsync(CancellationToken cancellationToken)
     {
@@ -78,7 +78,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// L?y các quy?n c?a m?t ngu?i dùng theo User ID
     /// </summary>
     [HttpGet("users/{userId:guid}/permissions")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Users.View)]
+    [HasPermission(Users.View)]
     [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserPermissionsByIdAsync(Guid userId, CancellationToken cancellationToken)
@@ -91,8 +91,8 @@ public class PermissionController(IMediator mediator) : ApiController
     /// <summary>
     /// L?y các quy?n c?a m?t vai trò c? th?
     /// </summary>
-    [HttpGet("roles/{roleId:guid}/permissions", Name = Domain.Constants.RouteNames.Permission.GetRolePermissions)]
-    [HasPermission(Domain.Constants.Permission.Permissions.Roles.View)]
+    [HttpGet("roles/{roleId:guid}/permissions", Name = Permission.GetRolePermissions)]
+    [HasPermission(Roles.View)]
     [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRolePermissionsAsync(Guid roleId, CancellationToken cancellationToken)
@@ -106,7 +106,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// C?p nh?t quy?n cho m?t vai trò
     /// </summary>
     [HttpPut("roles/{roleId:guid}")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Roles.Edit)]
+    [HasPermission(Roles.Edit)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(PermissionRoleUpdateResponse), StatusCodes.Status200OK)]
@@ -132,7 +132,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// L?y t?t c? các vai trò (có phân trang, l?c, s?p x?p)
     /// </summary>
     [HttpGet("roles")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Roles.View)]
+    [HasPermission(Roles.View)]
     [ProducesResponseType(typeof(PagedResult<RoleSelectResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRolesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -155,7 +155,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// T?o vai trò m?i v?i các quy?n du?c gán
     /// </summary>
     [HttpPost("roles")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Roles.Create)]
+    [HasPermission(Roles.Create)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleCreateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateRoleAsync(
@@ -173,7 +173,7 @@ public class PermissionController(IMediator mediator) : ApiController
             .ConfigureAwait(true);
         return HandleCreated(
             result,
-            Domain.Constants.RouteNames.Permission.GetRolePermissions,
+            Permission.GetRolePermissions,
             new { roleId = result.IsSuccess ? result.Value.RoleId : null });
     }
 
@@ -181,7 +181,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// Xóa vai trò
     /// </summary>
     [HttpDelete("roles/{roleId:guid}")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Roles.Delete)]
+    [HasPermission(Roles.Delete)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
@@ -196,7 +196,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// Xóa nhi?u vai trò
     /// </summary>
     [HttpPost("roles/delete-multiple")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Roles.Delete)]
+    [HasPermission(Roles.Delete)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteMultipleRolesAsync(
@@ -208,6 +208,4 @@ public class PermissionController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-
-
 

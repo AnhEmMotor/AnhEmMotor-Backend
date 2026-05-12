@@ -43,7 +43,7 @@ namespace Domain.Constants.Order
             return NotDeletedPhases.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
-       public static string GetDisplayName(string status) => status.ToLower() switch
+        public static string GetDisplayName(string status) => status.ToLower() switch
         {
             "pending" => "Chờ xác nhận",
             "confirmedcod" => "Đã xác nhận (Chờ thanh toán COD)",

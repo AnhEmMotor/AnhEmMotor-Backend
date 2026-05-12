@@ -1,4 +1,3 @@
-using Application.Common.Helper;
 using Domain.Entities;
 
 namespace UnitTests.Models;

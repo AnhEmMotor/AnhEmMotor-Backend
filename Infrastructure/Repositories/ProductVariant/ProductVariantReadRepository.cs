@@ -1,8 +1,7 @@
-using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -12,7 +11,10 @@ using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Infrastructure.Repositories.ProductVariant
 {
-    public class ProductVariantReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor, ISievePaginator paginator) : IProductVariantReadRepository
+    public class ProductVariantReadRepository(
+        ApplicationDBContext context,
+        ISieveProcessor sieveProcessor,
+        ISievePaginator paginator) : IProductVariantReadRepository
     {
         public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
             SieveModel sieveModel,
@@ -27,6 +29,7 @@ namespace Infrastructure.Repositories.ProductVariant
             }
             return paginator.ApplyAsync<ProductVariantEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
+
         internal IQueryable<ProductVariantEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return context.GetQuery<ProductVariantEntity>(mode);

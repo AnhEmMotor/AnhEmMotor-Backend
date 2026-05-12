@@ -24,7 +24,8 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
         var readRepository = scope.ServiceProvider.GetRequiredService<IOutputReadRepository>();
         var updateRepository = scope.ServiceProvider.GetRequiredService<IOutputUpdateRepository>();
         var expirationThreshold = DateTimeOffset.UtcNow.AddMinutes(-15);
-        var expiredOrders = await readRepository.GetExpiredOrdersAsync(expirationThreshold, cancellationToken).ConfigureAwait(false);
+        var expiredOrders = await readRepository.GetExpiredOrdersAsync(expirationThreshold, cancellationToken)
+            .ConfigureAwait(false);
         if (expiredOrders.Count > 0)
         {
             foreach (var order in expiredOrders)

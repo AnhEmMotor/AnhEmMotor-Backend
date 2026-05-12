@@ -1,8 +1,7 @@
 using Application.Interfaces.Repositories.HR.Employee;
-using Domain.Entities.HR;
-using Infrastructure.DBContexts;
-
 using Domain.Entities;
+
+using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.HR.Employee;
 
