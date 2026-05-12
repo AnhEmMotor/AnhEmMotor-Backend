@@ -54,13 +54,7 @@ public class UpdateRoleCommandHandler(
         }
         if (request.Permissions != null)
         {
-            var validSystemPermissions = typeof(PermissionsList)
-                .GetNestedTypes()
-                .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-                .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
-                .Select(fi => fi.GetRawConstantValue() as string)
-                .Where(p => p is not null)
-                .ToHashSet();
+            var validSystemPermissions = PermissionsList.GetMetadataList().Select(m => m.Id).ToHashSet();
             var invalidPermissions = request.Permissions.Where(p => !validSystemPermissions.Contains(p)).ToList();
             if (invalidPermissions.Count != 0)
             {

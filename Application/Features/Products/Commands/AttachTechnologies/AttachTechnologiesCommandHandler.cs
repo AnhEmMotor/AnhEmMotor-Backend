@@ -16,27 +16,33 @@ namespace Application.Features.Products.Commands.AttachTechnologies
         {
             var product = await readRepository.GetByIdWithDetailsAsync(request.ProductId, cancellationToken)
                 .ConfigureAwait(false);
+
             if (product == null)
-                return Result<Unit>.Failure(Error.NotFound("S?n ph?m kh�ng t?n t?i."));
+            {
+                return Result<Unit>.Failure(Error.NotFound("Sản phẩm không tồn tại."));
+            }
+
             var techIds = request.TechIds.Distinct().ToList();
             var existingTechIds = product.ProductTechnologies.Select(pt => pt.TechnologyId).ToHashSet();
+
             foreach (var tId in techIds)
             {
                 if (existingTechIds.Contains(tId))
                 {
-                    return Result<Unit>.Failure(Error.BadRequest($"C�ng ngh? ID {tId} d� du?c g�n cho s?n ph?m n�y."));
+                    return Result<Unit>.Failure(Error.BadRequest($"Công nghệ ID {tId} đã được gán cho sản phẩm này."));
                 }
-                product.ProductTechnologies
-                    .Add(
-                        new ProductTechnology
-                        {
-                            ProductId = product.Id,
-                            TechnologyId = tId,
-                            DisplayOrder = product.ProductTechnologies.Count + 1
-                        });
+
+                product.ProductTechnologies.Add(new ProductTechnology
+                {
+                    ProductId = product.Id,
+                    TechnologyId = tId,
+                    DisplayOrder = product.ProductTechnologies.Count + 1
+                });
             }
+
             updateRepository.Update(product);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
             return Result<Unit>.Success(Unit.Value);
         }
     }

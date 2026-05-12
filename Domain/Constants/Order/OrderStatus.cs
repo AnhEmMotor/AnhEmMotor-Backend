@@ -43,21 +43,21 @@ namespace Domain.Constants.Order
             return NotDeletedPhases.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
-        public static string GetDisplayName(string status) => status.ToLower() switch
+       public static string GetDisplayName(string status) => status.ToLower() switch
         {
-            Pending => "Ch? xác nh?n",
-            ConfirmedCod => "Ğã xác nh?n (Ch? thanh toán COD)",
-            PaidProcessing => "Ğã thanh toán (Ch? x? lı)",
-            WaitingDeposit => "Ch? d?t c?c",
-            DepositPaid => "Ğã d?t c?c (Ch? x? lı)",
-            WaitingInstallment => "Ch? duy?t tr? góp",
-            InstallmentApproved => "Ğã duy?t tr? góp (Ch? x? lı)",
-            Delivering => "Ğang giao hàng",
-            WaitingPickup => "Ch? l?y hàng t?i c?a hàng",
-            Completed => "Ğã hoàn thành",
-            Cancelled => "Ğã h?y",
-            Refunding => "Ğang hoàn ti?n",
-            Refunded => "Ğã hoàn ti?n",
+            "pending" => "Chá» xÃ¡c nháº­n",
+            "confirmedcod" => "ÄÃ£ xÃ¡c nháº­n (Chá» thanh toÃ¡n COD)",
+            "paidprocessing" => "ÄÃ£ thanh toÃ¡n (Chá» xá»­ lÃ½)",
+            "waitingdeposit" => "Chá» Ä‘áº·t cá»c",
+            "depositpaid" => "ÄÃ£ Ä‘áº·t cá»c (Chá» xá»­ lÃ½)",
+            "waitinginstallment" => "Chá» duyá»‡t tráº£ gÃ³p",
+            "installmentapproved" => "ÄÃ£ duyá»‡t tráº£ gÃ³p (Chá» xá»­ lÃ½)",
+            "delivering" => "Äang giao hÃ ng",
+            "waitingpickup" => "Chá» láº¥y hÃ ng táº¡i cá»­a hÃ ng",
+            "completed" => "ÄÃ£ hoÃ n thÃ nh",
+            "cancelled" => "ÄÃ£ há»§y",
+            "refunding" => "Äang hoÃ n tiá»n",
+            "refunded" => "ÄÃ£ hoÃ n tiá»n",
             _ => status
         };
     }
