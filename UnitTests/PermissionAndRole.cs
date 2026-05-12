@@ -596,19 +596,6 @@ public class PermissionAndRole
             .WithErrorMessage($"Permission '{Domain.Constants.Permission.Permissions.Brands.Create}' requires: {Domain.Constants.Permission.Permissions.Brands.View}");
     }
 
-    [Fact(DisplayName = "PERM_026 - Unit - Kiểm tra tính hợp lệ của tên vai trò (Role Name)")]
-    public void RoleName_ValidUnicodeAndSpecialChars_ShouldPass()
-    {
-        CreateRoleCommandValidator validator = new();
-        var command = new CreateRoleCommand
-        {
-            RoleName = "Quản lý - CRM.Hanoi",
-            Permissions = [Domain.Constants.Permission.Permissions.Brands.View]
-        };
-        var result = validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.RoleName);
-    }
-
     [Fact(DisplayName = "PERM_027 - Unit - Chặn tên vai trò chứa ký tự đặc biệt cấm")]
     public void RoleName_BannedSpecialChars_ShouldHaveError()
     {

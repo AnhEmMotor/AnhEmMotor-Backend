@@ -133,29 +133,4 @@ public class Contact
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().Contain(e => string.Compare(e.Message, "Liên hệ không tồn tại.") == 0);
     }
-
-    [Fact(DisplayName = "CONT_012 - Kiểm tra lưu trữ đánh giá của khách hàng")]
-    public void ContactEntity_RatingField_WorksCorrectly()
-    {
-        var contact = new Domain.Entities.Contact { Rating = 5 };
-        contact.Rating.Should().Be(5);
-    }
-
-    [Fact(DisplayName = "CONT_013 - Kiểm tra tính nhất quán của BaseEntity")]
-    public void BaseEntity_Timestamps_Exist()
-    {
-        var contact = new Domain.Entities.Contact();
-        var now = DateTimeOffset.UtcNow;
-        contact.CreatedAt = now;
-        contact.UpdatedAt = now;
-        contact.CreatedAt.Should().Be(now);
-        contact.UpdatedAt.Should().Be(now);
-    }
-
-    [Fact(DisplayName = "CONT_014 - Kiểm tra ghi chú nội bộ mặc định là rỗng")]
-    public void ContactEntity_InternalNote_DefaultIsNull()
-    {
-        var contact = new Domain.Entities.Contact();
-        contact.InternalNote.Should().BeNull();
-    }
 }

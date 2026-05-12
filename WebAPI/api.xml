@@ -1269,68 +1269,68 @@
         </member>
         <member name="T:WebAPI.Controllers.V1.StatisticsController">
             <summary>
-            Th?ng kê và báo cáo.
+            Th?ng k� v� b�o c�o.
             </summary>
             <param name="mediator"></param>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.#ctor(MediatR.IMediator)">
             <summary>
-            Th?ng kê và báo cáo.
+            Th?ng k� v� b�o c�o.
             </summary>
             <param name="mediator"></param>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.GetDailyRevenueAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            L?y doanh thu theo ngày trong kho?ng th?i gian xác d?nh.
+            L?y doanh thu theo ng�y trong kho?ng th?i gian x�c d?nh.
             </summary>
-            <param name="days">S? ngày tính t? hi?n t?i tr? v? tru?c</param>
+            <param name="days">S? ng�y t�nh t? hi?n t?i tr? v? tru?c</param>
             <param name="cancellationToken"></param>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.GetDashboardStatsAsync(System.Threading.CancellationToken)">
             <summary>
-            L?y các ch? s? t?ng h?p cho Dashboard.
+            L?y c�c ch? s? t?ng h?p cho Dashboard.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.GetMonthlyRevenueProfitAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            L?y doanh thu và l?i nhu?n theo tháng.
+            L?y doanh thu v� l?i nhu?n theo th�ng.
             </summary>
-            <param name="months">S? tháng tính t? hi?n t?i tr? v? tru?c</param>
+            <param name="months">S? th�ng t�nh t? hi?n t?i tr? v? tru?c</param>
             <param name="cancellationToken"></param>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.GetOrderStatusCountsAsync(System.Threading.CancellationToken)">
             <summary>
-            L?y s? lu?ng don hàng theo t?ng tr?ng thái.
+            L?y s? lu?ng don h�ng theo t?ng tr?ng th�i.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.GetProductReportLastMonthAsync(System.Threading.CancellationToken)">
             <summary>
-            L?y báo cáo s?n ph?m c?a tháng tru?c.
+            L?y b�o c�o s?n ph?m c?a th�ng tru?c.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.GetProductStockAndPriceAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            L?y giá và t?n kho c?a m?t s?n ph?m c? th?.
+            L?y gi� v� t?n kho c?a m?t s?n ph?m c? th?.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminDashboardOverviewAsync(System.Threading.CancellationToken)">
             <summary>
-            L?y toàn b? d? li?u g?p cho Admin Dashboard.
+            L?y to�n b? d? li?u g?p cho Admin Dashboard.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminRevenueAnalysisAsync(System.Threading.CancellationToken)">
             <summary>
-            L?y toàn b? phân tích doanh thu cho Admin (g?p).
+            L?y to�n b? ph�n t�ch doanh thu cho Admin (g?p).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminProductReportAsync(System.Threading.CancellationToken)">
             <summary>
-            L?y báo cáo hi?u su?t s?n ph?m cho Admin (g?p).
+            L?y b�o c�o hi?u su?t s?n ph?m cho Admin (g?p).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminWarehouseReportAsync(System.Threading.CancellationToken)">
             <summary>
-            L?y báo cáo t?n kho cho Admin (g?p).
+            L?y b�o c�o t?n kho cho Admin (g?p).
             </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.SupplierController">

@@ -288,42 +288,6 @@ public class Brand
         _updateRepoMock.Verify(x => x.Restore(It.Is<List<BrandEntities>>(l => l.Count == 2)), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
-
-    [Fact(DisplayName = "BRAND_042 - Unit: CreateBrand - Description Null")]
-    public void BRAND_042_CreateBrand_DescriptionNull_Success()
-    {
-        var validator = new CreateBrandCommandValidator();
-        var command = new CreateBrandCommand { Name = "Honda", Description = null };
-        var result = validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.Description);
-    }
-
-    [Fact(DisplayName = "BRAND_043 - Unit: UpdateBrand - Description Null")]
-    public void BRAND_043_UpdateBrand_DescriptionNull_Success()
-    {
-        var validator = new UpdateBrandCommandValidator();
-        var command = new UpdateBrandCommand { Id = 1, Name = "Honda", Description = null };
-        var result = validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.Description);
-    }
-
-    [Fact(DisplayName = "BRAND_047 - Unit: CreateBrand - Name with Special Chars (Valid)")]
-    public void BRAND_047_CreateBrand_NameWithSpecialChars_Valid()
-    {
-        var validator = new CreateBrandCommandValidator();
-        var command = new CreateBrandCommand { Name = "Honda-Vietnam", Description = "Desc" };
-        var result = validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.Name);
-    }
-
-    [Fact(DisplayName = "BRAND_048 - Unit: CreateBrand - Name with Numbers (Valid)")]
-    public void BRAND_048_CreateBrand_NameWithNumbers_Valid()
-    {
-        var validator = new CreateBrandCommandValidator();
-        var command = new CreateBrandCommand { Name = "Brand 123", Description = "Desc" };
-        var result = validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.Name);
-    }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }

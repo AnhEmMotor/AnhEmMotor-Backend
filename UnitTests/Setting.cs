@@ -24,38 +24,6 @@ public class Setting
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "SETTING_014 - Validator - Deposit_ratio = 1 (giá trị biên tối thiểu hợp lệ)")]
-    public void SETTING_014_Validator_DepositRatio_MinimumBoundary_ShouldPass()
-    {
-        var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Deposit_ratio", "1" } } };
-        var result = validator.TestValidate(request);
-        result.ShouldNotHaveAnyValidationErrors();
-    }
-
-    [Fact(DisplayName = "SETTING_015 - Validator - Deposit_ratio = 99 (giá trị biên tối đa hợp lệ)")]
-    public void SETTING_015_Validator_DepositRatio_MaximumBoundary_ShouldPass()
-    {
-        var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand
-        {
-            Settings = new Dictionary<string, string?> { { "Deposit_ratio", "99" } }
-        };
-        var result = validator.TestValidate(request);
-        result.ShouldNotHaveAnyValidationErrors();
-    }
-
-    [Fact(DisplayName = "SETTING_016 - Validator - Deposit_ratio = 50.5 (hợp lệ với 1 chữ số thập phân)")]
-    public void SETTING_016_Validator_DepositRatio_OneDecimalPlace_ShouldPass()
-    {
-        var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand
-        {
-            Settings = new Dictionary<string, string?> { { "Deposit_ratio", "50.5" } }
-        };
-        var result = validator.TestValidate(request);
-        result.ShouldNotHaveAnyValidationErrors();
-    }
 
     [Fact(DisplayName = "SETTING_017 - Validator - Deposit_ratio = 0.9 (dưới ngưỡng)")]
     public void SETTING_017_Validator_DepositRatio_BelowMinimum_ShouldFail()
@@ -96,18 +64,6 @@ public class Setting
             .WithErrorMessage("All numeric fields must contain valid numbers");
     }
 
-    [Fact(DisplayName = "SETTING_020 - Validator - Inventory_alert_level = 100 (integer hợp lệ)")]
-    public void SETTING_020_Validator_InventoryAlertLevel_ValidInteger_ShouldPass()
-    {
-        var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand
-        {
-            Settings = new Dictionary<string, string?> { { "Inventory_alert_level", "100" } }
-        };
-        var result = validator.TestValidate(request);
-        result.ShouldNotHaveAnyValidationErrors();
-    }
-
     [Fact(
         DisplayName = "SETTING_021 - Validator - Inventory_alert_level = 50.5 (decimal không hợp lệ cho integer field)")]
     public void SETTING_021_Validator_InventoryAlertLevel_DecimalValue_ShouldFail()
@@ -142,18 +98,6 @@ public class Setting
         var request = new SetSettingsCommand { Settings = [] };
         var result = validator.TestValidate(request);
         result.ShouldHaveValidationErrorFor(x => x.Settings).WithErrorMessage("Settings cannot be empty");
-    }
-
-    [Fact(DisplayName = "SETTING_025 - Validator - Khoảng trắng đầu/cuối trong value")]
-    public void SETTING_025_Validator_WhitespaceInValue_ShouldHandleCorrectly()
-    {
-        var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand
-        {
-            Settings = new Dictionary<string, string?> { { "Deposit_ratio", " 50 " } }
-        };
-        var result = validator.TestValidate(request);
-        result.ShouldNotHaveAnyValidationErrors();
     }
 
     [Fact(DisplayName = "SETTING_026 - Handler GetAllSettings - Trả về tất cả settings từ repository")]

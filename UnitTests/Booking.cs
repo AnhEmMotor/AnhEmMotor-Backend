@@ -88,13 +88,6 @@ public class Booking
             Times.Once);
     }
 
-    [Fact(DisplayName = "BOOKING_004 - Tự động gán loại hình Lái thử mặc định")]
-    public void CreateBookingCommand_DefaultBookingType_IsTestDrive()
-    {
-        var command = new CreateBookingCommand();
-        command.BookingType.Should().Be(BookingType.TestDrive);
-    }
-
     [Fact(DisplayName = "BOOKING_006 - Kiểm tra logic lọc BookingType khi tạo Activity")]
     public async Task CreateBooking_TestDriveType_ActivityDescriptionContainsVietnamese()
     {

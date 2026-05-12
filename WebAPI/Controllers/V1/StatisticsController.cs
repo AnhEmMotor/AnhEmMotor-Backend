@@ -21,19 +21,19 @@ using Domain.Constants.Permission.Permissions;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Th?ng kê và báo cáo.
+/// Th?ng kï¿½ vï¿½ bï¿½o cï¿½o.
 /// </summary>
 /// <param name="mediator"></param>
 [ApiVersion("1.0")]
-[SwaggerTag("Th?ng kê và báo cáo")]
+[SwaggerTag("Th?ng kï¿½ vï¿½ bï¿½o cï¿½o")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class StatisticsController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// L?y doanh thu theo ngày trong kho?ng th?i gian xác d?nh.
+    /// L?y doanh thu theo ngï¿½y trong kho?ng th?i gian xï¿½c d?nh.
     /// </summary>
-    /// <param name="days">S? ngày tính t? hi?n t?i tr? v? tru?c</param>
+    /// <param name="days">S? ngï¿½y tï¿½nh t? hi?n t?i tr? v? tru?c</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("daily-revenue")]
     [HasPermission(Statistical.View)]
@@ -48,7 +48,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y các ch? s? t?ng h?p cho Dashboard.
+    /// L?y cï¿½c ch? s? t?ng h?p cho Dashboard.
     /// </summary>
     [HttpGet("dashboard-stats")]
     [HasPermission(Statistical.View)]
@@ -61,9 +61,9 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y doanh thu và l?i nhu?n theo tháng.
+    /// L?y doanh thu vï¿½ l?i nhu?n theo thï¿½ng.
     /// </summary>
-    /// <param name="months">S? tháng tính t? hi?n t?i tr? v? tru?c</param>
+    /// <param name="months">S? thï¿½ng tï¿½nh t? hi?n t?i tr? v? tru?c</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("monthly-revenue-profit")]
     [HasPermission(Statistical.View)]
@@ -78,7 +78,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y s? lu?ng don hàng theo t?ng tr?ng thái.
+    /// L?y s? lu?ng don hï¿½ng theo t?ng tr?ng thï¿½i.
     /// </summary>
     [HttpGet("order-status-counts")]
     [HasPermission(Statistical.View)]
@@ -91,7 +91,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y báo cáo s?n ph?m c?a tháng tru?c.
+    /// L?y bï¿½o cï¿½o s?n ph?m c?a thï¿½ng tru?c.
     /// </summary>
     [HttpGet("product-report-last-month")]
     [HasPermission(Statistical.View)]
@@ -104,7 +104,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y giá và t?n kho c?a m?t s?n ph?m c? th?.
+    /// L?y giï¿½ vï¿½ t?n kho c?a m?t s?n ph?m c? th?.
     /// </summary>
     [HttpGet("product-stock-price/{variantId:int}")]
     [HasPermission(Statistical.View)]
@@ -118,7 +118,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y toàn b? d? li?u g?p cho Admin Dashboard.
+    /// L?y toï¿½n b? d? li?u g?p cho Admin Dashboard.
     /// </summary>
     [HttpGet("dashboard-overview")]
     [HasPermission(Statistical.View)]
@@ -131,7 +131,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y toàn b? phân tích doanh thu cho Admin (g?p).
+    /// L?y toï¿½n b? phï¿½n tï¿½ch doanh thu cho Admin (g?p).
     /// </summary>
     [HttpGet("revenue-analysis")]
     [HasPermission(Statistical.View)]
@@ -144,7 +144,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y báo cáo hi?u su?t s?n ph?m cho Admin (g?p).
+    /// L?y bï¿½o cï¿½o hi?u su?t s?n ph?m cho Admin (g?p).
     /// </summary>
     [HttpGet("product-report")]
     [HasPermission(Statistical.View)]
@@ -157,7 +157,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y báo cáo t?n kho cho Admin (g?p).
+    /// L?y bï¿½o cï¿½o t?n kho cho Admin (g?p).
     /// </summary>
     [HttpGet("warehouse-report")]
     [HasPermission(Statistical.View)]

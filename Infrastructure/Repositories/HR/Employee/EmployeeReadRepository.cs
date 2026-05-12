@@ -4,8 +4,6 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
-using Domain.Entities;
-
 namespace Infrastructure.Repositories.HR.Employee;
 
 public class EmployeeReadRepository(ApplicationDBContext context) : IEmployeeReadRepository

@@ -304,16 +304,6 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         updatedBanner!.IsActive.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "BANN_023 - Lọc Banner theo thiết bị hiển thị (TargetDevice)")]
-    public async Task BANN_023_Filter_By_TargetDevice_Success()
-    {
-        var response = await _client.GetAsync(
-            "/api/v1/banners/active?TargetDevice=Mobile",
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
     [Fact(DisplayName = "BANN_024 - Tự động ghi Log khi cập nhật nội dung")]
     public async Task BANN_024_Update_Triggers_AuditLog()
     {

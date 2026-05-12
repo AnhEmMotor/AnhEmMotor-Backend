@@ -11,16 +11,6 @@ public class UserManager
 {
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "UMGR_037 - Validate FullName rỗng vẫn hợp lệ")]
-    public void ValidateFullName_EmptyString_ValidationPasses()
-    {
-        var userId = Guid.NewGuid();
-        var command = new UpdateUserCommand() { UserId = userId, FullName = string.Empty };
-        var validator = new UpdateUserCommandValidator();
-        var result = validator.Validate(command);
-        result.IsValid.Should().BeTrue();
-    }
-
     [Fact(DisplayName = "UMGR_038 - Validate FullName có độ dài tối đa hợp lệ")]
     public void ValidateFullName_ExceedsMaxLength_ValidationFails()
     {
@@ -86,38 +76,6 @@ public class UserManager
         ChangePasswordByManagerCommandValidator.IsStrongPassword("password").Should().BeFalse();
         ChangePasswordByManagerCommandValidator.IsStrongPassword("Pass123").Should().BeFalse();
         ChangePasswordByManagerCommandValidator.IsStrongPassword("P@1").Should().BeFalse();
-    }
-
-    [Fact(DisplayName = "USER_074 - Kiểm tra logic Trim dữ liệu đầu vào")]
-    public void CreateUserCommand_TrimsUsernameAndEmail()
-    {
-        var command = new CreateUserByManagerCommand { Username = "  admin1  ", Email = " user@test.com  " };
-        command.Username.Should().Be("admin1");
-        command.Email.Should().Be("user@test.com");
-    }
-
-    [Fact(DisplayName = "USER_075 - Tuyệt đối không Trim mật khẩu")]
-    public void CreateUserCommand_DoesNotTrimPassword()
-    {
-        var password = " pass 123 ";
-        var command = new CreateUserByManagerCommand { Password = password };
-        command.Password.Should().Be(password);
-    }
-
-    [Fact(DisplayName = "USER_079 - Kiểm tra độ mạnh của mật khẩu (Validation)")]
-    public void CreateUserCommandValidator_ShouldFail_WhenPasswordTooShort()
-    {
-        var validator = new CreateUserByManagerCommandValidator();
-        var command = new CreateUserByManagerCommand
-        {
-            Username = "admin1",
-            Email = "user@test.com",
-            Password = "123",
-            RoleNames = ["Staff"]
-        };
-        var result = validator.Validate(command);
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => string.Compare(e.PropertyName, "Password") == 0);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

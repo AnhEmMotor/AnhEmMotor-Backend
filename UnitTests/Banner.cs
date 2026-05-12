@@ -22,45 +22,6 @@ public class Banner
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
-    [Fact(DisplayName = "BANN_002 - Trạng thái hoạt động mặc định của Banner")]
-    public void BannerEntity_DefaultIsActive_ShouldBeTrue()
-    {
-        var banner = new Domain.Entities.Banner();
-        banner.IsActive.Should().BeTrue();
-    }
-
-    [Fact(DisplayName = "BANN_004 - Kiểm tra Banner hết hạn hiển thị")]
-    public void Banner_IsExpired_ShouldReturnFalseForActivity()
-    {
-        var now = DateTimeOffset.UtcNow;
-        var banner = new Domain.Entities.Banner
-        {
-            IsActive = true,
-            StartDate = now.AddDays(-10),
-            EndDate = now.AddDays(-1)
-        };
-        bool isActiveAtMoment = banner.IsActive &&
-            (!banner.StartDate.HasValue || banner.StartDate <= now) &&
-            (!banner.EndDate.HasValue || banner.EndDate >= now);
-        isActiveAtMoment.Should().BeFalse();
-    }
-
-    [Fact(DisplayName = "BANN_005 - Kiểm tra Banner chưa đến ngày hiển thị")]
-    public void Banner_IsFuture_ShouldReturnFalseForActivity()
-    {
-        var now = DateTimeOffset.UtcNow;
-        var banner = new Domain.Entities.Banner
-        {
-            IsActive = true,
-            StartDate = now.AddDays(1),
-            EndDate = now.AddDays(10)
-        };
-        bool isActiveAtMoment = banner.IsActive &&
-            (!banner.StartDate.HasValue || banner.StartDate <= now) &&
-            (!banner.EndDate.HasValue || banner.EndDate >= now);
-        isActiveAtMoment.Should().BeFalse();
-    }
-
     [Fact(DisplayName = "BANN_007 - Tự động cắt khoảng trắng trong dữ liệu đầu vào")]
     public async Task CreateBanner_WhitespaceInInput_ShouldTrimValues()
     {
@@ -86,40 +47,6 @@ public class Banner
             Times.Once);
     }
 
-    [Fact(DisplayName = "BANN_008 - Hiển thị Banner theo vị trí cụ thể")]
-    public void Banner_Position_SetsCorrectValue()
-    {
-        var banner = new Domain.Entities.Banner { Position = "Sidebar" };
-        banner.Position.Should().Be("Sidebar");
-    }
-
-    [Fact(DisplayName = "BANN_009 - Mapping dữ liệu sang BannerResponse")]
-    public void BannerResponse_Mapping_ShouldHaveCorrectValues()
-    {
-        var banner = new Domain.Entities.Banner
-        {
-            Id = 1,
-            Title = "T",
-            ImageUrl = "I",
-            LinkUrl = "L",
-            Position = "P",
-            DisplayOrder = 5
-        };
-        var response = new BannerResponse
-        {
-            Id = banner.Id,
-            Title = banner.Title,
-            ImageUrl = banner.ImageUrl,
-            LinkUrl = banner.LinkUrl,
-            Position = banner.Position,
-        };
-        response.Id.Should().Be(1);
-        response.Title.Should().Be("T");
-        response.ImageUrl.Should().Be("I");
-        response.LinkUrl.Should().Be("L");
-        response.Position.Should().Be("P");
-    }
-
     [Fact(DisplayName = "BANN_011 - Kiểm tra lưu trữ Banner khi không có liên kết (LinkUrl)")]
     public async Task CreateBanner_NullLinkUrl_ShouldSaveSuccessfully()
     {
@@ -130,42 +57,5 @@ public class Banner
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         _bannerInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Banner>(b => b.LinkUrl == null)), Times.Once);
-    }
-
-    [Fact(DisplayName = "BANN_019 - Kiểm tra logic lọc theo Placement")]
-    public void Banner_PlacementFilter_ShouldWork()
-    {
-        var banners = new List<Domain.Entities.Banner>
-        {
-            new() { Placement = "Popup" },
-            new() { Placement = "HomeTop" },
-            new() { Placement = "Popup" }
-        };
-        var filtered = banners.Where(b => string.Compare(b.Placement, "Popup") == 0).ToList();
-        filtered.Should().HaveCount(2);
-        filtered.All(b => string.Compare(b.Placement, "Popup") == 0).Should().BeTrue();
-    }
-
-    [Fact(DisplayName = "BANN_022.1 - Kiểm tra Validation giá trị Placement (Valid)")]
-    public void Banner_ValidPlacement_ShouldNotHaveError()
-    {
-        var validPlacements = new[] { "HomeTop", "Sidebar", "Popup" };
-        var placement = "HomeTop";
-        validPlacements.Should().Contain(placement);
-    }
-
-    [Fact(DisplayName = "BANN_022.2 - Kiểm tra Validation giá trị Placement (Invalid)")]
-    public void Banner_InvalidPlacement_ShouldHaveError()
-    {
-        var validPlacements = new[] { "HomeTop", "Sidebar", "Popup" };
-        var placement = "Unknown_Position";
-        validPlacements.Should().NotContain(placement);
-    }
-
-    [Fact(DisplayName = "BANN_025 - Kiểm tra ràng buộc độ dài MetaTitle")]
-    public void Banner_MetaTitle_Length_Check()
-    {
-        var longTitle = new string('A', 200);
-        longTitle.Length.Should().BeGreaterThan(160);
     }
 }

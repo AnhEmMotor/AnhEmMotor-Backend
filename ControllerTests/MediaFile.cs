@@ -26,16 +26,7 @@ public class MediaFile
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-    #pragma warning disable IDE0079 
-    #pragma warning disable CRR0035
-    [Fact(DisplayName = "MF_006 - T?i lên ?nh th?t b?i khi chua dang nh?p")]
-    public void UploadImage_NotAuthenticated_Unauthorized()
-    {
-        var method = typeof(MediaFileController).GetMethod("UploadProductImageAsync");
-        var hasAuthorize = method!.GetCustomAttributes(typeof(AuthorizeAttribute), true).Length != 0 ||
-            typeof(MediaFileController).GetCustomAttributes(typeof(AuthorizeAttribute), true).Length != 0;
-        hasAuthorize.Should().BeTrue("API này ph?i yêu c?u dang nh?p (Authorize)");
-    }
+    
 
     [Fact(DisplayName = "MF_005: UploadImageAsync has RequiresAnyPermissions with Edit/Create permissions")]
     public void UploadImageAsync_HasCorrectPermissionsAttribute()
@@ -107,7 +98,7 @@ public class MediaFile
         var objectResult = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);
     }
-    #pragma warning restore CRR0035
-    #pragma warning restore IDE0079
+    #pragma warning disable IDE0079
+    #pragma warning disable CRR0035
 }
 

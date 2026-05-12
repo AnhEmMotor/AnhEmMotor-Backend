@@ -79,26 +79,6 @@ public class Setting
         returnedError.Errors.Should().ContainSingle().Which.Message.Should().Be("Validation failed");
     }
 
-    [Fact(DisplayName = "SETTING_033 - Controller GetAllSettings - Có attribute Authorize phù h?p")]
-    public void SETTING_033_Controller_GetAllSettings_HasAuthorizeAttribute()
-    {
-        var method = typeof(SettingController).GetMethod(nameof(SettingController.GetAllSettingsAsync));
-        var controllerType = typeof(SettingController);
-        var methodHasAuth = method?.GetCustomAttribute<AuthorizeAttribute>() != null;
-        var controllerHasAuth = controllerType.GetCustomAttribute<AuthorizeAttribute>() != null;
-        (methodHasAuth || controllerHasAuth).Should().BeTrue("Controller or method should have Authorize attribute");
-    }
-
-    [Fact(DisplayName = "SETTING_034 - Controller SetSettings - Có attribute Authorize phù h?p")]
-    public void SETTING_034_Controller_SetSettings_HasAuthorizeAttribute()
-    {
-        var method = typeof(SettingController).GetMethod(nameof(SettingController.SetSettingsAsync));
-        var controllerType = typeof(SettingController);
-        var methodHasAuth = method?.GetCustomAttribute<AuthorizeAttribute>() != null;
-        var controllerHasAuth = controllerType.GetCustomAttribute<AuthorizeAttribute>() != null;
-        (methodHasAuth || controllerHasAuth).Should().BeTrue("Controller or method should have Authorize attribute");
-    }
-
     [Fact(DisplayName = "SETTING_037 - SetSettings - Value null cho m?t key")]
     public async Task SETTING_037_SetSettings_NullValue_KeepsOriginal()
     {

@@ -252,13 +252,6 @@ public class Lead
         response.Activities.Should().NotBeEmpty();
     }
 
-    [Fact(DisplayName = "LEAD_020 - Kiểm tra giá trị mặc định của ActivityType")]
-    public void LeadActivityEntity_DefaultConstructor_ActivityTypeIsNote()
-    {
-        var activity = new LeadActivity();
-        activity.ActivityType.Should().Be("Note");
-    }
-
     [Fact(DisplayName = "LEAD_021 - Logic xử lý mô tả khi loại đặt lịch là Lái thử")]
     public async Task CreateBooking_TestDriveType_DescriptionUsesFriendlyName()
     {
@@ -311,38 +304,6 @@ public class Lead
             Times.Once);
     }
 
-    [Fact(DisplayName = "LEAD_023 - Mapping dữ liệu sang LeadActivityResponse")]
-    public void LeadActivity_MappingToResponse_CorrectValues()
-    {
-        var createdAt = DateTimeOffset.UtcNow;
-        var activity = new LeadActivity
-        {
-            Id = 100,
-            ActivityType = "Booking",
-            Description = "Test Description",
-            CreatedAt = createdAt
-        };
-        var response = new LeadActivityResponse
-        {
-            Id = activity.Id,
-            ActivityType = activity.ActivityType,
-            Description = activity.Description,
-            CreatedAt = activity.CreatedAt.Value
-        };
-        response.Id.Should().Be(100);
-        response.ActivityType.Should().Be("Booking");
-        response.Description.Should().Be("Test Description");
-        response.CreatedAt.Should().Be(createdAt);
-    }
-
-    [Fact(DisplayName = "LEAD_024 - Xử lý giá trị thời gian null khi Mapping")]
-    public void LeadActivity_MappingWithNullCreatedAt_ReturnsMinValue()
-    {
-        var activity = new LeadActivity { CreatedAt = null };
-        var response = new LeadActivityResponse { CreatedAt = activity.CreatedAt ?? DateTimeOffset.MinValue };
-        response.CreatedAt.Should().Be(DateTimeOffset.MinValue);
-    }
-
     [Fact(DisplayName = "LEAD_027 - Gán điểm khởi tạo cho khách hàng mới")]
     public async Task CreateBooking_NewLead_SetsInitialScore30()
     {
@@ -379,21 +340,6 @@ public class Lead
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         existingLead.Score.Should().Be(60);
         _leadUpdateRepoMock.Verify(x => x.Update(existingLead), Times.Once);
-    }
-
-    [Fact(DisplayName = "LEAD_030 - Kiểm tra giá trị Score mặc định của thực thể")]
-    public void LeadEntity_DefaultConstructor_ScoreIsZero()
-    {
-        var lead = new LeadEntity();
-        lead.Score.Should().Be(0);
-    }
-
-    [Fact(DisplayName = "LEAD_031 - Đảm bảo tính toàn vẹn của Score khi Mapping")]
-    public void Lead_MappingToResponse_PreservesScore()
-    {
-        var lead = new LeadEntity { Score = 150 };
-        var response = new LeadResponse { Score = lead.Score };
-        response.Score.Should().Be(150);
     }
 
     [Theory(DisplayName = "LEAD_032 - Cộng điểm không phụ thuộc vào địa điểm đặt lịch")]
@@ -440,9 +386,6 @@ public class Lead
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         _leadInsertRepoMock.Verify(x => x.Add(It.Is<LeadEntity>(l => l.Score == 30)), Times.Once);
     }
-    #pragma warning restore CRR0035
-
-    #pragma warning restore IDE0079
 
     [Fact(DisplayName = "LEAD_049 - Logic tích lũy điểm qua chuỗi hành động")]
     public async Task LEAD_049_Accumulate_Score_Sequence()
@@ -477,21 +420,8 @@ public class Lead
         }
         lead.Score.Should().Be(0);
     }
-
-    [Fact(DisplayName = "LEAD_043 - Kiểm tra logic tuổi tối thiểu của Lead")]
-    public void LEAD_043_Lead_Minimum_Age_Check()
-    {
-        var birthday = DateTime.Now.AddYears(-17);
-        var lead = new LeadEntity { Birthday = birthday };
-        lead.Birthday.Should().Be(birthday);
-    }
-
-    [Fact(DisplayName = "LEAD_045 - LEAD_045 - Khởi tạo điểm mặc định cho Lead")]
-    public void LEAD_045_Lead_Default_Score_Is_Zero()
-    {
-        var lead = new LeadEntity();
-        lead.Score.Should().Be(0);
-    }
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }
 
 

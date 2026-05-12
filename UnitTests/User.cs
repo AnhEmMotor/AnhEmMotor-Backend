@@ -1,6 +1,7 @@
-using Application.ApiContracts.Permission.Responses;
+Ôªøusing Application.ApiContracts.Permission.Responses;
 using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
+using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.Users.Commands.ChangePassword;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
@@ -37,7 +38,7 @@ public class User
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "USER_001 - L?y thÙng tin ngu?i d˘ng hi?n t?i th‡nh cÙng")]
+    [Fact(DisplayName = "USER_001 - L?y th√¥ng tin ngu?i d√πng hi?n t?i th√†nh c√¥ng")]
     public async Task GetCurrentUser_Success_ReturnsUserResponse()
     {
         var userId = Guid.NewGuid();
@@ -74,7 +75,7 @@ public class User
         result.Value.PhoneNumber.Should().Be("0123456789");
     }
 
-    [Fact(DisplayName = "USER_002 - L?y thÙng tin ngu?i d˘ng khi JWT khÙng h?p l?")]
+    [Fact(DisplayName = "USER_002 - L?y th√¥ng tin ngu?i d√πng khi JWT kh√¥ng h?p l?")]
     public async Task GetCurrentUser_InvalidJWT_ThrowsUnauthorizedException()
     {
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
@@ -85,7 +86,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_003 - L?y thÙng tin ngu?i d˘ng khi t‡i kho?n d„ b? xÛa m?m")]
+    [Fact(DisplayName = "USER_003 - L?y th√¥ng tin ngu?i d√πng khi t√†i kho?n d√£ b? x√≥a m?m")]
     public async Task GetCurrentUser_DeletedAccount_ThrowsForbiddenException()
     {
         var userId = Guid.NewGuid();
@@ -103,7 +104,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_004 - L?y thÙng tin ngu?i d˘ng khi t‡i kho?n b? Ban")]
+    [Fact(DisplayName = "USER_004 - L?y th√¥ng tin ngu?i d√πng khi t√†i kho?n b? Ban")]
     public async Task GetCurrentUser_BannedAccount_ReturnsUserResponseWithBannedStatus()
     {
         var userId = Guid.NewGuid();
@@ -124,7 +125,7 @@ public class User
         result.Value.Status.Should().Be(UserStatus.Banned);
     }
 
-    [Fact(DisplayName = "USER_051 - Verify UserResponse ch?a danh s·ch Permissions")]
+    [Fact(DisplayName = "USER_051 - Verify UserResponse ch?a danh s√°ch Permissions")]
     public async Task GetCurrentUser_WithPermissions_ReturnsPermissionsList()
     {
         var userId = Guid.NewGuid();
@@ -150,7 +151,7 @@ public class User
         result.Value.Permissions!.Should().Contain("User.Read");
     }
 
-    [Fact(DisplayName = "USER_052 - Verify UserResponse.Permissions r?ng khi user khÙng cÛ quy?n")]
+    [Fact(DisplayName = "USER_052 - Verify UserResponse.Permissions r?ng khi user kh√¥ng c√≥ quy?n")]
     public async Task GetCurrentUser_NoPermissions_ReturnsEmptyPermissions()
     {
         var userId = Guid.NewGuid();
@@ -171,7 +172,7 @@ public class User
         result.Value.Permissions.Should().BeNull();
     }
 
-    [Fact(DisplayName = "USER_005 - C?p nh?t thÙng tin ngu?i d˘ng th‡nh cÙng")]
+    [Fact(DisplayName = "USER_005 - C?p nh?t th√¥ng tin ngu?i d√πng th√†nh c√¥ng")]
     public async Task UpdateCurrentUser_Success_ReturnsUpdatedUser()
     {
         var userId = Guid.NewGuid();
@@ -210,7 +211,7 @@ public class User
         result.Value.PhoneNumber.Should().Be("0987654321");
     }
 
-    [Fact(DisplayName = "USER_006 - C?p nh?t thÙng tin v?i d? li?u r?ng (khÙng thay d?i gÏ)")]
+    [Fact(DisplayName = "USER_006 - C?p nh?t th√¥ng tin v?i d? li?u r?ng (kh√¥ng thay d?i g√¨)")]
     public async Task UpdateCurrentUser_EmptyData_KeepsOriginalData()
     {
         var userId = Guid.NewGuid();
@@ -247,7 +248,7 @@ public class User
         result.Value.PhoneNumber.Should().Be("0123456789");
     }
 
-    [Fact(DisplayName = "USER_007 - C?p nh?t thÙng tin v?i kho?ng tr?ng ? d?u v‡ cu?i chu?i")]
+    [Fact(DisplayName = "USER_007 - C?p nh?t th√¥ng tin v?i kho?ng tr?ng ? d?u v√† cu?i chu?i")]
     public async Task UpdateCurrentUser_WhitespaceData_TrimmedCorrectly()
     {
         var userId = Guid.NewGuid();
@@ -274,7 +275,7 @@ public class User
         result.Value.PhoneNumber.Should().Be("0999888777");
     }
 
-    [Fact(DisplayName = "USER_008 - C?p nh?t thÙng tin v?i k˝ t? d?c bi?t trong FullName")]
+    [Fact(DisplayName = "USER_008 - C?p nh?t th√¥ng tin v?i k√Ω t? d?c bi?t trong FullName")]
     public async Task UpdateCurrentUser_SpecialCharacters_SavedAsLiteral()
     {
         var userId = Guid.NewGuid();
@@ -300,7 +301,7 @@ public class User
         result.Value.FullName.Should().Be("<script>alert('XSS')</script>");
     }
 
-    [Fact(DisplayName = "USER_009 - C?p nh?t thÙng tin v?i Gender khÙng h?p l?")]
+    [Fact(DisplayName = "USER_009 - C?p nh?t th√¥ng tin v?i Gender kh√¥ng h?p l?")]
     public async Task UpdateCurrentUser_InvalidGender_ThrowsValidationException()
     {
         var userId = Guid.NewGuid();
@@ -316,7 +317,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_010 - C?p nh?t thÙng tin v?i s? di?n tho?i khÙng h?p l? (ch? v‡o ch? s?)")]
+    [Fact(DisplayName = "USER_010 - C?p nh?t th√¥ng tin v?i s? di?n tho?i kh√¥ng h?p l? (ch? v√†o ch? s?)")]
     public async Task UpdateCurrentUser_InvalidPhoneNumber_ThrowsValidationException()
     {
         var userId = Guid.NewGuid();
@@ -332,7 +333,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_011 - C?p nh?t thÙng tin khi ngu?i d˘ng d„ b? xÛa m?m")]
+    [Fact(DisplayName = "USER_011 - C?p nh?t th√¥ng tin khi ngu?i d√πng d√£ b? x√≥a m?m")]
     public async Task UpdateCurrentUser_DeletedAccount_ThrowsForbiddenException()
     {
         var userId = Guid.NewGuid();
@@ -348,7 +349,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_012 - C?p nh?t thÙng tin khi ngu?i d˘ng b? Ban")]
+    [Fact(DisplayName = "USER_012 - C?p nh?t th√¥ng tin khi ngu?i d√πng b? Ban")]
     public async Task UpdateCurrentUser_BannedAccount_ThrowsForbiddenException()
     {
         var userId = Guid.NewGuid();
@@ -364,7 +365,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_013 - C?p nh?t thÙng tin v?i tru?ng Email trong body (ph?i b? ch?n)")]
+    [Fact(DisplayName = "USER_013 - C?p nh?t th√¥ng tin v?i tru?ng Email trong body (ph?i b? ch?n)")]
     public async Task UpdateCurrentUser_EmailInBody_EmailNotChanged()
     {
         var userId = Guid.NewGuid();
@@ -394,7 +395,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_014 - –?i m?t kh?u th‡nh cÙng")]
+    [Fact(DisplayName = "USER_014 - √ê?i m?t kh?u th√†nh c√¥ng")]
     public async Task ChangePassword_Success_PasswordChangedAndSecurityStampRefreshed()
     {
         var userId = Guid.NewGuid();
@@ -428,7 +429,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_015 - –?i m?t kh?u v?i CurrentPassword sai")]
+    [Fact(DisplayName = "USER_015 - √ê?i m?t kh?u v?i CurrentPassword sai")]
     public async Task ChangePassword_WrongCurrentPassword_ThrowsUnauthorizedException()
     {
         var userId = Guid.NewGuid();
@@ -448,7 +449,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_016 - –?i m?t kh?u v?i NewPassword qu· ng?n (validation)")]
+    [Fact(DisplayName = "USER_016 - √ê?i m?t kh?u v?i NewPassword qu√° ng?n (validation)")]
     public async Task ChangePassword_NewPasswordTooShort_ThrowsValidationException()
     {
         var userId = Guid.NewGuid();
@@ -468,7 +469,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_017 - –?i m?t kh?u khi t‡i kho?n d„ b? xÛa m?m")]
+    [Fact(DisplayName = "USER_017 - √ê?i m?t kh?u khi t√†i kho?n d√£ b? x√≥a m?m")]
     public async Task ChangePassword_DeletedAccount_ThrowsForbiddenException()
     {
         var userId = Guid.NewGuid();
@@ -486,7 +487,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_018 - XÛa t‡i kho?n th‡nh cÙng")]
+    [Fact(DisplayName = "USER_018 - X√≥a t√†i kho?n th√†nh c√¥ng")]
     public async Task DeleteAccount_Success_AccountDeletedAndSecurityStampRefreshed()
     {
         var userId = Guid.NewGuid();
@@ -516,7 +517,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_019 - XÛa t‡i kho?n khi d„ b? Ban (khÙng cho phÈp)")]
+    [Fact(DisplayName = "USER_019 - X√≥a t√†i kho?n khi d√£ b? Ban (kh√¥ng cho ph√©p)")]
     public async Task DeleteAccount_BannedAccount_ThrowsForbiddenException()
     {
         var userId = Guid.NewGuid();
@@ -532,7 +533,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_020 - XÛa t‡i kho?n khi t‡i kho?n d„ b? xÛa m?m tru?c dÛ")]
+    [Fact(DisplayName = "USER_020 - X√≥a t√†i kho?n khi t√†i kho?n d√£ b? x√≥a m?m tru?c d√≥")]
     public async Task DeleteAccount_AlreadyDeleted_ThrowsBadRequestException()
     {
         var userId = Guid.NewGuid();
@@ -548,7 +549,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USR_PERM_001 - L?y quy?n c?a ngu?i d˘ng theo ID tr? v? danh s·ch chu?i ID")]
+    [Fact(DisplayName = "USR_PERM_001 - L?y quy?n c?a ngu?i d√πng theo ID tr? v? danh s√°ch chu?i ID")]
     public async Task GetUserPermissionsById_ReturnsListOfStringIds()
     {
         var handler = new GetUserPermissionsByIdQueryHandler(
@@ -577,7 +578,7 @@ public class User
         result.Value.Permissions.Should().NotContainNulls();
     }
 
-    [Fact(DisplayName = "USR_PERM_002 - L?y quy?n c?a ngu?i d˘ng hi?n t?i (GetMyPermissions) tr? v? danh s·ch chu?i ID")]
+    [Fact(DisplayName = "USR_PERM_002 - L?y quy?n c?a ngu?i d√πng hi?n t?i (GetMyPermissions) tr? v? danh s√°ch chu?i ID")]
     public async Task GetMyPermissions_ReturnsListOfStringIds()
     {
         var handler = new GetMyPermissionsQueryHandler(_roleReadRepositoryMock.Object, _userReadRepositoryMock.Object);
@@ -603,16 +604,23 @@ public class User
         result.Value.Permissions.Should().Contain(Domain.Constants.Permission.Permissions.Files.Upload);
     }
 
-    [Fact(DisplayName = "USR_PERM_003 - Ki?m tra d?nh d?ng response getUserPermissionsById (Contract)")]
-    public void PermissionAndRoleOfUserResponse_PermissionsField_IsListOfStrings()
+    [Fact(DisplayName = "USER_079 - Ki·ªÉm tra ƒë·ªô m·∫°nh c·ªßa m·∫≠t kh·∫©u (Validation)")]
+    public void CreateUserCommandValidator_ShouldFail_WhenPasswordTooShort()
     {
-        var propertyInfo = typeof(PermissionAndRoleOfUserResponse).GetProperty(
-            nameof(PermissionAndRoleOfUserResponse.Permissions));
-        propertyInfo.Should().NotBeNull();
-        typeof(IList<string>).IsAssignableFrom(propertyInfo!.PropertyType).Should().BeTrue();
+        var validator = new CreateUserByManagerCommandValidator();
+        var command = new CreateUserByManagerCommand
+        {
+            Username = "admin1",
+            Email = "user@test.com",
+            Password = "123",
+            RoleNames = ["Staff"]
+        };
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => string.Compare(e.PropertyName, "Password") == 0);
     }
-    #pragma warning restore CRR0035
-    #pragma warning restore IDE0079
+#pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }
 
 

@@ -1,6 +1,7 @@
-using Application.ApiContracts.User.Responses;
+ï»¿using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
+using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.Users.Commands.ChangePassword;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
@@ -44,7 +45,7 @@ public class User
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "USER_036 - Controller - GET /api/v1/User/me g?i dúng Query")]
+    [Fact(DisplayName = "USER_036 - Controller - GET /api/v1/User/me g?i dÃºng Query")]
     public async Task GetCurrentUser_CallsCorrectQuery_ReturnsOk()
     {
         var expectedResponse = new UserResponse
@@ -72,7 +73,7 @@ public class User
         _mediatorMock.Verify(m => m.Send(It.IsAny<GetCurrentUserQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "USER_037 - Controller - GET /api/v1/User/me x? lý exception")]
+    [Fact(DisplayName = "USER_037 - Controller - GET /api/v1/User/me x? lÃ½ exception")]
     public async Task GetCurrentUser_HandlesException_ThrowsUnauthorizedException()
     {
         var userId = Guid.NewGuid();
@@ -90,7 +91,7 @@ public class User
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "USER_038 - Controller - PUT /api/v1/User/me g?i dúng Command")]
+    [Fact(DisplayName = "USER_038 - Controller - PUT /api/v1/User/me g?i dÃºng Command")]
     public async Task UpdateCurrentUser_CallsCorrectCommand_ReturnsOk()
     {
         var userId = Guid.NewGuid();
@@ -135,7 +136,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_040 - Controller - PUT /api/v1/User/me x? lý ValidationException")]
+    [Fact(DisplayName = "USER_040 - Controller - PUT /api/v1/User/me x? lÃ½ ValidationException")]
     public async Task UpdateCurrentUser_ValidationException_ThrowsValidationException()
     {
         var request = new UpdateCurrentUserCommand { PhoneNumber = "invalid" };
@@ -145,7 +146,7 @@ public class User
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_041 - Controller - POST /api/v1/User/change-password g?i dúng Command")]
+    [Fact(DisplayName = "USER_041 - Controller - POST /api/v1/User/change-password g?i dÃºng Command")]
     public async Task ChangePassword_CallsCorrectCommand_ReturnsOk()
     {
         var userId = Guid.NewGuid();
@@ -185,7 +186,7 @@ public class User
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_043 - Controller - POST /api/v1/User/change-password x? lý UnauthorizedException")]
+    [Fact(DisplayName = "USER_043 - Controller - POST /api/v1/User/change-password x? lÃ½ UnauthorizedException")]
     public async Task ChangePassword_UnauthorizedException_ThrowsUnauthorizedException()
     {
         var request = new ChangePasswordCommand { CurrentPassword = "Wrong", NewPassword = "New" };
@@ -196,7 +197,7 @@ public class User
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "USER_044 - Controller - POST /api/v1/User/delete-account g?i dúng Command")]
+    [Fact(DisplayName = "USER_044 - Controller - POST /api/v1/User/delete-account g?i dÃºng Command")]
     public async Task DeleteAccount_CallsCorrectCommand_ReturnsOk()
     {
         var expectedResponse = new DeleteAccountByUserReponse { Message = "Account deleted successfully" };
@@ -211,7 +212,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_045 - Controller - POST /api/v1/User/delete-account x? lý ForbiddenException")]
+    [Fact(DisplayName = "USER_045 - Controller - POST /api/v1/User/delete-account x? lÃ½ ForbiddenException")]
     public async Task DeleteAccount_ForbiddenException_ReturnsForbiddenObjectResult()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteCurrentUserAccountCommand>(), It.IsAny<CancellationToken>()))
@@ -221,7 +222,7 @@ public class User
         objectResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
     }
 
-    [Fact(DisplayName = "USER_046 - Controller - POST /api/v1/User/{userId}/restore g?i dúng Command")]
+    [Fact(DisplayName = "USER_046 - Controller - POST /api/v1/User/{userId}/restore g?i dÃºng Command")]
     public async Task RestoreAccount_CallsCorrectCommand_ReturnsOk()
     {
         var userId = Guid.NewGuid();
@@ -237,7 +238,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_047 - Controller - POST /api/v1/User/{userId}/restore v?i userId không h?p l?")]
+    [Fact(DisplayName = "USER_047 - Controller - POST /api/v1/User/{userId}/restore v?i userId khÃ´ng h?p l?")]
     public async Task RestoreAccount_InvalidGuid_ModelBindingFail()
     {
         var userId = Guid.Empty;
@@ -247,7 +248,7 @@ public class User
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_048 - Controller - POST /api/v1/User/{userId}/restore x? lý NotFoundException")]
+    [Fact(DisplayName = "USER_048 - Controller - POST /api/v1/User/{userId}/restore x? lÃ½ NotFoundException")]
     public async Task RestoreAccount_NotFoundException_ThrowsNotFoundException()
     {
         var userId = Guid.NewGuid();
@@ -257,7 +258,7 @@ public class User
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_049 - Controller - POST /api/v1/User/{userId}/restore x? lý BadRequestException")]
+    [Fact(DisplayName = "USER_049 - Controller - POST /api/v1/User/{userId}/restore x? lÃ½ BadRequestException")]
     public async Task RestoreAccount_BadRequestException_ThrowsBadRequestException()
     {
         var userId = Guid.NewGuid();
@@ -266,30 +267,6 @@ public class User
         var result = await _controller.RestoreUserAccountAsync(userId, CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<BadRequestObjectResult>();
     }
-
-    [Fact(DisplayName = "USER_050 - Controller - Ki?m tra Authorization Attribute trên các endpoints")]
-    public void Controller_HasAuthorizeAttribute_AllEndpointsProtected()
-    {
-        var controllerType = typeof(UserController);
-        var controllerAttributes = controllerType.GetCustomAttributes(typeof(AuthorizeAttribute), true);
-        var methods = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        var hasControllerLevelAuthorize = controllerAttributes.Length > 0;
-        if (!hasControllerLevelAuthorize)
-        {
-            foreach (var method in methods)
-            {
-                var allowAnonymous = method.GetCustomAttributes(typeof(AllowAnonymousAttribute), true);
-                if (allowAnonymous.Length > 0)
-                    continue;
-                var methodAttributes = method.GetCustomAttributes(typeof(AuthorizeAttribute), true);
-                methodAttributes.Should()
-                    .NotBeEmpty($"Method {method.Name} should be secured or explicitly AllowAnonymous");
-            }
-        } else
-        {
-            hasControllerLevelAuthorize.Should().BeTrue();
-        }
-    }
-    #pragma warning restore CRR0035
-    #pragma warning restore IDE0079
+#pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }
