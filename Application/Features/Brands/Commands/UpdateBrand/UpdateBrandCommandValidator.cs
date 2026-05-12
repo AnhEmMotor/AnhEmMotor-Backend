@@ -6,11 +6,10 @@ public sealed class UpdateBrandCommandValidator : AbstractValidator<UpdateBrandC
 {
     public UpdateBrandCommandValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Name)
             .NotEmpty()
             .MaximumLength(100)
-            .Matches(@"^[\p{L}\p{N}\s]*$")
+            .Matches(@"^[\p{L}0-9\-\s]+$")
             .WithMessage("Brand name contains invalid characters.");
         RuleFor(x => x.Description).MaximumLength(500).When(x => !string.IsNullOrWhiteSpace(x.Description));
     }
