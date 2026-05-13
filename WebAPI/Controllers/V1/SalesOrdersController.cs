@@ -1,4 +1,4 @@
-using Application.ApiContracts.Output.Responses;
+ï»¿using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Features.Outputs.Commands.CancelOrderByBuyer;
 using Application.Features.Outputs.Commands.CreateOutput;
@@ -37,16 +37,16 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Qu?n lı don hàng/phi?u xu?t.
+/// Quáº£n lÃ½ Ä‘Æ¡n hÃ ng/phiáº¿u xuáº¥t.
 /// </summary>
 [ApiVersion("1.0")]
-[SwaggerTag("Qu?n lı don hàng/phi?u xu?t")]
+[SwaggerTag("Quáº£n lÃ½ Ä‘Æ¡n hÃ ng/phiáº¿u xuáº¥t")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SalesOrdersController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// L?y danh sách don hàng c?a khách hàng hi?n t?i (d?a trên JWT token).
+    /// Láº¥y danh sÃ¡ch Ä‘Æ¡n hÃ ng c?a khÃ¡ch hÃ ng hiá»‡n táº¡i (dá»±a trÃªn JWT token).
     /// </summary>
     [HttpGet("my-purchases")]
     [ProducesResponseType(typeof(PagedResult<MyOrderResponse>), StatusCodes.Status200OK)]
@@ -65,7 +65,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
                         [new ErrorDetail
                             {
                                 Field = "Authorization",
-                                Message = "Không th? l?y thông tin ngu?i dùng t? token."
+                                Message = "Khï¿½ng th? l?y thÃ´ng tin ngÆ°á»i dÃ¹ng t? token."
                             }]
                 });
         }
@@ -75,7 +75,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh sách don hàng c?a id khách hàng (ch? cho phép vào khi có quy?n xem don hàng).
+    /// Láº¥y danh sÃ¡ch Ä‘Æ¡n hÃ ng c?a id khï¿½ch hï¿½ng (ch? cho phï¿½p vï¿½o khi cï¿½ quyá»n xem Ä‘Æ¡n hÃ ng).
     /// </summary>
     [HttpGet("get-purchases/{id:Guid}")]
     [HasPermission(Outputs.View)]
@@ -92,7 +92,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh sách don hàng (có phân trang, l?c, s?p x?p).
+    /// Láº¥y danh sÃ¡ch Ä‘Æ¡n hÃ ng (cÃ³ phÃ¢n trang, lá»c, sáº¯p xáº¿p).
     /// </summary>
     [HttpGet]
     [HasPermission(Outputs.View)]
@@ -107,7 +107,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh sách don hàng dã b? xóa (có phân trang, l?c, s?p x?p).
+    /// Láº¥y danh sÃ¡ch Ä‘Æ¡n hÃ ng dï¿½ b? xï¿½a (cÃ³ phÃ¢n trang, lá»c, sáº¯p xáº¿p).
     /// </summary>
     [HttpGet("deleted")]
     [HasPermission(Outputs.View)]
@@ -122,7 +122,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh sách tr?ng thái don hàng.
+    /// L?y danh sï¿½ch tr?ng thï¿½i don hï¿½ng.
     /// </summary>
     [HttpGet("status")]
     [RequiresAnyPermissions(Outputs.View, Outputs.Create, Outputs.Edit)]
@@ -135,7 +135,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y b?n d? tên hi?n th? n?i b? c?a tr?ng thái don hàng (Ti?ng Vi?t).
+    /// L?y b?n d? tï¿½n hi?n th? n?i b? c?a tr?ng thï¿½i don hï¿½ng (Ti?ng Vi?t).
     /// </summary>
     [HttpGet("status-map")]
     [Authorize]
@@ -148,7 +148,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y so d? chuy?n d?i tr?ng thái don hàng.
+    /// L?y so d? chuy?n d?i tr?ng thï¿½i don hï¿½ng.
     /// </summary>
     [HttpGet("transition-map")]
     [RequiresAnyPermissions(Outputs.Create, Outputs.Edit)]
@@ -161,7 +161,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh sách tr?ng thái don hàng b? khóa không cho phép s?a thông tin chi ti?t.
+    /// L?y danh sï¿½ch tr?ng thï¿½i don hï¿½ng b? khï¿½a khï¿½ng cho phï¿½p s?a thï¿½ng tin chi ti?t.
     /// </summary>
     [HttpGet("locked-statuses")]
     [Authorize]
@@ -174,7 +174,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh sách các mã tr?ng thái có th? h?y don hàng tr?c ti?p.
+    /// L?y danh sï¿½ch cï¿½c mï¿½ tr?ng thï¿½i cï¿½ th? Há»§y Ä‘Æ¡n hÃ ng tr?c ti?p.
     /// </summary>
     [HttpGet("cancellable-statuses")]
     [Authorize]
@@ -187,7 +187,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y thông tin chi ti?t c?a don hàng.
+    /// L?y thï¿½ng tin chi ti?t c?a don hï¿½ng.
     /// </summary>
     [HttpGet("{id:int}", Name = SaleOrders.GetById)]
     [HasPermission(Outputs.View)]
@@ -201,7 +201,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// T?o don hàng m?i (dành cho ngu?i có quy?n t?o don hàng).
+    /// Táº¡o Ä‘Æ¡n hÃ ng m?i (dï¿½nh cho ngu?i cï¿½ quy?n Táº¡o Ä‘Æ¡n hÃ ng).
     /// </summary>
     [HttpPost("by-manager")]
     [HasPermission(Outputs.Create)]
@@ -221,7 +221,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// T?o don hàng m?i (dành cho các tài kho?n dã dang nh?p).
+    /// Táº¡o Ä‘Æ¡n hÃ ng m?i (dï¿½nh cho cï¿½c tï¿½i kho?n dï¿½ dang nh?p).
     /// </summary>
     [HttpPost]
     [Authorize]
@@ -241,7 +241,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// C?p nh?t don hàng (Cho phép s?a don hàng do chính mình t?o ra)
+    /// Cáº­p nháº­t Ä‘Æ¡n hÃ ng (Cho phï¿½p s?a don hï¿½ng do chï¿½nh mï¿½nh t?o ra)
     /// </summary>
     [HttpPut("{id:int}")]
     [Authorize]
@@ -264,7 +264,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// H?y don hàng (Dành cho ngu?i s? h?u don hàng).
+    /// Há»§y Ä‘Æ¡n hÃ ng (DÃ nh cho ngÆ°á»i sá»Ÿ há»¯u Ä‘Æ¡n hÃ ng).
     /// </summary>
     [HttpPatch("{id:int}/cancel-my-order")]
     [Authorize]
@@ -285,8 +285,8 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// C?p nh?t don hàng (Cho phép s?a t?t c? don hàng, nhung ch? cho phép c?p nh?t khi và ch? khi có quy?n ch?nh s?a
-    /// don hàng)
+    /// Cáº­p nháº­t Ä‘Æ¡n hÃ ng (Cho phï¿½p s?a t?t c? don hï¿½ng, nhung ch? cho phï¿½p c?p nh?t khi vï¿½ ch? khi cï¿½ quy?n ch?nh s?a
+    /// don hï¿½ng)
     /// </summary>
     [HttpPut("for-manager/{id:int}")]
     [HasPermission(Outputs.Edit)]
@@ -309,7 +309,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// C?p nh?t tr?ng thái c?a don hàng.
+    /// Cáº­p nháº­t tráº¡ng thÃ¡i cá»§a Ä‘Æ¡n hÃ ng.
     /// </summary>
     [HttpPatch("{id:int}/status")]
     [HasPermission(Outputs.ChangeStatus)]
@@ -332,7 +332,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// C?p nh?t tr?ng thái c?a nhi?u don hàng cùng lúc.
+    /// Cáº­p nháº­t tráº¡ng thÃ¡i cá»§a nhiá»u Ä‘Æ¡n hÃ ng cÃ¹ng lÃºc.
     /// </summary>
     [HttpPatch("status")]
     [HasPermission(Outputs.ChangeStatus)]
@@ -348,7 +348,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xóa don hàng.
+    /// XÃ³a Ä‘Æ¡n hÃ ng.
     /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -361,7 +361,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xóa nhi?u don hàng cùng lúc.
+    /// XÃ³a nhiá»u Ä‘Æ¡n hÃ ng cÃ¹ng lÃºc.
     /// </summary>
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -376,7 +376,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Khôi ph?c don hàng dã b? xóa.
+    /// KhÃ´i phá»¥c Ä‘Æ¡n hÃ ng dï¿½ b? xï¿½a.
     /// </summary>
     [HttpPost("{id:int}/restore")]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
@@ -389,7 +389,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Khôi ph?c nhi?u don hàng dã b? xóa cùng lúc.
+    /// Khï¿½i ph?c nhi?u don hï¿½ng dï¿½ b? xï¿½a cï¿½ng lï¿½c.
     /// </summary>
     [HttpPost("restore")]
     [ProducesResponseType(typeof(List<OutputItemResponse>), StatusCodes.Status200OK)]

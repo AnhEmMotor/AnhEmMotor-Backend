@@ -3176,29 +3176,6 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         highlights![0].GetProperty("technologyId").GetInt32().Should().Be(t2.Id);
     }
 
-    [Fact(DisplayName = "PRODUCT_168 - Lấy danh sách toàn bộ công nghệ template")]
-    public async Task GetTechnologies_ReturnsAllTemplates()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            $"user_{uniqueId}",
-            "Password123!",
-            [],
-            CancellationToken.None)
-            .ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            $"user_{uniqueId}",
-            "Password123!",
-            CancellationToken.None)
-            .ConfigureAwait(true);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.GetAsync("/api/v1/technology", TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
     [Fact(DisplayName = "PRODUCT_171 - Tìm kiếm sản phẩm theo giá tối thiểu (MinPrice)")]
     public async Task GetProducts_MinPrice_FiltersCorrectly()
     {

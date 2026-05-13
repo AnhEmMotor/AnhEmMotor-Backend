@@ -1,4 +1,4 @@
-using Application.ApiContracts.HR.Responses;
+﻿using Application.ApiContracts.HR.Responses;
 using Application.Features.HR.Commands.ApprovePayroll;
 using Application.Features.HR.Queries.GetCommissionRecords;
 using Application.Features.HR.Queries.GetPayrollSummary;
@@ -7,24 +7,26 @@ using Domain.Entities;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Linq;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Controller for managing employee commission records.
+/// Quản lý bản ghi hoa hồng của nhân viên.
 /// </summary>
-/// <param name="mediator">The mediator instance.</param>
+/// <param name="mediator">Instance của mediator.</param>
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý bản ghi hoa hồng của nhân viên")]
 [Route("api/v{version:apiVersion}/hr/commissions")]
 public class CommissionController(ISender mediator) : ApiController
 {
     /// <summary>
-    /// Gets all commission records.
+    /// Lấy danh sách tất cả bản ghi hoa hồng.
     /// </summary>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A list of commission records.</returns>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách các bản ghi hoa hồng.</returns>
     [HttpGet]
     public async Task<ActionResult<List<CommissionRecord>>> GetRecordsAsync(CancellationToken cancellationToken)
     {
@@ -33,11 +35,11 @@ public class CommissionController(ISender mediator) : ApiController
     }
 
     /// <summary>
-    /// Gets a summary of payroll (salary + commissions).
+    /// Lấy bảng tổng hợp lương và hoa hồng (payroll).
     /// </summary>
-    /// <param name="month">The month.</param>
-    /// <param name="year">The year.</param>
-    /// <param name="ct">The cancellation token.</param>
+    /// <param name="month">Tháng.</param>
+    /// <param name="year">Năm.</param>
+    /// <param name="ct">Token hủy bỏ.</param>
     [HttpGet("payroll-summary")]
     [HasPermission(Domain.Constants.Permission.Permissions.Payroll.View)]
     [ProducesResponseType(typeof(List<PayrollResponse>), StatusCodes.Status200OK)]
@@ -51,10 +53,10 @@ public class CommissionController(ISender mediator) : ApiController
     }
 
     /// <summary>
-    /// Approves commission payments.
+    /// Phê duyệt thanh toán hoa hồng/lương.
     /// </summary>
-    /// <param name="command">The approve payroll command.</param>
-    /// <param name="ct">The cancellation token.</param>
+    /// <param name="command">Lệnh phê duyệt payroll.</param>
+    /// <param name="ct">Token hủy bỏ.</param>
     [HttpPost("approve-payroll")]
     [HasPermission(Domain.Constants.Permission.Permissions.Payroll.Approve)]
     public async Task<IActionResult> ApprovePayrollAsync([FromBody] ApprovePayrollCommand command, CancellationToken ct)
@@ -65,4 +67,3 @@ public class CommissionController(ISender mediator) : ApiController
         return Ok();
     }
 }
-

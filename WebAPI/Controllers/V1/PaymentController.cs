@@ -6,23 +6,25 @@ using Application.Features.Payments.Commands.ProcessVNPayIPN;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Controller for handling payment-related operations.
+/// Quản lý các hoạt động thanh toán.
 /// </summary>
 [ApiController]
+[SwaggerTag("Quản lý các hoạt động thanh toán")]
 [Route("api/[controller]")]
 public class PaymentController(IMediator mediator) : ControllerBase
 {
     /// <summary>
-    /// Webhook endpoint for PayOS to notify payment status.
+    /// Webhook từ PayOS để thông báo trạng thái thanh toán.
     /// </summary>
-    /// <param name="data">Webhook data from PayOS.</param>
-    /// <param name="cancellationToken">Cancellation Token.</param>
-    /// <returns>Success response.</returns>
+    /// <param name="data">Dữ liệu Webhook từ PayOS.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả phản hồi.</returns>
     [HttpPost("payos-webhook")]
     [AllowAnonymous]
     public async Task<IActionResult> PayOSWebhook([FromBody] PayOSWebhookData data, CancellationToken cancellationToken)
@@ -32,11 +34,11 @@ public class PaymentController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Generates a payment link for a specific order.
+    /// Tạo link thanh toán cho một đơn hàng cụ thể.
     /// </summary>
-    /// <param name="orderId">The ID of the order.</param>
-    /// <param name="cancellationToken">Cancellation Token</param>
-    /// <returns>The payment link data.</returns>
+    /// <param name="orderId">ID của đơn hàng.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu link thanh toán.</returns>
     [HttpGet("link/{orderId}")]
     [Authorize]
     public async Task<IActionResult> GetPaymentLink(int orderId, CancellationToken cancellationToken)
@@ -52,10 +54,10 @@ public class PaymentController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Callback endpoint for VNPay after payment completion.
+    /// Callback từ VNPay sau khi hoàn tất thanh toán.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation Token</param>
-    /// <returns>Redirects to the storefront processing page.</returns>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Chuyển hướng về trang xử lý của Frontend.</returns>
     [HttpGet("vnpay-callback")]
     public async Task<IActionResult> VNPayCallback(CancellationToken cancellationToken)
     {
@@ -69,10 +71,10 @@ public class PaymentController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Callback endpoint for PayOS after payment completion.
+    /// Callback từ PayOS sau khi hoàn tất thanh toán.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation Token</param>
-    /// <returns>Redirects to the storefront processing page.</returns>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Chuyển hướng về trang xử lý của Frontend.</returns>
     [HttpGet("payos-callback")]
     public async Task<IActionResult> PayOSCallback(CancellationToken cancellationToken)
     {

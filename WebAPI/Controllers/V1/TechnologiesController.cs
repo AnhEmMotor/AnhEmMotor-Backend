@@ -1,29 +1,46 @@
+using Application.ApiContracts.Technology.Responses;
 using Application.Features.Technologies.Commands.CreateTechnology;
 using Application.Features.Technologies.Commands.CreateTechnologyCategory;
 using Application.Features.Technologies.Queries.GetAllTechnologies;
 using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
+using Application.Features.Technologies.Queries.GetTechnologiesList;
 using Asp.Versioning;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Controller for managing technologies and technology categories.
+/// Quản lý danh sách các công nghệ và loại công nghệ.
 /// </summary>
-/// <param name="mediator">The mediator instance.</param>
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý danh sách các công nghệ và loại công nghệ")]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class TechnologiesController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Gets all technologies, optionally filtered by category or brand.
+    /// Lấy danh sách các công nghệ (phiên bản rút gọn).
     /// </summary>
-    /// <param name="category_id">The category ID filter.</param>
-    /// <param name="brand_id">The brand ID filter.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A list of technologies.</returns>
+    [HttpGet("list")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<TechnologyResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetTechnologiesAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetTechnologiesListQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy tất cả công nghệ, có thể lọc theo loại hoặc thương hiệu.
+    /// </summary>
+    /// <param name="category_id">ID của loại công nghệ.</param>
+    /// <param name="brand_id">ID của thương hiệu.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách các công nghệ.</returns>
     [HttpGet]
     public async Task<IActionResult> GetAllAsync(
         [FromQuery] int? category_id,
@@ -36,10 +53,10 @@ public class TechnologiesController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Gets all technology categories.
+    /// Lấy danh sách các loại công nghệ.
     /// </summary>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A list of technology categories.</returns>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách các loại công nghệ.</returns>
     [HttpGet("categories")]
     public async Task<IActionResult> GetCategoriesAsync(CancellationToken cancellationToken)
     {
@@ -48,12 +65,13 @@ public class TechnologiesController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Creates a new technology.
+    /// Tạo mới một công nghệ.
     /// </summary>
-    /// <param name="command">The create technology command.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The result of the creation.</returns>
+    /// <param name="command">Lệnh tạo công nghệ.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả tạo mới.</returns>
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> CreateAsync(
         [FromBody] CreateTechnologyCommand command,
         CancellationToken cancellationToken)
@@ -62,12 +80,13 @@ public class TechnologiesController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Creates a new technology category.
+    /// Tạo mới một loại công nghệ.
     /// </summary>
-    /// <param name="command">The create technology category command.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The result of the creation.</returns>
+    /// <param name="command">Lệnh tạo loại công nghệ.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả tạo mới.</returns>
     [HttpPost("categories")]
+    [Authorize]
     public async Task<IActionResult> CreateCategoryAsync(
         [FromBody] CreateTechnologyCategoryCommand command,
         CancellationToken cancellationToken)

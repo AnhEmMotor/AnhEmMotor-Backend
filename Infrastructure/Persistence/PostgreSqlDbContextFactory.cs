@@ -22,6 +22,7 @@ namespace Infrastructure.Persistence
                 .SetBasePath(basePath)
                 .AddJsonFile("appsettings.json", optional: true)
                 .AddJsonFile($"appsettings.Development.json", optional: true)
+                .AddEnvironmentVariables()
                 .Build();
             var connectionString = configuration.GetConnectionString("StringConnection");
             var builder = new DbContextOptionsBuilder<PostgreSqlDbContext>();

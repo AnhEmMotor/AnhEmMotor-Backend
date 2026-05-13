@@ -213,3 +213,4 @@ StrykerOutput
 Spec
 nul
 *.txt
+api.xml
