@@ -18,6 +18,11 @@ public class UpdateOptionValueCommandHandler(
             return Result.Failure(new Error("OptionValue.NotFound", "Không tìm thấy thuộc tính yêu cầu."));
         }
         optionValue.Name = request.Name;
+        optionValue.Description = request.Description;
+        optionValue.ImageUrl = request.ImageUrl;
+        optionValue.SeoTitle = request.SeoTitle;
+        optionValue.SeoDescription = request.SeoDescription;
+        optionValue.IsActive = request.IsActive;
         optionValue.ColorCode = request.ColorCode;
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result.Success();

@@ -15,9 +15,4 @@ public class ContactInsertRepository(ApplicationDBContext context) : IContactIns
     {
         context.ContactReplies.Add(reply);
     }
-
-    public void Update(Domain.Entities.Contact contact)
-    {
-        context.Contacts.Update(contact);
-    }
 }

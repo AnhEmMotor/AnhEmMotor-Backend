@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories.Role;
+using Application.Interfaces.Repositories.Role;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using System;

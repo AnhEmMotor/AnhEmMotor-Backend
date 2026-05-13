@@ -4,7 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.User;
-
+using Application.Interfaces.Services.HR;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -19,6 +19,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
     IOutputDeleteRepository deleteRepository,
     IProductVariantReadRepository variantRepository,
     IUserReadRepository userReadRepository,
+    ICommissionService commissionService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputForManagerCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -141,29 +142,40 @@ public sealed class UpdateOutputForManagerCommandHandler(
                 output.OutputInfos.Add(newInfo);
             }
         }
-        if (string.Compare(output.StatusId, OrderStatus.Completed) == 0 &&
-            string.IsNullOrEmpty(output.FinishedBy?.ToString()))
+        if (string.Compare(output.StatusId, OrderStatus.Completed) == 0)
         {
-            output.FinishedBy = request.CurrentUserId;
-            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken)
-                .ConfigureAwait(false);
-            if (result.IsFailure)
+            if (string.IsNullOrEmpty(output.FinishedBy?.ToString()))
             {
-                return Result<OrderDetailResponse>.Failure(result.Errors!);
+                output.FinishedBy = request.CurrentUserId;
+            }
+            var inventoryResult = await updateRepository.HandleInventoryTransactionAsync(
+                output.Id,
+                true,
+                cancellationToken)
+                .ConfigureAwait(false);
+            if (inventoryResult.IsFailure)
+            {
+                return Result<OrderDetailResponse>.Failure(inventoryResult.Errors!);
             }
         } else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
         {
-            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken)
+            var inventoryResult = await updateRepository.HandleInventoryTransactionAsync(
+                output.Id,
+                false,
+                cancellationToken)
                 .ConfigureAwait(false);
-            if (result.IsFailure)
+            if (inventoryResult.IsFailure)
             {
-                return Result<OrderDetailResponse>.Failure(result.Errors!);
+                return Result<OrderDetailResponse>.Failure(inventoryResult.Errors!);
             }
         }
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
-        ArgumentNullException.ThrowIfNull(updated);
-        return updated.Adapt<OrderDetailResponse>();
+        if (string.Compare(output.StatusId, OrderStatus.Completed) == 0)
+        {
+            await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        return Result<OrderDetailResponse>.Success(output.Adapt<OrderDetailResponse>());
     }
 }

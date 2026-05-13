@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories.Brand;
+using Application.Interfaces.Repositories.Brand;
 using Infrastructure.DBContexts;
 using BrandEntity = Domain.Entities.Brand;
 

@@ -1,12 +1,15 @@
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.LocalFile;
+using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.HR;
 using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
+using Infrastructure.BackgroundJobs;
+using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
-using Infrastructure.Repositories.LocalFile;
+using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -77,13 +80,18 @@ public static class DependencyInjection
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
-        services.AddScoped<IFileStorageService, LocalFileStorageService>();
+        services.AddScoped<IFileReadService, FileReadService>();
+        services.AddScoped<IFileInsertService, FileInsertService>();
+        services.AddScoped<IFileUpdateService, FileUpdateService>();
+        services.AddScoped<IFileDeleteService, FileDeleteService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();
         services.AddScoped<IVNPayService, VNPayService>();
         services.AddScoped<IPayOSService, PayOSService>();
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ICommissionService, CommissionService>();
+        services.AddScoped<ILeadAssignmentService, LeadAssignmentService>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient();
         services.Scan(
@@ -92,6 +100,7 @@ public static class DependencyInjection
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
+        services.AddHostedService<BannerExpiryWorker>();
         return services;
     }
 }

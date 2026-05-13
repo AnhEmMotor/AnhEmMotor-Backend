@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -27,7 +27,7 @@ public sealed class CloneInputCommandHandler(
     {
         if (!command.Id.HasValue)
         {
-            return Error.BadRequest("Id không được để trống", "Id");
+            return Error.BadRequest("Id kh�ng du?c d? tr?ng", "Id");
         }
         var originalInput = await inputReadRepository.GetByIdWithDetailsAsync(
             command.Id.Value,
@@ -36,7 +36,7 @@ public sealed class CloneInputCommandHandler(
             .ConfigureAwait(false);
         if (originalInput is null)
         {
-            return Error.NotFound($"Phiếu nhập với Id = {command.Id.Value} không tồn tại", "Id");
+            return Error.NotFound($"Phi?u nh?p v?i Id = {command.Id.Value} kh�ng t?n t?i", "Id");
         }
         var supplier = await supplierReadRepository.GetByIdAsync(
             originalInput.SupplierId ?? 0,
@@ -45,7 +45,7 @@ public sealed class CloneInputCommandHandler(
             .ConfigureAwait(false);
         if (supplier is null || string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
         {
-            return Error.BadRequest("Nhà cung cấp không tồn tại hoặc không còn hoạt động", "SupplierId");
+            return Error.BadRequest("Nh� cung c?p kh�ng t?n t?i ho?c kh�ng c�n ho?t d?ng", "SupplierId");
         }
         var productVariantIds = originalInput.InputInfos
             .Where(p => p.ProductId.HasValue)
@@ -87,7 +87,7 @@ public sealed class CloneInputCommandHandler(
         if (validProducts.Count == 0)
         {
             return Error.BadRequest(
-                "Tất cả sản phẩm trong phiếu nhập gốc đều không còn hợp lệ (đã xoá hoặc không còn bán)",
+                "T?t c? s?n ph?m trong phi?u nh?p g?c d?u kh�ng c�n h?p l? (d� xo� ho?c kh�ng c�n b�n)",
                 "Products");
         }
         var newInput = new InputEntity

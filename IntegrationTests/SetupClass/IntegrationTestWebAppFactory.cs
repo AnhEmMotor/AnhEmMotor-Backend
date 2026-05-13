@@ -1,13 +1,14 @@
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.LocalFile;
+using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.HR;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
-using Infrastructure.Repositories.LocalFile;
+using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -205,7 +206,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IIdentityService, IdentityService>();
                 services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
                 services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
-                services.AddScoped<IFileStorageService, LocalFileStorageService>();
+                services.AddScoped<IFileReadService, FileReadService>();
+                services.AddScoped<IFileInsertService, FileInsertService>();
+                services.AddScoped<IFileUpdateService, FileUpdateService>();
+                services.AddScoped<IFileDeleteService, FileDeleteService>();
                 services.AddScoped<ISievePaginator, SievePaginator>();
                 services.AddScoped<IUnitOfWork, UnitOfWork>();
                 services.AddSingleton<INotificationService, NotificationService>();
@@ -213,6 +217,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IExternalAuthService, ExternalAuthService>();
                 services.AddScoped<IVNPayService, VNPayService>();
                 services.AddScoped<IPayOSService, PayOSService>();
+                services.AddScoped<ICommissionService, CommissionService>();
                 services.Scan(
                     scan => scan
                         .FromAssemblies(typeof(DependencyInjection).Assembly)

@@ -1,6 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Domain.Constants.Order;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -66,7 +66,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             "StrongPass1@",
-            [PermissionsList.Statistical.View],
+            [Statistical.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var token = (await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -159,8 +159,8 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=5", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Count.Should().Be(5);
@@ -194,7 +194,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.First().TotalRevenue.Should().Be(2000000);
@@ -226,7 +226,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=5", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         var targetDay = DateOnly.FromDateTime(yest);
@@ -251,7 +251,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.First().TotalRevenue.Should().Be(800000);
@@ -285,7 +285,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.LastMonthRevenue.Should().Be(30000000);
@@ -307,7 +307,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.PendingOrdersCount.Should().Be(7);
@@ -319,7 +319,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.NewCustomersCount.Should().BeGreaterThanOrEqualTo(1);
@@ -353,7 +353,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             "/api/v1/Statistics/monthly-revenue-profit?months=6",
             CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Count.Should().Be(6);
@@ -389,7 +389,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             "/api/v1/Statistics/monthly-revenue-profit?months=1",
             CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.First().TotalProfit.Should().Be(1000000);
@@ -411,20 +411,13 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/order-status-counts", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<OrderStatusCountResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content?.First(x => string.Compare(x.StatusName, OrderStatus.Pending, StringComparison.Ordinal) == 0).OrderCount
-        .Should()
-        .Be(3);
-        content?.First(x => string.Compare(x.StatusName, OrderStatus.Completed, StringComparison.Ordinal) == 0)
-        .OrderCount
-        .Should()
-        .Be(10);
-        content?.First(x => string.Compare(x.StatusName, OrderStatus.Cancelled, StringComparison.Ordinal) == 0)
-        .OrderCount
-        .Should()
-        .Be(1);
+        content.Should().NotBeNull();
+        content!.First(x => string.Compare(x.StatusName, OrderStatus.Pending) == 0).OrderCount.Should().Be(3);
+        content!.First(x => string.Compare(x.StatusName, OrderStatus.Completed) == 0).OrderCount.Should().Be(10);
+        content!.First(x => string.Compare(x.StatusName, OrderStatus.Cancelled) == 0).OrderCount.Should().Be(1);
     }
 
     [Fact(DisplayName = "STAT_031 - Báo cáo sản phẩm (Multi Variants)")]
@@ -448,7 +441,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<ProductReportResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content?.First(x => x.VariantId == v1).SoldLastMonth.Should().Be(20);
@@ -475,7 +468,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<ProductReportResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Any(x => x.VariantId == vid).Should().BeTrue();
@@ -507,7 +500,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/Statistics/product-stock-price/{vid}", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<ProductStockPriceResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.UnitPrice.Should().Be(price);
@@ -529,7 +522,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/Statistics/product-stock-price/{vid}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact(DisplayName = "STAT_035 - Doanh thu nhiều OutputInfo")]
@@ -552,7 +545,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.First().TotalRevenue.Should().Be(3100000);
@@ -586,7 +579,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             "/api/v1/Statistics/monthly-revenue-profit?months=1",
             CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.First().TotalProfit.Should().Be(-500000);
@@ -612,7 +605,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             "/api/v1/Statistics/monthly-revenue-profit?months=3",
             CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         var currentMonthStart = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
@@ -630,10 +623,10 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/order-status-counts", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<OrderStatusCountResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.All(x => x.OrderCount == 0).Should().BeTrue();
     }
 
@@ -649,7 +642,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             .ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<ProductReportResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.First(x => x.VariantId == vid).SoldLastMonth.Should().Be(0);
@@ -681,7 +674,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.First().TotalRevenue.Should().Be(1000000);
@@ -713,7 +706,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/revenue-analysis", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<AdminRevenueAnalysisResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.DailyTableData.First().TotalRevenue.Should().Be(1000000);
@@ -749,7 +742,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             "/api/v1/Statistics/monthly-revenue-profit?months=1",
             CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.First().TotalRevenue.Should().Be(2000000);
@@ -800,7 +793,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Compare(x.BrandName, brand.Name) == 0);
@@ -818,7 +811,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var baselineResponse = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
-        var baselineContent = await baselineResponse.Content
+        var baselineContent = await baselineResponse!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         var initialCount = baselineContent!.PendingOrdersCount;
@@ -834,7 +827,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             .ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.PendingOrdersCount.Should().Be(initialCount + 1);
@@ -885,7 +878,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Compare(x.BrandName, brand.Name) == 0);
@@ -937,7 +930,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/product-report", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<AdminProductReportResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         var perfData = content!.ProductPerformanceTable
@@ -982,7 +975,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.NewCustomersCount.Should().BeGreaterThanOrEqualTo(1);
@@ -1003,10 +996,10 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "STAT_100 - Integration - Tính tổng nợ khách hàng quá hạn")]
@@ -1015,22 +1008,24 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "STAT_102 - Integration - Nhận diện sản phẩm tồn kho vượt mức (Overstock)")]
     public async Task GetDashboardStats_OverstockCount_ReturnsCorrectValue()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+        var response = await _client.GetAsync(
+            "/api/v1/Statistics/dashboard-stats",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "STAT_103 - Integration - Phân phối doanh thu theo từng thương hiệu")]
@@ -1039,7 +1034,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.BrandRevenueDistribution.Should().NotBeNull();
@@ -1049,11 +1044,14 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
     public async Task GetDashboardStats_TodayActivities_ReturnsData()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+        var response = await _client.GetAsync(
+            "/api/v1/Statistics/dashboard-stats",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.TodayActivities.Should().NotBeNull();
     }
 }
+

@@ -1,13 +1,25 @@
-﻿using Application.Interfaces.Repositories.Brand;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
 using BrandEntity = Domain.Entities.Brand;
 
 namespace Infrastructure.Repositories.Brand;
 
-public class BrandReadRepository(ApplicationDBContext context) : IBrandReadRepository
+public class BrandReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IBrandReadRepository
 {
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(mode);
+        return paginator.ApplyAsync<BrandEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
+
     public Task<IEnumerable<BrandEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
@@ -46,7 +58,7 @@ public class BrandReadRepository(ApplicationDBContext context) : IBrandReadRepos
         return context.GetQuery<BrandEntity>(dataFetchMode).Where(b => b.Name == name).ToListAsync(cancellationToken);
     }
 
-    public IQueryable<BrandEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    internal IQueryable<BrandEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<BrandEntity>(mode);
     }

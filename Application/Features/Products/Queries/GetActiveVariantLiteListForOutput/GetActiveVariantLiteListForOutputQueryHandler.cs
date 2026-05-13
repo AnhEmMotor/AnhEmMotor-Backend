@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Features.Products.Mappings;
 using Application.Interfaces.Repositories.PredefinedOption;

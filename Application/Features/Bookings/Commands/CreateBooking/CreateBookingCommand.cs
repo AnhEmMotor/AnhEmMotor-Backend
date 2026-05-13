@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Domain.Constants.Booking;
 using MediatR;
+using System;
 
 namespace Application.Features.Bookings.Commands.CreateBooking;
 

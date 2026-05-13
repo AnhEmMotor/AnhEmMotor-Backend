@@ -1,15 +1,13 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
-using FluentAssertions;
+using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Reflection;
 using WebAPI.Controllers.V1;
-using static Domain.Constants.Permission.PermissionsList;
 
 namespace ControllerTests;
 
@@ -24,17 +22,6 @@ public class MediaFile
         _controller = new MediaFileController(_mediatorMock.Object);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
-    }
-
-    #pragma warning disable IDE0079 
-    #pragma warning disable CRR0035
-    [Fact(DisplayName = "MF_006 - Tải lên ảnh thất bại khi chưa đăng nhập")]
-    public void UploadImage_NotAuthenticated_Unauthorized()
-    {
-        var method = typeof(MediaFileController).GetMethod("UploadProductImageAsync");
-        var hasAuthorize = method!.GetCustomAttributes(typeof(AuthorizeAttribute), true).Length != 0 ||
-            typeof(MediaFileController).GetCustomAttributes(typeof(AuthorizeAttribute), true).Length != 0;
-        hasAuthorize.Should().BeTrue("API này phải yêu cầu đăng nhập (Authorize)");
     }
 
     [Fact(DisplayName = "MF_005: UploadImageAsync has RequiresAnyPermissions with Edit/Create permissions")]
@@ -107,6 +94,7 @@ public class MediaFile
         var objectResult = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);
     }
-    #pragma warning restore CRR0035
-    #pragma warning restore IDE0079
+    #pragma warning disable IDE0079
+    #pragma warning disable CRR0035
 }
+

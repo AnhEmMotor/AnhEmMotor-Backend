@@ -78,9 +78,7 @@ public sealed class CreateProductCommandHandler(
             }
         }
         if (errors.Count > 0)
-        {
             return Result<ProductDetailForManagerResponse?>.Failure(errors);
-        }
         var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>();
         var optionNameMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         if (request.Variants?.Count > 0)
@@ -101,9 +99,7 @@ public sealed class CreateProductCommandHandler(
                         {
                             var keyName = kvp.Key?.Trim();
                             if (!string.IsNullOrWhiteSpace(keyName))
-                            {
                                 potentialOptionNames.Add(keyName);
-                            }
                         }
                     }
                 }
@@ -130,9 +126,7 @@ public sealed class CreateProductCommandHandler(
                 foreach (var kvp in predefinedOptionsDict)
                 {
                     if (potentialOptionNames.Contains(kvp.Value))
-                    {
                         searchNames.Add(kvp.Key);
-                    }
                 }
                 var existingOptions = await optionReadRepository.GetByNamesAsync(
                     searchNames,
@@ -206,23 +200,20 @@ public sealed class CreateProductCommandHandler(
                     {
                         int optionId = 0;
                         if (int.TryParse(kvp.Key, out var parsedId))
-                        {
                             optionId = parsedId;
-                        } else
+                        else
                         {
                             var keyName = kvp.Key?.Trim();
                             if (!string.IsNullOrWhiteSpace(keyName) &&
                                 optionNameMap.TryGetValue(keyName, out var mappedId))
-                            {
                                 optionId = mappedId;
-                            }
                         }
                         if (optionId > 0)
                         {
                             var valueName = kvp.Value?.Trim();
                             if (!string.IsNullOrWhiteSpace(valueName))
                             {
-                                if (!allOptionValues.TryGetValue(optionId, out HashSet<string>? value))
+                                if (!allOptionValues.TryGetValue(optionId, out var value))
                                 {
                                     value = [];
                                     allOptionValues[optionId] = value;
@@ -247,9 +238,7 @@ public sealed class CreateProductCommandHandler(
                             var name = names[i];
                             var code = i < codes.Count ? codes[i] : null;
                             if (!string.IsNullOrWhiteSpace(name) && !colorNamesWithCodes.ContainsKey(name))
-                            {
                                 colorNamesWithCodes[name] = code;
-                            }
                         }
                     }
                 }
@@ -260,10 +249,8 @@ public sealed class CreateProductCommandHandler(
                 var valueNames = optionKvp.Value;
                 var option = await optionReadRepository.GetByIdAsync(optionId, cancellationToken).ConfigureAwait(false);
                 if (option == null)
-                {
                     return Result<ProductDetailForManagerResponse?>.Failure(
                         Error.NotFound($"Thuộc tính với ID {optionId} không tồn tại.", "Variants.OptionValues"));
-                }
                 var valueMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
                 foreach (var valueName in valueNames)
                 {
@@ -287,9 +274,7 @@ public sealed class CreateProductCommandHandler(
                     {
                         var newValue = new OptionValueEntity { OptionId = optionId, Name = valueName };
                         if (colorNamesWithCodes.TryGetValue(valueName, out var code))
-                        {
                             newValue.ColorCode = code;
-                        }
                         optionValueInsertRepository.Add(newValue);
                         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                         valueMap[valueName] = newValue.Id;
@@ -303,10 +288,11 @@ public sealed class CreateProductCommandHandler(
             Name = request.Name?.Trim(),
             CategoryId = request.CategoryId,
             BrandId = request.BrandId,
+            VehicleTypeId = request.VehicleTypeId,
             Description = request.Description?.Trim(),
             Weight = request.Weight,
             Dimensions = request.Dimensions?.Trim(),
-            Wheelbase = request.Wheelbase?.Trim(),
+            Wheelbase = request.Wheelbase,
             SeatHeight = request.SeatHeight,
             GroundClearance = request.GroundClearance,
             FuelCapacity = request.FuelCapacity,
@@ -323,6 +309,24 @@ public sealed class CreateProductCommandHandler(
             Displacement = request.Displacement,
             BoreStroke = request.BoreStroke?.Trim(),
             CompressionRatio = request.CompressionRatio?.Trim(),
+            FuelSystem = request.FuelSystem?.Trim(),
+            FrameType = request.FrameType?.Trim(),
+            FrontTireSize = request.FrontTireSize?.Trim(),
+            RearTireSize = request.RearTireSize?.Trim(),
+            FrontBrake = request.FrontBrake?.Trim(),
+            RearBrake = request.RearBrake?.Trim(),
+            BatteryType = request.BatteryType?.Trim(),
+            LightingSystem = request.LightingSystem?.Trim(),
+            DashboardType = request.DashboardType?.Trim(),
+            Material = request.Material?.Trim(),
+            Origin = request.Origin?.Trim(),
+            WarrantyPeriod = request.WarrantyPeriod?.Trim(),
+            Unit = request.Unit?.Trim(),
+            StdDot = request.StdDot,
+            StdEce = request.StdEce,
+            StdSnell = request.StdSnell,
+            StdJis = request.StdJis,
+            OtherStandards = request.OtherStandards?.Trim(),
             ShortDescription = request.ShortDescription?.Trim(),
             MetaTitle = request.MetaTitle?.Trim(),
             MetaDescription = request.MetaDescription?.Trim(),
@@ -343,15 +347,26 @@ public sealed class CreateProductCommandHandler(
                     ColorName = variantReq.ColorName?.Trim(),
                     ColorCode = variantReq.ColorCode?.Trim(),
                     SKU = variantReq.SKU?.Trim(),
+                    Weight = variantReq.Weight,
+                    Dimensions = variantReq.Dimensions?.Trim(),
+                    Wheelbase = variantReq.Wheelbase,
+                    SeatHeight = variantReq.SeatHeight,
+                    GroundClearance = variantReq.GroundClearance,
+                    FuelCapacity = variantReq.FuelCapacity,
+                    TireSize = variantReq.TireSize?.Trim(),
+                    FrontBrake = variantReq.FrontBrake?.Trim(),
+                    RearBrake = variantReq.RearBrake?.Trim(),
+                    FrontSuspension = variantReq.FrontSuspension?.Trim(),
+                    RearSuspension = variantReq.RearSuspension?.Trim(),
+                    EngineType = variantReq.EngineType?.Trim(),
+                    StockQuantity = variantReq.StockQuantity,
                     ProductCollectionPhotos = [],
                     VariantOptionValues = []
                 };
                 if (variantReq.PhotoCollection?.Count > 0)
                 {
                     foreach (var photoUrl in variantReq.PhotoCollection.Where(p => !string.IsNullOrWhiteSpace(p)))
-                    {
                         variant.ProductCollectionPhotos.Add(new ProductCollectionPhoto { ImageUrl = photoUrl.Trim() });
-                    }
                 }
                 if (variantReq.OptionValues?.Count > 0)
                 {
@@ -415,7 +430,27 @@ public sealed class CreateProductCommandHandler(
                         }
                     }
                 }
+                variant.Weight = variantReq.Weight;
+                variant.Dimensions = variantReq.Dimensions?.Trim();
+                variant.Wheelbase = variantReq.Wheelbase;
+                variant.SeatHeight = variantReq.SeatHeight;
+                variant.GroundClearance = variantReq.GroundClearance;
+                variant.FuelCapacity = variantReq.FuelCapacity;
+                variant.TireSize = variantReq.TireSize?.Trim();
+                variant.FrontBrake = variantReq.FrontBrake?.Trim();
+                variant.RearBrake = variantReq.RearBrake?.Trim();
+                variant.FrontSuspension = variantReq.FrontSuspension?.Trim();
+                variant.RearSuspension = variantReq.RearSuspension?.Trim();
+                variant.EngineType = variantReq.EngineType?.Trim();
+                variant.StockQuantity = variantReq.StockQuantity;
                 product.ProductVariants.Add(variant);
+            }
+        }
+        if (request.CompatibleVehicleModelIds?.Count > 0)
+        {
+            foreach (var vehicleId in request.CompatibleVehicleModelIds.Distinct())
+            {
+                product.CompatibleWith.Add(new ProductCompatibility { CompatibleVehicleModelId = vehicleId });
             }
         }
         if (!string.IsNullOrWhiteSpace(request.Highlights))
@@ -426,7 +461,7 @@ public sealed class CreateProductCommandHandler(
                 if (techs != null)
                 {
                     var order = 1;
-                    foreach (var t in techs)
+                    foreach (var t in techs.GroupBy(x => x.TechnologyId).Select(g => g.First()))
                     {
                         product.ProductTechnologies
                             .Add(
@@ -440,12 +475,15 @@ public sealed class CreateProductCommandHandler(
                                 });
                     }
                 }
-            } catch (Exception)
+            } catch
             {
             }
         }
         productInsertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return Result<ProductDetailForManagerResponse?>.Success(product.Adapt<ProductDetailForManagerResponse>());
+        var response = product.Adapt<ProductDetailForManagerResponse>();
+        if (response != null)
+            response.CompatibleVehicleModelIds = product.CompatibleWith.Select(c => c.CompatibleVehicleModelId).ToList();
+        return Result<ProductDetailForManagerResponse?>.Success(response);
     }
 }

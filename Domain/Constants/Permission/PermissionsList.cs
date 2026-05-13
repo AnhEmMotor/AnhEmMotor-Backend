@@ -1,136 +1,9 @@
+using Domain.Constants.Permission.Permissions;
 
 namespace Domain.Constants.Permission;
 
 public static class PermissionsList
 {
-    public static class Brands
-    {
-        public const string View = "Permissions.Brands.View";
-        public const string Create = "Permissions.Brands.Create";
-        public const string Edit = "Permissions.Brands.Edit";
-        public const string Delete = "Permissions.Brands.Delete";
-    }
-
-    public static class Products
-    {
-        public const string View = "Permissions.Products.View";
-        public const string Create = "Permissions.Products.Create";
-        public const string Edit = "Permissions.Products.Edit";
-        public const string Delete = "Permissions.Products.Delete";
-        public const string EditPrice = "Permissions.Products.EditPrice";
-        public const string ChangeStatus = "Permissions.Products.ChangeStatus";
-    }
-
-    public static class ProductCategories
-    {
-        public const string View = "Permissions.ProductCategories.View";
-        public const string Create = "Permissions.ProductCategories.Create";
-        public const string Edit = "Permissions.ProductCategories.Edit";
-        public const string Delete = "Permissions.ProductCategories.Delete";
-    }
-
-    public static class Suppliers
-    {
-        public const string View = "Permissions.Suppliers.View";
-        public const string Create = "Permissions.Suppliers.Create";
-        public const string Edit = "Permissions.Suppliers.Edit";
-        public const string Delete = "Permissions.Suppliers.Delete";
-    }
-
-    public static class Inputs
-    {
-        public const string View = "Permissions.Inputs.View";
-        public const string Create = "Permissions.Inputs.Create";
-        public const string Edit = "Permissions.Inputs.Edit";
-        public const string Delete = "Permissions.Inputs.Delete";
-        public const string ChangeStatus = "Permissions.Inputs.ChangeStatus";
-    }
-
-    public static class Outputs
-    {
-        public const string View = "Permissions.Outputs.View";
-        public const string Create = "Permissions.Outputs.Create";
-        public const string Edit = "Permissions.Outputs.Edit";
-        public const string Delete = "Permissions.Outputs.Delete";
-        public const string ChangeStatus = "Permissions.Outputs.ChangeStatus";
-    }
-
-    public static class Files
-    {
-        public const string View = "Permissions.Files.View";
-        public const string Upload = "Permissions.Files.Upload";
-        public const string Delete = "Permissions.Files.Delete";
-    }
-
-    public static class Settings
-    {
-        public const string View = "Permissions.Settings.View";
-        public const string Edit = "Permissions.Settings.Edit";
-    }
-
-    public static class Statistical
-    {
-        public const string View = "Permissions.Statistical.View";
-        public const string Export = "Permissions.Statistical.Export";
-    }
-
-    public static class Roles
-    {
-        public const string View = "Permissions.Roles.View";
-        public const string Create = "Permissions.Roles.Create";
-        public const string Edit = "Permissions.Roles.Edit";
-        public const string Delete = "Permissions.Roles.Delete";
-    }
-
-    public static class Users
-    {
-        public const string View = "Permissions.Users.View";
-        public const string Create = "Permissions.Users.Create";
-        public const string Edit = "Permissions.Users.Edit";
-        public const string Delete = "Permissions.Users.Delete";
-        public const string AssignRoles = "Permissions.Users.AssignRoles";
-        public const string ChangePassword = "Permissions.Users.ChangePassword";
-    }
-
-    public static class News
-    {
-        public const string View = "Permissions.News.View";
-        public const string Create = "Permissions.News.Create";
-        public const string Edit = "Permissions.News.Edit";
-        public const string Delete = "Permissions.News.Delete";
-    }
-
-    public static class Banners
-    {
-        public const string View = "Permissions.Banners.View";
-        public const string Create = "Permissions.Banners.Create";
-        public const string Edit = "Permissions.Banners.Edit";
-        public const string Delete = "Permissions.Banners.Delete";
-    }
-
-    public static class Contacts
-    {
-        public const string View = "Permissions.Contacts.View";
-        public const string Reply = "Permissions.Contacts.Reply";
-        public const string EditNote = "Permissions.Contacts.EditNote";
-        public const string Delete = "Permissions.Contacts.Delete";
-    }
-
-    public static class Bookings
-    {
-        public const string View = "Permissions.Bookings.View";
-        public const string Confirm = "Permissions.Bookings.Confirm";
-        public const string Delete = "Permissions.Bookings.Delete";
-    }
-
-    public static class Leads
-    {
-        public const string View = "Permissions.Leads.View";
-        public const string Create = "Permissions.Leads.Create";
-        public const string Edit = "Permissions.Leads.Edit";
-        public const string Delete = "Permissions.Leads.Delete";
-    }
-
     private static readonly Dictionary<string, PermissionMetadata> PermissionMetadataMap = new()
     {
         { Brands.View, new PermissionMetadata("View Brands", "Xem danh sách thương hiệu") },
@@ -218,6 +91,15 @@ public static class PermissionsList
         { Leads.Create, new PermissionMetadata("Create Lead", "Tạo khách hàng tiềm năng") },
         { Leads.Edit, new PermissionMetadata("Edit Lead", "Chỉnh sửa khách hàng tiềm năng") },
         { Leads.Delete, new PermissionMetadata("Delete Lead", "Xóa khách hàng tiềm năng") },
+
+        { Permissions.HR.View, new PermissionMetadata("View HR", "Xem danh sách nhân sự") },
+        { Permissions.HR.Create, new PermissionMetadata("Create Employee", "Thêm nhân viên mới") },
+        { Permissions.HR.Edit, new PermissionMetadata("Edit Employee", "Chỉnh sửa thông tin nhân viên") },
+        { Permissions.HR.Delete, new PermissionMetadata("Delete Employee", "Xóa nhân viên") },
+
+        { Payroll.View, new PermissionMetadata("View Payroll", "Xem Bảng Lương") },
+        { Payroll.Configure, new PermissionMetadata("Configure Payroll", "Cấu hình chính sách hoa hồng") },
+        { Payroll.Approve, new PermissionMetadata("Approve Payroll", "Duyệt chi lương") },
     };
 
     public static PermissionMetadata? GetMetadata(string permissionName)
@@ -260,6 +142,8 @@ public static class PermissionsList
             "CRM & Connect",
             [Contacts.View, Contacts.Reply, Contacts.EditNote, Contacts.Delete, Bookings.View, Bookings.Confirm, Bookings.Delete, Leads.View, Leads.Create, Leads.Edit, Leads.Delete]
         },
+        { "Nhân sự", [Permissions.HR.View, Permissions.HR.Create, Permissions.HR.Edit, Permissions.HR.Delete] },
+        { "Lương & Hoa hồng", [Payroll.View, Payroll.Configure, Payroll.Approve] },
     };
 
     public static readonly Dictionary<string, List<string>> Conflicts = new() { };
@@ -329,6 +213,13 @@ public static class PermissionsList
         { Leads.Create, [Leads.View] },
         { Leads.Edit, [Leads.View] },
         { Leads.Delete, [Leads.View] },
+
+        { Permissions.HR.Create, [Permissions.HR.View] },
+        { Permissions.HR.Edit, [Permissions.HR.View] },
+        { Permissions.HR.Delete, [Permissions.HR.View] },
+
+        { Payroll.Configure, [Payroll.View] },
+        { Payroll.Approve, [Payroll.View] },
     };
 
     public static (bool IsValid, string? ErrorMessage) ValidateRules(IEnumerable<string> permissions)
@@ -358,3 +249,4 @@ public static class PermissionsList
         return (true, null);
     }
 }
+

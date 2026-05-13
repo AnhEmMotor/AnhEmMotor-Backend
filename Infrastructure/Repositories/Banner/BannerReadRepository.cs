@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.Banner;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +20,20 @@ namespace Infrastructure.Repositories.Banner
                     b => b.IsActive &&
                         (!b.StartDate.HasValue || b.StartDate <= now) &&
                         (!b.EndDate.HasValue || b.EndDate >= now))
-                .OrderBy(b => b.DisplayOrder)
+                .OrderByDescending(b => b.Priority)
+                .ToListAsync(cancellationToken);
+        }
+
+        public Task<List<Domain.Entities.Banner>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return context.Banners.OrderByDescending(b => b.Priority).ToListAsync(cancellationToken);
+        }
+
+        public Task<List<BannerAuditLog>> GetLogsByBannerIdAsync(int bannerId, CancellationToken cancellationToken)
+        {
+            return context.BannerAuditLogs
+                .Where(l => l.BannerId == bannerId)
+                .OrderByDescending(l => l.CreatedAt)
                 .ToListAsync(cancellationToken);
         }
     }

@@ -1,11 +1,18 @@
-﻿using Domain.Constants;
+using Domain.Constants;
+using Domain.Primitives;
+using Sieve.Models;
+using System.Linq.Expressions;
 using OptionEntity = Domain.Entities.Option;
 
 namespace Application.Interfaces.Repositories.Option;
 
 public interface IOptionReadRepository
 {
-    public IQueryable<OptionEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<OptionEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default);
 
     public Task<OptionEntity?> GetByIdAsync(int id, CancellationToken cancellationToken);
 

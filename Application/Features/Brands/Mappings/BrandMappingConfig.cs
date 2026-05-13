@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Brand.Responses;
+using Application.ApiContracts.Brand.Responses;
 using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.UpdateBrand;
 using Mapster;

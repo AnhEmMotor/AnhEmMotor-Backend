@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Permission.Responses;
+using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
@@ -8,7 +8,6 @@ using Domain.Constants.Permission;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using System.Reflection;
 
 namespace Application.Features.Permissions.Commands.UpdateRole;
 
@@ -54,13 +53,7 @@ public class UpdateRoleCommandHandler(
         }
         if (request.Permissions != null)
         {
-            var validSystemPermissions = typeof(PermissionsList)
-                .GetNestedTypes()
-                .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-                .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
-                .Select(fi => fi.GetRawConstantValue() as string)
-                .Where(p => p is not null)
-                .ToHashSet();
+            var validSystemPermissions = PermissionsList.GetMetadataList().Select(m => m.Id).ToHashSet();
             var invalidPermissions = request.Permissions.Where(p => !validSystemPermissions.Contains(p)).ToList();
             if (invalidPermissions.Count != 0)
             {

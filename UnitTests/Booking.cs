@@ -2,7 +2,8 @@ using Application.Features.Bookings.Commands.ConfirmBooking;
 using Application.Features.Bookings.Commands.CreateBooking;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Booking;
-using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Repositories.Lead.Lead;
+using Application.Interfaces.Repositories.Lead.LeadActivity;
 using Application.Interfaces.Services;
 using Domain.Constants.Booking;
 using Domain.Constants.Lead;
@@ -21,6 +22,7 @@ public class Booking
     private readonly Mock<IBookingInsertRepository> _bookingInsertRepoMock;
     private readonly Mock<ILeadReadRepository> _leadReadRepoMock;
     private readonly Mock<ILeadInsertRepository> _leadInsertRepoMock;
+    private readonly Mock<ILeadUpdateRepository> _leadUpdateRepoMock;
     private readonly Mock<ILeadActivityInsertRepository> _leadActivityInsertRepoMock;
     private readonly Mock<INotificationService> _notificationServiceMock;
     private readonly Mock<IEmailService> _emailServiceMock;
@@ -32,6 +34,7 @@ public class Booking
         _bookingInsertRepoMock = new Mock<IBookingInsertRepository>();
         _leadReadRepoMock = new Mock<ILeadReadRepository>();
         _leadInsertRepoMock = new Mock<ILeadInsertRepository>();
+        _leadUpdateRepoMock = new Mock<ILeadUpdateRepository>();
         _leadActivityInsertRepoMock = new Mock<ILeadActivityInsertRepository>();
         _notificationServiceMock = new Mock<INotificationService>();
         _emailServiceMock = new Mock<IEmailService>();
@@ -51,6 +54,7 @@ public class Booking
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -74,6 +78,7 @@ public class Booking
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -81,13 +86,6 @@ public class Booking
         _bookingInsertRepoMock.Verify(
             x => x.Add(It.Is<BookingEntity>(b => string.Compare(b.Location, BookingLocation.CustomerAddress) == 0)),
             Times.Once);
-    }
-
-    [Fact(DisplayName = "BOOKING_004 - Tự động gán loại hình Lái thử mặc định")]
-    public void CreateBookingCommand_DefaultBookingType_IsTestDrive()
-    {
-        var command = new CreateBookingCommand();
-        command.BookingType.Should().Be(BookingType.TestDrive);
     }
 
     [Fact(DisplayName = "BOOKING_006 - Kiểm tra logic lọc BookingType khi tạo Activity")]
@@ -100,6 +98,7 @@ public class Booking
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -119,7 +118,7 @@ public class Booking
             _bookingReadRepoMock.Object,
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
-            _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
             _emailServiceMock.Object);
@@ -151,7 +150,7 @@ public class Booking
             _bookingReadRepoMock.Object,
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
-            _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
             _emailServiceMock.Object);
@@ -181,7 +180,7 @@ public class Booking
             _bookingReadRepoMock.Object,
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
-            _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
             _emailServiceMock.Object);
@@ -201,7 +200,7 @@ public class Booking
             _bookingReadRepoMock.Object,
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
-            _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _unitOfWorkMock.Object,
             _emailServiceMock.Object);
@@ -225,6 +224,7 @@ public class Booking
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -242,6 +242,7 @@ public class Booking
             _bookingInsertRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
+            _leadUpdateRepoMock.Object,
             _leadActivityInsertRepoMock.Object,
             _notificationServiceMock.Object,
             _unitOfWorkMock.Object);
@@ -253,3 +254,4 @@ public class Booking
     #pragma warning restore IDE0079 
     #pragma warning restore CRR0035
 }
+

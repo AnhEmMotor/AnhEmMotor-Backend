@@ -13,8 +13,31 @@ namespace Domain.Entities
         [Column("Name")]
         public string? Name { get; set; }
 
+        [Column("Slug")]
+        public string? Slug { get; set; }
+
+        [Column("ImageUrl")]
+        public string? ImageUrl { get; set; }
+
+        [Column("IsActive")]
+        public bool IsActive { get; set; } = true;
+
+        [Column("SortOrder")]
+        public int SortOrder { get; set; }
+
         [Column("Description")]
         public string? Description { get; set; }
+
+        [Column("CategoryGroup")]
+        public string? CategoryGroup { get; set; }
+
+        [Column("ParentId")]
+        public int? ParentId { get; set; }
+
+        [ForeignKey("ParentId")]
+        public ProductCategory? Parent { get; set; }
+
+        public ICollection<ProductCategory> SubCategories { get; set; } = [];
 
         [Column("MaxPurchaseQuantity")]
         public int? MaxPurchaseQuantity { get; set; }

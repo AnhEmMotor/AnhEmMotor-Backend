@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.DeleteManyInputs;
@@ -7,7 +7,7 @@ using Application.Features.Inputs.Commands.UpdateInput;
 using Application.Features.Inputs.Commands.UpdateInputNotes;
 using Application.Features.Inputs.Commands.UpdateInputStatus;
 using Application.Features.Inputs.Commands.UpdateManyInputStatus;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
@@ -54,7 +54,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "INPUT_001 - Tạo phiếu nhập hàng thành công (Happy Path)")]
+    [Fact(DisplayName = "INPUT_001 - T?o phi?u nh?p hàng thành công (Happy Path)")]
     public async Task CreateInput_Success_ReturnsOk()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -65,7 +65,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -135,7 +135,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var request = new CreateInputCommand
         {
-            Notes = "Nhập hàng tháng 1",
+            Notes = "Nh?p hàng tháng 1",
             SupplierId = supplier.Id,
             Products = [new CreateInputInfoRequest { ProductId = variant.Id, Count = 10, InputPrice = 100000 }]
         };
@@ -145,18 +145,18 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         };
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        if (response.StatusCode == HttpStatusCode.InternalServerError)
+        if (response!.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content
+            var errorContent = await response!.Content
                 .ReadAsStringAsync(TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var content = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Id.Should().NotBeNull();
         content.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
         content.Products.Should().HaveCount(1);
@@ -168,7 +168,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
     }
 
-    [Fact(DisplayName = "INPUT_002 - Tạo phiếu nhập với nhiều sản phẩm và tính toán chính xác tổng tiền")]
+    [Fact(DisplayName = "INPUT_002 - T?o phi?u nh?p v?i nhi?u s?n ph?m và tính toán chính xác t?ng ti?n")]
     public async Task CreateInput_MultipleProducts_CalculatesTotalCorrectly()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -179,7 +179,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -259,16 +259,16 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         };
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var content = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         decimal expectedTotal = (5 * 123456m) + (3 * 987654m);
         content!.TotalPayable.Should().Be((long)expectedTotal);
     }
 
-    [Fact(DisplayName = "INPUT_004 - Tạo phiếu nhập với SupplierId không tồn tại")]
+    [Fact(DisplayName = "INPUT_004 - T?o phi?u nh?p v?i SupplierId không t?n t?i")]
     public async Task CreateInput_NonExistentSupplier_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -279,7 +279,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -302,10 +302,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         };
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_005 - Tạo phiếu nhập với ProductId không tồn tại")]
+    [Fact(DisplayName = "INPUT_005 - T?o phi?u nh?p v?i ProductId không t?n t?i")]
     public async Task CreateInput_NonExistentProduct_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -316,7 +316,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -339,10 +339,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         };
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_006 - Tạo phiếu nhập với Product đã bị xóa hoặc không còn bán")]
+    [Fact(DisplayName = "INPUT_006 - T?o phi?u nh?p v?i Product dã b? xóa ho?c không còn bán")]
     public async Task CreateInput_DeletedProduct_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -353,7 +353,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -425,10 +425,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         };
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_012 - Tạo phiếu nhập với Notes chứa script XSS")]
+    [Fact(DisplayName = "INPUT_012 - T?o phi?u nh?p v?i Notes ch?a script XSS")]
     public async Task CreateInput_XSSInNotes_SanitizesInput()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -439,7 +439,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -505,15 +505,15 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         };
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var content = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var input = db.InputReceipts.FirstOrDefault(i => i.Id == content!.Id);
         input!.Notes.Should().NotContain("<script>");
     }
 
-    [Fact(DisplayName = "INPUT_016 - Lấy danh sách phiếu nhập có phân trang")]
+    [Fact(DisplayName = "INPUT_016 - L?y danh sách phi?u nh?p có phân trang")]
     public async Task GetInputs_WithPagination_ReturnsCorrectPage()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -524,7 +524,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -538,16 +538,16 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?page=1&pageSize=10");
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<InputListResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCountLessThanOrEqualTo(10);
         content.PageNumber.Should().Be(1);
     }
 
-    [Fact(DisplayName = "INPUT_017 - Lấy danh sách phiếu nhập với filter theo StatusId")]
+    [Fact(DisplayName = "INPUT_017 - L?y danh sách phi?u nh?p v?i filter theo StatusId")]
     public async Task GetInputs_FilterByStatus_ReturnsFilteredResults()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -558,7 +558,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -574,17 +574,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             "/api/v1/InventoryReceipts?filters=StatusId==working");
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<InputListResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items
             .Should()
             .OnlyContain(i => string.Compare(i.StatusId, Domain.Constants.Input.InputStatus.Working) == 0);
     }
 
-    [Fact(DisplayName = "INPUT_018 - Lấy danh sách phiếu nhập với sort theo InputDate descending")]
+    [Fact(DisplayName = "INPUT_018 - L?y danh sách phi?u nh?p v?i sort theo InputDate descending")]
     public async Task GetInputs_SortByInputDateDesc_ReturnsSortedResults()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -595,7 +595,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -657,25 +657,25 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?sorts=-InputDate");
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        if (response.StatusCode == HttpStatusCode.InternalServerError)
+        if (response!.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content
+            var errorContent = await response!.Content
                 .ReadAsStringAsync(TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<InputListResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         var createdIds = new List<int?> { input1.Id, input2.Id, input3.Id };
         var items = content!.Items?.Where(i => createdIds.Contains(i.Id)).ToList();
         items.Should().HaveCount(3);
         items.Should().BeInDescendingOrder(i => i.CreatedAt);
     }
 
-    [Fact(DisplayName = "INPUT_020 - Lấy chi tiết phiếu nhập thành công")]
+    [Fact(DisplayName = "INPUT_020 - L?y chi ti?t phi?u nh?p thành công")]
     public async Task GetInputById_ExistingInput_ReturnsCompleteDetails()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -686,7 +686,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -763,11 +763,11 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/InventoryReceipts/{input.Id}");
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Id.Should().Be(input.Id);
         content.StatusId.Should().Be(inputStatusId);
         content.Products.Should().NotBeNull();
@@ -776,7 +776,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content.TotalPayable.Should().Be(250000);
     }
 
-    [Fact(DisplayName = "INPUT_021 - Lấy chi tiết phiếu nhập không tồn tại")]
+    [Fact(DisplayName = "INPUT_021 - L?y chi ti?t phi?u nh?p không t?n t?i")]
     public async Task GetInputById_NonExistentInput_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -787,7 +787,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -802,10 +802,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/InventoryReceipts/{inputId}");
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "INPUT_023 - Cập nhật phiếu nhập thành công ở trạng thái working")]
+    [Fact(DisplayName = "INPUT_023 - C?p nh?t phi?u nh?p thành công ? tr?ng thái working")]
     public async Task UpdateInput_WorkingStatus_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -816,7 +816,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Edit],
+            [Inputs.Edit],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -919,8 +919,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         requestUpdateMessage.Content = JsonContent.Create(updateRequest);
         var response = await _client.SendAsync(requestUpdateMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         content!.Notes.Should().Be("Updated");
@@ -928,7 +928,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content.TotalPayable.Should().Be(4000000);
     }
 
-    [Fact(DisplayName = "INPUT_024 - Cập nhật phiếu nhập ở trạng thái finished (không cho phép)")]
+    [Fact(DisplayName = "INPUT_024 - C?p nh?t phi?u nh?p ? tr?ng thái finished (không cho phép)")]
     public async Task UpdateInput_FinishedStatus_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -939,7 +939,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Edit],
+            [Inputs.Edit],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1037,10 +1037,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         requestUpdateMessage.Content = JsonContent.Create(updateRequest);
         var response = await _client.SendAsync(requestUpdateMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_025 - Cập nhật phiếu nhập ở trạng thái cancelled (không cho phép)")]
+    [Fact(DisplayName = "INPUT_025 - C?p nh?t phi?u nh?p ? tr?ng thái cancelled (không cho phép)")]
     public async Task UpdateInput_CancelledStatus_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1051,7 +1051,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Edit],
+            [Inputs.Edit],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1149,10 +1149,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         requestUpdateMessage.Content = JsonContent.Create(updateRequest);
         var response = await _client.SendAsync(requestUpdateMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_028 - Cập nhật trạng thái phiếu nhập từ working sang finished")]
+    [Fact(DisplayName = "INPUT_028 - C?p nh?t tr?ng thái phi?u nh?p t? working sang finished")]
     public async Task UpdateInputStatus_WorkingToFinished_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1163,7 +1163,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.ChangeStatus],
+            [Inputs.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1248,8 +1248,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             statusRequest,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         content!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Finish);
@@ -1260,7 +1260,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input.ConfirmedBy.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_029 - Cập nhật trạng thái phiếu nhập từ working sang cancelled")]
+    [Fact(DisplayName = "INPUT_029 - C?p nh?t tr?ng thái phi?u nh?p t? working sang cancelled")]
     public async Task UpdateInputStatus_WorkingToCancelled_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1271,7 +1271,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.ChangeStatus],
+            [Inputs.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1356,14 +1356,14 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             statusRequest,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         content!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Cancel);
     }
 
-    [Fact(DisplayName = "INPUT_032 - Cập nhật trạng thái nhiều phiếu nhập cùng lúc")]
+    [Fact(DisplayName = "INPUT_032 - C?p nh?t tr?ng thái nhi?u phi?u nh?p cùng lúc")]
     public async Task UpdateManyInputStatus_MultipleInputs_UpdatesAllSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1374,7 +1374,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.ChangeStatus],
+            [Inputs.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1468,7 +1468,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             statusRequest,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var checkScope = _factory.Services.CreateScope();
         var checkDb = checkScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         foreach (var id in ids)
@@ -1478,7 +1478,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         }
     }
 
-    [Fact(DisplayName = "INPUT_033 - Cập nhật trạng thái nhiều phiếu nhập với một số Id không tồn tại")]
+    [Fact(DisplayName = "INPUT_033 - C?p nh?t tr?ng thái nhi?u phi?u nh?p v?i m?t s? Id không t?n t?i")]
     public async Task UpdateManyInputStatus_SomeNonExistent_HandlesPartially()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1489,7 +1489,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.ChangeStatus],
+            [Inputs.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1578,12 +1578,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             statusRequest,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode
+        response!.StatusCode
             .Should()
             .BeOneOf(HttpStatusCode.MultiStatus, HttpStatusCode.BadRequest, HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "INPUT_034 - Xóa phiếu nhập thành công ở trạng thái working")]
+    [Fact(DisplayName = "INPUT_034 - Xóa phi?u nh?p thành công ? tr?ng thái working")]
     public async Task DeleteInput_WorkingStatus_DeletesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1594,7 +1594,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Delete],
+            [Inputs.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1672,14 +1672,14 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             $"/api/v1/InventoryReceipts/{inputReceipt.Id}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
         using var checkScope = _factory.Services.CreateScope();
         var checkDb = checkScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var input = checkDb.InputReceipts.IgnoreQueryFilters().FirstOrDefault(i => i.Id == inputReceipt.Id);
         input!.DeletedAt.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_038 - Xóa nhiều phiếu nhập cùng lúc")]
+    [Fact(DisplayName = "INPUT_038 - Xóa nhi?u phi?u nh?p cùng lúc")]
     public async Task DeleteManyInputs_MultipleInputs_DeletesAllSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1690,7 +1690,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Delete],
+            [Inputs.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1779,10 +1779,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             },
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
 
-    [Fact(DisplayName = "INPUT_039 - Khôi phục phiếu nhập đã xóa thành công")]
+    [Fact(DisplayName = "INPUT_039 - Khôi ph?c phi?u nh?p dã xóa thành công")]
     public async Task RestoreInput_DeletedInput_RestoresSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1793,7 +1793,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Delete],
+            [Inputs.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1873,14 +1873,14 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             null,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var checkScope = _factory.Services.CreateScope();
         var checkDb = checkScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var input = checkDb.InputReceipts.FirstOrDefault(i => i.Id == inputReceipt.Id);
         input!.DeletedAt.Should().BeNull();
     }
 
-    [Fact(DisplayName = "INPUT_041 - Khôi phục nhiều phiếu nhập đã xóa cùng lúc")]
+    [Fact(DisplayName = "INPUT_041 - Khôi ph?c nhi?u phi?u nh?p dã xóa cùng lúc")]
     public async Task RestoreManyInputs_MultipleDeletedInputs_RestoresAllSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1891,7 +1891,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Delete],
+            [Inputs.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1974,7 +1974,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var restoreRequest = new RestoreManyInputsCommand { Ids = ids };
         var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts/restore", restoreRequest)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var checkScope = _factory.Services.CreateScope();
         var checkDb = checkScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         foreach (var id in ids)
@@ -1984,7 +1984,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         }
     }
 
-    [Fact(DisplayName = "INPUT_042 - Clone phiếu nhập thành công")]
+    [Fact(DisplayName = "INPUT_042 - Clone phi?u nh?p thành công")]
     public async Task CloneInput_ValidInput_CreatesNewInput()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1995,7 +1995,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2074,8 +2074,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             null,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
-        var clonedInput = await response.Content
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
+        var clonedInput = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         clonedInput!.Id.Should().NotBe(createdInput.Id);
@@ -2083,7 +2083,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         clonedInput.SupplierId.Should().Be(createdInput.SupplierId);
     }
 
-    [Fact(DisplayName = "INPUT_043 - Clone phiếu nhập với sản phẩm đã bị xóa")]
+    [Fact(DisplayName = "INPUT_043 - Clone phi?u nh?p v?i s?n ph?m dã b? xóa")]
     public async Task CloneInput_WithDeletedProduct_ClonesOnlyValidProducts()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2094,7 +2094,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2197,15 +2197,15 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             null,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
-        var clonedInput = await response.Content
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
+        var clonedInput = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         clonedInput!.Products.Should().HaveCount(1);
         clonedInput.Products[0].ProductId.Should().Be(variant1.Id);
     }
 
-    [Fact(DisplayName = "INPUT_046 - Lấy danh sách phiếu nhập theo SupplierId")]
+    [Fact(DisplayName = "INPUT_046 - L?y danh sách phi?u nh?p theo SupplierId")]
     public async Task GetInputsBySupplierId_ValidSupplierId_ReturnsFilteredInputs()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2216,7 +2216,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View, PermissionsList.Inputs.View],
+            [Suppliers.View, Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2277,15 +2277,15 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             $"/api/v1/InventoryReceipts/by-supplier/{supplierId}?page=1&pageSize=10",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<InputListResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().OnlyContain(i => i.SupplierId == supplierId);
     }
 
-    [Fact(DisplayName = "INPUT_047 - Lấy danh sách phiếu nhập đã xóa")]
+    [Fact(DisplayName = "INPUT_047 - L?y danh sách phi?u nh?p dã xóa")]
     public async Task GetDeletedInputs_ReturnsOnlyDeletedInputs()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2296,7 +2296,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Create, PermissionsList.Inputs.View, PermissionsList.Inputs.Delete],
+            [Inputs.Create, Inputs.View, Inputs.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2365,14 +2365,14 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             "/api/v1/InventoryReceipts/deleted?page=1&pageSize=10",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<InputListResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_066 - Tạo phiếu nhập với ImportPrice là 0")]
+    [Fact(DisplayName = "INPUT_066 - T?o phi?u nh?p v?i ImportPrice là 0")]
     public async Task CreateInput_ZeroImportPrice_AllowsFreeProducts()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2383,7 +2383,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Create],
+            [Inputs.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2444,14 +2444,14 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             Products = [new CreateInputInfoRequest { ProductId = variant.Id, Count = 10, InputPrice = 0 }]
         };
         var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
-        var content = await response.Content
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
+        var content = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         content!.TotalPayable.Should().Be(0);
     }
 
-    [Fact(DisplayName = "INPUT_068 - Kiểm tra ConfirmedBy được ghi nhận đúng khi cập nhật phiếu nhập")]
+    [Fact(DisplayName = "INPUT_068 - Ki?m tra ConfirmedBy du?c ghi nh?n dúng khi c?p nh?t phi?u nh?p")]
     public async Task UpdateInputStatus_TracksConfirmedByCorrectly()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2462,7 +2462,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Edit, PermissionsList.Inputs.ChangeStatus],
+            [Inputs.Edit, Inputs.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2558,14 +2558,14 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             statusRequest,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var input = verifyDb.InputReceipts.FirstOrDefault(i => i.Id == createdInput.Id);
         input!.ConfirmedBy.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_069 - Lấy danh sách phiếu nhập với nhiều filter kết hợp")]
+    [Fact(DisplayName = "INPUT_069 - L?y danh sách phi?u nh?p v?i nhi?u filter k?t h?p")]
     public async Task GetInputs_MultipleCombinedFilters_ReturnsFilteredResults()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2576,7 +2576,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2622,11 +2622,11 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             $"/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId=={supplier.Id}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<InputListResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items
             .Should()
             .OnlyContain(
@@ -2634,7 +2634,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                     i.SupplierId == supplier.Id);
     }
 
-    [Fact(DisplayName = "INPUT_070 - Lấy danh sách trạng thái phiếu nhập thành công (Happy Path)")]
+    [Fact(DisplayName = "INPUT_070 - L?y danh sách tr?ng thái phi?u nh?p thành công (Happy Path)")]
     public async Task GetInputStatuses_WithViewPermission_ReturnsAllStatusesWithVietnameseLabels()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2645,7 +2645,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.View],
+            [Inputs.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2658,27 +2658,27 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/InventoryReceipts/status", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<Dictionary<string, string>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Should().HaveCount(3);
-        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Working).WhoseValue.Should().Be("Phiếu tạm");
-        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Finish).WhoseValue.Should().Be("Hoàn thành");
-        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Cancel).WhoseValue.Should().Be("Đã huỷ");
+        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Working).WhoseValue.Should().Be("Phiếu tạm");
+        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Finish).WhoseValue.Should().Be("Hoàn thành");
+        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Cancel).WhoseValue.Should().Be("Đã huỷ");
     }
 
-    [Fact(DisplayName = "INPUT_071 - Lấy danh sách trạng thái phiếu nhập khi chưa đăng nhập trả 401")]
+    [Fact(DisplayName = "INPUT_071 - L?y danh sách tr?ng thái phi?u nh?p khi chua dang nh?p tr? 401")]
     public async Task GetInputStatuses_WithoutToken_ReturnsUnauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
         var response = await _client.GetAsync("/api/v1/InventoryReceipts/status", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "INPUT_076 - Cập nhật ghi chú phiếu nhập hàng qua API riêng thành công")]
+    [Fact(DisplayName = "INPUT_076 - C?p nh?t ghi chú phi?u nh?p hàng qua API riêng thành công")]
     public async Task UpdateInputNotes_Success_ReturnsOk()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2689,7 +2689,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [PermissionsList.Inputs.Edit],
+            [Inputs.Edit],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -2728,29 +2728,30 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             StatusId = inputStatusId,
             SupplierId = supplier.Id,
             CreatedBy = user.Id,
-            Notes = "Ghi chú cũ"
+            Notes = "Ghi chú cu"
         };
         db.InputReceipts.Add(input);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var request = new UpdateInputNotesCommand { Notes = "Ghi chú mới đã được cập nhật" };
+        var request = new UpdateInputNotesCommand { Notes = "Ghi chú m?i dã du?c c?p nh?t" };
         var requestMessage = new HttpRequestMessage(HttpMethod.Patch, $"/api/v1/InventoryReceipts/{input.Id}/notes")
         {
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content!.Notes.Should().Be("Ghi chú mới đã được cập nhật");
+        content!.Should().NotBeNull();
+        content!.Notes.Should().Be("Ghi chú m?i dã du?c c?p nh?t");
         var updatedInput = await db.InputReceipts
             .AsNoTracking()
             .FirstOrDefaultAsync(i => i.Id == input.Id, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         updatedInput.Should().NotBeNull();
-        updatedInput!.Notes.Should().Be("Ghi chú mới đã được cập nhật");
+        updatedInput!.Notes.Should().Be("Ghi chú m?i dã du?c c?p nh?t");
     }
     #pragma warning restore CRR0035
 }
+

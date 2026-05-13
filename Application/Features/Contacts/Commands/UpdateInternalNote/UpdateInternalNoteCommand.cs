@@ -9,4 +9,3 @@ public record UpdateInternalNoteCommand : IRequest<Result<bool>>
 
     public string InternalNote { get; init; } = string.Empty;
 }
-

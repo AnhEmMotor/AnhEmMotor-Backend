@@ -1,28 +1,21 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Setting;
 using Domain.Constants;
 using Domain.Primitives;
 using MediatR;
 using System.Linq;
-using OutputEntity = Domain.Entities.Output;
 
 namespace Application.Features.Outputs.Queries.GetOutputsList;
 
-public sealed class GetOutputsListQueryHandler(
-    IOutputReadRepository repository,
-    ISievePaginator paginator,
-    ISettingRepository settingRepository) : IRequestHandler<GetOutputsListQuery, Result<PagedResult<OutputItemResponse>>>
+public sealed class GetOutputsListQueryHandler(IOutputReadRepository repository, ISettingRepository settingRepository) : IRequestHandler<GetOutputsListQuery, Result<PagedResult<OutputItemResponse>>>
 {
     public async Task<Result<PagedResult<OutputItemResponse>>> Handle(
         GetOutputsListQuery request,
         CancellationToken cancellationToken)
     {
-        var query = repository.GetQueryable();
-        var result = await paginator.ApplyAsync<OutputEntity, OutputItemResponse>(
-            query,
+        var result = await repository.GetPagedAsync<OutputItemResponse>(
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);

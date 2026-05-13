@@ -32,7 +32,9 @@ public sealed class CreateNewsCommandHandler(
             PublishedDate = request.IsPublished ? DateTimeOffset.UtcNow : null,
             MetaTitle = request.MetaTitle?.Trim(),
             MetaDescription = request.MetaDescription?.Trim(),
-            MetaKeywords = request.MetaKeywords?.Trim()
+            MetaKeywords = request.MetaKeywords?.Trim(),
+            CategoryId = request.CategoryId,
+            AuthorId = request.AuthorId
         };
         newsInsertRepository.Add(news);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

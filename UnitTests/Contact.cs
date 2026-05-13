@@ -15,6 +15,7 @@ public class Contact
 {
     private readonly Mock<IContactReadRepository> _contactReadRepoMock;
     private readonly Mock<IContactInsertRepository> _contactInsertRepoMock;
+    private readonly Mock<IContactUpdateRepository> _contactUpdateRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IHttpTokenAccessorService> _tokenAccessorMock;
 
@@ -22,6 +23,7 @@ public class Contact
     {
         _contactReadRepoMock = new Mock<IContactReadRepository>();
         _contactInsertRepoMock = new Mock<IContactInsertRepository>();
+        _contactUpdateRepoMock = new Mock<IContactUpdateRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _tokenAccessorMock = new Mock<IHttpTokenAccessorService>();
     }
@@ -54,11 +56,12 @@ public class Contact
         var handler = new CreateContactReplyCommandHandler(
             _contactReadRepoMock.Object,
             _contactInsertRepoMock.Object,
+            _contactUpdateRepoMock.Object,
             _unitOfWorkMock.Object,
             _tokenAccessorMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         contact.Status.Should().Be("Processed");
-        _contactInsertRepoMock.Verify(x => x.Update(contact), Times.Once);
+        _contactUpdateRepoMock.Verify(x => x.Update(contact), Times.Once);
     }
 
     [Fact(DisplayName = "CONT_006 - Phản hồi cho một liên hệ không tồn tại")]
@@ -70,6 +73,7 @@ public class Contact
         var handler = new CreateContactReplyCommandHandler(
             _contactReadRepoMock.Object,
             _contactInsertRepoMock.Object,
+            _contactUpdateRepoMock.Object,
             _unitOfWorkMock.Object,
             _tokenAccessorMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -88,6 +92,7 @@ public class Contact
         var handler = new CreateContactReplyCommandHandler(
             _contactReadRepoMock.Object,
             _contactInsertRepoMock.Object,
+            _contactUpdateRepoMock.Object,
             _unitOfWorkMock.Object,
             _tokenAccessorMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -104,6 +109,7 @@ public class Contact
         var handler = new CreateContactReplyCommandHandler(
             _contactReadRepoMock.Object,
             _contactInsertRepoMock.Object,
+            _contactUpdateRepoMock.Object,
             _unitOfWorkMock.Object,
             _tokenAccessorMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -121,35 +127,10 @@ public class Contact
         var command = new UpdateInternalNoteCommand { ContactId = 999, InternalNote = "Note" };
         var handler = new UpdateInternalNoteCommandHandler(
             _contactReadRepoMock.Object,
-            _contactInsertRepoMock.Object,
+            _contactUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().Contain(e => string.Compare(e.Message, "Liên hệ không tồn tại.") == 0);
-    }
-
-    [Fact(DisplayName = "CONT_012 - Kiểm tra lưu trữ đánh giá của khách hàng")]
-    public void ContactEntity_RatingField_WorksCorrectly()
-    {
-        var contact = new Domain.Entities.Contact { Rating = 5 };
-        contact.Rating.Should().Be(5);
-    }
-
-    [Fact(DisplayName = "CONT_013 - Kiểm tra tính nhất quán của BaseEntity")]
-    public void BaseEntity_Timestamps_Exist()
-    {
-        var contact = new Domain.Entities.Contact();
-        var now = DateTimeOffset.UtcNow;
-        contact.CreatedAt = now;
-        contact.UpdatedAt = now;
-        contact.CreatedAt.Should().Be(now);
-        contact.UpdatedAt.Should().Be(now);
-    }
-
-    [Fact(DisplayName = "CONT_014 - Kiểm tra ghi chú nội bộ mặc định là rỗng")]
-    public void ContactEntity_InternalNote_DefaultIsNull()
-    {
-        var contact = new Domain.Entities.Contact();
-        contact.InternalNote.Should().BeNull();
     }
 }

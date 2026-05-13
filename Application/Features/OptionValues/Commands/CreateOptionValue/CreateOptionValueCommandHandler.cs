@@ -34,6 +34,11 @@ public class CreateOptionValueCommandHandler(
         {
             OptionId = targetOptionId,
             Name = request.Name,
+            Description = request.Description,
+            ImageUrl = request.ImageUrl,
+            SeoTitle = request.SeoTitle,
+            SeoDescription = request.SeoDescription,
+            IsActive = request.IsActive,
             ColorCode = request.ColorCode
         };
         optionValueInsertRepository.Add(optionValue);

@@ -1,5 +1,6 @@
 using Domain.Entities;
 using Infrastructure.DBContexts;
+using Infrastructure.Seeders.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -12,24 +13,44 @@ public static class ProductCategorySeeder
         IConfiguration configuration,
         CancellationToken cancellationToken)
     {
-        var protectedCategories = configuration.GetSection("ProtectedProductCategory").Get<List<string>>() ?? [];
-        if (protectedCategories.Count == 0)
-        {
+        var seedData = configuration.GetSection("ProtectedCategories").Get<List<CategorySeedModel>>() ?? [];
+        if (seedData.Count == 0)
             return;
-        }
-        var allExistingCategoryNames = await context.ProductCategories
+        var existingCategories = await context.ProductCategories.ToListAsync(cancellationToken).ConfigureAwait(false);
+        var existingCategoryDict = existingCategories
             .Where(c => c.Name != null)
-            .Select(c => c.Name!)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-        var existingCategorySet = new HashSet<string>(allExistingCategoryNames, StringComparer.OrdinalIgnoreCase);
-        var categoriesToAdd = protectedCategories
-            .Where(name => !string.IsNullOrWhiteSpace(name) && !existingCategorySet.Contains(name))
-            .Select(name => new ProductCategory { Name = name, })
-            .ToList();
-        if (categoriesToAdd.Count != 0)
+            .ToDictionary(c => c.Name!, StringComparer.OrdinalIgnoreCase);
+        var categoriesToAdd = new List<ProductCategory>();
+        bool hasChanges = false;
+        foreach (var seed in seedData)
+        {
+            if (string.IsNullOrWhiteSpace(seed.Name))
+                continue;
+            if (existingCategoryDict.TryGetValue(seed.Name, out var existing))
+            {
+                if (!string.Equals(existing.CategoryGroup, seed.Group, StringComparison.OrdinalIgnoreCase))
+                {
+                    existing.CategoryGroup = seed.Group;
+                    hasChanges = true;
+                }
+            } else
+            {
+                categoriesToAdd.Add(
+                    new ProductCategory
+                    {
+                        Name = seed.Name,
+                        CategoryGroup = seed.Group,
+                        Slug = seed.Name.ToLower().Replace(" ", "-")
+                    });
+                hasChanges = true;
+            }
+        }
+        if (categoriesToAdd.Count > 0)
         {
             await context.ProductCategories.AddRangeAsync(categoriesToAdd, cancellationToken).ConfigureAwait(false);
+        }
+        if (hasChanges)
+        {
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }

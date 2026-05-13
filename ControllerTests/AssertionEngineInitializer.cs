@@ -1,4 +1,4 @@
-﻿using ControllerTests;
+using ControllerTests;
 using FluentAssertions;
 using FluentAssertions.Extensibility;
 

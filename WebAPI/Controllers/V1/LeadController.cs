@@ -1,4 +1,11 @@
 using Application.ApiContracts.Leads.Responses;
+using Application.Features.Leads.Commands.AddLeadActivity;
+using Application.Features.Leads.Commands.AssignLead;
+using Application.Features.Leads.Commands.CreateLead;
+using Application.Features.Leads.Commands.ResetLeads;
+using Application.Features.Leads.Commands.UpdateLead;
+using Application.Features.Leads.Queries.GetLeadById;
+using Application.Features.Leads.Queries.GetLeadPipeline;
 using Application.Features.Leads.Queries.GetLeads;
 using Asp.Versioning;
 using MediatR;
@@ -27,5 +34,114 @@ public class LeadController(IMediator mediator) : ApiController
     {
         var result = await mediator.Send(new GetLeadsQuery(), cancellationToken).ConfigureAwait(true);
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Tạo mới một khách hàng tiềm năng
+    /// </summary>
+    [HttpPost]
+    [Authorize]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
+    public async Task<IActionResult> CreateLeadAsync(
+        [FromBody] CreateLeadCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleCreated(result);
+    }
+
+    /// <summary>
+    /// Lấy thông tin chi tiết khách hàng theo ID
+    /// </summary>
+    [HttpGet("{id:int}")]
+    [Authorize]
+    [ProducesResponseType(typeof(LeadResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetLeadByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetLeadByIdQuery(id), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách khách hàng theo luồng Pipeline (Kanban)
+    /// </summary>
+    [HttpGet("pipeline")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<LeadPipelineGroupResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPipelineAsync(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetLeadPipelineQuery(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Cập nhật thông tin khách hàng
+    /// </summary>
+    [HttpPut("{id}")]
+    [Authorize]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateLeadAsync(
+        int id,
+        [FromBody] UpdateLeadCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.Id)
+            return BadRequest();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Thêm ghi chú/lịch sử tương tác
+    /// </summary>
+    [HttpPost("{id}/activities")]
+    [Authorize]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> AddActivityAsync(
+        int id,
+        [FromBody] AddLeadActivityCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.LeadId)
+            return BadRequest();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Giao việc cho nhân viên
+    /// </summary>
+    [HttpPost("{id}/assign")]
+    [Authorize]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> AssignLeadAsync(
+        int id,
+        [FromBody] Guid? userId,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new AssignLeadCommand(id, userId), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Reset toàn bộ dữ liệu khách hàng (Xóa hết)
+    /// </summary>
+    [HttpDelete("reset")]
+    [Authorize]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ResetLeadsAsync(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new ResetLeadsCommand(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Reset toàn bộ dữ liệu khách hàng (NỘI BỘ - KHÔNG AUTH)
+    /// </summary>
+    [HttpGet("reset-internal-temporary")]
+    public async Task<IActionResult> ResetLeadsInternalAsync(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new ResetLeadsCommand(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 }

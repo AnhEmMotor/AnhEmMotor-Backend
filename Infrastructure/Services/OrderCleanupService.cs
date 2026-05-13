@@ -24,15 +24,8 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
         var readRepository = scope.ServiceProvider.GetRequiredService<IOutputReadRepository>();
         var updateRepository = scope.ServiceProvider.GetRequiredService<IOutputUpdateRepository>();
         var expirationThreshold = DateTimeOffset.UtcNow.AddMinutes(-15);
-        var expiredOrders = readRepository.GetQueryable()
-            .Where(
-                o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
-                    !string.IsNullOrEmpty(o.PaymentMethod) &&
-                    o.PaymentMethod != PaymentMethod.COD &&
-                    (o.PaymentExpiredAt.HasValue
-                        ? o.PaymentExpiredAt.Value < DateTimeOffset.UtcNow
-                        : o.CreatedAt < expirationThreshold))
-            .ToList();
+        var expiredOrders = await readRepository.GetExpiredOrdersAsync(expirationThreshold, cancellationToken)
+            .ConfigureAwait(false);
         if (expiredOrders.Count > 0)
         {
             foreach (var order in expiredOrders)

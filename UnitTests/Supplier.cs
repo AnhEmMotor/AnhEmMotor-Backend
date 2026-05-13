@@ -7,10 +7,10 @@ using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Moq;
+using UnitTests.Models;
 using SupplierEntity = Domain.Entities.Supplier;
 
 namespace UnitTests;
@@ -50,8 +50,6 @@ public class Supplier
             TaxIdentificationNumber = "0123456789",
             Notes = "Test notes"
         };
-        var emptySuppliers = new List<SupplierEntity>().AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -67,8 +65,6 @@ public class Supplier
             _insertRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand { Name = "Supplier B", Phone = "0987654321", Address = "456 Street" };
-        var emptySuppliers = new List<SupplierEntity>().AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -89,8 +85,6 @@ public class Supplier
             Email = "test@example.com",
             Address = "789 Street"
         };
-        var emptySuppliers = new List<SupplierEntity>().AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -204,8 +198,6 @@ public class Supplier
             Phone = "0123456789",
             TaxIdentificationNumber = "0123456789"
         };
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
-            .Returns(new List<SupplierEntity>().AsQueryable());
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -442,8 +434,6 @@ public class Supplier
         };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-        var emptySuppliers = new List<SupplierEntity>().AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Value.Should().NotBeNull();
         result.Value!.Name.Should().Be("Updated Name");
@@ -468,8 +458,6 @@ public class Supplier
         };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-        var emptySuppliers = new List<SupplierEntity>().AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Value.Should().NotBeNull();
         result.Value!.Name.Should().Be("Only Name Updated");
@@ -685,34 +673,6 @@ public class Supplier
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 
-    public class TestEntity : BaseEntity
-    {
-        public int Id { get; set; }
-    }
-
-    public class TestResponse
-    {
-        public int Id { get; set; }
-
-        public DateTimeOffset? CreatedAt { get; set; }
-
-        public DateTimeOffset? UpdatedAt { get; set; }
-
-        public DateTimeOffset? DeletedAt { get; set; }
-    }
-
-    public class TestResponseNoAudit
-    {
-        public int Id { get; set; }
-    }
-
-    public class TestResponseWrongType
-    {
-        public int Id { get; set; }
-
-        public string? CreatedAt { get; set; }
-    }
-
     [Fact(DisplayName = "SUP_061 - Gán CreatedAt thành công")]
     public void SUP_061_Apply_CreatedAt_Success()
     {
@@ -757,8 +717,8 @@ public class Supplier
     public void SUP_065_Apply_List_Success()
     {
         var now = DateTimeOffset.UtcNow;
-        var entities = new List<TestEntity> { new TestEntity { Id = 1, CreatedAt = now } };
-        var responses = new List<TestResponse> { new TestResponse { Id = 1 } };
+        var entities = new List<TestEntity> { new() { Id = 1, CreatedAt = now } };
+        var responses = new List<TestResponse> { new() { Id = 1 } };
         AuditColumnMapper.Apply(entities, responses, AuditColumn.CreatedAt);
         Assert.Equal(entities[0].CreatedAt, responses[0].CreatedAt);
     }

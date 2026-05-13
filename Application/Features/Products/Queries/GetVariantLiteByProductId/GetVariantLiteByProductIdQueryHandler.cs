@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductVariant;

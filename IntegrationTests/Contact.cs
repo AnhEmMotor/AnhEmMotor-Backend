@@ -1,7 +1,7 @@
 using Application.Features.Contacts.Commands.CreateContact;
 using Application.Features.Contacts.Commands.CreateContactReply;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -80,12 +80,12 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/contacts", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<Domain.Entities.Contact>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should().HaveCountGreaterThanOrEqualTo(2);
+        content!.Should().NotBeNull();
+        content!.Should().HaveCountGreaterThanOrEqualTo(2);
     }
 
     [Fact(DisplayName = "CONT_004 - Quản trị viên phản hồi liên hệ thành công")]
@@ -113,7 +113,7 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             "Password123!",
-            [PermissionsList.Contacts.Reply],
+            [Contacts.Reply],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -130,7 +130,7 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             MarkAsProcessed = true
         };
         var response = await _client.PostAsJsonAsync("/api/v1/contacts/reply", command).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -184,7 +184,7 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             command,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -239,11 +239,11 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync($"/api/v1/contacts", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<Domain.Entities.Contact>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         var contact = content!.FirstOrDefault(c => c.Id == contactId);
         contact.Should().NotBeNull();
         contact!.Replies.Should().HaveCount(2);
@@ -261,7 +261,7 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Message = "Tin nhắn có dấu"
         };
         var response = await _client.PostAsJsonAsync("/api/v1/contacts", command).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var contact = await db.Contacts
@@ -272,3 +272,4 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         contact!.Subject.Should().Be("Cần tư vấn xe SH");
     }
 }
+

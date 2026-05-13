@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Sieve;
 using Domain.Constants;
 using Domain.Primitives;

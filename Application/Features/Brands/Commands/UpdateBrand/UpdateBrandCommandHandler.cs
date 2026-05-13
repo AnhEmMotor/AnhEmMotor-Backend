@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Brand.Responses;
+using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
@@ -20,7 +20,6 @@ public sealed class UpdateBrandCommandHandler(
             return Error.NotFound($"Brand with Id {request.Id} not found.", "Id");
         }
         string? cleanName = request.Name?.Trim();
-        string? cleanDescription = request.Description?.Trim();
         var duplicateCandidates = await readRepository.GetByNameAsync(cleanName!, cancellationToken)
             .ConfigureAwait(false);
         if (duplicateCandidates.Any(x => x.Id != request.Id))
@@ -28,8 +27,10 @@ public sealed class UpdateBrandCommandHandler(
             return Error.Validation("Brand name already exists.", "Name");
         }
         request.Adapt(brand);
-        brand.Name = cleanName;
-        brand.Description = cleanDescription;
+        brand.Name = request.Name?.Trim();
+        brand.Description = request.Description?.Trim();
+        brand.Origin = request.Origin?.Trim();
+        brand.LogoUrl = request.LogoUrl?.Trim();
         updateRepository.Update(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return brand.Adapt<BrandResponse>();

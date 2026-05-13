@@ -95,19 +95,31 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
             return null;
         }
         var parts = filters.Split(',');
+        var operators = new[] { "<=", ">=", "<", ">", "==", "!", "@", "=" };
         foreach (var part in parts)
         {
-            var trimmedPart = part.Trim();
+            var trimmedPart = part.AsSpan().Trim();
             if (!trimmedPart.StartsWith(key, StringComparison.OrdinalIgnoreCase))
+            {
                 continue;
-            var operators = new[] { "<=", ">=", "<", ">", "==", "!", "@", "=" };
-            var foundOp = operators.FirstOrDefault(o => trimmedPart[key.Length..].Trim().StartsWith(o));
+            }
+            var remaining = trimmedPart.Slice(key.Length).Trim();
+            string? foundOp = null;
+            foreach (var o in operators)
+            {
+                if (remaining.StartsWith(o))
+                {
+                    foundOp = o;
+                    break;
+                }
+            }
             if (foundOp != null)
             {
                 if (!string.IsNullOrEmpty(op) && string.Compare(foundOp, op) != 0)
+                {
                     continue;
-                var value = trimmedPart[key.Length..].Trim()[foundOp.Length..].Trim();
-                return value;
+                }
+                return remaining.Slice(foundOp.Length).Trim().ToString();
             }
         }
         return null;

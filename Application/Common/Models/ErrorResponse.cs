@@ -1,4 +1,4 @@
-﻿using FluentValidation.Results;
+using FluentValidation.Results;
 using System.Text.Json.Serialization;
 
 namespace Application.Common.Models
@@ -37,8 +37,10 @@ namespace Application.Common.Models
 
         public static ErrorResponse CreateValidationError(IEnumerable<ValidationFailure> failures)
         {
-            return new ErrorResponse(null)
+            var firstFailure = failures.FirstOrDefault();
+            return new ErrorResponse(firstFailure?.ErrorMessage ?? "Validation failed.")
             {
+                Type = "Validation",
                 Errors = [.. failures.Select(f => new ErrorDetail { Field = f.PropertyName, Message = f.ErrorMessage })]
             };
         }

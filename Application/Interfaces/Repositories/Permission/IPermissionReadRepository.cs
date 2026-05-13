@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using System;
 using PermissionEntity = Domain.Entities.Permission;
 

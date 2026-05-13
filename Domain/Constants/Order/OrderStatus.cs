@@ -1,4 +1,4 @@
-﻿namespace Domain.Constants.Order
+namespace Domain.Constants.Order
 {
     public static class OrderStatus
     {
@@ -45,19 +45,19 @@
 
         public static string GetDisplayName(string status) => status.ToLower() switch
         {
-            Pending => "Chờ xác nhận",
-            ConfirmedCod => "Đã xác nhận (Chờ thanh toán COD)",
-            PaidProcessing => "Đã thanh toán (Chờ xử lý)",
-            WaitingDeposit => "Chờ đặt cọc",
-            DepositPaid => "Đã đặt cọc (Chờ xử lý)",
-            WaitingInstallment => "Chờ duyệt trả góp",
-            InstallmentApproved => "Đã duyệt trả góp (Chờ xử lý)",
-            Delivering => "Đang giao hàng",
-            WaitingPickup => "Chờ lấy hàng tại cửa hàng",
-            Completed => "Đã hoàn thành",
-            Cancelled => "Đã hủy",
-            Refunding => "Đang hoàn tiền",
-            Refunded => "Đã hoàn tiền",
+            "pending" => "Chờ xác nhận",
+            "confirmedcod" => "Đã xác nhận (Chờ thanh toán COD)",
+            "paidprocessing" => "Đã thanh toán (Chờ xử lý)",
+            "waitingdeposit" => "Chờ đặt cọc",
+            "depositpaid" => "Đã đặt cọc (Chờ xử lý)",
+            "waitinginstallment" => "Chờ duyệt trả góp",
+            "installmentapproved" => "Đã duyệt trả góp (Chờ xử lý)",
+            "delivering" => "Đang giao hàng",
+            "waitingpickup" => "Chờ lấy hàng tại cửa hàng",
+            "completed" => "Đã hoàn thành",
+            "cancelled" => "Đã hủy",
+            "refunding" => "Đang hoàn tiền",
+            "refunded" => "Đã hoàn tiền",
             _ => status
         };
     }

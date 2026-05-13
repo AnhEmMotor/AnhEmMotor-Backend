@@ -1,15 +1,21 @@
+using Application.ApiContracts.Option.Responses;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
+using Application.Features.Options.Queries.GetOptionsList;
 using Application.Features.OptionValues.Commands.CreateOptionValue;
 using Application.Features.OptionValues.Commands.DeleteOptionValue;
 using Application.Features.OptionValues.Commands.UpdateOptionValue;
 using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
+using Application.Features.ProductCategories.Commands.CreateCategoryGroup;
+using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.RestoreManyProducts;
 using Application.Features.Products.Commands.RestoreProduct;
+using Application.Features.Products.Commands.SetProductCompatibility;
 using Application.Features.Products.Commands.UpdateManyProductPrices;
 using Application.Features.Products.Commands.UpdateManyProductStatuses;
 using Application.Features.Products.Commands.UpdateManyVariantPrices;
@@ -17,6 +23,7 @@ using Application.Features.Products.Commands.UpdateProduct;
 using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
+using Application.Features.Products.Commands.UpdateVehicleType;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForInput;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
@@ -31,8 +38,14 @@ using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetSitemapSlugs;
 using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
+using Application.Features.Technologies.Commands.CreateTechnology;
+using Application.Features.Technologies.Commands.CreateTechnologyCategory;
+using Application.Features.Technologies.Queries.GetAllTechnologies;
+using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
 using Asp.Versioning;
 using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -41,7 +54,6 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -200,6 +212,19 @@ public class ProductController(ISender sender) : ApiController
     }
 
     /// <summary>
+    /// Lấy danh sách toàn bộ các thuộc tính (Options) và các giá trị của chúng (OptionValues).
+    /// </summary>
+    [HttpGet("all-options")]
+    [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]
+    [ProducesResponseType(typeof(List<OptionResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOptionsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetOptionsListQuery();
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Lấy danh sách ánh xạ trạng thái tồn kho (Key -> Tên tiếng Việt).
     /// </summary>
     [HttpGet("inventory-statuses")]
@@ -218,7 +243,7 @@ public class ProductController(ISender sender) : ApiController
     /// <summary>
     /// Lấy thông tin chi tiết sản phẩm theo Id (dành cho người quản lý)
     /// </summary>
-    [HttpGet("{id:int}/for-manager", Name = RouteNames.Product.GetVarientByIdForManager)]
+    [HttpGet("{id:int}/for-manager", Name = Product.GetVarientByIdForManager)]
     [HasPermission(Products.View)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -277,7 +302,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
-            RouteNames.Product.GetVarientByIdForManager,
+            Product.GetVarientByIdForManager,
             new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
@@ -562,4 +587,115 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(new DeleteOptionValueCommand(id), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
+
+    /// <summary>
+    /// Phân nhóm danh mục sản phẩm.
+    /// </summary>
+    [HttpPost("category-group")]
+    [HasPermission(Products.Edit)]
+    public async Task<IActionResult> CreateCategoryGroupAsync(
+        [FromBody] CreateCategoryGroupCommand request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Thiết lập danh sách xe tương thích cho phụ tùng.
+    /// </summary>
+    [HttpPost("{id:int}/compatibility")]
+    [HasPermission(Products.Edit)]
+    public async Task<IActionResult> SetCompatibilityAsync(
+        int id,
+        [FromBody] SetProductCompatibilityCommand request,
+        CancellationToken cancellationToken)
+    {
+        var command = request with { ProductId = id };
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Đính kèm công nghệ vào sản phẩm.
+    /// </summary>
+    [HttpPost("{id:int}/technologies")]
+    [HasPermission(Products.Edit)]
+    public async Task<IActionResult> AttachTechnologiesAsync(
+        int id,
+        [FromBody] AttachTechnologiesCommand request,
+        CancellationToken cancellationToken)
+    {
+        var command = request with { ProductId = id };
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Cập nhật loại xe cho sản phẩm.
+    /// </summary>
+    [HttpPatch("{id:int}/vehicle-type")]
+    [HasPermission(Products.Edit)]
+    public async Task<IActionResult> UpdateVehicleTypeAsync(
+        int id,
+        [FromBody] UpdateVehicleTypeCommand request,
+        CancellationToken cancellationToken)
+    {
+        var command = request with { ProductId = id };
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tạo mới một Công nghệ.
+    /// </summary>
+    [HttpPost("technologies")]
+    [ProducesResponseType(typeof(TechnologyResponse), StatusCodes.Status200OK)]
+    [HasPermission(Products.Edit)]
+    public async Task<IActionResult> CreateTechnologyAsync(
+        [FromBody] CreateTechnologyCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách toàn bộ Công nghệ.
+    /// </summary>
+    [HttpGet("technologies")]
+    [ProducesResponseType(typeof(List<TechnologyResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllTechnologiesAsync(
+        [FromQuery] int? category_id,
+        [FromQuery] int? brand_id,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetAllTechnologiesQuery(category_id, brand_id), cancellationToken)
+            .ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách toàn bộ Danh mục Công nghệ.
+    /// </summary>
+    [HttpGet("technology-categories")]
+    public async Task<IActionResult> GetTechnologyCategoriesAsync(CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetAllTechnologyCategoriesQuery(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tạo mới một Danh mục Công nghệ.
+    /// </summary>
+    [HttpPost("technology-categories")]
+    [HasPermission(Products.Edit)]
+    public async Task<IActionResult> CreateTechnologyCategoryAsync(
+        [FromBody] CreateTechnologyCategoryCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
 }
+

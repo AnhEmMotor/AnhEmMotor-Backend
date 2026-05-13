@@ -11,4 +11,3 @@ public record CreateContactReplyCommand : IRequest<Result<int>>
 
     public bool MarkAsProcessed { get; init; } = true;
 }
-

@@ -30,9 +30,16 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Product>(p => p.Name).CanSort().CanFilter();
         mapper.Property<Product>(p => p.BrandId).CanFilter();
         mapper.Property<Product>(p => p.CategoryId).CanFilter();
+        mapper.Property<Product>(p => p.VehicleTypeId).CanFilter();
         mapper.Property<Product>(p => p.StatusId).CanFilter();
+        mapper.Property<Product>(p => p.StdDot).CanFilter();
+        mapper.Property<Product>(p => p.StdEce).CanFilter();
+        mapper.Property<Product>(p => p.StdSnell).CanFilter();
+        mapper.Property<Product>(p => p.StdJis).CanFilter();
+        mapper.Property<Product>(p => p.StdDot).CanFilter().HasName("SafetyStandard");
         mapper.Property<News>(p => p.Id).CanSort().CanFilter();
         mapper.Property<News>(p => p.Title).CanSort().CanFilter();
+        mapper.Property<News>(p => p.CategoryId).CanFilter();
         mapper.Property<Banner>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Banner>(p => p.Title).CanSort().CanFilter();
         mapper.Property<ProductVariant>(p => p.Id).CanSort().CanFilter();
@@ -75,7 +82,27 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<ApplicationRole>(p => p.Name).CanSort().CanFilter();
         mapper.Property<RoleSelectResponse>(p => p.ID).CanSort().CanFilter();
         mapper.Property<RoleSelectResponse>(p => p.Name).CanSort().CanFilter();
+        mapper.Property<Vehicle>(v => v.Id).CanSort().CanFilter();
+        mapper.Property<Vehicle>(v => v.VinNumber).CanSort().CanFilter();
+        mapper.Property<Vehicle>(v => v.EngineNumber).CanSort().CanFilter();
+        mapper.Property<Vehicle>(v => v.LicensePlate).CanSort().CanFilter();
+        mapper.Property<Vehicle>(v => v.PurchaseDate).CanSort().CanFilter();
+        mapper.Property<Vehicle>(v => v.Lead.FullName).CanSort().CanFilter().HasName("FullName");
+        mapper.Property<Vehicle>(v => v.Lead.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
         return mapper;
+    }
+
+    public IQueryable<Product> SafetyStandard(IQueryable<Product> source, string op, string[] values)
+    {
+        var val = values[0].ToLower();
+        return val switch
+        {
+            "dot" => source.Where(p => p.StdDot),
+            "ece" => source.Where(p => p.StdEce),
+            "snell" => source.Where(p => p.StdSnell),
+            "jis" => source.Where(p => p.StdJis),
+            _ => source
+        };
     }
 
     private static void MapBaseProperties<T>(SievePropertyMapper mapper) where T : BaseEntity

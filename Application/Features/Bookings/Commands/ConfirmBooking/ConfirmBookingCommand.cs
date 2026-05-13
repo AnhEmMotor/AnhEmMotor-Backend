@@ -7,4 +7,3 @@ public record ConfirmBookingCommand : IRequest<Result<bool>>
 {
     public int BookingId { get; init; }
 }
-

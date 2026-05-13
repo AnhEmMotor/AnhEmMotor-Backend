@@ -10,13 +10,8 @@ public static class PermissionDataSeeder
 {
     public static async Task SeedPermissionsAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        var allPermissions = typeof(PermissionsList)
-            .GetNestedTypes()
-            .SelectMany(
-                type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-            .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
-            .Select(fieldInfo => fieldInfo.GetRawConstantValue() as string)
-            .Where(permission => permission is not null)
+        var allPermissions = PermissionsList.GetMetadataList()
+            .Select(m => m.Id)
             .ToList();
         var existingPermissions = await context.Permissions.ToListAsync(cancellationToken).ConfigureAwait(false);
         var newPermissions = allPermissions

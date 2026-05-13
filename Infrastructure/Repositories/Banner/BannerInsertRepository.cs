@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.Banner;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.Banner
@@ -8,6 +9,11 @@ namespace Infrastructure.Repositories.Banner
         public void Add(Domain.Entities.Banner banner)
         {
             context.Banners.Add(banner);
+        }
+
+        public void AddLog(BannerAuditLog log)
+        {
+            context.BannerAuditLogs.Add(log);
         }
     }
 }

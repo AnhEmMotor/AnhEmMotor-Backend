@@ -14,6 +14,11 @@ public sealed record CreateBannerCommand : IRequest<Result<int>>
     [JsonPropertyName("link_url")]
     public string? LinkUrl { get; init; }
 
+    [JsonPropertyName("cta_text")]
+    public string? CtaText { get; init; }
+
+    public string? Placement { get; init; }
+
     public string? Position { get; init; }
 
     [JsonPropertyName("start_date")]
@@ -24,6 +29,8 @@ public sealed record CreateBannerCommand : IRequest<Result<int>>
 
     [JsonPropertyName("is_active")]
     public bool IsActive { get; init; } = true;
+
+    public int Priority { get; init; }
 
     [JsonPropertyName("display_order")]
     public int DisplayOrder { get; init; }

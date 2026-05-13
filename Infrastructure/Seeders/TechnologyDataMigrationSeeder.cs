@@ -1,5 +1,6 @@
 using Domain.Entities;
 using Infrastructure.DBContexts;
+using Infrastructure.Seeders.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -83,17 +84,6 @@ namespace Infrastructure.Seeders
                 }
             }
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        private class HighlightJson
-        {
-            public string? Title { get; set; }
-
-            public string? Description { get; set; }
-
-            public string? Image { get; set; }
-
-            public string? Tag { get; set; }
         }
     }
 }

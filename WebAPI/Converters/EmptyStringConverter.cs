@@ -59,23 +59,23 @@ public class EmptyStringConverter : JsonConverter<string>
     }
 
     /// <summary>
-    /// Writes the specified string value as a property name to the JSON output.
+    /// Writes the string value as a JSON property name.
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="value"></param>
-    /// <param name="options"></param>
+    /// <param name="writer">The JSON writer.</param>
+    /// <param name="value">The string value.</param>
+    /// <param name="options">The serializer options.</param>
     public override void WriteAsPropertyName(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
     {
         writer.WritePropertyName(value ?? string.Empty);
     }
 
     /// <summary>
-    /// Reads a JSON property name and returns it as a string.
+    /// Reads the string value as a JSON property name.
     /// </summary>
-    /// <param name="reader"></param>
-    /// <param name="typeToConvert"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
+    /// <param name="reader">The JSON reader.</param>
+    /// <param name="typeToConvert">The type to convert.</param>
+    /// <param name="options">The serializer options.</param>
+    /// <returns>The string value.</returns>
     public override string ReadAsPropertyName(
         ref Utf8JsonReader reader,
         Type typeToConvert,

@@ -10,6 +10,7 @@ using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
 using Domain.Entities;
@@ -34,6 +35,7 @@ public sealed class UpdateProductCommandHandler(
     IOptionValueInsertRepository optionValueInsertRepository,
     IVariantOptionValueDeleteRepository variantOptionValueDeleteRepository,
     IProductVarientDeleteRepository productVarientDeleteRepository,
+    IProductUpdateRepository productUpdateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
     public async Task<Result<ProductDetailForManagerResponse?>> Handle(
@@ -105,32 +107,7 @@ public sealed class UpdateProductCommandHandler(
         {
             return errors;
         }
-        product.Name = command.Name?.Trim();
-        product.CategoryId = command.CategoryId;
-        product.BrandId = command.BrandId;
-        product.Description = command.Description?.Trim();
-        product.Weight = command.Weight;
-        product.Dimensions = command.Dimensions?.Trim();
-        product.Wheelbase = command.Wheelbase;
-        product.SeatHeight = command.SeatHeight;
-        product.GroundClearance = command.GroundClearance;
-        product.FuelCapacity = command.FuelCapacity;
-        product.TireSize = command.TireSize?.Trim();
-        product.FrontSuspension = command.FrontSuspension?.Trim();
-        product.RearSuspension = command.RearSuspension?.Trim();
-        product.EngineType = command.EngineType?.Trim();
-        product.MaxPower = command.MaxPower?.Trim();
-        product.OilCapacity = command.OilCapacity;
-        product.FuelConsumption = command.FuelConsumption?.Trim();
-        product.TransmissionType = command.TransmissionType?.Trim();
-        product.StarterSystem = command.StarterSystem?.Trim();
-        product.MaxTorque = command.MaxTorque?.Trim();
-        product.Displacement = command.Displacement;
-        product.BoreStroke = command.BoreStroke?.Trim();
-        product.CompressionRatio = command.CompressionRatio?.Trim();
-        product.ShortDescription = command.ShortDescription?.Trim();
-        product.MetaTitle = command.MetaTitle?.Trim();
-        product.MetaDescription = command.MetaDescription?.Trim();
+        command.Adapt(product);
         var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>();
         var optionNameMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var inputVariants = command.Variants ?? [];
@@ -365,13 +342,8 @@ public sealed class UpdateProductCommandHandler(
                 variantEntity = new ProductVariant { ProductId = command.Id };
                 product.ProductVariants.Add(variantEntity);
             }
+            variantReq.Adapt(variantEntity);
             variantEntity.UrlSlug = SlugHelper.GenerateSlug(variantReq.UrlSlug);
-            variantEntity.Price = variantReq.Price;
-            variantEntity.CoverImageUrl = variantReq.CoverImageUrl?.Trim();
-            variantEntity.VersionName = variantReq.VersionName?.Trim();
-            variantEntity.ColorName = variantReq.ColorName?.Trim();
-            variantEntity.ColorCode = variantReq.ColorCode?.Trim();
-            variantEntity.SKU = variantReq.SKU?.Trim();
             UpdateVariantPhotos(variantEntity, variantReq.PhotoCollection);
             var currentLinks = variantEntity.VariantOptionValues.ToList();
             foreach (var link in currentLinks)
@@ -455,10 +427,13 @@ public sealed class UpdateProductCommandHandler(
         {
             try
             {
-                newTechList = JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
+                newTechList = (JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
                         command.Highlights,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ??
-                    [];
+                    [])
+                    .GroupBy(x => x.TechnologyId)
+                    .Select(g => g.First())
+                    .ToList();
             } catch
             {
                 newTechList = [];
@@ -497,9 +472,22 @@ public sealed class UpdateProductCommandHandler(
                         });
             }
         }
+        product.CompatibleWith.Clear();
+        if (command.CompatibleVehicleModelIds?.Count > 0)
+        {
+            foreach (var vehicleId in command.CompatibleVehicleModelIds.Distinct())
+            {
+                product.CompatibleWith.Add(new ProductCompatibility { CompatibleVehicleModelId = vehicleId });
+            }
+        }
+        productUpdateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var response = product.Adapt<ProductDetailForManagerResponse>();
-        return response;
+        if (response != null)
+        {
+            response.CompatibleVehicleModelIds = product.CompatibleWith.Select(c => c.CompatibleVehicleModelId).ToList();
+        }
+        return Result<ProductDetailForManagerResponse?>.Success(response);
     }
 
     private static void UpdateVariantPhotos(ProductVariant variant, List<string>? newUrls)

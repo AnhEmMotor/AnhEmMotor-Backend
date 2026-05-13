@@ -1,10 +1,17 @@
 using Domain.Constants;
+using Domain.Primitives;
+using Sieve.Models;
+using System.Linq.Expressions;
 
 namespace Application.Interfaces.Repositories.News
 {
     public interface INewsReadRepository
     {
-        public IQueryable<Domain.Entities.News> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            Expression<Func<Domain.Entities.News, bool>>? filter = null,
+            CancellationToken cancellationToken = default);
 
         public Task<Domain.Entities.News?> GetByIdAsync(int id, CancellationToken cancellationToken);
 

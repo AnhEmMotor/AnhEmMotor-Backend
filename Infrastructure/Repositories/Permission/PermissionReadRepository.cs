@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories.Permission;
+using Application.Interfaces.Repositories.Permission;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,4 @@
-using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.Technology;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 

@@ -1,7 +1,8 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Booking;
-using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Repositories.Lead.Lead;
+using Application.Interfaces.Repositories.Lead.LeadActivity;
 using Application.Interfaces.Services;
 using Domain.Constants.Booking;
 using Domain.Constants.Lead;
@@ -15,7 +16,7 @@ namespace Application.Features.Bookings.Commands.ConfirmBooking
         IBookingReadRepository bookingReadRepository,
         IBookingInsertRepository bookingInsertRepository,
         ILeadReadRepository leadReadRepository,
-        ILeadInsertRepository leadInsertRepository,
+        ILeadUpdateRepository leadUpdateRepository,
         ILeadActivityInsertRepository leadActivityInsertRepository,
         IUnitOfWork unitOfWork,
         IEmailService emailService) : IRequestHandler<ConfirmBookingCommand, Result<bool>>
@@ -35,7 +36,7 @@ namespace Application.Features.Bookings.Commands.ConfirmBooking
             if (lead != null)
             {
                 lead.Status = LeadStatus.TestDriving;
-                leadInsertRepository.Update(lead);
+                leadUpdateRepository.Update(lead);
                 leadActivityInsertRepository.Add(
                     new LeadActivity
                     {

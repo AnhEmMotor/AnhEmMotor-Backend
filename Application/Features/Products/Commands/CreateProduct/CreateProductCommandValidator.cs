@@ -39,6 +39,14 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             .When(x => !string.IsNullOrWhiteSpace(x.MetaDescription))
             .WithMessage("Mô tả SEO không được vượt quá 255 ký tự.");
         RuleFor(x => x.Weight).GreaterThan(0).When(x => x.Weight.HasValue).WithMessage("Khối lượng phải lớn hơn 0.");
+        RuleFor(x => x.FrontTireSize)
+            .Matches(@"^\d+/\d+-\d+$")
+            .When(x => !string.IsNullOrWhiteSpace(x.FrontTireSize))
+            .WithMessage("Định dạng lốp trước không hợp lệ (VD: 120/70-17).");
+        RuleFor(x => x.RearTireSize)
+            .Matches(@"^\d+/\d+-\d+$")
+            .When(x => !string.IsNullOrWhiteSpace(x.RearTireSize))
+            .WithMessage("Định dạng lốp sau không hợp lệ (VD: 120/70-17).");
         RuleFor(x => x.Variants)
             .NotEmpty()
             .WithMessage("Sản phẩm phải có ít nhất một biến thể.")
@@ -62,7 +70,7 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
         {
             context.AddFailure(
                 "Variants",
-                "Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt (Options, Màu sắc hoặc Phiên bản).");
+                "Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt. Không được để trống thuộc tính.");
             return;
         }
         var optionSignatures = new HashSet<string>();

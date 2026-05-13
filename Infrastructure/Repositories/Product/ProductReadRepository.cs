@@ -1,20 +1,41 @@
 using Application.Common.Models;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
+using System.Linq.Expressions;
 using ProductEntity = Domain.Entities.Product;
 
 namespace Infrastructure.Repositories.Product;
 
-public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor) : IProductReadRepository
+public class ProductReadRepository(
+    ApplicationDBContext context,
+    ISieveProcessor sieveProcessor,
+    ISievePaginator paginator) : IProductReadRepository
 {
-    public IQueryable<ProductEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<ProductEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(mode);
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+        return paginator.ApplyAsync<ProductEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
+
+    internal IQueryable<ProductEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<ProductEntity>(mode)
             .Include(p => p.ProductCategory)
+            .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
             .Include(p => p.ProductTechnologies)
             .ThenInclude(pt => pt.Technology)
@@ -95,6 +116,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         }
         return query
             .Include(p => p.ProductCategory)
+            .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
             .Include(p => p.ProductTechnologies)
             .ThenInclude(pt => pt.Technology)
@@ -111,6 +133,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
+            .Include(p => p.CompatibleWith)
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
@@ -255,12 +278,20 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                     variantSubquery = variantSubquery.Where(
                         v => v.VariantOptionValues
                                 .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
-                            (v.ColorName != null && names.Any(n => v.ColorName.Contains(n))) ||
-                            (v.VersionName != null && names.Any(n => v.VersionName.Contains(n))));
+                            (v.ColorName != null && names.Any(n => v.ColorName.ToLower().Contains(n))) ||
+                            (v.VersionName != null && names.Any(n => v.VersionName.ToLower().Contains(n))));
                 }
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));
             }
+        } else if (minPrice.HasValue || maxPrice.HasValue)
+        {
+            query = query.Where(
+                p => p.ProductVariants
+                    .Any(
+                        v => v.DeletedAt == null &&
+                                (!minPrice.HasValue || v.Price >= minPrice.Value) &&
+                                (!maxPrice.HasValue || v.Price <= maxPrice.Value)));
         }
         var sieveModel = new SieveModel
         {
@@ -368,5 +399,10 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
             .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, slug) == 0, cancellationToken);
+    }
+
+    public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return context.Products.AnyAsync(p => p.Id == id, cancellationToken);
     }
 }

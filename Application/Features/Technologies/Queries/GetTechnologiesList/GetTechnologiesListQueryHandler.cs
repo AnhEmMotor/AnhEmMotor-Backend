@@ -1,6 +1,6 @@
 using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Technology;
+using Application.Interfaces.Repositories.Technology.Technology;
 using MediatR;
 
 namespace Application.Features.Technologies.Queries.GetTechnologiesList;

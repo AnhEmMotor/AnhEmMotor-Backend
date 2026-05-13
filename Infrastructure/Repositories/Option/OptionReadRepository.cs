@@ -1,14 +1,32 @@
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Option;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using System.Linq.Expressions;
 using OptionEntity = Domain.Entities.Option;
 
 namespace Infrastructure.Repositories.Option;
 
-public class OptionReadRepository(ApplicationDBContext context) : IOptionReadRepository
+public class OptionReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IOptionReadRepository
 {
-    public IQueryable<OptionEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<OptionEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(mode);
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+        return paginator.ApplyAsync<OptionEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
+
+    internal IQueryable<OptionEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<OptionEntity>(mode);
     }

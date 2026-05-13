@@ -1,4 +1,4 @@
-﻿using ProductVariantEntity = Domain.Entities.ProductVariant;
+using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Application.Interfaces.Repositories.ProductVariant
 {

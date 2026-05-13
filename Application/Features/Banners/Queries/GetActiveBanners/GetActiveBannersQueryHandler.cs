@@ -13,6 +13,7 @@ public sealed class GetActiveBannersQueryHandler(IBannerReadRepository bannerRea
         CancellationToken cancellationToken)
     {
         var banners = await bannerReadRepository.GetActiveBannersAsync(cancellationToken).ConfigureAwait(false);
-        return Result<List<BannerResponse>>.Success(banners.Adapt<List<BannerResponse>>());
+        var response = banners.Adapt<List<BannerResponse>>().OrderBy(b => b.DisplayOrder).ToList();
+        return Result<List<BannerResponse>>.Success(response);
     }
 }

@@ -10,6 +10,7 @@ namespace Application.Features.Contacts.Commands.CreateContactReply;
 public class CreateContactReplyCommandHandler(
     IContactReadRepository contactReadRepository,
     IContactInsertRepository contactInsertRepository,
+    IContactUpdateRepository contactUpdateRepository,
     IUnitOfWork unitOfWork,
     IHttpTokenAccessorService tokenAccessor) : IRequestHandler<CreateContactReplyCommand, Result<int>>
 {
@@ -31,7 +32,7 @@ public class CreateContactReplyCommandHandler(
         if (request.MarkAsProcessed)
         {
             contact.Status = "Processed";
-            contactInsertRepository.Update(contact);
+            contactUpdateRepository.Update(contact);
         }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(reply.Id);

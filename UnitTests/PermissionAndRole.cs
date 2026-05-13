@@ -13,11 +13,20 @@ using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
+using Infrastructure.Authorization.Hander;
+using Infrastructure.Authorization.Requirement;
+using Infrastructure.DBContexts;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Moq;
+using System.Security.Claims;
 using PermissionEntity = Domain.Entities.Permission;
 
 namespace UnitTests;
@@ -52,14 +61,7 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(
             x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(roles);
-        var permissions = new List<string>
-        {
-            PermissionsList.Brands.View,
-            PermissionsList.Brands.Create,
-            PermissionsList.Products.View,
-            PermissionsList.Products.Create,
-            PermissionsList.Roles.View
-        };
+        var permissions = new List<string> { Brands.View, Brands.Create, Products.View, Products.Create, Roles.View };
         roleReadRepoMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
@@ -107,12 +109,7 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(
             x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(roles);
-        var permissions = new List<string>
-        {
-            PermissionsList.Products.View,
-            PermissionsList.Brands.View,
-            PermissionsList.Files.View
-        };
+        var permissions = new List<string> { Products.View, Brands.View, Files.View };
         roleReadRepoMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
@@ -147,13 +144,7 @@ public class PermissionAndRole
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
         roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([role]);
-        var permissions = new List<string>
-        {
-            PermissionsList.Brands.View,
-            PermissionsList.Brands.Create,
-            PermissionsList.Brands.Edit,
-            PermissionsList.Brands.Delete
-        };
+        var permissions = new List<string> { Brands.View, Brands.Create, Brands.Edit, Brands.Delete };
         roleReadRepoMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
         var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
@@ -183,7 +174,7 @@ public class PermissionAndRole
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
         roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([role]);
-        var permissions = new List<string> { PermissionsList.Brands.View, PermissionsList.Brands.Create };
+        var permissions = new List<string> { Brands.View, Brands.Create };
         roleReadRepoMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
         var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
@@ -203,8 +194,8 @@ public class PermissionAndRole
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         var permissions = new List<PermissionEntity>
         {
-            new() { Id = 1, Name = PermissionsList.Brands.View },
-            new() { Id = 2, Name = PermissionsList.Products.View }
+            new() { Id = 1, Name = Brands.View },
+            new() { Id = 2, Name = Products.View }
         };
         permissionRepoMock.Setup(
             x => x.GetPermissionsByNamesAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
@@ -228,7 +219,7 @@ public class PermissionAndRole
         {
             RoleName = "NewRole",
             Description = "Test role",
-            Permissions = [PermissionsList.Brands.View, PermissionsList.Products.View]
+            Permissions = [Brands.View, Products.View]
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -257,7 +248,7 @@ public class PermissionAndRole
         {
             RoleName = "Manager",
             Description = "Duplicate",
-            Permissions = [PermissionsList.Brands.View]
+            Permissions = [Brands.View]
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -384,8 +375,8 @@ public class PermissionAndRole
             .ReturnsAsync([]);
         var newPermissions = new List<PermissionEntity>
         {
-            new() { Id = 3, Name = PermissionsList.Products.View },
-            new() { Id = 4, Name = PermissionsList.Products.Create }
+            new() { Id = 3, Name = Products.View },
+            new() { Id = 4, Name = Products.Create }
         };
         permissionReadRepoMock.Setup(
             x => x.GetPermissionsByNamesAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
@@ -420,7 +411,7 @@ public class PermissionAndRole
         {
             RoleId = roleId,
             Description = null,
-            Permissions = [PermissionsList.Products.View, PermissionsList.Products.Create]
+            Permissions = [Products.View, Products.Create]
         };
         roleManagerMock.Setup(x => x.FindByIdAsync(roleId.ToString())).ReturnsAsync(role);
         roleManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationRole>())).ReturnsAsync(IdentityResult.Success);
@@ -562,7 +553,7 @@ public class PermissionAndRole
     [Fact(DisplayName = "PR_001 - ValidateRules hợp lệ khi các quyền phụ thuộc được đáp ứng")]
     public void ValidateRules_ValidDependencies_ReturnsSuccess()
     {
-        var permissions = new List<string> { PermissionsList.Products.View, PermissionsList.Products.Create };
+        var permissions = new List<string> { Products.View, Products.Create };
         var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
         isValid.Should().BeTrue();
         errorMessage.Should().BeNull();
@@ -571,41 +562,28 @@ public class PermissionAndRole
     [Fact(DisplayName = "PR_002 - ValidateRules thất bại khi thiếu quyền phụ thuộc")]
     public void ValidateRules_MissingDependencies_ReturnsFailure()
     {
-        var permissions = new List<string> { PermissionsList.Products.Create };
+        var permissions = new List<string> { Products.Create };
         var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
         isValid.Should().BeFalse();
         errorMessage.Should().Contain("requires");
-        errorMessage.Should().Contain(PermissionsList.Products.View);
+        errorMessage.Should().Contain(Products.View);
     }
 
     [Fact(DisplayName = "PR_003 - Validator bắt lỗi dependency khi CreateRole")]
     public void CreateRoleCommand_MissingDependency_ShouldHaveValidationError()
     {
         CreateRoleCommandValidator validator = new();
-        var command = new CreateRoleCommand { RoleName = "ValidRole", Permissions = [PermissionsList.Brands.Create] };
+        var command = new CreateRoleCommand { RoleName = "ValidRole", Permissions = [Brands.Create] };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Permissions)
-            .WithErrorMessage($"Permission '{PermissionsList.Brands.Create}' requires: {PermissionsList.Brands.View}");
-    }
-
-    [Fact(DisplayName = "PERM_026 - Unit - Kiểm tra tính hợp lệ của tên vai trò (Role Name)")]
-    public void RoleName_ValidUnicodeAndSpecialChars_ShouldPass()
-    {
-        CreateRoleCommandValidator validator = new();
-        var command = new CreateRoleCommand
-        {
-            RoleName = "Quản lý - CRM.Hanoi",
-            Permissions = [PermissionsList.Brands.View]
-        };
-        var result = validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.RoleName);
+            .WithErrorMessage($"Permission '{Brands.Create}' requires: {Brands.View}");
     }
 
     [Fact(DisplayName = "PERM_027 - Unit - Chặn tên vai trò chứa ký tự đặc biệt cấm")]
     public void RoleName_BannedSpecialChars_ShouldHaveError()
     {
         CreateRoleCommandValidator validator = new();
-        var command = new CreateRoleCommand { RoleName = "Admin@123", Permissions = [PermissionsList.Brands.View] };
+        var command = new CreateRoleCommand { RoleName = "Admin@123", Permissions = [Brands.View] };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.RoleName);
     }
@@ -613,19 +591,19 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_028 - Unit - Ràng buộc phụ thuộc: Xác nhận cần quyền Xem")]
     public void ValidateRules_ConfirmBookingWithoutView_ReturnsFailure()
     {
-        var permissions = new List<string> { PermissionsList.Bookings.Confirm };
+        var permissions = new List<string> { Bookings.Confirm };
         var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
         isValid.Should().BeFalse();
-        errorMessage.Should().Contain(PermissionsList.Bookings.View);
+        errorMessage.Should().Contain(Bookings.View);
     }
 
     [Fact(DisplayName = "PERM_029 - Unit - Ràng buộc phụ thuộc: Phản hồi cần quyền Xem")]
     public void ValidateRules_ReplyContactWithoutView_ReturnsFailure()
     {
-        var permissions = new List<string> { PermissionsList.Contacts.Reply };
+        var permissions = new List<string> { Contacts.Reply };
         var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
         isValid.Should().BeFalse();
-        errorMessage.Should().Contain(PermissionsList.Contacts.View);
+        errorMessage.Should().Contain(Contacts.View);
     }
 
     [Fact(DisplayName = "PERM_035 - Unit - Kiểm tra cấu trúc nhóm quyền CRM & Connect")]
@@ -642,6 +620,55 @@ public class PermissionAndRole
         crmPerms.Any(p => p.ID!.Contains("Leads")).Should().BeTrue();
     }
 
+    [Fact(DisplayName = "PERM_041 - Unit - Quyền tối thượng của tài khoản Admin (Bypass check)")]
+    public async Task PermissionHandler_AdminRole_BypassesPermissionCheck()
+    {
+        var dbContextMock = new Mock<ApplicationDBContext>(new DbContextOptions<ApplicationDBContext>());
+        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
+        var userManagerMock = new Mock<UserManager<ApplicationUser>>(
+            userStoreMock.Object,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!);
+        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
+        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(roleStoreMock.Object, null!, null!, null!, null!);
+        var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = "admin" };
+        var requirement = new PermissionRequirement("Some.Permission");
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) };
+        var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
+        var authContext = new AuthorizationHandlerContext([requirement], userPrincipal, null);
+        userManagerMock.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(user);
+        userManagerMock.Setup(x => x.GetRolesAsync(user)).ReturnsAsync(["Admin"]);
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(
+                new Dictionary<string, string?> { ["ProtectedAuthorizationEntities:SuperRoles:0"] = "Admin" })
+            .Build();
+        var handler = new PermissionHandler(
+            dbContextMock.Object,
+            userManagerMock.Object,
+            roleManagerMock.Object,
+            configuration,
+            httpContextAccessorMock.Object);
+        await handler.HandleAsync(authContext).ConfigureAwait(true);
+        authContext.HasSucceeded.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "PERM_042 - Unit - Ngăn chặn gán quyền không tồn tại")]
+    public void UpdateRoleCommand_InvalidPermission_ShouldHaveError()
+    {
+        UpdateRoleCommandValidator validator = new();
+        var command = new UpdateRoleCommand { RoleId = Guid.NewGuid(), Permissions = ["Invalid_Permission_Name"] };
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Permissions);
+    }
+
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 }
+

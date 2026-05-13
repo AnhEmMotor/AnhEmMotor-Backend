@@ -1,18 +1,11 @@
 using Domain.Constants.Permission;
 using FluentValidation;
-using System.Reflection;
 
 namespace Application.Features.Permissions.Commands.UpdateRole;
 
 public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleCommand>
 {
-    private static readonly HashSet<string> ValidPermissions = [.. typeof(PermissionsList)
-        .GetNestedTypes()
-        .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-        .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
-        .Select(fieldInfo => fieldInfo.GetRawConstantValue() as string)
-        .Where(permission => permission is not null)
-        .Cast<string>()];
+    private static readonly HashSet<string> ValidPermissions = [.. PermissionsList.GetMetadataList().Select(m => m.Id)];
 
     public UpdateRoleCommandValidator()
     {

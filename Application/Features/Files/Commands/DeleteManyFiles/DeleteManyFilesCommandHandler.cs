@@ -1,7 +1,6 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.MediaFile;
-
+using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Domain.Constants;
 using MediatR;
 

@@ -1,4 +1,4 @@
-﻿using SettingEntity = Domain.Entities.Setting;
+using SettingEntity = Domain.Entities.Setting;
 
 namespace Application.Interfaces.Repositories.Setting
 {

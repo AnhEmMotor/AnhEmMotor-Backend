@@ -29,4 +29,10 @@ public sealed record CreateNewsCommand : IRequest<Result<int>>
 
     [JsonPropertyName("meta_keywords")]
     public string? MetaKeywords { get; init; }
+
+    [JsonPropertyName("category_id")]
+    public int? CategoryId { get; init; }
+
+    [JsonPropertyName("author_id")]
+    public Guid? AuthorId { get; init; }
 }

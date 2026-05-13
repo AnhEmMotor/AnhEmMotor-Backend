@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.UserManager.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;

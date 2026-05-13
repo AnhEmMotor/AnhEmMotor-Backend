@@ -17,6 +17,21 @@ namespace Domain.Entities
         [Column("Name", TypeName = "nvarchar(100)")]
         public string? Name { get; set; }
 
+        [Column("Description", TypeName = "nvarchar(MAX)")]
+        public string? Description { get; set; }
+
+        [Column("ImageUrl")]
+        public string? ImageUrl { get; set; }
+
+        [Column("SeoTitle", TypeName = "nvarchar(200)")]
+        public string? SeoTitle { get; set; }
+
+        [Column("SeoDescription", TypeName = "nvarchar(500)")]
+        public string? SeoDescription { get; set; }
+
+        [Column("IsActive")]
+        public bool IsActive { get; set; } = true;
+
         [Column("ColorCode", TypeName = "nvarchar(20)")]
         public string? ColorCode { get; set; }
 

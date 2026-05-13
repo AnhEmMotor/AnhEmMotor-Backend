@@ -1,13 +1,25 @@
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
 using CategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Infrastructure.Repositories.ProductCategory;
 
-public class ProductCategoryReadRepository(ApplicationDBContext context) : IProductCategoryReadRepository
+public class ProductCategoryReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IProductCategoryReadRepository
 {
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(mode);
+        return paginator.ApplyAsync<CategoryEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
+
     public Task<bool> ExistsByNameAsync(
         string name,
         CancellationToken cancellationToken,
@@ -50,7 +62,7 @@ public class ProductCategoryReadRepository(ApplicationDBContext context) : IProd
         return context.GetQuery<CategoryEntity>(mode).Where(c => ids.Contains(c.Id)).ToListAsync(cancellationToken);
     }
 
-    public IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    internal IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<CategoryEntity>(mode);
     }

@@ -2,7 +2,7 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
-
+using Application.Interfaces.Services.HR;
 using Domain.Constants.Order;
 using Mapster;
 using MediatR;
@@ -12,6 +12,7 @@ namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 public sealed class UpdateManyOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
+    ICommissionService commissionService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, Result<List<OutputItemResponse>?>>
 {
     public async Task<Result<List<OutputItemResponse>?>> Handle(
@@ -39,7 +40,8 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                         "StatusId"));
             }
         }
-        if (string.Compare(request.StatusId, OrderStatus.Completed) == 0 && outputsList.Count > 0)
+        bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0;
+        if (isCompleting && outputsList.Count > 0)
         {
             var productDemands = new Dictionary<int, int>();
             foreach (var output in outputsList)
@@ -81,7 +83,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
         }
         foreach (var output in outputsList)
         {
-            if (string.Compare(request.StatusId, OrderStatus.Completed) == 0)
+            if (isCompleting)
             {
                 var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken)
                     .ConfigureAwait(false);
@@ -98,6 +100,21 @@ public sealed class UpdateManyOutputStatusCommandHandler(
             updateRepository.Update(output);
         }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        if (isCompleting)
+        {
+            foreach (var output in outputsList)
+            {
+                await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+        } else if (string.Compare(request.StatusId, OrderStatus.Cancelled) == 0 ||
+            string.Compare(request.StatusId, OrderStatus.Refunded) == 0)
+        {
+            foreach (var output in outputsList)
+            {
+                await commissionService.VoidCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
+            }
+        }
         return outputsList.Adapt<List<OutputItemResponse>>();
     }
 }

@@ -1,9 +1,9 @@
-﻿using Application.ApiContracts.ProductCategory.Responses;
+using Application.ApiContracts.ProductCategory.Responses;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
 using Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -43,7 +43,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
 
     #pragma warning disable IDE0079
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "PC_025 - Lấy danh sách danh mục sản phẩm thành công (cho mọi người dùng)")]
+    [Fact(DisplayName = "PC_025 - L?y danh s�ch danh m?c s?n ph?m th�nh c�ng (cho m?i ngu?i d�ng)")]
     public async Task GetProductCategories_WithPagination_ShouldReturnCorrectData()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -54,7 +54,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -86,17 +86,17 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             $"/api/v1/ProductCategory?Page=1&PageSize=10&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(10);
         content.TotalCount.Should().Be(15);
         content.PageNumber.Should().Be(1);
     }
 
-    [Fact(DisplayName = "PC_026 - Lấy danh sách danh mục sản phẩm với phân trang")]
+    [Fact(DisplayName = "PC_026 - L?y danh s�ch danh m?c s?n ph?m v?i ph�n trang")]
     public async Task GetProductCategories_SecondPage_ShouldReturnCorrectData()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -107,7 +107,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -139,17 +139,17 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             $"/api/v1/ProductCategory?Page=2&PageSize=5&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
         content.TotalCount.Should().Be(12);
         content.PageNumber.Should().Be(2);
     }
 
-    [Fact(DisplayName = "PC_027 - Lấy danh sách danh mục sản phẩm với filter theo Name")]
+    [Fact(DisplayName = "PC_027 - L?y danh s�ch danh m?c s?n ph?m v?i filter theo Name")]
     public async Task GetProductCategories_WithFilter_ShouldReturnMatchingCategories()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -160,7 +160,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -196,18 +196,18 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             $"/api/v1/ProductCategory?Filters=Name@=Phone,Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         var items = content.Items?.Where(x => x.Name!.Contains(uniqueId)).ToList();
         items.Should().Contain(c => c.Name!.Contains("SmartPhone"));
         items.Should().Contain(c => c.Name!.Contains("Phone Case"));
         items.Should().NotContain(c => c.Name!.Contains("Laptop"));
     }
 
-    [Fact(DisplayName = "PC_028 - Lấy danh sách danh mục sản phẩm với sorting")]
+    [Fact(DisplayName = "PC_028 - L?y danh s�ch danh m?c s?n ph?m v?i sorting")]
     public async Task GetProductCategories_WithSorting_ShouldReturnSortedCategories()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -218,7 +218,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -244,18 +244,18 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             $"/api/v1/ProductCategory?Sorts=Name&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(3);
         content.Items[0].Name.Should().StartWith("Apple");
         content.Items[1].Name.Should().StartWith("Microsoft");
         content.Items[2].Name.Should().StartWith("Zebra");
     }
 
-    [Fact(DisplayName = "PC_029 - Lấy danh sách danh mục không tồn tại (Search k có kết quả)")]
+    [Fact(DisplayName = "PC_029 - L?y danh s�ch danh m?c kh�ng t?n t?i (Search k c� k?t qu?)")]
     public async Task GetProductCategories_NoResult_WhenFilterMatchesNothing()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -266,7 +266,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -281,16 +281,16 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             $"/api/v1/ProductCategory?Filters=Name@=NonExist{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().BeEmpty();
         content.TotalCount.Should().Be(0);
     }
 
-    [Fact(DisplayName = "PC_030 - Lấy danh sách danh mục sản phẩm cho manager thành công")]
+    [Fact(DisplayName = "PC_030 - L?y danh s�ch danh m?c s?n ph?m cho manager th�nh c�ng")]
     public async Task GetProductCategoriesForManager_WithPermission_ShouldReturnCategories()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -301,7 +301,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -333,16 +333,16 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             $"/api/v1/ProductCategory/for-manager?Page=1&PageSize=10&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content.Items?.Count.Should().BeGreaterThanOrEqualTo(5);
         content.Items.Should().Contain(c => c.Name!.Contains($"Manager_Cat_{uniqueId}"));
     }
 
-    [Fact(DisplayName = "PC_031 - Lấy danh sách danh mục sản phẩm đã xóa thành công")]
+    [Fact(DisplayName = "PC_031 - L?y danh s�ch danh m?c s?n ph?m d� x�a th�nh c�ng")]
     public async Task GetDeletedProductCategories_ShouldReturnOnlyDeletedCategories()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -353,7 +353,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -387,17 +387,17 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             $"/api/v1/ProductCategory/deleted?Page=1&PageSize=10&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
         content.Items.Should().OnlyContain(c => c.Name!.Contains("Deleted"));
         content.Items.Should().NotContain(c => c.Name!.Contains("Active"));
     }
 
-    [Fact(DisplayName = "PC_032 - Lấy chi tiết danh mục sản phẩm thành công")]
+    [Fact(DisplayName = "PC_032 - L?y chi ti?t danh m?c s?n ph?m th�nh c�ng")]
     public async Task GetProductCategoryById_ValidId_ShouldReturnCategoryWithProducts()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -408,7 +408,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -435,16 +435,16 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         }
         var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<ProductCategoryResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Id.Should().Be(categoryId);
         content.Name.Should().Be($"Detail_{uniqueId}");
     }
 
-    [Fact(DisplayName = "PC_033 - Lấy chi tiết danh mục sản phẩm không tồn tại")]
+    [Fact(DisplayName = "PC_033 - L?y chi ti?t danh m?c s?n ph?m kh�ng t?n t?i")]
     public async Task GetProductCategoryById_InvalidId_ShouldReturnNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -455,7 +455,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -468,10 +468,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/ProductCategory/99999", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "PC_034 - Lấy chi tiết danh mục sản phẩm đã bị xóa")]
+    [Fact(DisplayName = "PC_034 - L?y chi ti?t danh m?c s?n ph?m d� b? x�a")]
     public async Task GetProductCategoryById_DeletedCategory_ShouldReturnNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -482,7 +482,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.View],
+            [ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -509,10 +509,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         }
         var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "PC_035 - Tạo danh mục sản phẩm thành công qua API")]
+    [Fact(DisplayName = "PC_035 - T?o danh m?c s?n ph?m th�nh c�ng qua API")]
     public async Task CreateProductCategory_ValidRequest_ShouldCreateCategory()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -523,7 +523,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Create],
+            [ProductCategories.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -540,16 +540,16 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             Description = "Integration test"
         };
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory", request).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var content = await response!.Content
             .ReadFromJsonAsync<ProductCategoryResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Name.Should().Be($"API_Test_{uniqueId}");
         content.Id.Should().BeGreaterThan(0);
     }
 
-    [Fact(DisplayName = "PC_036 - Cập nhật danh mục sản phẩm thành công qua API")]
+    [Fact(DisplayName = "PC_036 - C?p nh?t danh m?c s?n ph?m th�nh c�ng qua API")]
     public async Task UpdateProductCategory_ValidRequest_ShouldUpdateCategory()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -560,7 +560,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Edit],
+            [ProductCategories.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -588,15 +588,15 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         var request = new UpdateProductCategoryCommand { Name = $"Updated_{uniqueId}" };
         var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{categoryId}", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<ProductCategoryResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Name.Should().Be($"Updated_{uniqueId}");
     }
 
-    [Fact(DisplayName = "PC_037 - Xóa danh mục sản phẩm thành công qua API")]
+    [Fact(DisplayName = "PC_037 - X�a danh m?c s?n ph?m th�nh c�ng qua API")]
     public async Task DeleteProductCategory_ValidId_ShouldDeleteCategory()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -607,7 +607,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -634,7 +634,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         }
         var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -647,7 +647,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         }
     }
 
-    [Fact(DisplayName = "PC_038 - Xóa nhiều danh mục sản phẩm thành công")]
+    [Fact(DisplayName = "PC_038 - X�a nhi?u danh m?c s?n ph?m th�nh c�ng")]
     public async Task DeleteManyProductCategories_ValidIds_ShouldDeleteAll()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -658,7 +658,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -692,7 +692,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequest, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -708,7 +708,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         }
     }
 
-    [Fact(DisplayName = "PC_039 - Xóa nhiều danh mục sản phẩm với một Id không hợp lệ")]
+    [Fact(DisplayName = "PC_039 - X�a nhi?u danh m?c s?n ph?m v?i m?t Id kh�ng h?p l?")]
     public async Task DeleteManyProductCategories_WithInvalidId_ShouldNotDeleteAny()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -719,7 +719,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -753,7 +753,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequest, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -767,7 +767,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         }
     }
 
-    [Fact(DisplayName = "PC_040 - Xóa nhiều danh mục sản phẩm với một Id đã bị xóa")]
+    [Fact(DisplayName = "PC_040 - X�a nhi?u danh m?c s?n ph?m v?i m?t Id d� b? x�a")]
     public async Task DeleteManyProductCategories_WithDeletedId_ShouldNotDeleteAny()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -778,7 +778,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -812,7 +812,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequest, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -823,7 +823,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         }
     }
 
-    [Fact(DisplayName = "PC_041 - Khôi phục nhiều danh mục sản phẩm thành công")]
+    [Fact(DisplayName = "PC_041 - Kh�i ph?c nhi?u danh m?c s?n ph?m th�nh c�ng")]
     public async Task RestoreManyProductCategories_ValidIds_ShouldRestoreAll()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -834,7 +834,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -865,7 +865,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         var request = new RestoreManyProductCategoriesCommand { Ids = [.. categoryIds] };
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -879,7 +879,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         }
     }
 
-    [Fact(DisplayName = "PC_042 - Khôi phục nhiều danh mục sản phẩm với một Id chưa bị xóa")]
+    [Fact(DisplayName = "PC_042 - Kh�i ph?c nhi?u danh m?c s?n ph?m v?i m?t Id chua b? x�a")]
     public async Task RestoreManyProductCategories_WithActiveId_ShouldNotRestoreAny()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -890,7 +890,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [PermissionsList.ProductCategories.Delete],
+            [ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -921,7 +921,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         var request = new RestoreManyProductCategoriesCommand { Ids = [.. categoryIds] };
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -935,3 +935,4 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     }
     #pragma warning restore CRR0035
 }
+

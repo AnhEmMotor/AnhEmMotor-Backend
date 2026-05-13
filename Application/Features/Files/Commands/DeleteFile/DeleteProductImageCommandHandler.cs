@@ -1,8 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.LocalFile;
-using Application.Interfaces.Repositories.MediaFile;
-
+using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Domain.Constants;
 using MediatR;
 
@@ -12,7 +11,7 @@ public sealed class DeleteProductImageCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork,
-    IFileStorageService fileStorageService) : IRequestHandler<DeleteProductImageCommand, Result>
+    IFileDeleteService fileDeleteService) : IRequestHandler<DeleteProductImageCommand, Result>
 {
     public async Task<Result> Handle(DeleteProductImageCommand request, CancellationToken cancellationToken)
     {
@@ -31,7 +30,7 @@ public sealed class DeleteProductImageCommandHandler(
         {
             try
             {
-                fileStorageService.DeleteFile(mediaFile.StoragePath);
+                fileDeleteService.DeleteFile(mediaFile.StoragePath);
             } catch
             {
             }

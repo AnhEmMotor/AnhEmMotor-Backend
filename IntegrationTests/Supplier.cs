@@ -1,8 +1,8 @@
-﻿using Application.ApiContracts.Supplier.Responses;
+using Application.ApiContracts.Supplier.Responses;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.RestoreManySuppliers;
 using Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
-using Domain.Constants.Permission;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
@@ -42,7 +42,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
 
     #pragma warning disable IDE0079
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "SUP_031 - Lấy danh sách Supplier với phân trang mặc định")]
+    [Fact(DisplayName = "SUP_031 - L?y danh s�ch Supplier v?i ph�n trang m?c d?nh")]
     public async Task GetSuppliers_DefaultPagination_ReturnsPagedResult()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -52,7 +52,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -97,16 +97,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
         var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(10);
         content.Items.Should().OnlyContain(s => s.Name!.Contains(uniqueId));
     }
 
-    [Fact(DisplayName = "SUP_032 - Lấy danh sách Supplier với phân trang tùy chỉnh")]
+    [Fact(DisplayName = "SUP_032 - L?y danh s�ch Supplier v?i ph�n trang t�y ch?nh")]
     public async Task GetSuppliers_CustomPagination_ReturnsPagedResult()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -116,7 +116,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -152,16 +152,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
         var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
         content.PageNumber.Should().Be(2);
     }
 
-    [Fact(DisplayName = "SUP_033 - Lấy danh sách Supplier với lọc theo Name")]
+    [Fact(DisplayName = "SUP_033 - L?y danh s�ch Supplier v?i l?c theo Name")]
     public async Task GetSuppliers_FilterByName_ReturnsFilteredResult()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -171,7 +171,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -219,16 +219,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
         var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=Test_{uniqueId}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(2);
         content.Items.Should().OnlyContain(s => s.Name!.Contains($"Test_{uniqueId}"));
     }
 
-    [Fact(DisplayName = "SUP_034 - Lấy danh sách Supplier với sắp xếp theo Name tăng dần")]
+    [Fact(DisplayName = "SUP_034 - L?y danh s�ch Supplier v?i s?p x?p theo Name tang d?n")]
     public async Task GetSuppliers_SortByNameAscending_ReturnsSortedResult()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -238,7 +238,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -288,18 +288,18 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             $"/api/v1/Supplier?Sorts=Name&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(3);
         content.Items![0].Name.Should().Be($"Alpha_{uniqueId}");
         content.Items[1].Name.Should().Be($"Beta_{uniqueId}");
         content.Items[2].Name.Should().Be($"Zebra_{uniqueId}");
     }
 
-    [Fact(DisplayName = "SUP_035 - Lấy danh sách Supplier chỉ bao gồm trạng thái active và inactive")]
+    [Fact(DisplayName = "SUP_035 - L?y danh s�ch Supplier ch? bao g?m tr?ng th�i active v� inactive")]
     public async Task GetSuppliers_OnlyActiveAndInactive_ExcludesDeleted()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -309,7 +309,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -366,17 +366,17 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
         var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Id@={uniqueId}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().Contain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
         content.Items.Should().Contain(s => string.Compare(s.Name, $"Inactive_{uniqueId}") == 0);
         content.Items.Should().NotContain(s => string.Compare(s.Name, $"Deleted_{uniqueId}") == 0);
     }
 
-    [Fact(DisplayName = "SUP_036 - Lấy danh sách Supplier đã xóa với phân trang")]
+    [Fact(DisplayName = "SUP_036 - L?y danh s�ch Supplier d� x�a v?i ph�n trang")]
     public async Task GetDeletedSuppliers_WithPagination_ReturnsDeletedOnly()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -386,7 +386,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -431,16 +431,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             $"/api/v1/Supplier/deleted?Filters=Id@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().Contain(s => string.Compare(s.Name, $"Deleted_{uniqueId}") == 0);
         content.Items.Should().NotContain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
     }
 
-    [Fact(DisplayName = "SUP_037 - Lấy chi tiết Supplier thành công với đầy đủ thông tin")]
+    [Fact(DisplayName = "SUP_037 - L?y chi ti?t Supplier th�nh c�ng v?i d?y d? th�ng tin")]
     public async Task GetSupplierById_WithFullInfo_ReturnsCompleteSupplier()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -450,7 +450,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -486,17 +486,17 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<SupplierResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Id.Should().Be(supplierId);
         content.Name.Should().Be($"Full Info {uniqueId}");
         content.Email.Should().Be($"test_{uniqueId}@test.com");
     }
 
-    [Fact(DisplayName = "SUP_038 - Lấy chi tiết Supplier thất bại khi Supplier đã bị xóa")]
+    [Fact(DisplayName = "SUP_038 - L?y chi ti?t Supplier th?t b?i khi Supplier d� b? x�a")]
     public async Task GetSupplierById_DeletedSupplier_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -506,7 +506,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -540,10 +540,10 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "SUP_039 - Lấy chi tiết Supplier thất bại khi Id không tồn tại")]
+    [Fact(DisplayName = "SUP_039 - L?y chi ti?t Supplier th?t b?i khi Id kh�ng t?n t?i")]
     public async Task GetSupplierById_NonExistentId_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -553,7 +553,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -564,10 +564,10 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/Supplier/999999", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "SUP_040 - Xóa nhiều Supplier thành công")]
+    [Fact(DisplayName = "SUP_040 - X�a nhi?u Supplier th�nh c�ng")]
     public async Task DeleteManySuppliers_AllValid_SuccessfullyDeletes()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -577,7 +577,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.Delete],
+            [Suppliers.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -624,7 +624,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -633,7 +633,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
     }
 
-    [Fact(DisplayName = "SUP_041 - Xóa nhiều Supplier thất bại khi một trong số đó còn Input Receipt Working")]
+    [Fact(DisplayName = "SUP_041 - X�a nhi?u Supplier th?t b?i khi m?t trong s? d� c�n Input Receipt Working")]
     public async Task DeleteManySuppliers_OneHasWorkingReceipt_FailsForAll()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -643,7 +643,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.Delete],
+            [Suppliers.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -705,7 +705,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -714,7 +714,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
     }
 
-    [Fact(DisplayName = "SUP_042 - Khôi phục nhiều Supplier thành công")]
+    [Fact(DisplayName = "SUP_042 - Kh�i ph?c nhi?u Supplier th�nh c�ng")]
     public async Task RestoreManySuppliers_AllDeleted_SuccessfullyRestores()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -724,7 +724,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.Delete],
+            [Suppliers.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -769,7 +769,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
         var request = new RestoreManySuppliersCommand { Ids = supplierIds };
         var response = await _client.PostAsJsonAsync("/api/v1/Supplier/restore-many", request).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -778,7 +778,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
     }
 
-    [Fact(DisplayName = "SUP_043 - Cập nhật trạng thái nhiều Supplier thành công")]
+    [Fact(DisplayName = "SUP_043 - C?p nh?t tr?ng th�i nhi?u Supplier th�nh c�ng")]
     public async Task UpdateManySupplierStatus_ValidStatus_SuccessfullyUpdates()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -788,7 +788,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.Edit],
+            [Suppliers.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -845,7 +845,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             request,
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -854,7 +854,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
     }
 
-    [Fact(DisplayName = "SUP_044 - Tính toán TotalInputValue chính xác với nhiều Input Receipt")]
+    [Fact(DisplayName = "SUP_044 - T�nh to�n TotalInputValue ch�nh x�c v?i nhi?u Input Receipt")]
     public async Task GetSupplierById_MultipleInputReceipts_CalculatesCorrectTotal()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -864,7 +864,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -936,15 +936,15 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<SupplierResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.TotalInput.Should().Be(65000);
     }
 
-    [Fact(DisplayName = "SUP_045 - Tính toán TotalInputValue không bao gồm Input Receipt ở trạng thái khác completed")]
+    [Fact(DisplayName = "SUP_045 - T�nh to�n TotalInputValue kh�ng bao g?m Input Receipt ? tr?ng th�i kh�c completed")]
     public async Task GetSupplierById_MixedInputStatuses_OnlyCountsCompleted()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -954,7 +954,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1034,15 +1034,15 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<SupplierResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.TotalInput.Should().Be(10000);
     }
 
-    [Fact(DisplayName = "SUP_066 - Lấy lịch sử nhập hàng của nhà cung cấp thành công")]
+    [Fact(DisplayName = "SUP_066 - L?y l?ch s? nh?p h�ng c?a nh� cung c?p th�nh c�ng")]
     public async Task GetPurchaseHistory_ValidSupplier_ReturnsPagedHistory()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1052,7 +1052,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [PermissionsList.Suppliers.View],
+            [Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1115,14 +1115,15 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}/purchase-history", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<SupplierPurchaseHistoryResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
         content.Items.Should().OnlyContain(x => x.TotalItems == 1);
     }
 
     #pragma warning restore CRR0035
 }
+

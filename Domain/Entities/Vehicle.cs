@@ -16,6 +16,12 @@ public class Vehicle : BaseEntity
 
     public Lead Lead { get; set; } = null!;
 
+    [Column("ProductId")]
+    [ForeignKey("Product")]
+    public int? ProductId { get; set; }
+
+    public Product? Product { get; set; }
+
     [Column("VinNumber", TypeName = "nvarchar(100)")]
     public string VinNumber { get; set; } = string.Empty;
 
@@ -24,6 +30,9 @@ public class Vehicle : BaseEntity
 
     [Column("LicensePlate", TypeName = "nvarchar(50)")]
     public string LicensePlate { get; set; } = string.Empty;
+
+    [Column("IsActive")]
+    public bool IsActive { get; set; } = true;
 
     [Column("PurchaseDate")]
     public DateTimeOffset PurchaseDate { get; set; }

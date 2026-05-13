@@ -1,0 +1,101 @@
+using Domain.Entities;
+using Infrastructure.DBContexts;
+using Microsoft.EntityFrameworkCore;
+
+namespace Infrastructure.Seeders;
+
+public static class TechnologySeeder
+{
+    public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken = default)
+    {
+        var categoryNames = new[] { "An toàn", "Tiện ích & Kết nối", "Động cơ & Vận hành" };
+        foreach (var name in categoryNames)
+        {
+            if (!await context.TechnologyCategories
+                .AnyAsync(c => c.Name.ToLower() == name.ToLower(), cancellationToken)
+                .ConfigureAwait(false))
+            {
+                context.TechnologyCategories.Add(new TechnologyCategory { Name = name });
+            }
+        }
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var categories = await context.TechnologyCategories
+            .ToDictionaryAsync(c => c.Name!.Trim(), c => c.Id, StringComparer.OrdinalIgnoreCase, cancellationToken)
+            .ConfigureAwait(false);
+        var honda = await context.Brands
+            .FirstOrDefaultAsync(
+                b => b.Name != null && b.Name.ToLower() == "honda",
+                cancellationToken)
+            .ConfigureAwait(false);
+        var yamaha = await context.Brands
+            .FirstOrDefaultAsync(
+                b => b.Name != null && b.Name.ToLower() == "yamaha",
+                cancellationToken)
+            .ConfigureAwait(false);
+        var piaggio = await context.Brands
+            .FirstOrDefaultAsync(
+                b => b.Name != null && b.Name.ToLower() == "piaggio",
+                cancellationToken)
+            .ConfigureAwait(false);
+        if (piaggio == null)
+        {
+            piaggio = new Brand { Name = "Piaggio" };
+            context.Brands.Add(piaggio);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        var techData = new List<(string Name, string Description, string Category, Brand? Brand)>
+        {
+            ("eSP+ (4 Van)", "Động cơ thế hệ mới, chạy cực êm và tiết kiệm xăng.", "Động cơ & Vận hành", honda),
+            ("HSTC", "Kiểm soát lực kéo, chống xoè khi đi đường trơn (SH, ADV).", "An toàn", honda),
+            ("E-Clutch", "Côn tay điện tử (Công nghệ mới nhất, không cần bóp côn).", "Động cơ & Vận hành", honda),
+            ("VVA (Variable Valve)", "Van biến thiên, giúp xe \"bốc\" ở tốc độ cao (Exciter, NVX).", "Động cơ & Vận hành", yamaha),
+            ("Blue Core", "Triết lý động cơ tập trung vào sự bền bỉ và tiết kiệm.", "Động cơ & Vận hành", yamaha),
+            ("Y-Connect", "Kết nối điện thoại chuyên sâu nhất (báo lỗi, lịch bảo trì).", "Tiện ích & Kết nối", yamaha),
+            ("i-Get", "Động cơ thế hệ mới giúp giảm tiếng ồn và độ rung (Vespa, Liberty).", "Động cơ & Vận hành", piaggio),
+            ("MIA", "Hệ thống định vị và kết nối smartphone cao cấp.", "Tiện ích & Kết nối", piaggio),
+            ("ABS 1 Kênh", "Hệ thống chống bó cứng phanh cho bánh trước.", "An toàn", null),
+            ("ABS 2 Kênh", "Hệ thống chống bó cứng phanh cho cả 2 bánh.", "An toàn", null),
+            ("Smartkey", "Hệ thống khóa thông minh chống trộm.", "Tiện ích & Kết nối", null),
+            ("Hệ thống đèn LED", "Chiếu sáng mạnh mẽ và tiết kiệm điện năng.", "Tiện ích & Kết nối", null)
+        };
+        foreach (var data in techData)
+        {
+            var exists = await context.Technologies
+                .AnyAsync(
+                    t => t.Name.ToLower() == data.Name.ToLower() &&
+                        t.BrandId == (data.Brand != null ? data.Brand.Id : null),
+                    cancellationToken)
+                .ConfigureAwait(false);
+            if (!exists)
+            {
+                if (categories.TryGetValue(data.Category.Trim(), out var categoryId))
+                {
+                    context.Technologies
+                        .Add(
+                            new Technology
+                            {
+                                Name = data.Name,
+                                DefaultTitle = data.Name,
+                                DefaultDescription = data.Description,
+                                CategoryId = categoryId,
+                                BrandId = data.Brand?.Id
+                            });
+                }
+            } else
+            {
+                var tech = await context.Technologies
+                    .FirstOrDefaultAsync(
+                        t => t.Name.ToLower() == data.Name.ToLower() &&
+                            t.BrandId == (data.Brand != null ? data.Brand.Id : null),
+                        cancellationToken)
+                    .ConfigureAwait(false);
+                if (tech != null && categories.TryGetValue(data.Category.Trim(), out var categoryId))
+                {
+                    tech.DefaultDescription = data.Description;
+                    tech.CategoryId = categoryId;
+                }
+            }
+        }
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+}

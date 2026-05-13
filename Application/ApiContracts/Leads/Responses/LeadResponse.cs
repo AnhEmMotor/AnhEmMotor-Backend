@@ -18,8 +18,25 @@ public class LeadResponse
 
     public string Source { get; set; } = string.Empty;
 
+    public string InterestedVehicle { get; set; } = string.Empty;
+
+    public string Address { get; set; } = string.Empty;
+
+    public string AddressDetail { get; set; } = string.Empty;
+
+    public string Ward { get; set; } = string.Empty;
+
+    public string District { get; set; } = string.Empty;
+
+    public string Province { get; set; } = string.Empty;
+
+    public string Gender { get; set; } = string.Empty;
+
+    public DateTime? Birthday { get; set; }
+
+    public string IdentificationNumber { get; set; } = string.Empty;
+
     public DateTimeOffset CreatedAt { get; set; }
 
     public List<LeadActivityResponse> Activities { get; set; } = [];
 }
-

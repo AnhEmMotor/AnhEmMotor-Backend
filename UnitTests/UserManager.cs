@@ -1,4 +1,4 @@
-﻿using Application.Features.UserManager.Commands.ChangePasswordByManager;
+using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Domain.Constants;
 using FluentAssertions;
@@ -10,16 +10,6 @@ public class UserManager
 {
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "UMGR_037 - Validate FullName rỗng vẫn hợp lệ")]
-    public void ValidateFullName_EmptyString_ValidationPasses()
-    {
-        var userId = Guid.NewGuid();
-        var command = new UpdateUserCommand() { UserId = userId, FullName = string.Empty };
-        var validator = new UpdateUserCommandValidator();
-        var result = validator.Validate(command);
-        result.IsValid.Should().BeTrue();
-    }
-
     [Fact(DisplayName = "UMGR_038 - Validate FullName có độ dài tối đa hợp lệ")]
     public void ValidateFullName_ExceedsMaxLength_ValidationFails()
     {

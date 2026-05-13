@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Auth.Responses;
+using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Features.Auth.Commands.FacebookLogin;
 using Application.Features.Auth.Commands.GoogleLogin;
@@ -51,7 +51,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     /// Đăng nhập bằng Username/Email và Password
     /// </summary>
     [HttpPost("login")]
-    [AnonymousOnly]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -102,7 +101,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     /// Đăng nhập bằng Google
     /// </summary>
     [HttpPost("google")]
-    [AnonymousOnly]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -118,7 +116,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     /// Đăng nhập bằng Facebook
     /// </summary>
     [HttpPost("facebook")]
-    [AnonymousOnly]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -134,7 +131,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     /// Đăng nhập bằng Username/Email và Password - Dành cho quản lý
     /// </summary>
     [HttpPost("login/for-manager")]
-    [AnonymousOnly]
     [EnableRateLimiting("public_api")]
     [SwaggerOperation(
         Summary = "Đăng nhập cho quản lý",

@@ -1,4 +1,6 @@
 
+using Domain.Entities;
+
 namespace Application.Interfaces.Repositories.Banner
 {
     public interface IBannerReadRepository
@@ -6,5 +8,9 @@ namespace Application.Interfaces.Repositories.Banner
         public Task<Domain.Entities.Banner?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
         public Task<List<Domain.Entities.Banner>> GetActiveBannersAsync(CancellationToken cancellationToken);
+
+        public Task<List<Domain.Entities.Banner>> GetAllAsync(CancellationToken cancellationToken = default);
+
+        public Task<List<BannerAuditLog>> GetLogsByBannerIdAsync(int bannerId, CancellationToken cancellationToken);
     }
 }

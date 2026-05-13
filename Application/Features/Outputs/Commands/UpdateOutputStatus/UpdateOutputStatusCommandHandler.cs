@@ -2,6 +2,7 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Services.HR;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Mapster;
@@ -12,6 +13,7 @@ namespace Application.Features.Outputs.Commands.UpdateOutputStatus;
 public sealed class UpdateOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
+    ICommissionService commissionService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -38,9 +40,11 @@ public sealed class UpdateOutputStatusCommandHandler(
                 $"Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}",
                 "StatusId");
         }
+        bool isCompleting = false;
         switch (request.StatusId)
         {
             case OrderStatus.Completed:
+                isCompleting = true;
                 output.FinishedBy = request.CurrentUserId;
                 var deductionResult = await updateRepository.HandleInventoryTransactionAsync(
                     output.Id,
@@ -66,14 +70,36 @@ public sealed class UpdateOutputStatusCommandHandler(
             case OrderStatus.Cancelled:
             case OrderStatus.Refunding:
             case OrderStatus.Refunded:
+                await commissionService.VoidCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
                 break;
             default:
+                foreach (var outputInfo in output.OutputInfos)
+                {
+                    if (outputInfo.ProductVarientId.HasValue && outputInfo.Count.HasValue)
+                    {
+                        var stock = await readRepository.GetStockQuantityByVariantIdAsync(
+                            outputInfo.ProductVarientId.Value,
+                            cancellationToken)
+                            .ConfigureAwait(false);
+                        if (stock < outputInfo.Count.Value)
+                        {
+                            return Error.BadRequest(
+                                $"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}",
+                                "Products");
+                        }
+                    }
+                }
                 break;
         }
         output.StatusId = request.StatusId;
         output.LastStatusChangedAt = DateTimeOffset.UtcNow;
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        if (isCompleting)
+        {
+            await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
+                .ConfigureAwait(false);
+        }
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
         return updated.Adapt<OrderDetailResponse>();

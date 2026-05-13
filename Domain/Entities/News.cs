@@ -41,5 +41,17 @@ namespace Domain.Entities
 
         [Column("MetaKeywords", TypeName = "nvarchar(255)")]
         public string? MetaKeywords { get; set; }
+
+        [Column("CategoryId")]
+        public int? CategoryId { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public NewsCategory? Category { get; set; }
+
+        [Column("AuthorId")]
+        public Guid? AuthorId { get; set; }
+
+        [ForeignKey("AuthorId")]
+        public ApplicationUser? Author { get; set; }
     }
 }

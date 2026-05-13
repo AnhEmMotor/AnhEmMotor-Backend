@@ -4,13 +4,12 @@ using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
 using Application.Features.Settings.Queries.GetStoreSettings;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -40,7 +39,7 @@ public class SettingController(IMediator mediator) : ApiController
     {
         var command = new SetSettingsCommand() { Settings = request };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, RouteNames.Settings.GetAllSettings);
+        return HandleCreated(result, Domain.Constants.RouteNames.Settings.GetAllSettings);
     }
 
     /// <summary>
@@ -48,7 +47,7 @@ public class SettingController(IMediator mediator) : ApiController
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpGet(Name = RouteNames.Settings.GetAllSettings)]
+    [HttpGet(Name = Domain.Constants.RouteNames.Settings.GetAllSettings)]
     [HasPermission(Settings.View)]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllSettingsAsync(CancellationToken cancellationToken)
@@ -72,3 +71,4 @@ public class SettingController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
+

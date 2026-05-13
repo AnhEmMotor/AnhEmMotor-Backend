@@ -15,4 +15,3 @@ public record CreateContactCommand : IRequest<Result<int>>
 
     public string Message { get; init; } = string.Empty;
 }
-

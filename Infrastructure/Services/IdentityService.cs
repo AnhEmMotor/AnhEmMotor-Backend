@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Auth.Requests;
+using Application.ApiContracts.Auth.Requests;
 using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Services;

@@ -46,6 +46,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
 
+    public virtual DbSet<VehicleType> VehicleTypes { get; set; }
+
     public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
 
     public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
@@ -61,6 +63,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<SupplierStatus> SupplierStatuses { get; set; }
 
     public virtual DbSet<VariantOptionValue> VariantOptionValues { get; set; }
+
+    public virtual DbSet<ProductCompatibility> ProductCompatibilities { get; set; }
 
     public virtual DbSet<MediaFile> MediaFiles { get; set; }
 
@@ -80,7 +84,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<News> News { get; set; }
 
+    public virtual DbSet<NewsCategory> NewsCategories { get; set; }
+
     public virtual DbSet<Banner> Banners { get; set; }
+
+    public virtual DbSet<BannerAuditLog> BannerAuditLogs { get; set; }
 
     public virtual DbSet<Contact> Contacts { get; set; }
 
@@ -97,6 +105,18 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<VehicleDocument> VehicleDocuments { get; set; }
 
     public virtual DbSet<MaintenanceHistory> MaintenanceHistories { get; set; }
+
+    public virtual DbSet<EmployeeProfile> EmployeeProfiles { get; set; }
+
+    public virtual DbSet<CommissionPolicy> CommissionPolicies { get; set; }
+
+    public virtual DbSet<CommissionRecord> CommissionRecords { get; set; }
+
+    public virtual DbSet<Payroll> Payrolls { get; set; }
+
+    public virtual DbSet<KPI> KPIs { get; set; }
+
+    public virtual DbSet<CommissionPolicyAuditLog> CommissionPolicyAuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -142,24 +162,13 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(pv => pv.VariantOptionValues)
             .HasForeignKey(v => v.VariantId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ProductTechnology>().HasKey(pt => new { pt.ProductId, pt.TechnologyId });
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => pt.Id);
         modelBuilder.Entity<ProductStatus>().HasKey(ps => ps.Key);
         modelBuilder.Entity<ProductStatus>()
             .HasData(new ProductStatus { Key = "for-sale" }, new ProductStatus { Key = "out-of-business" });
         modelBuilder.Entity<InputStatus>().HasKey(ins => ins.Key);
-        modelBuilder.Entity<InputStatus>()
-            .HasData(
-                new InputStatus { Key = "working" },
-                new InputStatus { Key = "finished" },
-                new InputStatus { Key = "cancelled" });
         modelBuilder.Entity<OutputStatus>().HasKey(ous => ous.Key);
-        modelBuilder.Entity<OutputStatus>()
-            .HasData(
-                new OutputStatus { Key = "pending" },
-                new OutputStatus { Key = "processing" },
-                new OutputStatus { Key = "shipped" },
-                new OutputStatus { Key = "delivered" },
-                new OutputStatus { Key = "cancelled" });
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)
             .WithMany(p => p.ProductTechnologies)
@@ -170,6 +179,26 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(t => t.ProductTechnologies)
             .HasForeignKey(pt => pt.TechnologyId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ProductCompatibility>()
+            .HasOne(pc => pc.BaseProduct)
+            .WithMany(p => p.CompatibleWith)
+            .HasForeignKey(pc => pc.BaseProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ProductCompatibility>()
+            .HasOne(pc => pc.CompatibleVehicleModel)
+            .WithMany(p => p.SupportedBy)
+            .HasForeignKey(pc => pc.CompatibleVehicleModelId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<News>()
+            .HasOne(n => n.Category)
+            .WithMany(c => c.News)
+            .HasForeignKey(n => n.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull);
+        modelBuilder.Entity<News>()
+            .HasOne(n => n.Author)
+            .WithMany()
+            .HasForeignKey(n => n.AuthorId)
+            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<MaintenanceHistory>()
             .HasOne(mh => mh.Vehicle)
             .WithMany(v => v.MaintenanceHistories)

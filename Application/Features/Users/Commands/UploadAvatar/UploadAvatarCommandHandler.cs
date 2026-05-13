@@ -1,7 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.LocalFile;
-using Application.Interfaces.Repositories.MediaFile;
+using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -13,7 +13,9 @@ namespace Application.Features.Users.Commands.UploadAvatar;
 public class UploadAvatarCommandHandler(
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,
-    IFileStorageService fileStorageService,
+    IFileReadService fileReadService,
+    IFileInsertService fileInsertService,
+    IFileDeleteService fileDeleteService,
     IMediaFileInsertRepository mediaFileInsertRepository,
     IMediaFileReadRepository mediaFileReadRepository,
     IMediaFileUpdateRepository mediaFileUpdateRepository,
@@ -39,7 +41,7 @@ public class UploadAvatarCommandHandler(
         {
             return Error.Forbidden("User account is banned.");
         }
-        var saveResult = await fileStorageService.SaveFileAsync(request.FileContent, cancellationToken, "avatars")
+        var saveResult = await fileInsertService.SaveFileAsync(request.FileContent, cancellationToken, "avatars")
             .ConfigureAwait(false);
         if (saveResult.IsFailure)
         {
@@ -71,11 +73,11 @@ public class UploadAvatarCommandHandler(
             }
         }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        user.AvatarUrl = fileStorageService.GetPublicUrl(savedFile.StoragePath);
+        user.AvatarUrl = fileReadService.GetPublicUrl(savedFile.StoragePath);
         var (succeeded, _) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
         if (!succeeded)
         {
-            fileStorageService.DeleteFile(savedFile.StoragePath);
+            fileDeleteService.DeleteFile(savedFile.StoragePath);
             return Error.Validation("Failed to update user avatar.", "UpdateFailed");
         }
         userStreamService.NotifyUserUpdate(user.Id);
