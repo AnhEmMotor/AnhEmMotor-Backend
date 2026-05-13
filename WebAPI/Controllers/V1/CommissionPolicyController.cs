@@ -7,6 +7,7 @@ using Asp.Versioning;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -16,6 +17,7 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 /// <param name="mediator">Instance của mediator.</param>
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý các chính sách hoa hồng")]
 [Route("api/v{version:apiVersion}/hr/commission-policies")]
 public class CommissionPolicyController(ISender mediator) : ApiController
 {

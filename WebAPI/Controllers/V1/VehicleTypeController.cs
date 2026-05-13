@@ -6,6 +6,7 @@ using Domain.Entities;
 using Domain.Primitives;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
+using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1
@@ -14,6 +15,7 @@ namespace WebAPI.Controllers.V1
     /// Quản lý các loại xe.
     /// </summary>
     [ApiVersion("1.0")]
+    [SwaggerTag("Quản lý các loại xe")]
     [Route("api/v{version:apiVersion}/[controller]")]
     public class VehicleTypeController(
         IVehicleTypeReadRepository readRepository,

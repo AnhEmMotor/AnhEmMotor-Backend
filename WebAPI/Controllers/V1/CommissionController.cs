@@ -7,6 +7,7 @@ using Domain.Entities;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Linq;
 using WebAPI.Controllers.Base;
 
@@ -17,6 +18,7 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 /// <param name="mediator">Instance của mediator.</param>
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý bản ghi hoa hồng của nhân viên")]
 [Route("api/v{version:apiVersion}/hr/commissions")]
 public class CommissionController(ISender mediator) : ApiController
 {

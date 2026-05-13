@@ -8,6 +8,7 @@ using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -16,6 +17,7 @@ namespace WebAPI.Controllers.V1;
 /// Quản lý danh sách các công nghệ và loại công nghệ.
 /// </summary>
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý danh sách các công nghệ và loại công nghệ")]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class TechnologiesController(IMediator mediator) : ApiController
 {

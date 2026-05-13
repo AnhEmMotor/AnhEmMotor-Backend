@@ -6,6 +6,7 @@ using Application.Features.Payments.Commands.ProcessVNPayIPN;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 
 namespace WebAPI.Controllers.V1;
@@ -14,6 +15,7 @@ namespace WebAPI.Controllers.V1;
 /// Quản lý các hoạt động thanh toán.
 /// </summary>
 [ApiController]
+[SwaggerTag("Quản lý các hoạt động thanh toán")]
 [Route("api/[controller]")]
 public class PaymentController(IMediator mediator) : ControllerBase
 {
