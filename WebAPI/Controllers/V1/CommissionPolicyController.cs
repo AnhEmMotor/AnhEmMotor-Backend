@@ -1,4 +1,4 @@
-using Application.Features.HR.Commands.CreateCommissionPolicy;
+﻿using Application.Features.HR.Commands.CreateCommissionPolicy;
 using Application.Features.HR.Commands.DeleteCommissionPolicy;
 using Application.Features.HR.Commands.UpdateCommissionPolicy;
 using Application.Features.HR.Queries.GetCommissionPolicies;
@@ -12,17 +12,18 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Controller for managing commission policies.
+/// Quản lý các chính sách hoa hồng.
 /// </summary>
-/// <param name="mediator">The mediator instance.</param>
+/// <param name="mediator">Instance của mediator.</param>
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/hr/commission-policies")]
 public class CommissionPolicyController(ISender mediator) : ApiController
 {
     /// <summary>
-    /// Gets all commission policies.
+    /// Lấy danh sách các chính sách hoa hồng.
     /// </summary>
-    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách chính sách hoa hồng.</returns>
     [HttpGet]
     public async Task<ActionResult<List<CommissionPolicy>>> GetPoliciesAsync(CancellationToken cancellationToken)
     {
@@ -31,10 +32,11 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     }
 
     /// <summary>
-    /// Creates a new commission policy.
+    /// Tạo mới một chính sách hoa hồng.
     /// </summary>
-    /// <param name="command">The create commission policy command.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <param name="command">Lệnh tạo chính sách.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu chính sách mới được tạo.</returns>
     [HttpPost]
     public async Task<IActionResult> CreatePolicyAsync(
         [FromBody] CreateCommissionPolicyCommand command,
@@ -47,11 +49,12 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     }
 
     /// <summary>
-    /// Updates an existing commission policy.
+    /// Cập nhật chính sách hoa hồng hiện có.
     /// </summary>
-    /// <param name="id">The policy ID.</param>
-    /// <param name="command">The update commission policy command.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <param name="id">ID của chính sách.</param>
+    /// <param name="command">Lệnh cập nhật chính sách.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả thực hiện.</returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdatePolicyAsync(
         int id,
@@ -67,10 +70,11 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     }
 
     /// <summary>
-    /// Gets audit logs for a policy.
+    /// Lấy lịch sử thay đổi (audit logs) của chính sách.
     /// </summary>
-    /// <param name="id">The policy ID.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <param name="id">ID của chính sách.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách lịch sử thay đổi.</returns>
     [HttpGet("{id}/audit-logs")]
     public async Task<ActionResult<List<CommissionPolicyAuditLog>>> GetAuditLogsAsync(
         int id,
@@ -82,10 +86,11 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     }
 
     /// <summary>
-    /// Deletes a commission policy.
+    /// Xóa một chính sách hoa hồng.
     /// </summary>
-    /// <param name="id">The policy ID.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <param name="id">ID của chính sách cần xóa.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả thực hiện.</returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePolicyAsync(int id, CancellationToken cancellationToken)
     {

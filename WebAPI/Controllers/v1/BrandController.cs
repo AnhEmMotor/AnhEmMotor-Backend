@@ -1,4 +1,4 @@
-using Application.ApiContracts.Brand.Responses;
+﻿using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
 using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteBrand;
@@ -23,17 +23,20 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Qu?n l� danh s�ch c�c thuong hi?u s?n ph?m (v� d?: Honda, Yamaha, Suzuki).
+/// Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).
 /// </summary>
 [ApiVersion("1.0")]
-[SwaggerTag("Qu?n l� danh s�ch c�c thuong hi?u s?n ph?m")]
+[SwaggerTag("Quản lý danh sách các thương hiệu sản phẩm")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class BrandController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// L?y danh s�ch thuong hi?u (c� ph�n trang, l?c, s?p x?p - v�o du?c cho m?i ngu?i d�ng).
+    /// Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp - dành cho mọi người dùng).
     /// </summary>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách thương hiệu.</returns>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetBrandsAsync(
@@ -46,8 +49,11 @@ public class BrandController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch thuong hi?u (c� ph�n trang, l?c, s?p x?p - v�o du?c khi c� quy?n xem danh s�ch thuong hi?u).
+    /// Lấy danh sách thương hiệu cho quản lý (có quyền xem danh sách).
     /// </summary>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách thương hiệu dành cho quản lý.</returns>
     [HttpGet("for-manager")]
     [HasPermission(Brands.View)]
     [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
@@ -61,8 +67,11 @@ public class BrandController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch thuong hi?u d� b? xo� (c� ph�n trang, l?c, s?p x?p).
+    /// Lấy danh sách thương hiệu đã bị xóa (có phân trang, lọc, sắp xếp).
     /// </summary>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách thương hiệu đã xóa.</returns>
     [HttpGet("deleted")]
     [HasPermission(Brands.Delete)]
     [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
@@ -76,8 +85,11 @@ public class BrandController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y th�ng tin c?a thuong hi?u du?c ch?n.
+    /// Lấy thông tin chi tiết của thương hiệu được chọn.
     /// </summary>
+    /// <param name="id">ID của thương hiệu.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin chi tiết thương hiệu.</returns>
     [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.Brands.GetById)]
     [HasPermission(Brands.View)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
@@ -90,8 +102,11 @@ public class BrandController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// T?o thuong hi?u m?i.
+    /// Tạo thương hiệu mới.
     /// </summary>
+    /// <param name="request">Thông tin thương hiệu cần tạo.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thương hiệu vừa được tạo.</returns>
     [HttpPost]
     [HasPermission(Brands.Create)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status201Created)]
@@ -108,8 +123,12 @@ public class BrandController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// C?p nh?t th�ng tin thuong hi?u.
+    /// Cập nhật thông tin thương hiệu.
     /// </summary>
+    /// <param name="id">ID thương hiệu cần cập nhật.</param>
+    /// <param name="request">Thông tin cập nhật.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin thương hiệu sau cập nhật.</returns>
     [HttpPut("{id:int}")]
     [HasPermission(Brands.Edit)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
@@ -125,8 +144,11 @@ public class BrandController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xo� thuong hi?u.
+    /// Xóa thương hiệu.
     /// </summary>
+    /// <param name="id">ID thương hiệu cần xóa.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả xóa.</returns>
     [HttpDelete("{id:int}")]
     [HasPermission(Brands.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -139,8 +161,11 @@ public class BrandController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Kh�i ph?c l?i thuong hi?u d� xo�.
+    /// Khôi phục thương hiệu đã xóa.
     /// </summary>
+    /// <param name="id">ID thương hiệu cần khôi phục.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin thương hiệu sau khi khôi phục.</returns>
     [HttpPost("restore/{id:int}")]
     [HasPermission(Brands.Delete)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
@@ -153,8 +178,11 @@ public class BrandController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xo� nhi?u thuong hi?u c�ng l�c.
+    /// Xóa nhiều thương hiệu cùng lúc.
     /// </summary>
+    /// <param name="request">Danh sách ID thương hiệu cần xóa.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả xóa nhiều.</returns>
     [HttpDelete("delete-many")]
     [HasPermission(Brands.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -169,8 +197,11 @@ public class BrandController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Kh�i ph?c nhi?u thuong hi?u d� xo� c�ng l�c.
+    /// Khôi phục nhiều thương hiệu đã xóa cùng lúc.
     /// </summary>
+    /// <param name="request">Danh sách ID thương hiệu cần khôi phục.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách thương hiệu sau khi khôi phục.</returns>
     [HttpPost("restore-many")]
     [HasPermission(Brands.Delete)]
     [ProducesResponseType(typeof(List<BrandResponse>), StatusCodes.Status200OK)]
@@ -184,4 +215,3 @@ public class BrandController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-
