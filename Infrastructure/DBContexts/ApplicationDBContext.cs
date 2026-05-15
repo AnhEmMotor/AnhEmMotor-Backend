@@ -60,6 +60,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<SupplierContact> SupplierContacts { get; set; }
 
+    public virtual DbSet<Domain.Entities.PartnerType> PartnerTypes { get; set; }
     public virtual DbSet<SupplierStatus> SupplierStatuses { get; set; }
 
     public virtual DbSet<VariantOptionValue> VariantOptionValues { get; set; }
@@ -168,6 +169,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<ProductStatus>()
             .HasData(new ProductStatus { Key = "for-sale" }, new ProductStatus { Key = "out-of-business" });
         modelBuilder.Entity<InputStatus>().HasKey(ins => ins.Key);
+        modelBuilder.Entity<Domain.Entities.PartnerType>().HasKey(pt => pt.Key);
+        modelBuilder.Entity<Domain.Entities.PartnerType>().HasData(
+            new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Supplier },
+            new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Financial },
+            new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Insurance }
+        );
         modelBuilder.Entity<OutputStatus>().HasKey(ous => ous.Key);
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)

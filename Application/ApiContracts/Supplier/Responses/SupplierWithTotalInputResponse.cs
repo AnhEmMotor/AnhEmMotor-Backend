@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 namespace Application.ApiContracts.Supplier.Responses
 {
     public sealed class SupplierWithTotalInputResponse
@@ -25,5 +26,8 @@ namespace Application.ApiContracts.Supplier.Responses
         public string? Notes { get; set; }
 
         public string? TaxIdentificationNumber { get; set; }
+
+        [JsonPropertyName("partnerTypeId")]
+        public string? PartnerTypeId { get; set; }
     }
 }

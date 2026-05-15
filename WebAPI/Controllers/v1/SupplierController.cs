@@ -12,6 +12,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
+using Application.Features.Suppliers.Queries.GetPartnerTypesList;
 using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
@@ -36,6 +37,21 @@ namespace WebAPI.Controllers.V1;
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SupplierController(IMediator mediator) : ApiController
 {
+    /// <summary>
+    /// Lấy danh sách các loại đối tác.
+    /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách loại đối tác.</returns>
+    [HttpGet("partner-types")]
+    [RequiresAnyPermissions(Suppliers.View, Suppliers.Create, Suppliers.Edit)]
+    [ProducesResponseType(typeof(List<PartnerTypeResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPartnerTypesAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetPartnerTypesListQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
     /// <summary>
     /// Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp).
     /// </summary>
