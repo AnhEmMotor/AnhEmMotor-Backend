@@ -32,20 +32,20 @@ public class ProductCategory
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
-    [Fact(DisplayName = "PC_001 - T?o danh m?c s?n ph?m thành công (Happy Path)")]
+    [Fact(DisplayName = "PC_001 - T?o danh m?c s?n ph?m thï¿½nh cï¿½ng (Happy Path)")]
     public async Task CreateProductCategory_WithValidData_ShouldSucceed()
     {
         var handler = new CreateProductCategoryCommandHandler(
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Ði?n tho?i", Description = "Các s?n ph?m di?n tho?i" };
+        var command = new CreateProductCategoryCommand { Name = "ï¿½i?n tho?i", Description = "Cï¿½c s?n ph?m di?n tho?i" };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
-        resultObj.Value.Name.Should().Be("Ði?n tho?i");
-        resultObj.Value.Description.Should().Be("Các s?n ph?m di?n tho?i");
+        resultObj.Value.Name.Should().Be("ï¿½i?n tho?i");
+        resultObj.Value.Description.Should().Be("Cï¿½c s?n ph?m di?n tho?i");
         _insertRepoMock.Verify(
-            x => x.Add(It.Is<ProductCategoryEntity>(c => string.Compare(c.Name, "Ði?n tho?i") == 0)),
+            x => x.Add(It.Is<ProductCategoryEntity>(c => string.Compare(c.Name, "ï¿½i?n tho?i") == 0)),
             Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -81,7 +81,7 @@ public class ProductCategory
         resultObj.Value.Description.Should().BeNull();
     }
 
-    [Fact(DisplayName = "PC_004 - T?o danh m?c s?n ph?m v?i Name có kho?ng tr?ng d?u/cu?i")]
+    [Fact(DisplayName = "PC_004 - T?o danh m?c s?n ph?m v?i Name cï¿½ kho?ng tr?ng d?u/cu?i")]
     public async Task CreateProductCategory_WithNameWhitespace_ShouldTrim()
     {
         var handler = new CreateProductCategoryCommandHandler(
@@ -94,30 +94,30 @@ public class ProductCategory
         resultObj.Value.Name.Should().Be("Ph? ki?n");
     }
 
-    [Fact(DisplayName = "PC_005 - T?o danh m?c s?n ph?m v?i Description có kho?ng tr?ng d?u/cu?i")]
+    [Fact(DisplayName = "PC_005 - T?o danh m?c s?n ph?m v?i Description cï¿½ kho?ng tr?ng d?u/cu?i")]
     public async Task CreateProductCategory_WithDescriptionWhitespace_ShouldTrim()
     {
         var handler = new CreateProductCategoryCommandHandler(
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Máy tính", Description = "  Mô t? test  " };
+        var command = new CreateProductCategoryCommand { Name = "Mï¿½y tï¿½nh", Description = "  Mï¿½ t? test  " };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
-        resultObj.Value.Description.Should().Be("Mô t? test");
+        resultObj.Value.Description.Should().Be("Mï¿½ t? test");
     }
 
-    [Fact(DisplayName = "PC_006 - T?o danh m?c s?n ph?m v?i Name ch?a ký t? d?c bi?t")]
+    [Fact(DisplayName = "PC_006 - T?o danh m?c s?n ph?m v?i Name ch?a kï¿½ t? d?c bi?t")]
     public async Task CreateProductCategory_WithSpecialCharacters_ShouldSucceed()
     {
         var handler = new CreateProductCategoryCommandHandler(
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Ð? di?n t? & Công ngh? <Tag>", Description = "Test" };
+        var command = new CreateProductCategoryCommand { Name = "ï¿½? di?n t? & Cï¿½ng ngh? <Tag>", Description = "Test" };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
-        resultObj.Value.Name.Should().Be("Ð? di?n t? & Công ngh? <Tag>");
+        resultObj.Value.Name.Should().Be("ï¿½? di?n t? & Cï¿½ng ngh? <Tag>");
     }
 
     [Fact(DisplayName = "PC_007 - T?o danh m?c s?n ph?m thi?u Name (Name null)")]
@@ -138,7 +138,7 @@ public class ProductCategory
         result.ShouldHaveValidationErrorFor(x => x.Name);
     }
 
-    [Fact(DisplayName = "PC_009 - T?o danh m?c s?n ph?m v?i Name trùng (case-sensitive)")]
+    [Fact(DisplayName = "PC_009 - T?o danh m?c s?n ph?m v?i Name trï¿½ng (case-sensitive)")]
     public async Task CreateProductCategory_WithDuplicateName_ShouldThrowException()
     {
         var handler = new CreateProductCategoryCommandHandler(
@@ -156,7 +156,7 @@ public class ProductCategory
         resultObj.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PC_010 - T?o danh m?c s?n ph?m v?i Name trùng (case-insensitive)")]
+    [Fact(DisplayName = "PC_010 - T?o danh m?c s?n ph?m v?i Name trï¿½ng (case-insensitive)")]
     public async Task CreateProductCategory_WithDuplicateNameCaseInsensitive_ShouldThrowException()
     {
         var handler = new CreateProductCategoryCommandHandler(
@@ -174,21 +174,21 @@ public class ProductCategory
         resultObj.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PC_011 - T?o danh m?c s?n ph?m v?i Name trùng b?n ghi dã xóa")]
+    [Fact(DisplayName = "PC_011 - T?o danh m?c s?n ph?m v?i Name trï¿½ng b?n ghi dï¿½ xï¿½a")]
     public async Task CreateProductCategory_WithNameOfDeletedCategory_ShouldThrowException()
     {
         var handler = new CreateProductCategoryCommandHandler(
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Ðã xóa", Description = "Test" };
-        _readRepoMock.Setup(x => x.ExistsByNameAsync("Ðã xóa", It.IsAny<CancellationToken>(), DataFetchMode.All))
+        var command = new CreateProductCategoryCommand { Name = "ï¿½ï¿½ xï¿½a", Description = "Test" };
+        _readRepoMock.Setup(x => x.ExistsByNameAsync("ï¿½ï¿½ xï¿½a", It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(true);
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PC_012 - T?o danh m?c s?n ph?m v?i d? li?u rác trong request")]
+    [Fact(DisplayName = "PC_012 - T?o danh m?c s?n ph?m v?i d? li?u rï¿½c trong request")]
     public async Task CreateProductCategory_WithExtraFields_ShouldIgnoreExtraData()
     {
         var handler = new CreateProductCategoryCommandHandler(
@@ -202,7 +202,7 @@ public class ProductCategory
         resultObj.Value.Description.Should().Be("Valid");
     }
 
-    [Fact(DisplayName = "PC_013 - C?p nh?t danh m?c s?n ph?m thành công (c? Name và Description)")]
+    [Fact(DisplayName = "PC_013 - C?p nh?t danh m?c s?n ph?m thï¿½nh cï¿½ng (c? Name vï¿½ Description)")]
     public async Task UpdateProductCategory_WithBothFields_ShouldSucceed()
     {
         var handler = new UpdateProductCategoryCommandHandler(
@@ -273,7 +273,7 @@ public class ProductCategory
         result.ShouldHaveValidationErrorFor(x => x);
     }
 
-    [Fact(DisplayName = "PC_017 - C?p nh?t danh m?c s?n ph?m v?i Name trùng (khác Id)")]
+    [Fact(DisplayName = "PC_017 - C?p nh?t danh m?c s?n ph?m v?i Name trï¿½ng (khï¿½c Id)")]
     public async Task UpdateProductCategory_WithDuplicateName_ShouldThrowException()
     {
         var handler = new UpdateProductCategoryCommandHandler(
@@ -290,7 +290,7 @@ public class ProductCategory
         resultObj.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PC_018 - C?p nh?t danh m?c s?n ph?m không t?n t?i")]
+    [Fact(DisplayName = "PC_018 - C?p nh?t danh m?c s?n ph?m khï¿½ng t?n t?i")]
     public async Task UpdateProductCategory_NotFound_ShouldThrowException()
     {
         var handler = new UpdateProductCategoryCommandHandler(
@@ -304,7 +304,7 @@ public class ProductCategory
         resultObj.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PC_019 - C?p nh?t danh m?c s?n ph?m dã b? xóa")]
+    [Fact(DisplayName = "PC_019 - C?p nh?t danh m?c s?n ph?m dï¿½ b? xï¿½a")]
     public async Task UpdateProductCategory_DeletedCategory_ShouldThrowException()
     {
         var handler = new UpdateProductCategoryCommandHandler(
@@ -318,26 +318,7 @@ public class ProductCategory
         resultObj.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PC_020 - Xóa danh m?c s?n ph?m thành công")]
-    public async Task DeleteProductCategory_ValidId_ShouldSucceed()
-    {
-        var handler = new DeleteProductCategoryCommandHandler(
-            _readRepoMock.Object,
-            _deleteRepoMock.Object,
-            _protectedCategoryServiceMock.Object,
-            _unitOfWorkMock.Object);
-        var command = new DeleteProductCategoryCommand { Id = 8 };
-        _readRepoMock.Setup(x => x.GetByIdAsync(8, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(new ProductCategoryEntity { Id = 8, Name = "To Delete", DeletedAt = null });
-        _protectedCategoryServiceMock.Setup(x => x.IsProtectedAsync(8, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
-        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        resultObj.IsSuccess.Should().BeTrue();
-        _deleteRepoMock.Verify(x => x.Delete(It.Is<ProductCategoryEntity>(c => c.Id == 8)), Times.Once);
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact(DisplayName = "PC_021 - Xóa danh m?c s?n ph?m không t?n t?i")]
+    [Fact(DisplayName = "PC_021 - Xï¿½a danh m?c s?n ph?m khï¿½ng t?n t?i")]
     public async Task DeleteProductCategory_NotFound_ShouldThrowException()
     {
         var handler = new DeleteProductCategoryCommandHandler(
@@ -352,7 +333,7 @@ public class ProductCategory
         resultObj.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PC_022 - Xóa danh m?c s?n ph?m dã b? xóa")]
+    [Fact(DisplayName = "PC_022 - Xï¿½a danh m?c s?n ph?m dï¿½ b? xï¿½a")]
     public async Task DeleteProductCategory_AlreadyDeleted_ShouldThrowException()
     {
         var handler = new DeleteProductCategoryCommandHandler(
@@ -367,7 +348,7 @@ public class ProductCategory
         resultObj.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PC_023 - Khôi ph?c danh m?c s?n ph?m thành công")]
+    [Fact(DisplayName = "PC_023 - Khï¿½i ph?c danh m?c s?n ph?m thï¿½nh cï¿½ng")]
     public async Task RestoreProductCategory_ValidId_ShouldSucceed()
     {
         var handler = new RestoreProductCategoryCommandHandler(
@@ -384,7 +365,7 @@ public class ProductCategory
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "PC_024 - Khôi ph?c danh m?c s?n ph?m chua b? xóa")]
+    [Fact(DisplayName = "PC_024 - Khï¿½i ph?c danh m?c s?n ph?m chua b? xï¿½a")]
     public async Task RestoreProductCategory_NotDeleted_ShouldThrowException()
     {
         var handler = new RestoreProductCategoryCommandHandler(

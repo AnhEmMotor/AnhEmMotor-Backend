@@ -62,6 +62,68 @@ public class ProductCategoryReadRepository(ApplicationDBContext context, ISieveP
         return context.GetQuery<CategoryEntity>(mode).Where(c => ids.Contains(c.Id)).ToListAsync(cancellationToken);
     }
 
+    public Task<bool> HasSubCategoriesAsync(
+        int id,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return context.GetQuery<CategoryEntity>(mode).AnyAsync(x => x.ParentId == id, cancellationToken);
+    }
+
+    public Task<List<CategoryEntity>> GetSubCategoriesAsync(
+        int parentId,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return context.GetQuery<CategoryEntity>(mode)
+            .Where(x => x.ParentId == parentId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> AnyCategoryInTreeHasProductsAsync(
+        int rootId,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        // 1. Check root category
+        var hasProducts = await context.GetQuery<Domain.Entities.Product>(mode)
+            .AnyAsync(p => p.CategoryId == rootId, cancellationToken);
+        if (hasProducts) return true;
+
+        // 2. Check its subcategories
+        var subCategoryIds = await context.GetQuery<CategoryEntity>(mode)
+            .Where(c => c.ParentId == rootId)
+            .Select(c => c.Id)
+            .ToListAsync(cancellationToken);
+
+        if (subCategoryIds.Any())
+        {
+            return await context.GetQuery<Domain.Entities.Product>(mode)
+                .AnyAsync(p => p.CategoryId.HasValue && subCategoryIds.Contains(p.CategoryId.Value), cancellationToken);
+        }
+
+        return false;
+    }
+
+    public async Task<bool> AnyInTreeHasProductsAsync(
+        IEnumerable<int> rootIds,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        var rootIdList = rootIds.ToList();
+        if (!rootIdList.Any()) return false;
+
+        var subCategoryIds = await context.GetQuery<CategoryEntity>(mode)
+            .Where(c => c.ParentId.HasValue && rootIdList.Contains(c.ParentId.Value))
+            .Select(c => c.Id)
+            .ToListAsync(cancellationToken);
+
+        var allIds = rootIdList.Union(subCategoryIds).Distinct().ToList();
+
+        return await context.GetQuery<Domain.Entities.Product>(mode)
+            .AnyAsync(p => p.CategoryId.HasValue && allIds.Contains(p.CategoryId.Value), cancellationToken);
+    }
+
     internal IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<CategoryEntity>(mode);

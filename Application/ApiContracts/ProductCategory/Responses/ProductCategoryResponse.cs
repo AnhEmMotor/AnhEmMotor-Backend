@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Application.ApiContracts.ProductCategory.Responses
 {
     public class ProductCategoryResponse

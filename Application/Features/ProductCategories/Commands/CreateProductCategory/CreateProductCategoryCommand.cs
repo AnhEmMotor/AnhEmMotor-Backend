@@ -1,6 +1,7 @@
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Common.Models;
 using MediatR;
+using System.Text.Json.Serialization;
 
 namespace Application.Features.ProductCategories.Commands.CreateProductCategory;
 

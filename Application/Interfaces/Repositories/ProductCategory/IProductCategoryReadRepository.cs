@@ -36,4 +36,24 @@ public interface IProductCategoryReadRepository
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<bool> HasSubCategoriesAsync(
+        int id,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<List<CategoryEntity>> GetSubCategoriesAsync(
+        int parentId,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<bool> AnyCategoryInTreeHasProductsAsync(
+        int rootId,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<bool> AnyInTreeHasProductsAsync(
+        IEnumerable<int> rootIds,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
 }
