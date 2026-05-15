@@ -26,6 +26,7 @@ using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Technology;
+using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
 using Domain.Constants.Order;
@@ -59,6 +60,7 @@ public class Product
     private readonly Mock<IProductVariantInsertRepository> _productVariantInsertRepository;
     private readonly Mock<IVariantOptionValueDeleteRepository> _variantOptionValueDeleteRepoMock;
     private readonly Mock<IProductTechnologyRepository> _productTechnologyRepoMock;
+    private readonly Mock<ITechnologyReadRepository> _technologyReadRepoMock;
 
     public Product()
     {
@@ -88,6 +90,9 @@ public class Product
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
         _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
         _productTechnologyRepoMock = new Mock<IProductTechnologyRepository>();
+        _technologyReadRepoMock = new Mock<ITechnologyReadRepository>();
+        _technologyReadRepoMock.Setup(x => x.GetByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
         new ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
@@ -184,6 +189,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -226,6 +232,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -253,6 +260,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -282,6 +290,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -309,6 +318,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -338,6 +348,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -369,6 +380,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -400,6 +412,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -446,6 +459,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -549,6 +563,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -603,6 +618,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -682,6 +698,7 @@ public class Product
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -715,6 +732,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _variantInsertRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
@@ -740,6 +758,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _variantInsertRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
@@ -765,6 +784,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _variantInsertRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
@@ -801,6 +821,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _variantInsertRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
@@ -828,6 +849,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _variantInsertRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
@@ -866,6 +888,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _variantInsertRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
@@ -904,6 +927,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _variantInsertRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
@@ -942,6 +966,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _variantInsertRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,

@@ -5,16 +5,16 @@ namespace Application.ApiContracts.Product.Requests
 {
     public class TechnologyJsonRequest
     {
-        [JsonPropertyName("technology_id")]
+        [JsonPropertyName("technologyId")]
         public int TechnologyId { get; set; }
 
-        [JsonPropertyName("custom_title")]
+        [JsonPropertyName("customTitle")]
         public string? CustomTitle { get; set; }
 
-        [JsonPropertyName("custom_description")]
+        [JsonPropertyName("customDescription")]
         public string? CustomDescription { get; set; }
 
-        [JsonPropertyName("custom_image_url")]
+        [JsonPropertyName("customImageUrl")]
         public string? CustomImageUrl { get; set; }
     }
 }

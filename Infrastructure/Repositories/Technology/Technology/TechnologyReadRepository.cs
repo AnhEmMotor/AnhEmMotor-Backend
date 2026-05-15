@@ -58,6 +58,16 @@ public class TechnologyReadRepository(ApplicationDBContext context, ISieveProces
         return query.ToListAsync(cancellationToken);
     }
 
+    public Task<List<TechnologyEntity>> GetByIdsAsync(
+        IEnumerable<int> ids,
+        CancellationToken cancellationToken = default)
+    {
+        return context.Technologies
+            .AsNoTracking()
+            .Where(x => ids.Contains(x.Id) && x.DeletedAt == null)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<List<TechnologyEntity>> GetAllWithCategoryAsync(CancellationToken cancellationToken = default)
     {
         return context.Technologies

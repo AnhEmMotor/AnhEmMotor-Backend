@@ -24,5 +24,9 @@ public interface ITechnologyReadRepository
         int? brandId,
         CancellationToken cancellationToken = default);
 
+    public Task<List<TechnologyEntity>> GetByIdsAsync(
+        IEnumerable<int> ids,
+        CancellationToken cancellationToken = default);
+
     public Task<List<TechnologyEntity>> GetAllWithCategoryAsync(CancellationToken cancellationToken = default);
 }

@@ -9,7 +9,7 @@ public class CreateProductVariantRequest
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Price { get; set; }
 
-    [JsonPropertyName("url_slug")]
+    [JsonPropertyName("url")]
     public string? UrlSlug { get; set; }
 
     [JsonPropertyName("cover_image_url")]

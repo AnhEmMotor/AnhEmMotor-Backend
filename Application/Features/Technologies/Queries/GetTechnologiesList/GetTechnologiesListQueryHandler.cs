@@ -21,7 +21,8 @@ public sealed class GetTechnologiesListQueryHandler(ITechnologyReadRepository re
                 DefaultDescription = t.DefaultDescription,
                 DefaultImageUrl = t.DefaultImageUrl,
                 CategoryId = t.CategoryId,
-                CategoryName = t.Category?.Name
+                CategoryName = t.Category?.Name,
+                BrandId = t.BrandId
             })
             .ToList();
         return Result<List<TechnologyResponse>>.Success(response);

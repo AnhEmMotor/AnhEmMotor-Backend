@@ -10,7 +10,7 @@ public class UpdateProductVariantRequest
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Price { get; set; }
 
-    [JsonPropertyName("url_slug")]
+    [JsonPropertyName("url")]
     public string? UrlSlug { get; set; }
 
     [JsonPropertyName("cover_image_url")]
@@ -19,7 +19,7 @@ public class UpdateProductVariantRequest
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
 
-    [JsonPropertyName("option_values")]
+    [JsonPropertyName("optionValues")]
     public Dictionary<string, string> OptionValues { get; set; } = [];
 
     [JsonPropertyName("version_name")]

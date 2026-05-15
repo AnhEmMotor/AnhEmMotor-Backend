@@ -10,6 +10,7 @@ using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.Technology.Technology;
 using Domain.Constants;
 using Domain.Entities;
 using Mapster;
@@ -31,6 +32,7 @@ public sealed class CreateProductCommandHandler(
     IProductInsertRepository productInsertRepository,
     IProductVariantInsertRepository productVariantInsertRepository,
     IOptionValueInsertRepository optionValueInsertRepository,
+    ITechnologyReadRepository technologyReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
     public async Task<Result<ProductDetailForManagerResponse?>> Handle(
@@ -457,11 +459,29 @@ public sealed class CreateProductCommandHandler(
         {
             try
             {
-                var techs = JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(request.Highlights);
+                var techs = JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
+                    request.Highlights,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 if (techs != null)
                 {
+                    var techList = techs.GroupBy(x => x.TechnologyId).Select(g => g.First()).ToList();
+                    var techIds = techList.Select(x => x.TechnologyId).ToList();
+
+                    var validTechs = await technologyReadRepository.GetByIdsAsync(techIds, cancellationToken)
+                        .ConfigureAwait(false);
+                    var validTechIds = validTechs.Select(t => t.Id).ToHashSet();
+
+                    var invalidIds = techIds.Where(id => !validTechIds.Contains(id)).ToList();
+                    if (invalidIds.Count > 0)
+                    {
+                        return Result<ProductDetailForManagerResponse?>.Failure(
+                            Error.BadRequest(
+                                $"Các công nghệ sau không tồn tại: {string.Join(", ", invalidIds)}.",
+                                nameof(request.Highlights)));
+                    }
+
                     var order = 1;
-                    foreach (var t in techs.GroupBy(x => x.TechnologyId).Select(g => g.First()))
+                    foreach (var t in techList)
                     {
                         product.ProductTechnologies
                             .Add(
@@ -482,8 +502,7 @@ public sealed class CreateProductCommandHandler(
         productInsertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var response = product.Adapt<ProductDetailForManagerResponse>();
-        if (response != null)
-            response.CompatibleVehicleModelIds = product.CompatibleWith.Select(c => c.CompatibleVehicleModelId).ToList();
+        response?.CompatibleVehicleModelIds = [.. product.CompatibleWith.Select(c => c.CompatibleVehicleModelId)];
         return Result<ProductDetailForManagerResponse?>.Success(response);
     }
 }
