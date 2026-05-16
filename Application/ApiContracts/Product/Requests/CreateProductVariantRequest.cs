@@ -9,7 +9,7 @@ public class CreateProductVariantRequest
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Price { get; set; }
 
-    [JsonPropertyName("url")]
+    [JsonPropertyName("url_slug")]
     public string? UrlSlug { get; set; }
 
     [JsonPropertyName("cover_image_url")]
@@ -33,11 +33,14 @@ public class CreateProductVariantRequest
     [JsonPropertyName("sku")]
     public string? SKU { get; set; }
 
+    [JsonPropertyName("weight")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Weight { get; set; }
 
+    [JsonPropertyName("dimensions")]
     public string? Dimensions { get; set; }
 
+    [JsonPropertyName("wheelbase")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Wheelbase { get; set; }
 

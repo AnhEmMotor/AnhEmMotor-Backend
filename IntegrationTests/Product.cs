@@ -2722,6 +2722,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             ""variants"": [{{
                 ""id"": {variantId},
                 ""url_slug"": ""updated-slug-{uniqueId}"",
+                ""price"": 1000,
                 ""cover_image_url"": ""http://example.com/new-cover.jpg"",
                 ""photo_collection"": [""http://example.com/photo1.jpg""]
             }}]

@@ -344,8 +344,18 @@ public sealed class UpdateProductCommandHandler(
                 variantEntity = new ProductVariant { ProductId = command.Id };
                 product.ProductVariants.Add(variantEntity);
             }
+            var oldSlug = variantEntity.UrlSlug;
             variantReq.Adapt(variantEntity);
-            variantEntity.UrlSlug = SlugHelper.GenerateSlug(variantReq.UrlSlug);
+            if (!string.IsNullOrWhiteSpace(variantReq.UrlSlug))
+            {
+                variantEntity.UrlSlug = SlugHelper.GenerateSlug(variantReq.UrlSlug);
+            } else if (variantReq.Id.HasValue && variantReq.Id > 0)
+            {
+                variantEntity.UrlSlug = oldSlug;
+            } else
+            {
+                variantEntity.UrlSlug = string.Empty;
+            }
             UpdateVariantPhotos(variantEntity, variantReq.PhotoCollection);
             var currentLinks = variantEntity.VariantOptionValues.ToList();
             foreach (var link in currentLinks)
