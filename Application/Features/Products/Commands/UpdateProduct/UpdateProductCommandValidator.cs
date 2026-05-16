@@ -45,7 +45,18 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
         RuleFor(x => x.Variants)
             .NotEmpty()
             .WithMessage("Sản phẩm phải có ít nhất một biến thể.")
+            .Must(HaveUniqueSlugs)
+            .WithMessage("Đã tìm thấy các đường dẫn (slug) trùng lặp trong yêu cầu.")
             .Custom(ValidateVariantOptions);
+        RuleForEach(x => x.Variants).SetValidator(new UpdateProductVariantRequestValidator());
+    }
+
+    private bool HaveUniqueSlugs(List<UpdateProductVariantRequest> variants)
+    {
+        if (variants == null)
+            return true;
+        var slugs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        return variants.All(v => string.IsNullOrWhiteSpace(v.UrlSlug) || slugs.Add(v.UrlSlug.Trim()));
     }
 
     private void ValidateVariantOptions(

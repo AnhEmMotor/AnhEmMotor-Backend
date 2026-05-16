@@ -11,6 +11,7 @@ using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Technology;
+using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
 using Domain.Entities;
@@ -33,6 +34,7 @@ public sealed class UpdateProductCommandHandler(
     IOptionValueReadRepository optionValueReadRepository,
     IProductVariantInsertRepository productVariantInsertRepository,
     IOptionValueInsertRepository optionValueInsertRepository,
+    ITechnologyReadRepository technologyReadRepository,
     IVariantOptionValueDeleteRepository variantOptionValueDeleteRepository,
     IProductVarientDeleteRepository productVarientDeleteRepository,
     IProductUpdateRepository productUpdateRepository,
@@ -342,8 +344,18 @@ public sealed class UpdateProductCommandHandler(
                 variantEntity = new ProductVariant { ProductId = command.Id };
                 product.ProductVariants.Add(variantEntity);
             }
+            var oldSlug = variantEntity.UrlSlug;
             variantReq.Adapt(variantEntity);
-            variantEntity.UrlSlug = SlugHelper.GenerateSlug(variantReq.UrlSlug);
+            if (!string.IsNullOrWhiteSpace(variantReq.UrlSlug))
+            {
+                variantEntity.UrlSlug = SlugHelper.GenerateSlug(variantReq.UrlSlug);
+            } else if (variantReq.Id.HasValue && variantReq.Id > 0)
+            {
+                variantEntity.UrlSlug = oldSlug;
+            } else
+            {
+                variantEntity.UrlSlug = string.Empty;
+            }
             UpdateVariantPhotos(variantEntity, variantReq.PhotoCollection);
             var currentLinks = variantEntity.VariantOptionValues.ToList();
             foreach (var link in currentLinks)
@@ -427,13 +439,28 @@ public sealed class UpdateProductCommandHandler(
         {
             try
             {
-                newTechList = (JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
+                var deserialized = (JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
                         command.Highlights,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ??
                     [])
                     .GroupBy(x => x.TechnologyId)
                     .Select(g => g.First())
                     .ToList();
+
+                var techIds = deserialized.Select(x => x.TechnologyId).ToList();
+                var validTechs = await technologyReadRepository.GetByIdsAsync(techIds, cancellationToken)
+                    .ConfigureAwait(false);
+                var validTechIds = validTechs.Select(t => t.Id).ToHashSet();
+
+                var invalidIds = techIds.Where(id => !validTechIds.Contains(id)).ToList();
+                if (invalidIds.Count > 0)
+                {
+                    return Error.BadRequest(
+                        $"Các công nghệ sau không tồn tại: {string.Join(", ", invalidIds)}.",
+                        nameof(command.Highlights));
+                }
+
+                newTechList = deserialized;
             } catch
             {
                 newTechList = [];

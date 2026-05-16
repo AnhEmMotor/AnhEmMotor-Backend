@@ -41,6 +41,7 @@ public class SupplierReadRepository(ApplicationDBContext context, ISievePaginato
                     DeletedAt = x.supplier.DeletedAt,
                     Notes = x.supplier.Notes,
                     TaxIdentificationNumber = x.supplier.TaxIdentificationNumber,
+                    PartnerTypeId = x.supplier.PartnerTypeId ?? "supplier",
                     TotalInput =
                         x.inputs.SelectMany(i => i.InputInfos).Sum(ii => (ii.Count ?? 0) * (ii.InputPrice ?? 0))
                 });

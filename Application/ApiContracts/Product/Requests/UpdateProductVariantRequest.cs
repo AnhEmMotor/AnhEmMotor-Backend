@@ -19,7 +19,7 @@ public class UpdateProductVariantRequest
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
 
-    [JsonPropertyName("option_values")]
+    [JsonPropertyName("optionValues")]
     public Dictionary<string, string> OptionValues { get; set; } = [];
 
     [JsonPropertyName("version_name")]
@@ -34,11 +34,14 @@ public class UpdateProductVariantRequest
     [JsonPropertyName("sku")]
     public string? SKU { get; set; }
 
+    [JsonPropertyName("weight")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Weight { get; set; }
 
+    [JsonPropertyName("dimensions")]
     public string? Dimensions { get; set; }
 
+    [JsonPropertyName("wheelbase")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Wheelbase { get; set; }
 

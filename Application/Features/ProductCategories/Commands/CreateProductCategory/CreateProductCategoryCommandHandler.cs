@@ -27,6 +27,18 @@ public sealed class CreateProductCategoryCommandHandler(
                 Error.Conflict($"Category name '{categoryName}' already exists."));
         }
         var category = request.Adapt<ProductCategoryEntity>();
+        if (request.ParentId.HasValue)
+        {
+            var parent = await readRepository.GetByIdAsync(request.ParentId.Value, cancellationToken).ConfigureAwait(false);
+            if (parent == null)
+            {
+                return Result<ProductCategoryResponse>.Failure(Error.NotFound($"Parent category with Id {request.ParentId.Value} not found."));
+            }
+            if (parent.ParentId.HasValue)
+            {
+                return Result<ProductCategoryResponse>.Failure(Error.Validation("Cannot create a category at this level. Only 2 levels are allowed (Parent and Child)."));
+            }
+        }
         category.Name = categoryName;
         category.Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
         repository.Add(category);
