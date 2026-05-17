@@ -1,3 +1,4 @@
+using Application.ApiContracts.Brand.Responses;
 using Domain.Constants;
 using Domain.Primitives;
 using Sieve.Models;
@@ -8,6 +9,11 @@ namespace Application.Interfaces.Repositories.Brand
     public interface IBrandReadRepository
     {
         public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            CancellationToken cancellationToken = default);
+
+        public Task<List<BrandEntity>> GetFilteredListAsync(
             SieveModel sieveModel,
             DataFetchMode mode = DataFetchMode.ActiveOnly,
             CancellationToken cancellationToken = default);
@@ -30,5 +36,7 @@ namespace Application.Interfaces.Repositories.Brand
             string name,
             CancellationToken cancellationToken,
             DataFetchMode dataFetchMode = DataFetchMode.ActiveOnly);
+
+        public Task<BrandStatisticsResponse> GetStatisticsAsync(CancellationToken cancellationToken);
     }
 }

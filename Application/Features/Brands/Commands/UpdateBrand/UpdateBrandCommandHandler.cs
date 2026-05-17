@@ -20,11 +20,14 @@ public sealed class UpdateBrandCommandHandler(
             return Error.NotFound($"Brand with Id {request.Id} not found.", "Id");
         }
         string? cleanName = request.Name?.Trim();
-        var duplicateCandidates = await readRepository.GetByNameAsync(cleanName!, cancellationToken)
-            .ConfigureAwait(false);
-        if (duplicateCandidates.Any(x => x.Id != request.Id))
+        if (!string.Equals(brand.Name?.Trim(), cleanName, StringComparison.OrdinalIgnoreCase))
         {
-            return Error.Validation("Brand name already exists.", "Name");
+            var duplicateCandidates = await readRepository.GetByNameAsync(cleanName!, cancellationToken)
+                .ConfigureAwait(false);
+            if (duplicateCandidates.Any(x => x.Id != request.Id))
+            {
+                return Error.Validation("Brand name already exists.", "Name");
+            }
         }
         request.Adapt(brand);
         brand.Name = request.Name?.Trim();

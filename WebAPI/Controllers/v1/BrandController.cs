@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Brand.Responses;
+using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
 using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteBrand;
@@ -9,6 +9,8 @@ using Application.Features.Brands.Commands.UpdateBrand;
 using Application.Features.Brands.Queries.GetBrandById;
 using Application.Features.Brands.Queries.GetBrandsList;
 using Application.Features.Brands.Queries.GetDeletedBrandsList;
+using Application.Features.Brands.Queries.GetBrandStatistics;
+using Application.Features.Brands.Queries.ExportBrands;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -82,6 +84,46 @@ public class BrandController(IMediator mediator) : ApiController
         var query = new GetDeletedBrandsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy thống kê chung về các thương hiệu sản phẩm.
+    /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin thống kê thương hiệu.</returns>
+    [HttpGet("statistics")]
+    [HasPermission(Brands.View)]
+    [ProducesResponseType(typeof(BrandStatisticsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBrandStatisticsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetBrandStatisticsQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Xuất danh sách thương hiệu ra file Excel (có hỗ trợ lọc và sắp xếp).
+    /// </summary>
+    /// <param name="sieveModel">Các thông tin lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>File Excel chứa danh sách thương hiệu.</returns>
+    [HttpGet("export")]
+    [HasPermission(Brands.View)]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportBrandsAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
+    {
+        var query = new ExportBrandsQuery { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        
+        if (!result.IsSuccess)
+        {
+            return HandleResult(result);
+        }
+
+        var fileResult = result.Value;
+        return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
     }
 
     /// <summary>
