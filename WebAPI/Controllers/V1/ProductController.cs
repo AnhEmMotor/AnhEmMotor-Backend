@@ -23,7 +23,6 @@ using Application.Features.Products.Commands.UpdateProduct;
 using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
-using Application.Features.Products.Commands.UpdateVehicleType;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForInput;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
@@ -631,20 +630,6 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
-    /// <summary>
-    /// Cập nhật loại xe cho sản phẩm.
-    /// </summary>
-    [HttpPatch("{id:int}/vehicle-type")]
-    [HasPermission(Products.Edit)]
-    public async Task<IActionResult> UpdateVehicleTypeAsync(
-        int id,
-        [FromBody] UpdateVehicleTypeCommand request,
-        CancellationToken cancellationToken)
-    {
-        var command = request with { ProductId = id };
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
 
     /// <summary>
     /// Tạo mới một Công nghệ.

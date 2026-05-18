@@ -22,9 +22,6 @@ namespace Domain.Entities
         [Column("IsActive")]
         public bool IsActive { get; set; } = true;
 
-        [Column("SortOrder")]
-        public int SortOrder { get; set; }
-
         [Column("Description")]
         public string? Description { get; set; }
 

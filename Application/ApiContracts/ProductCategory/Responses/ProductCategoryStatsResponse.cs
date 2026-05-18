@@ -8,14 +8,8 @@ namespace Application.ApiContracts.ProductCategory.Responses
 
         public int ProductCategoriesCount { get; set; }
 
-        public int VehicleTypesCount { get; set; }
+        public string? LatestUpdatedCategoryName { get; set; }
 
-        public string? NewProductCategoryName { get; set; }
-
-        public string? NewVehicleTypeName { get; set; }
-
-        public int NewProductCategoriesCount { get; set; }
-
-        public int NewVehicleTypesCount { get; set; }
+        public DateTimeOffset? LatestUpdatedAt { get; set; }
     }
 }

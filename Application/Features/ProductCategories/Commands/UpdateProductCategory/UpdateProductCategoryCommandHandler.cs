@@ -48,7 +48,6 @@ public sealed class UpdateProductCategoryCommandHandler(
         if (request.CategoryGroup != null)
             category.CategoryGroup = request.CategoryGroup.Trim();
         category.IsActive = request.IsActive;
-        category.SortOrder = request.SortOrder;
         
         if (request.ParentId.HasValue)
         {

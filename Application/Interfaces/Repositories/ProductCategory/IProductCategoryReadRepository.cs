@@ -1,12 +1,16 @@
 using Domain.Constants;
 using Domain.Primitives;
 using Sieve.Models;
+using Application.ApiContracts.ProductCategory.Responses;
 using CategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Application.Interfaces.Repositories.ProductCategory;
 
 public interface IProductCategoryReadRepository
 {
+    public Task<ProductCategoryStatsResponse> GetStatisticsAsync(
+        CancellationToken cancellationToken);
+
     public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
         DataFetchMode mode = DataFetchMode.ActiveOnly,

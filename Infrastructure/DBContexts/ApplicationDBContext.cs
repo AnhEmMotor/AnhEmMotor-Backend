@@ -48,10 +48,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
 
-    public virtual DbSet<ItemAttribute> ItemAttributes { get; set; }
-
-    public virtual DbSet<VehicleType> VehicleTypes { get; set; }
-
     public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
 
     public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
@@ -151,14 +147,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(rp => rp.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<PredefinedOption>().HasIndex(p => p.Key).IsUnique();
-        modelBuilder.Entity<ItemAttribute>()
-            .HasIndex(ia => new { ia.ItemId, ia.AttributeName })
-            .IsUnique();
-        modelBuilder.Entity<ItemAttribute>()
-            .HasOne(ia => ia.Product)
-            .WithMany(p => p.ItemAttributes)
-            .HasForeignKey(ia => ia.ItemId)
-            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Option>()
             .HasOne<PredefinedOption>()
             .WithMany()
@@ -288,55 +276,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        // Detect and cascade soft delete/restoration for ItemAttribute when Product is soft deleted/restored
-        var softDeletingProductIds = new List<int>();
-        var restoringProductIds = new List<int>();
-
-        foreach (var entry in ChangeTracker.Entries<Product>())
-        {
-            if (entry.State == EntityState.Deleted)
-            {
-                softDeletingProductIds.Add(entry.Entity.Id);
-            }
-            else if (entry.State == EntityState.Modified && entry.Property(p => p.DeletedAt).IsModified)
-            {
-                if (entry.Entity.DeletedAt != null)
-                {
-                    softDeletingProductIds.Add(entry.Entity.Id);
-                }
-                else
-                {
-                    restoringProductIds.Add(entry.Entity.Id);
-                }
-            }
-        }
-
-        if (softDeletingProductIds.Count > 0)
-        {
-            var attributesToSoftDelete = ItemAttributes
-                .Where(ia => softDeletingProductIds.Contains(ia.ItemId) && ia.DeletedAt == null)
-                .ToList();
-
-            foreach (var ia in attributesToSoftDelete)
-            {
-                ia.DeletedAt = DateTimeOffset.UtcNow;
-                Entry(ia).State = EntityState.Modified;
-            }
-        }
-
-        if (restoringProductIds.Count > 0)
-        {
-            var attributesToRestore = Set<ItemAttribute>()
-                .IgnoreQueryFilters()
-                .Where(ia => restoringProductIds.Contains(ia.ItemId) && ia.DeletedAt != null)
-                .ToList();
-
-            foreach (var ia in attributesToRestore)
-            {
-                ia.DeletedAt = null;
-                Entry(ia).State = EntityState.Modified;
-            }
-        }
 
         var entries = ChangeTracker.Entries<BaseEntity>();
         foreach (var entry in entries)

@@ -26,10 +26,6 @@ namespace Domain.Entities
         [ForeignKey("ProductCategory")]
         public int? CategoryId { get; set; }
 
-        [Column("VehicleTypeId")]
-        [ForeignKey("VehicleType")]
-        public int? VehicleTypeId { get; set; }
-
         [Column("StatusId")]
         [ForeignKey("ProductStatus")]
         public string? StatusId { get; set; }
@@ -160,8 +156,6 @@ namespace Domain.Entities
         public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
 
         public ProductCategory? ProductCategory { get; set; }
-
-        public VehicleType? VehicleType { get; set; }
 
         public ProductStatus? ProductStatus { get; set; }
 

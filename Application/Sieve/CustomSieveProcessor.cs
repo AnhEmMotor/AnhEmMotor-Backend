@@ -30,7 +30,6 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Product>(p => p.Name).CanSort().CanFilter();
         mapper.Property<Product>(p => p.BrandId).CanFilter();
         mapper.Property<Product>(p => p.CategoryId).CanFilter();
-        mapper.Property<Product>(p => p.VehicleTypeId).CanFilter();
         mapper.Property<Product>(p => p.StatusId).CanFilter();
         mapper.Property<Product>(p => p.StdDot).CanFilter();
         mapper.Property<Product>(p => p.StdEce).CanFilter();

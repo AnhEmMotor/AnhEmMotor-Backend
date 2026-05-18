@@ -11,6 +11,28 @@ namespace Infrastructure.Repositories.ProductCategory;
 
 public class ProductCategoryReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IProductCategoryReadRepository
 {
+    public async Task<Application.ApiContracts.ProductCategory.Responses.ProductCategoryStatsResponse> GetStatisticsAsync(CancellationToken cancellationToken)
+    {
+        var query = context.GetQuery<CategoryEntity>(DataFetchMode.ActiveOnly);
+
+        var totalProductCategories = await query.CountAsync(cancellationToken).ConfigureAwait(false);
+
+        var latestProductCategory = await query
+            .OrderByDescending(c => c.UpdatedAt ?? c.CreatedAt ?? DateTimeOffset.MinValue)
+            .ThenByDescending(c => c.Id)
+            .Select(c => new { c.Name, LatestTime = c.UpdatedAt ?? c.CreatedAt })
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return new Application.ApiContracts.ProductCategory.Responses.ProductCategoryStatsResponse
+        {
+            TotalCategories = totalProductCategories,
+            ProductCategoriesCount = totalProductCategories,
+            LatestUpdatedCategoryName = latestProductCategory?.Name,
+            LatestUpdatedAt = latestProductCategory?.LatestTime
+        };
+    }
+
     public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
         DataFetchMode mode = DataFetchMode.ActiveOnly,

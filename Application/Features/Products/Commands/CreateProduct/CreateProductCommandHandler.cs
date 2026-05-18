@@ -290,7 +290,6 @@ public sealed class CreateProductCommandHandler(
             Name = request.Name?.Trim(),
             CategoryId = request.CategoryId,
             BrandId = request.BrandId,
-            VehicleTypeId = request.VehicleTypeId,
             Description = request.Description?.Trim(),
             Weight = request.Weight,
             Dimensions = request.Dimensions?.Trim(),
