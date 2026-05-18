@@ -4,6 +4,8 @@ using Application.Features.ProductCategories.Commands.RestoreProductCategory;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
+using Application.Interfaces.Repositories.VehicleType.VehicleType;
+using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using FluentAssertions;
@@ -377,6 +379,41 @@ public class ProductCategory
             .ReturnsAsync((ProductCategoryEntity?)null);
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "PC_071 - Lấy thống kê danh mục sản phẩm và loại xe thành công")]
+    public async Task GetProductCategoryStats_ShouldSucceed()
+    {
+        var vehicleRepoMock = new Mock<IVehicleTypeReadRepository>();
+        var handler = new GetProductCategoryStatsQueryHandler(_readRepoMock.Object, vehicleRepoMock.Object);
+
+        // Set up mock product categories
+        var productCategories = new List<ProductCategoryEntity>
+        {
+            new() { Id = 1, Name = "Danh mục 1", CreatedAt = DateTimeOffset.UtcNow.AddDays(-10) },
+            new() { Id = 2, Name = "Danh mục 2", CreatedAt = DateTimeOffset.UtcNow.AddDays(-5) }
+        };
+        _readRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
+            .ReturnsAsync(productCategories);
+
+        // Set up mock vehicle types
+        var vehicleTypes = new List<Domain.Entities.VehicleType>
+        {
+            new() { Id = 1, Name = "Xe 1", CreatedAt = DateTimeOffset.UtcNow.AddDays(-2) }
+        };
+        vehicleRepoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
+            .ReturnsAsync(vehicleTypes);
+
+        var query = new GetProductCategoryStatsQuery();
+        var resultObj = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        resultObj.IsSuccess.Should().BeTrue();
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value.TotalCategories.Should().Be(3);
+        resultObj.Value.ProductCategoriesCount.Should().Be(2);
+        resultObj.Value.VehicleTypesCount.Should().Be(1);
+        resultObj.Value.NewProductCategoryName.Should().Be("Danh mục 2");
+        resultObj.Value.NewVehicleTypeName.Should().Be("Xe 1");
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

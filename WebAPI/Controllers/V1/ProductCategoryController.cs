@@ -9,6 +9,7 @@ using Application.Features.ProductCategories.Commands.UpdateProductCategory;
 using Application.Features.ProductCategories.Queries.GetDeletedProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
+using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Constants.RouteNames;
@@ -32,6 +33,19 @@ namespace WebAPI.Controllers.V1;
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class ProductCategoryController(IMediator mediator) : ApiController
 {
+    /// <summary>
+    /// Lấy thống kê danh mục sản phẩm và loại xe.
+    /// </summary>
+    [HttpGet("stats")]
+    [HasPermission(ProductCategories.View)]
+    [ProducesResponseType(typeof(ProductCategoryStatsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetProductCategoryStatsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetProductCategoryStatsQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
     /// <summary>
     /// Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp - vào được cho mọi người dùng).
     /// </summary>
