@@ -1,6 +1,8 @@
 using Application.ApiContracts.Technology.Responses;
 using Application.Features.Technologies.Commands.CreateTechnology;
 using Application.Features.Technologies.Commands.CreateTechnologyCategory;
+using Application.Features.Technologies.Commands.UpdateTechnology;
+using Application.Features.Technologies.Commands.DeleteTechnology;
 using Application.Features.Technologies.Queries.GetAllTechnologies;
 using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
 using Application.Features.Technologies.Queries.GetTechnologiesList;
@@ -77,6 +79,42 @@ public class TechnologiesController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(true));
+    }
+
+    /// <summary>
+    /// Cập nhật thông tin công nghệ.
+    /// </summary>
+    /// <param name="id">ID công nghệ.</param>
+    /// <param name="command">Lệnh cập nhật công nghệ.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả cập nhật.</returns>
+    [HttpPut("{id:int}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateAsync(
+        int id,
+        [FromBody] UpdateTechnologyCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("ID không khớp.");
+        }
+        return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(true));
+    }
+
+    /// <summary>
+    /// Xóa một công nghệ.
+    /// </summary>
+    /// <param name="id">ID công nghệ cần xóa.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả xóa.</returns>
+    [HttpDelete("{id:int}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteAsync(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        return HandleResult(await mediator.Send(new DeleteTechnologyCommand(id), cancellationToken).ConfigureAwait(true));
     }
 
     /// <summary>
