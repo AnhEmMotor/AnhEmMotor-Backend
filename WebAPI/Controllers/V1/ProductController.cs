@@ -37,6 +37,7 @@ using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetSitemapSlugs;
 using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
+using Application.Features.Products.Queries.ExportProducts;
 using Application.Features.Technologies.Commands.CreateTechnology;
 using Application.Features.Technologies.Commands.CreateTechnologyCategory;
 using Application.Features.Technologies.Queries.GetAllTechnologies;
@@ -208,6 +209,31 @@ public class ProductController(ISender sender) : ApiController
         var query = new GetPredefinedOptionsListQuery();
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Xuất danh sách sản phẩm và biến thể ra file Excel (có hỗ trợ lọc và sắp xếp).
+    /// </summary>
+    /// <param name="sieveModel">Các thông tin lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>File Excel chứa danh sách sản phẩm và biến thể.</returns>
+    [HttpGet("export")]
+    [HasPermission(Products.View)]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportProductsAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
+    {
+        var query = new ExportProductsQuery { SieveModel = sieveModel };
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+
+        if (!result.IsSuccess)
+        {
+            return HandleResult(result);
+        }
+
+        var fileResult = result.Value;
+        return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
     }
 
     /// <summary>
