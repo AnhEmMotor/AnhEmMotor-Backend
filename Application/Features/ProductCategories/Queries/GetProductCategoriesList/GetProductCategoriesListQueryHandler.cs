@@ -7,10 +7,11 @@ using Mapster;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Text;
+using Sieve.Services;
 
 namespace Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 
-public sealed class GetProductCategoriesListQueryHandler(IProductCategoryReadRepository repository) : IRequestHandler<GetProductCategoriesListQuery, Result<PagedResult<ProductCategoryResponse>>>
+public sealed class GetProductCategoriesListQueryHandler(IProductCategoryReadRepository repository, ISieveProcessor sieveProcessor) : IRequestHandler<GetProductCategoriesListQuery, Result<PagedResult<ProductCategoryResponse>>>
 {
     public async Task<Result<PagedResult<ProductCategoryResponse>>> Handle(
         GetProductCategoriesListQuery request,
@@ -66,13 +67,18 @@ public sealed class GetProductCategoriesListQueryHandler(IProductCategoryReadRep
             }
 
             var finalCategories = allCategories.Where(c => resultIds.Contains(c.Id)).ToList();
-            var responseItems = finalCategories.Select(c => c.Adapt<ProductCategoryResponse>()).ToList();
+            var query = finalCategories.AsQueryable();
+            var totalCount = query.Count();
+
+            var pagedQuery = sieveProcessor.Apply(request.SieveModel!, query, applyFiltering: false);
+            var paginatedCategories = pagedQuery.ToList();
+            var responseItems = paginatedCategories.Select(c => c.Adapt<ProductCategoryResponse>()).ToList();
 
             var pagedResult = new PagedResult<ProductCategoryResponse>(
                 responseItems,
-                responseItems.Count,
-                1,
-                responseItems.Count == 0 ? 10 : responseItems.Count
+                totalCount,
+                request.SieveModel?.Page ?? 1,
+                request.SieveModel?.PageSize ?? 10
             );
             return Result<PagedResult<ProductCategoryResponse>>.Success(pagedResult);
         }
