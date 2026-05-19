@@ -1819,10 +1819,6 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<int?>("VehicleTypeId")
-                        .HasColumnType("int")
-                        .HasColumnName("VehicleTypeId");
-
                     b.Property<string>("WarrantyPeriod")
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("WarrantyPeriod");
@@ -1842,8 +1838,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("StatusId");
-
-                    b.HasIndex("VehicleTypeId");
 
                     b.ToTable("Product");
                 });
@@ -1894,10 +1888,6 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Slug")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Slug");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int")
-                        .HasColumnName("SortOrder");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
@@ -2138,10 +2128,6 @@ namespace Infrastructure.Migrations
                     b.Property<decimal?>("SeatHeight")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("SeatHeight");
-
-                    b.Property<int?>("StockQuantity")
-                        .HasColumnType("int")
-                        .HasColumnName("StockQuantity");
 
                     b.Property<string>("TireSize")
                         .HasColumnType("nvarchar(100)")
@@ -2586,53 +2572,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("VehicleDocument");
                 });
 
-            modelBuilder.Entity("Domain.Entities.VehicleType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Description");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("ImageUrl");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("IsActive");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Name");
-
-                    b.Property<string>("Slug")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Slug");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int")
-                        .HasColumnName("SortOrder");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("VehicleType");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -3038,17 +2977,11 @@ namespace Infrastructure.Migrations
                         .WithMany("Products")
                         .HasForeignKey("StatusId");
 
-                    b.HasOne("Domain.Entities.VehicleType", "VehicleType")
-                        .WithMany("Products")
-                        .HasForeignKey("VehicleTypeId");
-
                     b.Navigation("Brand");
 
                     b.Navigation("ProductCategory");
 
                     b.Navigation("ProductStatus");
-
-                    b.Navigation("VehicleType");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCategory", b =>
@@ -3436,11 +3369,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Documents");
 
                     b.Navigation("MaintenanceHistories");
-                });
-
-            modelBuilder.Entity("Domain.Entities.VehicleType", b =>
-                {
-                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }
