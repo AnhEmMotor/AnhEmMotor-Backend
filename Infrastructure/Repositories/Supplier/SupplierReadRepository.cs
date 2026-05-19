@@ -6,11 +6,12 @@ using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
+using Sieve.Services;
 using SupplierEntity = Domain.Entities.Supplier;
 
 namespace Infrastructure.Repositories.Supplier;
 
-public class SupplierReadRepository(ApplicationDBContext context, ISievePaginator paginator) : ISupplierReadRepository
+public class SupplierReadRepository(ApplicationDBContext context, ISievePaginator paginator, ISieveProcessor sieveProcessor) : ISupplierReadRepository
 {
     internal IQueryable<SupplierEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
@@ -143,4 +144,31 @@ public class SupplierReadRepository(ApplicationDBContext context, ISievePaginato
                 x => string.Compare(x.Email, email) == 0 && (!excludeId.HasValue || x.Id != excludeId),
                 cancellationToken);
     }
+
+    public Task<List<SupplierEntity>> GetFilteredListAsync(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(mode);
+        var filteredQuery = sieveProcessor.Apply(sieveModel, query);
+        return filteredQuery.ToListAsync(cancellationToken);
+    }
+
+    public async Task<SupplierStatisticsResponse> GetStatisticsAsync(CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(DataFetchMode.ActiveOnly);
+
+        var totalSuppliers = await query.CountAsync(cancellationToken);
+        var financialSuppliers = await query.Where(s => s.PartnerTypeId == PartnerType.Financial).CountAsync(cancellationToken);
+        var creditSuppliers = await query.Where(s => s.PartnerTypeId == PartnerType.Supplier).CountAsync(cancellationToken);
+
+        return new SupplierStatisticsResponse
+        {
+            TotalSuppliers = totalSuppliers,
+            FinancialSuppliers = financialSuppliers,
+            CreditSuppliers = creditSuppliers.ToString()
+        };
+    }
 }
+

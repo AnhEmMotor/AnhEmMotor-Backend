@@ -62,6 +62,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Supplier>(s => s.Email).CanFilter();
         mapper.Property<Supplier>(s => s.StatusId).CanSort().CanFilter();
         mapper.Property<Supplier>(s => s.Address).CanFilter();
+        mapper.Property<Supplier>(s => s.PartnerTypeId).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.Id).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.Name).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.Phone).CanSort().CanFilter();
@@ -72,6 +73,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<SupplierWithTotalInputResponse>(s => s.UpdatedAt).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.DeletedAt).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.TotalInput).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.PartnerTypeId).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.Id).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.UserName).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.FullName).CanSort().CanFilter();
