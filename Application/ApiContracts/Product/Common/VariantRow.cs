@@ -51,7 +51,5 @@ namespace Application.ApiContracts.Product.Common
         public string? RearSuspension { get; set; }
 
         public string? EngineType { get; set; }
-
-        public int? StockQuantity { get; set; }
     }
 }

@@ -360,7 +360,6 @@ public sealed class CreateProductCommandHandler(
                     FrontSuspension = variantReq.FrontSuspension?.Trim(),
                     RearSuspension = variantReq.RearSuspension?.Trim(),
                     EngineType = variantReq.EngineType?.Trim(),
-                    StockQuantity = variantReq.StockQuantity,
                     ProductCollectionPhotos = [],
                     VariantOptionValues = []
                 };
@@ -443,7 +442,6 @@ public sealed class CreateProductCommandHandler(
                 variant.FrontSuspension = variantReq.FrontSuspension?.Trim();
                 variant.RearSuspension = variantReq.RearSuspension?.Trim();
                 variant.EngineType = variantReq.EngineType?.Trim();
-                variant.StockQuantity = variantReq.StockQuantity;
                 product.ProductVariants.Add(variant);
             }
         }
