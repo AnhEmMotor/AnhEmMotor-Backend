@@ -14,8 +14,6 @@ namespace Application.ApiContracts.ProductCategory.Responses
 
         public bool IsActive { get; set; }
 
-        public int SortOrder { get; set; }
-
         public int? ParentId { get; set; }
 
         public string? Description { get; set; }

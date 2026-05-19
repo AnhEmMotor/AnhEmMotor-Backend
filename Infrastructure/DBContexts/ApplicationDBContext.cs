@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using InputStatus = Domain.Entities.InputStatus;
 using ProductStatus = Domain.Entities.ProductStatus;
@@ -45,8 +47,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
-
-    public virtual DbSet<VehicleType> VehicleTypes { get; set; }
 
     public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
 
@@ -276,6 +276,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+
         var entries = ChangeTracker.Entries<BaseEntity>();
         foreach (var entry in entries)
         {

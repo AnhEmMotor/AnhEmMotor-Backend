@@ -184,7 +184,6 @@ public class ProductMappingConfig : IRegister
                         FrontSuspension = row.FrontSuspension,
                         RearSuspension = row.RearSuspension,
                         EngineType = row.EngineType,
-                        StockQuantity = row.StockQuantity,
                         StatusStockId = GetStockStatus(available),
                         InventoryStatus = inventoryStatus
                     };

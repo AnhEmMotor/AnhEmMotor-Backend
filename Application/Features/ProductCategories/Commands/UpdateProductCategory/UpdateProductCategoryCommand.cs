@@ -17,8 +17,6 @@ public sealed record UpdateProductCategoryCommand : IRequest<Result<ProductCateg
 
     public bool IsActive { get; init; }
 
-    public int SortOrder { get; init; }
-
     public int? ParentId { get; init; }
 
     public string? Description { get; init; }

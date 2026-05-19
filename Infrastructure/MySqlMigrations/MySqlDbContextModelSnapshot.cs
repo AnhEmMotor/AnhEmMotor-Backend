@@ -1817,10 +1817,6 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<long?>("UpdatedAt")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("VehicleTypeId")
-                        .HasColumnType("int")
-                        .HasColumnName("VehicleTypeId");
-
                     b.Property<string>("WarrantyPeriod")
                         .HasColumnType("longtext")
                         .HasColumnName("WarrantyPeriod");
@@ -1840,8 +1836,6 @@ namespace Infrastructure.MySqlMigrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("StatusId");
-
-                    b.HasIndex("VehicleTypeId");
 
                     b.ToTable("Product");
                 });
@@ -1892,10 +1886,6 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<string>("Slug")
                         .HasColumnType("longtext")
                         .HasColumnName("Slug");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int")
-                        .HasColumnName("SortOrder");
 
                     b.Property<long?>("UpdatedAt")
                         .HasColumnType("bigint");
@@ -2136,10 +2126,6 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<decimal?>("SeatHeight")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("SeatHeight");
-
-                    b.Property<int?>("StockQuantity")
-                        .HasColumnType("int")
-                        .HasColumnName("StockQuantity");
 
                     b.Property<string>("TireSize")
                         .HasColumnType("longtext")
@@ -2584,53 +2570,6 @@ namespace Infrastructure.MySqlMigrations
                     b.ToTable("VehicleDocument");
                 });
 
-            modelBuilder.Entity("Domain.Entities.VehicleType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<long?>("CreatedAt")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("DeletedAt")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("longtext")
-                        .HasColumnName("Description");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("longtext")
-                        .HasColumnName("ImageUrl");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("IsActive");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("longtext")
-                        .HasColumnName("Name");
-
-                    b.Property<string>("Slug")
-                        .HasColumnType("longtext")
-                        .HasColumnName("Slug");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int")
-                        .HasColumnName("SortOrder");
-
-                    b.Property<long?>("UpdatedAt")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("VehicleType");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -3036,17 +2975,11 @@ namespace Infrastructure.MySqlMigrations
                         .WithMany("Products")
                         .HasForeignKey("StatusId");
 
-                    b.HasOne("Domain.Entities.VehicleType", "VehicleType")
-                        .WithMany("Products")
-                        .HasForeignKey("VehicleTypeId");
-
                     b.Navigation("Brand");
 
                     b.Navigation("ProductCategory");
 
                     b.Navigation("ProductStatus");
-
-                    b.Navigation("VehicleType");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCategory", b =>
@@ -3434,11 +3367,6 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("Documents");
 
                     b.Navigation("MaintenanceHistories");
-                });
-
-            modelBuilder.Entity("Domain.Entities.VehicleType", b =>
-                {
-                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

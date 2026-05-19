@@ -75,9 +75,6 @@ public class UpdateProductVariantRequest
     [JsonPropertyName("engine_type")]
     public string? EngineType { get; set; }
 
-    [JsonPropertyName("stock_quantity")]
-    public int? StockQuantity { get; set; }
-
     [JsonIgnore]
     public List<int> OptionValueIds { get; set; } = [];
 }

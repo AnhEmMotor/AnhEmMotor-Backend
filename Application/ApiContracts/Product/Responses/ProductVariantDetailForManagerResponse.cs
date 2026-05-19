@@ -65,9 +65,6 @@ public class ProductVariantDetailForManagerResponse
     [JsonPropertyName("engine_type")]
     public string? EngineType { get; set; }
 
-    [JsonPropertyName("stock_quantity")]
-    public int? StockQuantity { get; set; }
-
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
 

@@ -13,7 +13,6 @@ using Application.Features.Products.Commands.UpdateProduct;
 using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
-using Application.Features.Products.Commands.UpdateVehicleType;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForInput;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
@@ -267,15 +266,6 @@ public class Product
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PRODUCT_190 - API cập nhật Loại xe cho sản phẩm thành công")]
-    public async Task UpdateProductVehicleType_ValidData_ReturnsSuccess()
-    {
-        var command = new UpdateVehicleTypeCommand { VehicleTypeId = 2 };
-        _senderMock.Setup(m => m.Send(It.IsAny<UpdateVehicleTypeCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Unit>.Success(Unit.Value));
-        var result = await _controller.UpdateVehicleTypeAsync(1, command, CancellationToken.None).ConfigureAwait(true);
-        Assert.IsType<OkObjectResult>(result);
-    }
 
     [Fact(DisplayName = "PRODUCT_187 - API tạo Công nghệ mới trả về 201 Created")]
     public async Task CreateTechnology_ValidData_ReturnsCreated()

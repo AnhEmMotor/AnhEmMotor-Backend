@@ -66,7 +66,7 @@ namespace Infrastructure.Repositories.Role
         public Task<List<RoleSelectResponse>> GetAllRolesSelectAsync(CancellationToken cancellationToken = default)
         {
             return context.Roles
-                .Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name })
+                .Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name, Description = r.Description })
                 .ToListAsync(cancellationToken);
         }
 
@@ -74,7 +74,7 @@ namespace Infrastructure.Repositories.Role
             SieveModel sieveModel,
             CancellationToken cancellationToken = default)
         {
-            var query = context.Roles.AsNoTracking().Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name });
+            var query = context.Roles.AsNoTracking().Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name, Description = r.Description });
             SieveHelper.ApplyDefaultSorting(sieveModel);
             var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
             var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);

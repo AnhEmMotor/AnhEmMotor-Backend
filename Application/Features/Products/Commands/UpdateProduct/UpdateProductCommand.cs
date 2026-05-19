@@ -19,9 +19,6 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("brand_id")]
     public int? BrandId { get; init; }
 
-    [JsonPropertyName("vehicle_type_id")]
-    public int? VehicleTypeId { get; init; }
-
     public string? Description { get; init; }
 
     [JsonConverter(typeof(NullableDecimalConverter))]

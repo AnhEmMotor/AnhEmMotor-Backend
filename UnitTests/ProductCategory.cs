@@ -4,7 +4,9 @@ using Application.Features.ProductCategories.Commands.RestoreProductCategory;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
+using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Application.Interfaces.Services;
+using Application.ApiContracts.ProductCategory.Responses;
 using Domain.Constants;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -377,6 +379,32 @@ public class ProductCategory
             .ReturnsAsync((ProductCategoryEntity?)null);
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "PC_071 - Lấy thống kê danh mục sản phẩm thành công")]
+    public async Task GetProductCategoryStats_ShouldSucceed()
+    {
+        var handler = new GetProductCategoryStatsQueryHandler(_readRepoMock.Object);
+
+        var statsResponse = new ProductCategoryStatsResponse
+        {
+            TotalCategories = 2,
+            ProductCategoriesCount = 2,
+            LatestUpdatedCategoryName = "Danh mục 2",
+            LatestUpdatedAt = DateTimeOffset.UtcNow.AddDays(-5)
+        };
+
+        _readRepoMock.Setup(r => r.GetStatisticsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(statsResponse);
+
+        var query = new GetProductCategoryStatsQuery();
+        var resultObj = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        resultObj.IsSuccess.Should().BeTrue();
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value.TotalCategories.Should().Be(2);
+        resultObj.Value.ProductCategoriesCount.Should().Be(2);
+        resultObj.Value.LatestUpdatedCategoryName.Should().Be("Danh mục 2");
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

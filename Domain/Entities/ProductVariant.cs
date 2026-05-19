@@ -71,9 +71,6 @@ namespace Domain.Entities
         [Column("EngineType", TypeName = "nvarchar(100)")]
         public string? EngineType { get; set; }
 
-        [Column("StockQuantity")]
-        public int? StockQuantity { get; set; }
-
         public Product? Product { get; set; }
 
         public ICollection<InputInfo> InputInfos { get; set; } = [];

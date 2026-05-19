@@ -11,9 +11,6 @@ public class ProductDetailForManagerResponse
     [JsonPropertyName("category_id")]
     public int? CategoryId { get; set; }
 
-    [JsonPropertyName("vehicle_type_id")]
-    public int? VehicleTypeId { get; set; }
-
     [JsonPropertyName("category")]
     public string? CategoryName { get; set; }
 

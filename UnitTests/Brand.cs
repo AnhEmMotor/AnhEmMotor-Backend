@@ -88,6 +88,26 @@ public class Brand
         result.Error!.Code.Should().Be("Validation");
     }
 
+    [Fact(DisplayName = "BRAND_011b - Cập nhật thương hiệu với cùng tên cũ phải thành công")]
+    public async Task BRAND_011b_UpdateBrand_SameName_ShouldSucceed()
+    {
+        var handler = new UpdateBrandCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var command = new UpdateBrandCommand { Id = 1, Name = "OldName", Description = "Updated Desc" };
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(new BrandEntities { Id = 1, Name = "OldName", Description = "Desc" });
+        var duplicateBrands = new List<BrandEntities> { new() { Id = 1, Name = "OldName" } };
+        _readRepoMock.Setup(
+            x => x.GetByNameAsync("OldName", It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(duplicateBrands);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Description.Should().Be("Updated Desc");
+    }
+
     [Fact(DisplayName = "BRAND_019 - Validate Tên thương hiệu chứa ký tự đặc biệt không hợp lệ")]
     public void BRAND_019_CreateBrand_SpecialChars_ShouldFailValidation()
     {
@@ -287,6 +307,29 @@ public class Brand
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         _updateRepoMock.Verify(x => x.Restore(It.Is<List<BrandEntities>>(l => l.Count == 2)), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = "BRAND_051 - Unit: GetBrandStatisticsQueryHandler - Success")]
+    public async Task BRAND_051_GetBrandStatistics_Success()
+    {
+        var handler = new Application.Features.Brands.Queries.GetBrandStatistics.GetBrandStatisticsQueryHandler(_readRepoMock.Object);
+        var query = new Application.Features.Brands.Queries.GetBrandStatistics.GetBrandStatisticsQuery();
+        var statsResponse = new Application.ApiContracts.Brand.Responses.BrandStatisticsResponse
+        {
+            TotalBrands = 5,
+            PopularOrigin = "Japan",
+            PopularOriginCount = 3,
+            LatestUpdatedBrandName = "Honda",
+            LatestUpdatedAt = DateTimeOffset.UtcNow
+        };
+        _readRepoMock.Setup(x => x.GetStatisticsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(statsResponse);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.Should().NotBeNull();
+        result.Value.Should().NotBeNull();
+        result.Value.TotalBrands.Should().Be(5);
+        string.Compare(result.Value.PopularOrigin, "Japan").Should().Be(0);
+        string.Compare(result.Value.LatestUpdatedBrandName, "Honda").Should().Be(0);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

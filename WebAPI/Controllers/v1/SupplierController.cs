@@ -13,7 +13,9 @@ using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Application.Features.Suppliers.Queries.GetPartnerTypesList;
+using Application.Features.Suppliers.Queries.GetSupplierStatistics;
 using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
+using Application.Features.Suppliers.Queries.ExportSuppliers;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Constants.RouteNames;
@@ -292,5 +294,45 @@ public class SupplierController(IMediator mediator) : ApiController
         var command = request.Adapt<UpdateManySupplierStatusCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy thống kê số lượng nhà cung cấp theo loại đối tác.
+    /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thống kê số lượng nhà cung cấp.</returns>
+    [HttpGet("statistics")]
+    [RequiresAnyPermissions(Suppliers.View, Inputs.Edit, Inputs.Create)]
+    [ProducesResponseType(typeof(SupplierStatisticsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetSupplierStatisticsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetSupplierStatisticsQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Xuất danh sách nhà cung cấp ra file Excel (có hỗ trợ lọc và sắp xếp).
+    /// </summary>
+    /// <param name="sieveModel">Các thông tin lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>File Excel chứa danh sách nhà cung cấp.</returns>
+    [HttpGet("export")]
+    [HasPermission(Suppliers.View)]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportSuppliersAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
+    {
+        var query = new ExportSuppliersQuery { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+
+        if (!result.IsSuccess)
+        {
+            return HandleResult(result);
+        }
+
+        var fileResult = result.Value;
+        return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
     }
 }

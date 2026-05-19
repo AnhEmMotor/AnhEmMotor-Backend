@@ -1817,10 +1817,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("VehicleTypeId")
-                        .HasColumnType("integer")
-                        .HasColumnName("VehicleTypeId");
-
                     b.Property<string>("WarrantyPeriod")
                         .HasColumnType("text")
                         .HasColumnName("WarrantyPeriod");
@@ -1840,8 +1836,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("StatusId");
-
-                    b.HasIndex("VehicleTypeId");
 
                     b.ToTable("Product");
                 });
@@ -1892,10 +1886,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<string>("Slug")
                         .HasColumnType("text")
                         .HasColumnName("Slug");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer")
-                        .HasColumnName("SortOrder");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -2134,10 +2124,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<decimal?>("SeatHeight")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("SeatHeight");
-
-                    b.Property<int?>("StockQuantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("StockQuantity");
 
                     b.Property<string>("TireSize")
                         .HasColumnType("text")
@@ -2582,53 +2568,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("VehicleDocument");
                 });
 
-            modelBuilder.Entity("Domain.Entities.VehicleType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("Description");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("ImageUrl");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("IsActive");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text")
-                        .HasColumnName("Name");
-
-                    b.Property<string>("Slug")
-                        .HasColumnType("text")
-                        .HasColumnName("Slug");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer")
-                        .HasColumnName("SortOrder");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("VehicleType");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -3034,17 +2973,11 @@ namespace Infrastructure.PostgreSqlMigrations
                         .WithMany("Products")
                         .HasForeignKey("StatusId");
 
-                    b.HasOne("Domain.Entities.VehicleType", "VehicleType")
-                        .WithMany("Products")
-                        .HasForeignKey("VehicleTypeId");
-
                     b.Navigation("Brand");
 
                     b.Navigation("ProductCategory");
 
                     b.Navigation("ProductStatus");
-
-                    b.Navigation("VehicleType");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCategory", b =>
@@ -3432,11 +3365,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("Documents");
 
                     b.Navigation("MaintenanceHistories");
-                });
-
-            modelBuilder.Entity("Domain.Entities.VehicleType", b =>
-                {
-                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

@@ -15,8 +15,6 @@ public sealed record CreateProductCategoryCommand : IRequest<Result<ProductCateg
 
     public bool IsActive { get; init; } = true;
 
-    public int SortOrder { get; init; }
-
     public int? ParentId { get; init; }
 
     public string? Description { get; init; }
