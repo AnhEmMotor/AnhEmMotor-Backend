@@ -61,25 +61,10 @@ public sealed class InputMappingConfig : IRegister
             return null;
         }
         var productName = variant.Product.Name ?? string.Empty;
-        if (variant.VariantOptionValues is null || variant.VariantOptionValues.Count == 0)
+        if (string.IsNullOrWhiteSpace(variant.VariantName))
         {
             return productName;
         }
-        var parts = variant.VariantOptionValues
-            .Where(vov => vov.OptionValue is not null && !string.IsNullOrWhiteSpace(vov.OptionValue.Name))
-            .Select(
-                vov =>
-                {
-                    var optionName = vov.OptionValue?.Option?.Name;
-                    return string.IsNullOrWhiteSpace(optionName)
-                        ? vov.OptionValue!.Name
-                        : $"{optionName}: {vov.OptionValue!.Name}";
-                })
-            .ToList();
-        if (parts.Count == 0)
-        {
-            return productName;
-        }
-        return $"{productName} ({string.Join(", ", parts)})";
+        return $"{productName} ({variant.VariantName})";
     }
 }

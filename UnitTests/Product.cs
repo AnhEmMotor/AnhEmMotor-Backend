@@ -106,7 +106,7 @@ public class Product
             BrandId = 1,
             FrontTireSize = "120/70-17",
             RearTireSize = "180/55-17",
-            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000 }]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, VariantName = "1234" }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1424,7 +1424,7 @@ public class Product
             Name = "Honda",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [new CreateProductVariantRequest { UrlSlug = "honda", Price = 100, OptionValues = [] }]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "honda", Price = 100, OptionValues = [], VariantName = "1234" }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1761,10 +1761,10 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [new CreateProductVariantRequest { UrlSlug = "v1", VersionName = "V1", ColorName = "Red" }, new CreateProductVariantRequest
+                [new CreateProductVariantRequest { UrlSlug = "v1", VariantName = "V1", ColorName = "Red" }, new CreateProductVariantRequest
                 {
                     UrlSlug = "v2",
-                    VersionName = "V1",
+                    VariantName = "V1",
                     ColorName = "Red"
                 }]
         };
@@ -1798,7 +1798,7 @@ public class Product
     {
         var variant = new ProductVariant
         {
-            VersionName = "V1",
+            VariantName = "V1",
             ColorName = "Đỏ",
             Product = new ProductEntity { Name = "Bike" }
         };
@@ -1813,7 +1813,7 @@ public class Product
         var variant = new ProductVariant
         {
             Product = new ProductEntity { Name = "Standard Bike" },
-            VersionName = null,
+            VariantName = null,
             ColorName = null
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
@@ -1919,7 +1919,7 @@ public class Product
             Name = "P",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, OptionValueIds = [] }]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, OptionValueIds = [], VariantName = "1234" }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1945,8 +1945,8 @@ public class Product
         result.IsValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "PRODUCT_179 - Ngăn chặn trùng lặp phiên bản (VersionName) giữa các biến thể")]
-    public void CreateProduct_DuplicateVersionName_Fails()
+    [Fact(DisplayName = "PRODUCT_179 - Ngăn chặn trùng lặp phiên bản (VariantName) giữa các biến thể")]
+    public void CreateProduct_DuplicateVariantName_Fails()
     {
         var command = new CreateProductCommand
         {
@@ -1954,9 +1954,9 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [new CreateProductVariantRequest { VersionName = "V1" }, new CreateProductVariantRequest
+                [new CreateProductVariantRequest { VariantName = "V1" }, new CreateProductVariantRequest
                 {
-                    VersionName = "V1"
+                    VariantName = "V1"
                 }]
         };
         var validator = new CreateProductCommandValidator();
@@ -1973,10 +1973,10 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [new CreateProductVariantRequest { ColorName = "Red", VersionName = "V1" }, new CreateProductVariantRequest
+                [new CreateProductVariantRequest { ColorName = "Red", VariantName = "V1" }, new CreateProductVariantRequest
                 {
                     ColorName = "Red",
-                    VersionName = "V1"
+                    VariantName = "V1"
                 }]
         };
         var validator = new CreateProductCommandValidator();

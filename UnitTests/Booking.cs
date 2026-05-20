@@ -139,7 +139,7 @@ public class Booking
             ProductVariant =
                 new ProductVariant
                 {
-                    VersionName = "Standard",
+                    VariantName = "Standard",
                     Product = new Domain.Entities.Product { Name = "Honda SH" }
                 }
         };
