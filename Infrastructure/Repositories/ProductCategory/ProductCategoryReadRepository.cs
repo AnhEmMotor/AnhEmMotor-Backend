@@ -109,19 +109,19 @@ public class ProductCategoryReadRepository(ApplicationDBContext context, ISieveP
     {
         // 1. Check root category
         var hasProducts = await context.GetQuery<Domain.Entities.Product>(mode)
-            .AnyAsync(p => p.CategoryId == rootId, cancellationToken);
+            .AnyAsync(p => p.CategoryId == rootId, cancellationToken).ConfigureAwait(false);
         if (hasProducts) return true;
 
         // 2. Check its subcategories
         var subCategoryIds = await context.GetQuery<CategoryEntity>(mode)
             .Where(c => c.ParentId == rootId)
             .Select(c => c.Id)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-        if (subCategoryIds.Any())
+        if (subCategoryIds.Count != 0)
         {
             return await context.GetQuery<Domain.Entities.Product>(mode)
-                .AnyAsync(p => p.CategoryId.HasValue && subCategoryIds.Contains(p.CategoryId.Value), cancellationToken);
+                .AnyAsync(p => p.CategoryId.HasValue && subCategoryIds.Contains(p.CategoryId.Value), cancellationToken).ConfigureAwait(false);
         }
 
         return false;
@@ -133,17 +133,17 @@ public class ProductCategoryReadRepository(ApplicationDBContext context, ISieveP
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var rootIdList = rootIds.ToList();
-        if (!rootIdList.Any()) return false;
+        if (rootIdList.Count == 0) return false;
 
         var subCategoryIds = await context.GetQuery<CategoryEntity>(mode)
             .Where(c => c.ParentId.HasValue && rootIdList.Contains(c.ParentId.Value))
             .Select(c => c.Id)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
 
         var allIds = rootIdList.Union(subCategoryIds).Distinct().ToList();
 
         return await context.GetQuery<Domain.Entities.Product>(mode)
-            .AnyAsync(p => p.CategoryId.HasValue && allIds.Contains(p.CategoryId.Value), cancellationToken);
+            .AnyAsync(p => p.CategoryId.HasValue && allIds.Contains(p.CategoryId.Value), cancellationToken).ConfigureAwait(false);
     }
 
     internal IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)

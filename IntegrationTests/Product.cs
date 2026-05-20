@@ -1400,7 +1400,6 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Variants = [new UpdateProductVariantRequest { Id = variant.Id, Price = 2000, OptionValues = [], VariantName = "V1" }]
         };
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        var json = JsonSerializer.Serialize(updateCommand, options);
         var response = await _client.PutAsJsonAsync($"/api/v1/product/{product.Id}", updateCommand, options, TestContext.Current.CancellationToken).ConfigureAwait(true);
         if (response.StatusCode != HttpStatusCode.OK)
         {

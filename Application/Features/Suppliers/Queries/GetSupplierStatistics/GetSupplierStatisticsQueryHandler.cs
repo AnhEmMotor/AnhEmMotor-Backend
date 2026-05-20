@@ -12,7 +12,7 @@ public sealed class GetSupplierStatisticsQueryHandler(
         GetSupplierStatisticsQuery request,
         CancellationToken cancellationToken)
     {
-        var statistics = await repository.GetStatisticsAsync(cancellationToken);
+        var statistics = await repository.GetStatisticsAsync(cancellationToken).ConfigureAwait(false);
         return Result<SupplierStatisticsResponse>.Success(statistics);
     }
 }

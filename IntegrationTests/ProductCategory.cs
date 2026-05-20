@@ -944,12 +944,12 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var parent = new ProductCategoryEntity { Name = "Parent " + uniqueId, CategoryGroup = "Product" };
+            var parent = new ProductCategoryEntity { Name = $"Parent {uniqueId}", CategoryGroup = "Product" };
             db.ProductCategories.Add(parent);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             parentId = parent.Id;
 
-            var child = new ProductCategoryEntity { Name = "Child " + uniqueId, ParentId = parentId, CategoryGroup = "Product" };
+            var child = new ProductCategoryEntity { Name = $"Child {uniqueId}", ParentId = parentId, CategoryGroup = "Product" };
             db.ProductCategories.Add(child);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
@@ -1013,14 +1013,14 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             
-            var oldParent = new ProductCategoryEntity { Name = "OldParent" + dataId, CategoryGroup = "Product", Slug = "old-parent-" + dataId };
-            var newParent = new ProductCategoryEntity { Name = "NewParent" + dataId, CategoryGroup = "Product", Slug = "new-parent-" + dataId };
+            var oldParent = new ProductCategoryEntity { Name = $"OldParent {dataId}", CategoryGroup = "Product", Slug = $"old-parent-{dataId}" };
+            var newParent = new ProductCategoryEntity { Name = $"NewParent {dataId}", CategoryGroup = "Product", Slug = $"new-parent-{dataId}" };
             db.ProductCategories.AddRange(oldParent, newParent);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             
             newParentId = newParent.Id;
 
-            var child = new ProductCategoryEntity { Name = "Child" + dataId, ParentId = oldParent.Id, CategoryGroup = "Product", Slug = "child-" + dataId };
+            var child = new ProductCategoryEntity { Name = $"Child {dataId}", ParentId = oldParent.Id, CategoryGroup = "Product", Slug = $"child-{dataId}" };
             db.ProductCategories.Add(child);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             childId = child.Id;
@@ -1029,10 +1029,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         // 3. Thực hiện Update qua API
         var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{childId}", new { 
             id = childId,
-            name = "UpdatedChild" + dataId,
+            name = $"UpdatedChild{dataId}",
             parentId = newParentId,
             categoryGroup = "Product",
-            slug = "child-updated-" + dataId,
+            slug = $"child-updated-{dataId}",
             isActive = true
         }).ConfigureAwait(true);
         
@@ -1076,13 +1076,13 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var parentA = new ProductCategoryEntity { Name = "ParentA" + dataId, CategoryGroup = "Product", Slug = "pa-" + dataId };
-            var parentB = new ProductCategoryEntity { Name = "ParentB" + dataId, CategoryGroup = "Product", Slug = "pb-" + dataId };
+            var parentA = new ProductCategoryEntity { Name = $"ParentA{dataId}", CategoryGroup = "Product", Slug = $"pa-{dataId}" };
+            var parentB = new ProductCategoryEntity { Name = $"ParentB{dataId}", CategoryGroup = "Product", Slug = $"pb-{dataId}" };
             db.ProductCategories.AddRange(parentA, parentB);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             
             parentBId = parentB.Id;
-            var child = new ProductCategoryEntity { Name = "Child" + dataId, ParentId = parentA.Id, CategoryGroup = "Product", Slug = "c-" + dataId };
+            var child = new ProductCategoryEntity { Name = $"Child{dataId}", ParentId = parentA.Id, CategoryGroup = "Product", Slug = $"c-{dataId}" };
             db.ProductCategories.Add(child);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             childId = child.Id;
@@ -1091,10 +1091,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         // 3. Update Parent from A to B
         var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{childId}", new { 
             id = childId,
-            name = "ChildUpdated" + dataId,
+            name = $"ChildUpdated{dataId}",
             parentId = parentBId,
             categoryGroup = "Product",
-            slug = "c-up-" + dataId,
+            slug = $"c-up-{dataId}",
             isActive = true
         }).ConfigureAwait(true);
         

@@ -159,9 +159,9 @@ public class SupplierReadRepository(ApplicationDBContext context, ISievePaginato
     {
         var query = GetQueryable(DataFetchMode.ActiveOnly);
 
-        var totalSuppliers = await query.CountAsync(cancellationToken);
-        var financialSuppliers = await query.Where(s => s.PartnerTypeId == PartnerType.Financial).CountAsync(cancellationToken);
-        var creditSuppliers = await query.Where(s => s.PartnerTypeId == PartnerType.Supplier).CountAsync(cancellationToken);
+        var totalSuppliers = await query.CountAsync(cancellationToken).ConfigureAwait(false);
+        var financialSuppliers = await query.Where(s => s.PartnerTypeId == PartnerType.Financial).CountAsync(cancellationToken).ConfigureAwait(false);
+        var creditSuppliers = await query.Where(s => s.PartnerTypeId == PartnerType.Supplier).CountAsync(cancellationToken).ConfigureAwait(false);
 
         return new SupplierStatisticsResponse
         {

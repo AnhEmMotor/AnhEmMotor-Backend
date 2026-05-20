@@ -22,17 +22,17 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
         var totalVehicles = await context.InputReceipts
             .Where(x => x.DeletedAt == null && x.StatusId == Domain.Constants.Input.InputStatus.Finish && x.InputDate >= startOfMonth)
             .SelectMany(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .SumAsync(y => y.Count ?? 0, cancellationToken);
+            .SumAsync(y => y.Count ?? 0, cancellationToken).ConfigureAwait(false);
 
         // Processing receipts: count of working receipts
         var processingReceipts = await context.InputReceipts
-            .CountAsync(x => x.DeletedAt == null && x.StatusId == Domain.Constants.Input.InputStatus.Working, cancellationToken);
+            .CountAsync(x => x.DeletedAt == null && string.Compare(x.StatusId, Domain.Constants.Input.InputStatus.Working) == 0, cancellationToken).ConfigureAwait(false);
 
         // Total value: sum of total payable of all finished receipts
         var totalValue = await context.InputReceipts
             .Where(x => x.DeletedAt == null && x.StatusId == Domain.Constants.Input.InputStatus.Finish)
             .SelectMany(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .SumAsync(y => (y.Count ?? 0) * (y.InputPrice ?? 0), cancellationToken);
+            .SumAsync(y => (y.Count ?? 0) * (y.InputPrice ?? 0), cancellationToken).ConfigureAwait(false);
 
         return new InventoryReceiptStatsResponse
         {

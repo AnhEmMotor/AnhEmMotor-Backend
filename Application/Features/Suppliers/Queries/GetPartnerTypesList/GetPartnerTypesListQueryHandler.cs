@@ -1,3 +1,4 @@
+using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
 using Domain.Constants;
 using MediatR;
@@ -8,6 +9,7 @@ public sealed class GetPartnerTypesListQueryHandler : IRequestHandler<GetPartner
 {
     public Task<Result<List<PartnerTypeResponse>>> Handle(GetPartnerTypesListQuery request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var list = PartnerType.All.Select(key => new PartnerTypeResponse(key, PartnerType.GetName(key))).ToList();
         return Task.FromResult(Result<List<PartnerTypeResponse>>.Success(list));
     }
