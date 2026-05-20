@@ -7,6 +7,11 @@ namespace Application.Features.Products.Commands.CreateProduct
     {
         public CreateProductVariantCommandValidator()
         {
+            RuleFor(x => x.VariantName)
+                .NotEmpty()
+                .WithMessage("Variant name is required.")
+                .MaximumLength(100)
+                .WithMessage("Variant name must not exceed 100 characters.");
             RuleFor(x => x.UrlSlug)
                 .NotEmpty()
                 .WithMessage("Variant URL slug is required.")

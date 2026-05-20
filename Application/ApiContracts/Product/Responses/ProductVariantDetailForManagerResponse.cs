@@ -20,8 +20,8 @@ public class ProductVariantDetailForManagerResponse
     [JsonPropertyName("optionValues")]
     public Dictionary<string, string> OptionValues { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
-    [JsonPropertyName("version_name")]
-    public string? VersionName { get; set; }
+    [JsonPropertyName("variant_name")]
+    public string? VariantName { get; set; }
 
     [JsonPropertyName("color_name")]
     public string? ColorName { get; set; }

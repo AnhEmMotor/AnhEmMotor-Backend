@@ -23,8 +23,8 @@ namespace Domain.Entities
         [Column("CoverImageUrl", TypeName = "nvarchar(1000)")]
         public string? CoverImageUrl { get; set; }
 
-        [Column("VersionName", TypeName = "nvarchar(100)")]
-        public string? VersionName { get; set; }
+        [Column("VariantName", TypeName = "nvarchar(100)")]
+        public string? VariantName { get; set; }
 
         [Column("ColorName", TypeName = "nvarchar(500)")]
         public string? ColorName { get; set; }

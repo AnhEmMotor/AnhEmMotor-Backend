@@ -168,7 +168,7 @@ public class ProductMappingConfig : IRegister
                         PhotoCollection = row.Photos,
                         Stock = row.Stock,
                         HasBeenBooked = row.HasBeenBooked,
-                        VersionName = row.VersionName,
+                        VariantName = row.VariantName,
                         ColorName = row.ColorName,
                         ColorCode = row.ColorCode,
                         SKU = row.SKU,
@@ -246,7 +246,7 @@ public class ProductMappingConfig : IRegister
             ShortDescription = product.ShortDescription,
             MetaTitle = product.MetaTitle,
             MetaDescription = product.MetaDescription,
-            CompatibleVehicleModelIds = product.CompatibleWith.Select(c => c.CompatibleVehicleModelId).ToList(),
+            CompatibleVehicleModelIds = [.. product.CompatibleWith.Select(c => c.CompatibleVehicleModelId)],
             StatusId = product.StatusId,
             Highlights =
                 product.ProductTechnologies?.Count > 0
@@ -338,7 +338,7 @@ public class ProductMappingConfig : IRegister
             ShortDescription = product.ShortDescription,
             MetaTitle = product.MetaTitle,
             MetaDescription = product.MetaDescription,
-            CompatibleVehicleModelIds = product.CompatibleWith.Select(c => c.CompatibleVehicleModelId).ToList(),
+            CompatibleVehicleModelIds = [.. product.CompatibleWith.Select(c => c.CompatibleVehicleModelId)],
             Highlights =
                 product.ProductTechnologies?.Count > 0
                     ? JsonSerializer.Serialize(
@@ -376,8 +376,8 @@ public class ProductMappingConfig : IRegister
             .ToList();
         var variantName = BuildVariantName(optionPairs);
         var extraParts = new List<string>();
-        if (!string.IsNullOrWhiteSpace(variant.VersionName))
-            extraParts.Add(variant.VersionName);
+        if (!string.IsNullOrWhiteSpace(variant.VariantName))
+            extraParts.Add(variant.VariantName);
         if (!string.IsNullOrWhiteSpace(variant.ColorName))
             extraParts.Add(variant.ColorName);
         if (extraParts.Count > 0)
@@ -386,7 +386,7 @@ public class ProductMappingConfig : IRegister
             if (string.IsNullOrWhiteSpace(variantName))
             {
                 variantName = extra;
-            } else if (!variantName.Contains(variant.VersionName ?? "NONE") &&
+            } else if (!variantName.Contains(variant.VariantName ?? "NONE") &&
                 !variantName.Contains(variant.ColorName ?? "NONE"))
             {
                 variantName = $"{variantName} - {extra}";
@@ -580,13 +580,13 @@ public class ProductMappingConfig : IRegister
 
     private static string BuildStoreVariantDisplayName(ProductVariantEntity variant, bool isOtherVariant = false)
     {
-        if (!string.IsNullOrWhiteSpace(variant.VersionName) && !string.IsNullOrWhiteSpace(variant.ColorName))
+        if (!string.IsNullOrWhiteSpace(variant.VariantName) && !string.IsNullOrWhiteSpace(variant.ColorName))
         {
-            return $"{variant.VersionName} - {variant.ColorName}";
+            return $"{variant.VariantName} - {variant.ColorName}";
         }
-        if (!string.IsNullOrWhiteSpace(variant.VersionName))
+        if (!string.IsNullOrWhiteSpace(variant.VariantName))
         {
-            return variant.VersionName;
+            return variant.VariantName;
         }
         if (!string.IsNullOrWhiteSpace(variant.ColorName))
         {

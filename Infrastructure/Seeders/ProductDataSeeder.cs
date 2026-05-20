@@ -49,7 +49,7 @@ public static class ProductDataSeeder
                 var pVariant = p.ProductVariants.FirstOrDefault(v => string.Compare(v.UrlSlug, variant.UrlSlug) == 0);
                 if (pVariant != null)
                 {
-                    variant.VersionName = pVariant.VersionName;
+                    variant.VariantName = pVariant.VariantName;
                     variant.ColorName = pVariant.ColorName;
                     variant.ColorCode = pVariant.ColorCode;
                     variant.SKU = pVariant.SKU;

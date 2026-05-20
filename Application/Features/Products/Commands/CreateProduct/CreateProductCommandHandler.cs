@@ -91,7 +91,7 @@ public sealed class CreateProductCommandHandler(
             {
                 if (!string.IsNullOrWhiteSpace(variantReq.ColorName))
                     potentialOptionNames.Add("Màu sắc");
-                if (!string.IsNullOrWhiteSpace(variantReq.VersionName))
+                if (!string.IsNullOrWhiteSpace(variantReq.VariantName))
                     potentialOptionNames.Add("Phiên bản");
                 if (variantReq.OptionValues?.Count > 0)
                 {
@@ -185,7 +185,7 @@ public sealed class CreateProductCommandHandler(
                     }
                     vSet.Add(variantReq.ColorName.Trim());
                 }
-                if (!string.IsNullOrWhiteSpace(variantReq.VersionName) &&
+                if (!string.IsNullOrWhiteSpace(variantReq.VariantName) &&
                     (optionNameMap.TryGetValue("Phiên bản", out var versionOptId) ||
                         optionNameMap.TryGetValue("Version", out versionOptId)))
                 {
@@ -194,7 +194,7 @@ public sealed class CreateProductCommandHandler(
                         vSet = [];
                         allOptionValues[versionOptId] = vSet;
                     }
-                    vSet.Add(variantReq.VersionName.Trim());
+                    vSet.Add(variantReq.VariantName.Trim());
                 }
                 if (variantReq.OptionValues?.Count > 0)
                 {
@@ -344,7 +344,7 @@ public sealed class CreateProductCommandHandler(
                     UrlSlug = SlugHelper.GenerateSlug(variantReq.UrlSlug),
                     Price = variantReq.Price,
                     CoverImageUrl = variantReq.CoverImageUrl?.Trim(),
-                    VersionName = variantReq.VersionName?.Trim(),
+                    VariantName = variantReq.VariantName?.Trim(),
                     ColorName = variantReq.ColorName?.Trim(),
                     ColorCode = variantReq.ColorCode?.Trim(),
                     SKU = variantReq.SKU?.Trim(),
@@ -414,13 +414,13 @@ public sealed class CreateProductCommandHandler(
                         }
                     }
                 }
-                if (!string.IsNullOrWhiteSpace(variant.VersionName))
+                if (!string.IsNullOrWhiteSpace(variant.VariantName))
                 {
                     if (optionNameMap.TryGetValue("Phiên bản", out var versionOptionId) ||
                         optionNameMap.TryGetValue("Version", out versionOptionId))
                     {
                         if (optionIdToValueMap.TryGetValue(versionOptionId, out var versionValueMap) &&
-                            versionValueMap.TryGetValue(variant.VersionName, out var versionValueId))
+                            versionValueMap.TryGetValue(variant.VariantName, out var versionValueId))
                         {
                             if (!variant.VariantOptionValues.Any(vov => vov.OptionValueId == versionValueId))
                             {

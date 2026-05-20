@@ -68,7 +68,7 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
         var hasVariantWithoutOptions = variants.Any(
             v => (v.OptionValues == null || v.OptionValues.Count == 0) &&
                 string.IsNullOrWhiteSpace(v.ColorName) &&
-                string.IsNullOrWhiteSpace(v.VersionName));
+                string.IsNullOrWhiteSpace(v.VariantName));
         if (hasVariantWithoutOptions)
         {
             context.AddFailure(
@@ -89,8 +89,8 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
             }
             if (!string.IsNullOrWhiteSpace(variant.ColorName))
                 parts.Add($"specialized_color:{variant.ColorName.Trim().ToLowerInvariant()}");
-            if (!string.IsNullOrWhiteSpace(variant.VersionName))
-                parts.Add($"specialized_version:{variant.VersionName.Trim().ToLowerInvariant()}");
+            if (!string.IsNullOrWhiteSpace(variant.VariantName))
+                parts.Add($"specialized_version:{variant.VariantName.Trim().ToLowerInvariant()}");
             var sig = string.Join("|", parts);
             if (!optionSignatures.Add(sig))
             {

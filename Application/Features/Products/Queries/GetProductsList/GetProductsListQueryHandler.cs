@@ -62,8 +62,8 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
                                                                     .Split(',')
                                                                     .Any(
                                                                         cn => group.Names.Contains(cn.Trim().ToLower()))) ||
-                                                            (v.VersionName != null &&
-                                                                v.VersionName
+                                                            (v.VariantName != null &&
+                                                                v.VariantName
                                                                     .Split(',')
                                                                     .Any(
                                                                         vn => group.Names.Contains(vn.Trim().ToLower())))))) &&
@@ -79,11 +79,11 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
                                     var coverImage = string.IsNullOrWhiteSpace(v.CoverImageUrl)
                                         ? photos.FirstOrDefault()
                                         : v.CoverImageUrl;
-                                    var variantDisplayName = !string.IsNullOrWhiteSpace(v.VersionName) &&
+                                    var variantDisplayName = !string.IsNullOrWhiteSpace(v.VariantName) &&
                                                         !string.IsNullOrWhiteSpace(v.ColorName)
-                                        ? $"{v.VersionName} - {v.ColorName}"
-                                        : (!string.IsNullOrWhiteSpace(v.VersionName)
-                                                        ? v.VersionName
+                                        ? $"{v.VariantName} - {v.ColorName}"
+                                        : (!string.IsNullOrWhiteSpace(v.VariantName)
+                                                        ? v.VariantName
                                                         : (v.ColorName ?? "Tiêu chuẩn"));
                                     return new ProductVariantListStoreResponse
                             {

@@ -283,8 +283,8 @@ public sealed class ExportProductsQueryHandler(
     {
         var parts = new StringBuilder();
 
-        if (!string.IsNullOrWhiteSpace(variant.VersionName))
-            parts.Append(variant.VersionName);
+        if (!string.IsNullOrWhiteSpace(variant.VariantName))
+            parts.Append(variant.VariantName);
 
         if (!string.IsNullOrWhiteSpace(variant.ColorName))
         {

@@ -121,7 +121,7 @@ public sealed class UpdateProductCommandHandler(
             {
                 if (!string.IsNullOrWhiteSpace(variantReq.ColorName))
                     potentialOptionNames.Add("Màu sắc");
-                if (!string.IsNullOrWhiteSpace(variantReq.VersionName))
+                if (!string.IsNullOrWhiteSpace(variantReq.VariantName))
                     potentialOptionNames.Add("Phiên bản");
                 if (variantReq.OptionValues?.Count > 0)
                 {
@@ -215,7 +215,7 @@ public sealed class UpdateProductCommandHandler(
                     foreach (var name in names)
                         vSet.Add(name);
                 }
-                if (!string.IsNullOrWhiteSpace(variantReq.VersionName) &&
+                if (!string.IsNullOrWhiteSpace(variantReq.VariantName) &&
                     optionNameMap.TryGetValue("Phiên bản", out var versionOptId))
                 {
                     if (!allOptionValues.TryGetValue(versionOptId, out var vSet))
@@ -223,7 +223,7 @@ public sealed class UpdateProductCommandHandler(
                         vSet = [];
                         allOptionValues[versionOptId] = vSet;
                     }
-                    vSet.Add(variantReq.VersionName.Trim());
+                    vSet.Add(variantReq.VariantName.Trim());
                 }
                 if (variantReq.OptionValues?.Count > 0)
                 {
@@ -416,13 +416,13 @@ public sealed class UpdateProductCommandHandler(
                     }
                 }
             }
-            if (!string.IsNullOrWhiteSpace(variantEntity.VersionName))
+            if (!string.IsNullOrWhiteSpace(variantEntity.VariantName))
             {
                 if (optionNameMap.TryGetValue("Phiên bản", out var versionOptionId) ||
                     optionNameMap.TryGetValue("Version", out versionOptionId))
                 {
                     if (optionIdToValueMap.TryGetValue(versionOptionId, out var versionValueMap) &&
-                        versionValueMap.TryGetValue(variantEntity.VersionName, out var versionValueId))
+                        versionValueMap.TryGetValue(variantEntity.VariantName, out var versionValueId))
                     {
                         if (!variantEntity.VariantOptionValues.Any(vov => vov.OptionValueId == versionValueId))
                         {

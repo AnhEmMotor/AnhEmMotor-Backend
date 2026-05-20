@@ -58,7 +58,7 @@ namespace Application.Features.Bookings.Commands.ConfirmBooking
                 
                 <div style='background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;'>
                     <p style='margin: 5px 0;'><strong>Thời gian:</strong> {booking.PreferredDate:dd/MM/yyyy HH:mm}</p>
-                    <p style='margin: 5px 0;'><strong>Dòng xe:</strong> {booking.ProductVariant?.Product?.Name} - {booking.ProductVariant?.VersionName}</p>
+                    <p style='margin: 5px 0;'><strong>Dòng xe:</strong> {booking.ProductVariant?.Product?.Name} - {booking.ProductVariant?.VariantName}</p>
                     <p style='margin: 5px 0;'><strong>Địa điểm:</strong> {booking.Location}</p>
                 </div>
 
