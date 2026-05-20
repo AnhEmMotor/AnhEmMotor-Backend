@@ -9,7 +9,7 @@ public class ProductVariantDetailForManagerResponse
     [JsonPropertyName("product_id")]
     public int? ProductId { get; set; }
 
-    [JsonPropertyName("url")]
+    [JsonPropertyName("url_slug")]
     public string? UrlSlug { get; set; }
 
     public decimal? Price { get; set; }

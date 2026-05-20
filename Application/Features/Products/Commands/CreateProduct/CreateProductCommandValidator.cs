@@ -18,10 +18,9 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             .WithMessage("ID danh mục phải lớn hơn 0.");
         RuleFor(x => x.BrandId)
             .NotNull()
-            .WithMessage("Brand ID is required.")
+            .WithMessage("Thương hiệu sản phẩm là bắt buộc.")
             .GreaterThan(0)
-            .When(x => x.BrandId.HasValue)
-            .WithMessage("ID thương hiệu phải lớn hơn 0 khi cung cấp.");
+            .WithMessage("ID thương hiệu phải lớn hơn 0.");
         RuleFor(x => x.Description)
             .MaximumLength(2000)
             .When(x => !string.IsNullOrWhiteSpace(x.Description))

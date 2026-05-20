@@ -103,6 +103,7 @@ public class Product
         {
             Name = "Product 1",
             CategoryId = 1,
+            BrandId = 1,
             FrontTireSize = "120/70-17",
             RearTireSize = "180/55-17",
             Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000 }]
