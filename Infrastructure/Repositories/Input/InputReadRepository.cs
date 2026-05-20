@@ -1,3 +1,4 @@
+using Application.ApiContracts.Input.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Domain.Constants;
@@ -12,6 +13,35 @@ namespace Infrastructure.Repositories.Input;
 
 public class InputReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IInputReadRepository
 {
+    public async Task<InventoryReceiptStatsResponse> GetStatsAsync(CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var startOfMonth = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
+
+        // Total vehicles: sum of count of products in finished receipts whose InputDate is in the current month
+        var totalVehicles = await context.InputReceipts
+            .Where(x => x.DeletedAt == null && x.StatusId == Domain.Constants.Input.InputStatus.Finish && x.InputDate >= startOfMonth)
+            .SelectMany(x => x.InputInfos.Where(y => y.DeletedAt == null))
+            .SumAsync(y => y.Count ?? 0, cancellationToken);
+
+        // Processing receipts: count of working receipts
+        var processingReceipts = await context.InputReceipts
+            .CountAsync(x => x.DeletedAt == null && x.StatusId == Domain.Constants.Input.InputStatus.Working, cancellationToken);
+
+        // Total value: sum of total payable of all finished receipts
+        var totalValue = await context.InputReceipts
+            .Where(x => x.DeletedAt == null && x.StatusId == Domain.Constants.Input.InputStatus.Finish)
+            .SelectMany(x => x.InputInfos.Where(y => y.DeletedAt == null))
+            .SumAsync(y => (y.Count ?? 0) * (y.InputPrice ?? 0), cancellationToken);
+
+        return new InventoryReceiptStatsResponse
+        {
+            TotalVehicles = totalVehicles,
+            ProcessingReceipts = processingReceipts,
+            TotalValue = totalValue
+        };
+    }
+
     public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
         DataFetchMode mode = DataFetchMode.ActiveOnly,
