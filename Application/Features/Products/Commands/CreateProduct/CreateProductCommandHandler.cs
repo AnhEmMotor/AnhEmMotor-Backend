@@ -463,11 +463,9 @@ public sealed class CreateProductCommandHandler(
                 {
                     var techList = techs.GroupBy(x => x.TechnologyId).Select(g => g.First()).ToList();
                     var techIds = techList.Select(x => x.TechnologyId).ToList();
-
                     var validTechs = await technologyReadRepository.GetByIdsAsync(techIds, cancellationToken)
                         .ConfigureAwait(false);
                     var validTechIds = validTechs.Select(t => t.Id).ToHashSet();
-
                     var invalidIds = techIds.Where(id => !validTechIds.Contains(id)).ToList();
                     if (invalidIds.Count > 0)
                     {
@@ -476,7 +474,6 @@ public sealed class CreateProductCommandHandler(
                                 $"Các công nghệ sau không tồn tại: {string.Join(", ", invalidIds)}.",
                                 nameof(request.Highlights)));
                     }
-
                     var order = 1;
                     foreach (var t in techList)
                     {

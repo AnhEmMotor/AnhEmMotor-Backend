@@ -11,7 +11,10 @@ using BrandEntity = Domain.Entities.Brand;
 
 namespace Infrastructure.Repositories.Brand;
 
-public class BrandReadRepository(ApplicationDBContext context, ISievePaginator paginator, ISieveProcessor sieveProcessor) : IBrandReadRepository
+public class BrandReadRepository(
+    ApplicationDBContext context,
+    ISievePaginator paginator,
+    ISieveProcessor sieveProcessor) : IBrandReadRepository
 {
     public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
@@ -73,9 +76,7 @@ public class BrandReadRepository(ApplicationDBContext context, ISievePaginator p
     public async Task<BrandStatisticsResponse> GetStatisticsAsync(CancellationToken cancellationToken)
     {
         var query = context.GetQuery<BrandEntity>(DataFetchMode.ActiveOnly);
-
         var totalBrands = await query.CountAsync(cancellationToken).ConfigureAwait(false);
-
         var popularOriginGroup = await query
             .Where(b => !string.IsNullOrEmpty(b.Origin))
             .GroupBy(b => b.Origin)
@@ -83,13 +84,11 @@ public class BrandReadRepository(ApplicationDBContext context, ISievePaginator p
             .OrderByDescending(x => x.Count)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var latestUpdatedBrand = await query
             .OrderByDescending(b => b.UpdatedAt ?? b.CreatedAt)
             .Select(b => new { b.Name, LatestTime = b.UpdatedAt ?? b.CreatedAt })
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
-
         return new BrandStatisticsResponse
         {
             TotalBrands = totalBrands,

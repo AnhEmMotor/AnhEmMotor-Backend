@@ -2,16 +2,18 @@ using Application.ApiContracts.ProductCategory.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Primitives;
-using MediatR;
 using Mapster;
-using System.Text.RegularExpressions;
+using MediatR;
+using Sieve.Services;
 using System.Globalization;
 using System.Text;
-using Sieve.Services;
+using System.Text.RegularExpressions;
 
 namespace Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 
-public sealed class GetProductCategoriesListQueryHandler(IProductCategoryReadRepository repository, ISieveProcessor sieveProcessor) : IRequestHandler<GetProductCategoriesListQuery, Result<PagedResult<ProductCategoryResponse>>>
+public sealed class GetProductCategoriesListQueryHandler(
+    IProductCategoryReadRepository repository,
+    ISieveProcessor sieveProcessor) : IRequestHandler<GetProductCategoriesListQuery, Result<PagedResult<ProductCategoryResponse>>>
 {
     public async Task<Result<PagedResult<ProductCategoryResponse>>> Handle(
         GetProductCategoriesListQuery request,
@@ -24,8 +26,7 @@ public sealed class GetProductCategoriesListQueryHandler(IProductCategoryReadRep
             if (match.Success)
             {
                 searchKeyword = match.Groups[1].Value.Trim();
-            }
-            else
+            } else
             {
                 match = Regex.Match(request.SieveModel.Filters, @"Name==(.+?)(?:,|$)");
                 if (match.Success)
@@ -34,55 +35,46 @@ public sealed class GetProductCategoriesListQueryHandler(IProductCategoryReadRep
                 }
             }
         }
-
         if (!string.IsNullOrWhiteSpace(searchKeyword))
         {
             var allCategories = await repository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-
-            var matchedCategories = allCategories.Where(c => 
-                RemoveDiacritics(c.Name ?? "").Contains(RemoveDiacritics(searchKeyword), StringComparison.OrdinalIgnoreCase)
-            ).ToList();
-
+            var matchedCategories = allCategories.Where(
+                c => RemoveDiacritics(c.Name ?? string.Empty)
+                    .Contains(RemoveDiacritics(searchKeyword), StringComparison.OrdinalIgnoreCase))
+                .ToList();
             var resultIds = new HashSet<int>();
             foreach (var cat in matchedCategories)
             {
                 resultIds.Add(cat.Id);
-
-                // Traverse upwards to root
                 var parent = cat;
                 while (parent.ParentId.HasValue)
                 {
                     var parentId = parent.ParentId.Value;
-                    if (!resultIds.Add(parentId)) break; // prevent infinite loops
+                    if (!resultIds.Add(parentId))
+                        break;
                     parent = allCategories.FirstOrDefault(c => c.Id == parentId);
-                    if (parent == null) break;
+                    if (parent == null)
+                        break;
                 }
-
-                // Traverse downwards to subcategories
                 var children = allCategories.Where(c => c.ParentId == cat.Id);
                 foreach (var child in children)
                 {
                     resultIds.Add(child.Id);
                 }
             }
-
             var finalCategories = allCategories.Where(c => resultIds.Contains(c.Id)).ToList();
             var query = finalCategories.AsQueryable();
             var totalCount = query.Count();
-
             var pagedQuery = sieveProcessor.Apply(request.SieveModel!, query, applyFiltering: false);
             var paginatedCategories = pagedQuery.ToList();
             var responseItems = paginatedCategories.Select(c => c.Adapt<ProductCategoryResponse>()).ToList();
-
             var pagedResult = new PagedResult<ProductCategoryResponse>(
                 responseItems,
                 totalCount,
                 request.SieveModel?.Page ?? 1,
-                request.SieveModel?.PageSize ?? 10
-            );
+                request.SieveModel?.PageSize ?? 10);
             return Result<PagedResult<ProductCategoryResponse>>.Success(pagedResult);
         }
-
         var result = await repository.GetPagedAsync<ProductCategoryResponse>(
             request.SieveModel!,
             cancellationToken: cancellationToken)
@@ -92,7 +84,8 @@ public sealed class GetProductCategoriesListQueryHandler(IProductCategoryReadRep
 
     private static string RemoveDiacritics(string text)
     {
-        if (string.IsNullOrWhiteSpace(text)) return text;
+        if (string.IsNullOrWhiteSpace(text))
+            return text;
         var normalizedString = text.Normalize(NormalizationForm.FormD);
         var stringBuilder = new StringBuilder();
         foreach (var c in normalizedString)
@@ -103,7 +96,6 @@ public sealed class GetProductCategoriesListQueryHandler(IProductCategoryReadRep
                 stringBuilder.Append(c);
             }
         }
-        return stringBuilder.ToString().Normalize(NormalizationForm.FormC)
-            .Replace('đ', 'd').Replace('Đ', 'D');
+        return stringBuilder.ToString().Normalize(NormalizationForm.FormC).Replace('đ', 'd').Replace('Đ', 'D');
     }
 }

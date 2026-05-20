@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using InputStatus = Domain.Entities.InputStatus;
@@ -61,6 +60,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<SupplierContact> SupplierContacts { get; set; }
 
     public virtual DbSet<Domain.Entities.PartnerType> PartnerTypes { get; set; }
+
     public virtual DbSet<SupplierStatus> SupplierStatuses { get; set; }
 
     public virtual DbSet<VariantOptionValue> VariantOptionValues { get; set; }
@@ -170,11 +170,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasData(new ProductStatus { Key = "for-sale" }, new ProductStatus { Key = "out-of-business" });
         modelBuilder.Entity<InputStatus>().HasKey(ins => ins.Key);
         modelBuilder.Entity<Domain.Entities.PartnerType>().HasKey(pt => pt.Key);
-        modelBuilder.Entity<Domain.Entities.PartnerType>().HasData(
-            new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Supplier },
-            new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Financial },
-            new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Insurance }
-        );
+        modelBuilder.Entity<Domain.Entities.PartnerType>()
+            .HasData(
+                new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Supplier },
+                new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Financial },
+                new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Insurance });
         modelBuilder.Entity<OutputStatus>().HasKey(ous => ous.Key);
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)
@@ -276,7 +276,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-
         var entries = ChangeTracker.Entries<BaseEntity>();
         foreach (var entry in entries)
         {

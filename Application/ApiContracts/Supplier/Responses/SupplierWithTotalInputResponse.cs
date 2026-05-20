@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+
 namespace Application.ApiContracts.Supplier.Responses
 {
     public sealed class SupplierWithTotalInputResponse

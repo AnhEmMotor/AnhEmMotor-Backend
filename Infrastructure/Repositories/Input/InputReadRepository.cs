@@ -2,6 +2,7 @@ using Application.ApiContracts.Input.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Domain.Constants;
+using Domain.Constants.Input;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -17,23 +18,21 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
     {
         var now = DateTimeOffset.UtcNow;
         var startOfMonth = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
-
-        // Total vehicles: sum of count of products in finished receipts whose InputDate is in the current month
         var totalVehicles = await context.InputReceipts
-            .Where(x => x.DeletedAt == null && x.StatusId == Domain.Constants.Input.InputStatus.Finish && x.InputDate >= startOfMonth)
+            .Where(x => x.DeletedAt == null && x.StatusId == InputStatus.Finish && x.InputDate >= startOfMonth)
             .SelectMany(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .SumAsync(y => y.Count ?? 0, cancellationToken).ConfigureAwait(false);
-
-        // Processing receipts: count of working receipts
+            .SumAsync(y => y.Count ?? 0, cancellationToken)
+            .ConfigureAwait(false);
         var processingReceipts = await context.InputReceipts
-            .CountAsync(x => x.DeletedAt == null && string.Compare(x.StatusId, Domain.Constants.Input.InputStatus.Working) == 0, cancellationToken).ConfigureAwait(false);
-
-        // Total value: sum of total payable of all finished receipts
+            .CountAsync(
+                x => x.DeletedAt == null && string.Compare(x.StatusId, InputStatus.Working) == 0,
+                cancellationToken)
+            .ConfigureAwait(false);
         var totalValue = await context.InputReceipts
-            .Where(x => x.DeletedAt == null && x.StatusId == Domain.Constants.Input.InputStatus.Finish)
+            .Where(x => x.DeletedAt == null && x.StatusId == InputStatus.Finish)
             .SelectMany(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .SumAsync(y => (y.Count ?? 0) * (y.InputPrice ?? 0), cancellationToken).ConfigureAwait(false);
-
+            .SumAsync(y => (y.Count ?? 0) * (y.InputPrice ?? 0), cancellationToken)
+            .ConfigureAwait(false);
         return new InventoryReceiptStatsResponse
         {
             TotalVehicles = totalVehicles,

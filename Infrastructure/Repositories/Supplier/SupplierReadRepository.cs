@@ -2,6 +2,7 @@ using Application.ApiContracts.Supplier.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
+using Domain.Constants.Input;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,10 @@ using SupplierEntity = Domain.Entities.Supplier;
 
 namespace Infrastructure.Repositories.Supplier;
 
-public class SupplierReadRepository(ApplicationDBContext context, ISievePaginator paginator, ISieveProcessor sieveProcessor) : ISupplierReadRepository
+public class SupplierReadRepository(
+    ApplicationDBContext context,
+    ISievePaginator paginator,
+    ISieveProcessor sieveProcessor) : ISupplierReadRepository
 {
     internal IQueryable<SupplierEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
@@ -24,7 +28,7 @@ public class SupplierReadRepository(ApplicationDBContext context, ISievePaginato
         return context.GetQuery<SupplierEntity>(mode)
             .GroupJoin(
                 context.GetQuery<Domain.Entities.Input>(DataFetchMode.ActiveOnly)
-                    .Where(i => i.StatusId == Domain.Constants.Input.InputStatus.Finish),
+                    .Where(i => i.StatusId == InputStatus.Finish),
                 supplier => supplier.Id,
                 input => input.SupplierId,
                 (supplier, inputs) => new { supplier, inputs })
@@ -158,11 +162,13 @@ public class SupplierReadRepository(ApplicationDBContext context, ISievePaginato
     public async Task<SupplierStatisticsResponse> GetStatisticsAsync(CancellationToken cancellationToken = default)
     {
         var query = GetQueryable(DataFetchMode.ActiveOnly);
-
         var totalSuppliers = await query.CountAsync(cancellationToken).ConfigureAwait(false);
-        var financialSuppliers = await query.Where(s => s.PartnerTypeId == PartnerType.Financial).CountAsync(cancellationToken).ConfigureAwait(false);
-        var creditSuppliers = await query.Where(s => s.PartnerTypeId == PartnerType.Supplier).CountAsync(cancellationToken).ConfigureAwait(false);
-
+        var financialSuppliers = await query.Where(s => s.PartnerTypeId == PartnerType.Financial)
+            .CountAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var creditSuppliers = await query.Where(s => s.PartnerTypeId == PartnerType.Supplier)
+            .CountAsync(cancellationToken)
+            .ConfigureAwait(false);
         return new SupplierStatisticsResponse
         {
             TotalSuppliers = totalSuppliers,

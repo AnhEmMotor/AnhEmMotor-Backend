@@ -5,8 +5,7 @@ using MediatR;
 
 namespace Application.Features.Inputs.Queries.GetInventoryReceiptStats;
 
-public sealed class GetInventoryReceiptStatsQueryHandler(IInputReadRepository repository)
-    : IRequestHandler<GetInventoryReceiptStatsQuery, Result<InventoryReceiptStatsResponse>>
+public sealed class GetInventoryReceiptStatsQueryHandler(IInputReadRepository repository) : IRequestHandler<GetInventoryReceiptStatsQuery, Result<InventoryReceiptStatsResponse>>
 {
     public async Task<Result<InventoryReceiptStatsResponse>> Handle(
         GetInventoryReceiptStatsQuery request,

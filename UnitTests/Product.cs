@@ -1424,7 +1424,14 @@ public class Product
             Name = "Honda",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [new CreateProductVariantRequest { UrlSlug = "honda", Price = 100, OptionValues = [], VariantName = "1234" }]
+            Variants =
+                [new CreateProductVariantRequest
+                {
+                    UrlSlug = "honda",
+                    Price = 100,
+                    OptionValues = [],
+                    VariantName = "1234"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1919,7 +1926,14 @@ public class Product
             Name = "P",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, OptionValueIds = [], VariantName = "1234" }]
+            Variants =
+                [new CreateProductVariantRequest
+                {
+                    UrlSlug = "v1",
+                    Price = 1000,
+                    OptionValueIds = [],
+                    VariantName = "1234"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);

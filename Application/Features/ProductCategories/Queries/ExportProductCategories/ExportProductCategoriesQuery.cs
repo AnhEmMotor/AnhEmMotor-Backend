@@ -1,7 +1,6 @@
 using Application.Common.Models;
 using MediatR;
 using Sieve.Models;
-using Domain.Primitives;
 
 namespace Application.Features.ProductCategories.Queries.ExportProductCategories;
 

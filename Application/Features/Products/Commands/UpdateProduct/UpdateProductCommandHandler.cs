@@ -446,12 +446,10 @@ public sealed class UpdateProductCommandHandler(
                     .GroupBy(x => x.TechnologyId)
                     .Select(g => g.First())
                     .ToList();
-
                 var techIds = deserialized.Select(x => x.TechnologyId).ToList();
                 var validTechs = await technologyReadRepository.GetByIdsAsync(techIds, cancellationToken)
                     .ConfigureAwait(false);
                 var validTechIds = validTechs.Select(t => t.Id).ToHashSet();
-
                 var invalidIds = techIds.Where(id => !validTechIds.Contains(id)).ToList();
                 if (invalidIds.Count > 0)
                 {
@@ -459,7 +457,6 @@ public sealed class UpdateProductCommandHandler(
                         $"Các công nghệ sau không tồn tại: {string.Join(", ", invalidIds)}.",
                         nameof(command.Highlights));
                 }
-
                 newTechList = deserialized;
             } catch
             {

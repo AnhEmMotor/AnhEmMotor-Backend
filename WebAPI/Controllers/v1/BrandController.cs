@@ -6,11 +6,11 @@ using Application.Features.Brands.Commands.DeleteManyBrands;
 using Application.Features.Brands.Commands.RestoreBrand;
 using Application.Features.Brands.Commands.RestoreManyBrands;
 using Application.Features.Brands.Commands.UpdateBrand;
+using Application.Features.Brands.Queries.ExportBrands;
 using Application.Features.Brands.Queries.GetBrandById;
 using Application.Features.Brands.Queries.GetBrandsList;
-using Application.Features.Brands.Queries.GetDeletedBrandsList;
 using Application.Features.Brands.Queries.GetBrandStatistics;
-using Application.Features.Brands.Queries.ExportBrands;
+using Application.Features.Brands.Queries.GetDeletedBrandsList;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -116,12 +116,10 @@ public class BrandController(IMediator mediator) : ApiController
     {
         var query = new ExportBrandsQuery { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        
         if (!result.IsSuccess)
         {
             return HandleResult(result);
         }
-
         var fileResult = result.Value;
         return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
     }

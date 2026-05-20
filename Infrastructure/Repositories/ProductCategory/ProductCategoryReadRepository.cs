@@ -1,3 +1,4 @@
+using Application.ApiContracts.ProductCategory.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Constants;
@@ -11,20 +12,17 @@ namespace Infrastructure.Repositories.ProductCategory;
 
 public class ProductCategoryReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IProductCategoryReadRepository
 {
-    public async Task<Application.ApiContracts.ProductCategory.Responses.ProductCategoryStatsResponse> GetStatisticsAsync(CancellationToken cancellationToken)
+    public async Task<ProductCategoryStatsResponse> GetStatisticsAsync(CancellationToken cancellationToken)
     {
         var query = context.GetQuery<CategoryEntity>(DataFetchMode.ActiveOnly);
-
         var totalProductCategories = await query.CountAsync(cancellationToken).ConfigureAwait(false);
-
         var latestProductCategory = await query
             .OrderByDescending(c => c.UpdatedAt ?? c.CreatedAt ?? DateTimeOffset.MinValue)
             .ThenByDescending(c => c.Id)
             .Select(c => new { c.Name, LatestTime = c.UpdatedAt ?? c.CreatedAt })
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
-
-        return new Application.ApiContracts.ProductCategory.Responses.ProductCategoryStatsResponse
+        return new ProductCategoryStatsResponse
         {
             TotalCategories = totalProductCategories,
             ProductCategoriesCount = totalProductCategories,
@@ -97,9 +95,7 @@ public class ProductCategoryReadRepository(ApplicationDBContext context, ISieveP
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<CategoryEntity>(mode)
-            .Where(x => x.ParentId == parentId)
-            .ToListAsync(cancellationToken);
+        return context.GetQuery<CategoryEntity>(mode).Where(x => x.ParentId == parentId).ToListAsync(cancellationToken);
     }
 
     public async Task<bool> AnyCategoryInTreeHasProductsAsync(
@@ -107,23 +103,22 @@ public class ProductCategoryReadRepository(ApplicationDBContext context, ISieveP
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        // 1. Check root category
         var hasProducts = await context.GetQuery<Domain.Entities.Product>(mode)
-            .AnyAsync(p => p.CategoryId == rootId, cancellationToken).ConfigureAwait(false);
-        if (hasProducts) return true;
-
-        // 2. Check its subcategories
+            .AnyAsync(p => p.CategoryId == rootId, cancellationToken)
+            .ConfigureAwait(false);
+        if (hasProducts)
+            return true;
         var subCategoryIds = await context.GetQuery<CategoryEntity>(mode)
             .Where(c => c.ParentId == rootId)
             .Select(c => c.Id)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         if (subCategoryIds.Count != 0)
         {
             return await context.GetQuery<Domain.Entities.Product>(mode)
-                .AnyAsync(p => p.CategoryId.HasValue && subCategoryIds.Contains(p.CategoryId.Value), cancellationToken).ConfigureAwait(false);
+                .AnyAsync(p => p.CategoryId.HasValue && subCategoryIds.Contains(p.CategoryId.Value), cancellationToken)
+                .ConfigureAwait(false);
         }
-
         return false;
     }
 
@@ -133,17 +128,17 @@ public class ProductCategoryReadRepository(ApplicationDBContext context, ISieveP
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var rootIdList = rootIds.ToList();
-        if (rootIdList.Count == 0) return false;
-
+        if (rootIdList.Count == 0)
+            return false;
         var subCategoryIds = await context.GetQuery<CategoryEntity>(mode)
             .Where(c => c.ParentId.HasValue && rootIdList.Contains(c.ParentId.Value))
             .Select(c => c.Id)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
-
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         var allIds = rootIdList.Union(subCategoryIds).Distinct().ToList();
-
         return await context.GetQuery<Domain.Entities.Product>(mode)
-            .AnyAsync(p => p.CategoryId.HasValue && allIds.Contains(p.CategoryId.Value), cancellationToken).ConfigureAwait(false);
+            .AnyAsync(p => p.CategoryId.HasValue && allIds.Contains(p.CategoryId.Value), cancellationToken)
+            .ConfigureAwait(false);
     }
 
     internal IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)

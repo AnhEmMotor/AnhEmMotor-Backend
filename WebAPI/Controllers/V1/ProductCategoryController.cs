@@ -6,11 +6,11 @@ using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
 using Application.Features.ProductCategories.Commands.RestoreProductCategory;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
+using Application.Features.ProductCategories.Queries.ExportProductCategories;
 using Application.Features.ProductCategories.Queries.GetDeletedProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
-using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
-using Application.Features.ProductCategories.Queries.ExportProductCategories;
+using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Constants.RouteNames;
@@ -59,12 +59,10 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     {
         var query = new ExportProductCategoriesQuery { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        
         if (!result.IsSuccess)
         {
             return HandleResult(result);
         }
-
         var fileResult = result.Value;
         return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
     }

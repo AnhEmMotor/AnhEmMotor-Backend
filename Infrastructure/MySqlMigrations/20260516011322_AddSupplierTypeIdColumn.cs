@@ -18,7 +18,6 @@ namespace Infrastructure.MySqlMigrations
                 type: "varchar(255)",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "PartnerType",
                 columns: table => new
@@ -34,22 +33,31 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_PartnerType", x => x.Key);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.InsertData(
                 table: "PartnerType",
                 columns: new[] { "Key", "CreatedAt", "DeletedAt", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { "financial", null, null, null },
-                    { "insurance", null, null, null },
-                    { "supplier", null, null, null }
+                {
+                    "financial",
+                    null,
+                    null,
+                    null
+                },
+                {
+                    "insurance",
+                    null,
+                    null,
+                    null
+                },
+                {
+                    "supplier",
+                    null,
+                    null,
+                    null
+                }
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Supplier_PartnerTypeId",
-                table: "Supplier",
-                column: "PartnerTypeId");
-
+            migrationBuilder.CreateIndex(name: "IX_Supplier_PartnerTypeId", table: "Supplier", column: "PartnerTypeId");
             migrationBuilder.AddForeignKey(
                 name: "FK_Supplier_PartnerType_PartnerTypeId",
                 table: "Supplier",
@@ -61,20 +69,10 @@ namespace Infrastructure.MySqlMigrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Supplier_PartnerType_PartnerTypeId",
-                table: "Supplier");
-
-            migrationBuilder.DropTable(
-                name: "PartnerType");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Supplier_PartnerTypeId",
-                table: "Supplier");
-
-            migrationBuilder.DropColumn(
-                name: "PartnerTypeId",
-                table: "Supplier");
+            migrationBuilder.DropForeignKey(name: "FK_Supplier_PartnerType_PartnerTypeId", table: "Supplier");
+            migrationBuilder.DropTable(name: "PartnerType");
+            migrationBuilder.DropIndex(name: "IX_Supplier_PartnerTypeId", table: "Supplier");
+            migrationBuilder.DropColumn(name: "PartnerTypeId", table: "Supplier");
         }
     }
 }
