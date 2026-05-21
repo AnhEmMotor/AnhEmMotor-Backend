@@ -22,7 +22,8 @@ public sealed class DeleteProductCommandHandler(
         var imageFileNames = new List<string>();
         foreach (var variant in product.ProductVariants)
         {
-            if (variant.ProductVariantColor != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColor.CoverImageUrl))
+            if (variant.ProductVariantColor != null &&
+                !string.IsNullOrWhiteSpace(variant.ProductVariantColor.CoverImageUrl))
             {
                 imageFileNames.Add(StringExtensions.ExtractFileName(variant.ProductVariantColor.CoverImageUrl));
             }

@@ -57,9 +57,16 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
                                                                                                         group.Ids
                                                                                                             .Contains(
                                                                                                                 vov.OptionValueId.Value)) ||
-                                                            v.ProductVariantColors.Any(
-                                                                c => c.ColorName != null &&
-                                                                    group.Names.Contains(c.ColorName.Trim().ToLower())) ||
+                                                            v.ProductVariantColors
+                                                                .Any(
+                                                                    c => c.ColorName != null &&
+                                                                                                        group.Names
+                                                                                                            .Contains(
+                                                                                                                c.ColorName
+                                                                                                                                                            .Trim(
+                                                                                                                                                                )
+                                                                                                                                                            .ToLower(
+                                                                                                                                                                ))) ||
                                                             (v.VariantName != null &&
                                                                 v.VariantName
                                                                     .Split(',')
@@ -83,11 +90,11 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
                                         ? photos.FirstOrDefault()
                                         : coverImageUrl;
                                     var variantDisplayName = !string.IsNullOrWhiteSpace(v.VariantName) &&
-                                                         !string.IsNullOrWhiteSpace(colorName)
-                                         ? $"{v.VariantName} - {colorName}"
-                                         : (!string.IsNullOrWhiteSpace(v.VariantName)
-                                                         ? v.VariantName
-                                                         : (colorName ?? "Tiêu chuẩn"));
+                                                        !string.IsNullOrWhiteSpace(colorName)
+                                        ? $"{v.VariantName} - {colorName}"
+                                        : (!string.IsNullOrWhiteSpace(v.VariantName)
+                                                        ? v.VariantName
+                                                        : (colorName ?? "Tiêu chuẩn"));
                                     return new ProductVariantListStoreResponse
                             {
                                 Id = v.Id,

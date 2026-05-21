@@ -33,7 +33,9 @@ namespace Application.Features.Products.Commands.CreateProduct
                 .When(x => !HasSpecializedColors(x))
                 .WithMessage("Biến thể không có màu sắc riêng phải có cover_image_url.");
             RuleFor(x => x.Colors)
-                .Must(colors => colors.Select(c => c.ColorName?.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() == colors.Count)
+                .Must(
+                    colors => colors.Select(c => c.ColorName?.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() ==
+                        colors.Count)
                 .When(x => x.Colors.Count > 0)
                 .WithMessage("Tên màu sắc trong cùng biến thể không được trùng lặp.");
             RuleForEach(x => x.Colors)

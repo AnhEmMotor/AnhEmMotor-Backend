@@ -2,7 +2,8 @@ namespace Domain.Constants
 {
     public static class PredefinedOptions
     {
-        public static readonly IReadOnlyDictionary<string, string> Options = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase)
+        public static readonly IReadOnlyDictionary<string, string> Options = new Dictionary<string, string>(
+            StringComparer.OrdinalIgnoreCase)
         {
             { "VehicleType", "Loại xe" },
             { "Displacement", "Phân khối" },

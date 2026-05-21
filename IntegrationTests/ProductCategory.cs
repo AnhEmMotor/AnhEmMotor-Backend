@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
@@ -13,6 +12,7 @@ using IntegrationTests.SetupClass;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
 using ProductEntity = Domain.Entities.Product;
@@ -43,8 +43,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         GC.SuppressFinalize(this);
     }
 
-#pragma warning disable IDE0079
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "PC_025 - Lấy danh sách danh mục sản phẩm thành công (cho mọi người dùng)")]
     public async Task GetProductCategories_WithPagination_ShouldReturnCorrectData()
     {
@@ -949,16 +949,18 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             db.ProductCategories.Add(parent);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             parentId = parent.Id;
-
             var child = new ProductCategoryEntity { Name = $"Child {uniqueId}", ParentId = parentId };
             db.ProductCategories.Add(child);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Filters=Name@={uniqueId}", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync(
+            $"/api/v1/ProductCategory?Filters=Name@={uniqueId}",
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         var childCat = content!.Items!.FirstOrDefault(c => c.Name!.Contains("Child"));
         childCat.Should().NotBeNull();
         childCat!.ParentId.Should().Be(parentId);
@@ -967,10 +969,14 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     [Fact(DisplayName = "PC_062 - Lấy danh sách toàn bộ để build cấu trúc cây")]
     public async Task GetAllCategories_ShouldReturnAllForTreeStructure()
     {
-        var response = await _client.GetAsync("/api/v1/ProductCategory?PageSize=1000", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync(
+            "/api/v1/ProductCategory?PageSize=1000",
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         content!.Items.Should().NotBeNull();
         foreach (var item in content.Items.Where(i => i.ParentId.HasValue))
         {
@@ -984,68 +990,79 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         var uniqueAuthId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueAuthId}";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
             password,
             [ProductCategories.View, ProductCategories.Edit, ProductCategories.Create],
-            CancellationToken.None).ConfigureAwait(true);
-
-        var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", new
-        {
-            UsernameOrEmail = username,
-            Password = password,
-            RememberMe = true
-        }).ConfigureAwait(true);
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await _client.PostAsJsonAsync(
+            "/api/v1/Auth/login",
+            new { UsernameOrEmail = username, Password = password, RememberMe = true })
+            .ConfigureAwait(true);
         loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var loginResult = await loginResponse.Content
+            .ReadFromJsonAsync<LoginResponse>(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
-
         int childId;
         int newParentId;
         var dataId = Guid.NewGuid().ToString("N")[..8];
-
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
-            var oldParent = new ProductCategoryEntity { Name = $"OldParent {dataId}", Slug = $"old-parent-{dataId}", ManagementType = "vin_number" };
-            var newParent = new ProductCategoryEntity { Name = $"NewParent {dataId}", Slug = $"new-parent-{dataId}", ManagementType = "vin_number" };
+            var oldParent = new ProductCategoryEntity
+            {
+                Name = $"OldParent {dataId}",
+                Slug = $"old-parent-{dataId}",
+                ManagementType = "vin_number"
+            };
+            var newParent = new ProductCategoryEntity
+            {
+                Name = $"NewParent {dataId}",
+                Slug = $"new-parent-{dataId}",
+                ManagementType = "vin_number"
+            };
             db.ProductCategories.AddRange(oldParent, newParent);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
             newParentId = newParent.Id;
-
-            var child = new ProductCategoryEntity { Name = $"Child {dataId}", ParentId = oldParent.Id, Slug = $"child-{dataId}" };
+            var child = new ProductCategoryEntity
+            {
+                Name = $"Child {dataId}",
+                ParentId = oldParent.Id,
+                Slug = $"child-{dataId}"
+            };
             db.ProductCategories.Add(child);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             childId = child.Id;
         }
-
-        var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{childId}", new
-        {
-            id = childId,
-            name = $"UpdatedChild{dataId}",
-            parentId = newParentId,
-            categoryGroup = "Product",
-            slug = $"child-updated-{dataId}",
-            isActive = true
-        }).ConfigureAwait(true);
-
+        var response = await _client.PutAsJsonAsync(
+            $"/api/v1/ProductCategory/{childId}",
+            new
+            {
+                id = childId,
+                name = $"UpdatedChild{dataId}",
+                parentId = newParentId,
+                categoryGroup = "Product",
+                slug = $"child-updated-{dataId}",
+                isActive = true
+            })
+            .ConfigureAwait(true);
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            var error = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var error = await response.Content
+                .ReadAsStringAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             _output.WriteLine($"Update Failed: {error}");
         }
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var updatedCat = await db.ProductCategories.FindAsync([childId], TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var updatedCat = await db.ProductCategories
+                .FindAsync([childId], TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             updatedCat.Should().NotBeNull();
             updatedCat!.ParentId.Should().Be(newParentId);
         }
@@ -1062,44 +1079,65 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             username,
             password,
             [ProductCategories.View, ProductCategories.Edit],
-            CancellationToken.None).ConfigureAwait(true);
-        var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", new { UsernameOrEmail = username, Password = password }).ConfigureAwait(true);
-        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await _client.PostAsJsonAsync(
+            "/api/v1/Auth/login",
+            new { UsernameOrEmail = username, Password = password })
+            .ConfigureAwait(true);
+        var loginResult = await loginResponse.Content
+            .ReadFromJsonAsync<LoginResponse>(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
-
         int childId, parentBId;
         var dataId = Guid.NewGuid().ToString("N")[..8];
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var parentA = new ProductCategoryEntity { Name = $"ParentA{dataId}", Slug = $"pa-{dataId}", ManagementType = "vin_number" };
-            var parentB = new ProductCategoryEntity { Name = $"ParentB{dataId}", Slug = $"pb-{dataId}", ManagementType = "vin_number" };
+            var parentA = new ProductCategoryEntity
+            {
+                Name = $"ParentA{dataId}",
+                Slug = $"pa-{dataId}",
+                ManagementType = "vin_number"
+            };
+            var parentB = new ProductCategoryEntity
+            {
+                Name = $"ParentB{dataId}",
+                Slug = $"pb-{dataId}",
+                ManagementType = "vin_number"
+            };
             db.ProductCategories.AddRange(parentA, parentB);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
             parentBId = parentB.Id;
-            var child = new ProductCategoryEntity { Name = $"Child{dataId}", ParentId = parentA.Id, Slug = $"c-{dataId}" };
+            var child = new ProductCategoryEntity
+            {
+                Name = $"Child{dataId}",
+                ParentId = parentA.Id,
+                Slug = $"c-{dataId}"
+            };
             db.ProductCategories.Add(child);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             childId = child.Id;
         }
-
-        var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{childId}", new
-        {
-            id = childId,
-            name = $"ChildUpdated{dataId}",
-            parentId = parentBId,
-            categoryGroup = "Product",
-            slug = $"c-up-{dataId}",
-            isActive = true
-        }).ConfigureAwait(true);
-
+        var response = await _client.PutAsJsonAsync(
+            $"/api/v1/ProductCategory/{childId}",
+            new
+            {
+                id = childId,
+                name = $"ChildUpdated{dataId}",
+                parentId = parentBId,
+                categoryGroup = "Product",
+                slug = $"c-up-{dataId}",
+                isActive = true
+            })
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var updatedCat = await db.ProductCategories.FindAsync([childId], TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var updatedCat = await db.ProductCategories
+                .FindAsync([childId], TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             updatedCat!.ParentId.Should().Be(parentBId);
         }
     }
@@ -1129,7 +1167,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     public async Task DeleteParentCategory_WithChildren_NoProducts_ShouldSucceed()
     {
         await AuthenticateAsync([ProductCategories.Delete, ProductCategories.View]).ConfigureAwait(true);
-
         int parentId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -1138,22 +1175,28 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             db.ProductCategories.Add(parent);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             parentId = parent.Id;
-
             var child = new ProductCategoryEntity { Name = "Child", ParentId = parentId };
             db.ProductCategories.Add(child);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-
-        var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{parentId}", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.DeleteAsync(
+            $"/api/v1/ProductCategory/{parentId}",
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var parent = await db.ProductCategories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Id == parentId, TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var parent = await db.ProductCategories
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(c => c.Id == parentId, TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             parent!.DeletedAt.Should().NotBeNull();
-
-            var children = await db.ProductCategories.IgnoreQueryFilters().Where(c => c.ParentId == parentId).ToListAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var children = await db.ProductCategories
+                .IgnoreQueryFilters()
+                .Where(c => c.ParentId == parentId)
+                .ToListAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             children.Should().AllSatisfy(c => c.DeletedAt.Should().NotBeNull());
         }
     }
@@ -1162,7 +1205,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     public async Task UpdateCategory_ParentAsSelf_ShouldFail()
     {
         await AuthenticateAsync([ProductCategories.Edit, ProductCategories.View]).ConfigureAwait(true);
-
         int categoryId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -1172,10 +1214,13 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             categoryId = category.Id;
         }
-
         var request = new UpdateProductCategoryCommand { Id = categoryId, ParentId = categoryId };
-        var response = await HttpClientJsonExtensions.PutAsJsonAsync(_client, $"/api/v1/ProductCategory/{categoryId}", request, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
+        var response = await HttpClientJsonExtensions.PutAsJsonAsync(
+            _client,
+            $"/api/v1/ProductCategory/{categoryId}",
+            request,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -1183,7 +1228,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     public async Task UpdateCategory_ParentAsChild_ShouldFail()
     {
         await AuthenticateAsync([ProductCategories.Edit, ProductCategories.View]).ConfigureAwait(true);
-
         int parentId, childId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -1192,16 +1236,18 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             db.ProductCategories.Add(parent);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             parentId = parent.Id;
-
             var child = new ProductCategoryEntity { Name = "Child", ParentId = parentId, Slug = "child-slug" };
             db.ProductCategories.Add(child);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             childId = child.Id;
         }
-
         var request = new UpdateProductCategoryCommand { Id = parentId, ParentId = childId };
-        var response = await HttpClientJsonExtensions.PutAsJsonAsync(_client, $"/api/v1/ProductCategory/{parentId}", request, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
+        var response = await HttpClientJsonExtensions.PutAsJsonAsync(
+            _client,
+            $"/api/v1/ProductCategory/{parentId}",
+            request,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -1209,7 +1255,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     public async Task DeleteLevel1_WithProductsInLevel2_ShouldFail()
     {
         await AuthenticateAsync([ProductCategories.Delete, ProductCategories.View]).ConfigureAwait(true);
-
         int parentId, childId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -1218,18 +1263,18 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             db.ProductCategories.Add(parent);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             parentId = parent.Id;
-
             var child = new ProductCategoryEntity { Name = "L2", ParentId = parentId };
             db.ProductCategories.Add(child);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             childId = child.Id;
-
             var product = new ProductEntity { Name = "Product", CategoryId = childId, StatusId = "for-sale" };
             db.Products.Add(product);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-
-        var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{parentId}", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.DeleteAsync(
+            $"/api/v1/ProductCategory/{parentId}",
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -1237,7 +1282,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     public async Task DeleteLevel2_WithProducts_ShouldFail()
     {
         await AuthenticateAsync([ProductCategories.Delete, ProductCategories.View]).ConfigureAwait(true);
-
         int childId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -1245,18 +1289,18 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             var parent = new ProductCategoryEntity { Name = "L1" };
             db.ProductCategories.Add(parent);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
             var child = new ProductCategoryEntity { Name = "L2", ParentId = parent.Id };
             db.ProductCategories.Add(child);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             childId = child.Id;
-
             var product = new ProductEntity { Name = "Product", CategoryId = childId, StatusId = "for-sale" };
             db.Products.Add(product);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-
-        var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{childId}", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.DeleteAsync(
+            $"/api/v1/ProductCategory/{childId}",
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -1264,44 +1308,40 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     public async Task DeleteMany_MixedResults_ShouldRollbackAll()
     {
         await AuthenticateAsync([ProductCategories.Delete, ProductCategories.View]).ConfigureAwait(true);
-
         int cat1Id, cat2Id;
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
             var cat1 = new ProductCategoryEntity { Name = "Cat1" };
             db.ProductCategories.Add(cat1);
-
             var cat2 = new ProductCategoryEntity { Name = "Cat2" };
             db.ProductCategories.Add(cat2);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             cat1Id = cat1.Id;
             cat2Id = cat2.Id;
-
             var product = new ProductEntity { Name = "Product", CategoryId = cat2Id, StatusId = "for-sale" };
             db.Products.Add(product);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-
         var request = new DeleteManyProductCategoriesCommand { Ids = [cat1Id, cat2Id] };
         var httpRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/ProductCategory/delete-many")
         {
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequest, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var cat1 = await db.ProductCategories.FindAsync([cat1Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var cat1 = await db.ProductCategories
+                .FindAsync([cat1Id], TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             cat1!.DeletedAt.Should().BeNull();
-
-            var cat2 = await db.ProductCategories.FindAsync([cat2Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var cat2 = await db.ProductCategories
+                .FindAsync([cat2Id], TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             cat2!.DeletedAt.Should().BeNull();
         }
     }
-#pragma warning restore CRR0035
+    #pragma warning restore CRR0035
 }

@@ -1,18 +1,19 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services.HR;
 using Domain.Constants;
+using Domain.Constants.Lead;
 using Domain.Constants.Order;
+
 using Mapster;
 using MediatR;
-
-using Application.Interfaces.Repositories.Vehicle;
-using Application.Interfaces.Repositories.Lead.Lead;
-using VehicleEntity = Domain.Entities.Vehicle;
 using LeadEntity = Domain.Entities.Lead;
 using OutputInfoEntity = Domain.Entities.OutputInfo;
+using VehicleEntity = Domain.Entities.Vehicle;
 
 namespace Application.Features.Outputs.Commands.UpdateOutputStatus;
 
@@ -67,80 +68,99 @@ public sealed class UpdateOutputStatusCommandHandler(
                 }
                 break;
             case OrderStatus.Delivering:
-                // Check vehicle-managed products
                 var vehicleOutputInfos = output.OutputInfos
-                    .Where(oi => oi.ProductVariant?.Product?.ProductCategory != null &&
-                                 string.Equals(oi.ProductVariant.Product.ProductCategory.ManagementType, "vin_number", StringComparison.OrdinalIgnoreCase))
+                    .Where(
+                        oi => oi.ProductVariant?.Product?.ProductCategory != null &&
+                            string.Equals(
+                                oi.ProductVariant.Product.ProductCategory.ManagementType,
+                                "vin_number",
+                                StringComparison.OrdinalIgnoreCase))
                     .ToList();
-
                 if (vehicleOutputInfos.Count > 0)
                 {
-                    if (vehicleReadRepository == null || vehicleUpdateRepository == null || leadReadRepository == null || leadInsertRepository == null)
+                    if (vehicleReadRepository == null ||
+                        vehicleUpdateRepository == null ||
+                        leadReadRepository == null ||
+                        leadInsertRepository == null)
                     {
-                        throw new System.InvalidOperationException("Vehicle/Lead repositories are not injected.");
+                        throw new InvalidOperationException("Vehicle/Lead repositories are not injected.");
                     }
-
                     int requiredVehicleCount = vehicleOutputInfos.Sum(oi => oi.Count ?? 0);
                     if (request.SelectedVehicleIds == null || request.SelectedVehicleIds.Count != requiredVehicleCount)
                     {
-                        return Error.BadRequest($"Danh sách xe (SelectedVehicleIds) phải có đúng {requiredVehicleCount} phần tử cho các sản phẩm quản lý theo số khung.", "SelectedVehicleIds");
+                        return Error.BadRequest(
+                            $"Danh sách xe (SelectedVehicleIds) phải có đúng {requiredVehicleCount} phần tử cho các sản phẩm quản lý theo số khung.",
+                            "SelectedVehicleIds");
                     }
-
-                    var vehicles = await vehicleReadRepository.GetByIdsAsync(request.SelectedVehicleIds, cancellationToken).ConfigureAwait(false);
+                    var vehicles = await vehicleReadRepository.GetByIdsAsync(
+                        request.SelectedVehicleIds,
+                        cancellationToken)
+                        .ConfigureAwait(false);
                     if (vehicles.Count != request.SelectedVehicleIds.Count)
                     {
-                        return Error.BadRequest("Một hoặc nhiều mã xe không tồn tại trong hệ thống.", "SelectedVehicleIds");
+                        return Error.BadRequest(
+                            "Một hoặc nhiều mã xe không tồn tại trong hệ thống.",
+                            "SelectedVehicleIds");
                     }
-
                     foreach (var v in vehicles)
                     {
                         if (!v.IsActive)
                         {
-                            return Error.BadRequest($"Xe có số khung (VIN) {v.VinNumber} đang ở trạng thái không hoạt động.", "SelectedVehicleIds");
+                            return Error.BadRequest(
+                                $"Xe có số khung (VIN) {v.VinNumber} đang ở trạng thái không hoạt động.",
+                                "SelectedVehicleIds");
                         }
                         if (v.InputInfoId == null)
                         {
-                            return Error.BadRequest($"Xe có số khung (VIN) {v.VinNumber} chưa được nhập kho.", "SelectedVehicleIds");
+                            return Error.BadRequest(
+                                $"Xe có số khung (VIN) {v.VinNumber} chưa được nhập kho.",
+                                "SelectedVehicleIds");
                         }
                         if (v.OutputInfoId != null)
                         {
-                            return Error.BadRequest($"Xe có số khung (VIN) {v.VinNumber} đã được bán hoặc xuất kho trước đó.", "SelectedVehicleIds");
+                            return Error.BadRequest(
+                                $"Xe có số khung (VIN) {v.VinNumber} đã được bán hoặc xuất kho trước đó.",
+                                "SelectedVehicleIds");
                         }
                     }
-
                     var remainingVehicles = new List<VehicleEntity>(vehicles);
                     var matchedVehiclesMap = new Dictionary<OutputInfoEntity, List<VehicleEntity>>();
-
                     foreach (var oi in vehicleOutputInfos)
                     {
                         int count = oi.Count ?? 0;
-                        var matches = remainingVehicles.Where(v =>
-                            v.ProductId == oi.ProductVariant.ProductId &&
-                            (!oi.ProductVariantColorId.HasValue || (v.InputInfo != null && v.InputInfo.ProductVariantColorId == oi.ProductVariantColorId))
-                        ).Take(count).ToList();
-
+                        var matches = remainingVehicles.Where(
+                            v => v.ProductId == oi.ProductVariant.ProductId &&
+                                (!oi.ProductVariantColorId.HasValue ||
+                                    (v.InputInfo != null &&
+                                        v.InputInfo.ProductVariantColorId == oi.ProductVariantColorId)))
+                            .Take(count)
+                            .ToList();
                         if (matches.Count < count)
                         {
-                            var colorMsg = oi.ProductVariantColorId.HasValue ? " và màu sắc đã chọn" : "";
-                            return Error.BadRequest($"Không tìm thấy đủ xe phù hợp trong danh sách SelectedVehicleIds cho sản phẩm '{oi.ProductVariant.Product.Name}'{colorMsg}. Cần: {count}, tìm thấy: {matches.Count}.", "SelectedVehicleIds");
+                            var colorMsg = oi.ProductVariantColorId.HasValue ? " và màu sắc đã chọn" : string.Empty;
+                            return Error.BadRequest(
+                                $"Không tìm thấy đủ xe phù hợp trong danh sách SelectedVehicleIds cho sản phẩm '{oi.ProductVariant.Product.Name}'{colorMsg}. Cần: {count}, tìm thấy: {matches.Count}.",
+                                "SelectedVehicleIds");
                         }
-
                         matchedVehiclesMap[oi] = matches;
                         foreach (var m in matches)
                         {
                             remainingVehicles.Remove(m);
                         }
                     }
-
                     if (remainingVehicles.Count > 0)
                     {
-                        return Error.BadRequest("Danh sách SelectedVehicleIds chứa xe không khớp với bất kỳ sản phẩm nào trong đơn hàng.", "SelectedVehicleIds");
+                        return Error.BadRequest(
+                            "Danh sách SelectedVehicleIds chứa xe không khớp với bất kỳ sản phẩm nào trong đơn hàng.",
+                            "SelectedVehicleIds");
                     }
-
                     LeadEntity? lead = null;
                     if (!string.IsNullOrWhiteSpace(output.CustomerPhone))
                     {
-                        lead = await leadReadRepository.GetByPhoneNumberAsync(output.CustomerPhone.Trim(), cancellationToken).ConfigureAwait(false);
+                        lead = await leadReadRepository.GetByPhoneNumberAsync(
+                            output.CustomerPhone.Trim(),
+                            cancellationToken)
+                            .ConfigureAwait(false);
                         if (lead is null)
                         {
                             lead = new LeadEntity
@@ -148,13 +168,12 @@ public sealed class UpdateOutputStatusCommandHandler(
                                 FullName = output.CustomerName?.Trim() ?? string.Empty,
                                 PhoneNumber = output.CustomerPhone.Trim(),
                                 Address = output.CustomerAddress?.Trim() ?? string.Empty,
-                                Status = Domain.Constants.Lead.LeadStatus.New,
-                                Source = Domain.Constants.Lead.LeadSource.WebStore
+                                Status = LeadStatus.New,
+                                Source = LeadSource.WebStore
                             };
                             await leadInsertRepository.AddAsync(lead, cancellationToken).ConfigureAwait(false);
                         }
                     }
-
                     foreach (var pair in matchedVehiclesMap)
                     {
                         var oi = pair.Key;
@@ -169,7 +188,6 @@ public sealed class UpdateOutputStatusCommandHandler(
                         }
                     }
                 }
-
                 var checkResult = await updateRepository.HandleInventoryTransactionAsync(
                     output.Id,
                     false,

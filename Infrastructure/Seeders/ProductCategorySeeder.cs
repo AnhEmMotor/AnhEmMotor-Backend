@@ -32,11 +32,7 @@ public static class ProductCategorySeeder
             } else
             {
                 categoriesToAdd.Add(
-                    new ProductCategory
-                    {
-                        Name = seed.Name,
-                        Slug = seed.Name.ToLower().Replace(" ", "-")
-                    });
+                    new ProductCategory { Name = seed.Name, Slug = seed.Name.ToLower().Replace(" ", "-") });
                 hasChanges = true;
             }
         }

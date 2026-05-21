@@ -978,7 +978,16 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             category_id = category.Id,
             brand_id = brand.Id,
             status_id = "for-sale",
-            variants = new[] { new { url_slug = $"dec-{uniqueId}", price = 20000000.99m, variant_name = "V1", cover_image_url = "image.jpg" } }
+            variants = new[]
+            {
+                new
+            {
+                url_slug = $"dec-{uniqueId}",
+                price = 20000000.99m,
+                variant_name = "V1",
+                cover_image_url = "image.jpg"
+            }
+            }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -1282,7 +1291,17 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             category_id = cat.Id,
             brand_id = brand.Id,
             status_id = "for-sale",
-            variants = new[] { new { url_slug = longSlug, price = 1000, optionValueIds = Array.Empty<int>(), variant_name = "V1", cover_image_url = "image.jpg" } }
+            variants = new[]
+            {
+                new
+            {
+                url_slug = longSlug,
+                price = 1000,
+                optionValueIds = Array.Empty<int>(),
+                variant_name = "V1",
+                cover_image_url = "image.jpg"
+            }
+            }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.Created, HttpStatusCode.OK);
@@ -1334,7 +1353,14 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             displacement = string.Empty,
             variants = new[]
             {
-                new { url_slug = $"test-dec-{uniqueId}", price = 1000, optionValueIds = Array.Empty<int>(), variant_name = "V1", cover_image_url = "image.jpg" }
+                new
+            {
+                url_slug = $"test-dec-{uniqueId}",
+                price = 1000,
+                optionValueIds = Array.Empty<int>(),
+                variant_name = "V1",
+                cover_image_url = "image.jpg"
+            }
             }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", reqBody).ConfigureAwait(true);
@@ -1387,7 +1413,13 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         };
         db.Products.Add(product);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var variant = new ProductVariant { ProductId = product.Id, UrlSlug = $"v-{uniqueId}", Price = 1000, VariantName = "1234" };
+        var variant = new ProductVariant
+        {
+            ProductId = product.Id,
+            UrlSlug = $"v-{uniqueId}",
+            Price = 1000,
+            VariantName = "1234"
+        };
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var variantOptionValue = new VariantOptionValue { VariantId = variant.Id, OptionValueId = optionValue.Id };
@@ -1399,19 +1431,34 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Name = "P1 Updated",
             CategoryId = cat.Id,
             BrandId = brand.Id,
-            Variants = [new UpdateProductVariantRequest { Id = variant.Id, Price = 2000, OptionValues = [], VariantName = "V1", CoverImageUrl = "image.jpg" }]
+            Variants =
+                [new UpdateProductVariantRequest
+                {
+                    Id = variant.Id,
+                    Price = 2000,
+                    OptionValues = [],
+                    VariantName = "V1",
+                    CoverImageUrl = "image.jpg"
+                }]
         };
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        var response = await _client.PutAsJsonAsync($"/api/v1/product/{product.Id}", updateCommand, options, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync(
+            $"/api/v1/product/{product.Id}",
+            updateCommand,
+            options,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            var contentStr = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var contentStr = await response.Content
+                .ReadAsStringAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             throw new Exception($"Response is {response.StatusCode}, content: {contentStr}");
         }
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var existsWithFilter = await db.Set<VariantOptionValue>()
-         .AnyAsync(v => v.VariantId == variant.Id && v.OptionValueId == optionValue.Id, CancellationToken.None)
-         .ConfigureAwait(true);
+            .AnyAsync(v => v.VariantId == variant.Id && v.OptionValueId == optionValue.Id, CancellationToken.None)
+            .ConfigureAwait(true);
         var existsIgnoreFilter = await db.Set<VariantOptionValue>()
             .IgnoreQueryFilters()
             .AnyAsync(v => v.VariantId == variant.Id && v.OptionValueId == optionValue.Id, CancellationToken.None)
@@ -2719,7 +2766,13 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             BrandId = brand.Id,
             StatusId = productStatusId,
             ProductVariants =
-                [new ProductVariant { Price = 100, UrlSlug = $"slug-{uniqueId}", CoverImageUrl = "old.jpg",VariantName = "1234" }]
+                [new ProductVariant
+                {
+                    Price = 100,
+                    UrlSlug = $"slug-{uniqueId}",
+                    CoverImageUrl = "old.jpg",
+                    VariantName = "1234"
+                }]
         };
         db.Products.Add(product);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2783,13 +2836,13 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             variants = new[]
             {
                 new
-                {
-                    sku = "SKU-123",
-                    variant_name = "Premium",
-                    price = 1000,
-                    url_slug = "special-bike-v1",
-                    cover_image_url = "http://example.com/special-bike-v1.jpg",
-                }
+            {
+                sku = "SKU-123",
+                variant_name = "Premium",
+                price = 1000,
+                url_slug = "special-bike-v1",
+                cover_image_url = "http://example.com/special-bike-v1.jpg",
+            }
             }
         };
         var uniqueIdAuth = Guid.NewGuid().ToString("N")[..8];
@@ -2912,7 +2965,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             meta_title = "Meta Title",
             meta_description = "Meta Description",
             short_description = "Short Description",
-            variants = new[] { new { url_slug = "seo-bike", price = 1000, variant_name = "V1", cover_image_url = "image.jpg" } }
+            variants = new[]
+            {
+                new { url_slug = "seo-bike", price = 1000, variant_name = "V1", cover_image_url = "image.jpg" }
+            }
         };
         var response150 = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
         if (!response150.IsSuccessStatusCode)
@@ -2963,7 +3019,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             category_id = cat.Id,
             brand_id = brand.Id,
             highlights = $"[{{\"technology_id\":{tech.Id}, \"custom_title\":\"Cool ABS\"}}]",
-            variants = new[] { new { url_slug = "tech-bike", price = 1000, variant_name = "V1", cover_image_url = "image.jpg"} }
+            variants = new[]
+            {
+                new { url_slug = "tech-bike", price = 1000, variant_name = "V1", cover_image_url = "image.jpg" }
+            }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
         response.EnsureSuccessStatusCode();
@@ -3018,18 +3077,30 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CategoryId = cat.Id,
             BrandId = brand.Id,
             Highlights = $"[{{\"technology_id\":{t1.Id}}}, {{\"technology_id\":{t2.Id}}}]",
-            Variants = [new UpdateProductVariantRequest { UrlSlug = "v1", Price = 1000, VariantName = "V1", CoverImageUrl = "image.jpg" }]
+            Variants =
+                [new UpdateProductVariantRequest
+                {
+                    UrlSlug = "v1",
+                    Price = 1000,
+                    VariantName = "V1",
+                    CoverImageUrl = "image.jpg"
+                }]
         };
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        var response = await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd, options, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync(
+            $"/api/v1/product/{p.Id}",
+            cmd,
+            options,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            var contentStr = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var contentStr = await response.Content
+                .ReadAsStringAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             throw new Exception($"Response is {response.StatusCode}, content: {contentStr}");
         }
-
         db.ChangeTracker.Clear();
-
         var links = await db.ProductTechnologies
             .Where(pt => pt.ProductId == p.Id)
             .ToListAsync(TestContext.Current.CancellationToken)
@@ -3076,18 +3147,30 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CategoryId = cat.Id,
             BrandId = brand.Id,
             Highlights = "[]",
-            Variants = [new UpdateProductVariantRequest { UrlSlug = "v1", Price = 1000, VariantName = "V1", CoverImageUrl = "image.jpg" }]
+            Variants =
+                [new UpdateProductVariantRequest
+                {
+                    UrlSlug = "v1",
+                    Price = 1000,
+                    VariantName = "V1",
+                    CoverImageUrl = "image.jpg"
+                }]
         };
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        var response = await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd, options, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync(
+            $"/api/v1/product/{p.Id}",
+            cmd,
+            options,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            var contentStr = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var contentStr = await response.Content
+                .ReadAsStringAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             throw new Exception($"Response is {response.StatusCode}, content: {contentStr}");
         }
-
         db.ChangeTracker.Clear();
-
         var links = await db.ProductTechnologies
             .Where(pt => pt.ProductId == p.Id)
             .ToListAsync(TestContext.Current.CancellationToken)
@@ -3136,18 +3219,30 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CategoryId = cat.Id,
             BrandId = brand.Id,
             Highlights = $"[{{\"technology_id\":{t1.Id}, \"custom_title\":\"New\"}}]",
-            Variants = [new UpdateProductVariantRequest { UrlSlug = "v1", Price = 1000, VariantName = "V1", CoverImageUrl = "image.jpg" }]
+            Variants =
+                [new UpdateProductVariantRequest
+                {
+                    UrlSlug = "v1",
+                    Price = 1000,
+                    VariantName = "V1",
+                    CoverImageUrl = "image.jpg"
+                }]
         };
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-        var response = await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd, options, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync(
+            $"/api/v1/product/{p.Id}",
+            cmd,
+            options,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            var contentStr = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var contentStr = await response.Content
+                .ReadAsStringAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             throw new Exception($"Response is {response.StatusCode}, content: {contentStr}");
         }
-
         db.ChangeTracker.Clear();
-
         var link = await db.ProductTechnologies
             .FirstOrDefaultAsync(pt => pt.ProductId == p.Id, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
@@ -3402,7 +3497,14 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             FrontBrake = "Brembo",
             RearBrake = "Nissin",
             Variants =
-                [new CreateProductVariantRequest { UrlSlug = $"v-{uniqueId}", Price = 5000, OptionValueIds = [], VariantName = "V1", CoverImageUrl = "image.jpg" }]
+                [new CreateProductVariantRequest
+                {
+                    UrlSlug = $"v-{uniqueId}",
+                    Price = 5000,
+                    OptionValueIds = [],
+                    VariantName = "V1",
+                    CoverImageUrl = "image.jpg"
+                }]
         };
         var response = await _client.PostAsync("/api/v1/product", JsonContent.Create(request), CancellationToken.None)
             .ConfigureAwait(true);
@@ -3456,7 +3558,14 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             BrandId = brand.Id,
             StdDot = true,
             StdSnell = true,
-            Variants = [new UpdateProductVariantRequest { Id = product.ProductVariants.First().Id, Price = 5500, VariantName = "V1", CoverImageUrl = "image.jpg" }]
+            Variants =
+                [new UpdateProductVariantRequest
+                {
+                    Id = product.ProductVariants.First().Id,
+                    Price = 5500,
+                    VariantName = "V1",
+                    CoverImageUrl = "image.jpg"
+                }]
         };
         var response = await _client.PutAsync(
             $"/api/v1/product/{product.Id}",
@@ -3546,20 +3655,15 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             variants = new[]
             {
                 new
+            {
+                variant_name = "Premium",
+                url_slug = $"product-color-{uniqueId}",
+                price = 1000,
+                colors = new[]
                 {
-                    variant_name = "Premium",
-                    url_slug = $"product-color-{uniqueId}",
-                    price = 1000,
-                    colors = new[]
-                    {
-                        new
-                        {
-                            color_name = "Red",
-                            color_code = "#FF0000",
-                            cover_image_url = "https://example.com/red.jpg"
-                        }
-                    }
+                    new { color_name = "Red", color_code = "#FF0000", cover_image_url = "https://example.com/red.jpg" }
                 }
+            }
             }
         };
         var response = await _client.PostAsync(
@@ -3570,7 +3674,9 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         response!.StatusCode.Should().Be(HttpStatusCode.Created);
         var variant = await db.ProductVariants
             .Include(v => v.ProductVariantColors)
-            .FirstAsync(v => string.Compare(v.UrlSlug, $"product-color-{uniqueId}") == 0, TestContext.Current.CancellationToken)
+            .FirstAsync(
+                v => string.Compare(v.UrlSlug, $"product-color-{uniqueId}") == 0,
+                TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         variant.CoverImageUrl.Should().BeNull();
         variant.ProductVariantColor.Should().NotBeNull();
@@ -3608,15 +3714,13 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Brand = brand,
             StatusId = ProductStatusConstants.ForSale,
             ProductVariants =
-            [
-                new ProductVariant
+                [new ProductVariant
                 {
                     VariantName = "Standard",
                     UrlSlug = $"product-update-color-{uniqueId}",
                     Price = 1000,
                     CoverImageUrl = "https://example.com/old.jpg"
-                }
-            ]
+                }]
         };
         db.Products.Add(product);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -3629,21 +3733,21 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             variants = new[]
             {
                 new
+            {
+                id = variantId,
+                variant_name = "Standard",
+                url_slug = $"product-update-color-new-{uniqueId}",
+                price = 1200,
+                colors = new[]
                 {
-                    id = variantId,
-                    variant_name = "Standard",
-                    url_slug = $"product-update-color-new-{uniqueId}",
-                    price = 1200,
-                    colors = new[]
-                    {
-                        new
-                        {
-                            color_name = "Blue",
-                            color_code = "#0000FF",
-                            cover_image_url = "https://example.com/blue.jpg"
-                        }
-                    }
+                    new
+                {
+                    color_name = "Blue",
+                    color_code = "#0000FF",
+                    cover_image_url = "https://example.com/blue.jpg"
                 }
+                }
+            }
             }
         };
         var response = await _client.PutAsync(
@@ -3666,5 +3770,4 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
     #pragma warning restore CRR0035
 }
-
 

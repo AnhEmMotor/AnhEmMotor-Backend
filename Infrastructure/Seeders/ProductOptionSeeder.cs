@@ -13,14 +13,12 @@ public static class ProductOptionSeeder
                 o => string.Compare(o.Name, "VehicleType") == 0 || string.Compare(o.Name, "Loại xe") == 0,
                 cancellationToken)
             .ConfigureAwait(false);
-
         if (typeOption == null)
         {
             typeOption = new Option { Name = "VehicleType" };
             await context.Set<Option>().AddAsync(typeOption, cancellationToken).ConfigureAwait(false);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-
         var types = new[] { "Xe ga", "Xe số", "Tay côn", "Xe điện" };
         foreach (var type in types)
         {
@@ -33,7 +31,6 @@ public static class ProductOptionSeeder
                     .ConfigureAwait(false);
             }
         }
-
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }

@@ -43,7 +43,10 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
             {
                 continue;
             }
-            var batches = await GetAvailableBatchesAsync(outputInfo.ProductVarientId.Value, outputInfo.ProductVariantColorId, cancellationToken)
+            var batches = await GetAvailableBatchesAsync(
+                outputInfo.ProductVarientId.Value,
+                outputInfo.ProductVariantColorId,
+                cancellationToken)
                 .ConfigureAwait(false);
             var totalAvailable = batches.Sum(b => b.RemainingCount ?? 0);
             if (totalAvailable < outputInfo.Count.Value)
@@ -92,7 +95,10 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
         return true;
     }
 
-    private Task<List<InputInfo>> GetAvailableBatchesAsync(int productId, int? colorId, CancellationToken cancellationToken)
+    private Task<List<InputInfo>> GetAvailableBatchesAsync(
+        int productId,
+        int? colorId,
+        CancellationToken cancellationToken)
     {
         var finishedStatuses = Domain.Constants.Input.InputStatus.FinishInputValues;
         return context.InputInfos

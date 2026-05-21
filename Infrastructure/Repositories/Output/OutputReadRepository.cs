@@ -111,7 +111,10 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             .ContinueWith(t => t.Result, cancellationToken);
     }
 
-    public async Task<long> GetStockQuantityByVariantIdAsync(int variantId, int? colorId, CancellationToken cancellationToken)
+    public async Task<long> GetStockQuantityByVariantIdAsync(
+        int variantId,
+        int? colorId,
+        CancellationToken cancellationToken)
     {
         var validStatusIds = InputStatus.FinishInputValues;
         var currentStock = await context.InputInfos

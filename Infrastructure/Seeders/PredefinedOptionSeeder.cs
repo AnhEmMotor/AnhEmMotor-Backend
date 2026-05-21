@@ -20,7 +20,6 @@ public static class PredefinedOptionSeeder
             context.Set<PredefinedOption>().RemoveRange(obsoleteColorOptions);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-
         var existingKeys = await context.Set<PredefinedOption>()
             .Select(p => p.Key)
             .ToListAsync(cancellationToken)

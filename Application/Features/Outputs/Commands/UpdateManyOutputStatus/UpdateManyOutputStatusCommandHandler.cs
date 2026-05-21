@@ -41,9 +41,13 @@ public sealed class UpdateManyOutputStatusCommandHandler(
             }
             if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
             {
-                var containsVehicleManagedProduct = output.OutputInfos.Any(oi =>
-                    oi.ProductVariant?.Product?.ProductCategory != null &&
-                    string.Equals(oi.ProductVariant.Product.ProductCategory.ManagementType, "vin_number", StringComparison.OrdinalIgnoreCase));
+                var containsVehicleManagedProduct = output.OutputInfos
+                    .Any(
+                        oi => oi.ProductVariant?.Product?.ProductCategory != null &&
+                            string.Equals(
+                                oi.ProductVariant.Product.ProductCategory.ManagementType,
+                                "vin_number",
+                                StringComparison.OrdinalIgnoreCase));
                 if (containsVehicleManagedProduct)
                 {
                     errors.Add(
@@ -81,11 +85,14 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                 var variantId = kvp.Key.VariantId;
                 var colorId = kvp.Key.ColorId;
                 var totalNeeded = kvp.Value;
-                var currentStock = await readRepository.GetStockQuantityByVariantIdAsync(variantId, colorId, cancellationToken)
+                var currentStock = await readRepository.GetStockQuantityByVariantIdAsync(
+                    variantId,
+                    colorId,
+                    cancellationToken)
                     .ConfigureAwait(false);
                 if (currentStock < totalNeeded)
                 {
-                    var colorSuffix = colorId.HasValue ? $" (Màu ID {colorId})" : "";
+                    var colorSuffix = colorId.HasValue ? $" (Màu ID {colorId})" : string.Empty;
                     errors.Add(
                         Error.BadRequest(
                             $"Sản phẩm ID {variantId}{colorSuffix} không đủ tồn kho. Tổng kho hiện có: {currentStock}, Tổng đơn hàng cần: {totalNeeded}, Thiếu: {totalNeeded - currentStock}",

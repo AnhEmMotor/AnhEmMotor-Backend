@@ -199,7 +199,9 @@ public sealed class UpdateOutputForManagerCommandHandler(
         }
         if (!productVarientColorId.HasValue || productVarientColorId <= 0)
         {
-            return Error.BadRequest("Biến thể sản phẩm có màu sắc, ProductVarientColorId là bắt buộc.", "ProductVarientColorId");
+            return Error.BadRequest(
+                "Biến thể sản phẩm có màu sắc, ProductVarientColorId là bắt buộc.",
+                "ProductVarientColorId");
         }
         return variant.ProductVariantColors.Any(c => c.Id == productVarientColorId.Value)
             ? null

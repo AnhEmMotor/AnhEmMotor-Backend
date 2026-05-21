@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Domain.Constants.Product
 {
@@ -27,11 +25,7 @@ namespace Domain.Constants.Product
 
         public static IEnumerable<object> GetActiveList()
         {
-            return All.Select(type => new
-            {
-                Value = type,
-                Text = GetDisplayName(type)
-            });
+            return All.Select(type => new { Value = type, Text = GetDisplayName(type) });
         }
     }
 }

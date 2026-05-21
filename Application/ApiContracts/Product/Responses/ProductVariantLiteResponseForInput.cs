@@ -18,6 +18,4 @@ namespace Application.ApiContracts.Product.Responses
 
         public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
     }
-
-
 }

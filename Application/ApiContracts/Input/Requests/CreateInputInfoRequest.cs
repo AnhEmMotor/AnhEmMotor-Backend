@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Input.Requests
@@ -29,6 +28,4 @@ namespace Application.ApiContracts.Input.Requests
 
         public List<VehicleInputRequest>? Vehicles { get; set; }
     }
-
-    
 }

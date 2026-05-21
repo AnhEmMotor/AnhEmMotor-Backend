@@ -303,19 +303,19 @@ public sealed class UpdateProductCommandHandler(
                 variantEntity.ProductVariantColors.Clear();
                 foreach (var color in GetColorRequests(variantReq))
                 {
-                    variantEntity.ProductVariantColors.Add(
-                        new ProductVariantColor
-                        {
-                            Id = color.Id ?? 0,
-                            ProductVariantId = variantEntity.Id,
-                            ColorName = color.ColorName?.Trim(),
-                            ColorCode = color.ColorCode?.Trim(),
-                            CoverImageUrl = color.CoverImageUrl?.Trim()
-                        });
+                    variantEntity.ProductVariantColors
+                        .Add(
+                            new ProductVariantColor
+                            {
+                                Id = color.Id ?? 0,
+                                ProductVariantId = variantEntity.Id,
+                                ColorName = color.ColorName?.Trim(),
+                                ColorCode = color.ColorCode?.Trim(),
+                                CoverImageUrl = color.CoverImageUrl?.Trim()
+                            });
                 }
                 variantEntity.CoverImageUrl = null;
-            }
-            else
+            } else
             {
                 variantEntity.ProductVariantColors.Clear();
                 variantEntity.CoverImageUrl = variantReq.CoverImageUrl?.Trim();

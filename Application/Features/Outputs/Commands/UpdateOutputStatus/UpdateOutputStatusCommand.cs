@@ -1,7 +1,6 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using MediatR;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Application.Features.Outputs.Commands.UpdateOutputStatus;

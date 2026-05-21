@@ -322,13 +322,14 @@ public sealed class CreateProductCommandHandler(
                 };
                 foreach (var color in variantReq.Colors)
                 {
-                    variant.ProductVariantColors.Add(
-                        new ProductVariantColor
-                        {
-                            ColorName = color.ColorName?.Trim(),
-                            ColorCode = color.ColorCode?.Trim(),
-                            CoverImageUrl = color.CoverImageUrl?.Trim()
-                        });
+                    variant.ProductVariantColors
+                        .Add(
+                            new ProductVariantColor
+                            {
+                                ColorName = color.ColorName?.Trim(),
+                                ColorCode = color.ColorCode?.Trim(),
+                                CoverImageUrl = color.CoverImageUrl?.Trim()
+                            });
                 }
                 if (variantReq.PhotoCollection?.Count > 0)
                 {

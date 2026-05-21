@@ -48,7 +48,8 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
             .NotEmpty()
             .WithMessage("Sản phẩm phải có ít nhất một biến thể.")
             .Must(NotContainColorOptionValues)
-            .WithMessage("Không được gửi màu sắc trong optionValues. Vui lòng dùng color_name và color_code của biến thể.")
+            .WithMessage(
+                "Không được gửi màu sắc trong optionValues. Vui lòng dùng color_name và color_code của biến thể.")
             .Must(HaveUniqueSlugs)
             .WithMessage("Đã tìm thấy các đường dẫn (slug) trùng lặp trong yêu cầu.")
             .Custom(ValidateVariantOptions);
@@ -109,8 +110,11 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
         return variants == null ||
             variants.All(
                 v => v.OptionValues == null ||
-                    v.OptionValues.Keys.All(
-                        key => !ColorOptionKeys.Contains((key ?? string.Empty).Trim(), StringComparer.OrdinalIgnoreCase)));
+                    v.OptionValues.Keys
+                        .All(
+                            key => !ColorOptionKeys.Contains(
+                                            (key ?? string.Empty).Trim(),
+                                            StringComparer.OrdinalIgnoreCase)));
     }
 
     private static bool HasColor(UpdateProductVariantRequest variant)
