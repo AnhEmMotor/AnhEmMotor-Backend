@@ -26,7 +26,7 @@ public static class ProductCategorySeeder
         {
             if (string.IsNullOrWhiteSpace(seed.Name))
                 continue;
-            if (existingCategoryDict.TryGetValue(seed.Name, out var existing))
+            if (existingCategoryDict.TryGetValue(seed.Name, out var _))
             {
                 hasChanges = true;
             } else

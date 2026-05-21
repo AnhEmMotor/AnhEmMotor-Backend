@@ -12,7 +12,7 @@ public static class TechnologySeeder
         foreach (var name in categoryNames)
         {
             if (!await context.TechnologyCategories
-                .AnyAsync(c => c.Name!.ToLower() == name.ToLower(), cancellationToken)
+                .AnyAsync(c => string.Compare(c.Name!.ToLower(), name.ToLower()) == 0, cancellationToken)
                 .ConfigureAwait(false))
             {
                 context.TechnologyCategories.Add(new TechnologyCategory { Name = name });
@@ -25,15 +25,15 @@ public static class TechnologySeeder
             .ConfigureAwait(false);
 
         var honda = await context.Brands
-            .FirstOrDefaultAsync(b => b.Name != null && b.Name.ToLower() == "honda", cancellationToken)
+            .FirstOrDefaultAsync(b => b.Name != null && string.Compare(b.Name.ToLower(), "honda") == 0, cancellationToken)
             .ConfigureAwait(false);
 
         var yamaha = await context.Brands
-            .FirstOrDefaultAsync(b => b.Name != null && b.Name.ToLower() == "yamaha", cancellationToken)
+            .FirstOrDefaultAsync(b => b.Name != null && string.Compare(b.Name.ToLower(), "yamaha") == 0, cancellationToken)
             .ConfigureAwait(false);
 
         var piaggio = await context.Brands
-            .FirstOrDefaultAsync(b => b.Name != null && b.Name.ToLower() == "piaggio", cancellationToken)
+            .FirstOrDefaultAsync(b => b.Name != null && string.Compare(b.Name.ToLower(), "piaggio") == 0, cancellationToken)
             .ConfigureAwait(false);
 
         if (piaggio == null)
@@ -65,7 +65,7 @@ public static class TechnologySeeder
 
             var exists = await context.Technologies
                 .AnyAsync(
-                    t => t.Name!.ToLower() == data.Name.ToLower() && t.BrandId == targetBrandId,
+                    t => string.Compare(t.Name!.ToLower(), data.Name.ToLower()) == 0 && t.BrandId == targetBrandId,
                     cancellationToken)
                 .ConfigureAwait(false);
 
@@ -88,7 +88,7 @@ public static class TechnologySeeder
             {
                 var tech = await context.Technologies
                     .FirstOrDefaultAsync(
-                        t => t.Name!.ToLower() == data.Name.ToLower() && t.BrandId == targetBrandId,
+                        t => string.Compare(t.Name!.ToLower(), data.Name.ToLower()) == 0 && t.BrandId == targetBrandId,
                         cancellationToken)
                     .ConfigureAwait(false);
 

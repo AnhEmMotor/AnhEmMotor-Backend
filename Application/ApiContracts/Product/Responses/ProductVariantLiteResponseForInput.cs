@@ -19,14 +19,5 @@ namespace Application.ApiContracts.Product.Responses
         public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
     }
 
-    public class ProductVariantColorLiteResponse
-    {
-        public int Id { get; set; }
 
-        public string? ColorName { get; set; }
-
-        public string? ColorCode { get; set; }
-
-        public string? CoverImageUrl { get; set; }
-    }
 }

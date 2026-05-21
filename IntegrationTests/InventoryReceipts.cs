@@ -2202,7 +2202,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         clonedInput!.Products.Should().HaveCount(1);
-        clonedInput.Products[0].ProductId.Should().Be(variant1.Id);
+        clonedInput.Products[0].ProductVarientId.Should().Be(variant1.Id);
     }
 
     [Fact(DisplayName = "INPUT_046 - L?y danh sách phi?u nh?p theo SupplierId")]

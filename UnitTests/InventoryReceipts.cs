@@ -109,9 +109,9 @@ public class InventoryReceipts
     public void CreateInputProductValidator_NullProductId_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputInfoRequest { ProductId = null, Count = 10, InputPrice = 100000 };
+        var command = new CreateInputInfoRequest { ProductVarientId = null, Count = 10, InputPrice = 100000 };
         var result = validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.ProductId);
+        result.ShouldHaveValidationErrorFor(x => x.ProductVarientId);
     }
 
     [Fact(DisplayName = "INPUT_050 - Validator kiểm tra UpdateInputRequest với Products chứa Quantity âm")]
