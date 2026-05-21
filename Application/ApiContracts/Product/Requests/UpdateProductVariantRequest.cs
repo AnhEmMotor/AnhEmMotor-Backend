@@ -25,11 +25,8 @@ public class UpdateProductVariantRequest
     [JsonPropertyName("variant_name")]
     public string? VariantName { get; set; }
 
-    [JsonPropertyName("color_name")]
-    public string? ColorName { get; set; }
-
-    [JsonPropertyName("color_code")]
-    public string? ColorCode { get; set; }
+    [JsonPropertyName("colors")]
+    public List<UpdateProductVariantColorRequest> Colors { get; set; } = [];
 
     [JsonPropertyName("sku")]
     public string? SKU { get; set; }

@@ -53,6 +53,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ProductVariant> ProductVariants { get; set; }
 
+    public virtual DbSet<ProductVariantColor> ProductVariantColors { get; set; }
+
     public virtual DbSet<Setting> Settings { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
@@ -162,6 +164,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(v => v.ProductVariant)
             .WithMany(pv => pv.VariantOptionValues)
             .HasForeignKey(v => v.VariantId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ProductVariantColor>()
+            .HasOne(pvc => pvc.ProductVariant)
+            .WithMany(pv => pv.ProductVariantColors)
+            .HasForeignKey(pvc => pvc.ProductVariantId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => new { pt.ProductId, pt.TechnologyId });
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => pt.Id);

@@ -110,6 +110,8 @@ public sealed class OutputMappingConfig : IRegister
     {
         if (variant == null)
             return null;
+        if (variant.ProductVariantColor != null && !string.IsNullOrEmpty(variant.ProductVariantColor.CoverImageUrl))
+            return variant.ProductVariantColor.CoverImageUrl;
         if (!string.IsNullOrEmpty(variant.CoverImageUrl))
             return variant.CoverImageUrl;
         return variant.ProductCollectionPhotos?

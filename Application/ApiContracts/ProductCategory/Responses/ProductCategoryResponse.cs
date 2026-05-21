@@ -20,6 +20,8 @@ namespace Application.ApiContracts.ProductCategory.Responses
 
         public int ProductCount { get; set; }
 
+        public string? ManagementType { get; set; }
+
         public int? MaxPurchaseQuantity { get; set; }
     }
 }

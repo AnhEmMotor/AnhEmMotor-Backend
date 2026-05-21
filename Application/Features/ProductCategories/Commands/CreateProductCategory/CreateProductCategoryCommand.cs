@@ -18,7 +18,7 @@ public sealed record CreateProductCategoryCommand : IRequest<Result<ProductCateg
 
     public string? Description { get; init; }
 
-    public string? CategoryGroup { get; init; }
+    public string? ManagementType { get; init; }
 
     public int? MaxPurchaseQuantity { get; init; }
 }

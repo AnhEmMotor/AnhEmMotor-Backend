@@ -7,7 +7,6 @@ namespace Domain.Constants
             { "VehicleType", "Loại xe" },
             { "Displacement", "Phân khối" },
             { "Condition", "Tình trạng" },
-            { "Color", "Màu sắc" },
             { "Version", "Phiên bản" },
             { "ManufactureYear", "Năm sản xuất" },
             { "BrakeSystem", "Hệ thống phanh" },

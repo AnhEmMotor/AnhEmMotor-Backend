@@ -45,8 +45,6 @@ public sealed class UpdateProductCategoryCommandHandler(
             category.Slug = request.Slug.Trim();
         if (request.ImageUrl != null)
             category.ImageUrl = request.ImageUrl.Trim();
-        if (request.CategoryGroup != null)
-            category.CategoryGroup = request.CategoryGroup.Trim();
         category.IsActive = request.IsActive;
         if (request.ParentId.HasValue)
         {
@@ -78,6 +76,8 @@ public sealed class UpdateProductCategoryCommandHandler(
         }
         category.ParentId = request.ParentId;
         category.MaxPurchaseQuantity = request.MaxPurchaseQuantity;
+        if (request.ManagementType != null)
+            category.ManagementType = request.ManagementType.Trim();
         updateRepository.Update(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return category.Adapt<ProductCategoryResponse>();

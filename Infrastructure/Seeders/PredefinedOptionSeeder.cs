@@ -7,8 +7,20 @@ namespace Infrastructure.Seeders;
 
 public static class PredefinedOptionSeeder
 {
+    private static readonly string[] ObsoleteColorKeys = ["Color", "Màu sắc"];
+
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
+        var obsoleteColorOptions = await context.Set<PredefinedOption>()
+            .Where(p => ObsoleteColorKeys.Contains(p.Key) || ObsoleteColorKeys.Contains(p.Value))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        if (obsoleteColorOptions.Count > 0)
+        {
+            context.Set<PredefinedOption>().RemoveRange(obsoleteColorOptions);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         var existingKeys = await context.Set<PredefinedOption>()
             .Select(p => p.Key)
             .ToListAsync(cancellationToken)

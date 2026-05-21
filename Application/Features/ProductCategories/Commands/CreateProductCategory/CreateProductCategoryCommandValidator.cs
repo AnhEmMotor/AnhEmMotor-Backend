@@ -1,3 +1,4 @@
+using Domain.Constants.Product;
 using FluentValidation;
 
 namespace Application.Features.ProductCategories.Commands.CreateProductCategory;
@@ -6,7 +7,20 @@ public sealed class CreateProductCategoryCommandValidator : AbstractValidator<Cr
 {
     public CreateProductCategoryCommandValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.Description).MaximumLength(500).When(x => !string.IsNullOrWhiteSpace(x.Description));
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Tên danh mục không được để trống.")
+            .MaximumLength(100)
+            .WithMessage("Tên danh mục không được vượt quá 100 ký tự.");
+
+        RuleFor(x => x.Description)
+            .MaximumLength(500)
+            .WithMessage("Mô tả không được vượt quá 500 ký tự.")
+            .When(x => !string.IsNullOrWhiteSpace(x.Description));
+
+        RuleFor(x => x.ManagementType)
+            .NotEmpty()
+            .Must(ProductManagementType.IsValid)
+            .WithMessage("Loại quản lý không hợp lệ.");
     }
 }

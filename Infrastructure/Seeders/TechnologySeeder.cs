@@ -12,37 +12,37 @@ public static class TechnologySeeder
         foreach (var name in categoryNames)
         {
             if (!await context.TechnologyCategories
-                .AnyAsync(c => string.Compare(c.Name.ToLower(), name.ToLower()) == 0, cancellationToken)
+                .AnyAsync(c => c.Name!.ToLower() == name.ToLower(), cancellationToken)
                 .ConfigureAwait(false))
             {
                 context.TechnologyCategories.Add(new TechnologyCategory { Name = name });
             }
         }
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
         var categories = await context.TechnologyCategories
             .ToDictionaryAsync(c => c.Name!.Trim(), c => c.Id, StringComparer.OrdinalIgnoreCase, cancellationToken)
             .ConfigureAwait(false);
+
         var honda = await context.Brands
-            .FirstOrDefaultAsync(
-                b => b.Name != null && string.Compare(b.Name.ToLower(), "honda") == 0,
-                cancellationToken)
+            .FirstOrDefaultAsync(b => b.Name != null && b.Name.ToLower() == "honda", cancellationToken)
             .ConfigureAwait(false);
+
         var yamaha = await context.Brands
-            .FirstOrDefaultAsync(
-                b => b.Name != null && string.Compare(b.Name.ToLower(), "yamaha") == 0,
-                cancellationToken)
+            .FirstOrDefaultAsync(b => b.Name != null && b.Name.ToLower() == "yamaha", cancellationToken)
             .ConfigureAwait(false);
+
         var piaggio = await context.Brands
-            .FirstOrDefaultAsync(
-                b => b.Name != null && string.Compare(b.Name.ToLower(), "piaggio") == 0,
-                cancellationToken)
+            .FirstOrDefaultAsync(b => b.Name != null && b.Name.ToLower() == "piaggio", cancellationToken)
             .ConfigureAwait(false);
+
         if (piaggio == null)
         {
             piaggio = new Brand { Name = "Piaggio" };
             context.Brands.Add(piaggio);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
+
         var techData = new List<(string Name, string Description, string Category, Brand? Brand)>
         {
             ("eSP+ (4 Van)", "Động cơ thế hệ mới, chạy cực êm và tiết kiệm xăng.", "Động cơ & Vận hành", honda),
@@ -58,37 +58,40 @@ public static class TechnologySeeder
             ("Smartkey", "Hệ thống khóa thông minh chống trộm.", "Tiện ích & Kết nối", null),
             ("Hệ thống đèn LED", "Chiếu sáng mạnh mẽ và tiết kiệm điện năng.", "Tiện ích & Kết nối", null)
         };
+
         foreach (var data in techData)
         {
+            var targetBrandId = data.Brand?.Id;
+
             var exists = await context.Technologies
                 .AnyAsync(
-                    t => t.Name.Equals(data.Name, StringComparison.CurrentCultureIgnoreCase) &&
-                        t.BrandId == (data.Brand != null ? data.Brand.Id : null),
+                    t => t.Name!.ToLower() == data.Name.ToLower() && t.BrandId == targetBrandId,
                     cancellationToken)
                 .ConfigureAwait(false);
+
             if (!exists)
             {
                 if (categories.TryGetValue(data.Category.Trim(), out var categoryId))
                 {
-                    context.Technologies
-                        .Add(
-                            new Technology
-                            {
-                                Name = data.Name,
-                                DefaultTitle = data.Name,
-                                DefaultDescription = data.Description,
-                                CategoryId = categoryId,
-                                BrandId = data.Brand?.Id
-                            });
+                    context.Technologies.Add(
+                        new Technology
+                        {
+                            Name = data.Name,
+                            DefaultTitle = data.Name,
+                            DefaultDescription = data.Description,
+                            CategoryId = categoryId,
+                            BrandId = targetBrandId
+                        });
                 }
-            } else
+            }
+            else
             {
                 var tech = await context.Technologies
                     .FirstOrDefaultAsync(
-                        t => t.Name.Equals(data.Name, StringComparison.CurrentCultureIgnoreCase) &&
-                            t.BrandId == (data.Brand != null ? data.Brand.Id : null),
+                        t => t.Name!.ToLower() == data.Name.ToLower() && t.BrandId == targetBrandId,
                         cancellationToken)
                     .ConfigureAwait(false);
+
                 if (tech != null && categories.TryGetValue(data.Category.Trim(), out var categoryId))
                 {
                     tech.DefaultDescription = data.Description;

@@ -25,9 +25,6 @@ namespace Domain.Entities
         [Column("Description")]
         public string? Description { get; set; }
 
-        [Column("CategoryGroup")]
-        public string? CategoryGroup { get; set; }
-
         [Column("ParentId")]
         public int? ParentId { get; set; }
 
@@ -38,6 +35,9 @@ namespace Domain.Entities
 
         [Column("MaxPurchaseQuantity")]
         public int? MaxPurchaseQuantity { get; set; }
+
+        [Column("ManagementType")]
+        public string ManagementType { get; set; } = "none";
 
         public ICollection<Product> Products { get; set; } = [];
     }

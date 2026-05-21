@@ -63,7 +63,7 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             return;
         var hasVariantWithoutOptions = variants.Any(
             v => (v.OptionValues == null || v.OptionValues.Count == 0) &&
-                string.IsNullOrWhiteSpace(v.ColorName) &&
+                !HasColor(v) &&
                 string.IsNullOrWhiteSpace(v.VariantName));
         if (hasVariantWithoutOptions)
         {
@@ -83,8 +83,6 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
                         .OrderBy(kvp => kvp.Key)
                         .Select(kvp => $"{kvp.Key.Trim().ToLowerInvariant()}:{kvp.Value.Trim().ToLowerInvariant()}"));
             }
-            if (!string.IsNullOrWhiteSpace(variant.ColorName))
-                parts.Add($"specialized_color:{variant.ColorName.Trim().ToLowerInvariant()}");
             if (!string.IsNullOrWhiteSpace(variant.VariantName))
                 parts.Add($"specialized_version:{variant.VariantName.Trim().ToLowerInvariant()}");
             var sig = string.Join("|", parts);
@@ -104,5 +102,10 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             return true;
         var slugs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         return variants.All(v => string.IsNullOrWhiteSpace(v.UrlSlug) || slugs.Add(v.UrlSlug.Trim()));
+    }
+
+    private static bool HasColor(CreateProductVariantRequest variant)
+    {
+        return variant.Colors.Count > 0;
     }
 }

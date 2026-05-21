@@ -25,6 +25,9 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.TotalStock, src => CalculateTotalStock(src))
             .Map(dest => dest.TotalBooked, src => CalculateTotalBooked(src));
         config.NewConfig<ProductVariantEntity, VariantRow>()
+            .Map(dest => dest.ColorName, src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
+            .Map(dest => dest.ColorCode, src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorCode : null)
+            .Map(dest => dest.CoverImageUrl, src => src.ProductVariantColor != null && !string.IsNullOrWhiteSpace(src.ProductVariantColor.CoverImageUrl) ? src.ProductVariantColor.CoverImageUrl : src.CoverImageUrl)
             .Map(
                 dest => dest.Photos,
                 src => src.ProductCollectionPhotos.Select(p => p.ImageUrl ?? string.Empty).ToList())
@@ -113,12 +116,14 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src))
             .Map(
                 dest => dest.CoverImageUrl,
-                src => !string.IsNullOrWhiteSpace(src.CoverImageUrl)
-                    ? src.CoverImageUrl
-                    : src.ProductCollectionPhotos
-                        .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
-                        .Select(p => p.ImageUrl)
-                        .FirstOrDefault())
+                src => src.ProductVariantColor != null && !string.IsNullOrWhiteSpace(src.ProductVariantColor.CoverImageUrl)
+                    ? src.ProductVariantColor.CoverImageUrl
+                    : (!string.IsNullOrWhiteSpace(src.CoverImageUrl)
+                        ? src.CoverImageUrl
+                        : src.ProductCollectionPhotos
+                            .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
+                            .Select(p => p.ImageUrl)
+                            .FirstOrDefault()))
             .Map(
                 dest => dest.PhotoCollection,
                 src => src.ProductCollectionPhotos
@@ -378,8 +383,8 @@ public class ProductMappingConfig : IRegister
         var extraParts = new List<string>();
         if (!string.IsNullOrWhiteSpace(variant.VariantName))
             extraParts.Add(variant.VariantName);
-        if (!string.IsNullOrWhiteSpace(variant.ColorName))
-            extraParts.Add(variant.ColorName);
+        if (variant.ProductVariantColor != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColor.ColorName))
+            extraParts.Add(variant.ProductVariantColor.ColorName);
         if (extraParts.Count > 0)
         {
             var extra = string.Join(" - ", extraParts);
@@ -387,7 +392,7 @@ public class ProductMappingConfig : IRegister
             {
                 variantName = extra;
             } else if (!variantName.Contains(variant.VariantName ?? "NONE") &&
-                !variantName.Contains(variant.ColorName ?? "NONE"))
+                (variant.ProductVariantColor == null || !variantName.Contains(variant.ProductVariantColor.ColorName ?? "NONE")))
             {
                 variantName = $"{variantName} - {extra}";
             }
@@ -404,9 +409,11 @@ public class ProductMappingConfig : IRegister
             .Select(p => p.ImageUrl ?? string.Empty)
             .Where(url => !string.IsNullOrWhiteSpace(url))
             .ToList();
-        var coverImage = string.IsNullOrWhiteSpace(variant.CoverImageUrl)
-            ? photos.FirstOrDefault()
-            : variant.CoverImageUrl;
+        var coverImage = variant.ProductVariantColor != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColor.CoverImageUrl)
+            ? variant.ProductVariantColor.CoverImageUrl
+            : (!string.IsNullOrWhiteSpace(variant.CoverImageUrl)
+                ? variant.CoverImageUrl
+                : photos.FirstOrDefault());
         return new ProductVariantLiteResponse
         {
             Id = variant.Id,
@@ -464,7 +471,9 @@ public class ProductMappingConfig : IRegister
                                     translations != null &&
                                     translations.TryGetValue(op.OptionName, out var translated)
                             ? translated
-                            : op.OptionName ?? string.Empty;
+                            : (string.Compare(op.OptionName, "Color", StringComparison.OrdinalIgnoreCase) == 0
+                                ? "Màu sắc"
+                                : op.OptionName ?? string.Empty);
                         return $"{translatedKey}: {op.OptionValue}";
                     })
                 .ToList();
@@ -476,7 +485,7 @@ public class ProductMappingConfig : IRegister
             ProductId = variant.ProductId,
             DisplayName = displayName,
             Price = variant.Price,
-            CoverImageUrl = variant.CoverImageUrl,
+            CoverImageUrl = variant.ProductVariantColor != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColor.CoverImageUrl) ? variant.ProductVariantColor.CoverImageUrl : variant.CoverImageUrl,
             CategoryId = variant.Product?.CategoryId
         };
     }
@@ -530,9 +539,11 @@ public class ProductMappingConfig : IRegister
         var variantName = BuildVariantName(optionPairs);
         var productName = variant.Product?.Name ?? string.Empty;
         var displayName = string.IsNullOrWhiteSpace(variantName) ? productName : $"{productName} ({variantName})";
-        var coverImage = string.IsNullOrWhiteSpace(variant.CoverImageUrl)
-            ? variant.ProductCollectionPhotos.FirstOrDefault()?.ImageUrl
-            : variant.CoverImageUrl;
+        var coverImage = variant.ProductVariantColor != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColor.CoverImageUrl)
+            ? variant.ProductVariantColor.CoverImageUrl
+            : (!string.IsNullOrWhiteSpace(variant.CoverImageUrl)
+                ? variant.CoverImageUrl
+                : variant.ProductCollectionPhotos.FirstOrDefault()?.ImageUrl);
         return new VariantCartDetailResponse
         {
             Id = variant.Id,
@@ -580,17 +591,18 @@ public class ProductMappingConfig : IRegister
 
     private static string BuildStoreVariantDisplayName(ProductVariantEntity variant, bool isOtherVariant = false)
     {
-        if (!string.IsNullOrWhiteSpace(variant.VariantName) && !string.IsNullOrWhiteSpace(variant.ColorName))
+        var colorName = variant.ProductVariantColor != null ? variant.ProductVariantColor.ColorName : null;
+        if (!string.IsNullOrWhiteSpace(variant.VariantName) && !string.IsNullOrWhiteSpace(colorName))
         {
-            return $"{variant.VariantName} - {variant.ColorName}";
+            return $"{variant.VariantName} - {colorName}";
         }
         if (!string.IsNullOrWhiteSpace(variant.VariantName))
         {
             return variant.VariantName;
         }
-        if (!string.IsNullOrWhiteSpace(variant.ColorName))
+        if (!string.IsNullOrWhiteSpace(colorName))
         {
-            return variant.ColorName;
+            return colorName;
         }
         if (!isOtherVariant && variant.VariantOptionValues.Count > 0)
         {

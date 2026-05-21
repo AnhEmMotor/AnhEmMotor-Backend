@@ -8,7 +8,6 @@ using Application.Features.OptionValues.Commands.CreateOptionValue;
 using Application.Features.OptionValues.Commands.DeleteOptionValue;
 using Application.Features.OptionValues.Commands.UpdateOptionValue;
 using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
-using Application.Features.ProductCategories.Commands.CreateCategoryGroup;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -608,19 +607,6 @@ public class ProductController(ISender sender) : ApiController
     public async Task<IActionResult> DeleteOptionValueAsync(int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new DeleteOptionValueCommand(id), cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
-    /// Phân nhóm danh mục sản phẩm.
-    /// </summary>
-    [HttpPost("category-group")]
-    [HasPermission(Products.Edit)]
-    public async Task<IActionResult> CreateCategoryGroupAsync(
-        [FromBody] CreateCategoryGroupCommand request,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

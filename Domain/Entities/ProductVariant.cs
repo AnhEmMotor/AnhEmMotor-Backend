@@ -26,12 +26,6 @@ namespace Domain.Entities
         [Column("VariantName", TypeName = "nvarchar(100)")]
         public string? VariantName { get; set; }
 
-        [Column("ColorName", TypeName = "nvarchar(500)")]
-        public string? ColorName { get; set; }
-
-        [Column("ColorCode", TypeName = "nvarchar(200)")]
-        public string? ColorCode { get; set; }
-
         [Column("SKU", TypeName = "nvarchar(50)")]
         public string? SKU { get; set; }
 
@@ -72,6 +66,22 @@ namespace Domain.Entities
         public string? EngineType { get; set; }
 
         public Product? Product { get; set; }
+
+        public ICollection<ProductVariantColor> ProductVariantColors { get; set; } = [];
+
+        [NotMapped]
+        public ProductVariantColor? ProductVariantColor
+        {
+            get => ProductVariantColors.FirstOrDefault();
+            set
+            {
+                ProductVariantColors.Clear();
+                if (value is not null)
+                {
+                    ProductVariantColors.Add(value);
+                }
+            }
+        }
 
         public ICollection<InputInfo> InputInfos { get; set; } = [];
 

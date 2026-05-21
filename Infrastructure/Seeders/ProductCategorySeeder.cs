@@ -28,18 +28,13 @@ public static class ProductCategorySeeder
                 continue;
             if (existingCategoryDict.TryGetValue(seed.Name, out var existing))
             {
-                if (!string.Equals(existing.CategoryGroup, seed.Group, StringComparison.OrdinalIgnoreCase))
-                {
-                    existing.CategoryGroup = seed.Group;
-                    hasChanges = true;
-                }
+                hasChanges = true;
             } else
             {
                 categoriesToAdd.Add(
                     new ProductCategory
                     {
                         Name = seed.Name,
-                        CategoryGroup = seed.Group,
                         Slug = seed.Name.ToLower().Replace(" ", "-")
                     });
                 hasChanges = true;
