@@ -14,8 +14,7 @@ namespace Infrastructure.Persistence
             if (Directory.Exists(webApiPath))
             {
                 basePath = webApiPath;
-            }
-            else if (Directory.Exists(Path.Combine(basePath, "../WebAPI")))
+            } else if (Directory.Exists(Path.Combine(basePath, "../WebAPI")))
             {
                 basePath = Path.Combine(basePath, "../WebAPI");
             }

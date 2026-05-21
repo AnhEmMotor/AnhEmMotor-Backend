@@ -6,13 +6,14 @@ using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
 using Application.Features.ProductCategories.Commands.RestoreProductCategory;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
+using Application.Features.ProductCategories.Queries.ExportProductCategories;
 using Application.Features.ProductCategories.Queries.GetDeletedProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
-using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
-using Application.Features.ProductCategories.Queries.ExportProductCategories;
+using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Product;
 using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
@@ -34,6 +35,16 @@ namespace WebAPI.Controllers.V1;
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class ProductCategoryController(IMediator mediator) : ApiController
 {
+    /// <summary>
+    /// Lấy danh sách loại quản lý sản phẩm.
+    /// </summary>
+    [HttpGet("management-types")]
+    [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
+    public IActionResult GetProductManagementTypes()
+    {
+        return Ok(ProductManagementType.GetActiveList());
+    }
+
     /// <summary>
     /// Lấy thống kê danh mục sản phẩm và loại xe.
     /// </summary>
@@ -59,12 +70,10 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     {
         var query = new ExportProductCategoriesQuery { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        
         if (!result.IsSuccess)
         {
             return HandleResult(result);
         }
-
         var fileResult = result.Value;
         return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
     }

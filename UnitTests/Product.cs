@@ -103,9 +103,10 @@ public class Product
         {
             Name = "Product 1",
             CategoryId = 1,
+            BrandId = 1,
             FrontTireSize = "120/70-17",
             RearTireSize = "180/55-17",
-            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000 }]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, VariantName = "1234", CoverImageUrl = "image.jpg" }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1423,7 +1424,15 @@ public class Product
             Name = "Honda",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [new CreateProductVariantRequest { UrlSlug = "honda", Price = 100, OptionValues = [] }]
+            Variants =
+                [new CreateProductVariantRequest
+                {
+                    UrlSlug = "honda",
+                    Price = 100,
+                    OptionValues = [],
+                    VariantName = "1234",
+                    CoverImageUrl = "image.jpg"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1760,11 +1769,10 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [new CreateProductVariantRequest { UrlSlug = "v1", VersionName = "V1", ColorName = "Red" }, new CreateProductVariantRequest
+                [new CreateProductVariantRequest { UrlSlug = "v1", VariantName = "V1" }, new CreateProductVariantRequest
                 {
                     UrlSlug = "v2",
-                    VersionName = "V1",
-                    ColorName = "Red"
+                    VariantName = "V1",
                 }]
         };
         var validator = new CreateProductCommandValidator();
@@ -1797,8 +1805,8 @@ public class Product
     {
         var variant = new ProductVariant
         {
-            VersionName = "V1",
-            ColorName = "Đỏ",
+            VariantName = "V1",
+            ProductVariantColor = new ProductVariantColor { ColorName = "Đỏ" },
             Product = new ProductEntity { Name = "Bike" }
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
@@ -1812,8 +1820,8 @@ public class Product
         var variant = new ProductVariant
         {
             Product = new ProductEntity { Name = "Standard Bike" },
-            VersionName = null,
-            ColorName = null
+            VariantName = null,
+            ProductVariantColor = null
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
         response.DisplayName.Should().NotBeNullOrEmpty();
@@ -1918,11 +1926,23 @@ public class Product
             Name = "P",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, OptionValueIds = [] }]
+            Variants =
+                [new CreateProductVariantRequest
+                {
+                    VariantName = "123",
+                    UrlSlug = "v1",
+                    Price = 1000,
+                    OptionValueIds = [],
+                    CoverImageUrl = "image.jpg"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
-        result.IsValid.Should().BeTrue();
+        if (!result.IsValid)
+        {
+            var errorMessages = string.Join(", ", result.Errors.Select(x => x.ErrorMessage));
+            result.IsValid.Should().BeTrue(errorMessages);
+        }
     }
 
     [Fact(DisplayName = "PRODUCT_178 - Ngăn chặn trùng lặp màu sắc (ColorName) giữa các biến thể")]
@@ -1934,9 +1954,9 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [new CreateProductVariantRequest { ColorName = "Red" }, new CreateProductVariantRequest
+                [new CreateProductVariantRequest { Colors = [new() { ColorName = "Red" }] }, new CreateProductVariantRequest
                 {
-                    ColorName = "Red"
+                    Colors = [new() { ColorName = "Red" }]
                 }]
         };
         var validator = new CreateProductCommandValidator();
@@ -1944,8 +1964,8 @@ public class Product
         result.IsValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "PRODUCT_179 - Ngăn chặn trùng lặp phiên bản (VersionName) giữa các biến thể")]
-    public void CreateProduct_DuplicateVersionName_Fails()
+    [Fact(DisplayName = "PRODUCT_179 - Ngăn chặn trùng lặp phiên bản (VariantName) giữa các biến thể")]
+    public void CreateProduct_DuplicateVariantName_Fails()
     {
         var command = new CreateProductCommand
         {
@@ -1953,9 +1973,9 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [new CreateProductVariantRequest { VersionName = "V1" }, new CreateProductVariantRequest
+                [new CreateProductVariantRequest { VariantName = "V1" }, new CreateProductVariantRequest
                 {
-                    VersionName = "V1"
+                    VariantName = "V1"
                 }]
         };
         var validator = new CreateProductCommandValidator();
@@ -1972,10 +1992,10 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [new CreateProductVariantRequest { ColorName = "Red", VersionName = "V1" }, new CreateProductVariantRequest
+                [new CreateProductVariantRequest { Colors = [new() { ColorName = "Red" }], VariantName = "V1" }, new CreateProductVariantRequest
                 {
-                    ColorName = "Red",
-                    VersionName = "V1"
+                     Colors = [new() { ColorName = "Red" }] ,
+                    VariantName = "V1"
                 }]
         };
         var validator = new CreateProductCommandValidator();
@@ -1992,10 +2012,10 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [new CreateProductVariantRequest { ColorName = "RED" }, new CreateProductVariantRequest
+                [new CreateProductVariantRequest { Colors = [new() { ColorName = "RED" }] }, new CreateProductVariantRequest
                 {
-                    ColorName = "red"
-                }]
+                    Colors = [ new() { ColorName = "red" }
+                ] }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -2008,6 +2028,65 @@ public class Product
         var brandIds = ",,,";
         var ids = brandIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
         ids.Should().BeEmpty();
+    }
+
+    [Fact(DisplayName = "PRODUCT_193 - Cho phép gửi ảnh màu khi tạo biến thể có màu sắc")]
+    public void CreateProductVariant_ColorImageWithColor_IsValid()
+    {
+        var request = new CreateProductVariantRequest
+        {
+            VariantName = "Premium",
+            UrlSlug = "premium-red",
+            Price = 1000,
+            Colors =
+            [
+                new CreateProductVariantColorRequest
+                {
+                    ColorName = "Red",
+                    ColorCode = "#FF0000",
+                    CoverImageUrl = "https://example.com/red.jpg"
+                }
+            ]
+        };
+        var validator = new CreateProductVariantCommandValidator();
+        var result = validator.Validate(request);
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "PRODUCT_196 - Chặn biến thể không màu thiếu ảnh đại diện")]
+    public void CreateProductVariant_NoColorWithoutCoverImage_IsInvalid()
+    {
+        var request = new CreateProductVariantRequest
+        {
+            VariantName = "Standard",
+            UrlSlug = "standard",
+            Price = 1000
+        };
+        var validator = new CreateProductVariantCommandValidator();
+        var result = validator.Validate(request);
+        result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_197 - Chặn màu biến thể thiếu hình ảnh màu")]
+    public void CreateProductVariant_ColorWithoutImage_IsInvalid()
+    {
+        var request = new CreateProductVariantRequest
+        {
+            VariantName = "Premium",
+            UrlSlug = "premium-blue",
+            Price = 1000,
+            Colors =
+            [
+                new CreateProductVariantColorRequest
+                {
+                    ColorName = "Blue",
+                    ColorCode = "#0000FF"
+                }
+            ]
+        };
+        var validator = new CreateProductVariantCommandValidator();
+        var result = validator.Validate(request);
+        result.IsValid.Should().BeFalse();
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

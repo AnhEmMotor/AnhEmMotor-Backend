@@ -74,7 +74,9 @@ namespace Infrastructure.Repositories.Role
             SieveModel sieveModel,
             CancellationToken cancellationToken = default)
         {
-            var query = context.Roles.AsNoTracking().Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name, Description = r.Description });
+            var query = context.Roles
+                .AsNoTracking()
+                .Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name, Description = r.Description });
             SieveHelper.ApplyDefaultSorting(sieveModel);
             var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
             var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);

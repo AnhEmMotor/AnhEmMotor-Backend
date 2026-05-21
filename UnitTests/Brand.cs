@@ -1,3 +1,4 @@
+using Application.ApiContracts.Brand.Responses;
 using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteBrand;
 using Application.Features.Brands.Commands.DeleteManyBrands;
@@ -5,6 +6,7 @@ using Application.Features.Brands.Commands.RestoreBrand;
 using Application.Features.Brands.Commands.RestoreManyBrands;
 using Application.Features.Brands.Commands.UpdateBrand;
 using Application.Features.Brands.Queries.GetBrandById;
+using Application.Features.Brands.Queries.GetBrandStatistics;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
@@ -99,8 +101,7 @@ public class Brand
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new BrandEntities { Id = 1, Name = "OldName", Description = "Desc" });
         var duplicateBrands = new List<BrandEntities> { new() { Id = 1, Name = "OldName" } };
-        _readRepoMock.Setup(
-            x => x.GetByNameAsync("OldName", It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByNameAsync("OldName", It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(duplicateBrands);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -312,9 +313,9 @@ public class Brand
     [Fact(DisplayName = "BRAND_051 - Unit: GetBrandStatisticsQueryHandler - Success")]
     public async Task BRAND_051_GetBrandStatistics_Success()
     {
-        var handler = new Application.Features.Brands.Queries.GetBrandStatistics.GetBrandStatisticsQueryHandler(_readRepoMock.Object);
-        var query = new Application.Features.Brands.Queries.GetBrandStatistics.GetBrandStatisticsQuery();
-        var statsResponse = new Application.ApiContracts.Brand.Responses.BrandStatisticsResponse
+        var handler = new GetBrandStatisticsQueryHandler(_readRepoMock.Object);
+        var query = new GetBrandStatisticsQuery();
+        var statsResponse = new BrandStatisticsResponse
         {
             TotalBrands = 5,
             PopularOrigin = "Japan",
@@ -322,8 +323,7 @@ public class Brand
             LatestUpdatedBrandName = "Honda",
             LatestUpdatedAt = DateTimeOffset.UtcNow
         };
-        _readRepoMock.Setup(x => x.GetStatisticsAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(statsResponse);
+        _readRepoMock.Setup(x => x.GetStatisticsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(statsResponse);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.Value.Should().NotBeNull();

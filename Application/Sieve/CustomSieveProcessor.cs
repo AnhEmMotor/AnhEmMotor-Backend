@@ -57,6 +57,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<ProductCategory>(c => c.Id).CanSort().CanFilter();
         mapper.Property<ProductCategory>(c => c.Name).CanSort().CanFilter();
         mapper.Property<ProductCategory>(c => c.Description).CanFilter();
+        mapper.Property<ProductCategory>(c => c.ManagementType).CanSort().CanFilter().HasName("managementType");
         mapper.Property<Supplier>(s => s.Name).CanSort().CanFilter();
         mapper.Property<Supplier>(s => s.Phone).CanFilter();
         mapper.Property<Supplier>(s => s.Email).CanFilter();
@@ -90,8 +91,8 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Vehicle>(v => v.EngineNumber).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.LicensePlate).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.PurchaseDate).CanSort().CanFilter();
-        mapper.Property<Vehicle>(v => v.Lead.FullName).CanSort().CanFilter().HasName("FullName");
-        mapper.Property<Vehicle>(v => v.Lead.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
+        mapper.Property<Vehicle>(v => v.Lead!.FullName).CanSort().CanFilter().HasName("FullName");
+        mapper.Property<Vehicle>(v => v.Lead!.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
         return mapper;
     }
 

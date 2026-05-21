@@ -9,13 +9,13 @@ using Application.Features.Suppliers.Commands.RestoreSupplier;
 using Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
 using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
+using Application.Features.Suppliers.Queries.ExportSuppliers;
 using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
+using Application.Features.Suppliers.Queries.GetPartnerTypesList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
-using Application.Features.Suppliers.Queries.GetPartnerTypesList;
-using Application.Features.Suppliers.Queries.GetSupplierStatistics;
 using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
-using Application.Features.Suppliers.Queries.ExportSuppliers;
+using Application.Features.Suppliers.Queries.GetSupplierStatistics;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Constants.RouteNames;
@@ -326,12 +326,10 @@ public class SupplierController(IMediator mediator) : ApiController
     {
         var query = new ExportSuppliersQuery { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-
         if (!result.IsSuccess)
         {
             return HandleResult(result);
         }
-
         var fileResult = result.Value;
         return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
     }

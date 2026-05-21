@@ -2,7 +2,6 @@ using Domain.Constants.Permission;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 
 namespace Infrastructure.Seeders;
 
@@ -10,9 +9,7 @@ public static class PermissionDataSeeder
 {
     public static async Task SeedPermissionsAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        var allPermissions = PermissionsList.GetMetadataList()
-            .Select(m => m.Id)
-            .ToList();
+        var allPermissions = PermissionsList.GetMetadataList().Select(m => m.Id).ToList();
         var existingPermissions = await context.Permissions.ToListAsync(cancellationToken).ConfigureAwait(false);
         var newPermissions = allPermissions
             .Except(existingPermissions.Select(p => p.Name))

@@ -79,6 +79,8 @@ public class ProductReadRepository(
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductCollectionPhotos)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.ProductVariantColors)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InputInfos)
             .ThenInclude(ii => ii.InputReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
@@ -127,6 +129,8 @@ public class ProductReadRepository(
             .ThenInclude(ov => ov!.Option)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductCollectionPhotos)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.ProductVariantColors)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InputInfos)
             .ThenInclude(ii => ii.InputReceipt)
@@ -177,6 +181,8 @@ public class ProductReadRepository(
             .ThenInclude(ov => ov!.Option)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductCollectionPhotos)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.ProductVariantColors)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InputInfos)
             .ThenInclude(ii => ii.InputReceipt)
@@ -278,8 +284,9 @@ public class ProductReadRepository(
                     variantSubquery = variantSubquery.Where(
                         v => v.VariantOptionValues
                                 .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
-                            (v.ColorName != null && names.Any(n => v.ColorName.ToLower().Contains(n))) ||
-                            (v.VersionName != null && names.Any(n => v.VersionName.ToLower().Contains(n))));
+                            v.ProductVariantColors
+                                .Any(c => c.ColorName != null && names.Any(n => c.ColorName.ToLower().Contains(n))) ||
+                            (v.VariantName != null && names.Any(n => v.VariantName.ToLower().Contains(n))));
                 }
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));
@@ -307,6 +314,8 @@ public class ProductReadRepository(
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductCollectionPhotos)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.ProductVariantColors)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)

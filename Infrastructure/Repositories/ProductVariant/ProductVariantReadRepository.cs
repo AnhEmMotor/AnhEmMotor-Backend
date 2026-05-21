@@ -43,6 +43,7 @@ namespace Infrastructure.Repositories.ProductVariant
             return context.GetQuery<ProductVariantEntity>(mode)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
+                .Include(v => v.ProductVariantColors)
                 .FirstOrDefaultAsync(v => v.Id == id, cancellationToken)
                 .ContinueWith(t => t.Result, cancellationToken);
         }
@@ -53,6 +54,7 @@ namespace Infrastructure.Repositories.ProductVariant
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return context.GetQuery<ProductVariantEntity>(mode)
+                .Include(v => v.ProductVariantColors)
                 .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, slug) == 0, cancellationToken)
                 .ContinueWith(t => t.Result, cancellationToken);
         }
@@ -67,6 +69,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.Product)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.InputInfos)
+                .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
                 .ThenInclude(ov => ov!.Option)
@@ -85,6 +88,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
                 .Include(v => v.ProductCollectionPhotos)
+                .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
                 .AsSplitQuery()
@@ -139,6 +143,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductStatus)
                 .Include(v => v.ProductCollectionPhotos)
+                .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
                 .ThenInclude(ov => ov!.Option)

@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -18,7 +18,6 @@ namespace Infrastructure.Migrations
                 table: "Supplier",
                 type: "nvarchar(50)",
                 nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "PartnerType",
                 columns: table => new
@@ -32,22 +31,31 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_PartnerType", x => x.Key);
                 });
-
             migrationBuilder.InsertData(
                 table: "PartnerType",
                 columns: new[] { "Key", "CreatedAt", "DeletedAt", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { "financial", null, null, null },
-                    { "insurance", null, null, null },
-                    { "supplier", null, null, null }
+                {
+                    "financial",
+                    null,
+                    null,
+                    null
+                },
+                {
+                    "insurance",
+                    null,
+                    null,
+                    null
+                },
+                {
+                    "supplier",
+                    null,
+                    null,
+                    null
+                }
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Supplier_PartnerTypeId",
-                table: "Supplier",
-                column: "PartnerTypeId");
-
+            migrationBuilder.CreateIndex(name: "IX_Supplier_PartnerTypeId", table: "Supplier", column: "PartnerTypeId");
             migrationBuilder.AddForeignKey(
                 name: "FK_Supplier_PartnerType_PartnerTypeId",
                 table: "Supplier",
@@ -59,20 +67,10 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Supplier_PartnerType_PartnerTypeId",
-                table: "Supplier");
-
-            migrationBuilder.DropTable(
-                name: "PartnerType");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Supplier_PartnerTypeId",
-                table: "Supplier");
-
-            migrationBuilder.DropColumn(
-                name: "PartnerTypeId",
-                table: "Supplier");
+            migrationBuilder.DropForeignKey(name: "FK_Supplier_PartnerType_PartnerTypeId", table: "Supplier");
+            migrationBuilder.DropTable(name: "PartnerType");
+            migrationBuilder.DropIndex(name: "IX_Supplier_PartnerTypeId", table: "Supplier");
+            migrationBuilder.DropColumn(name: "PartnerTypeId", table: "Supplier");
         }
     }
 }

@@ -28,19 +28,20 @@ public sealed class DeleteProductCategoryCommandHandler(
                 Error.Validation(
                     $"Cannot delete product category '{category.Name}'. This category is protected and cannot be deleted."));
         }
-
-        var hasProducts = await readRepository.AnyCategoryInTreeHasProductsAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var hasProducts = await readRepository.AnyCategoryInTreeHasProductsAsync(request.Id, cancellationToken)
+            .ConfigureAwait(false);
         if (hasProducts)
         {
-            return Result.Failure(Error.Validation($"Cannot delete category '{category.Name}' or its subcategories because they still contain products."));
+            return Result.Failure(
+                Error.Validation(
+                    $"Cannot delete category '{category.Name}' or its subcategories because they still contain products."));
         }
-
-        var subCategories = await readRepository.GetSubCategoriesAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var subCategories = await readRepository.GetSubCategoriesAsync(request.Id, cancellationToken)
+            .ConfigureAwait(false);
         if (subCategories is { Count: > 0 })
         {
             deleteRepository.Delete(subCategories);
         }
-
         deleteRepository.Delete(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result.Success();

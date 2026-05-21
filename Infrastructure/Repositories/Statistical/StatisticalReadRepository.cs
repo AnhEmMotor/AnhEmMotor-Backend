@@ -52,6 +52,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var variantIds = grouped.Select(g => g.VariantId).ToList();
         var variants = await context.ProductVariants
             .Include(pv => pv.Product)
+            .Include(pv => pv.ProductVariantColors)
             .Where(pv => variantIds.Contains(pv.Id))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -63,7 +64,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 {
                     ProductName =
                         variant != null
-                                ? $"{variant.Product?.Name} - {variant.VersionName} ({variant.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                                ? $"{variant.Product?.Name} - {variant.VariantName} ({variant.ProductVariantColor?.ColorName?.Split(',').FirstOrDefault()})".Trim(
                                     ' ',
                                     '-',
                                     '(',
@@ -614,13 +615,14 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var variants = await context.ProductVariants
             .IgnoreQueryFilters()
             .Include(pv => pv.Product)
+            .Include(pv => pv.ProductVariantColors)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         return variants.Select(
             pv => new ProductReportResponse
             {
                 ProductName =
-                    $"{pv.Product?.Name} - {pv.VersionName} ({pv.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                    $"{pv.Product?.Name} - {pv.VariantName} ({pv.ProductVariantColor?.ColorName?.Split(',').FirstOrDefault()})".Trim(
                             ' ',
                             '-',
                             '(',
@@ -677,6 +679,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var variants = await context.ProductVariants
             .IgnoreQueryFilters()
             .Include(pv => pv.Product)
+            .Include(pv => pv.ProductVariantColors)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         return variants.Select(
@@ -693,7 +696,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 return new ProductPerformanceTableResponse
                 {
                     ProductName =
-                        $"{pv.Product?.Name} - {pv.VersionName} ({pv.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                        $"{pv.Product?.Name} - {pv.VariantName} ({pv.ProductVariantColor?.ColorName?.Split(',').FirstOrDefault()})".Trim(
                                 ' ',
                                 '-',
                                 '(',
@@ -817,3 +820,4 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         };
     }
 }
+

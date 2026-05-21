@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using InputStatus = Domain.Entities.InputStatus;
@@ -54,6 +53,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ProductVariant> ProductVariants { get; set; }
 
+    public virtual DbSet<ProductVariantColor> ProductVariantColors { get; set; }
+
     public virtual DbSet<Setting> Settings { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
@@ -61,6 +62,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<SupplierContact> SupplierContacts { get; set; }
 
     public virtual DbSet<Domain.Entities.PartnerType> PartnerTypes { get; set; }
+
     public virtual DbSet<SupplierStatus> SupplierStatuses { get; set; }
 
     public virtual DbSet<VariantOptionValue> VariantOptionValues { get; set; }
@@ -163,6 +165,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(pv => pv.VariantOptionValues)
             .HasForeignKey(v => v.VariantId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ProductVariantColor>()
+            .HasOne(pvc => pvc.ProductVariant)
+            .WithMany(pv => pv.ProductVariantColors)
+            .HasForeignKey(pvc => pvc.ProductVariantId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => new { pt.ProductId, pt.TechnologyId });
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => pt.Id);
         modelBuilder.Entity<ProductStatus>().HasKey(ps => ps.Key);
@@ -170,11 +177,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasData(new ProductStatus { Key = "for-sale" }, new ProductStatus { Key = "out-of-business" });
         modelBuilder.Entity<InputStatus>().HasKey(ins => ins.Key);
         modelBuilder.Entity<Domain.Entities.PartnerType>().HasKey(pt => pt.Key);
-        modelBuilder.Entity<Domain.Entities.PartnerType>().HasData(
-            new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Supplier },
-            new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Financial },
-            new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Insurance }
-        );
+        modelBuilder.Entity<Domain.Entities.PartnerType>()
+            .HasData(
+                new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Supplier },
+                new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Financial },
+                new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Insurance });
         modelBuilder.Entity<OutputStatus>().HasKey(ous => ous.Key);
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)
@@ -216,6 +223,26 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(v => v.Documents)
             .HasForeignKey(vd => vd.VehicleId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Vehicle>()
+            .HasOne(v => v.InputInfo)
+            .WithMany(ii => ii.Vehicles)
+            .HasForeignKey(v => v.InputInfoId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Vehicle>()
+            .HasOne(v => v.OutputInfo)
+            .WithMany(oi => oi.Vehicles)
+            .HasForeignKey(v => v.OutputInfoId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InputInfo>()
+            .HasOne(ii => ii.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(ii => ii.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<OutputInfo>()
+            .HasOne(oi => oi.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(oi => oi.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Restrict);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
         if (isNotSqlServer)
@@ -276,7 +303,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-
         var entries = ChangeTracker.Entries<BaseEntity>();
         foreach (var entry in entries)
         {

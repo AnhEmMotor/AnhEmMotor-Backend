@@ -18,10 +18,9 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             .WithMessage("ID danh mục phải lớn hơn 0.");
         RuleFor(x => x.BrandId)
             .NotNull()
-            .WithMessage("Brand ID is required.")
+            .WithMessage("Thương hiệu sản phẩm là bắt buộc.")
             .GreaterThan(0)
-            .When(x => x.BrandId.HasValue)
-            .WithMessage("ID thương hiệu phải lớn hơn 0 khi cung cấp.");
+            .WithMessage("ID thương hiệu phải lớn hơn 0.");
         RuleFor(x => x.Description)
             .MaximumLength(2000)
             .When(x => !string.IsNullOrWhiteSpace(x.Description))
@@ -64,8 +63,8 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             return;
         var hasVariantWithoutOptions = variants.Any(
             v => (v.OptionValues == null || v.OptionValues.Count == 0) &&
-                string.IsNullOrWhiteSpace(v.ColorName) &&
-                string.IsNullOrWhiteSpace(v.VersionName));
+                !HasColor(v) &&
+                string.IsNullOrWhiteSpace(v.VariantName));
         if (hasVariantWithoutOptions)
         {
             context.AddFailure(
@@ -84,10 +83,8 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
                         .OrderBy(kvp => kvp.Key)
                         .Select(kvp => $"{kvp.Key.Trim().ToLowerInvariant()}:{kvp.Value.Trim().ToLowerInvariant()}"));
             }
-            if (!string.IsNullOrWhiteSpace(variant.ColorName))
-                parts.Add($"specialized_color:{variant.ColorName.Trim().ToLowerInvariant()}");
-            if (!string.IsNullOrWhiteSpace(variant.VersionName))
-                parts.Add($"specialized_version:{variant.VersionName.Trim().ToLowerInvariant()}");
+            if (!string.IsNullOrWhiteSpace(variant.VariantName))
+                parts.Add($"specialized_version:{variant.VariantName.Trim().ToLowerInvariant()}");
             var sig = string.Join("|", parts);
             if (!optionSignatures.Add(sig))
             {
@@ -105,5 +102,10 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             return true;
         var slugs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         return variants.All(v => string.IsNullOrWhiteSpace(v.UrlSlug) || slugs.Add(v.UrlSlug.Trim()));
+    }
+
+    private static bool HasColor(CreateProductVariantRequest variant)
+    {
+        return variant.Colors.Count > 0;
     }
 }

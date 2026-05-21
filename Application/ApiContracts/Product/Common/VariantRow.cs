@@ -20,7 +20,7 @@ namespace Application.ApiContracts.Product.Common
 
         public int HasBeenBooked { get; set; }
 
-        public string? VersionName { get; set; }
+        public string? VariantName { get; set; }
 
         public string? ColorName { get; set; }
 

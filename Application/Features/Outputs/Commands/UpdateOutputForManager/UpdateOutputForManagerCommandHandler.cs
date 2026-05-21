@@ -1,4 +1,4 @@
-using Application.ApiContracts.Output.Responses;
+﻿using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
@@ -48,8 +48,8 @@ public sealed class UpdateOutputForManagerCommandHandler(
             output.BuyerId = request.BuyerId;
         }
         var variantIds = request.OutputInfos
-            .Where(p => p.ProductId.HasValue)
-            .Select(p => p.ProductId!.Value)
+            .Where(p => p.ProductVarientId.HasValue)
+            .Select(p => p.ProductVarientId!.Value)
             .Distinct()
             .ToList();
         List<ProductVariant> variantsList = [];
@@ -73,6 +73,15 @@ public sealed class UpdateOutputForManagerCommandHandler(
                     return Error.BadRequest(
                         $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",
                         "Products");
+                }
+            }
+            foreach (var product in request.OutputInfos.Where(p => p.ProductVarientId.HasValue))
+            {
+                var variant = variantsList.First(v => v.Id == product.ProductVarientId!.Value);
+                var colorValidation = ValidateVariantColor(variant, product.ProductVarientColorId);
+                if (colorValidation is not null)
+                {
+                    return colorValidation;
                 }
             }
         }
@@ -117,7 +126,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
         }
         foreach (var productRequest in request.OutputInfos)
         {
-            var currentVariant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductId);
+            var currentVariant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductVarientId);
             if (productRequest.Id.HasValue && productRequest.Id > 0)
             {
                 if (existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
@@ -132,7 +141,8 @@ public sealed class UpdateOutputForManagerCommandHandler(
             {
                 var newInfo = new OutputInfo
                 {
-                    ProductVarientId = productRequest.ProductId,
+                    ProductVarientId = productRequest.ProductVarientId,
+                    ProductVariantColorId = productRequest.ProductVarientColorId,
                     Count = productRequest.Count
                 };
                 if (currentVariant != null)
@@ -177,5 +187,24 @@ public sealed class UpdateOutputForManagerCommandHandler(
                 .ConfigureAwait(false);
         }
         return Result<OrderDetailResponse>.Success(output.Adapt<OrderDetailResponse>());
+    }
+
+    private static Error? ValidateVariantColor(ProductVariant variant, int? productVarientColorId)
+    {
+        if (variant.ProductVariantColors.Count == 0)
+        {
+            return productVarientColorId.HasValue
+                ? Error.BadRequest("Biến thể sản phẩm này không có màu sắc để chọn.", "ProductVarientColorId")
+                : null;
+        }
+        if (!productVarientColorId.HasValue || productVarientColorId <= 0)
+        {
+            return Error.BadRequest(
+                "Biến thể sản phẩm có màu sắc, ProductVarientColorId là bắt buộc.",
+                "ProductVarientColorId");
+        }
+        return variant.ProductVariantColors.Any(c => c.Id == productVarientColorId.Value)
+            ? null
+            : Error.BadRequest("ProductVarientColorId không thuộc biến thể sản phẩm đã chọn.", "ProductVarientColorId");
     }
 }

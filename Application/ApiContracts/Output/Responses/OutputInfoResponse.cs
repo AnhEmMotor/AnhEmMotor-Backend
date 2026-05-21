@@ -5,7 +5,9 @@ public class OutputInfoResponse
 {
     public int? Id { get; set; }
 
-    public int? ProductId { get; set; }
+    public int? ProductVarientId { get; set; }
+
+    public int? ProductVarientColorId { get; set; }
 
     public string? ProductName { get; set; }
 

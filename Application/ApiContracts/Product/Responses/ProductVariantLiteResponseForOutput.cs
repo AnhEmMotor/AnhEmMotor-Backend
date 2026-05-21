@@ -15,5 +15,7 @@ namespace Application.ApiContracts.Product.Responses
         public int Stock { get; set; }
 
         public int? CategoryId { get; set; }
+
+        public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
     }
 }

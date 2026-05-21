@@ -44,14 +44,17 @@ public sealed class OutputMappingConfig : IRegister
             .Map(dest => dest.Price, src => src.Price)
             .Map(dest => dest.CoverImageUrl, src => MapCoverImageUrl(src.ProductVariant));
         config.NewConfig<OutputInfo, OutputInfoResponse>()
-            .Map(dest => dest.ProductId, src => src.ProductVarientId)
+            .Map(dest => dest.ProductVarientId, src => src.ProductVarientId)
+            .Map(dest => dest.ProductVarientColorId, src => src.ProductVariantColorId)
             .Map(dest => dest.ProductName, src => MapProductName(src))
             .Map(dest => dest.CoverImageUrl, src => MapCoverImageUrl(src.ProductVariant));
         config.NewConfig<CreateOutputInfoRequest, OutputInfo>()
-            .Map(dest => dest.ProductVarientId, src => src.ProductId)
+            .Map(dest => dest.ProductVarientId, src => src.ProductVarientId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVarientColorId)
             .IgnoreNullValues(true);
         config.NewConfig<UpdateOutputInfoRequest, OutputInfo>()
-            .Map(dest => dest.ProductVarientId, src => src.ProductId)
+            .Map(dest => dest.ProductVarientId, src => src.ProductVarientId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVarientColorId)
             .Map(dest => dest.Count, src => src.Count)
             .Ignore(dest => dest.Id)
             .IgnoreNullValues(true);
@@ -110,6 +113,8 @@ public sealed class OutputMappingConfig : IRegister
     {
         if (variant == null)
             return null;
+        if (variant.ProductVariantColor != null && !string.IsNullOrEmpty(variant.ProductVariantColor.CoverImageUrl))
+            return variant.ProductVariantColor.CoverImageUrl;
         if (!string.IsNullOrEmpty(variant.CoverImageUrl))
             return variant.CoverImageUrl;
         return variant.ProductCollectionPhotos?

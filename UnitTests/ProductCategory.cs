@@ -1,12 +1,12 @@
+using Application.ApiContracts.ProductCategory.Responses;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.RestoreProductCategory;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
+using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
-using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Application.Interfaces.Services;
-using Application.ApiContracts.ProductCategory.Responses;
 using Domain.Constants;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -385,7 +385,6 @@ public class ProductCategory
     public async Task GetProductCategoryStats_ShouldSucceed()
     {
         var handler = new GetProductCategoryStatsQueryHandler(_readRepoMock.Object);
-
         var statsResponse = new ProductCategoryStatsResponse
         {
             TotalCategories = 2,
@@ -393,13 +392,9 @@ public class ProductCategory
             LatestUpdatedCategoryName = "Danh mục 2",
             LatestUpdatedAt = DateTimeOffset.UtcNow.AddDays(-5)
         };
-
-        _readRepoMock.Setup(r => r.GetStatisticsAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(statsResponse);
-
+        _readRepoMock.Setup(r => r.GetStatisticsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(statsResponse);
         var query = new GetProductCategoryStatsQuery();
         var resultObj = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
         resultObj.IsSuccess.Should().BeTrue();
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.TotalCategories.Should().Be(2);

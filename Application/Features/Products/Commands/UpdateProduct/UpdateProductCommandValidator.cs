@@ -5,6 +5,8 @@ namespace Application.Features.Products.Commands.UpdateProduct;
 
 public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProductCommand>
 {
+    private static readonly string[] ColorOptionKeys = ["Color", "Màu sắc"];
+
     public UpdateProductCommandValidator()
     {
         RuleFor(x => x.Name)
@@ -45,6 +47,9 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
         RuleFor(x => x.Variants)
             .NotEmpty()
             .WithMessage("Sản phẩm phải có ít nhất một biến thể.")
+            .Must(NotContainColorOptionValues)
+            .WithMessage(
+                "Không được gửi màu sắc trong optionValues. Vui lòng dùng color_name và color_code của biến thể.")
             .Must(HaveUniqueSlugs)
             .WithMessage("Đã tìm thấy các đường dẫn (slug) trùng lặp trong yêu cầu.")
             .Custom(ValidateVariantOptions);
@@ -67,8 +72,8 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
             return;
         var hasVariantWithoutOptions = variants.Any(
             v => (v.OptionValues == null || v.OptionValues.Count == 0) &&
-                string.IsNullOrWhiteSpace(v.ColorName) &&
-                string.IsNullOrWhiteSpace(v.VersionName));
+                !HasColor(v) &&
+                string.IsNullOrWhiteSpace(v.VariantName));
         if (hasVariantWithoutOptions)
         {
             context.AddFailure(
@@ -87,10 +92,8 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
                         .OrderBy(kvp => kvp.Key)
                         .Select(kvp => $"{kvp.Key.Trim().ToLowerInvariant()}:{kvp.Value.Trim().ToLowerInvariant()}"));
             }
-            if (!string.IsNullOrWhiteSpace(variant.ColorName))
-                parts.Add($"specialized_color:{variant.ColorName.Trim().ToLowerInvariant()}");
-            if (!string.IsNullOrWhiteSpace(variant.VersionName))
-                parts.Add($"specialized_version:{variant.VersionName.Trim().ToLowerInvariant()}");
+            if (!string.IsNullOrWhiteSpace(variant.VariantName))
+                parts.Add($"specialized_version:{variant.VariantName.Trim().ToLowerInvariant()}");
             var sig = string.Join("|", parts);
             if (!optionSignatures.Add(sig))
             {
@@ -100,5 +103,22 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
                 return;
             }
         }
+    }
+
+    private bool NotContainColorOptionValues(List<UpdateProductVariantRequest> variants)
+    {
+        return variants == null ||
+            variants.All(
+                v => v.OptionValues == null ||
+                    v.OptionValues.Keys
+                        .All(
+                            key => !ColorOptionKeys.Contains(
+                                            (key ?? string.Empty).Trim(),
+                                            StringComparer.OrdinalIgnoreCase)));
+    }
+
+    private static bool HasColor(UpdateProductVariantRequest variant)
+    {
+        return variant.Colors.Count > 0;
     }
 }

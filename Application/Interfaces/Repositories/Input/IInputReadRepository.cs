@@ -1,3 +1,4 @@
+using Application.ApiContracts.Input.Responses;
 using Domain.Constants;
 using Domain.Primitives;
 using Sieve.Models;
@@ -8,6 +9,8 @@ namespace Application.Interfaces.Repositories.Input;
 
 public interface IInputReadRepository
 {
+    public Task<InventoryReceiptStatsResponse> GetStatsAsync(CancellationToken cancellationToken);
+
     public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
         DataFetchMode mode = DataFetchMode.ActiveOnly,

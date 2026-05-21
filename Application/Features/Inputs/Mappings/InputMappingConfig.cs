@@ -13,7 +13,9 @@ public sealed class InputMappingConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<CreateInputCommand, Input>();
-        config.NewConfig<CreateInputInfoRequest, InputInfo>();
+        config.NewConfig<CreateInputInfoRequest, InputInfo>()
+            .Map(dest => dest.ProductId, src => src.ProductVarientId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVarientColorId);
         config.NewConfig<Input, InputListResponse>()
             .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
@@ -35,13 +37,18 @@ public sealed class InputMappingConfig : IRegister
                     : 0)
             .Map(dest => dest.Products, src => src.InputInfos);
         config.NewConfig<InputInfo, InputInfoResponse>()
+            .Map(dest => dest.ProductVarientId, src => src.ProductId)
+            .Map(dest => dest.ProductVarientColorId, src => src.ProductVariantColorId)
             .Map(dest => dest.Name, src => BuildFullVariantName(src.ProductVariant))
             .Map(dest => dest.Quantity, src => src.Count)
             .Map(dest => dest.UnitPrice, src => src.InputPrice)
             .Map(dest => dest.ImportPrice, src => src.InputPrice)
             .Map(dest => dest.Discount, src => 0)
             .Map(dest => dest.Total, src => (decimal)(src.Count ?? 0) * (src.InputPrice ?? 0));
-        config.NewConfig<UpdateInputInfoRequest, InputInfo>().IgnoreNullValues(true);
+        config.NewConfig<UpdateInputInfoRequest, InputInfo>()
+            .Map(dest => dest.ProductId, src => src.ProductVarientId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVarientColorId)
+            .IgnoreNullValues(true);
         config.NewConfig<UpdateInputCommand, Input>().IgnoreNullValues(true);
         config.NewConfig<Input, SupplierPurchaseHistoryResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
@@ -61,25 +68,10 @@ public sealed class InputMappingConfig : IRegister
             return null;
         }
         var productName = variant.Product.Name ?? string.Empty;
-        if (variant.VariantOptionValues is null || variant.VariantOptionValues.Count == 0)
+        if (string.IsNullOrWhiteSpace(variant.VariantName))
         {
             return productName;
         }
-        var parts = variant.VariantOptionValues
-            .Where(vov => vov.OptionValue is not null && !string.IsNullOrWhiteSpace(vov.OptionValue.Name))
-            .Select(
-                vov =>
-                {
-                    var optionName = vov.OptionValue?.Option?.Name;
-                    return string.IsNullOrWhiteSpace(optionName)
-                        ? vov.OptionValue!.Name
-                        : $"{optionName}: {vov.OptionValue!.Name}";
-                })
-            .ToList();
-        if (parts.Count == 0)
-        {
-            return productName;
-        }
-        return $"{productName} ({string.Join(", ", parts)})";
+        return $"{productName} ({variant.VariantName})";
     }
 }

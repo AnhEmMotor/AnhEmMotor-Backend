@@ -8,7 +8,6 @@ using Application.Features.OptionValues.Commands.CreateOptionValue;
 using Application.Features.OptionValues.Commands.DeleteOptionValue;
 using Application.Features.OptionValues.Commands.UpdateOptionValue;
 using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
-using Application.Features.ProductCategories.Commands.CreateCategoryGroup;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -24,6 +23,7 @@ using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Queries.CheckSlugAvailability;
+using Application.Features.Products.Queries.ExportProducts;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForInput;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
@@ -37,7 +37,6 @@ using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetSitemapSlugs;
 using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
-using Application.Features.Products.Queries.ExportProducts;
 using Application.Features.Technologies.Commands.CreateTechnology;
 using Application.Features.Technologies.Commands.CreateTechnologyCategory;
 using Application.Features.Technologies.Queries.GetAllTechnologies;
@@ -226,12 +225,10 @@ public class ProductController(ISender sender) : ApiController
     {
         var query = new ExportProductsQuery { SieveModel = sieveModel };
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
-
         if (!result.IsSuccess)
         {
             return HandleResult(result);
         }
-
         var fileResult = result.Value;
         return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
     }
@@ -614,19 +611,6 @@ public class ProductController(ISender sender) : ApiController
     }
 
     /// <summary>
-    /// Phân nhóm danh mục sản phẩm.
-    /// </summary>
-    [HttpPost("category-group")]
-    [HasPermission(Products.Edit)]
-    public async Task<IActionResult> CreateCategoryGroupAsync(
-        [FromBody] CreateCategoryGroupCommand request,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
     /// Thiết lập danh sách xe tương thích cho phụ tùng.
     /// </summary>
     [HttpPost("{id:int}/compatibility")]
@@ -655,7 +639,6 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
-
 
     /// <summary>
     /// Tạo mới một Công nghệ.

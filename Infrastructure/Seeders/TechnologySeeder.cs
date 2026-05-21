@@ -12,7 +12,7 @@ public static class TechnologySeeder
         foreach (var name in categoryNames)
         {
             if (!await context.TechnologyCategories
-                .AnyAsync(c => c.Name.ToLower() == name.ToLower(), cancellationToken)
+                .AnyAsync(c => string.Compare(c.Name!.ToLower(), name.ToLower()) == 0, cancellationToken)
                 .ConfigureAwait(false))
             {
                 context.TechnologyCategories.Add(new TechnologyCategory { Name = name });
@@ -24,17 +24,17 @@ public static class TechnologySeeder
             .ConfigureAwait(false);
         var honda = await context.Brands
             .FirstOrDefaultAsync(
-                b => b.Name != null && b.Name.ToLower() == "honda",
+                b => b.Name != null && string.Compare(b.Name.ToLower(), "honda") == 0,
                 cancellationToken)
             .ConfigureAwait(false);
         var yamaha = await context.Brands
             .FirstOrDefaultAsync(
-                b => b.Name != null && b.Name.ToLower() == "yamaha",
+                b => b.Name != null && string.Compare(b.Name.ToLower(), "yamaha") == 0,
                 cancellationToken)
             .ConfigureAwait(false);
         var piaggio = await context.Brands
             .FirstOrDefaultAsync(
-                b => b.Name != null && b.Name.ToLower() == "piaggio",
+                b => b.Name != null && string.Compare(b.Name.ToLower(), "piaggio") == 0,
                 cancellationToken)
             .ConfigureAwait(false);
         if (piaggio == null)
@@ -60,10 +60,10 @@ public static class TechnologySeeder
         };
         foreach (var data in techData)
         {
+            var targetBrandId = data.Brand?.Id;
             var exists = await context.Technologies
                 .AnyAsync(
-                    t => t.Name.ToLower() == data.Name.ToLower() &&
-                        t.BrandId == (data.Brand != null ? data.Brand.Id : null),
+                    t => string.Compare(t.Name!.ToLower(), data.Name.ToLower()) == 0 && t.BrandId == targetBrandId,
                     cancellationToken)
                 .ConfigureAwait(false);
             if (!exists)
@@ -78,15 +78,14 @@ public static class TechnologySeeder
                                 DefaultTitle = data.Name,
                                 DefaultDescription = data.Description,
                                 CategoryId = categoryId,
-                                BrandId = data.Brand?.Id
+                                BrandId = targetBrandId
                             });
                 }
             } else
             {
                 var tech = await context.Technologies
                     .FirstOrDefaultAsync(
-                        t => t.Name.ToLower() == data.Name.ToLower() &&
-                            t.BrandId == (data.Brand != null ? data.Brand.Id : null),
+                        t => string.Compare(t.Name!.ToLower(), data.Name.ToLower()) == 0 && t.BrandId == targetBrandId,
                         cancellationToken)
                     .ConfigureAwait(false);
                 if (tech != null && categories.TryGetValue(data.Category.Trim(), out var categoryId))

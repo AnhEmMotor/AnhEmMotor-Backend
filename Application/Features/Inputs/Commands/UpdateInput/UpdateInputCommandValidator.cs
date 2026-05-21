@@ -12,8 +12,8 @@ public sealed class UpdateInputCommandValidator : AbstractValidator<UpdateInputC
                 products =>
                 {
                     var productIds = products
-                    .Where(p => p.ProductId.HasValue)
-                        .Select(p => p!.ProductId!.Value)
+                    .Where(p => p.ProductVarientId.HasValue)
+                        .Select(p => p!.ProductVarientId!.Value)
                         .ToList();
                     var distinctCount = productIds.Distinct().Count();
                     var isDuplicate = productIds.Count != distinctCount;

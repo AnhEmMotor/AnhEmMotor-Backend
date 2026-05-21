@@ -49,9 +49,17 @@ public static class ProductDataSeeder
                 var pVariant = p.ProductVariants.FirstOrDefault(v => string.Compare(v.UrlSlug, variant.UrlSlug) == 0);
                 if (pVariant != null)
                 {
-                    variant.VersionName = pVariant.VersionName;
-                    variant.ColorName = pVariant.ColorName;
-                    variant.ColorCode = pVariant.ColorCode;
+                    variant.VariantName = pVariant.VariantName;
+                    if (pVariant.ProductVariantColor != null)
+                    {
+                        if (variant.ProductVariantColor == null)
+                        {
+                            variant.ProductVariantColor = new ProductVariantColor();
+                        }
+                        variant.ProductVariantColor.ColorName = pVariant.ProductVariantColor.ColorName;
+                        variant.ProductVariantColor.ColorCode = pVariant.ProductVariantColor.ColorCode;
+                        variant.ProductVariantColor.CoverImageUrl = pVariant.ProductVariantColor.CoverImageUrl;
+                    }
                     variant.SKU = pVariant.SKU;
                     variant.Price = pVariant.Price;
                 }
@@ -116,3 +124,4 @@ public static class ProductDataSeeder
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }
+

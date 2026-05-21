@@ -1,8 +1,8 @@
 using Application.ApiContracts.Technology.Responses;
 using Application.Features.Technologies.Commands.CreateTechnology;
 using Application.Features.Technologies.Commands.CreateTechnologyCategory;
-using Application.Features.Technologies.Commands.UpdateTechnology;
 using Application.Features.Technologies.Commands.DeleteTechnology;
+using Application.Features.Technologies.Commands.UpdateTechnology;
 using Application.Features.Technologies.Queries.GetAllTechnologies;
 using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
 using Application.Features.Technologies.Queries.GetTechnologiesList;
@@ -110,11 +110,10 @@ public class TechnologiesController(IMediator mediator) : ApiController
     /// <returns>Kết quả xóa.</returns>
     [HttpDelete("{id:int}")]
     [Authorize]
-    public async Task<IActionResult> DeleteAsync(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        return HandleResult(await mediator.Send(new DeleteTechnologyCommand(id), cancellationToken).ConfigureAwait(true));
+        return HandleResult(
+            await mediator.Send(new DeleteTechnologyCommand(id), cancellationToken).ConfigureAwait(true));
     }
 
     /// <summary>

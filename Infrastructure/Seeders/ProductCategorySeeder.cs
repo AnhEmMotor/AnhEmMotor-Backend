@@ -26,22 +26,13 @@ public static class ProductCategorySeeder
         {
             if (string.IsNullOrWhiteSpace(seed.Name))
                 continue;
-            if (existingCategoryDict.TryGetValue(seed.Name, out var existing))
+            if (existingCategoryDict.TryGetValue(seed.Name, out var _))
             {
-                if (!string.Equals(existing.CategoryGroup, seed.Group, StringComparison.OrdinalIgnoreCase))
-                {
-                    existing.CategoryGroup = seed.Group;
-                    hasChanges = true;
-                }
+                hasChanges = true;
             } else
             {
                 categoriesToAdd.Add(
-                    new ProductCategory
-                    {
-                        Name = seed.Name,
-                        CategoryGroup = seed.Group,
-                        Slug = seed.Name.ToLower().Replace(" ", "-")
-                    });
+                    new ProductCategory { Name = seed.Name, Slug = seed.Name.ToLower().Replace(" ", "-") });
                 hasChanges = true;
             }
         }

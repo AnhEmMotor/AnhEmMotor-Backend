@@ -45,36 +45,39 @@ public sealed class UpdateProductCategoryCommandHandler(
             category.Slug = request.Slug.Trim();
         if (request.ImageUrl != null)
             category.ImageUrl = request.ImageUrl.Trim();
-        if (request.CategoryGroup != null)
-            category.CategoryGroup = request.CategoryGroup.Trim();
         category.IsActive = request.IsActive;
-        
         if (request.ParentId.HasValue)
         {
             if (request.ParentId.Value == request.Id)
             {
-                return Result<ProductCategoryResponse?>.Failure(Error.Validation("A category cannot be its own parent."));
+                return Result<ProductCategoryResponse?>.Failure(
+                    Error.Validation("A category cannot be its own parent."));
             }
-
-            var parent = await readRepository.GetByIdAsync(request.ParentId.Value, cancellationToken).ConfigureAwait(false);
+            var parent = await readRepository.GetByIdAsync(request.ParentId.Value, cancellationToken)
+                .ConfigureAwait(false);
             if (parent == null)
             {
-                return Result<ProductCategoryResponse?>.Failure(Error.NotFound($"Parent category with Id {request.ParentId.Value} not found."));
+                return Result<ProductCategoryResponse?>.Failure(
+                    Error.NotFound($"Parent category with Id {request.ParentId.Value} not found."));
             }
             if (parent.ParentId.HasValue)
             {
-                return Result<ProductCategoryResponse?>.Failure(Error.Validation("Cannot move this category under another child category. Only 2 levels are allowed."));
+                return Result<ProductCategoryResponse?>.Failure(
+                    Error.Validation(
+                        "Cannot move this category under another child category. Only 2 levels are allowed."));
             }
-
-            var hasSubCategories = await readRepository.HasSubCategoriesAsync(request.Id, cancellationToken).ConfigureAwait(false);
+            var hasSubCategories = await readRepository.HasSubCategoriesAsync(request.Id, cancellationToken)
+                .ConfigureAwait(false);
             if (hasSubCategories)
             {
-                return Result<ProductCategoryResponse?>.Failure(Error.Validation("This category has subcategories and cannot be made a child of another category."));
+                return Result<ProductCategoryResponse?>.Failure(
+                    Error.Validation("This category has subcategories and cannot be made a child of another category."));
             }
         }
-
         category.ParentId = request.ParentId;
         category.MaxPurchaseQuantity = request.MaxPurchaseQuantity;
+        if (request.ManagementType != null)
+            category.ManagementType = request.ManagementType.Trim();
         updateRepository.Update(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return category.Adapt<ProductCategoryResponse>();

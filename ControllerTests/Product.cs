@@ -266,7 +266,6 @@ public class Product
             .ConfigureAwait(true);
     }
 
-
     [Fact(DisplayName = "PRODUCT_187 - API tạo Công nghệ mới trả về 201 Created")]
     public async Task CreateTechnology_ValidData_ReturnsCreated()
     {

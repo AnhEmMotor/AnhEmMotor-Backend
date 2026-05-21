@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Features.Inputs.Commands.CloneInput;
 using Application.Features.Inputs.Commands.CreateInput;
@@ -15,6 +15,7 @@ using Application.Features.Inputs.Queries.GetInputById;
 using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Inputs.Queries.GetInputsList;
 using Application.Features.Inputs.Queries.GetInputStatusList;
+using Application.Features.Inputs.Queries.GetInventoryReceiptStats;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Constants.RouteNames;
@@ -31,16 +32,16 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Qu?n l� phi?u nh?p h�ng.
+/// Quản lý phiếu nhập hàng.
 /// </summary>
 [ApiVersion("1.0")]
-[SwaggerTag("Qu?n l� phi?u nh?p h�ng")]
+[SwaggerTag("Quản lý phiếu nhập hàng")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class InventoryReceiptsController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// L?y danh s�ch phi?u nh?p (c� ph�n trang, l?c, s?p x?p).
+    /// Lấy danh sách phiếu nhập (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
     [HasPermission(Inputs.View)]
@@ -55,7 +56,20 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch tr?ng th�i phi?u nh?p.
+    /// Lấy thống kê cho phần phiếu nhập kho.
+    /// </summary>
+    [HttpGet("statistics")]
+    [HasPermission(Inputs.View)]
+    [ProducesResponseType(typeof(InventoryReceiptStatsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetInventoryReceiptStatsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetInventoryReceiptStatsQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách trạng thái phiếu nhập.
     /// </summary>
     [HttpGet("status")]
     [RequiresAnyPermissions(Inputs.View, Inputs.Create, Inputs.Edit)]
@@ -68,7 +82,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch phi?u nh?p d� b? x�a (c� ph�n trang, l?c, s?p x?p).
+    /// Lấy danh sách phiếu nhập đã bị xóa (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
     [HasPermission(Inputs.View)]
@@ -83,7 +97,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y th�ng tin chi ti?t c?a phi?u nh?p.
+    /// Lấy thông tin chi tiết của phiếu nhập.
     /// </summary>
     [HttpGet("{id:int}", Name = InventoryReceipts.GetById)]
     [HasPermission(Inputs.View)]
@@ -97,7 +111,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch phi?u nh?p theo nh� cung c?p.
+    /// Lấy danh sách phiếu nhập theo nhà cung cấp.
     /// </summary>
     [HttpGet("by-supplier/{supplierId:int}")]
     [RequiresAllPermissions(Suppliers.View, Inputs.View)]
@@ -113,7 +127,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// T?o phi?u nh?p m?i.
+    /// Tạo phiếu nhập mới.
     /// </summary>
     [HttpPost]
     [HasPermission(Inputs.Create)]
@@ -129,7 +143,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Clone phi?u nh?p t? phi?u nh?p g?c. Ch? clone c�c s?n ph?m c�n h?p l? (chua xo�, c�n dang b�n).
+    /// Clone phiếu nhập từ phiếu nhập gốc. Chỉ clone các sản phẩm còn hợp lệ (chưa xóa, còn đang bán).
     /// </summary>
     [HttpPost("{id:int}/clone")]
     [HasPermission(Inputs.Create)]
@@ -144,7 +158,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// C?p nh?t phi?u nh?p.
+    /// Cập nhật phiếu nhập.
     /// </summary>
     [HttpPut("{id:int}")]
     [HasPermission(Inputs.Edit)]
@@ -157,8 +171,8 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = request.Adapt<UpdateInputCommand>() with 
-        { 
+        var command = request.Adapt<UpdateInputCommand>() with
+        {
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
@@ -167,7 +181,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// C?p nh?t tr?ng th�i c?a phi?u nh?p.
+    /// Cập nhật trạng thái của phiếu nhập.
     /// </summary>
     [HttpPatch("{id:int}/status")]
     [HasPermission(Inputs.ChangeStatus)]
@@ -180,8 +194,8 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = request.Adapt<UpdateInputStatusCommand>() with 
-        { 
+        var command = request.Adapt<UpdateInputStatusCommand>() with
+        {
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
@@ -190,7 +204,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// C?p nh?t ghi ch� c?a phi?u nh?p.
+    /// Cập nhật ghi chú của phiếu nhập.
     /// </summary>
     [HttpPatch("{id:int}/notes")]
     [HasPermission(Inputs.Edit)]
@@ -207,7 +221,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// C?p nh?t tr?ng th�i c?a nhi?u phi?u nh?p c�ng l�c.
+    /// Cập nhật trạng thái của nhiều phiếu nhập cùng lúc.
     /// </summary>
     [HttpPatch("status")]
     [HasPermission(Inputs.ChangeStatus)]
@@ -223,7 +237,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// X�a phi?u nh?p.
+    /// Xóa phiếu nhập.
     /// </summary>
     [HttpDelete("{id:int}")]
     [HasPermission(Inputs.Delete)]
@@ -237,7 +251,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// X�a nhi?u phi?u nh?p c�ng l�c.
+    /// Xóa nhiều phiếu nhập cùng lúc.
     /// </summary>
     [HttpDelete]
     [HasPermission(Inputs.Delete)]
@@ -253,7 +267,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Kh�i ph?c phi?u nh?p d� b? x�a.
+    /// Khôi phục phiếu nhập đã bị xóa.
     /// </summary>
     [HttpPost("{id:int}/restore")]
     [HasPermission(Inputs.Delete)]
@@ -267,7 +281,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Kh�i ph?c nhi?u phi?u nh?p d� b? x�a c�ng l�c.
+    /// Khôi phục nhiều phiếu nhập đã bị xóa cùng lúc.
     /// </summary>
     [HttpPost("restore")]
     [HasPermission(Inputs.Delete)]
@@ -282,4 +296,3 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-

@@ -1,7 +1,6 @@
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Common.Models;
 using MediatR;
-using System.Text.Json.Serialization;
 
 namespace Application.Features.ProductCategories.Commands.UpdateProductCategory;
 
@@ -21,7 +20,7 @@ public sealed record UpdateProductCategoryCommand : IRequest<Result<ProductCateg
 
     public string? Description { get; init; }
 
-    public string? CategoryGroup { get; init; }
-
     public int? MaxPurchaseQuantity { get; init; }
+
+    public string? ManagementType { get; init; }
 }

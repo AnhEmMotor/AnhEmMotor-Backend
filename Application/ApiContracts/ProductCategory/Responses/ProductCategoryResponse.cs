@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Application.ApiContracts.ProductCategory.Responses
 {
     public class ProductCategoryResponse
@@ -21,6 +19,8 @@ namespace Application.ApiContracts.ProductCategory.Responses
         public string? CategoryGroup { get; set; }
 
         public int ProductCount { get; set; }
+
+        public string? ManagementType { get; set; }
 
         public int? MaxPurchaseQuantity { get; set; }
     }

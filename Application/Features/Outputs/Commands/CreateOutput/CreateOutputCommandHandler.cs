@@ -24,8 +24,8 @@ public sealed class CreateOutputCommandHandler(
         CancellationToken cancellationToken)
     {
         var variantIds = request.OutputInfos
-            .Where(p => p.ProductId.HasValue)
-            .Select(p => p.ProductId!.Value)
+            .Where(p => p.ProductVarientId.HasValue)
+            .Select(p => p.ProductVarientId!.Value)
             .Distinct()
             .ToList();
         var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
@@ -52,14 +52,19 @@ public sealed class CreateOutputCommandHandler(
         for (int i = 0; i < request.OutputInfos.Count; i++)
         {
             var info = request.OutputInfos[i];
-            var variant = variantsList.FirstOrDefault(v => v.Id == info.ProductId);
+            var variant = variantsList.FirstOrDefault(v => v.Id == info.ProductVarientId);
+            var colorValidation = ValidateVariantColor(variant, info.ProductVarientColorId);
+            if (colorValidation is not null)
+            {
+                errors.Add(colorValidation);
+            }
             if (variant?.Product?.ProductCategory != null &&
                 variant.Product.ProductCategory.MaxPurchaseQuantity.HasValue)
             {
                 var category = variant.Product.ProductCategory;
                 var maxAllowed = category.MaxPurchaseQuantity.Value;
                 var totalCountForProduct = request.OutputInfos
-                    .Where(oi => oi.ProductId == info.ProductId)
+                    .Where(oi => oi.ProductVarientId == info.ProductVarientId)
                     .Sum(oi => oi.Count ?? 0);
                 if (totalCountForProduct > maxAllowed)
                 {
@@ -114,6 +119,29 @@ public sealed class CreateOutputCommandHandler(
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(created);
         return created.Adapt<OrderDetailResponse>();
+    }
+
+    private static Error? ValidateVariantColor(ProductVariant? variant, int? productVarientColorId)
+    {
+        if (variant is null)
+        {
+            return null;
+        }
+        if (variant.ProductVariantColors.Count == 0)
+        {
+            return productVarientColorId.HasValue
+                ? Error.BadRequest("Biến thể sản phẩm này không có màu sắc để chọn.", "ProductVarientColorId")
+                : null;
+        }
+        if (!productVarientColorId.HasValue || productVarientColorId <= 0)
+        {
+            return Error.BadRequest(
+                "Biến thể sản phẩm có màu sắc, ProductVarientColorId là bắt buộc.",
+                "ProductVarientColorId");
+        }
+        return variant.ProductVariantColors.Any(c => c.Id == productVarientColorId.Value)
+            ? null
+            : Error.BadRequest("ProductVarientColorId không thuộc biến thể sản phẩm đã chọn.", "ProductVarientColorId");
     }
 }
 

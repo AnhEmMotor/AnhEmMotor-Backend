@@ -7,7 +7,7 @@ namespace Application.ApiContracts.Product.Responses
     {
         public int Id { get; set; }
 
-        [JsonPropertyName("url")]
+        [JsonPropertyName("url_slug")]
         public string? UrlSlug { get; set; }
 
         public decimal? Price { get; set; }

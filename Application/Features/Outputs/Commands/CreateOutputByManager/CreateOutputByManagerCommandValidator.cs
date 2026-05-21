@@ -29,9 +29,9 @@ namespace Application.Features.Outputs.Commands.CreateOutputByManager
             var productIds = new HashSet<int>();
             foreach (var item in products)
             {
-                if (item.ProductId.HasValue)
+                if (item.ProductVarientId.HasValue)
                 {
-                    if (!productIds.Add(item.ProductId.Value))
+                    if (!productIds.Add(item.ProductVarientId.Value))
                     {
                         return false;
                     }

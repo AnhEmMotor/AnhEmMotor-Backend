@@ -31,10 +31,18 @@ namespace Domain.Entities
         [ForeignKey("ParentOutputInfo")]
         public int? ParentOutputInfoId { get; set; }
 
+        [Column("ProductVariantColorId")]
+        [ForeignKey("ProductVariantColor")]
+        public int? ProductVariantColorId { get; set; }
+
         public Input? InputReceipt { get; set; }
 
         public ProductVariant? ProductVariant { get; set; }
 
+        public ProductVariantColor? ProductVariantColor { get; set; }
+
         public OutputInfo? ParentOutputInfo { get; set; }
+
+        public ICollection<Vehicle> Vehicles { get; set; } = [];
     }
 }

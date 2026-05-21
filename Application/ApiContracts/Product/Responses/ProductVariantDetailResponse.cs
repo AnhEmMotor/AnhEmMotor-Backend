@@ -10,7 +10,7 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("product_id")]
         public int? ProductId { get; set; }
 
-        [JsonPropertyName("url")]
+        [JsonPropertyName("url_slug")]
         public string? UrlSlug { get; set; }
 
         public decimal? Price { get; set; }
@@ -21,8 +21,8 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("optionValues")]
         public Dictionary<string, string> OptionValues { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
-        [JsonPropertyName("version_name")]
-        public string? VersionName { get; set; }
+        [JsonPropertyName("variant_name")]
+        public string? VariantName { get; set; }
 
         [JsonPropertyName("color_name")]
         public string? ColorName { get; set; }
