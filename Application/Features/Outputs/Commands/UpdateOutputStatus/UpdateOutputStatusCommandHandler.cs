@@ -129,7 +129,7 @@ public sealed class UpdateOutputStatusCommandHandler(
                     {
                         int count = oi.Count ?? 0;
                         var matches = remainingVehicles.Where(
-                            v => v.ProductId == oi.ProductVariant.ProductId &&
+                            v => v.ProductId == oi.ProductVariant!.ProductId &&
                                 (!oi.ProductVariantColorId.HasValue ||
                                     (v.InputInfo != null &&
                                         v.InputInfo.ProductVariantColorId == oi.ProductVariantColorId)))
@@ -139,7 +139,7 @@ public sealed class UpdateOutputStatusCommandHandler(
                         {
                             var colorMsg = oi.ProductVariantColorId.HasValue ? " và màu sắc đã chọn" : string.Empty;
                             return Error.BadRequest(
-                                $"Không tìm thấy đủ xe phù hợp trong danh sách SelectedVehicleIds cho sản phẩm '{oi.ProductVariant.Product.Name}'{colorMsg}. Cần: {count}, tìm thấy: {matches.Count}.",
+                                $"Không tìm thấy đủ xe phù hợp trong danh sách SelectedVehicleIds cho sản phẩm '{oi.ProductVariant!.Product!.Name}'{colorMsg}. Cần: {count}, tìm thấy: {matches.Count}.",
                                 "SelectedVehicleIds");
                         }
                         matchedVehiclesMap[oi] = matches;

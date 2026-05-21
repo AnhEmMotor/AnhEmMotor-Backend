@@ -23,7 +23,7 @@ namespace Application.Features.Vehicles.Queries.GetVehicles
             {
                 filter = v => v.LicensePlate.Contains(search) ||
                     v.VinNumber.Contains(search) ||
-                    v.Lead.FullName.Contains(search);
+                    v.Lead!.FullName.Contains(search);
                 sieveModel.Filters = RemoveFilter(sieveModel.Filters, "search");
             }
             if (string.IsNullOrWhiteSpace(sieveModel.Sorts))
