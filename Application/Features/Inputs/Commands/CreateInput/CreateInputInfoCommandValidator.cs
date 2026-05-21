@@ -7,7 +7,7 @@ namespace Application.Features.Inputs.Commands.CreateInput
     {
         public CreateInputInfoCommandValidator()
         {
-            RuleFor(x => x.ProductId).NotNull().GreaterThan(0);
+            RuleFor(x => x.ProductVarientId).NotNull().GreaterThan(0);
             RuleFor(x => x.Count).NotNull().GreaterThan((short)0);
             RuleFor(x => x.InputPrice)
                 .NotNull()

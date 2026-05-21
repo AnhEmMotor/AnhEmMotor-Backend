@@ -19,6 +19,8 @@ public interface IVehicleReadRepository
 
     public Task<Domain.Entities.Vehicle?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
+    public Task<List<Domain.Entities.Vehicle>> GetByIdsAsync(System.Collections.Generic.IEnumerable<int> ids, CancellationToken cancellationToken = default);
+
     public Task<bool> ExistsByVinAsync(string vin, CancellationToken cancellationToken = default);
 
     public Task<bool> ExistsByEngineNumberAsync(string engineNumber, CancellationToken cancellationToken = default);

@@ -42,6 +42,7 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.Product)
+            .ThenInclude(p => p!.ProductCategory)
             .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.ProductCollectionPhotos)
@@ -93,6 +94,7 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             .Include(o => o.OutputInfos)
             .ThenInclude(oi => oi.ProductVariant)
             .ThenInclude(pv => pv!.Product)
+            .ThenInclude(p => p!.ProductCategory)
             .Include(o => o.OutputInfos)
             .ThenInclude(oi => oi.ProductVariant)
             .ThenInclude(pv => pv!.VariantOptionValues)
@@ -109,12 +111,12 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             .ContinueWith(t => t.Result, cancellationToken);
     }
 
-    public async Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken)
+    public async Task<long> GetStockQuantityByVariantIdAsync(int variantId, int? colorId, CancellationToken cancellationToken)
     {
         var validStatusIds = InputStatus.FinishInputValues;
         var currentStock = await context.InputInfos
             .AsNoTracking()
-            .Where(ii => ii.ProductId == variantId && ii.DeletedAt == null)
+            .Where(ii => ii.ProductId == variantId && ii.ProductVariantColorId == colorId && ii.DeletedAt == null)
             .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => x.i.DeletedAt == null && validStatusIds.Contains(x.i.StatusId))
             .SumAsync(x => x.ii.RemainingCount ?? 0, cancellationToken)

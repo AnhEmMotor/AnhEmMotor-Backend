@@ -39,11 +39,24 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                         $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}",
                         "StatusId"));
             }
+            if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
+            {
+                var containsVehicleManagedProduct = output.OutputInfos.Any(oi =>
+                    oi.ProductVariant?.Product?.ProductCategory != null &&
+                    string.Equals(oi.ProductVariant.Product.ProductCategory.ManagementType, "vin_number", StringComparison.OrdinalIgnoreCase));
+                if (containsVehicleManagedProduct)
+                {
+                    errors.Add(
+                        Error.BadRequest(
+                            $"Đơn hàng ID {output.Id} chứa sản phẩm quản lý theo số khung, không thể cập nhật trạng thái hàng loạt sang '{request.StatusId}'. Vui lòng cập nhật riêng lẻ và truyền SelectedVehicleIds.",
+                            "StatusId"));
+                }
+            }
         }
         bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0;
         if (isCompleting && outputsList.Count > 0)
         {
-            var productDemands = new Dictionary<int, int>();
+            var productDemands = new Dictionary<(int VariantId, int? ColorId), int>();
             foreach (var output in outputsList)
             {
                 if (output.OutputInfos == null)
@@ -52,27 +65,30 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                 {
                     if (info.ProductVarientId.HasValue && info.Count.HasValue)
                     {
-                        if (productDemands.ContainsKey(info.ProductVarientId.Value))
+                        var key = (info.ProductVarientId.Value, info.ProductVariantColorId);
+                        if (productDemands.ContainsKey(key))
                         {
-                            productDemands[info.ProductVarientId.Value] += info.Count.Value;
+                            productDemands[key] += info.Count.Value;
                         } else
                         {
-                            productDemands[info.ProductVarientId.Value] = info.Count.Value;
+                            productDemands[key] = info.Count.Value;
                         }
                     }
                 }
             }
             foreach (var kvp in productDemands)
             {
-                var variantId = kvp.Key;
+                var variantId = kvp.Key.VariantId;
+                var colorId = kvp.Key.ColorId;
                 var totalNeeded = kvp.Value;
-                var currentStock = await readRepository.GetStockQuantityByVariantIdAsync(variantId, cancellationToken)
+                var currentStock = await readRepository.GetStockQuantityByVariantIdAsync(variantId, colorId, cancellationToken)
                     .ConfigureAwait(false);
                 if (currentStock < totalNeeded)
                 {
+                    var colorSuffix = colorId.HasValue ? $" (Màu ID {colorId})" : "";
                     errors.Add(
                         Error.BadRequest(
-                            $"Sản phẩm ID {variantId} không đủ tồn kho. Tổng kho hiện có: {currentStock}, Tổng đơn hàng cần: {totalNeeded}, Thiếu: {totalNeeded - currentStock}",
+                            $"Sản phẩm ID {variantId}{colorSuffix} không đủ tồn kho. Tổng kho hiện có: {currentStock}, Tổng đơn hàng cần: {totalNeeded}, Thiếu: {totalNeeded - currentStock}",
                             "Products"));
                 }
             }

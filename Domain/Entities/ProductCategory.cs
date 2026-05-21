@@ -37,7 +37,7 @@ namespace Domain.Entities
         public int? MaxPurchaseQuantity { get; set; }
 
         [Column("ManagementType")]
-        public string ManagementType { get; set; } = "none";
+        public string ManagementType { get; set; } = "sku";
 
         public ICollection<Product> Products { get; set; } = [];
     }

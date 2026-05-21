@@ -50,6 +50,15 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
         return context.Vehicles.Include(v => v.Lead).FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
     }
 
+    public Task<List<Domain.Entities.Vehicle>> GetByIdsAsync(System.Collections.Generic.IEnumerable<int> ids, CancellationToken cancellationToken = default)
+    {
+        return context.Vehicles
+            .Include(v => v.Lead)
+            .Include(v => v.InputInfo)
+            .Where(v => ids.Contains(v.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<bool> ExistsByVinAsync(string vin, CancellationToken cancellationToken = default)
     {
         return context.Vehicles.AnyAsync(v => string.Compare(v.VinNumber, vin) == 0, cancellationToken);

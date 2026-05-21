@@ -33,7 +33,7 @@ public interface IOutputReadRepository
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    public Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken);
+    public Task<long> GetStockQuantityByVariantIdAsync(int variantId, int? colorId, CancellationToken cancellationToken);
 
     public Task<List<OutputEntity>> GetExpiredOrdersAsync(
         DateTimeOffset expirationThreshold,

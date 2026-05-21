@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+ï»¿using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -27,7 +27,7 @@ public sealed class CloneInputCommandHandler(
     {
         if (!command.Id.HasValue)
         {
-            return Error.BadRequest("Id không du?c d? tr?ng", "Id");
+            return Error.BadRequest("Id khï¿½ng du?c d? tr?ng", "Id");
         }
         var originalInput = await inputReadRepository.GetByIdWithDetailsAsync(
             command.Id.Value,
@@ -36,7 +36,7 @@ public sealed class CloneInputCommandHandler(
             .ConfigureAwait(false);
         if (originalInput is null)
         {
-            return Error.NotFound($"Phi?u nh?p v?i Id = {command.Id.Value} không t?n t?i", "Id");
+            return Error.NotFound($"Phi?u nh?p v?i Id = {command.Id.Value} khï¿½ng t?n t?i", "Id");
         }
         var supplier = await supplierReadRepository.GetByIdAsync(
             originalInput.SupplierId ?? 0,
@@ -45,7 +45,7 @@ public sealed class CloneInputCommandHandler(
             .ConfigureAwait(false);
         if (supplier is null || string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
         {
-            return Error.BadRequest("Nhà cung c?p không t?n t?i ho?c không còn ho?t d?ng", "SupplierId");
+            return Error.BadRequest("Nhï¿½ cung c?p khï¿½ng t?n t?i ho?c khï¿½ng cï¿½n ho?t d?ng", "SupplierId");
         }
         var productVariantIds = originalInput.InputInfos
             .Where(p => p.ProductId.HasValue)
@@ -77,6 +77,7 @@ public sealed class CloneInputCommandHandler(
                 new InputInfoEntity
                 {
                     ProductId = originalProduct.ProductId,
+                    ProductVariantColorId = originalProduct.ProductVariantColorId,
                     Count = originalProduct.Count,
                     RemainingCount = originalProduct.Count,
                     InputPrice = originalProduct.InputPrice,
@@ -87,7 +88,7 @@ public sealed class CloneInputCommandHandler(
         if (validProducts.Count == 0)
         {
             return Error.BadRequest(
-                "T?t c? s?n ph?m trong phi?u nh?p g?c d?u không còn h?p l? (dã xoá ho?c không còn bán)",
+                "T?t c? s?n ph?m trong phi?u nh?p g?c d?u khï¿½ng cï¿½n h?p l? (dï¿½ xoï¿½ ho?c khï¿½ng cï¿½n bï¿½n)",
                 "Products");
         }
         var newInput = new InputEntity

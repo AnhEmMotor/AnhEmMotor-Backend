@@ -223,6 +223,26 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(v => v.Documents)
             .HasForeignKey(vd => vd.VehicleId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Vehicle>()
+            .HasOne(v => v.InputInfo)
+            .WithMany(ii => ii.Vehicles)
+            .HasForeignKey(v => v.InputInfoId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Vehicle>()
+            .HasOne(v => v.OutputInfo)
+            .WithMany(oi => oi.Vehicles)
+            .HasForeignKey(v => v.OutputInfoId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InputInfo>()
+            .HasOne(ii => ii.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(ii => ii.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<OutputInfo>()
+            .HasOne(oi => oi.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(oi => oi.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Restrict);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
         if (isNotSqlServer)

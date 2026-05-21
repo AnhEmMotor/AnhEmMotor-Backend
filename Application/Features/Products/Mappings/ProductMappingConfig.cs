@@ -486,7 +486,17 @@ public class ProductMappingConfig : IRegister
             DisplayName = displayName,
             Price = variant.Price,
             CoverImageUrl = variant.ProductVariantColor != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColor.CoverImageUrl) ? variant.ProductVariantColor.CoverImageUrl : variant.CoverImageUrl,
-            CategoryId = variant.Product?.CategoryId
+            CategoryId = variant.Product?.CategoryId,
+            Colors = variant.ProductVariantColors
+                .Select(
+                    c => new ProductVariantColorLiteResponse
+                    {
+                        Id = c.Id,
+                        ColorName = c.ColorName,
+                        ColorCode = c.ColorCode,
+                        CoverImageUrl = c.CoverImageUrl
+                    })
+                .ToList()
         };
     }
 
