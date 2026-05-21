@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,10 +6,10 @@ namespace Domain.Constants.Product
 {
     public static class ProductManagementType
     {
-        public const string ChassisNumber = "chassis_number";
+        public const string Sku = "sku";
         public const string VinNumber = "vin_number";
 
-        public static readonly HashSet<string> All = [ChassisNumber, VinNumber];
+        public static readonly HashSet<string> All = [Sku, VinNumber];
 
         public static bool IsValid(string? value)
         {
@@ -20,8 +20,7 @@ namespace Domain.Constants.Product
 
         public static string GetDisplayName(string type) => type.ToLower() switch
         {
-            "none" => "Thông thường",
-            "chassis_number" => "Quản lý theo số khung",
+            "sku" => "Quản lý theo SKU",
             "vin_number" => "Quản lý theo số VIN",
             _ => type
         };
