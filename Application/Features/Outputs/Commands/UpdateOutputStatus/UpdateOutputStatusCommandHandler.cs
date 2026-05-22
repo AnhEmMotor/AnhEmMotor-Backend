@@ -98,6 +98,8 @@ public sealed class UpdateOutputStatusCommandHandler(
             case OrderStatus.Refunded:
                 await commissionService.VoidCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
                 break;
+            case OrderStatus.PaidProcessing:
+                break;
             default:
                 foreach (var outputInfo in output.OutputInfos)
                 {
