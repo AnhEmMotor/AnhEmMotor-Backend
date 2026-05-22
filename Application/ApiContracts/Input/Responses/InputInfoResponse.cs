@@ -9,6 +9,8 @@ public class InputInfoResponse
 
     public int? ProductVarientColorId { get; set; }
 
+    public string? ProductVarientColorName { get; set; }
+
     public string? Name { get; set; }
 
     public int? Quantity { get; set; }
@@ -22,4 +24,6 @@ public class InputInfoResponse
     public decimal? Total { get; set; }
 
     public int? RemainingCount { get; set; }
+
+    public List<InputVehicleResponse> Vehicles { get; set; } = [];
 }

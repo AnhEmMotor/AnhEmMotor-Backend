@@ -9,6 +9,7 @@ using Domain.Constants;
 using Domain.Entities;
 using Mapster;
 using MediatR;
+using System.Text.RegularExpressions;
 
 namespace Application.Features.Inputs.Commands.UpdateInput;
 
@@ -65,11 +66,12 @@ public sealed class UpdateInputCommandHandler(
             .Select(p => p.ProductVarientId!.Value)
             .Distinct()
             .ToList();
+        var variantsList = new List<ProductVariant>();
         if (variantIds.Count > 0)
         {
             var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
-            var variantsList = variants.ToList();
+            variantsList = variants.ToList();
             if (variantsList.Count != variantIds.Count)
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
@@ -95,9 +97,18 @@ public sealed class UpdateInputCommandHandler(
                 {
                     return colorValidation;
                 }
+                var vehicleValidation = ValidateVehicleIdentifiers(variant, product);
+                if (vehicleValidation is not null)
+                {
+                    return vehicleValidation;
+                }
             }
         }
         request.Adapt(input);
+        if (!string.IsNullOrEmpty(input.Notes))
+        {
+            input.Notes = Regex.Replace(input.Notes, "<.*?>", string.Empty);
+        }
         if (string.Equals(
             request.StatusId,
             Domain.Constants.Input.InputStatus.Finish,
@@ -125,11 +136,15 @@ public sealed class UpdateInputCommandHandler(
                     {
                         existingInfo.RemainingCount = productRequest.Count.Value;
                     }
+                    var variant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductVarientId);
+                    SyncVehicleIdentifiers(existingInfo, productRequest, variant);
                 }
             } else
             {
                 var newInfo = productRequest.Adapt<InputInfo>();
                 newInfo.RemainingCount = newInfo.Count ?? 0;
+                var variant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductVarientId);
+                SyncVehicleIdentifiers(newInfo, productRequest, variant);
                 input.InputInfos.Add(newInfo);
             }
         }
@@ -156,5 +171,83 @@ public sealed class UpdateInputCommandHandler(
         return variant.ProductVariantColors.Any(c => c.Id == productVarientColorId.Value)
             ? null
             : Error.BadRequest("ProductVarientColorId không thuộc biến thể sản phẩm đã chọn.", "ProductVarientColorId");
+    }
+
+    private static Error? ValidateVehicleIdentifiers(
+        ProductVariant variant,
+        Application.ApiContracts.Input.Requests.UpdateInputInfoRequest product)
+    {
+        var managementType = variant.Product?.ProductCategory?.ManagementType;
+        if (!string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+        if (product.Vehicles == null || product.Vehicles.Count != (product.Count ?? 0))
+        {
+            return Error.BadRequest(
+                $"Danh sách xe (Vehicles) phải có đúng {product.Count ?? 0} phần tử cho sản phẩm quản lý theo số khung.",
+                "Products");
+        }
+        var uniqueVins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var uniqueEngines = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var vehicle in product.Vehicles)
+        {
+            if (string.IsNullOrWhiteSpace(vehicle.VinNumber) || string.IsNullOrWhiteSpace(vehicle.EngineNumber))
+            {
+                return Error.BadRequest(
+                    "Số khung (VinNumber) và Số máy (EngineNumber) không được để trống.",
+                    "Products");
+            }
+            var vin = vehicle.VinNumber.Trim();
+            var engine = vehicle.EngineNumber.Trim();
+            if (!uniqueVins.Add(vin))
+            {
+                return Error.BadRequest($"Số khung trùng lặp trong yêu cầu: {vin}", "Products");
+            }
+            if (!uniqueEngines.Add(engine))
+            {
+                return Error.BadRequest($"Số máy trùng lặp trong yêu cầu: {engine}", "Products");
+            }
+        }
+        return null;
+    }
+
+    private static void SyncVehicleIdentifiers(
+        InputInfo inputInfo,
+        Application.ApiContracts.Input.Requests.UpdateInputInfoRequest productRequest,
+        ProductVariant? variant)
+    {
+        var managementType = variant?.Product?.ProductCategory?.ManagementType;
+        if (!string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase))
+        {
+            inputInfo.Vehicles.Clear();
+            return;
+        }
+        var requestedVehicles = productRequest.Vehicles ?? [];
+        var existingVehicles = inputInfo.Vehicles.ToDictionary(v => v.Id);
+        var updatedVehicles = new List<Vehicle>();
+        foreach (var vehicleRequest in requestedVehicles)
+        {
+            var vehicle = vehicleRequest.Id.HasValue &&
+                existingVehicles.TryGetValue(vehicleRequest.Id.Value, out var existingVehicle)
+                    ? existingVehicle
+                    : new Vehicle
+                    {
+                        LicensePlate = string.Empty,
+                        ProductId = variant?.ProductId,
+                        LeadId = null,
+                        PurchaseDate = DateTimeOffset.UtcNow,
+                        IsActive = true
+                    };
+            vehicle.VinNumber = vehicleRequest.VinNumber.Trim();
+            vehicle.EngineNumber = vehicleRequest.EngineNumber.Trim();
+            vehicle.ProductId = variant?.ProductId;
+            updatedVehicles.Add(vehicle);
+        }
+        inputInfo.Vehicles.Clear();
+        foreach (var vehicle in updatedVehicles)
+        {
+            inputInfo.Vehicles.Add(vehicle);
+        }
     }
 }

@@ -284,6 +284,60 @@ public class InventoryReceipts
         var response = input.Adapt<InputDetailResponse>(config);
         response.TotalPayable.Should().Be((2 * 150000) + (3 * 50000) + 0 + 0);
     }
+
+    [Fact(DisplayName = "INPUT_079 - Chi tiet phieu nhap tra ve danh sach xe theo tung dong san pham")]
+    public void InputMappingConfig_InputInfoVehicles_MapsVehicleIdentifiers()
+    {
+        var config = new TypeAdapterConfig();
+        new InputMappingConfig().Register(config);
+        var input = new Input
+        {
+            InputInfos =
+            [
+                new InputInfo
+                {
+                    Id = 10,
+                    ProductId = 118,
+                    ProductVariantColorId = 244,
+                    ProductVariantColor = new ProductVariantColor
+                    {
+                        Id = 244,
+                        ColorName = "Do den"
+                    },
+                    Count = 1,
+                    InputPrice = 960000,
+                    Vehicles =
+                    [
+                        new Vehicle
+                        {
+                            Id = 15,
+                            VinNumber = "VIN001",
+                            EngineNumber = "ENG001"
+                        }
+                    ]
+                },
+                new InputInfo
+                {
+                    Id = 11,
+                    ProductId = 99,
+                    Count = 1,
+                    InputPrice = 560000
+                }
+            ]
+        };
+
+        var response = input.Adapt<InputDetailResponse>(config);
+
+        response.Products.Should().HaveCount(2);
+        response.Products[0].ProductVarientColorId.Should().Be(244);
+        response.Products[0].ProductVarientColorName.Should().Be("Do den");
+        response.Products[0].Vehicles.Should().ContainSingle();
+        response.Products[0].Vehicles[0].Id.Should().Be(15);
+        response.Products[0].Vehicles[0].VinNumber.Should().Be("VIN001");
+        response.Products[0].Vehicles[0].EngineNumber.Should().Be("ENG001");
+        response.Products[1].ProductVarientColorName.Should().BeNull();
+        response.Products[1].Vehicles.Should().BeEmpty();
+    }
     
 
     [Fact(DisplayName = "PRODUCT_196 - Tạo phiếu nhập với sản phẩm quản lý theo số khung nhưng thiếu thông tin xe")]

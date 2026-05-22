@@ -27,5 +27,7 @@ namespace Application.ApiContracts.Input.Requests
         public int? Count { get; set; }
 
         public decimal? InputPrice { get; set; }
+
+        public List<VehicleInputRequest>? Vehicles { get; set; }
     }
 }

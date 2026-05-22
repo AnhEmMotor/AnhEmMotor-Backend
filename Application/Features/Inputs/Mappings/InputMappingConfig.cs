@@ -39,17 +39,23 @@ public sealed class InputMappingConfig : IRegister
         config.NewConfig<InputInfo, InputInfoResponse>()
             .Map(dest => dest.ProductVarientId, src => src.ProductId)
             .Map(dest => dest.ProductVarientColorId, src => src.ProductVariantColorId)
+            .Map(
+                dest => dest.ProductVarientColorName,
+                src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
             .Map(dest => dest.Name, src => BuildFullVariantName(src.ProductVariant))
             .Map(dest => dest.Quantity, src => src.Count)
             .Map(dest => dest.UnitPrice, src => src.InputPrice)
             .Map(dest => dest.ImportPrice, src => src.InputPrice)
             .Map(dest => dest.Discount, src => 0)
-            .Map(dest => dest.Total, src => (decimal)(src.Count ?? 0) * (src.InputPrice ?? 0));
+            .Map(dest => dest.Total, src => (decimal)(src.Count ?? 0) * (src.InputPrice ?? 0))
+            .Map(dest => dest.Vehicles, src => src.Vehicles);
         config.NewConfig<UpdateInputInfoRequest, InputInfo>()
             .Map(dest => dest.ProductId, src => src.ProductVarientId)
             .Map(dest => dest.ProductVariantColorId, src => src.ProductVarientColorId)
+            .Ignore(dest => dest.Vehicles)
             .IgnoreNullValues(true);
         config.NewConfig<UpdateInputCommand, Input>().IgnoreNullValues(true);
+        config.NewConfig<Vehicle, InputVehicleResponse>();
         config.NewConfig<Input, SupplierPurchaseHistoryResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
