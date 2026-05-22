@@ -14,8 +14,8 @@ public sealed class InputMappingConfig : IRegister
     {
         config.NewConfig<CreateInputCommand, Input>();
         config.NewConfig<CreateInputInfoRequest, InputInfo>()
-            .Map(dest => dest.ProductId, src => src.ProductVarientId)
-            .Map(dest => dest.ProductVariantColorId, src => src.ProductVarientColorId);
+            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId);
         config.NewConfig<Input, InputListResponse>()
             .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
@@ -37,10 +37,10 @@ public sealed class InputMappingConfig : IRegister
                     : 0)
             .Map(dest => dest.Products, src => src.InputInfos);
         config.NewConfig<InputInfo, InputInfoResponse>()
-            .Map(dest => dest.ProductVarientId, src => src.ProductId)
-            .Map(dest => dest.ProductVarientColorId, src => src.ProductVariantColorId)
+            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId)
             .Map(
-                dest => dest.ProductVarientColorName,
+                dest => dest.ProductVariantColorName,
                 src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
             .Map(dest => dest.Name, src => BuildFullVariantName(src.ProductVariant))
             .Map(dest => dest.Quantity, src => src.Count)
@@ -50,12 +50,14 @@ public sealed class InputMappingConfig : IRegister
             .Map(dest => dest.Total, src => (decimal)(src.Count ?? 0) * (src.InputPrice ?? 0))
             .Map(dest => dest.Vehicles, src => src.Vehicles);
         config.NewConfig<UpdateInputInfoRequest, InputInfo>()
-            .Map(dest => dest.ProductId, src => src.ProductVarientId)
-            .Map(dest => dest.ProductVariantColorId, src => src.ProductVarientColorId)
+            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId)
             .Ignore(dest => dest.Vehicles)
             .IgnoreNullValues(true);
         config.NewConfig<UpdateInputCommand, Input>().IgnoreNullValues(true);
-        config.NewConfig<Vehicle, InputVehicleResponse>();
+        config.NewConfig<Vehicle, InputVehicleResponse>()
+            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId);
         config.NewConfig<Input, SupplierPurchaseHistoryResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(

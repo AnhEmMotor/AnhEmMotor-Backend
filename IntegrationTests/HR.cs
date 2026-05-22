@@ -268,7 +268,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                 new InputInfo
                 {
                     InputId = input.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     RemainingCount = 10,
                     InputPrice = 15000000
@@ -304,7 +304,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         {
             CreatedBy = staffUser.Id,
             StatusId = OrderStatus.Pending,
-            OutputInfos = [new OutputInfo { ProductVarientId = variant.Id, Count = 1, Price = 20000000 }]
+            OutputInfos = [new OutputInfo { ProductVariantId = variant.Id, Count = 1, Price = 20000000 }]
         };
         db.OutputOrders.Add(order);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);

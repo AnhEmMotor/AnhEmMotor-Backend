@@ -14,8 +14,8 @@ public sealed class CreateInputCommandValidator : AbstractValidator<CreateInputC
                 products =>
                 {
                     var productIds = products
-                    .Where(p => p.ProductVarientId.HasValue)
-                        .Select(p => p!.ProductVarientId!.Value)
+                    .Where(p => p.ProductVariantId.HasValue)
+                        .Select(p => p!.ProductVariantId!.Value)
                         .ToList();
                     var distinctCount = productIds.Distinct().Count();
                     var isDuplicate = productIds.Count != distinctCount;

@@ -145,17 +145,17 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 600000, Count = 2 });
+            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = variantId, Price = 600000, Count = 2 });
         var o2 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = today.AddDays(-1), Notes = "Order2" };
         db.OutputOrders.Add(o2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 3500000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVariantId = variantId, Price = 3500000, Count = 1 });
         var o3 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = today.AddDays(-2), Notes = "Order3" };
         db.OutputOrders.Add(o3);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o3.Id, ProductVarientId = variantId, Price = 2800000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o3.Id, ProductVariantId = variantId, Price = 2800000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=5", CancellationToken.None)
             .ConfigureAwait(true);
@@ -185,12 +185,12 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 2000000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = variantId, Price = 2000000, Count = 1 });
         var o2 = new OutputEntity { StatusId = OrderStatus.Cancelled, CreatedAt = today };
         db.OutputOrders.Add(o2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 5000000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVariantId = variantId, Price = 5000000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
@@ -215,14 +215,14 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 1000000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = variantId, Price = 1000000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var yest = DateTime.UtcNow.Date.AddDays(-1).AddHours(23).AddMinutes(30);
         var o2 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = yest };
         db.OutputOrders.Add(o2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 500000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVariantId = variantId, Price = 500000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=5", CancellationToken.None)
             .ConfigureAwait(true);
@@ -247,7 +247,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 800000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = variantId, Price = 800000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
@@ -277,7 +277,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                 new OutputInfoEntity
                 {
                     OutputId = o1.Id,
-                    ProductVarientId = variantId,
+                    ProductVariantId = variantId,
                     Price = 30000000,
                     CostPrice = 18000000,
                     Count = 1
@@ -341,13 +341,13 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 1000000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = variantId, Price = 1000000, Count = 1 });
         var d2 = DateTime.UtcNow.AddMonths(-3);
         var o2 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = d2 };
         db.OutputOrders.Add(o2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 2000000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVariantId = variantId, Price = 2000000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync(
             "/api/v1/Statistics/monthly-revenue-profit?months=6",
@@ -379,7 +379,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                 new OutputInfoEntity
                 {
                     OutputId = o1.Id,
-                    ProductVarientId = variantId,
+                    ProductVariantId = variantId,
                     Price = 1000000,
                     CostPrice = 0,
                     Count = 1
@@ -436,8 +436,8 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = lastMonth };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = v1, Count = 20 });
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = v2, Count = 15 });
+        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = v1, Count = 20 });
+        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = v2, Count = 15 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month", CancellationToken.None)
             .ConfigureAwait(true);
@@ -464,7 +464,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow.AddMonths(-1) };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = vid, Count = 5 });
+        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = vid, Count = 5 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month", CancellationToken.None)
             .ConfigureAwait(true);
@@ -496,7 +496,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var inp = new InputEntity { StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedAt = DateTime.UtcNow };
         db.InputReceipts.Add(inp);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        db.InputInfos.Add(new InputInfoEntity { InputId = inp.Id, ProductId = vid, Count = 35 });
+        db.InputInfos.Add(new InputInfoEntity { InputId = inp.Id, ProductVariantId = vid, Count = 35 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/Statistics/product-stock-price/{vid}", CancellationToken.None)
             .ConfigureAwait(true);
@@ -538,10 +538,10 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = vid, Count = 2, Price = 500000 });
+        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = vid, Count = 2, Price = 500000 });
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = vid, Count = 1, Price = 1200000 });
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = vid, Count = 3, Price = 300000 });
+            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = vid, Count = 1, Price = 1200000 });
+        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = vid, Count = 3, Price = 300000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
@@ -569,7 +569,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                 new OutputInfoEntity
                 {
                     OutputId = o1.Id,
-                    ProductVarientId = vid,
+                    ProductVariantId = vid,
                     Count = 1,
                     Price = 1000000,
                     CostPrice = 1500000
@@ -599,7 +599,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = d2 };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = vid, Count = 1, Price = 100000 });
+        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = vid, Count = 1, Price = 100000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync(
             "/api/v1/Statistics/monthly-revenue-profit?months=3",
@@ -666,11 +666,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputOrders.AddRange(o1, o2, o3);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 1000000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVariantId = variantId, Price = 1000000, Count = 1 });
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 2000000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVariantId = variantId, Price = 2000000, Count = 1 });
         db.OutputInfos
-            .Add(new OutputInfoEntity { OutputId = o3.Id, ProductVarientId = variantId, Price = 3000000, Count = 1 });
+            .Add(new OutputInfoEntity { OutputId = o3.Id, ProductVariantId = variantId, Price = 3000000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
@@ -698,7 +698,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                 new OutputInfoEntity
                 {
                     OutputId = o1.Id,
-                    ProductVarientId = variantId,
+                    ProductVariantId = variantId,
                     Price = 1000000,
                     CostPrice = 0,
                     Count = 1
@@ -732,7 +732,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                 new OutputInfoEntity
                 {
                     OutputId = o1.Id,
-                    ProductVarientId = variantId,
+                    ProductVariantId = variantId,
                     Price = 2000000,
                     CostPrice = 0,
                     Count = 1
@@ -787,7 +787,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var inp = new InputEntity { StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedAt = DateTime.UtcNow };
         db.InputReceipts.Add(inp);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        db.InputInfos.Add(new InputInfoEntity { InputId = inp.Id, ProductId = vid.Id, Count = 10, InputPrice = 50000 });
+        db.InputInfos.Add(new InputInfoEntity { InputId = inp.Id, ProductVariantId = vid.Id, Count = 10, InputPrice = 50000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         vid.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -872,9 +872,9 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.InputReceipts.AddRange(inp1, inp2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.InputInfos
-            .Add(new InputInfoEntity { InputId = inp1.Id, ProductId = vid.Id, Count = 10, InputPrice = 100000 });
+            .Add(new InputInfoEntity { InputId = inp1.Id, ProductVariantId = vid.Id, Count = 10, InputPrice = 100000 });
         db.InputInfos
-            .Add(new InputInfoEntity { InputId = inp2.Id, ProductId = vid.Id, Count = 20, InputPrice = 130000 });
+            .Add(new InputInfoEntity { InputId = inp2.Id, ProductVariantId = vid.Id, Count = 20, InputPrice = 130000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None)
             .ConfigureAwait(true);
@@ -920,7 +920,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                 new OutputInfoEntity
                 {
                     OutputId = o1.Id,
-                    ProductVarientId = vid.Id,
+                    ProductVariantId = vid.Id,
                     Count = 5,
                     Price = 500000,
                     CostPrice = 300000

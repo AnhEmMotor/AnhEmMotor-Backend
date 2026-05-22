@@ -29,11 +29,11 @@ namespace IntegrationTests.SetupClass
             params (string Field, string FileName, string ContentType, byte[] Bytes)[] files)
         {
             var content = new MultipartFormDataContent();
-            foreach (var f in files)
+            foreach (var (Field, FileName, ContentType, Bytes) in files)
             {
-                var fileContent = new ByteArrayContent(f.Bytes);
-                fileContent.Headers.ContentType = new MediaTypeHeaderValue(f.ContentType);
-                content.Add(fileContent, f.Field, f.FileName);
+                var fileContent = new ByteArrayContent(Bytes);
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(ContentType);
+                content.Add(fileContent, Field, FileName);
             }
             return content;
         }

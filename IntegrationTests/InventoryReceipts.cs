@@ -137,7 +137,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         {
             Notes = "Nh?p hàng tháng 1",
             SupplierId = supplier.Id,
-            Products = [new CreateInputInfoRequest { ProductId = variant.Id, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = variant.Id, Count = 10, InputPrice = 100000 }]
         };
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts")
         {
@@ -246,9 +246,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             Notes = "Test",
             SupplierId = supplier.Id,
             Products =
-                [new CreateInputInfoRequest { ProductId = variant1.Id, Count = 5, InputPrice = 123456m }, new CreateInputInfoRequest
+                [new CreateInputInfoRequest { ProductVariantId = variant1.Id, Count = 5, InputPrice = 123456m }, new CreateInputInfoRequest
                 {
-                    ProductId = variant2.Id,
+                    ProductVariantId = variant2.Id,
                     Count = 3,
                     InputPrice = 987654m
                 }]
@@ -294,7 +294,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         {
             Notes = "Test",
             SupplierId = 9999,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = 1, Count = 10, InputPrice = 100000 }]
         };
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts")
         {
@@ -331,7 +331,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         {
             Notes = "Test",
             SupplierId = 1,
-            Products = [new CreateInputInfoRequest { ProductId = 9999, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = 9999, Count = 10, InputPrice = 100000 }]
         };
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts")
         {
@@ -417,7 +417,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         {
             Notes = "Test",
             SupplierId = supplier.Id,
-            Products = [new CreateInputInfoRequest { ProductId = variant.Id, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = variant.Id, Count = 10, InputPrice = 100000 }]
         };
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts")
         {
@@ -497,7 +497,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         {
             Notes = "<script>alert('XSS')</script>",
             SupplierId = supplier.Id,
-            Products = [new CreateInputInfoRequest { ProductId = variant.Id, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = variant.Id, Count = 10, InputPrice = 100000 }]
         };
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts")
         {
@@ -753,12 +753,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var inputInfo = new InputInfoEntity
         {
             InputId = input.Id,
-            ProductId = variant.Id,
+            ProductVariantId = variant.Id,
             Count = 5,
             InputPrice = 50000
         };
         db.Entry(inputInfo).State = EntityState.Added;
-        input.InputInfos = [new InputInfoEntity { ProductId = variant.Id, Count = 5, InputPrice = 50000 }];
+        input.InputInfos = [new InputInfoEntity { ProductVariantId = variant.Id, Count = 5, InputPrice = 50000 }];
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/InventoryReceipts/{input.Id}");
         var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
@@ -901,7 +901,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = inputReceipt.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     InputPrice = 100000
                 });
@@ -910,7 +910,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         {
             Notes = "Updated",
             SupplierId = supplier2.Id,
-            Products = [new UpdateInputInfoRequest { ProductId = variant2.Id, Count = 20, InputPrice = 200000 }]
+            Products = [new UpdateInputInfoRequest { ProductVariantId = variant2.Id, Count = 20, InputPrice = 200000 }]
         };
         var requestUpdateMessage = new HttpRequestMessage(
             HttpMethod.Put,
@@ -1019,7 +1019,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = inputReceipt.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     InputPrice = 100000
                 });
@@ -1028,7 +1028,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         {
             Notes = "Updated",
             SupplierId = supplier.Id,
-            Products = [new UpdateInputInfoRequest { ProductId = variant.Id, Count = 20, InputPrice = 200000 }]
+            Products = [new UpdateInputInfoRequest { ProductVariantId = variant.Id, Count = 20, InputPrice = 200000 }]
         };
         var requestUpdateMessage = new HttpRequestMessage(
             HttpMethod.Put,
@@ -1131,7 +1131,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = inputReceipt.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     InputPrice = 100000
                 });
@@ -1140,7 +1140,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         {
             Notes = "Updated",
             SupplierId = supplier.Id,
-            Products = [new UpdateInputInfoRequest { ProductId = variant.Id, Count = 20, InputPrice = 200000 }]
+            Products = [new UpdateInputInfoRequest { ProductVariantId = variant.Id, Count = 20, InputPrice = 200000 }]
         };
         var requestUpdateMessage = new HttpRequestMessage(
             HttpMethod.Put,
@@ -1237,7 +1237,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = inputReceipt.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     InputPrice = 100000
                 });
@@ -1345,7 +1345,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = inputReceipt.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     InputPrice = 100000
                 });
@@ -1451,7 +1451,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                     new InputInfoEntity
                     {
                         InputId = inputReceipt.Id,
-                        ProductId = variant.Id,
+                        ProductVariantId = variant.Id,
                         Count = 10,
                         InputPrice = 100000
                     });
@@ -1563,7 +1563,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = inputReceipt.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     InputPrice = 100000
                 });
@@ -1663,7 +1663,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = inputReceipt.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     InputPrice = 100000
                 });
@@ -1762,7 +1762,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                     new InputInfoEntity
                     {
                         InputId = inputReceipt.Id,
-                        ProductId = variant.Id,
+                        ProductVariantId = variant.Id,
                         Count = 10,
                         InputPrice = 100000
                     });
@@ -1863,7 +1863,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = inputReceipt.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     InputPrice = 100000
                 });
@@ -1964,7 +1964,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                     new InputInfoEntity
                     {
                         InputId = inputReceipt.Id,
-                        ProductId = variant.Id,
+                        ProductVariantId = variant.Id,
                         Count = 10,
                         InputPrice = 100000
                     });
@@ -2064,7 +2064,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = createdInput.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     InputPrice = 100000
                 });
@@ -2173,7 +2173,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = createdInput.Id,
-                    ProductId = variant1.Id,
+                    ProductVariantId = variant1.Id,
                     Count = 10,
                     InputPrice = 100000
                 });
@@ -2182,7 +2182,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = createdInput.Id,
-                    ProductId = variant2.Id,
+                    ProductVariantId = variant2.Id,
                     Count = 5,
                     InputPrice = 50000
                 });
@@ -2202,7 +2202,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         clonedInput!.Products.Should().HaveCount(1);
-        clonedInput.Products[0].ProductVarientId.Should().Be(variant1.Id);
+        clonedInput.Products[0].ProductVariantId.Should().Be(variant1.Id);
     }
 
     [Fact(DisplayName = "INPUT_046 - L?y danh sách phi?u nh?p theo SupplierId")]
@@ -2441,7 +2441,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         {
             Notes = "Free products",
             SupplierId = supplier.Id,
-            Products = [new CreateInputInfoRequest { ProductId = variant.Id, Count = 10, InputPrice = 0 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = variant.Id, Count = 10, InputPrice = 0 }]
         };
         var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
@@ -2547,7 +2547,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                 new InputInfoEntity
                 {
                     InputId = createdInput.Id,
-                    ProductId = variant.Id,
+                    ProductVariantId = variant.Id,
                     Count = 10,
                     InputPrice = 100000
                 });

@@ -26,7 +26,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_NegativeQuantity_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputInfoRequest { ProductId = 1, Count = -5, InputPrice = 100000 };
+        var command = new CreateInputInfoRequest { ProductVariantId = 1, Count = -5, InputPrice = 100000 };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Count);
     }
@@ -35,7 +35,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_ZeroQuantity_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputInfoRequest { ProductId = 1, Count = 0, InputPrice = 100000 };
+        var command = new CreateInputInfoRequest { ProductVariantId = 1, Count = 0, InputPrice = 100000 };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Count);
     }
@@ -44,7 +44,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_NegativeInputPrice_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = -100000 };
+        var command = new CreateInputInfoRequest { ProductVariantId = 1, Count = 10, InputPrice = -100000 };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.InputPrice);
     }
@@ -53,7 +53,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_ExcessiveDecimalPlaces_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 10000012.3456m };
+        var command = new CreateInputInfoRequest { ProductVariantId = 1, Count = 10, InputPrice = 10000012.3456m };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.InputPrice);
     }
@@ -75,7 +75,7 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = null,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = 1, Count = 10, InputPrice = 100000 }]
         };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.SupplierId);
@@ -99,7 +99,7 @@ public class InventoryReceipts
         {
             Notes = longNotes,
             SupplierId = 1,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = 1, Count = 10, InputPrice = 100000 }]
         };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Notes);
@@ -109,16 +109,16 @@ public class InventoryReceipts
     public void CreateInputProductValidator_NullProductId_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputInfoRequest { ProductVarientId = null, Count = 10, InputPrice = 100000 };
+        var command = new CreateInputInfoRequest { ProductVariantId = null, Count = 10, InputPrice = 100000 };
         var result = validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.ProductVarientId);
+        result.ShouldHaveValidationErrorFor(x => x.ProductVariantId);
     }
 
     [Fact(DisplayName = "INPUT_050 - Validator kiểm tra UpdateInputRequest với Products chứa Quantity âm")]
     public void UpdateInputProductValidator_NegativeQuantity_ReturnsValidationError()
     {
         var validator = new UpdateInputInfoCommandValidator();
-        var command = new UpdateInputInfoRequest { ProductId = 1, Count = -10, InputPrice = 100000 };
+        var command = new UpdateInputInfoRequest { ProductVariantId = 1, Count = -10, InputPrice = 100000 };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Count);
     }
@@ -148,7 +148,7 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = 1,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = 1, Count = 10, InputPrice = 100000 }]
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -239,7 +239,7 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = -1,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = 1, Count = 10, InputPrice = 100000 }]
         };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.SupplierId);
@@ -255,9 +255,9 @@ public class InventoryReceipts
             Notes = "Test",
             SupplierId = 1,
             Products =
-                [new UpdateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100 }, new UpdateInputInfoRequest
+                [new UpdateInputInfoRequest { ProductVariantId = 1, Count = 10, InputPrice = 100 }, new UpdateInputInfoRequest
                 {
-                    ProductId = 1,
+                    ProductVariantId = 1,
                     Count = 5,
                     InputPrice = 200
                 }]
@@ -297,7 +297,7 @@ public class InventoryReceipts
                 new InputInfo
                 {
                     Id = 10,
-                    ProductId = 118,
+                    ProductVariantId = 118,
                     ProductVariantColorId = 244,
                     ProductVariantColor = new ProductVariantColor
                     {
@@ -319,7 +319,7 @@ public class InventoryReceipts
                 new InputInfo
                 {
                     Id = 11,
-                    ProductId = 99,
+                    ProductVariantId = 99,
                     Count = 1,
                     InputPrice = 560000
                 }
@@ -329,13 +329,13 @@ public class InventoryReceipts
         var response = input.Adapt<InputDetailResponse>(config);
 
         response.Products.Should().HaveCount(2);
-        response.Products[0].ProductVarientColorId.Should().Be(244);
-        response.Products[0].ProductVarientColorName.Should().Be("Do den");
+        response.Products[0].ProductVariantColorId.Should().Be(244);
+        response.Products[0].ProductVariantColorName.Should().Be("Do den");
         response.Products[0].Vehicles.Should().ContainSingle();
         response.Products[0].Vehicles[0].Id.Should().Be(15);
         response.Products[0].Vehicles[0].VinNumber.Should().Be("VIN001");
         response.Products[0].Vehicles[0].EngineNumber.Should().Be("ENG001");
-        response.Products[1].ProductVarientColorName.Should().BeNull();
+        response.Products[1].ProductVariantColorName.Should().BeNull();
         response.Products[1].Vehicles.Should().BeEmpty();
     }
     
@@ -376,7 +376,7 @@ public class InventoryReceipts
         var command = new CreateInputCommand
         {
             SupplierId = null,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 2, InputPrice = 100000, Vehicles = null }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = 1, Count = 2, InputPrice = 100000, Vehicles = null }]
         };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -409,7 +409,9 @@ public class InventoryReceipts
         mockVariantRepo.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([variant]);
 
-        mockVehicleReadRepo.Setup(x => x.ExistsByVinAsync("VIN123", It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        mockVehicleReadRepo
+            .Setup(x => x.ExistsByVinAsync("VIN123", 1, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         var handler = new CreateInputCommandHandler(
             mockInsertRepo.Object,
@@ -423,8 +425,8 @@ public class InventoryReceipts
         {
             SupplierId = null,
             Products = [
-                new CreateInputInfoRequest { 
-                    ProductId = 1, 
+                new CreateInputInfoRequest {
+                    ProductVariantId = 1, 
                     Count = 2, 
                     InputPrice = 100000, 
                     Vehicles = [
@@ -438,6 +440,87 @@ public class InventoryReceipts
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Contain("VIN123");
+    }
+
+    [Fact(DisplayName = "PRODUCT_198 - Tạo phiếu nhập cho phép trùng số khung hoặc số máy khi khác cặp biến thể và màu")]
+    public async Task CreateInputHandler_VinManagedProduct_DuplicateIdentifiersInDifferentVariantColorPair_Succeeds()
+    {
+        var mockInsertRepo = new Mock<IInputInsertRepository>();
+        var mockReadRepo = new Mock<IInputReadRepository>();
+        var mockVariantRepo = new Mock<IProductVariantReadRepository>();
+        var mockVehicleReadRepo = new Mock<IVehicleReadRepository>();
+        var mockUnitOfWork = new Mock<IUnitOfWork>();
+
+        var variant = new ProductVariant
+        {
+            Id = 2,
+            ProductId = 1,
+            Product = new Domain.Entities.Product
+            {
+                Name = "Xe máy Test",
+                ProductCategory = new Domain.Entities.ProductCategory
+                {
+                    ManagementType = "vin_number"
+                }
+            },
+            ProductVariantColors =
+            [
+                new ProductVariantColor { Id = 20, ProductVariantId = 2, ColorName = "Đỏ" }
+            ]
+        };
+
+        mockVariantRepo
+            .Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([variant]);
+
+        mockVehicleReadRepo
+            .Setup(x => x.ExistsByVinAsync("VIN123", 2, 20, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        mockVehicleReadRepo
+            .Setup(x => x.ExistsByEngineNumberAsync("ENG123", 2, 20, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        var savedInput = default(Input);
+        mockInsertRepo
+            .Setup(x => x.Add(It.IsAny<Input>()))
+            .Callback<Input>(input => savedInput = input);
+
+        mockReadRepo
+            .Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => savedInput);
+
+        var handler = new CreateInputCommandHandler(
+            mockInsertRepo.Object,
+            mockReadRepo.Object,
+            Mock.Of<ISupplierReadRepository>(),
+            mockVariantRepo.Object,
+            mockVehicleReadRepo.Object,
+            mockUnitOfWork.Object);
+
+        var command = new CreateInputCommand
+        {
+            SupplierId = null,
+            Products =
+            [
+                new CreateInputInfoRequest
+                {
+                    ProductVariantId = 2,
+                    ProductVariantColorId = 20,
+                    Count = 1,
+                    InputPrice = 100000,
+                    Vehicles =
+                    [
+                        new VehicleInputRequest { VinNumber = "VIN123", EngineNumber = "ENG123" }
+                    ]
+                }
+            ]
+        };
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        savedInput!.InputInfos.Single().Vehicles.Single().VinNumber.Should().Be("VIN123");
     }
 
     [Fact(DisplayName = "INPUT_077 - Tạo phiếu nhập xe không lấy biển số từ chi tiết xe")]
@@ -470,17 +553,25 @@ public class InventoryReceipts
             .ReturnsAsync([variant]);
 
         mockVehicleReadRepo
-            .Setup(x => x.ExistsByVinAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.ExistsByVinAsync(
+                It.IsAny<string>(),
+                It.IsAny<int>(),
+                It.IsAny<int?>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         mockVehicleReadRepo
-            .Setup(x => x.ExistsByEngineNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.ExistsByEngineNumberAsync(
+                It.IsAny<string>(),
+                It.IsAny<int>(),
+                It.IsAny<int?>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        var savedInput = default(Domain.Entities.Input);
+        var savedInput = default(Input);
         mockInsertRepo
-            .Setup(x => x.Add(It.IsAny<Domain.Entities.Input>()))
-            .Callback<Domain.Entities.Input>(input => savedInput = input);
+            .Setup(x => x.Add(It.IsAny<Input>()))
+            .Callback<Input>(input => savedInput = input);
 
         mockReadRepo
             .Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
@@ -501,7 +592,7 @@ public class InventoryReceipts
             [
                 new CreateInputInfoRequest
                 {
-                    ProductVarientId = 1,
+                    ProductVariantId = 1,
                     Count = 1,
                     InputPrice = 100000,
                     Vehicles =

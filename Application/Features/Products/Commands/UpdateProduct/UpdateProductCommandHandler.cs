@@ -36,7 +36,7 @@ public sealed class UpdateProductCommandHandler(
     IOptionValueInsertRepository optionValueInsertRepository,
     ITechnologyReadRepository technologyReadRepository,
     IVariantOptionValueDeleteRepository variantOptionValueDeleteRepository,
-    IProductVarientDeleteRepository productVarientDeleteRepository,
+    IProductVariantDeleteRepository productVariantDeleteRepository,
     IProductUpdateRepository productUpdateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
@@ -283,7 +283,7 @@ public sealed class UpdateProductCommandHandler(
         var variantsToDelete = currentVariants.Where(v => !inputVariantIds.Contains(v.Id)).ToList();
         foreach (var v in variantsToDelete)
         {
-            productVarientDeleteRepository.Delete(v);
+            productVariantDeleteRepository.Delete(v);
             product.ProductVariants.Remove(v);
         }
         foreach (var variantReq in inputVariants)

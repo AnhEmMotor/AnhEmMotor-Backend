@@ -265,11 +265,11 @@ public class ProductController(ISender sender) : ApiController
     /// <summary>
     /// Lấy thông tin chi tiết sản phẩm theo Id (dành cho người quản lý)
     /// </summary>
-    [HttpGet("{id:int}/for-manager", Name = Product.GetVarientByIdForManager)]
+    [HttpGet("{id:int}/for-manager", Name = Product.GetVariantByIdForManager)]
     [HasPermission(Products.View)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetVarientByIdForManagerAsync(
+    public async Task<IActionResult> GetVariantByIdForManagerAsync(
         int id,
         CancellationToken cancellationToken = default)
     {
@@ -324,7 +324,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
-            Product.GetVarientByIdForManager,
+            Product.GetVariantByIdForManager,
             new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 

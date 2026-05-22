@@ -68,5 +68,5 @@ public class Lead : BaseEntity
     [ForeignKey("AssignedToId")]
     public ApplicationUser? AssignedTo { get; set; }
 
-    public ICollection<LeadActivity> Activities { get; set; } = new List<LeadActivity>();
+    public ICollection<LeadActivity> Activities { get; set; } = [];
 }

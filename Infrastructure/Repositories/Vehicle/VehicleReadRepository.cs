@@ -57,7 +57,20 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
         return context.Vehicles
             .Include(v => v.Lead)
             .Include(v => v.InputInfo)
+            .Include(v => v.OutputInfo)
             .Where(v => ids.Contains(v.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<List<Domain.Entities.Vehicle>> GetVehiclesForAssignmentAsync(
+        IEnumerable<int> productVariantIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = productVariantIds.Distinct().ToList();
+        return context.Vehicles
+            .Include(v => v.InputInfo)
+            .Include(v => v.OutputInfo)
+            .Where(v => v.ProductVariantId.HasValue && ids.Contains(v.ProductVariantId.Value))
             .ToListAsync(cancellationToken);
     }
 
@@ -69,5 +82,31 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
     public Task<bool> ExistsByEngineNumberAsync(string engineNumber, CancellationToken cancellationToken = default)
     {
         return context.Vehicles.AnyAsync(v => string.Compare(v.EngineNumber, engineNumber) == 0, cancellationToken);
+    }
+
+    public Task<bool> ExistsByVinAsync(
+        string vin,
+        int productVariantId,
+        int? productVariantColorId,
+        CancellationToken cancellationToken = default)
+    {
+        return context.Vehicles.AnyAsync(
+            v => string.Compare(v.VinNumber, vin) == 0 &&
+                v.ProductVariantId == productVariantId &&
+                v.ProductVariantColorId == productVariantColorId,
+            cancellationToken);
+    }
+
+    public Task<bool> ExistsByEngineNumberAsync(
+        string engineNumber,
+        int productVariantId,
+        int? productVariantColorId,
+        CancellationToken cancellationToken = default)
+    {
+        return context.Vehicles.AnyAsync(
+            v => string.Compare(v.EngineNumber, engineNumber) == 0 &&
+                v.ProductVariantId == productVariantId &&
+                v.ProductVariantColorId == productVariantColorId,
+            cancellationToken);
     }
 }

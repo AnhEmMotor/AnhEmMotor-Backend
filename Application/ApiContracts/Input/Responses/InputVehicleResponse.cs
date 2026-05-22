@@ -7,4 +7,8 @@ public class InputVehicleResponse
     public string? VinNumber { get; set; }
 
     public string? EngineNumber { get; set; }
+
+    public int? ProductVariantId { get; set; }
+
+    public int? ProductVariantColorId { get; set; }
 }

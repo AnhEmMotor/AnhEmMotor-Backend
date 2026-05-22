@@ -50,7 +50,7 @@ public class Product
     private readonly Mock<IBrandReadRepository> _brandReadRepoMock;
     private readonly Mock<IProductVariantInsertRepository> _variantInsertRepoMock;
     private readonly Mock<IProductVariantUpdateRepository> _variantUpdateRepoMock;
-    private readonly Mock<IProductVarientDeleteRepository> _variantDeleteRepoMock;
+    private readonly Mock<IProductVariantDeleteRepository> _variantDeleteRepoMock;
     private readonly Mock<IProductVariantReadRepository> _variantReadRepoMock;
     private readonly Mock<IOptionReadRepository> _optionReadRepoMock;
     private readonly Mock<IOptionValueInsertRepository> _optionValueInsertRepoMock;
@@ -72,7 +72,7 @@ public class Product
         _brandReadRepoMock = new Mock<IBrandReadRepository>();
         _variantInsertRepoMock = new Mock<IProductVariantInsertRepository>();
         _variantUpdateRepoMock = new Mock<IProductVariantUpdateRepository>();
-        _variantDeleteRepoMock = new Mock<IProductVarientDeleteRepository>();
+        _variantDeleteRepoMock = new Mock<IProductVariantDeleteRepository>();
         _variantReadRepoMock = new Mock<IProductVariantReadRepository>();
         _optionReadRepoMock = new Mock<IOptionReadRepository>();
         _optionValueInsertRepoMock = new Mock<IOptionValueInsertRepository>();

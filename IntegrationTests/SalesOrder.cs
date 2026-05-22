@@ -110,7 +110,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var inputInfo = new InputInfo
         {
             InputId = input.Id,
-            ProductId = variantId,
+            ProductVariantId = variantId,
             Count = quantity,
             RemainingCount = quantity,
             InputPrice = 50000
@@ -165,7 +165,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
                     notes = "Test",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var response = await _client.PostAsync(
@@ -225,7 +225,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
                     notes = "COD Order",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var response = await _client.PostAsync(
@@ -293,7 +293,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerName = "Khách hàng Test",
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync(
@@ -385,7 +385,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerName = "Khách hàng Test",
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync(
@@ -472,7 +472,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerName = "Khách hàng Test",
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync(
@@ -540,7 +540,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerName = "Khách hàng Test",
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var response = await _client.PostAsync(
@@ -673,8 +673,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerAddress = "Số 123, Đường Test, Hà Nội",
                     products = new[]
                     {
-                        new { ProductVarientId = variantId1, count = 1 },
-                        new { ProductVarientId = variantId2, count = 2 }
+                        new { ProductVariantId = variantId1, count = 1 },
+                        new { ProductVariantId = variantId2, count = 2 }
                     }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -844,7 +844,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
                     notes = "DeleteMe",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync(
@@ -906,7 +906,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerName = "Khách hàng Test",
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync(
@@ -1056,7 +1056,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerName = "Khách hàng Test",
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync(
@@ -1119,7 +1119,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerName = "Khách hàng Test",
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, TestContext.Current.CancellationToken)
@@ -1187,7 +1187,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerName = "Khách hàng Test",
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, TestContext.Current.CancellationToken)
@@ -1256,7 +1256,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerName = "Khách hàng Test",
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, TestContext.Current.CancellationToken)
@@ -1328,7 +1328,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     customerPhone = "0987654321",
                     customerAddress = "Số 123, Đường Test, Hà Nội",
                     notes = $"Mine_{uniqueId}",
-                    products = new[] { new { ProductVarientId = variantId, count = 1 } }
+                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
                 });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync(
@@ -1613,7 +1613,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                 customerName = "Khách hàng Test",
                 customerPhone = "0987654321",
                 customerAddress = "Hà Nội",
-                products = new[] { new { ProductVarientId = variantId, count = 3 } }
+                products = new[] { new { ProductVariantId = variantId, count = 3 } }
             });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var response = await _client.PostAsync(

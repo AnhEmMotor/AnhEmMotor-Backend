@@ -106,7 +106,6 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var existingVehicle = new VehicleEntity
         {
             LeadId = lead.Id,
-            ProductId = product.Id,
             VinNumber = vin,
             EngineNumber = "ENG1"
         };
@@ -139,7 +138,6 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var existingVehicle = new VehicleEntity
         {
             LeadId = lead.Id,
-            ProductId = product.Id,
             VinNumber = vin,
             EngineNumber = "ENG1"
         };

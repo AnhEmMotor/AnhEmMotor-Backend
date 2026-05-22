@@ -233,6 +233,16 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(oi => oi.Vehicles)
             .HasForeignKey(v => v.OutputInfoId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Vehicle>()
+            .HasOne(v => v.ProductVariant)
+            .WithMany()
+            .HasForeignKey(v => v.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Vehicle>()
+            .HasOne(v => v.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(v => v.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<InputInfo>()
             .HasOne(ii => ii.ProductVariantColor)
             .WithMany()

@@ -5,11 +5,11 @@ public class InputInfoResponse
 {
     public int? Id { get; set; }
 
-    public int? ProductVarientId { get; set; }
+    public int? ProductVariantId { get; set; }
 
-    public int? ProductVarientColorId { get; set; }
+    public int? ProductVariantColorId { get; set; }
 
-    public string? ProductVarientColorName { get; set; }
+    public string? ProductVariantColorName { get; set; }
 
     public string? Name { get; set; }
 

@@ -20,7 +20,7 @@ public sealed class UpdateOutputForManagerCommandValidator : AbstractValidator<U
             .ChildRules(
                 item =>
                 {
-                    item.RuleFor(i => i.ProductVarientId).NotEmpty().GreaterThan(0);
+                    item.RuleFor(i => i.ProductVariantId).NotEmpty().GreaterThan(0);
                     item.RuleFor(i => i.Count).NotEmpty().GreaterThan(0);
                 });
     }

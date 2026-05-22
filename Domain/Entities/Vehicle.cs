@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Constants.Order;
 
 namespace Domain.Entities;
 
@@ -28,11 +29,19 @@ public class Vehicle : BaseEntity
 
     public OutputInfo? OutputInfo { get; set; }
 
-    [Column("ProductId")]
-    [ForeignKey("Product")]
-    public int? ProductId { get; set; }
-
     public Product? Product { get; set; }
+
+    [Column("ProductVariantId")]
+    [ForeignKey("ProductVariant")]
+    public int? ProductVariantId { get; set; }
+
+    public ProductVariant? ProductVariant { get; set; }
+
+    [Column("ProductVariantColorId")]
+    [ForeignKey("ProductVariantColor")]
+    public int? ProductVariantColorId { get; set; }
+
+    public ProductVariantColor? ProductVariantColor { get; set; }
 
     [Column("VinNumber", TypeName = "nvarchar(100)")]
     public string VinNumber { get; set; } = string.Empty;
@@ -45,6 +54,9 @@ public class Vehicle : BaseEntity
 
     [Column("IsActive")]
     public bool IsActive { get; set; } = true;
+
+    [Column("Status", TypeName = "nvarchar(50)")]
+    public string Status { get; set; } = VehicleStatus.Available;
 
     [Column("PurchaseDate")]
     public DateTimeOffset PurchaseDate { get; set; }

@@ -14,9 +14,9 @@ namespace Domain.Entities
         [ForeignKey("InputReceipt")]
         public int InputId { get; set; }
 
-        [Column("ProductId")]
+        [Column("ProductVariantId")]
         [ForeignKey("ProductVariant")]
-        public int? ProductId { get; set; }
+        public int? ProductVariantId { get; set; }
 
         [Column("Count")]
         public int? Count { get; set; }

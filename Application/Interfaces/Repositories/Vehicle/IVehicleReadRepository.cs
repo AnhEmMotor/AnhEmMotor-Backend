@@ -23,7 +23,23 @@ public interface IVehicleReadRepository
         IEnumerable<int> ids,
         CancellationToken cancellationToken = default);
 
+    public Task<List<Domain.Entities.Vehicle>> GetVehiclesForAssignmentAsync(
+        IEnumerable<int> productVariantIds,
+        CancellationToken cancellationToken = default);
+
     public Task<bool> ExistsByVinAsync(string vin, CancellationToken cancellationToken = default);
 
     public Task<bool> ExistsByEngineNumberAsync(string engineNumber, CancellationToken cancellationToken = default);
+
+    public Task<bool> ExistsByVinAsync(
+        string vin,
+        int productVariantId,
+        int? productVariantColorId,
+        CancellationToken cancellationToken = default);
+
+    public Task<bool> ExistsByEngineNumberAsync(
+        string engineNumber,
+        int productVariantId,
+        int? productVariantColorId,
+        CancellationToken cancellationToken = default);
 }
