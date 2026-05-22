@@ -50,7 +50,7 @@ public class Product
     private readonly Mock<IBrandReadRepository> _brandReadRepoMock;
     private readonly Mock<IProductVariantInsertRepository> _variantInsertRepoMock;
     private readonly Mock<IProductVariantUpdateRepository> _variantUpdateRepoMock;
-    private readonly Mock<IProductVarientDeleteRepository> _variantDeleteRepoMock;
+    private readonly Mock<IProductVariantDeleteRepository> _variantDeleteRepoMock;
     private readonly Mock<IProductVariantReadRepository> _variantReadRepoMock;
     private readonly Mock<IOptionReadRepository> _optionReadRepoMock;
     private readonly Mock<IOptionValueInsertRepository> _optionValueInsertRepoMock;
@@ -72,7 +72,7 @@ public class Product
         _brandReadRepoMock = new Mock<IBrandReadRepository>();
         _variantInsertRepoMock = new Mock<IProductVariantInsertRepository>();
         _variantUpdateRepoMock = new Mock<IProductVariantUpdateRepository>();
-        _variantDeleteRepoMock = new Mock<IProductVarientDeleteRepository>();
+        _variantDeleteRepoMock = new Mock<IProductVariantDeleteRepository>();
         _variantReadRepoMock = new Mock<IProductVariantReadRepository>();
         _optionReadRepoMock = new Mock<IOptionReadRepository>();
         _optionValueInsertRepoMock = new Mock<IOptionValueInsertRepository>();
@@ -106,7 +106,14 @@ public class Product
             BrandId = 1,
             FrontTireSize = "120/70-17",
             RearTireSize = "180/55-17",
-            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, VariantName = "1234", CoverImageUrl = "image.jpg" }]
+            Variants =
+                [new CreateProductVariantRequest
+                {
+                    UrlSlug = "v1",
+                    Price = 1000,
+                    VariantName = "1234",
+                    CoverImageUrl = "image.jpg"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1994,7 +2001,7 @@ public class Product
             Variants =
                 [new CreateProductVariantRequest { Colors = [new() { ColorName = "Red" }], VariantName = "V1" }, new CreateProductVariantRequest
                 {
-                     Colors = [new() { ColorName = "Red" }] ,
+                    Colors = [new() { ColorName = "Red" }],
                     VariantName = "V1"
                 }]
         };
@@ -2014,8 +2021,8 @@ public class Product
             Variants =
                 [new CreateProductVariantRequest { Colors = [new() { ColorName = "RED" }] }, new CreateProductVariantRequest
                 {
-                    Colors = [ new() { ColorName = "red" }
-                ] }]
+                    Colors = [new() { ColorName = "red" }]
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -2039,14 +2046,12 @@ public class Product
             UrlSlug = "premium-red",
             Price = 1000,
             Colors =
-            [
-                new CreateProductVariantColorRequest
+                [new CreateProductVariantColorRequest
                 {
                     ColorName = "Red",
                     ColorCode = "#FF0000",
                     CoverImageUrl = "https://example.com/red.jpg"
-                }
-            ]
+                }]
         };
         var validator = new CreateProductVariantCommandValidator();
         var result = validator.Validate(request);
@@ -2056,12 +2061,7 @@ public class Product
     [Fact(DisplayName = "PRODUCT_196 - Chặn biến thể không màu thiếu ảnh đại diện")]
     public void CreateProductVariant_NoColorWithoutCoverImage_IsInvalid()
     {
-        var request = new CreateProductVariantRequest
-        {
-            VariantName = "Standard",
-            UrlSlug = "standard",
-            Price = 1000
-        };
+        var request = new CreateProductVariantRequest { VariantName = "Standard", UrlSlug = "standard", Price = 1000 };
         var validator = new CreateProductVariantCommandValidator();
         var result = validator.Validate(request);
         result.IsValid.Should().BeFalse();
@@ -2075,14 +2075,7 @@ public class Product
             VariantName = "Premium",
             UrlSlug = "premium-blue",
             Price = 1000,
-            Colors =
-            [
-                new CreateProductVariantColorRequest
-                {
-                    ColorName = "Blue",
-                    ColorCode = "#0000FF"
-                }
-            ]
+            Colors = [new CreateProductVariantColorRequest { ColorName = "Blue", ColorCode = "#0000FF" }]
         };
         var validator = new CreateProductVariantCommandValidator();
         var result = validator.Validate(request);

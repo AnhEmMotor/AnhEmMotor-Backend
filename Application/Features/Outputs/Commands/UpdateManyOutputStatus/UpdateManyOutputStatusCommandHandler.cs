@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Services.HR;
 using Domain.Constants.Order;
+using Domain.Constants.Product;
 using Mapster;
 using MediatR;
 
@@ -39,14 +40,14 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                         $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}",
                         "StatusId"));
             }
-            if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
+            if (OrderVehicleAssignmentStatus.RequiresVehicleAssignment(request.StatusId))
             {
                 var containsVehicleManagedProduct = output.OutputInfos
                     .Any(
                         oi => oi.ProductVariant?.Product?.ProductCategory != null &&
                             string.Equals(
                                 oi.ProductVariant.Product.ProductCategory.ManagementType,
-                                "vin_number",
+                                ProductManagementType.VinNumber,
                                 StringComparison.OrdinalIgnoreCase));
                 if (containsVehicleManagedProduct)
                 {
@@ -67,9 +68,9 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                     continue;
                 foreach (var info in output.OutputInfos)
                 {
-                    if (info.ProductVarientId.HasValue && info.Count.HasValue)
+                    if (info.ProductVariantId.HasValue && info.Count.HasValue)
                     {
-                        var key = (info.ProductVarientId.Value, info.ProductVariantColorId);
+                        var key = (info.ProductVariantId.Value, info.ProductVariantColorId);
                         if (productDemands.ContainsKey(key))
                         {
                             productDemands[key] += info.Count.Value;

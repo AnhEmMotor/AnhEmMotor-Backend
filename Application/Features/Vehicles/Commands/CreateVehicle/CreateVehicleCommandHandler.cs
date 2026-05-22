@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.Vehicle;
+using Domain.Constants.Order;
 using Domain.Entities;
 using Mapster;
 using MediatR;
@@ -55,12 +56,12 @@ public sealed class CreateVehicleCommandHandler(
         var vehicle = new Vehicle
         {
             LeadId = request.LeadId,
-            ProductId = request.ProductId,
             VinNumber = request.VinNumber.Trim(),
             EngineNumber = request.EngineNumber.Trim(),
             LicensePlate = request.LicensePlate?.Trim() ?? string.Empty,
             PurchaseDate = request.PurchaseDate ?? DateTimeOffset.UtcNow,
-            IsActive = true
+            IsActive = true,
+            Status = VehicleStatus.Available
         };
         updateRepository.Add(vehicle);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

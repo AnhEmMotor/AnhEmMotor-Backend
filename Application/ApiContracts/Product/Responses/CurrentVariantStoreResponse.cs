@@ -18,11 +18,8 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("cover_image_url")]
         public string? CoverImageUrl { get; set; }
 
-        [JsonPropertyName("color_name")]
-        public string? ColorName { get; set; }
-
-        [JsonPropertyName("color_code")]
-        public string? ColorCode { get; set; }
+        [JsonPropertyName("colors")]
+        public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
 
         [JsonPropertyName("photo_collection")]
         public List<string> PhotoCollection { get; set; } = [];

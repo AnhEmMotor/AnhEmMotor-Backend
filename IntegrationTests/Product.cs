@@ -1583,7 +1583,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var inputInfo = new InputInfo
         {
             InputId = input.Id,
-            ProductId = variant.Id,
+            ProductVariantId = variant.Id,
             Count = 100,
             RemainingCount = 100,
             InputPrice = 800
@@ -1595,7 +1595,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var outputInfo = new OutputInfo
         {
             OutputId = output.Id,
-            ProductVarientId = variant.Id,
+            ProductVariantId = variant.Id,
             Count = 30,
             Price = 1000
         };
@@ -2315,14 +2315,15 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var receipt = new Input { StatusId = statusFinished };
             db.InputReceipts.Add(receipt);
             db.SaveChanges();
-            db.InputInfos.Add(new InputInfo { ProductId = variant.Id, InputId = receipt.Id, RemainingCount = stock });
+            db.InputInfos
+                .Add(new InputInfo { ProductVariantId = variant.Id, InputId = receipt.Id, RemainingCount = stock });
         }
         if (booked > 0)
         {
             var order = new Output { StatusId = statusBooking };
             db.OutputOrders.Add(order);
             db.SaveChanges();
-            db.OutputInfos.Add(new OutputInfo { ProductVarientId = variant.Id, OutputId = order.Id, Count = booked });
+            db.OutputInfos.Add(new OutputInfo { ProductVariantId = variant.Id, OutputId = order.Id, Count = booked });
         }
         return product;
     }

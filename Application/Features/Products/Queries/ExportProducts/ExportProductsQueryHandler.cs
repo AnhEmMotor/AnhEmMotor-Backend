@@ -251,11 +251,15 @@ public sealed class ExportProductsQueryHandler(IProductReadRepository repository
         var parts = new StringBuilder();
         if (!string.IsNullOrWhiteSpace(variant.VariantName))
             parts.Append(variant.VariantName);
-        if (!string.IsNullOrWhiteSpace(variant.ColorName))
+        var colorNames = variant.Colors
+            .Select(color => color.ColorName)
+            .Where(colorName => !string.IsNullOrWhiteSpace(colorName))
+            .ToList();
+        if (colorNames.Count > 0)
         {
             if (parts.Length > 0)
                 parts.Append(" - ");
-            parts.Append(variant.ColorName);
+            parts.Append(string.Join(", ", colorNames));
         }
         return parts.Length > 0 ? parts.ToString() : "Co ban";
     }

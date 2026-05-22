@@ -67,8 +67,12 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
         }
         return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+            .ThenInclude(x => x.Vehicles)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.Product)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+            .ThenInclude(x => x.ProductVariantColor)
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.VariantOptionValues)
@@ -121,8 +125,12 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
         var query = GetQueryable(mode);
         return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+            .ThenInclude(x => x.Vehicles)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.Product)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+            .ThenInclude(x => x.ProductVariantColor)
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.VariantOptionValues)

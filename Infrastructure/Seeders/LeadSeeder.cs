@@ -21,7 +21,7 @@ public static class LeadSeeder
         var firstSale = sales.FirstOrDefault();
         var leads = new List<Lead>
         {
-            new Lead
+            new()
             {
                 FullName = "Nguyễn Văn Nam",
                 Email = "nam.nguyen@gmail.com",
@@ -31,23 +31,19 @@ public static class LeadSeeder
                 Score = 30,
                 InterestedVehicle = "Winner X 2024",
                 Activities =
-                    new List<LeadActivity>
+                    [new LeadActivity
                     {
-                        new LeadActivity
-                        {
-                            ActivityType = "Registration",
-                            Description = "Đã đăng ký lái thử xe Winner X từ Banner ưu đãi tháng 4.",
-                            CreatedAt = DateTimeOffset.UtcNow.AddHours(-2)
-                        },
-                        new LeadActivity
-                        {
-                            ActivityType = "AI_Query",
-                            Description = "Khách hỏi AI: 'Winner X có tốn xăng không?'",
-                            CreatedAt = DateTimeOffset.UtcNow.AddMinutes(-30)
-                        }
-                    }
+                        ActivityType = "Registration",
+                        Description = "Đã đăng ký lái thử xe Winner X từ Banner ưu đãi tháng 4.",
+                        CreatedAt = DateTimeOffset.UtcNow.AddHours(-2)
+                    }, new LeadActivity
+                    {
+                        ActivityType = "AI_Query",
+                        Description = "Khách hỏi AI: 'Winner X có tốn xăng không?'",
+                        CreatedAt = DateTimeOffset.UtcNow.AddMinutes(-30)
+                    }]
             },
-            new Lead
+            new()
             {
                 FullName = "Trần Thị Mai",
                 Email = "maimai.tran@yahoo.com",
@@ -60,23 +56,19 @@ public static class LeadSeeder
                 CreatedAt = DateTimeOffset.UtcNow.AddDays(-2),
                 UpdatedAt = DateTimeOffset.UtcNow.AddDays(-1.5),
                 Activities =
-                    new List<LeadActivity>
+                    [new LeadActivity
                     {
-                        new LeadActivity
-                        {
-                            ActivityType = "Inquiry",
-                            Description = "Nhắn tin hỏi về thủ tục trả góp xe Air Blade 160.",
-                            CreatedAt = DateTimeOffset.UtcNow.AddDays(-2)
-                        },
-                        new LeadActivity
-                        {
-                            ActivityType = LeadActivityType.Call,
-                            Description = "Sale đã gọi điện tư vấn nhưng khách đang bận, hẹn gọi lại sau.",
-                            CreatedAt = DateTimeOffset.UtcNow.AddDays(-1.5)
-                        }
-                    }
+                        ActivityType = "Inquiry",
+                        Description = "Nhắn tin hỏi về thủ tục trả góp xe Air Blade 160.",
+                        CreatedAt = DateTimeOffset.UtcNow.AddDays(-2)
+                    }, new LeadActivity
+                    {
+                        ActivityType = LeadActivityType.Call,
+                        Description = "Sale đã gọi điện tư vấn nhưng khách đang bận, hẹn gọi lại sau.",
+                        CreatedAt = DateTimeOffset.UtcNow.AddDays(-1.5)
+                    }]
             },
-            new Lead
+            new()
             {
                 FullName = "Lê Minh Hiếu",
                 Email = "hieu.le@outlook.com",
@@ -87,21 +79,17 @@ public static class LeadSeeder
                 InterestedVehicle = "CBR150R Edition",
                 AssignedToId = firstSale?.Id,
                 Activities =
-                    new List<LeadActivity>
+                    [new LeadActivity
                     {
-                        new LeadActivity
-                        {
-                            ActivityType = "Visit",
-                            Description = "Đã đến showroom lái thử xe CBR150R.",
-                            CreatedAt = DateTimeOffset.UtcNow.AddHours(-10)
-                        },
-                        new LeadActivity
-                        {
-                            ActivityType = "Process",
-                            Description = "Khách rất ưng ý, đang chờ duyệt hồ sơ vay trả góp từ ngân hàng HD Saison.",
-                            CreatedAt = DateTimeOffset.UtcNow.AddHours(-1)
-                        }
-                    }
+                        ActivityType = "Visit",
+                        Description = "Đã đến showroom lái thử xe CBR150R.",
+                        CreatedAt = DateTimeOffset.UtcNow.AddHours(-10)
+                    }, new LeadActivity
+                    {
+                        ActivityType = "Process",
+                        Description = "Khách rất ưng ý, đang chờ duyệt hồ sơ vay trả góp từ ngân hàng HD Saison.",
+                        CreatedAt = DateTimeOffset.UtcNow.AddHours(-1)
+                    }]
             }
         };
         context.Leads.AddRange(leads);

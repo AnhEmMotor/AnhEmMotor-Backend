@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Output.Responses;
+using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Features.Outputs.Commands.CancelOrderByBuyer;
 using Application.Features.Outputs.Commands.CreateOutput;
@@ -20,6 +20,8 @@ using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
+using Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
+using Application.Features.Outputs.Queries.GetVehicleAssignmentStatuses;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Constants.RouteNames;
@@ -46,7 +48,7 @@ namespace WebAPI.Controllers.V1;
 public class SalesOrdersController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Lấy danh sách đơn hàng c?a khách hàng hiện tại (dựa trên JWT token).
+    /// Lấy danh sách đơn hàng của khách hàng hiện tại (dựa trên JWT token).
     /// </summary>
     [HttpGet("my-purchases")]
     [ProducesResponseType(typeof(PagedResult<MyOrderResponse>), StatusCodes.Status200OK)]
@@ -65,7 +67,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
                         [new ErrorDetail
                             {
                                 Field = "Authorization",
-                                Message = "Kh�ng th? l?y thông tin người dùng t? token."
+                                Message = "Không thể lấy thông tin người dùng từ token."
                             }]
                 });
         }
@@ -75,7 +77,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách đơn hàng c?a id kh�ch h�ng (ch? cho ph�p v�o khi c� quyền xem đơn hàng).
+    /// Lấy danh sách đơn hàng của ID khách hàng (chỉ cho phép vào khi có quyền xem đơn hàng).
     /// </summary>
     [HttpGet("get-purchases/{id:Guid}")]
     [HasPermission(Outputs.View)]
@@ -107,7 +109,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách đơn hàng d� b? x�a (có phân trang, lọc, sắp xếp).
+    /// Lấy danh sách đơn hàng đã bị xóa (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
     [HasPermission(Outputs.View)]
@@ -122,7 +124,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch tr?ng th�i don h�ng.
+    /// Lấy danh sách trạng thái đơn hàng.
     /// </summary>
     [HttpGet("status")]
     [RequiresAnyPermissions(Outputs.View, Outputs.Create, Outputs.Edit)]
@@ -135,7 +137,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y b?n d? t�n hi?n th? n?i b? c?a tr?ng th�i don h�ng (Ti?ng Vi?t).
+    /// Lấy bản đồ tên hiển thị nội bộ của trạng thái đơn hàng (Tiếng Việt).
     /// </summary>
     [HttpGet("status-map")]
     [Authorize]
@@ -148,7 +150,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y so d? chuy?n d?i tr?ng th�i don h�ng.
+    /// Lấy sơ đồ chuyển đổi trạng thái đơn hàng.
     /// </summary>
     [HttpGet("transition-map")]
     [RequiresAnyPermissions(Outputs.Create, Outputs.Edit)]
@@ -161,7 +163,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch tr?ng th�i don h�ng b? kh�a kh�ng cho ph�p s?a th�ng tin chi ti?t.
+    /// Lấy danh sách trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
     /// </summary>
     [HttpGet("locked-statuses")]
     [Authorize]
@@ -174,7 +176,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch c�c m� tr?ng th�i c� th? Hủy đơn hàng tr?c ti?p.
+    /// Lấy danh sách các mã trạng thái có thể hủy đơn hàng trực tiếp.
     /// </summary>
     [HttpGet("cancellable-statuses")]
     [Authorize]
@@ -187,7 +189,36 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y th�ng tin chi ti?t c?a don h�ng.
+    /// Lấy danh sách các mã trạng thái yêu cầu gán xe (VIN).
+    /// </summary>
+    [HttpGet("vehicle-assignment-statuses")]
+    [Authorize]
+    [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetVehicleAssignmentStatusesAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetVehicleAssignmentStatusesQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy yêu cầu chọn VIN theo từng dòng sản phẩm trước khi đổi trạng thái đơn hàng.
+    /// </summary>
+    [HttpGet("{id:int}/vehicle-assignment-requirements")]
+    [RequiresAnyPermissions(Outputs.View, Outputs.ChangeStatus)]
+    [ProducesResponseType(typeof(VehicleAssignmentRequirementResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetVehicleAssignmentRequirementsAsync(
+        int id,
+        [FromQuery] string targetStatusId,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetVehicleAssignmentRequirementsQuery { Id = id, TargetStatusId = targetStatusId };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy thông tin chi tiết của đơn hàng.
     /// </summary>
     [HttpGet("{id:int}", Name = SaleOrders.GetById)]
     [HasPermission(Outputs.View)]
@@ -201,7 +232,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tạo đơn hàng m?i (d�nh cho ngu?i c� quy?n Tạo đơn hàng).
+    /// Tạo đơn hàng mới (dành cho người có quyền tạo đơn hàng).
     /// </summary>
     [HttpPost("by-manager")]
     [HasPermission(Outputs.Create)]
@@ -221,7 +252,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tạo đơn hàng m?i (d�nh cho c�c t�i kho?n d� dang nh?p).
+    /// Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
     /// </summary>
     [HttpPost]
     [Authorize]
@@ -241,7 +272,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật đơn hàng (Cho ph�p s?a don h�ng do ch�nh m�nh t?o ra)
+    /// Cập nhật đơn hàng (Cho phép sửa đơn hàng do chính mình tạo ra).
     /// </summary>
     [HttpPut("{id:int}")]
     [Authorize]
@@ -285,8 +316,8 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật đơn hàng (Cho ph�p s?a t?t c? don h�ng, nhung ch? cho ph�p c?p nh?t khi v� ch? khi c� quy?n ch?nh s?a
-    /// don h�ng)
+    /// Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa
+    /// đơn hàng).
     /// </summary>
     [HttpPut("for-manager/{id:int}")]
     [HasPermission(Outputs.Edit)]
@@ -322,8 +353,8 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = request.Adapt<UpdateOutputStatusCommand>() with 
-        { 
+        var command = request.Adapt<UpdateOutputStatusCommand>() with
+        {
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
@@ -376,7 +407,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Khôi phục đơn hàng d� b? x�a.
+    /// Khôi phục đơn hàng đã bị xóa.
     /// </summary>
     [HttpPost("{id:int}/restore")]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
@@ -389,7 +420,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Kh�i ph?c nhi?u don h�ng d� b? x�a c�ng l�c.
+    /// Khôi phục nhiều đơn hàng đã bị xóa cùng lúc.
     /// </summary>
     [HttpPost("restore")]
     [ProducesResponseType(typeof(List<OutputItemResponse>), StatusCodes.Status200OK)]
@@ -403,4 +434,3 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-

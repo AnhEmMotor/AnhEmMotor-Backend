@@ -50,7 +50,7 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = 1,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = 1, Count = 10, InputPrice = 100000 }]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(
@@ -260,7 +260,7 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = 1,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
+            Products = [new CreateInputInfoRequest { ProductVariantId = 1, Count = 10, InputPrice = 100000 }]
         };
         var expectedResponse = new InputDetailResponse { Id = 1, StatusId = "working" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()))

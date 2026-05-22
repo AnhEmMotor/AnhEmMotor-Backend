@@ -36,7 +36,7 @@ public sealed class UpdateProductCommandHandler(
     IOptionValueInsertRepository optionValueInsertRepository,
     ITechnologyReadRepository technologyReadRepository,
     IVariantOptionValueDeleteRepository variantOptionValueDeleteRepository,
-    IProductVarientDeleteRepository productVarientDeleteRepository,
+    IProductVariantDeleteRepository productVariantDeleteRepository,
     IProductUpdateRepository productUpdateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
@@ -45,6 +45,11 @@ public sealed class UpdateProductCommandHandler(
         CancellationToken cancellationToken)
     {
         var errors = new List<Error>();
+        if (command.Variants is null || command.Variants.Count == 0)
+        {
+            return Result<ProductDetailForManagerResponse?>.Failure(
+                Error.BadRequest("Sản phẩm phải có ít nhất một biến thể.", nameof(command.Variants)));
+        }
         var product = await productReadRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken)
             .ConfigureAwait(false);
         if (product is null)
@@ -278,7 +283,7 @@ public sealed class UpdateProductCommandHandler(
         var variantsToDelete = currentVariants.Where(v => !inputVariantIds.Contains(v.Id)).ToList();
         foreach (var v in variantsToDelete)
         {
-            productVarientDeleteRepository.Delete(v);
+            productVariantDeleteRepository.Delete(v);
             product.ProductVariants.Remove(v);
         }
         foreach (var variantReq in inputVariants)

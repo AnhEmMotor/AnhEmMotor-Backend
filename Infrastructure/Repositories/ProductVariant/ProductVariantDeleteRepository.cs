@@ -5,7 +5,7 @@ using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Infrastructure.Repositories.ProductVariant
 {
-    public class ProductVarientDeleteRepository(ApplicationDBContext context) : IProductVarientDeleteRepository
+    public class ProductVariantDeleteRepository(ApplicationDBContext context) : IProductVariantDeleteRepository
     {
         public void Delete(ProductVariantEntity variant)
         {

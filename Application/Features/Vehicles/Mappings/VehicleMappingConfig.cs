@@ -10,6 +10,8 @@ public sealed class VehicleMappingConfig : IRegister
     {
         config.NewConfig<Vehicle, VehicleResponse>()
             .Map(dest => dest.FullName, src => src.Lead!.FullName)
-            .Map(dest => dest.PhoneNumber, src => src.Lead!.PhoneNumber);
+            .Map(dest => dest.PhoneNumber, src => src.Lead!.PhoneNumber)
+            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId);
     }
 }

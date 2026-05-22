@@ -7,6 +7,7 @@ using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
 using Domain.Constants.Input;
+using Domain.Constants.Order;
 using Mapster;
 using MediatR;
 using System;
@@ -19,7 +20,7 @@ using Vehicle = Domain.Entities.Vehicle;
 
 namespace Application.Features.Inputs.Commands.CreateInput;
 
-public sealed class CreateInputCommandHandler(
+public sealed partial class CreateInputCommandHandler(
     IInputInsertRepository insertRepository,
     IInputReadRepository readRepository,
     ISupplierReadRepository supplierRepository,
@@ -27,6 +28,9 @@ public sealed class CreateInputCommandHandler(
     IVehicleReadRepository vehicleReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, Result<InputDetailResponse?>>
 {
+    [GeneratedRegex("<.*?>")]
+    private static partial Regex HtmlTagRegex();
+
     public async Task<Result<InputDetailResponse?>> Handle(
         CreateInputCommand request,
         CancellationToken cancellationToken)
@@ -48,12 +52,14 @@ public sealed class CreateInputCommandHandler(
             }
         }
         var variantMap = new Dictionary<int, ProductVariant>();
+        var uniqueVins = new HashSet<(string Vin, int ProductVariantId, int? ProductVariantColorId)>();
+        var uniqueEngines = new HashSet<(string Engine, int ProductVariantId, int? ProductVariantColorId)>();
         foreach (var product in request.Products)
         {
-            if (product.ProductVarientId.HasValue)
+            if (product.ProductVariantId.HasValue)
             {
                 var variants = await variantRepository.GetByIdAsync(
-                    [product.ProductVarientId.Value],
+                    [product.ProductVariantId.Value],
                     cancellationToken,
                     DataFetchMode.ActiveOnly)
                     .ConfigureAwait(false);
@@ -61,15 +67,15 @@ public sealed class CreateInputCommandHandler(
                 if (variant is null)
                 {
                     return Error.BadRequest(
-                        $"Biến thể sản phẩm {product.ProductVarientId} không tồn tại hoặc đã bị xóa.",
+                        $"Biến thể sản phẩm {product.ProductVariantId} không tồn tại hoặc đã bị xóa.",
                         "Products");
                 }
-                var colorValidation = ValidateVariantColor(variant, product.ProductVarientColorId);
+                var colorValidation = ValidateVariantColor(variant, product.ProductVariantColorId);
                 if (colorValidation is not null)
                 {
                     return colorValidation;
                 }
-                variantMap[product.ProductVarientId.Value] = variant;
+                variantMap[product.ProductVariantId.Value] = variant;
                 var managementType = variant.Product?.ProductCategory?.ManagementType;
                 if (string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase))
                 {
@@ -79,8 +85,6 @@ public sealed class CreateInputCommandHandler(
                             $"Danh sách xe (Vehicles) phải có đúng {product.Count ?? 0} phần tử cho sản phẩm quản lý theo số khung.",
                             "Products");
                     }
-                    var uniqueVins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    var uniqueEngines = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     foreach (var v in product.Vehicles)
                     {
                         if (string.IsNullOrWhiteSpace(v.VinNumber) || string.IsNullOrWhiteSpace(v.EngineNumber))
@@ -91,15 +95,21 @@ public sealed class CreateInputCommandHandler(
                         }
                         var vin = v.VinNumber.Trim();
                         var engine = v.EngineNumber.Trim();
-                        if (!uniqueVins.Add(vin))
+                        var normalizedVinKey = (vin.ToUpperInvariant(), product.ProductVariantId.Value, product.ProductVariantColorId);
+                        if (!uniqueVins.Add(normalizedVinKey))
                         {
                             return Error.BadRequest($"Số khung trùng lặp trong yêu cầu: {vin}", "Products");
                         }
-                        if (!uniqueEngines.Add(engine))
+                        var normalizedEngineKey = (engine.ToUpperInvariant(), product.ProductVariantId.Value, product.ProductVariantColorId);
+                        if (!uniqueEngines.Add(normalizedEngineKey))
                         {
                             return Error.BadRequest($"Số máy trùng lặp trong yêu cầu: {engine}", "Products");
                         }
-                        var isVinExists = await vehicleReadRepository.ExistsByVinAsync(vin, cancellationToken)
+                        var isVinExists = await vehicleReadRepository.ExistsByVinAsync(
+                            vin,
+                            product.ProductVariantId.Value,
+                            product.ProductVariantColorId,
+                            cancellationToken)
                             .ConfigureAwait(false);
                         if (isVinExists)
                         {
@@ -107,6 +117,8 @@ public sealed class CreateInputCommandHandler(
                         }
                         var isEngineExists = await vehicleReadRepository.ExistsByEngineNumberAsync(
                             engine,
+                            product.ProductVariantId.Value,
+                            product.ProductVariantColorId,
                             cancellationToken)
                             .ConfigureAwait(false);
                         if (isEngineExists)
@@ -120,7 +132,7 @@ public sealed class CreateInputCommandHandler(
         var input = request.Adapt<InputEntity>();
         if (!string.IsNullOrEmpty(input.Notes))
         {
-            input.Notes = Regex.Replace(input.Notes, "<.*?>", string.Empty);
+            input.Notes = HtmlTagRegex().Replace(input.Notes, string.Empty);
         }
         input.StatusId = InputStatus.Working;
         var inputInfos = new List<InputInfoEntity>();
@@ -128,26 +140,27 @@ public sealed class CreateInputCommandHandler(
         {
             var inputInfo = p.Adapt<InputInfoEntity>();
             inputInfo.RemainingCount = p.Count ?? 0;
-            inputInfo.ProductVariantColorId = p.ProductVarientColorId;
-            if (p.ProductVarientId.HasValue && variantMap.TryGetValue(p.ProductVarientId.Value, out var variant))
+            inputInfo.ProductVariantColorId = p.ProductVariantColorId;
+            if (p.ProductVariantId.HasValue && variantMap.TryGetValue(p.ProductVariantId.Value, out var variant))
             {
                 var managementType = variant.Product?.ProductCategory?.ManagementType;
                 if (string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase) &&
                     p.Vehicles != null)
                 {
-                    inputInfo.Vehicles = p.Vehicles
+                    inputInfo.Vehicles = [.. p.Vehicles
                         .Select(
                             v => new Vehicle
                             {
                                 VinNumber = v.VinNumber.Trim(),
                                 EngineNumber = v.EngineNumber.Trim(),
-                                LicensePlate = v.LicensePlate?.Trim() ?? string.Empty,
-                                ProductId = variant.ProductId,
+                                LicensePlate = string.Empty,
+                                ProductVariantId = variant.Id,
+                                ProductVariantColorId = p.ProductVariantColorId,
                                 LeadId = null,
                                 PurchaseDate = DateTimeOffset.UtcNow,
-                                IsActive = true
-                            })
-                        .ToList();
+                                IsActive = true,
+                                Status = VehicleStatus.Available
+                            })];
                 }
             }
             inputInfos.Add(inputInfo);
@@ -159,22 +172,22 @@ public sealed class CreateInputCommandHandler(
         return created!.Adapt<InputDetailResponse>();
     }
 
-    private static Error? ValidateVariantColor(ProductVariant variant, int? productVarientColorId)
+    private static Error? ValidateVariantColor(ProductVariant variant, int? productVariantColorId)
     {
         if (variant.ProductVariantColors.Count == 0)
         {
-            return productVarientColorId.HasValue
-                ? Error.BadRequest("Biến thể sản phẩm này không có màu sắc để chọn.", "ProductVarientColorId")
+            return productVariantColorId.HasValue
+                ? Error.BadRequest("Biến thể sản phẩm này không có màu sắc để chọn.", "ProductVariantColorId")
                 : null;
         }
-        if (!productVarientColorId.HasValue || productVarientColorId <= 0)
+        if (!productVariantColorId.HasValue || productVariantColorId <= 0)
         {
             return Error.BadRequest(
-                "Biến thể sản phẩm có màu sắc, ProductVarientColorId là bắt buộc.",
-                "ProductVarientColorId");
+                "Biến thể sản phẩm có màu sắc, ProductVariantColorId là bắt buộc.",
+                "ProductVariantColorId");
         }
-        return variant.ProductVariantColors.Any(c => c.Id == productVarientColorId.Value)
+        return variant.ProductVariantColors.Any(c => c.Id == productVariantColorId.Value)
             ? null
-            : Error.BadRequest("ProductVarientColorId không thuộc biến thể sản phẩm đã chọn.", "ProductVarientColorId");
+            : Error.BadRequest("ProductVariantColorId không thuộc biến thể sản phẩm đã chọn.", "ProductVariantColorId");
     }
 }

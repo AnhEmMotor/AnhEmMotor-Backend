@@ -25,12 +25,7 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.TotalStock, src => CalculateTotalStock(src))
             .Map(dest => dest.TotalBooked, src => CalculateTotalBooked(src));
         config.NewConfig<ProductVariantEntity, VariantRow>()
-            .Map(
-                dest => dest.ColorName,
-                src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
-            .Map(
-                dest => dest.ColorCode,
-                src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorCode : null)
+            .Map(dest => dest.Colors, src => MapVariantColors(src))
             .Map(
                 dest => dest.CoverImageUrl,
                 src => src.ProductVariantColor != null &&
@@ -123,6 +118,7 @@ public class ProductMappingConfig : IRegister
                 });
         config.NewConfig<ProductVariantEntity, CurrentVariantStoreResponse>()
             .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src))
+            .Map(dest => dest.Colors, src => MapVariantColors(src))
             .Map(
                 dest => dest.CoverImageUrl,
                 src => src.ProductVariantColor != null &&
@@ -141,7 +137,8 @@ public class ProductMappingConfig : IRegister
                     .Select(p => p.ImageUrl!)
                     .ToList());
         config.NewConfig<ProductVariantEntity, OtherVariantStoreResponse>()
-            .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src, true));
+            .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src, true))
+            .Map(dest => dest.Colors, src => MapVariantColors(src));
     }
 
     private static ProductDetailForManagerResponse MapProductToDetailForManagerResponse(ProductEntity product)
@@ -184,8 +181,7 @@ public class ProductMappingConfig : IRegister
                         Stock = row.Stock,
                         HasBeenBooked = row.HasBeenBooked,
                         VariantName = row.VariantName,
-                        ColorName = row.ColorName,
-                        ColorCode = row.ColorCode,
+                        Colors = row.Colors,
                         SKU = row.SKU,
                         Weight = row.Weight,
                         Dimensions = row.Dimensions,
@@ -466,8 +462,12 @@ public class ProductMappingConfig : IRegister
                 })
             .ToList();
         var productName = variant.Product?.Name ?? string.Empty;
+        var variantName = !string.IsNullOrWhiteSpace(variant.VariantName) ? variant.VariantName.Trim() : string.Empty;
         string displayName;
-        if (optionPairs.Count == 0 || optionPairs.All(op => string.IsNullOrWhiteSpace(op.OptionValue)))
+        if (!string.IsNullOrWhiteSpace(variantName))
+        {
+            displayName = $"{productName} ({variantName})";
+        } else if (optionPairs.Count == 0 || optionPairs.All(op => string.IsNullOrWhiteSpace(op.OptionValue)))
         {
             displayName = productName;
         } else
@@ -501,18 +501,23 @@ public class ProductMappingConfig : IRegister
                     ? variant.ProductVariantColor.CoverImageUrl
                     : variant.CoverImageUrl,
             CategoryId = variant.Product?.CategoryId,
-            Colors =
-                variant.ProductVariantColors
-                    .Select(
-                        c => new ProductVariantColorLiteResponse
-                    {
-                        Id = c.Id,
-                        ColorName = c.ColorName,
-                        ColorCode = c.ColorCode,
-                        CoverImageUrl = c.CoverImageUrl
-                    })
-                    .ToList()
+            ManagementType = variant.Product?.ProductCategory?.ManagementType,
+            Colors = MapVariantColors(variant)
         };
+    }
+
+    private static List<ProductVariantColorLiteResponse> MapVariantColors(ProductVariantEntity variant)
+    {
+        return variant.ProductVariantColors
+            .Select(
+                c => new ProductVariantColorLiteResponse
+                {
+                    Id = c.Id,
+                    ColorName = c.ColorName,
+                    ColorCode = c.ColorCode,
+                    CoverImageUrl = c.CoverImageUrl
+                })
+            .ToList();
     }
 
     public static string CalculateInventoryStatus(long availableStock, long alertLevel)

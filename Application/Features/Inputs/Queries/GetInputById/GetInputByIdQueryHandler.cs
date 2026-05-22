@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Input;
 
@@ -16,7 +16,7 @@ public sealed class GetInputByIdQueryHandler(IInputReadRepository repository) : 
         var input = await repository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (input is null)
         {
-            return Error.NotFound($"Kh�ng t�m th?y phi?u nh?p c� ID {request.Id}.");
+            return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.");
         }
         return input.Adapt<InputDetailResponse>();
     }

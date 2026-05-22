@@ -318,17 +318,17 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<int>("InputId").HasColumnType("integer").HasColumnName("InputId");
                     b.Property<decimal?>("InputPrice").HasColumnType("decimal(18, 2)").HasColumnName("InputPrice");
                     b.Property<int?>("ParentOutputInfoId").HasColumnType("integer").HasColumnName("ParentOutputInfoId");
-                    b.Property<int?>("ProductId").HasColumnType("integer").HasColumnName("ProductId");
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("integer")
                         .HasColumnName("ProductVariantColorId");
+                    b.Property<int?>("ProductVariantId").HasColumnType("integer").HasColumnName("ProductVariantId");
                     b.Property<int?>("RemainingCount").HasColumnType("integer").HasColumnName("RemainingCount");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
                     b.HasKey("Id");
                     b.HasIndex("InputId");
                     b.HasIndex("ParentOutputInfoId");
-                    b.HasIndex("ProductId");
                     b.HasIndex("ProductVariantColorId");
+                    b.HasIndex("ProductVariantId");
                     b.ToTable("InputInfo");
                 });
             modelBuilder.Entity(
@@ -593,12 +593,12 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("integer")
                         .HasColumnName("ProductVariantColorId");
-                    b.Property<int?>("ProductVarientId").HasColumnType("integer").HasColumnName("ProductVarientId");
+                    b.Property<int?>("ProductVariantId").HasColumnType("integer").HasColumnName("ProductVariantId");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
                     b.HasKey("Id");
                     b.HasIndex("OutputId");
                     b.HasIndex("ProductVariantColorId");
-                    b.HasIndex("ProductVarientId");
+                    b.HasIndex("ProductVariantId");
                     b.ToTable("OutputInfo");
                 });
             modelBuilder.Entity(
@@ -1030,10 +1030,15 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<int?>("LeadId").HasColumnType("integer").HasColumnName("LeadId");
                     b.Property<string>("LicensePlate").IsRequired().HasColumnType("text").HasColumnName("LicensePlate");
                     b.Property<int?>("OutputInfoId").HasColumnType("integer").HasColumnName("OutputInfoId");
-                    b.Property<int?>("ProductId").HasColumnType("integer").HasColumnName("ProductId");
+                    b.Property<int?>("ProductId").HasColumnType("integer");
+                    b.Property<int?>("ProductVariantColorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ProductVariantColorId");
+                    b.Property<int?>("ProductVariantId").HasColumnType("integer").HasColumnName("ProductVariantId");
                     b.Property<DateTimeOffset>("PurchaseDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("PurchaseDate");
+                    b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("Status");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
                     b.Property<string>("VinNumber").IsRequired().HasColumnType("text").HasColumnName("VinNumber");
                     b.HasKey("Id");
@@ -1041,6 +1046,8 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasIndex("LeadId");
                     b.HasIndex("OutputInfoId");
                     b.HasIndex("ProductId");
+                    b.HasIndex("ProductVariantColorId");
+                    b.HasIndex("ProductVariantId");
                     b.ToTable("Vehicle");
                 });
             modelBuilder.Entity(
@@ -1239,13 +1246,13 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasOne("Domain.Entities.OutputInfo", "ParentOutputInfo")
                         .WithMany("Returns")
                         .HasForeignKey("ParentOutputInfoId");
-                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany("InputInfos")
-                        .HasForeignKey("ProductId");
                     b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
                         .WithMany()
                         .HasForeignKey("ProductVariantColorId")
                         .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("InputInfos")
+                        .HasForeignKey("ProductVariantId");
                     b.Navigation("InputReceipt");
                     b.Navigation("ParentOutputInfo");
                     b.Navigation("ProductVariant");
@@ -1353,7 +1360,7 @@ namespace Infrastructure.PostgreSqlMigrations
                         .OnDelete(DeleteBehavior.Restrict);
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany("OutputInfos")
-                        .HasForeignKey("ProductVarientId");
+                        .HasForeignKey("ProductVariantId");
                     b.Navigation("OutputOrder");
                     b.Navigation("ProductVariant");
                     b.Navigation("ProductVariantColor");
@@ -1550,10 +1557,20 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasForeignKey("OutputInfoId")
                         .OnDelete(DeleteBehavior.Restrict);
                     b.HasOne("Domain.Entities.Product", "Product").WithMany().HasForeignKey("ProductId");
+                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantColorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
                     b.Navigation("InputInfo");
                     b.Navigation("Lead");
                     b.Navigation("OutputInfo");
                     b.Navigation("Product");
+                    b.Navigation("ProductVariant");
+                    b.Navigation("ProductVariantColor");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.VehicleDocument",

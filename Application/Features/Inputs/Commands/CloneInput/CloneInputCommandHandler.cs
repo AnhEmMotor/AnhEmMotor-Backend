@@ -27,7 +27,7 @@ public sealed class CloneInputCommandHandler(
     {
         if (!command.Id.HasValue)
         {
-            return Error.BadRequest("Id kh�ng du?c d? tr?ng", "Id");
+            return Error.BadRequest("Id không được để trống", "Id");
         }
         var originalInput = await inputReadRepository.GetByIdWithDetailsAsync(
             command.Id.Value,
@@ -36,7 +36,7 @@ public sealed class CloneInputCommandHandler(
             .ConfigureAwait(false);
         if (originalInput is null)
         {
-            return Error.NotFound($"Phi?u nh?p v?i Id = {command.Id.Value} kh�ng t?n t?i", "Id");
+            return Error.NotFound($"Phiếu nhập với Id = {command.Id.Value} không tồn tại", "Id");
         }
         var supplier = await supplierReadRepository.GetByIdAsync(
             originalInput.SupplierId ?? 0,
@@ -45,11 +45,11 @@ public sealed class CloneInputCommandHandler(
             .ConfigureAwait(false);
         if (supplier is null || string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
         {
-            return Error.BadRequest("Nh� cung c?p kh�ng t?n t?i ho?c kh�ng c�n ho?t d?ng", "SupplierId");
+            return Error.BadRequest("Nhà cung cấp không tồn tại hoặc không còn hoạt động", "SupplierId");
         }
         var productVariantIds = originalInput.InputInfos
-            .Where(p => p.ProductId.HasValue)
-            .Select(p => p.ProductId!.Value)
+            .Where(p => p.ProductVariantId.HasValue)
+            .Select(p => p.ProductVariantId!.Value)
             .Distinct()
             .ToList();
         var variants = await variantReadRepository.GetByIdAsync(
@@ -61,11 +61,11 @@ public sealed class CloneInputCommandHandler(
         var validProducts = new List<InputInfoEntity>();
         foreach (var originalProduct in originalInput.InputInfos)
         {
-            if (!originalProduct.ProductId.HasValue)
+            if (!originalProduct.ProductVariantId.HasValue)
             {
                 continue;
             }
-            if (!variantDict.TryGetValue(originalProduct.ProductId.Value, out var variant))
+            if (!variantDict.TryGetValue(originalProduct.ProductVariantId.Value, out var variant))
             {
                 continue;
             }
@@ -76,7 +76,7 @@ public sealed class CloneInputCommandHandler(
             validProducts.Add(
                 new InputInfoEntity
                 {
-                    ProductId = originalProduct.ProductId,
+                    ProductVariantId = originalProduct.ProductVariantId,
                     ProductVariantColorId = originalProduct.ProductVariantColorId,
                     Count = originalProduct.Count,
                     RemainingCount = originalProduct.Count,
@@ -88,7 +88,7 @@ public sealed class CloneInputCommandHandler(
         if (validProducts.Count == 0)
         {
             return Error.BadRequest(
-                "T?t c? s?n ph?m trong phi?u nh?p g?c d?u kh�ng c�n h?p l? (d� xo� ho?c kh�ng c�n b�n)",
+                "Tất cả sản phẩm trong phiếu nhập gốc đều không còn hợp lệ (đã xóa hoặc không còn bán)",
                 "Products");
         }
         var newInput = new InputEntity
@@ -107,4 +107,3 @@ public sealed class CloneInputCommandHandler(
         return createdInput!.Adapt<InputDetailResponse>();
     }
 }
-

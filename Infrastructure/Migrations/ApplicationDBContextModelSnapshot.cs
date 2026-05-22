@@ -330,17 +330,17 @@ namespace Infrastructure.Migrations
                     b.Property<int>("InputId").HasColumnType("int").HasColumnName("InputId");
                     b.Property<decimal?>("InputPrice").HasColumnType("decimal(18, 2)").HasColumnName("InputPrice");
                     b.Property<int?>("ParentOutputInfoId").HasColumnType("int").HasColumnName("ParentOutputInfoId");
-                    b.Property<int?>("ProductId").HasColumnType("int").HasColumnName("ProductId");
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
+                    b.Property<int?>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
                     b.Property<int?>("RemainingCount").HasColumnType("int").HasColumnName("RemainingCount");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Id");
                     b.HasIndex("InputId");
                     b.HasIndex("ParentOutputInfoId");
-                    b.HasIndex("ProductId");
                     b.HasIndex("ProductVariantColorId");
+                    b.HasIndex("ProductVariantId");
                     b.ToTable("InputInfo");
                 });
             modelBuilder.Entity(
@@ -614,12 +614,12 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
-                    b.Property<int?>("ProductVarientId").HasColumnType("int").HasColumnName("ProductVarientId");
+                    b.Property<int?>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Id");
                     b.HasIndex("OutputId");
                     b.HasIndex("ProductVariantColorId");
-                    b.HasIndex("ProductVarientId");
+                    b.HasIndex("ProductVariantId");
                     b.ToTable("OutputInfo");
                 });
             modelBuilder.Entity(
@@ -1077,10 +1077,15 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("LicensePlate");
                     b.Property<int?>("OutputInfoId").HasColumnType("int").HasColumnName("OutputInfoId");
-                    b.Property<int?>("ProductId").HasColumnType("int").HasColumnName("ProductId");
+                    b.Property<int?>("ProductId").HasColumnType("int");
+                    b.Property<int?>("ProductVariantColorId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantColorId");
+                    b.Property<int?>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
                     b.Property<DateTimeOffset>("PurchaseDate")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("PurchaseDate");
+                    b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(50)").HasColumnName("Status");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.Property<string>("VinNumber")
                         .IsRequired()
@@ -1091,6 +1096,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("LeadId");
                     b.HasIndex("OutputInfoId");
                     b.HasIndex("ProductId");
+                    b.HasIndex("ProductVariantColorId");
+                    b.HasIndex("ProductVariantId");
                     b.ToTable("Vehicle");
                 });
             modelBuilder.Entity(
@@ -1295,13 +1302,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.OutputInfo", "ParentOutputInfo")
                         .WithMany("Returns")
                         .HasForeignKey("ParentOutputInfoId");
-                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany("InputInfos")
-                        .HasForeignKey("ProductId");
                     b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
                         .WithMany()
                         .HasForeignKey("ProductVariantColorId")
                         .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("InputInfos")
+                        .HasForeignKey("ProductVariantId");
                     b.Navigation("InputReceipt");
                     b.Navigation("ParentOutputInfo");
                     b.Navigation("ProductVariant");
@@ -1409,7 +1416,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany("OutputInfos")
-                        .HasForeignKey("ProductVarientId");
+                        .HasForeignKey("ProductVariantId");
                     b.Navigation("OutputOrder");
                     b.Navigation("ProductVariant");
                     b.Navigation("ProductVariantColor");
@@ -1606,10 +1613,20 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("OutputInfoId")
                         .OnDelete(DeleteBehavior.Restrict);
                     b.HasOne("Domain.Entities.Product", "Product").WithMany().HasForeignKey("ProductId");
+                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantColorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
                     b.Navigation("InputInfo");
                     b.Navigation("Lead");
                     b.Navigation("OutputInfo");
                     b.Navigation("Product");
+                    b.Navigation("ProductVariant");
+                    b.Navigation("ProductVariantColor");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.VehicleDocument",

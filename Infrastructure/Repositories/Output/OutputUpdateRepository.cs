@@ -39,19 +39,19 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
         var transactions = new List<(OutputInfo Info, List<InputInfo> Batches, int Quantity)>();
         foreach (var outputInfo in outputInfos)
         {
-            if (outputInfo.ProductVarientId is null || outputInfo.Count is null || outputInfo.Count <= 0)
+            if (outputInfo.ProductVariantId is null || outputInfo.Count is null || outputInfo.Count <= 0)
             {
                 continue;
             }
             var batches = await GetAvailableBatchesAsync(
-                outputInfo.ProductVarientId.Value,
+                outputInfo.ProductVariantId.Value,
                 outputInfo.ProductVariantColorId,
                 cancellationToken)
                 .ConfigureAwait(false);
             var totalAvailable = batches.Sum(b => b.RemainingCount ?? 0);
             if (totalAvailable < outputInfo.Count.Value)
             {
-                var productName = outputInfo.ProductVariant?.Product?.Name ?? $"ID {outputInfo.ProductVarientId}";
+                var productName = outputInfo.ProductVariant?.Product?.Name ?? $"ID {outputInfo.ProductVariantId}";
                 errors.Add(
                     Error.BadRequest(
                         $"Sản phẩm '{productName}' không đủ tồn kho. Hiện có: {totalAvailable}, cần: {outputInfo.Count.Value}",
@@ -104,7 +104,7 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
         return context.InputInfos
             .Include(ii => ii.InputReceipt)
             .Where(
-                ii => ii.ProductId == productId &&
+                ii => ii.ProductVariantId == productId &&
                     ii.ProductVariantColorId == colorId &&
                     ii.RemainingCount > 0 &&
                     ii.DeletedAt == null &&

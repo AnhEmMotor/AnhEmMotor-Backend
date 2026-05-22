@@ -48,8 +48,8 @@ public sealed class UpdateOutputForManagerCommandHandler(
             output.BuyerId = request.BuyerId;
         }
         var variantIds = request.OutputInfos
-            .Where(p => p.ProductVarientId.HasValue)
-            .Select(p => p.ProductVarientId!.Value)
+            .Where(p => p.ProductVariantId.HasValue)
+            .Select(p => p.ProductVariantId!.Value)
             .Distinct()
             .ToList();
         List<ProductVariant> variantsList = [];
@@ -75,10 +75,10 @@ public sealed class UpdateOutputForManagerCommandHandler(
                         "Products");
                 }
             }
-            foreach (var product in request.OutputInfos.Where(p => p.ProductVarientId.HasValue))
+            foreach (var product in request.OutputInfos.Where(p => p.ProductVariantId.HasValue))
             {
-                var variant = variantsList.First(v => v.Id == product.ProductVarientId!.Value);
-                var colorValidation = ValidateVariantColor(variant, product.ProductVarientColorId);
+                var variant = variantsList.First(v => v.Id == product.ProductVariantId!.Value);
+                var colorValidation = ValidateVariantColor(variant, product.ProductVariantColorId);
                 if (colorValidation is not null)
                 {
                     return colorValidation;
@@ -126,7 +126,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
         }
         foreach (var productRequest in request.OutputInfos)
         {
-            var currentVariant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductVarientId);
+            var currentVariant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductVariantId);
             if (productRequest.Id.HasValue && productRequest.Id > 0)
             {
                 if (existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
@@ -141,8 +141,8 @@ public sealed class UpdateOutputForManagerCommandHandler(
             {
                 var newInfo = new OutputInfo
                 {
-                    ProductVarientId = productRequest.ProductVarientId,
-                    ProductVariantColorId = productRequest.ProductVarientColorId,
+                    ProductVariantId = productRequest.ProductVariantId,
+                    ProductVariantColorId = productRequest.ProductVariantColorId,
                     Count = productRequest.Count
                 };
                 if (currentVariant != null)
@@ -189,22 +189,22 @@ public sealed class UpdateOutputForManagerCommandHandler(
         return Result<OrderDetailResponse>.Success(output.Adapt<OrderDetailResponse>());
     }
 
-    private static Error? ValidateVariantColor(ProductVariant variant, int? productVarientColorId)
+    private static Error? ValidateVariantColor(ProductVariant variant, int? productVariantColorId)
     {
         if (variant.ProductVariantColors.Count == 0)
         {
-            return productVarientColorId.HasValue
-                ? Error.BadRequest("Biến thể sản phẩm này không có màu sắc để chọn.", "ProductVarientColorId")
+            return productVariantColorId.HasValue
+                ? Error.BadRequest("Biến thể sản phẩm này không có màu sắc để chọn.", "ProductVariantColorId")
                 : null;
         }
-        if (!productVarientColorId.HasValue || productVarientColorId <= 0)
+        if (!productVariantColorId.HasValue || productVariantColorId <= 0)
         {
             return Error.BadRequest(
-                "Biến thể sản phẩm có màu sắc, ProductVarientColorId là bắt buộc.",
-                "ProductVarientColorId");
+                "Biến thể sản phẩm có màu sắc, ProductVariantColorId là bắt buộc.",
+                "ProductVariantColorId");
         }
-        return variant.ProductVariantColors.Any(c => c.Id == productVarientColorId.Value)
+        return variant.ProductVariantColors.Any(c => c.Id == productVariantColorId.Value)
             ? null
-            : Error.BadRequest("ProductVarientColorId không thuộc biến thể sản phẩm đã chọn.", "ProductVarientColorId");
+            : Error.BadRequest("ProductVariantColorId không thuộc biến thể sản phẩm đã chọn.", "ProductVariantColorId");
     }
 }

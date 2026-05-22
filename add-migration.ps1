@@ -78,7 +78,7 @@ else
 }
 Write-Host ""
 
-Write-Host "[1/2] Creating SQL Server Migration (local)..." -ForegroundColor Cyan
+Write-Host "[1/3] Creating SQL Server Migration (local)..." -ForegroundColor Cyan
 dotnet ef migrations add $MigrationName --context ApplicationDBContext --project Infrastructure --startup-project WebAPI
 
 if ($LASTEXITCODE -ne 0)

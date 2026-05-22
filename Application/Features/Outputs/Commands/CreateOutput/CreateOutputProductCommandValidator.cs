@@ -7,7 +7,7 @@ namespace Application.Features.Outputs.Commands.CreateOutput
     {
         public CreateOutputProductCommandValidator()
         {
-            RuleFor(x => x.ProductVarientId).NotNull().GreaterThan(0);
+            RuleFor(x => x.ProductVariantId).NotNull().GreaterThan(0);
             RuleFor(x => x.Count).NotNull().GreaterThan(0);
         }
     }
