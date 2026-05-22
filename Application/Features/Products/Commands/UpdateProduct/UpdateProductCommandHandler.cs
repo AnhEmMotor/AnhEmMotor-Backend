@@ -45,6 +45,11 @@ public sealed class UpdateProductCommandHandler(
         CancellationToken cancellationToken)
     {
         var errors = new List<Error>();
+        if (command.Variants is null || command.Variants.Count == 0)
+        {
+            return Result<ProductDetailForManagerResponse?>.Failure(
+                Error.BadRequest("Sản phẩm phải có ít nhất một biến thể.", nameof(command.Variants)));
+        }
         var product = await productReadRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken)
             .ConfigureAwait(false);
         if (product is null)

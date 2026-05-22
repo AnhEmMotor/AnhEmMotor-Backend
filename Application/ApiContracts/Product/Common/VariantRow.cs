@@ -22,9 +22,7 @@ namespace Application.ApiContracts.Product.Common
 
         public string? VariantName { get; set; }
 
-        public string? ColorName { get; set; }
-
-        public string? ColorCode { get; set; }
+        public List<Responses.ProductVariantColorLiteResponse> Colors { get; set; } = [];
 
         public string? SKU { get; set; }
 
