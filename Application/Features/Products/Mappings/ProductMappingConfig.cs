@@ -462,9 +462,7 @@ public class ProductMappingConfig : IRegister
                 })
             .ToList();
         var productName = variant.Product?.Name ?? string.Empty;
-        var variantName = !string.IsNullOrWhiteSpace(variant.VariantName)
-            ? variant.VariantName.Trim()
-            : string.Empty;
+        var variantName = !string.IsNullOrWhiteSpace(variant.VariantName) ? variant.VariantName.Trim() : string.Empty;
         string displayName;
         if (!string.IsNullOrWhiteSpace(variantName))
         {
@@ -504,8 +502,7 @@ public class ProductMappingConfig : IRegister
                     : variant.CoverImageUrl,
             CategoryId = variant.Product?.CategoryId,
             ManagementType = variant.Product?.ProductCategory?.ManagementType,
-            Colors =
-                MapVariantColors(variant)
+            Colors = MapVariantColors(variant)
         };
     }
 

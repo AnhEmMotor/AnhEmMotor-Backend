@@ -2315,7 +2315,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var receipt = new Input { StatusId = statusFinished };
             db.InputReceipts.Add(receipt);
             db.SaveChanges();
-            db.InputInfos.Add(new InputInfo { ProductVariantId = variant.Id, InputId = receipt.Id, RemainingCount = stock });
+            db.InputInfos
+                .Add(new InputInfo { ProductVariantId = variant.Id, InputId = receipt.Id, RemainingCount = stock });
         }
         if (booked > 0)
         {

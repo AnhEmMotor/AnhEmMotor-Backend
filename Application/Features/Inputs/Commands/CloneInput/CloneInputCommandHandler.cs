@@ -29,61 +29,50 @@ public sealed class CloneInputCommandHandler(
         {
             return Error.BadRequest("Id không được để trống", "Id");
         }
-
         var originalInput = await inputReadRepository.GetByIdWithDetailsAsync(
             command.Id.Value,
             cancellationToken,
             DataFetchMode.All)
             .ConfigureAwait(false);
-
         if (originalInput is null)
         {
             return Error.NotFound($"Phiếu nhập với Id = {command.Id.Value} không tồn tại", "Id");
         }
-
         var supplier = await supplierReadRepository.GetByIdAsync(
             originalInput.SupplierId ?? 0,
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
         if (supplier is null || string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
         {
             return Error.BadRequest("Nhà cung cấp không tồn tại hoặc không còn hoạt động", "SupplierId");
         }
-
         var productVariantIds = originalInput.InputInfos
             .Where(p => p.ProductVariantId.HasValue)
             .Select(p => p.ProductVariantId!.Value)
             .Distinct()
             .ToList();
-
         var variants = await variantReadRepository.GetByIdAsync(
             productVariantIds,
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
         var variantDict = variants.ToDictionary(v => v.Id);
         var validProducts = new List<InputInfoEntity>();
-
         foreach (var originalProduct in originalInput.InputInfos)
         {
             if (!originalProduct.ProductVariantId.HasValue)
             {
                 continue;
             }
-
             if (!variantDict.TryGetValue(originalProduct.ProductVariantId.Value, out var variant))
             {
                 continue;
             }
-
             if (string.Compare(variant.Product?.StatusId, ProductStatus.ForSale) != 0)
             {
                 continue;
             }
-
             validProducts.Add(
                 new InputInfoEntity
                 {
@@ -96,14 +85,12 @@ public sealed class CloneInputCommandHandler(
                     UpdatedAt = DateTimeOffset.UtcNow
                 });
         }
-
         if (validProducts.Count == 0)
         {
             return Error.BadRequest(
                 "Tất cả sản phẩm trong phiếu nhập gốc đều không còn hợp lệ (đã xóa hoặc không còn bán)",
                 "Products");
         }
-
         var newInput = new InputEntity
         {
             Notes = originalInput.Notes,
@@ -113,13 +100,10 @@ public sealed class CloneInputCommandHandler(
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
         };
-
         inputInsertRepository.Add(newInput);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var createdInput = await inputReadRepository.GetByIdWithDetailsAsync(newInput.Id, cancellationToken)
             .ConfigureAwait(false);
-
         return createdInput!.Adapt<InputDetailResponse>();
     }
 }

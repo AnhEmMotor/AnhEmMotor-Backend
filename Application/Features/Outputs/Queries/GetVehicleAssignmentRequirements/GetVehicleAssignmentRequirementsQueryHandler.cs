@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
@@ -30,7 +31,6 @@ public sealed class GetVehicleAssignmentRequirementsQueryHandler(
         {
             return Error.BadRequest($"Trạng thái '{request.TargetStatusId}' không hợp lệ.", "TargetStatusId");
         }
-
         var response = new VehicleAssignmentRequirementResponse
         {
             OrderId = output.Id,
@@ -41,7 +41,6 @@ public sealed class GetVehicleAssignmentRequirementsQueryHandler(
         {
             return response;
         }
-
         var vehicleManagedInfos = output.OutputInfos
             .Where(
                 oi => string.Equals(
@@ -53,7 +52,6 @@ public sealed class GetVehicleAssignmentRequirementsQueryHandler(
         {
             return response;
         }
-
         var productVariantIds = vehicleManagedInfos
             .Select(oi => oi.ProductVariantId)
             .Where(id => id.HasValue)
@@ -62,7 +60,6 @@ public sealed class GetVehicleAssignmentRequirementsQueryHandler(
             .ToList();
         var vehicles = await vehicleReadRepository.GetVehiclesForAssignmentAsync(productVariantIds, cancellationToken)
             .ConfigureAwait(false);
-
         foreach (var info in vehicleManagedInfos)
         {
             var productId = info.ProductVariant?.ProductId;
@@ -81,27 +78,28 @@ public sealed class GetVehicleAssignmentRequirementsQueryHandler(
                 .Select(ToOption)
                 .ToList();
             var requiredCount = info.Count ?? 0;
-            response.Items.Add(
-                new VehicleAssignmentRequirementItemResponse
-                {
-                    OutputInfoId = info.Id,
-                    ProductId = productId,
-                    ProductName = info.ProductVariant?.Product?.Name,
-                    ProductVariantId = info.ProductVariantId,
-                    ProductVariantName = BuildVariantName(info.ProductVariant),
-                    ProductVariantColorId = info.ProductVariantColorId,
-                    ColorName = info.ProductVariantColor?.ColorName ?? info.ProductVariantColor?.ColorCode,
-                    RequiredCount = requiredCount,
-                    AssignedVehicles = assigned,
-                    AvailableVehicles = available,
-                    AvailableCount = available.Count,
-                    CanFulfill = assigned.Count + available.Count >= requiredCount
-                });
+            response.Items
+                .Add(
+                    new VehicleAssignmentRequirementItemResponse
+                    {
+                        OutputInfoId = info.Id,
+                        ProductId = productId,
+                        ProductName = info.ProductVariant?.Product?.Name,
+                        ProductVariantId = info.ProductVariantId,
+                        ProductVariantName = BuildVariantName(info.ProductVariant),
+                        ProductVariantColorId = info.ProductVariantColorId,
+                        ColorName = info.ProductVariantColor?.ColorName ?? info.ProductVariantColor?.ColorCode,
+                        RequiredCount = requiredCount,
+                        AssignedVehicles = assigned,
+                        AvailableVehicles = available,
+                        AvailableCount = available.Count,
+                        CanFulfill = assigned.Count + available.Count >= requiredCount
+                    });
         }
         return response;
     }
 
-    private static VehicleAssignmentOptionResponse ToOption(Domain.Entities.Vehicle vehicle)
+    private static VehicleAssignmentOptionResponse ToOption(Vehicle vehicle)
     {
         return new VehicleAssignmentOptionResponse
         {
@@ -112,12 +110,10 @@ public sealed class GetVehicleAssignmentRequirementsQueryHandler(
         };
     }
 
-    private static string? BuildVariantName(Domain.Entities.ProductVariant? variant)
+    private static string? BuildVariantName(ProductVariant? variant)
     {
         var names = variant?.VariantOptionValues?
-            .Select(vov => vov.OptionValue?.Name)
-            .Where(name => !string.IsNullOrWhiteSpace(name))
-            .ToList();
+            .Select(vov => vov.OptionValue?.Name).Where(name => !string.IsNullOrWhiteSpace(name)).ToList();
         return names is { Count: > 0 } ? string.Join(" - ", names) : null;
     }
 }

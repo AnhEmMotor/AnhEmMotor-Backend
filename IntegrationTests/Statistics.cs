@@ -787,7 +787,8 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var inp = new InputEntity { StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedAt = DateTime.UtcNow };
         db.InputReceipts.Add(inp);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        db.InputInfos.Add(new InputInfoEntity { InputId = inp.Id, ProductVariantId = vid.Id, Count = 10, InputPrice = 50000 });
+        db.InputInfos
+            .Add(new InputInfoEntity { InputId = inp.Id, ProductVariantId = vid.Id, Count = 10, InputPrice = 50000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         vid.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);

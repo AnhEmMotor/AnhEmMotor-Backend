@@ -102,7 +102,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 BrandName = variants.FirstOrDefault(v => v.Id == r.ProductVariantId)?.Product?.Brand?.Name ?? "Khác",
                 Revenue = r.Price * r.Count
             });
-        return [.. revenueData.GroupBy(r => r.BrandName)
+        return[.. revenueData.GroupBy(r => r.BrandName)
             .Select(g => new BrandRevenueResponse { BrandName = g.Key, Revenue = g.Sum(x => x.Revenue) })
             .OrderByDescending(b => b.Revenue)];
     }
@@ -373,13 +373,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
-            .GroupBy(
-                x => new
-                {
-                    x.o.CreatedAt!.Value.Year,
-                    x.o.CreatedAt!.Value.Month,
-                    x.o.CreatedAt!.Value.Day
-                })
+            .GroupBy(x => new { x.o.CreatedAt!.Value.Year, x.o.CreatedAt!.Value.Month, x.o.CreatedAt!.Value.Day })
             .Select(
                 g => new
                 {
@@ -681,7 +675,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Include(pv => pv.ProductVariantColors)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-        return [.. variants.Select(
+        return[.. variants.Select(
             pv =>
             {
                 var stock = (int)((confirmedInputs.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -

@@ -103,12 +103,7 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         db.Products.Add(product);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var vin = "VIN123456";
-        var existingVehicle = new VehicleEntity
-        {
-            LeadId = lead.Id,
-            VinNumber = vin,
-            EngineNumber = "ENG1"
-        };
+        var existingVehicle = new VehicleEntity { LeadId = lead.Id, VinNumber = vin, EngineNumber = "ENG1" };
         db.Vehicles.Add(existingVehicle);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var payload = new { lead_id = lead.Id, product_id = product.Id, vin_number = vin, engine_number = "ENG2" };
@@ -135,12 +130,7 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         db.Products.Add(product);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var vin = "VIN_WS_123";
-        var existingVehicle = new VehicleEntity
-        {
-            LeadId = lead.Id,
-            VinNumber = vin,
-            EngineNumber = "ENG1"
-        };
+        var existingVehicle = new VehicleEntity { LeadId = lead.Id, VinNumber = vin, EngineNumber = "ENG1" };
         db.Vehicles.Add(existingVehicle);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var payload = new

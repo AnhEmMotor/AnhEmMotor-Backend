@@ -9,7 +9,7 @@ using Domain.Constants;
 using Domain.Constants.Lead;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
-
+using Domain.Entities;
 using Mapster;
 using MediatR;
 using LeadEntity = Domain.Entities.Lead;
@@ -135,7 +135,7 @@ public sealed class UpdateOutputStatusCommandHandler(
     }
 
     private async Task<Result> AssignVehiclesToOrderAsync(
-        Domain.Entities.Output output,
+        Output output,
         UpdateOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -161,46 +161,47 @@ public sealed class UpdateOutputStatusCommandHandler(
         var requiredVehicleCount = vehicleOutputInfos.Sum(oi => oi.Count ?? 0);
         if (selectedVehicleIds.Count != requiredVehicleCount)
         {
-            return Result.Failure(Error.BadRequest(
-                $"Danh sách xe (SelectedVehicleIds) phải có đúng {requiredVehicleCount} phần tử cho các sản phẩm quản lý theo số khung.",
-                "SelectedVehicleIds"));
+            return Result.Failure(
+                Error.BadRequest(
+                    $"Danh sách xe (SelectedVehicleIds) phải có đúng {requiredVehicleCount} phần tử cho các sản phẩm quản lý theo số khung.",
+                    "SelectedVehicleIds"));
         }
-
         var vehicles = await vehicleReadRepository.GetByIdsAsync(selectedVehicleIds, cancellationToken)
             .ConfigureAwait(false);
         if (vehicles.Count != selectedVehicleIds.Count)
         {
-            return Result.Failure(Error.BadRequest("Một hoặc nhiều mã xe không tồn tại trong hệ thống.", "SelectedVehicleIds"));
+            return Result.Failure(
+                Error.BadRequest("Một hoặc nhiều mã xe không tồn tại trong hệ thống.", "SelectedVehicleIds"));
         }
         foreach (var vehicle in vehicles)
         {
             if (!vehicle.IsActive)
             {
-                return Result.Failure(Error.BadRequest(
-                    $"Xe có số khung (VIN) {vehicle.VinNumber} đang ở trạng thái không hoạt động.",
-                    "SelectedVehicleIds"));
+                return Result.Failure(
+                    Error.BadRequest(
+                        $"Xe có số khung (VIN) {vehicle.VinNumber} đang ở trạng thái không hoạt động.",
+                        "SelectedVehicleIds"));
             }
             if (vehicle.InputInfoId == null)
             {
-                return Result.Failure(Error.BadRequest(
-                    $"Xe có số khung (VIN) {vehicle.VinNumber} chưa được nhập kho.",
-                    "SelectedVehicleIds"));
+                return Result.Failure(
+                    Error.BadRequest(
+                        $"Xe có số khung (VIN) {vehicle.VinNumber} chưa được nhập kho.",
+                        "SelectedVehicleIds"));
             }
             if (string.Equals(vehicle.Status, VehicleStatus.Sold, StringComparison.OrdinalIgnoreCase))
             {
-                return Result.Failure(Error.BadRequest(
-                    $"Xe có số khung (VIN) {vehicle.VinNumber} đã được bán.",
-                    "SelectedVehicleIds"));
+                return Result.Failure(
+                    Error.BadRequest($"Xe có số khung (VIN) {vehicle.VinNumber} đã được bán.", "SelectedVehicleIds"));
             }
-            if (vehicle.OutputInfoId.HasValue &&
-                vehicleOutputInfos.All(oi => oi.Id != vehicle.OutputInfoId.Value))
+            if (vehicle.OutputInfoId.HasValue && vehicleOutputInfos.All(oi => oi.Id != vehicle.OutputInfoId.Value))
             {
-                return Result.Failure(Error.BadRequest(
-                    $"Xe có số khung (VIN) {vehicle.VinNumber} đã được giữ cho đơn hàng khác.",
-                    "SelectedVehicleIds"));
+                return Result.Failure(
+                    Error.BadRequest(
+                        $"Xe có số khung (VIN) {vehicle.VinNumber} đã được giữ cho đơn hàng khác.",
+                        "SelectedVehicleIds"));
             }
         }
-
         var remainingVehicles = new List<VehicleEntity>(vehicles);
         var matchedVehiclesMap = new Dictionary<OutputInfoEntity, List<VehicleEntity>>();
         foreach (var outputInfo in vehicleOutputInfos)
@@ -215,9 +216,10 @@ public sealed class UpdateOutputStatusCommandHandler(
             if (matches.Count < count)
             {
                 var colorMsg = outputInfo.ProductVariantColorId.HasValue ? " và màu sắc đã chọn" : string.Empty;
-                return Result.Failure(Error.BadRequest(
-                    $"Không tìm thấy đủ xe phù hợp trong danh sách SelectedVehicleIds cho sản phẩm '{outputInfo.ProductVariant!.Product!.Name}'{colorMsg}. Cần: {count}, tìm thấy: {matches.Count}.",
-                    "SelectedVehicleIds"));
+                return Result.Failure(
+                    Error.BadRequest(
+                        $"Không tìm thấy đủ xe phù hợp trong danh sách SelectedVehicleIds cho sản phẩm '{outputInfo.ProductVariant!.Product!.Name}'{colorMsg}. Cần: {count}, tìm thấy: {matches.Count}.",
+                        "SelectedVehicleIds"));
             }
             matchedVehiclesMap[outputInfo] = matches;
             foreach (var match in matches)
@@ -227,11 +229,11 @@ public sealed class UpdateOutputStatusCommandHandler(
         }
         if (remainingVehicles.Count > 0)
         {
-            return Result.Failure(Error.BadRequest(
-                "Danh sách SelectedVehicleIds chứa xe không khớp với bất kỳ sản phẩm nào trong đơn hàng.",
-                "SelectedVehicleIds"));
+            return Result.Failure(
+                Error.BadRequest(
+                    "Danh sách SelectedVehicleIds chứa xe không khớp với bất kỳ sản phẩm nào trong đơn hàng.",
+                    "SelectedVehicleIds"));
         }
-
         var selectedSet = selectedVehicleIds.ToHashSet();
         foreach (var assignedVehicle in output.OutputInfos.SelectMany(oi => oi.Vehicles))
         {
@@ -243,14 +245,16 @@ public sealed class UpdateOutputStatusCommandHandler(
                 vehicleUpdateRepository.Update(assignedVehicle);
             }
         }
-
         var lead = await GetOrCreateLeadAsync(output, cancellationToken).ConfigureAwait(false);
         foreach (var pair in matchedVehiclesMap)
         {
             foreach (var vehicle in pair.Value)
             {
                 vehicle.OutputInfoId = pair.Key.Id;
-                vehicle.Status = string.Equals(request.StatusId, OrderStatus.Completed, StringComparison.OrdinalIgnoreCase)
+                vehicle.Status = string.Equals(
+                        request.StatusId,
+                        OrderStatus.Completed,
+                        StringComparison.OrdinalIgnoreCase)
                     ? VehicleStatus.Sold
                     : VehicleStatus.AssignedToOrder;
                 if (lead is not null)
@@ -263,11 +267,11 @@ public sealed class UpdateOutputStatusCommandHandler(
         return Result.Success();
     }
 
-    private async Task<LeadEntity?> GetOrCreateLeadAsync(
-        Domain.Entities.Output output,
-        CancellationToken cancellationToken)
+    private async Task<LeadEntity?> GetOrCreateLeadAsync(Output output, CancellationToken cancellationToken)
     {
-        if (leadReadRepository == null || leadInsertRepository == null || string.IsNullOrWhiteSpace(output.CustomerPhone))
+        if (leadReadRepository == null ||
+            leadInsertRepository == null ||
+            string.IsNullOrWhiteSpace(output.CustomerPhone))
         {
             return null;
         }

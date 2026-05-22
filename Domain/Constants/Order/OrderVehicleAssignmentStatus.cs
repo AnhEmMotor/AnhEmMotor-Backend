@@ -1,13 +1,9 @@
+
 namespace Domain.Constants.Order;
 
 public static class OrderVehicleAssignmentStatus
 {
-    public static readonly HashSet<string> RequiredStatuses =
-    [
-        OrderStatus.Delivering,
-        OrderStatus.WaitingPickup,
-        OrderStatus.Completed
-    ];
+    public static readonly HashSet<string> RequiredStatuses =[OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed];
 
     public static bool RequiresVehicleAssignment(string? statusId)
     {

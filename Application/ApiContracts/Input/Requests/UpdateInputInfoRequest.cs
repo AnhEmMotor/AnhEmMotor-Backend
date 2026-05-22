@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Application.ApiContracts.Input.Requests
 {
     public class UpdateInputInfoRequest

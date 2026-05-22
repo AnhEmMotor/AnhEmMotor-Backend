@@ -958,7 +958,8 @@ public class SalesOrder
         {
             BuyerId = Guid.NewGuid(),
             OutputInfos =
-                [new() { ProductVariantId = productId1, Count = 5 }, new() { ProductVariantId = productId2, Count = 3 }, new()
+                [new() { ProductVariantId = productId1, Count = 5 }, new() { ProductVariantId = productId2, Count = 3 }, new(
+                    )
                 {
                     ProductVariantId = productId3,
                     Count = 2
@@ -1364,7 +1365,11 @@ public class SalesOrder
             _userRepoMock.Object,
             _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
-        var command = new UpdateOutputForManagerCommand { Id = 1, OutputInfos = [new() { ProductVariantId = 999, Count = 1 }] };
+        var command = new UpdateOutputForManagerCommand
+        {
+            Id = 1,
+            OutputInfos = [new() { ProductVariantId = 999, Count = 1 }]
+        };
         var existingOutput = new Output { Id = 1, StatusId = "pending", OutputInfos = [] };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);

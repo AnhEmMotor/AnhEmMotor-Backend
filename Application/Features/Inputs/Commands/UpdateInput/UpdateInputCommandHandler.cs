@@ -1,3 +1,4 @@
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
@@ -181,7 +182,7 @@ public sealed partial class UpdateInputCommandHandler(
 
     private static Error? ValidateVehicleIdentifiers(
         ProductVariant variant,
-        ApiContracts.Input.Requests.UpdateInputInfoRequest product,
+        UpdateInputInfoRequest product,
         HashSet<(string Vin, int ProductVariantId, int? ProductVariantColorId)> uniqueVins,
         HashSet<(string Engine, int ProductVariantId, int? ProductVariantColorId)> uniqueEngines)
     {
@@ -222,7 +223,7 @@ public sealed partial class UpdateInputCommandHandler(
 
     private static void SyncVehicleIdentifiers(
         InputInfo inputInfo,
-        ApiContracts.Input.Requests.UpdateInputInfoRequest productRequest,
+        UpdateInputInfoRequest productRequest,
         ProductVariant? variant)
     {
         var managementType = variant?.Product?.ProductCategory?.ManagementType;
@@ -237,18 +238,18 @@ public sealed partial class UpdateInputCommandHandler(
         foreach (var vehicleRequest in requestedVehicles)
         {
             var vehicle = vehicleRequest.Id.HasValue &&
-                existingVehicles.TryGetValue(vehicleRequest.Id.Value, out var existingVehicle)
-                    ? existingVehicle
-                    : new Vehicle
-                    {
-                        LicensePlate = string.Empty,
-                        ProductVariantId = variant?.Id,
-                        ProductVariantColorId = productRequest.ProductVariantColorId,
-                        LeadId = null,
-                        PurchaseDate = DateTimeOffset.UtcNow,
-                        IsActive = true,
-                        Status = VehicleStatus.Available
-                    };
+                    existingVehicles.TryGetValue(vehicleRequest.Id.Value, out var existingVehicle)
+                ? existingVehicle
+                : new Vehicle
+                {
+                    LicensePlate = string.Empty,
+                    ProductVariantId = variant?.Id,
+                    ProductVariantColorId = productRequest.ProductVariantColorId,
+                    LeadId = null,
+                    PurchaseDate = DateTimeOffset.UtcNow,
+                    IsActive = true,
+                    Status = VehicleStatus.Available
+                };
             vehicle.VinNumber = vehicleRequest.VinNumber.Trim();
             vehicle.EngineNumber = vehicleRequest.EngineNumber.Trim();
             vehicle.ProductVariantId = variant?.Id;

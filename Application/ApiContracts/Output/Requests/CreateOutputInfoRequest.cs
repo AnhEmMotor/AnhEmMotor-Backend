@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Application.ApiContracts.Output.Requests
 {
     public class CreateOutputInfoRequest

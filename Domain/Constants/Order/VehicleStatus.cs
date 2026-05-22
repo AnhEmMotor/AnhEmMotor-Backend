@@ -1,3 +1,4 @@
+
 namespace Domain.Constants.Order;
 
 public static class VehicleStatus
@@ -10,7 +11,6 @@ public static class VehicleStatus
 
     public static bool IsValid(string? status)
     {
-        return !string.IsNullOrWhiteSpace(status) &&
-            All.Contains(status, StringComparer.OrdinalIgnoreCase);
+        return !string.IsNullOrWhiteSpace(status) && All.Contains(status, StringComparer.OrdinalIgnoreCase);
     }
 }

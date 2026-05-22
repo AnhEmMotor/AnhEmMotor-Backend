@@ -133,6 +133,7 @@ public sealed class OutputMappingConfig : IRegister
                     EngineNumber = v.EngineNumber,
                     Status = v.Status
                 })
-            .ToList() ?? [];
+                .ToList() ??
+            [];
     }
 }

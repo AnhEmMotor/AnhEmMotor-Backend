@@ -123,7 +123,8 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         var validStatusIds = InputStatus.FinishInputValues;
         var currentStock = await context.InputInfos
             .AsNoTracking()
-            .Where(ii => ii.ProductVariantId == variantId && ii.ProductVariantColorId == colorId && ii.DeletedAt == null)
+            .Where(
+                ii => ii.ProductVariantId == variantId && ii.ProductVariantColorId == colorId && ii.DeletedAt == null)
             .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => x.i.DeletedAt == null && validStatusIds.Contains(x.i.StatusId))
             .SumAsync(x => x.ii.RemainingCount ?? 0, cancellationToken)

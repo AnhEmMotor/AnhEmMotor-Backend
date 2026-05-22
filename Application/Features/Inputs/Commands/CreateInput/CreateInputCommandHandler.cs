@@ -109,7 +109,8 @@ public sealed partial class CreateInputCommandHandler(
                             vin,
                             product.ProductVariantId.Value,
                             product.ProductVariantColorId,
-                            cancellationToken).ConfigureAwait(false);
+                            cancellationToken)
+                            .ConfigureAwait(false);
                         if (isVinExists)
                         {
                             return Error.BadRequest($"Số khung (VIN) {vin} đã tồn tại trong hệ thống.", "Products");
@@ -118,7 +119,8 @@ public sealed partial class CreateInputCommandHandler(
                             engine,
                             product.ProductVariantId.Value,
                             product.ProductVariantColorId,
-                            cancellationToken).ConfigureAwait(false);
+                            cancellationToken)
+                            .ConfigureAwait(false);
                         if (isEngineExists)
                         {
                             return Error.BadRequest($"Số máy {engine} đã tồn tại trong hệ thống.", "Products");
@@ -127,7 +129,6 @@ public sealed partial class CreateInputCommandHandler(
                 }
             }
         }
-
         var input = request.Adapt<InputEntity>();
         if (!string.IsNullOrEmpty(input.Notes))
         {

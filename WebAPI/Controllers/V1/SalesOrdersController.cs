@@ -316,7 +316,8 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa đơn hàng).
+    /// Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa
+    /// đơn hàng).
     /// </summary>
     [HttpPut("for-manager/{id:int}")]
     [HasPermission(Outputs.Edit)]

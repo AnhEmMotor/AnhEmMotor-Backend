@@ -1,6 +1,6 @@
+using Domain.Constants.Order;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Constants.Order;
 
 namespace Domain.Entities;
 
