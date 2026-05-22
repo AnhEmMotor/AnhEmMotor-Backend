@@ -385,6 +385,92 @@ public class InventoryReceipts
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Contain("VIN123");
     }
+
+    [Fact(DisplayName = "INPUT_077 - Tạo phiếu nhập xe không lấy biển số từ chi tiết xe")]
+    public async Task CreateInputHandler_VinManagedProduct_CreatesVehiclesWithEmptyLicensePlate()
+    {
+        var mockInsertRepo = new Mock<IInputInsertRepository>();
+        var mockReadRepo = new Mock<IInputReadRepository>();
+        var mockVariantRepo = new Mock<IProductVariantReadRepository>();
+        var mockVehicleReadRepo = new Mock<IVehicleReadRepository>();
+        var mockUnitOfWork = new Mock<IUnitOfWork>();
+
+        var variant = new ProductVariant
+        {
+            ProductId = 1,
+            Product = new Domain.Entities.Product
+            {
+                Name = "Xe máy Test",
+                ProductCategory = new Domain.Entities.ProductCategory
+                {
+                    ManagementType = "vin_number"
+                }
+            }
+        };
+
+        mockVariantRepo
+            .Setup(x => x.GetByIdAsync(
+                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([variant]);
+
+        mockVehicleReadRepo
+            .Setup(x => x.ExistsByVinAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        mockVehicleReadRepo
+            .Setup(x => x.ExistsByEngineNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        var savedInput = default(Domain.Entities.Input);
+        mockInsertRepo
+            .Setup(x => x.Add(It.IsAny<Domain.Entities.Input>()))
+            .Callback<Domain.Entities.Input>(input => savedInput = input);
+
+        mockReadRepo
+            .Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => savedInput);
+
+        var handler = new CreateInputCommandHandler(
+            mockInsertRepo.Object,
+            mockReadRepo.Object,
+            Mock.Of<ISupplierReadRepository>(),
+            mockVariantRepo.Object,
+            mockVehicleReadRepo.Object,
+            mockUnitOfWork.Object);
+
+        var command = new CreateInputCommand
+        {
+            SupplierId = null,
+            Products =
+            [
+                new CreateInputInfoRequest
+                {
+                    ProductVarientId = 1,
+                    Count = 1,
+                    InputPrice = 100000,
+                    Vehicles =
+                    [
+                        new VehicleInputRequest
+                        {
+                            VinNumber = "VIN-INPUT-001",
+                            EngineNumber = "ENG-INPUT-001"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        savedInput.Should().NotBeNull();
+        savedInput!.InputInfos.Should().ContainSingle();
+        var savedInputInfo = savedInput.InputInfos.Single();
+        savedInputInfo.Vehicles.Should().ContainSingle();
+        savedInputInfo.Vehicles.Single().LicensePlate.Should().BeEmpty();
+    }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }

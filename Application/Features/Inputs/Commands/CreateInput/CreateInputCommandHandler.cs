@@ -141,7 +141,7 @@ public sealed class CreateInputCommandHandler(
                             {
                                 VinNumber = v.VinNumber.Trim(),
                                 EngineNumber = v.EngineNumber.Trim(),
-                                LicensePlate = v.LicensePlate?.Trim() ?? string.Empty,
+                                LicensePlate = string.Empty,
                                 ProductId = variant.ProductId,
                                 LeadId = null,
                                 PurchaseDate = DateTimeOffset.UtcNow,
