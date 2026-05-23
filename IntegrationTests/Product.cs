@@ -1312,7 +1312,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         createdProduct!.UrlSlug?.Length.Should().Be(200);
     }
 
-    [Fact(DisplayName = "PRODUCT_105 - Cập nhật sản phẩm với thuộc tính null (chuỗi trống) parse thành decimal an toàn")]
+    [Fact(DisplayName = "PRODUCT_201 - Cập nhật sản phẩm với thuộc tính null (chuỗi trống) parse thành decimal an toàn")]
     public async Task UpdateProduct_EmptyDecimalStrings_ParsedAsNullSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];

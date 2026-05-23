@@ -54,7 +54,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "INPUT_001 - T?o phi?u nh?p hàng thành công (Happy Path)")]
+    [Fact(DisplayName = "INPUT_001 - Tạo phiếu nhập hàng thành công (Happy Path)")]
     public async Task CreateInput_Success_ReturnsOk()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -168,7 +168,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
     }
 
-    [Fact(DisplayName = "INPUT_002 - T?o phi?u nh?p v?i nhi?u s?n ph?m và tính toán chính xác t?ng ti?n")]
+    [Fact(DisplayName = "INPUT_002 - Tạo phiếu nhập với nhiều sản phẩm và tính toán chính xác tổng tiền")]
     public async Task CreateInput_MultipleProducts_CalculatesTotalCorrectly()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -268,7 +268,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.TotalPayable.Should().Be((long)expectedTotal);
     }
 
-    [Fact(DisplayName = "INPUT_004 - T?o phi?u nh?p v?i SupplierId không t?n t?i")]
+    [Fact(DisplayName = "INPUT_004 - Tạo phiếu nhập với SupplierId không tồn tại")]
     public async Task CreateInput_NonExistentSupplier_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -305,7 +305,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_005 - T?o phi?u nh?p v?i ProductId không t?n t?i")]
+    [Fact(DisplayName = "INPUT_005 - Tạo phiếu nhập với ProductId không tồn tại")]
     public async Task CreateInput_NonExistentProduct_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -342,7 +342,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_006 - T?o phi?u nh?p v?i Product dã b? xóa ho?c không còn bán")]
+    [Fact(DisplayName = "INPUT_006 - Tạo phiếu nhập với Product đã bị xóa hoặc không còn bán")]
     public async Task CreateInput_DeletedProduct_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -428,7 +428,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_012 - T?o phi?u nh?p v?i Notes ch?a script XSS")]
+    [Fact(DisplayName = "INPUT_012 - Tạo phiếu nhập với Notes chứa script XSS")]
     public async Task CreateInput_XSSInNotes_SanitizesInput()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -513,7 +513,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.Notes.Should().NotContain("<script>");
     }
 
-    [Fact(DisplayName = "INPUT_016 - L?y danh sách phi?u nh?p có phân trang")]
+    [Fact(DisplayName = "INPUT_016 - Lấy danh sách phiếu nhập có phân trang")]
     public async Task GetInputs_WithPagination_ReturnsCorrectPage()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -547,7 +547,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content.PageNumber.Should().Be(1);
     }
 
-    [Fact(DisplayName = "INPUT_017 - L?y danh sách phi?u nh?p v?i filter theo StatusId")]
+    [Fact(DisplayName = "INPUT_017 - Lấy danh sách phiếu nhập với filter theo StatusId")]
     public async Task GetInputs_FilterByStatus_ReturnsFilteredResults()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -584,7 +584,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             .OnlyContain(i => string.Compare(i.StatusId, Domain.Constants.Input.InputStatus.Working) == 0);
     }
 
-    [Fact(DisplayName = "INPUT_018 - L?y danh sách phi?u nh?p v?i sort theo InputDate descending")]
+    [Fact(DisplayName = "INPUT_018 - Lấy danh sách phiếu nhập với sort theo InputDate descending")]
     public async Task GetInputs_SortByInputDateDesc_ReturnsSortedResults()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -675,7 +675,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         items.Should().BeInDescendingOrder(i => i.CreatedAt);
     }
 
-    [Fact(DisplayName = "INPUT_020 - L?y chi ti?t phi?u nh?p thành công")]
+    [Fact(DisplayName = "INPUT_020 - Lấy chi tiết phiếu nhập thành công")]
     public async Task GetInputById_ExistingInput_ReturnsCompleteDetails()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -776,7 +776,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content.TotalPayable.Should().Be(250000);
     }
 
-    [Fact(DisplayName = "INPUT_021 - L?y chi ti?t phi?u nh?p không t?n t?i")]
+    [Fact(DisplayName = "INPUT_021 - Lấy chi tiết phiếu nhập không tồn tại")]
     public async Task GetInputById_NonExistentInput_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -805,7 +805,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "INPUT_023 - C?p nh?t phi?u nh?p thành công ? tr?ng thái working")]
+    [Fact(DisplayName = "INPUT_023 - Cập nhật phiếu nhập thành công ở trạng thái working")]
     public async Task UpdateInput_WorkingStatus_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -928,7 +928,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content.TotalPayable.Should().Be(4000000);
     }
 
-    [Fact(DisplayName = "INPUT_024 - C?p nh?t phi?u nh?p ? tr?ng thái finished (không cho phép)")]
+    [Fact(DisplayName = "INPUT_024 - Cập nhật phiếu nhập ở trạng thái finished (không cho phép)")]
     public async Task UpdateInput_FinishedStatus_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1040,7 +1040,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_025 - C?p nh?t phi?u nh?p ? tr?ng thái cancelled (không cho phép)")]
+    [Fact(DisplayName = "INPUT_025 - Cập nhật phiếu nhập ở trạng thái cancelled (không cho phép)")]
     public async Task UpdateInput_CancelledStatus_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1152,7 +1152,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_028 - C?p nh?t tr?ng thái phi?u nh?p t? working sang finished")]
+    [Fact(DisplayName = "INPUT_028 - Cập nhật trạng thái phiếu nhập từ working sang finished")]
     public async Task UpdateInputStatus_WorkingToFinished_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1260,7 +1260,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input.ConfirmedBy.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_029 - C?p nh?t tr?ng thái phi?u nh?p t? working sang cancelled")]
+    [Fact(DisplayName = "INPUT_029 - Cập nhật trạng thái phiếu nhập từ working sang cancelled")]
     public async Task UpdateInputStatus_WorkingToCancelled_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1363,7 +1363,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Cancel);
     }
 
-    [Fact(DisplayName = "INPUT_032 - C?p nh?t tr?ng thái nhi?u phi?u nh?p cùng lúc")]
+    [Fact(DisplayName = "INPUT_032 - Cập nhật trạng thái nhiều phiếu nhập cùng lúc")]
     public async Task UpdateManyInputStatus_MultipleInputs_UpdatesAllSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1478,7 +1478,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         }
     }
 
-    [Fact(DisplayName = "INPUT_033 - C?p nh?t tr?ng thái nhi?u phi?u nh?p v?i m?t s? Id không t?n t?i")]
+    [Fact(DisplayName = "INPUT_033 - Cập nhật trạng thái nhiều phiếu nhập với một số Id không tồn tại")]
     public async Task UpdateManyInputStatus_SomeNonExistent_HandlesPartially()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1583,7 +1583,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             .BeOneOf(HttpStatusCode.MultiStatus, HttpStatusCode.BadRequest, HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "INPUT_034 - Xóa phi?u nh?p thành công ? tr?ng thái working")]
+    [Fact(DisplayName = "INPUT_034 - Xóa phiếu nhập thành công ở trạng thái working")]
     public async Task DeleteInput_WorkingStatus_DeletesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1679,7 +1679,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.DeletedAt.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_038 - Xóa nhi?u phi?u nh?p cùng lúc")]
+    [Fact(DisplayName = "INPUT_038 - Xóa nhiều phiếu nhập cùng lúc")]
     public async Task DeleteManyInputs_MultipleInputs_DeletesAllSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1782,7 +1782,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
 
-    [Fact(DisplayName = "INPUT_039 - Khôi ph?c phi?u nh?p dã xóa thành công")]
+    [Fact(DisplayName = "INPUT_039 - Khôi phục phiếu nhập đã xóa thành công")]
     public async Task RestoreInput_DeletedInput_RestoresSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1880,7 +1880,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.DeletedAt.Should().BeNull();
     }
 
-    [Fact(DisplayName = "INPUT_041 - Khôi ph?c nhi?u phi?u nh?p dã xóa cùng lúc")]
+    [Fact(DisplayName = "INPUT_041 - Khôi phục nhiều phiếu nhập đã xóa cùng lúc")]
     public async Task RestoreManyInputs_MultipleDeletedInputs_RestoresAllSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1984,7 +1984,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         }
     }
 
-    [Fact(DisplayName = "INPUT_042 - Clone phi?u nh?p thành công")]
+    [Fact(DisplayName = "INPUT_042 - Clone phiếu nhập thành công")]
     public async Task CloneInput_ValidInput_CreatesNewInput()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2083,7 +2083,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         clonedInput.SupplierId.Should().Be(createdInput.SupplierId);
     }
 
-    [Fact(DisplayName = "INPUT_043 - Clone phi?u nh?p v?i s?n ph?m dã b? xóa")]
+    [Fact(DisplayName = "INPUT_043 - Clone phiếu nhập với sản phẩm đã bị xóa")]
     public async Task CloneInput_WithDeletedProduct_ClonesOnlyValidProducts()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2205,7 +2205,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         clonedInput.Products[0].ProductVariantId.Should().Be(variant1.Id);
     }
 
-    [Fact(DisplayName = "INPUT_046 - L?y danh sách phi?u nh?p theo SupplierId")]
+    [Fact(DisplayName = "INPUT_046 - Lấy danh sách phiếu nhập theo SupplierId")]
     public async Task GetInputsBySupplierId_ValidSupplierId_ReturnsFilteredInputs()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2285,7 +2285,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.Items.Should().OnlyContain(i => i.SupplierId == supplierId);
     }
 
-    [Fact(DisplayName = "INPUT_047 - L?y danh sách phi?u nh?p dã xóa")]
+    [Fact(DisplayName = "INPUT_047 - Lấy danh sách phiếu nhập đã xóa")]
     public async Task GetDeletedInputs_ReturnsOnlyDeletedInputs()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2372,7 +2372,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_066 - T?o phi?u nh?p v?i ImportPrice là 0")]
+    [Fact(DisplayName = "INPUT_066 - Tạo phiếu nhập với ImportPrice là 0")]
     public async Task CreateInput_ZeroImportPrice_AllowsFreeProducts()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2451,7 +2451,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.TotalPayable.Should().Be(0);
     }
 
-    [Fact(DisplayName = "INPUT_068 - Ki?m tra ConfirmedBy du?c ghi nh?n dúng khi c?p nh?t phi?u nh?p")]
+    [Fact(DisplayName = "INPUT_068 - Kiểm tra ConfirmedBy được ghi nhận đúng khi cập nhật phiếu nhập")]
     public async Task UpdateInputStatus_TracksConfirmedByCorrectly()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2565,7 +2565,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.ConfirmedBy.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_069 - L?y danh sách phi?u nh?p v?i nhi?u filter k?t h?p")]
+    [Fact(DisplayName = "INPUT_069 - Lấy danh sách phiếu nhập với nhiều filter kết hợp")]
     public async Task GetInputs_MultipleCombinedFilters_ReturnsFilteredResults()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2634,7 +2634,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                     i.SupplierId == supplier.Id);
     }
 
-    [Fact(DisplayName = "INPUT_070 - L?y danh sách tr?ng thái phi?u nh?p thành công (Happy Path)")]
+    [Fact(DisplayName = "INPUT_070 - Lấy danh sách trạng thái phiếu nhập thành công (Happy Path)")]
     public async Task GetInputStatuses_WithViewPermission_ReturnsAllStatusesWithVietnameseLabels()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2669,7 +2669,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Cancel).WhoseValue.Should().Be("Đã huỷ");
     }
 
-    [Fact(DisplayName = "INPUT_071 - L?y danh sách tr?ng thái phi?u nh?p khi chua dang nh?p tr? 401")]
+    [Fact(DisplayName = "INPUT_071 - Lấy danh sách trạng thái phiếu nhập khi chua dang nhap trả 401")]
     public async Task GetInputStatuses_WithoutToken_ReturnsUnauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
@@ -2678,7 +2678,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "INPUT_076 - C?p nh?t ghi chú phi?u nh?p hàng qua API riêng thành công")]
+    [Fact(DisplayName = "INPUT_076 - Cập nhật ghi chú phiếu nhập hàng qua API riêng thành công")]
     public async Task UpdateInputNotes_Success_ReturnsOk()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2732,7 +2732,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         };
         db.InputReceipts.Add(input);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var request = new UpdateInputNotesCommand { Notes = "Ghi chú m?i dã du?c c?p nh?t" };
+        var request = new UpdateInputNotesCommand { Notes = "Ghi chú mới đã được cập nhật" };
         var requestMessage = new HttpRequestMessage(HttpMethod.Patch, $"/api/v1/InventoryReceipts/{input.Id}/notes")
         {
             Content = JsonContent.Create(request)
@@ -2744,13 +2744,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
-        content!.Notes.Should().Be("Ghi chú m?i dã du?c c?p nh?t");
+        content!.Notes.Should().Be("Ghi chú mới đã được cập nhật");
         var updatedInput = await db.InputReceipts
             .AsNoTracking()
             .FirstOrDefaultAsync(i => i.Id == input.Id, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         updatedInput.Should().NotBeNull();
-        updatedInput!.Notes.Should().Be("Ghi chú m?i dã du?c c?p nh?t");
+        updatedInput!.Notes.Should().Be("Ghi chú mới đã được cập nhật");
     }
     #pragma warning restore CRR0035
 }

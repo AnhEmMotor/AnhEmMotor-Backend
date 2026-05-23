@@ -16,7 +16,7 @@ using System.Linq;
 
 namespace UnitTests;
 
-public class PaymentTests
+public class Payment
 {
     private readonly Mock<IOutputReadRepository> _readRepositoryMock = new();
     private readonly Mock<IOutputUpdateRepository> _updateRepositoryMock = new();

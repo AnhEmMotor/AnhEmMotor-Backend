@@ -1,5 +1,7 @@
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
+using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -19,15 +21,18 @@ using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
+using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.Option;
 using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Technology;
 using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
+using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -2058,7 +2063,7 @@ public class Product
         result.IsValid.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PRODUCT_196 - Chặn biến thể không màu thiếu ảnh đại diện")]
+    [Fact(DisplayName = "PRODUCT_199 - Chặn biến thể không màu thiếu ảnh đại diện")]
     public void CreateProductVariant_NoColorWithoutCoverImage_IsInvalid()
     {
         var request = new CreateProductVariantRequest { VariantName = "Standard", UrlSlug = "standard", Price = 1000 };
@@ -2067,7 +2072,7 @@ public class Product
         result.IsValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "PRODUCT_197 - Chặn màu biến thể thiếu hình ảnh màu")]
+    [Fact(DisplayName = "PRODUCT_200 - Chặn màu biến thể thiếu hình ảnh màu")]
     public void CreateProductVariant_ColorWithoutImage_IsInvalid()
     {
         var request = new CreateProductVariantRequest
@@ -2080,6 +2085,164 @@ public class Product
         var validator = new CreateProductVariantCommandValidator();
         var result = validator.Validate(request);
         result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_196 - Tạo phiếu nhập với sản phẩm quản lý theo số khung nhưng thiếu thông tin xe")]
+    public async Task CreateInputHandler_VinManagedProduct_MissingVehicles_ReturnsError()
+    {
+        var mockInsertRepo = new Mock<IInputInsertRepository>();
+        var mockReadRepo = new Mock<IInputReadRepository>();
+        var mockVariantRepo = new Mock<IProductVariantReadRepository>();
+        var mockVehicleReadRepo = new Mock<IVehicleReadRepository>();
+        var mockUnitOfWork = new Mock<IUnitOfWork>();
+        var variant = new ProductVariant
+        {
+            ProductId = 1,
+            Product =
+                new ProductEntity
+                {
+                    Name = "Xe máy Test",
+                    ProductCategory = new Domain.Entities.ProductCategory { ManagementType = "vin_number" }
+                }
+        };
+        mockVariantRepo.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([variant]);
+        var handler = new CreateInputCommandHandler(
+            mockInsertRepo.Object,
+            mockReadRepo.Object,
+            Mock.Of<ISupplierReadRepository>(),
+            mockVariantRepo.Object,
+            mockVehicleReadRepo.Object,
+            mockUnitOfWork.Object);
+        var command = new CreateInputCommand
+        {
+            SupplierId = null,
+            Products =
+                [new CreateInputInfoRequest { ProductVariantId = 1, Count = 2, InputPrice = 100000, Vehicles = null }]
+        };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsFailure.Should().BeTrue();
+        result.Error?.Message.Should().Contain("Vehicles");
+    }
+
+    [Fact(
+        DisplayName = "PRODUCT_197 - Tạo phiếu nhập với sản phẩm quản lý theo số khung trùng lặp số khung hoặc số máy")]
+    public async Task CreateInputHandler_VinManagedProduct_DuplicateVehicles_ReturnsError()
+    {
+        var mockInsertRepo = new Mock<IInputInsertRepository>();
+        var mockReadRepo = new Mock<IInputReadRepository>();
+        var mockVariantRepo = new Mock<IProductVariantReadRepository>();
+        var mockVehicleReadRepo = new Mock<IVehicleReadRepository>();
+        var mockUnitOfWork = new Mock<IUnitOfWork>();
+        var variant = new ProductVariant
+        {
+            ProductId = 1,
+            Product =
+                new ProductEntity
+                {
+                    Name = "Xe máy Test",
+                    ProductCategory = new Domain.Entities.ProductCategory { ManagementType = "vin_number" }
+                }
+        };
+        mockVariantRepo.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([variant]);
+        mockVehicleReadRepo
+            .Setup(x => x.ExistsByVinAsync("VIN123", 1, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        var handler = new CreateInputCommandHandler(
+            mockInsertRepo.Object,
+            mockReadRepo.Object,
+            Mock.Of<ISupplierReadRepository>(),
+            mockVariantRepo.Object,
+            mockVehicleReadRepo.Object,
+            mockUnitOfWork.Object);
+        var command = new CreateInputCommand
+        {
+            SupplierId = null,
+            Products =
+                [new CreateInputInfoRequest
+                {
+                    ProductVariantId = 1,
+                    Count = 2,
+                    InputPrice = 100000,
+                    Vehicles =
+                        [new VehicleInputRequest { VinNumber = "VIN123", EngineNumber = "ENG123" }, new VehicleInputRequest
+                            {
+                                VinNumber = "VIN456",
+                                EngineNumber = "ENG456"
+                            }]
+                }]
+        };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsFailure.Should().BeTrue();
+        result.Error?.Message.Should().Contain("VIN123");
+    }
+
+    [Fact(DisplayName = "PRODUCT_198 - Tạo phiếu nhập cho phép trùng số khung hoặc số máy khi khác cặp biến thể và màu")]
+    public async Task CreateInputHandler_VinManagedProduct_DuplicateIdentifiersInDifferentVariantColorPair_Succeeds()
+    {
+        var mockInsertRepo = new Mock<IInputInsertRepository>();
+        var mockReadRepo = new Mock<IInputReadRepository>();
+        var mockVariantRepo = new Mock<IProductVariantReadRepository>();
+        var mockVehicleReadRepo = new Mock<IVehicleReadRepository>();
+        var mockUnitOfWork = new Mock<IUnitOfWork>();
+        var variant = new ProductVariant
+        {
+            Id = 2,
+            ProductId = 1,
+            Product =
+                new ProductEntity
+                {
+                    Name = "Xe máy Test",
+                    ProductCategory = new Domain.Entities.ProductCategory { ManagementType = "vin_number" }
+                },
+            ProductVariantColors = [new ProductVariantColor { Id = 20, ProductVariantId = 2, ColorName = "Đỏ" }]
+        };
+        mockVariantRepo
+            .Setup(
+                x => x.GetByIdAsync(
+                    It.IsAny<IEnumerable<int>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([variant]);
+        mockVehicleReadRepo
+            .Setup(x => x.ExistsByVinAsync("VIN123", 2, 20, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        mockVehicleReadRepo
+            .Setup(x => x.ExistsByEngineNumberAsync("ENG123", 2, 20, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        var savedInput = default(Input);
+        mockInsertRepo
+            .Setup(x => x.Add(It.IsAny<Input>()))
+            .Callback<Input>(input => savedInput = input);
+        mockReadRepo
+            .Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => savedInput);
+        var handler = new CreateInputCommandHandler(
+            mockInsertRepo.Object,
+            mockReadRepo.Object,
+            Mock.Of<ISupplierReadRepository>(),
+            mockVariantRepo.Object,
+            mockVehicleReadRepo.Object,
+            mockUnitOfWork.Object);
+        var command = new CreateInputCommand
+        {
+            SupplierId = null,
+            Products =
+                [new CreateInputInfoRequest
+                {
+                    ProductVariantId = 2,
+                    ProductVariantColorId = 20,
+                    Count = 1,
+                    InputPrice = 100000,
+                    Vehicles = [new VehicleInputRequest { VinNumber = "VIN123", EngineNumber = "ENG123" }]
+                }]
+        };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        savedInput!.InputInfos.Single().Vehicles.Single().VinNumber.Should().Be("VIN123");
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
