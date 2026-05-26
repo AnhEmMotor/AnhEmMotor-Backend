@@ -1,4 +1,5 @@
-﻿using Domain.Constants;
+using AnhEmMotor.Domain.Entities;
+using Domain.Constants;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -83,6 +84,16 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<NewsArticle> NewsArticles { get; set; }
 
     public virtual DbSet<PromotionBanner> PromotionBanners { get; set; }
+
+    public virtual DbSet<Vehicle> Vehicles { get; set; }
+
+    public virtual DbSet<ServiceBooking> ServiceBookings { get; set; }
+
+    public virtual DbSet<SupportTicket> SupportTickets { get; set; }
+
+    public virtual DbSet<Lead> Leads { get; set; }
+
+    public virtual DbSet<OrderLogistics> OrderLogistics { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -241,6 +252,53 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
         modelBuilder.Entity<PromotionBanner>()
             .HasIndex(b => new { b.IsEnabled, b.StartDate, b.EndDate });
+
+        modelBuilder.Entity<Vehicle>(entity =>
+        {
+            entity.HasOne(v => v.User)
+                .WithMany()
+                .HasForeignKey(v => v.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(v => v.Product)
+                .WithMany()
+                .HasForeignKey(v => v.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ServiceBooking>(entity =>
+        {
+            entity.HasOne(b => b.Vehicle)
+                .WithMany()
+                .HasForeignKey(b => b.VehicleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(b => b.AssignedSale)
+                .WithMany()
+                .HasForeignKey(b => b.AssignedSaleId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<SupportTicket>(entity =>
+        {
+            entity.HasOne(t => t.Customer)
+                .WithMany()
+                .HasForeignKey(t => t.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(t => t.AssignedAdmin)
+                .WithMany()
+                .HasForeignKey(t => t.AssignedAdminId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<Lead>(entity =>
+        {
+            entity.HasOne(l => l.AssignedSale)
+                .WithMany()
+                .HasForeignKey(l => l.AssignedSaleId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
 
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;

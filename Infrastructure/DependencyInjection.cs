@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Services;
 using Domain.Entities;
