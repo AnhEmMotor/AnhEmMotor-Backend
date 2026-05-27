@@ -1,11 +1,19 @@
+using Application.Common.Models;
 using Domain.Constants;
+using Domain.Primitives;
+using Sieve.Models;
+using System.Linq.Expressions;
 using ProductEntity = Domain.Entities.Product;
 
 namespace Application.Interfaces.Repositories.Product;
 
 public interface IProductReadRepository
 {
-    public IQueryable<ProductEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<ProductEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default);
 
     public Task<IEnumerable<ProductEntity>> GetAllAsync(
         CancellationToken cancellationToken,
@@ -38,11 +46,14 @@ public interface IProductReadRepository
         string? sorts,
         CancellationToken cancellationToken);
 
-    public Task<(List<ProductEntity> Items, int TotalCount, List<List<int>> GroupedOptionValueIds)> GetPagedProductsAsync(
+    public Task<(List<ProductEntity> Items, int TotalCount, List<FilterGroup> GroupedOptionFilters)> GetPagedProductsAsync(
         string? search,
         List<string> statusIds,
         List<int> categoryIds,
+        List<int> brandIds,
         List<int> optionValueIds,
+        decimal? minPrice,
+        decimal? maxPrice,
         int page,
         int pageSize,
         string? filters,
@@ -60,4 +71,6 @@ public interface IProductReadRepository
         string slug,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
 }

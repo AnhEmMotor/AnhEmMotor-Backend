@@ -1,18 +1,39 @@
-﻿using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
-
 using Sieve.Services;
+using System.Linq.Expressions;
 using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Infrastructure.Repositories.ProductVariant
 {
-    public class ProductVariantReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor) : IProductVariantReadRepository
+    public class ProductVariantReadRepository(
+        ApplicationDBContext context,
+        ISieveProcessor sieveProcessor,
+        ISievePaginator paginator) : IProductVariantReadRepository
     {
-        public IQueryable<ProductVariantEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-        { return context.GetQuery<ProductVariantEntity>(mode); }
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            Expression<Func<ProductVariantEntity, bool>>? filter = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = GetQueryable(mode);
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return paginator.ApplyAsync<ProductVariantEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+        }
+
+        internal IQueryable<ProductVariantEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+        {
+            return context.GetQuery<ProductVariantEntity>(mode);
+        }
 
         public Task<ProductVariantEntity?> GetByIdWithDetailsAsync(
             int id,
@@ -22,6 +43,7 @@ namespace Infrastructure.Repositories.ProductVariant
             return context.GetQuery<ProductVariantEntity>(mode)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
+                .Include(v => v.ProductVariantColors)
                 .FirstOrDefaultAsync(v => v.Id == id, cancellationToken)
                 .ContinueWith(t => t.Result, cancellationToken);
         }
@@ -32,6 +54,7 @@ namespace Infrastructure.Repositories.ProductVariant
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return context.GetQuery<ProductVariantEntity>(mode)
+                .Include(v => v.ProductVariantColors)
                 .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, slug) == 0, cancellationToken)
                 .ContinueWith(t => t.Result, cancellationToken);
         }
@@ -46,6 +69,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.Product)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.InputInfos)
+                .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
                 .ThenInclude(ov => ov!.Option)
@@ -62,7 +86,9 @@ namespace Infrastructure.Repositories.ProductVariant
             return context.GetQuery<ProductVariantEntity>(mode)
                 .Where(v => ids.Contains(v.Id))
                 .Include(v => v.Product)
+                .ThenInclude(p => p!.ProductCategory)
                 .Include(v => v.ProductCollectionPhotos)
+                .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
                 .AsSplitQuery()
@@ -80,16 +106,14 @@ namespace Infrastructure.Repositories.ProductVariant
             string? search = null)
         {
             var query = context.GetQuery<ProductVariantEntity>(mode);
-
-            if(mode == DataFetchMode.ActiveOnly)
+            if (mode == DataFetchMode.ActiveOnly)
             {
                 query = query.Where(v => v.Product != null && v.Product.DeletedAt == null);
-            } else if(mode == DataFetchMode.DeletedOnly)
+            } else if (mode == DataFetchMode.DeletedOnly)
             {
                 query = query.Where(v => v.Product != null && v.Product.DeletedAt == null);
             }
-
-            if(!string.IsNullOrWhiteSpace(search))
+            if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchPattern = $"%{search.Trim()}%";
                 query = query.Where(
@@ -100,10 +124,8 @@ namespace Infrastructure.Repositories.ProductVariant
                                     vov => vov.OptionValue != null &&
                                                     EF.Functions.Like(vov.OptionValue.Name!, searchPattern))));
             }
-
             var normalizedPage = Math.Max(page, 1);
             var normalizedPageSize = Math.Max(pageSize, 1);
-
             var sieveModel = new SieveModel
             {
                 Filters = filters,
@@ -111,11 +133,8 @@ namespace Infrastructure.Repositories.ProductVariant
                 Page = normalizedPage,
                 PageSize = normalizedPageSize
             };
-
             query = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
-
             var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
-
             IQueryable<ProductVariantEntity> dbQuery = query
                 .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
@@ -124,29 +143,34 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductStatus)
                 .Include(v => v.ProductCollectionPhotos)
+                .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
                 .ThenInclude(ov => ov!.Option)
-
                 .Include(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
                 .ThenInclude(ii => ii.InputReceipt)
-
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
                 .ThenInclude(oi => oi.OutputOrder);
-
-            if(string.IsNullOrWhiteSpace(sorts))
+            if (string.IsNullOrWhiteSpace(sorts))
             {
                 dbQuery = dbQuery.OrderByDescending(v => v.Id);
             }
-
             var items = await dbQuery
                 .Skip((normalizedPage - 1) * normalizedPageSize)
                 .Take(normalizedPageSize)
                 .AsSplitQuery()
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             return (items, totalCount);
+        }
+
+        public Task<List<string>> GetUrlSlugsAsync(CancellationToken cancellationToken)
+        {
+            return context.GetQuery<ProductVariantEntity>(DataFetchMode.ActiveOnly)
+                .Where(v => !string.IsNullOrEmpty(v.UrlSlug))
+                .Select(v => v.UrlSlug!)
+                .Distinct()
+                .ToListAsync(cancellationToken);
         }
     }
 }

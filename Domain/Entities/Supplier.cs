@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -31,6 +31,12 @@ namespace Domain.Entities
 
         [Column("TaxIdentificationNumber", TypeName = "varchar(20)")]
         public string? TaxIdentificationNumber { get; set; }
+
+        [Column("PartnerTypeId", TypeName = "nvarchar(50)")]
+        [ForeignKey("PartnerType")]
+        public string? PartnerTypeId { get; set; }
+
+        public PartnerType? PartnerType { get; set; }
 
         public SupplierStatus? SupplierStatus { get; set; }
 

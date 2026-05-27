@@ -11,4 +11,3 @@ public sealed record UpdateProductPriceCommand : IRequest<Result<ProductDetailFo
     public decimal Price { get; init; }
 }
 
-

@@ -19,6 +19,8 @@
 - Sử dụng `nameof` thay vì chuỗi ký tự khi tham chiếu đến tên thành viên.
 - Đảm bảo rằng các chú thích tài liệu XML được tạo cho bất kỳ hàm nào và class nào được tạo ra ở trong dự án WebAPI. Khi thích hợp, hãy bao gồm tài liệu `<example>` và `<code>` trong các chú thích.
 - Luôn đính kèm CancellationToken và thiết lập ConfigureAwait (true cho WebAPI/Test, false cho các trường hợp khác) để đảm bảo khả năng kiểm soát tiến trình và hiệu suất xử lý luồng.
+- Khi so sánh 2 chuỗi string, luôn sử dụng string.Compare thay vì các dấu != hoặc ==
+- Khi tạo 1 Feature, Luôn luôn tách The Request và The Executor thành 2 file \*.cs riêng biệt chứ không được để vào 1 file
 
 ## Toàn vẹn kiểu dữ liệu và xử lý kiểu dữ liệu null.
 
@@ -47,7 +49,7 @@
   - Dữ liệu phải có trước (Pre-condition): Trạng thái hệ thống hoặc dữ liệu mẫu cần thiết.
   - Kết quả mong đợi: Trạng thái hoặc giá trị trả về sau khi thực thi.
   - Số lượng Test: Tổng số kịch bản (Case) thực tế sẽ chạy.
-  - Loại Test: Phải định rõ là Unit Test, Controller Test hoặc IntegrationTests.
+  - Loại Test: Phải định rõ là Unit Test, Controller Test hoặc Integration Test.
 - Quy trình cập nhật bài test (Update):
   - Khi chỉ sửa đổi nhỏ không làm thay đổi bản chất logic, không cần tạo lại bảng.
   - Thay đổi quan trọng: Nếu việc sửa bài test dẫn đến thay đổi quan trọng về logic hoặc dữ liệu, bắt buộc phải viết một file Markdown khác tách biệt. File này phải giữ nguyên cấu trúc bảng như khi tạo mới, trong đó cột ID phải khớp chính xác với ID của bài test đang được sửa đổi và điền đầy đủ nội dung tương ứng, không được bỏ sót bất kỳ cột nào.
@@ -63,6 +65,8 @@
 ```
 ./add-migration.ps1 -MigrationName "TenMigrationCuaBan"
 ```
+
+- **Quy định quan trọng:** Mỗi nhánh (branch) hoặc Pull Request chỉ được phép có **duy nhất 1 migration**. Nếu cần thay đổi thêm, hãy xóa migration cũ và tạo lại.
 
 # Quy tắc khi thêm 1 biến môi trường vào trong appsetting.json hoặc appsettings.Development.json
 

@@ -14,12 +14,10 @@ public sealed class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepos
         CancellationToken cancellationToken)
     {
         var category = await repository.GetByIdAsync(request.Id!.Value, cancellationToken).ConfigureAwait(false);
-
-        if(category == null)
+        if (category == null)
         {
             return Error.NotFound($"Product category with Id {request.Id} not found.");
         }
-
         return category.Adapt<ProductCategoryResponse>();
     }
 }

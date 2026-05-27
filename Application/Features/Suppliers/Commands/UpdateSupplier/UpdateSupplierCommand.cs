@@ -19,4 +19,6 @@ public sealed record UpdateSupplierCommand : IRequest<Result<SupplierResponse?>>
     public string? Notes { get; init; }
 
     public string? TaxIdentificationNumber { get; init; }
+
+    public string? PartnerTypeId { get; init; }
 }

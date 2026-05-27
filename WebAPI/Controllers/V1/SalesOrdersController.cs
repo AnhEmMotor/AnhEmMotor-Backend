@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Output.Responses;
+using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Features.Outputs.Commands.CancelOrderByBuyer;
 using Application.Features.Outputs.Commands.CreateOutput;
@@ -20,8 +20,11 @@ using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
+using Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
+using Application.Features.Outputs.Queries.GetVehicleAssignmentStatuses;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -32,7 +35,6 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -56,27 +58,26 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if(string.IsNullOrEmpty(currentUserId) || !Guid.TryParse(currentUserId, out var buyerId))
+        if (string.IsNullOrEmpty(currentUserId) || !Guid.TryParse(currentUserId, out var buyerId))
         {
             return Unauthorized(
                 new ErrorResponse
                 {
                     Errors =
-                        [ new ErrorDetail
+                        [new ErrorDetail
                             {
                                 Field = "Authorization",
                                 Message = "Không thể lấy thông tin người dùng từ token."
-                            } ]
+                            }]
                 });
         }
-
         var query = new GetOutputsByUserIdQuery() { BuyerId = buyerId, SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy danh sách đơn hàng của id khách hàng (chỉ cho phép vào khi có quyền xem đơn hàng).
+    /// Lấy danh sách đơn hàng của ID khách hàng (chỉ cho phép vào khi có quyền xem đơn hàng).
     /// </summary>
     [HttpGet("get-purchases/{id:Guid}")]
     [HasPermission(Outputs.View)]
@@ -188,9 +189,38 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
+    /// Lấy danh sách các mã trạng thái yêu cầu gán xe (VIN).
+    /// </summary>
+    [HttpGet("vehicle-assignment-statuses")]
+    [Authorize]
+    [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetVehicleAssignmentStatusesAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetVehicleAssignmentStatusesQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy yêu cầu chọn VIN theo từng dòng sản phẩm trước khi đổi trạng thái đơn hàng.
+    /// </summary>
+    [HttpGet("{id:int}/vehicle-assignment-requirements")]
+    [RequiresAnyPermissions(Outputs.View, Outputs.ChangeStatus)]
+    [ProducesResponseType(typeof(VehicleAssignmentRequirementResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetVehicleAssignmentRequirementsAsync(
+        int id,
+        [FromQuery] string targetStatusId,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetVehicleAssignmentRequirementsQuery { Id = id, TargetStatusId = targetStatusId };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Lấy thông tin chi tiết của đơn hàng.
     /// </summary>
-    [HttpGet("{id:int}", Name = RouteNames.SaleOrders.GetById)]
+    [HttpGet("{id:int}", Name = SaleOrders.GetById)]
     [HasPermission(Outputs.View)]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -218,10 +248,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            RouteNames.SaleOrders.GetById,
-            new { id = result.IsSuccess ? result.Value?.Id : 0 });
+        return HandleCreated(result, SaleOrders.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>
@@ -241,14 +268,11 @@ public class SalesOrdersController(IMediator mediator) : ApiController
             BuyerId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            RouteNames.SaleOrders.GetById,
-            new { id = result.IsSuccess ? result.Value?.Id : 0 });
+        return HandleCreated(result, SaleOrders.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>
-    /// Cập nhật đơn hàng (Cho phép sửa đơn hàng do chính mình tạo ra)
+    /// Cập nhật đơn hàng (Cho phép sửa đơn hàng do chính mình tạo ra).
     /// </summary>
     [HttpPut("{id:int}")]
     [Authorize]
@@ -293,7 +317,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
 
     /// <summary>
     /// Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa
-    /// đơn hàng)
+    /// đơn hàng).
     /// </summary>
     [HttpPut("for-manager/{id:int}")]
     [HasPermission(Outputs.Edit)]
@@ -315,7 +339,6 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 
-
     /// <summary>
     /// Cập nhật trạng thái của đơn hàng.
     /// </summary>
@@ -330,8 +353,8 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = request.Adapt<UpdateOutputStatusCommand>() with 
-        { 
+        var command = request.Adapt<UpdateOutputStatusCommand>() with
+        {
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };

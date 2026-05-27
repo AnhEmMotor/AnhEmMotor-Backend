@@ -17,15 +17,12 @@ public sealed class RestoreBrandCommandHandler(
     {
         var brand = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
-        if(brand == null)
+        if (brand == null)
         {
             return Error.NotFound($"Brand with Id {request.Id} not found in deleted brands.", "Id");
         }
-
         updateRepository.Restore(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return brand.Adapt<BrandResponse>();
     }
 }

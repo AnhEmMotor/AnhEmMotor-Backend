@@ -1,0 +1,39 @@
+using Application.Common.Models;
+using MediatR;
+using System.Text.Json.Serialization;
+
+namespace Application.Features.Banners.Commands.UpdateBanner;
+
+public sealed record UpdateBannerCommand : IRequest<Result<Unit>>
+{
+    public int Id { get; init; }
+
+    public string Title { get; init; } = string.Empty;
+
+    [JsonPropertyName("image_url")]
+    public string ImageUrl { get; init; } = string.Empty;
+
+    [JsonPropertyName("link_url")]
+    public string? LinkUrl { get; init; }
+
+    [JsonPropertyName("cta_text")]
+    public string? CtaText { get; init; }
+
+    public string? Placement { get; init; }
+
+    [JsonPropertyName("start_date")]
+    public DateTimeOffset? StartDate { get; init; }
+
+    [JsonPropertyName("end_date")]
+    public DateTimeOffset? EndDate { get; init; }
+
+    [JsonPropertyName("is_active")]
+    public bool IsActive { get; init; } = true;
+
+    public string? Position { get; init; }
+
+    public int Priority { get; init; }
+
+    [JsonPropertyName("display_order")]
+    public int DisplayOrder { get; init; }
+}

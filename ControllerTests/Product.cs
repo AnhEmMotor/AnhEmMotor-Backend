@@ -1,4 +1,6 @@
-﻿using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Product.Requests;
+using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -18,6 +20,7 @@ using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
+using Application.Features.Technologies.Commands.CreateTechnology;
 using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -37,19 +40,17 @@ public class Product
     {
         _senderMock = new Mock<ISender>();
         _controller = new ProductController(_senderMock.Object);
-
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "PRODUCT_081 - API tạo sản phẩm trả về 403 khi user không có quyền")]
     public async Task CreateProduct_UserNoPermission_ReturnsForbidden()
     {
         _senderMock.Setup(m => m.Send(It.IsAny<CreateProductCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CreateProductAsync(new CreateProductCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -60,7 +61,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<CreateProductCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CreateProductAsync(new CreateProductCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -71,7 +71,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<GetProductsListForManagerQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetProductsForManagerAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -84,10 +83,8 @@ public class Product
             .ReturnsAsync(
                 Result<PagedResult<ProductListStoreResponse>>.Success(
                     new PagedResult<ProductListStoreResponse>([], 0, 1, 10)));
-
-        var result = await _controller.GetProductsAsync(new GetProductsRequest(), CancellationToken.None)
+        var result = await _controller.GetProductsAsync(new GetProductsRequest(), null, null, CancellationToken.None)
             .ConfigureAwait(true);
-
         Assert.NotNull(result);
     }
 
@@ -96,7 +93,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<DeleteProductCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.DeleteProductAsync(1, CancellationToken.None))
             .ConfigureAwait(true);
@@ -107,7 +103,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<UpdateProductCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateProductAsync(1, new UpdateProductCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -118,7 +113,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<GetDeletedProductsListQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetDeletedProductsAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -129,7 +123,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<CheckSlugAvailabilityQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CheckSlugAvailabilityAsync("test-slug", CancellationToken.None))
             .ConfigureAwait(true);
@@ -140,7 +133,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<UpdateProductPriceCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateProductPriceAsync(1, new UpdateProductPriceCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -151,7 +143,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<UpdateVariantPriceCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateVariantPriceAsync(1, new UpdateVariantPriceCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -162,7 +153,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<UpdateManyProductPricesCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateManyProductPricesAsync(new UpdateManyProductPricesCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -173,7 +163,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<UpdateProductStatusCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateProductStatusAsync(1, new UpdateProductStatusCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -184,7 +173,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<UpdateManyProductStatusesCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateManyProductStatusesAsync(
                 new UpdateManyProductStatusesCommand(),
@@ -197,7 +185,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<DeleteManyProductsCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.DeleteProductsAsync(new DeleteManyProductsCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -208,7 +195,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<RestoreProductCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.RestoreProductAsync(1, CancellationToken.None))
             .ConfigureAwait(true);
@@ -219,7 +205,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<RestoreManyProductsCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.RestoreProductsAsync(new RestoreManyProductsCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -230,7 +215,6 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<GetActiveVariantLiteListForInputQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetActiveVariantLiteProductsForInputAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -242,7 +226,6 @@ public class Product
         _senderMock.Setup(
             m => m.Send(It.IsAny<GetActiveVariantLiteListForOutputQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetActiveVariantLiteProductsForOutputAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -253,10 +236,8 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<CreateProductCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ProductDetailForManagerResponse?>.Failure(Error.BadRequest("Name là bắt buộc")));
-
         var result = await _controller.CreateProductAsync(new CreateProductCommand(), CancellationToken.None)
             .ConfigureAwait(true);
-
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
@@ -266,12 +247,10 @@ public class Product
         var sieveModel = new GetProductsRequest { Page = 2, PageSize = 5 };
         var expectedResult = Result<PagedResult<ProductListStoreResponse>>.Success(
             new PagedResult<ProductListStoreResponse>([], 15, 2, 5));
-
         _senderMock.Setup(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResult);
-
-        var result = await _controller.GetProductsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
+        var result = await _controller.GetProductsAsync(sieveModel, null, null, CancellationToken.None)
+            .ConfigureAwait(true);
         Assert.NotNull(result);
         _senderMock.Verify(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -282,11 +261,22 @@ public class Product
         _senderMock.Setup(
             m => m.Send(It.IsAny<GetProductsListForPriceManagementQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetProductsForPriceManagementAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+
+    [Fact(DisplayName = "PRODUCT_187 - API tạo Công nghệ mới trả về 201 Created")]
+    public async Task CreateTechnology_ValidData_ReturnsCreated()
+    {
+        var command = new CreateTechnologyCommand("Công nghệ ABS", 1, null, "ABS", "Hệ thống chống bó cứng phanh", null);
+        _senderMock.Setup(m => m.Send(It.IsAny<CreateTechnologyCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<TechnologyResponse>.Success(new TechnologyResponse { Id = 1, Name = "ABS" }));
+        var result = await _controller.CreateTechnologyAsync(command, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        Assert.IsType<OkObjectResult>(result);
+    }
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }
+

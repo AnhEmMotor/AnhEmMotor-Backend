@@ -22,6 +22,9 @@ namespace Application.ApiContracts.Supplier.Responses
 
         public string? TaxIdentificationNumber { get; set; }
 
+        [JsonPropertyName("partnerTypeId")]
+        public string? PartnerTypeId { get; set; }
+
         [JsonPropertyName("created_at")]
         public DateTimeOffset? CreatedAt { get; set; }
     }

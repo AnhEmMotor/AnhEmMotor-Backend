@@ -1,4 +1,4 @@
-﻿using ControllerTests;
+using ControllerTests;
 using FluentAssertions;
 using FluentAssertions.Extensibility;
 
@@ -10,5 +10,8 @@ namespace ControllerTests;
 
 public static class AssertionEngineInitializer
 {
-    public static void AcknowledgeSoftWarning() { License.Accepted = true; }
+    public static void AcknowledgeSoftWarning()
+    {
+        License.Accepted = true;
+    }
 }

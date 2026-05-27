@@ -2,6 +2,7 @@ using AnhEmMotor.Application.Interfaces.Repositories.ServiceBooking;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
@@ -29,8 +30,13 @@ namespace AnhEmMotor.Infrastructure.Persistence.Repositories.ServiceBooking
 
         public async Task<List<ServiceBookingEntity>> GetByUserIdAsync(string userId, CancellationToken cancellationToken)
         {
+            if (!Guid.TryParse(userId, out var parsedUserId))
+            {
+                return [];
+            }
+
             return await _db.ServiceBookings
-                .Where(b => b.Vehicle.UserId == userId)
+                .Where(b => b.Vehicle.UserId == parsedUserId)
                 .ToListAsync(cancellationToken);
         }
     }

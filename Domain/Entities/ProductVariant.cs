@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -20,10 +20,68 @@ namespace Domain.Entities
         [Column("Price", TypeName = "decimal(18, 2)")]
         public decimal? Price { get; set; }
 
-        [Column("CoverImageUrl", TypeName = "nvarchar(150)")]
+        [Column("CoverImageUrl", TypeName = "nvarchar(1000)")]
         public string? CoverImageUrl { get; set; }
 
+        [Column("VariantName", TypeName = "nvarchar(100)")]
+        public string? VariantName { get; set; }
+
+        [Column("SKU", TypeName = "nvarchar(50)")]
+        public string? SKU { get; set; }
+
+        [Column("Weight", TypeName = "decimal(18, 2)")]
+        public decimal? Weight { get; set; }
+
+        [Column("Dimensions", TypeName = "nvarchar(35)")]
+        public string? Dimensions { get; set; }
+
+        [Column("Wheelbase", TypeName = "decimal(18, 2)")]
+        public decimal? Wheelbase { get; set; }
+
+        [Column("SeatHeight", TypeName = "decimal(18, 2)")]
+        public decimal? SeatHeight { get; set; }
+
+        [Column("GroundClearance", TypeName = "decimal(18, 2)")]
+        public decimal? GroundClearance { get; set; }
+
+        [Column("FuelCapacity", TypeName = "decimal(18, 2)")]
+        public decimal? FuelCapacity { get; set; }
+
+        [Column("TireSize", TypeName = "nvarchar(100)")]
+        public string? TireSize { get; set; }
+
+        [Column("FrontBrake", TypeName = "nvarchar(100)")]
+        public string? FrontBrake { get; set; }
+
+        [Column("RearBrake", TypeName = "nvarchar(100)")]
+        public string? RearBrake { get; set; }
+
+        [Column("FrontSuspension", TypeName = "nvarchar(255)")]
+        public string? FrontSuspension { get; set; }
+
+        [Column("RearSuspension", TypeName = "nvarchar(255)")]
+        public string? RearSuspension { get; set; }
+
+        [Column("EngineType", TypeName = "nvarchar(100)")]
+        public string? EngineType { get; set; }
+
         public Product? Product { get; set; }
+
+        public ICollection<ProductVariantColor> ProductVariantColors { get; set; } = [];
+
+        [NotMapped]
+        public ProductVariantColor? ProductVariantColor
+        {
+            get => ProductVariantColors.FirstOrDefault();
+            set
+            {
+                ProductVariantColors.Clear();
+                if (value is not null)
+                {
+                    ProductVariantColors.Add(value);
+                }
+            }
+        }
 
         public ICollection<InputInfo> InputInfos { get; set; } = [];
 

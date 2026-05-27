@@ -8,9 +8,7 @@ public sealed class UpdateManyProductStatusesCommandValidator : AbstractValidato
     public UpdateManyProductStatusesCommandValidator()
     {
         RuleFor(x => x.Ids).NotEmpty().WithMessage("Ids list cannot be empty.");
-
         RuleForEach(x => x.Ids).GreaterThan(0).WithMessage("Each Id must be greater than 0.");
-
         RuleFor(x => x.StatusId)
             .NotEmpty()
             .WithMessage("Status is required.")

@@ -2,7 +2,7 @@ using AnhEmMotor.Application.Interfaces.Repositories.Lead;
 using Infrastructure.DBContexts;
 using System.Threading;
 using System.Threading.Tasks;
-using LeadEntity = AnhEmMotor.Domain.Entities.Lead;
+using LeadEntity = global::Domain.Entities.Lead;
 
 namespace AnhEmMotor.Infrastructure.Persistence.Repositories.Lead
 {

@@ -1,34 +1,92 @@
-using System;
-using System.Collections.Generic;
-using Domain.Entities;
+using Domain.Constants.Order;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AnhEmMotor.Domain.Entities
+namespace Domain.Entities;
+
+[Table("Vehicle")]
+public class Vehicle : BaseEntity
 {
-    public class Vehicle : BaseEntity
-    {
-        [Key]
-        [Column("Id")]
-        public int Id { get; set; }
+    [Key]
+    [Column("Id")]
+    public int Id { get; set; }
 
-        public string Vin { get; set; } = string.Empty;
-        public string LicensePlate { get; set; } = string.Empty;
-        public string ModelName { get; set; } = string.Empty;
-        public double CurrentOdo { get; set; }
-        public DateTime LastMaintenanceDate { get; set; }
-        public DateTime NextMaintenanceDate { get; set; }
-        public double NextMaintenanceOdo { get; set; }
-        public string ElectronicWarrantyQrCode { get; set; } = string.Empty;
-        public string Color { get; set; } = string.Empty;
-        public int Year { get; set; }
-        
-        // FK to User (Owner)
-        public string UserId { get; set; } = string.Empty;
-        public virtual ApplicationUser User { get; set; } = null!;
+    [Column("LeadId")]
+    [ForeignKey("Lead")]
+    public int? LeadId { get; set; }
 
-        // Relation to Product (Catalog)
-        public int ProductId { get; set; }
-        public virtual Product Product { get; set; } = null!;
-    }
+    public Lead? Lead { get; set; }
+
+    [Column("UserId")]
+    [ForeignKey("User")]
+    public Guid? UserId { get; set; }
+
+    public ApplicationUser? User { get; set; }
+
+    [Column("InputInfoId")]
+    [ForeignKey("InputInfo")]
+    public int? InputInfoId { get; set; }
+
+    public InputInfo? InputInfo { get; set; }
+
+    [Column("OutputInfoId")]
+    [ForeignKey("OutputInfo")]
+    public int? OutputInfoId { get; set; }
+
+    public OutputInfo? OutputInfo { get; set; }
+
+    [Column("ProductId")]
+    [ForeignKey("Product")]
+    public int? ProductId { get; set; }
+
+    public Product? Product { get; set; }
+
+    [Column("ProductVariantId")]
+    [ForeignKey("ProductVariant")]
+    public int? ProductVariantId { get; set; }
+
+    public ProductVariant? ProductVariant { get; set; }
+
+    [Column("ProductVariantColorId")]
+    [ForeignKey("ProductVariantColor")]
+    public int? ProductVariantColorId { get; set; }
+
+    public ProductVariantColor? ProductVariantColor { get; set; }
+
+    [Column("VinNumber", TypeName = "nvarchar(100)")]
+    public string VinNumber { get; set; } = string.Empty;
+
+    [Column("EngineNumber", TypeName = "nvarchar(100)")]
+    public string EngineNumber { get; set; } = string.Empty;
+
+    [Column("LicensePlate", TypeName = "nvarchar(50)")]
+    public string LicensePlate { get; set; } = string.Empty;
+
+    [Column("CurrentOdo")]
+    public double CurrentOdo { get; set; }
+
+    [Column("LastMaintenanceDate")]
+    public DateTime? LastMaintenanceDate { get; set; }
+
+    [Column("NextMaintenanceDate")]
+    public DateTime? NextMaintenanceDate { get; set; }
+
+    [Column("NextMaintenanceOdo")]
+    public double? NextMaintenanceOdo { get; set; }
+
+    [Column("ElectronicWarrantyQrCode", TypeName = "nvarchar(255)")]
+    public string ElectronicWarrantyQrCode { get; set; } = string.Empty;
+
+    [Column("IsActive")]
+    public bool IsActive { get; set; } = true;
+
+    [Column("Status", TypeName = "nvarchar(50)")]
+    public string Status { get; set; } = VehicleStatus.Available;
+
+    [Column("PurchaseDate")]
+    public DateTimeOffset PurchaseDate { get; set; }
+
+    public ICollection<VehicleDocument> Documents { get; set; } = new List<VehicleDocument>();
+
+    public ICollection<MaintenanceHistory> MaintenanceHistories { get; set; } = new List<MaintenanceHistory>();
 }

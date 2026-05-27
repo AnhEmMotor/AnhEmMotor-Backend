@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Output.Requests;
+using Application.ApiContracts.Output.Requests;
 using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.CreateOutputByManager
@@ -7,7 +7,7 @@ namespace Application.Features.Outputs.Commands.CreateOutputByManager
     {
         public CreateOutputProductByManagerCommandValidator()
         {
-            RuleFor(x => x.ProductId).NotNull().GreaterThan(0);
+            RuleFor(x => x.ProductVariantId).NotNull().GreaterThan(0);
             RuleFor(x => x.Count).NotNull().GreaterThan(0);
         }
     }

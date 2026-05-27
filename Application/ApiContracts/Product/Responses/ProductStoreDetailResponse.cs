@@ -13,4 +13,3 @@ public class ProductStoreDetailResponse
     public List<OtherVariantStoreResponse> OtherVariants { get; set; } = [];
 }
 
-

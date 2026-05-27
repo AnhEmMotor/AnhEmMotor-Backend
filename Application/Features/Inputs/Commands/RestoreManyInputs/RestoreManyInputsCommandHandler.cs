@@ -20,10 +20,8 @@ public sealed class RestoreManyInputsCommandHandler(
     {
         var inputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
         var inputsList = inputs.ToList();
-
-        if(inputsList.Count != request.Ids.Count)
+        if (inputsList.Count != request.Ids.Count)
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
@@ -31,10 +29,8 @@ public sealed class RestoreManyInputsCommandHandler(
                 $"Không tìm thấy {missingIds.Count} phiếu nhập đã xóa: {string.Join(", ", missingIds)}",
                 "Ids");
         }
-
         updateRepository.Restore(inputsList);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return inputs.Adapt<List<InputDetailResponse>>();
     }
 }

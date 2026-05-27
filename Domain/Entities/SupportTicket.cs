@@ -7,8 +7,8 @@ namespace AnhEmMotor.Domain.Entities
 {
     public class SupportTicket : BaseEntity
     {
-        public string CustomerId { get; set; } = string.Empty;
-        public virtual ApplicationUser Customer { get; set; } = null!;
+        public Guid? CustomerId { get; set; }
+        public virtual ApplicationUser? Customer { get; set; }
 
         public string Subject { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
@@ -17,8 +17,8 @@ namespace AnhEmMotor.Domain.Entities
         public DateTime? ResolvedAt { get; set; }
         public DateTime SLADeadline { get; set; }
         
-        public string AssignedAdminId { get; set; } = string.Empty;
-        public virtual ApplicationUser AssignedAdmin { get; set; } = null!;
+        public Guid? AssignedAdminId { get; set; }
+        public virtual ApplicationUser? AssignedAdmin { get; set; }
 
         public virtual ICollection<CustomerContactReply> Replies { get; set; } = new List<CustomerContactReply>();
     }

@@ -7,13 +7,84 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: TestDb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: TestDb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: Password123!
+        ports:
+          - 1433:1433
+
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
+
+      - name: Install dotnet-ef
+        run: |
+          dotnet tool install --global dotnet-ef
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Check Migration Count
+        shell: bash
+        run: |
+          FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD | grep -E 'Infrastructure/(Migrations|MySqlMigrations|PostgreSqlMigrations)/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' || true)
+          if [ -z "$FILES" ]; then
+            echo "No new migrations found. Check passed."
+            exit 0
+          fi
+          echo "Detected new migration files:"
+          echo "$FILES"
+          echo "--------------------------------"
+          echo "Checking migrations per provider..."
+          FAILED=0
+          DIRS=$(echo "$FILES" | xargs -n1 dirname | sort -u)
+          for DIR in $DIRS; do
+            UNIQUE_NAMES=$(echo "$FILES" | grep "^$DIR/" | sed 's/.*\///' | sed -E 's/^[0-9]+_(.*)\.cs$/\1/' | sort -u)
+            COUNT=$(echo "$UNIQUE_NAMES" | wc -l)
+            if [ "$COUNT" -gt 1 ]; then
+              echo "::error::Provider '$DIR' has $COUNT unique migrations. Only 1 is allowed per PR."
+              echo "Migrations found: "
+              echo "$UNIQUE_NAMES"
+              FAILED=1
+            else
+              echo "  - $DIR: $COUNT migration(s) [OK] ($UNIQUE_NAMES)"
+            fi
+          done
+
+          if [ "$FAILED" -eq 1 ]; then
+            exit 1
+          fi
 
       - name: Restore dependencies
         run: dotnet restore
@@ -38,3 +109,42 @@ jobs:
         env:
           Logging__LogLevel__Default: "Warning"
           Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+
+      - name: Verify Migrations (SQL Server, MySQL, PostgreSql)
+        shell: bash
+        run: |
+          echo "Starting Migration Verification..."
+          echo "--- Checking SQL Server ---"
+          export Provider=SqlServer
+          export ConnectionStrings__StringConnection="Server=localhost,1433;Database=TestDb;User Id=sa;Password=Password123!;Encrypt=False;TrustServerCertificate=True"
+          dotnet ef migrations has-pending-model-changes --context ApplicationDBContext --project Infrastructure --startup-project WebAPI || { 
+            echo "::error::SQL Server migrations are out of sync with models. Please recreate migrations using @AnhEmMotor-Backend/add-migration.ps1"; 
+            exit 1; 
+          }
+          dotnet ef database update --context ApplicationDBContext --project Infrastructure --startup-project WebAPI || { 
+            echo "::error::Failed to apply SQL Server migrations. Please recreate migrations using @AnhEmMotor-Backend/add-migration.ps1"; 
+            exit 1; 
+          }
+          echo "--- Checking MySQL ---"
+          export Provider=MySql
+          export ConnectionStrings__StringConnection="Server=localhost;Port=3306;Database=TestDb;Uid=root;Pwd=root;"
+          dotnet ef migrations has-pending-model-changes --context MySqlDbContext --project Infrastructure --startup-project WebAPI || { 
+            echo "::error::MySQL migrations are out of sync with models. Please recreate migrations using @AnhEmMotor-Backend/add-migration.ps1"; 
+            exit 1; 
+          }
+          dotnet ef database update --context MySqlDbContext --project Infrastructure --startup-project WebAPI || { 
+            echo "::error::Failed to apply MySQL migrations. Please recreate migrations using @AnhEmMotor-Backend/add-migration.ps1"; 
+            exit 1; 
+          }
+          echo "--- Checking PostgreSQL ---"
+          export Provider=PostgreSql
+          export ConnectionStrings__StringConnection="Host=localhost;Port=5432;Database=TestDb;Username=postgres;Password=postgres"
+          dotnet ef migrations has-pending-model-changes --context PostgreSqlDbContext --project Infrastructure --startup-project WebAPI || { 
+            echo "::error::PostgreSQL migrations are out of sync with models. Please recreate migrations using @AnhEmMotor-Backend/add-migration.ps1"; 
+            exit 1; 
+          }
+          dotnet ef database update --context PostgreSqlDbContext --project Infrastructure --startup-project WebAPI || { 
+            echo "::error::Failed to apply PostgreSQL migrations. Please recreate migrations using @AnhEmMotor-Backend/add-migration.ps1"; 
+            exit 1; 
+          }
+          echo "All migrations verified successfully!"

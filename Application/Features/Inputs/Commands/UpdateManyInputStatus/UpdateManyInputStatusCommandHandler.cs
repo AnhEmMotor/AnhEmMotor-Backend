@@ -17,16 +17,13 @@ public sealed class UpdateManyInputStatusCommandHandler(
         UpdateManyInputStatusCommand request,
         CancellationToken cancellationToken)
     {
-        if(!InputStatus.IsValid(request.StatusId))
+        if (!InputStatus.IsValid(request.StatusId))
         {
             return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
-
         var inputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken).ConfigureAwait(false);
-
         var inputsList = inputs.ToList();
-
-        if(inputsList.Count != request.Ids.Count)
+        if (inputsList.Count != request.Ids.Count)
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
@@ -34,12 +31,10 @@ public sealed class UpdateManyInputStatusCommandHandler(
                 $"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}",
                 "Ids");
         }
-
         var errors = new List<Error>();
-
-        foreach(var input in inputsList)
+        foreach (var input in inputsList)
         {
-            if(InputStatus.IsCannotEdit(input.StatusId))
+            if (InputStatus.IsCannotEdit(input.StatusId))
             {
                 errors.Add(
                     Error.BadRequest(
@@ -48,20 +43,16 @@ public sealed class UpdateManyInputStatusCommandHandler(
                 continue;
             }
         }
-
-        if(errors.Count > 0)
+        if (errors.Count > 0)
         {
             return errors;
         }
-
-        foreach(var input in inputsList)
+        foreach (var input in inputsList)
         {
             input.StatusId = request.StatusId;
             updateRepository.Update(input);
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return inputs.Adapt<List<InputDetailResponse>>();
     }
 }

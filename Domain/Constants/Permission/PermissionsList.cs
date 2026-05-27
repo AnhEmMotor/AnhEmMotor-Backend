@@ -1,97 +1,9 @@
+using Domain.Constants.Permission.Permissions;
 
 namespace Domain.Constants.Permission;
 
 public static class PermissionsList
 {
-    public static class Brands
-    {
-        public const string View = "Permissions.Brands.View";
-        public const string Create = "Permissions.Brands.Create";
-        public const string Edit = "Permissions.Brands.Edit";
-        public const string Delete = "Permissions.Brands.Delete";
-    }
-
-    public static class Products
-    {
-        public const string View = "Permissions.Products.View";
-        public const string Create = "Permissions.Products.Create";
-        public const string Edit = "Permissions.Products.Edit";
-        public const string Delete = "Permissions.Products.Delete";
-        public const string EditPrice = "Permissions.Products.EditPrice";
-        public const string ChangeStatus = "Permissions.Products.ChangeStatus";
-    }
-
-    public static class ProductCategories
-    {
-        public const string View = "Permissions.ProductCategories.View";
-        public const string Create = "Permissions.ProductCategories.Create";
-        public const string Edit = "Permissions.ProductCategories.Edit";
-        public const string Delete = "Permissions.ProductCategories.Delete";
-    }
-
-    public static class Suppliers
-    {
-        public const string View = "Permissions.Suppliers.View";
-        public const string Create = "Permissions.Suppliers.Create";
-        public const string Edit = "Permissions.Suppliers.Edit";
-        public const string Delete = "Permissions.Suppliers.Delete";
-    }
-
-    public static class Inputs
-    {
-        public const string View = "Permissions.Inputs.View";
-        public const string Create = "Permissions.Inputs.Create";
-        public const string Edit = "Permissions.Inputs.Edit";
-        public const string Delete = "Permissions.Inputs.Delete";
-        public const string ChangeStatus = "Permissions.Inputs.ChangeStatus";
-    }
-
-    public static class Outputs
-    {
-        public const string View = "Permissions.Outputs.View";
-        public const string Create = "Permissions.Outputs.Create";
-        public const string Edit = "Permissions.Outputs.Edit";
-        public const string Delete = "Permissions.Outputs.Delete";
-        public const string ChangeStatus = "Permissions.Outputs.ChangeStatus";
-    }
-
-    public static class Files
-    {
-        public const string View = "Permissions.Files.View";
-        public const string Upload = "Permissions.Files.Upload";
-        public const string Delete = "Permissions.Files.Delete";
-    }
-
-    public static class Settings
-    {
-        public const string View = "Permissions.Settings.View";
-        public const string Edit = "Permissions.Settings.Edit";
-    }
-
-    public static class Statistical
-    {
-        public const string View = "Permissions.Statistical.View";
-        public const string Export = "Permissions.Statistical.Export";
-    }
-
-    public static class Roles
-    {
-        public const string View = "Permissions.Roles.View";
-        public const string Create = "Permissions.Roles.Create";
-        public const string Edit = "Permissions.Roles.Edit";
-        public const string Delete = "Permissions.Roles.Delete";
-    }
-
-    public static class Users
-    {
-        public const string View = "Permissions.Users.View";
-        public const string Create = "Permissions.Users.Create";
-        public const string Edit = "Permissions.Users.Edit";
-        public const string Delete = "Permissions.Users.Delete";
-        public const string AssignRoles = "Permissions.Users.AssignRoles";
-        public const string ChangePassword = "Permissions.Users.ChangePassword";
-    }
-
     private static readonly Dictionary<string, PermissionMetadata> PermissionMetadataMap = new()
     {
         { Brands.View, new PermissionMetadata("View Brands", "Xem danh sách thương hiệu") },
@@ -155,10 +67,53 @@ public static class PermissionsList
         { Users.Delete, new PermissionMetadata("Delete User", "Xóa người dùng") },
         { Users.AssignRoles, new PermissionMetadata("Assign Roles", "Gán vai trò cho người dùng") },
         { Users.ChangePassword, new PermissionMetadata("Change Password", "Đổi mật khẩu người dùng") },
+
+        { News.View, new PermissionMetadata("View News", "Xem danh sách tin tức") },
+        { News.Create, new PermissionMetadata("Create News", "Tạo tin tức mới") },
+        { News.Edit, new PermissionMetadata("Edit News", "Chỉnh sửa tin tức") },
+        { News.Delete, new PermissionMetadata("Delete News", "Xóa tin tức") },
+
+        { Banners.View, new PermissionMetadata("View Banners", "Xem danh sách banner") },
+        { Banners.Create, new PermissionMetadata("Create Banner", "Thêm banner mới") },
+        { Banners.Edit, new PermissionMetadata("Edit Banner", "Chỉnh sửa banner") },
+        { Banners.Delete, new PermissionMetadata("Delete Banner", "Xóa banner") },
+
+        { Contacts.View, new PermissionMetadata("View Contacts", "Xem danh sách liên hệ khách hàng") },
+        { Contacts.Reply, new PermissionMetadata("Reply to Contact", "Phản hồi liên hệ khách hàng") },
+        { Contacts.EditNote, new PermissionMetadata("Edit Internal Note", "Chỉnh sửa ghi chú nội bộ khách hàng") },
+        { Contacts.Delete, new PermissionMetadata("Delete Contact", "Xóa liên hệ khách hàng") },
+
+        { Bookings.View, new PermissionMetadata("View Bookings", "Xem danh sách đặt lịch lái thử") },
+        { Bookings.Confirm, new PermissionMetadata("Confirm Booking", "Xác nhận lịch hẹn lái thử") },
+        { Bookings.Delete, new PermissionMetadata("Delete Booking", "Xóa lịch hẹn lái thử") },
+
+        { Leads.View, new PermissionMetadata("View Leads", "Xem danh sách khách hàng tiềm năng") },
+        { Leads.Create, new PermissionMetadata("Create Lead", "Tạo khách hàng tiềm năng") },
+        { Leads.Edit, new PermissionMetadata("Edit Lead", "Chỉnh sửa khách hàng tiềm năng") },
+        { Leads.Delete, new PermissionMetadata("Delete Lead", "Xóa khách hàng tiềm năng") },
+
+        { Permissions.HR.View, new PermissionMetadata("View HR", "Xem danh sách nhân sự") },
+        { Permissions.HR.Create, new PermissionMetadata("Create Employee", "Thêm nhân viên mới") },
+        { Permissions.HR.Edit, new PermissionMetadata("Edit Employee", "Chỉnh sửa thông tin nhân viên") },
+        { Permissions.HR.Delete, new PermissionMetadata("Delete Employee", "Xóa nhân viên") },
+
+        { Payroll.View, new PermissionMetadata("View Payroll", "Xem Bảng Lương") },
+        { Payroll.Configure, new PermissionMetadata("Configure Payroll", "Cấu hình chính sách hoa hồng") },
+        { Payroll.Approve, new PermissionMetadata("Approve Payroll", "Duyệt chi lương") },
+
+        { Quotations.View, new PermissionMetadata("View Quotations", "Xem danh sách báo giá") },
+        { Quotations.Create, new PermissionMetadata("Create Quotation", "Tạo báo giá mới") },
+        { Quotations.Edit, new PermissionMetadata("Edit Quotation", "Chỉnh sửa báo giá") },
+        { Quotations.Delete, new PermissionMetadata("Delete Quotation", "Xóa báo giá") },
+        { Quotations.Send, new PermissionMetadata("Send Quotation", "Gửi báo giá") },
+        { Quotations.Approve, new PermissionMetadata("Approve Quotation", "Xác nhận hoặc hủy báo giá") },
     };
 
     public static PermissionMetadata? GetMetadata(string permissionName)
-    { return PermissionMetadataMap.TryGetValue(permissionName, out var metadata) ? metadata : null; }
+    {
+        return PermissionMetadataMap.TryGetValue(permissionName, out var metadata) ? metadata : null;
+    }
+
     public static IEnumerable<(string Id, string Name, string Description)> GetMetadataList()
     {
         return PermissionMetadataMap.Select(
@@ -171,106 +126,141 @@ public static class PermissionsList
 
     public static readonly Dictionary<string, List<string>> Groups = new()
     {
-        { "Thương hiệu", [ Brands.View, Brands.Create, Brands.Edit, Brands.Delete ] },
+        { "Thương hiệu", [Brands.View, Brands.Create, Brands.Edit, Brands.Delete] },
         {
             "Sản phẩm",
-            [ Products.View, Products.Create, Products.Edit, Products.Delete, Products.EditPrice, Products.ChangeStatus ]
+            [Products.View, Products.Create, Products.Edit, Products.Delete, Products.EditPrice, Products.ChangeStatus]
         },
         {
             "Danh mục sản phẩm",
-            [ ProductCategories.View, ProductCategories.Create, ProductCategories.Edit, ProductCategories.Delete ]
+            [ProductCategories.View, ProductCategories.Create, ProductCategories.Edit, ProductCategories.Delete]
         },
-        { "Nhà cung cấp", [ Suppliers.View, Suppliers.Create, Suppliers.Edit, Suppliers.Delete ] },
-        { "Nhập hàng", [ Inputs.View, Inputs.Create, Inputs.Edit, Inputs.Delete, Inputs.ChangeStatus ] },
-        { "Xuất hàng", [ Outputs.View, Outputs.Create, Outputs.Edit, Outputs.Delete, Outputs.ChangeStatus ] },
-        { "Tệp tin", [ Files.View, Files.Upload, Files.Delete ] },
-        { "Cài đặt", [ Settings.View, Settings.Edit ] },
-        { "Thống kê", [ Statistical.View, Statistical.Export ] },
-        { "Vai trò", [ Roles.View, Roles.Create, Roles.Edit, Roles.Delete ] },
+        { "Nhà cung cấp", [Suppliers.View, Suppliers.Create, Suppliers.Edit, Suppliers.Delete] },
+        { "Nhập hàng", [Inputs.View, Inputs.Create, Inputs.Edit, Inputs.Delete, Inputs.ChangeStatus] },
+        { "Xuất hàng", [Outputs.View, Outputs.Create, Outputs.Edit, Outputs.Delete, Outputs.ChangeStatus] },
+        { "Tệp tin", [Files.View, Files.Upload, Files.Delete] },
+        { "Cài đặt", [Settings.View, Settings.Edit] },
+        { "Thống kê", [Statistical.View, Statistical.Export] },
+        { "Vai trò", [Roles.View, Roles.Create, Roles.Edit, Roles.Delete] },
+        { "Người dùng", [Users.View, Users.Create, Users.Edit, Users.Delete, Users.AssignRoles, Users.ChangePassword] },
+        { "Tin tức", [News.View, News.Create, News.Edit, News.Delete] },
+        { "Banner", [Banners.View, Banners.Create, Banners.Edit, Banners.Delete] },
         {
-            "Người dùng",
-            [ Users.View, Users.Create, Users.Edit, Users.Delete, Users.AssignRoles, Users.ChangePassword ]
+            "CRM & Connect",
+            [Contacts.View, Contacts.Reply, Contacts.EditNote, Contacts.Delete, Bookings.View, Bookings.Confirm, Bookings.Delete, Leads.View, Leads.Create, Leads.Edit, Leads.Delete]
         },
+        { "Nhân sự", [Permissions.HR.View, Permissions.HR.Create, Permissions.HR.Edit, Permissions.HR.Delete] },
+        { "Lương & Hoa hồng", [Payroll.View, Payroll.Configure, Payroll.Approve] },
+        { "Báo giá", [Quotations.View, Quotations.Create, Quotations.Edit, Quotations.Delete, Quotations.Send, Quotations.Approve] },
     };
 
     public static readonly Dictionary<string, List<string>> Conflicts = new() { };
 
     public static readonly Dictionary<string, List<string>> Dependencies = new()
     {
-        { Brands.Create, [ Brands.View ] },
-        { Brands.Edit, [ Brands.View ] },
-        { Brands.Delete, [ Brands.View ] },
+        { Brands.Create, [Brands.View] },
+        { Brands.Edit, [Brands.View] },
+        { Brands.Delete, [Brands.View] },
 
-        { Products.Create, [ Products.View ] },
-        { Products.Edit, [ Products.View ] },
-        { Products.Delete, [ Products.View ] },
-        { Products.EditPrice, [ Products.View ] },
-        { Products.ChangeStatus, [ Products.View ] },
+        { Products.Create, [Products.View] },
+        { Products.Edit, [Products.View] },
+        { Products.Delete, [Products.View] },
+        { Products.EditPrice, [Products.View] },
+        { Products.ChangeStatus, [Products.View] },
 
-        { ProductCategories.Create, [ ProductCategories.View ] },
-        { ProductCategories.Edit, [ ProductCategories.View ] },
-        { ProductCategories.Delete, [ ProductCategories.View ] },
+        { ProductCategories.Create, [ProductCategories.View] },
+        { ProductCategories.Edit, [ProductCategories.View] },
+        { ProductCategories.Delete, [ProductCategories.View] },
 
-        { Suppliers.Create, [ Suppliers.View ] },
-        { Suppliers.Edit, [ Suppliers.View ] },
-        { Suppliers.Delete, [ Suppliers.View ] },
+        { Suppliers.Create, [Suppliers.View] },
+        { Suppliers.Edit, [Suppliers.View] },
+        { Suppliers.Delete, [Suppliers.View] },
 
-        { Inputs.Create, [ Inputs.View ] },
-        { Inputs.Edit, [ Inputs.View ] },
-        { Inputs.Delete, [ Inputs.View ] },
-        { Inputs.ChangeStatus, [ Inputs.View ] },
+        { Inputs.Create, [Inputs.View] },
+        { Inputs.Edit, [Inputs.View] },
+        { Inputs.Delete, [Inputs.View] },
+        { Inputs.ChangeStatus, [Inputs.View] },
 
-        { Outputs.Create, [ Outputs.View ] },
-        { Outputs.Edit, [ Outputs.View ] },
-        { Outputs.Delete, [ Outputs.View ] },
-        { Outputs.ChangeStatus, [ Outputs.View ] },
+        { Outputs.Create, [Outputs.View] },
+        { Outputs.Edit, [Outputs.View] },
+        { Outputs.Delete, [Outputs.View] },
+        { Outputs.ChangeStatus, [Outputs.View] },
 
-        { Files.Upload, [ Files.View ] },
-        { Files.Delete, [ Files.View ] },
+        { Files.Upload, [Files.View] },
+        { Files.Delete, [Files.View] },
 
-        { Settings.Edit, [ Settings.View ] },
+        { Settings.Edit, [Settings.View] },
 
-        { Statistical.Export, [ Statistical.View ] },
+        { Statistical.Export, [Statistical.View] },
 
-        { Roles.Create, [ Roles.View ] },
-        { Roles.Edit, [ Roles.View ] },
-        { Roles.Delete, [ Roles.View ] },
+        { Roles.Create, [Roles.View] },
+        { Roles.Edit, [Roles.View] },
+        { Roles.Delete, [Roles.View] },
 
-        { Users.Create, [ Users.View ] },
-        { Users.Edit, [ Users.View ] },
-        { Users.Delete, [ Users.View ] },
-        { Users.AssignRoles, [ Users.View, Roles.View ] },
-        { Users.ChangePassword, [ Users.View ] },
+        { Users.Create, [Users.View] },
+        { Users.Edit, [Users.View] },
+        { Users.Delete, [Users.View] },
+        { Users.AssignRoles, [Users.View, Roles.View] },
+        { Users.ChangePassword, [Users.View] },
+
+        { News.Create, [News.View] },
+        { News.Edit, [News.View] },
+        { News.Delete, [News.View] },
+
+        { Banners.Create, [Banners.View] },
+        { Banners.Edit, [Banners.View] },
+        { Banners.Delete, [Banners.View] },
+
+        { Contacts.Reply, [Contacts.View] },
+        { Contacts.EditNote, [Contacts.View] },
+        { Contacts.Delete, [Contacts.View] },
+
+        { Bookings.Confirm, [Bookings.View] },
+        { Bookings.Delete, [Bookings.View] },
+
+        { Leads.Create, [Leads.View] },
+        { Leads.Edit, [Leads.View] },
+        { Leads.Delete, [Leads.View] },
+
+        { Permissions.HR.Create, [Permissions.HR.View] },
+        { Permissions.HR.Edit, [Permissions.HR.View] },
+        { Permissions.HR.Delete, [Permissions.HR.View] },
+
+        { Payroll.Configure, [Payroll.View] },
+        { Payroll.Approve, [Payroll.View] },
+
+        { Quotations.Create, [Quotations.View] },
+        { Quotations.Edit, [Quotations.View] },
+        { Quotations.Delete, [Quotations.View] },
+        { Quotations.Send, [Quotations.View] },
+        { Quotations.Approve, [Quotations.View] },
     };
 
     public static (bool IsValid, string? ErrorMessage) ValidateRules(IEnumerable<string> permissions)
     {
-        if(permissions == null)
+        if (permissions == null)
             return (true, null);
-
         var permSet = permissions.ToHashSet();
-
-        foreach(var perm in permSet)
+        foreach (var perm in permSet)
         {
-            if(Conflicts.TryGetValue(perm, out var conflicts))
+            if (Conflicts.TryGetValue(perm, out var conflicts))
             {
                 var intersected = conflicts.Intersect(permSet).ToList();
-                if(intersected.Count != 0)
+                if (intersected.Count != 0)
                 {
                     return (false, $"Permission '{perm}' conflicts with: {string.Join(", ", intersected)}");
                 }
             }
-
-            if(Dependencies.TryGetValue(perm, out var dependencies))
+            if (Dependencies.TryGetValue(perm, out var dependencies))
             {
                 var missing = dependencies.Where(d => !permSet.Contains(d)).ToList();
-                if(missing.Count != 0)
+                if (missing.Count != 0)
                 {
                     return (false, $"Permission '{perm}' requires: {string.Join(", ", missing)}");
                 }
             }
         }
-
         return (true, null);
     }
 }
+

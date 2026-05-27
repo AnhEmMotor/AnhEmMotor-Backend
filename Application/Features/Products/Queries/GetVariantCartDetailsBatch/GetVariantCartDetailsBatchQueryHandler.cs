@@ -13,11 +13,9 @@ public class GetVariantCartDetailsBatchQueryHandler(IProductVariantReadRepositor
         CancellationToken cancellationToken)
     {
         var variants = await repository.GetByIdAsync(request.VariantIds, cancellationToken).ConfigureAwait(false);
-
         var responses = variants
             .Select(ProductMappingConfig.BuildVariantCartDetailResponse)
             .ToList();
-
         return Result<List<VariantCartDetailResponse>>.Success(responses);
     }
 }

@@ -20,10 +20,8 @@ public sealed class RestoreManyOutputsCommandHandler(
     {
         var outputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
         var outputsList = outputs.ToList();
-
-        if(outputsList.Count != request.Ids.Count)
+        if (outputsList.Count != request.Ids.Count)
         {
             var foundIds = outputsList.Select(o => o.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
@@ -31,10 +29,8 @@ public sealed class RestoreManyOutputsCommandHandler(
                 $"Không tìm thấy {missingIds.Count} đơn hàng đã xóa: {string.Join(", ", missingIds)}",
                 "Ids");
         }
-
         updateRepository.Restore(outputsList);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return outputs.Adapt<List<OutputItemResponse>>();
     }
 }

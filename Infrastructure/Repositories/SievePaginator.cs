@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Sieve;
 using Domain.Constants;
 using Domain.Primitives;
@@ -18,24 +18,19 @@ namespace Infrastructure.Repositories
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            if(defaultSortMode.HasValue)
+            if (defaultSortMode.HasValue)
             {
                 SieveHelper.ApplyDefaultSorting(sieveModel, defaultSortMode.Value);
             }
-
             var totalCount = await sieveProcessor
                 .Apply(sieveModel, query, applyPagination: false)
                 .CountAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             var pagedQuery = sieveProcessor.Apply(sieveModel, query);
-
             var entities = await pagedQuery
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             var responses = entities.Adapt<List<TResponse>>();
-
             return new PagedResult<TResponse>(responses, totalCount, sieveModel.Page ?? 1, sieveModel.PageSize ?? 10);
         }
     }

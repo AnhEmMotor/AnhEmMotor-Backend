@@ -1,4 +1,4 @@
-﻿namespace Application.Interfaces.Services
+namespace Application.Interfaces.Services
 {
     public interface IHttpTokenAccessorService
     {
@@ -9,5 +9,7 @@
         public void DeleteRefreshTokenFromCookie();
 
         public string? GetAuthorizationValueFromHeader();
+
+        public string? GetUserId();
     }
 }

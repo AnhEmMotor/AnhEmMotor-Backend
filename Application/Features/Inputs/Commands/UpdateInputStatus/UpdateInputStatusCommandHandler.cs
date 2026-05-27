@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -23,36 +23,28 @@ public sealed class UpdateInputStatusCommandHandler(
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
-        if(input is null)
+        if (input is null)
         {
-            return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
+            return Error.NotFound($"Kh�ng t�m th?y phi?u nh?p c� ID {request.Id}.", "Id");
         }
-
-        if(InputStatus.IsCannotEdit(input.StatusId))
+        if (InputStatus.IsCannotEdit(input.StatusId))
         {
-            return Error.BadRequest("Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy.", "StatusId");
+            return Error.BadRequest("Kh�ng th? s?a tr?ng th�i phi?u nh?p d� ho�n th�nh ho?c d� h?y.", "StatusId");
         }
-
-        if(!InputStatus.IsValid(request.StatusId))
+        if (!InputStatus.IsValid(request.StatusId))
         {
-            return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
+            return Error.BadRequest($"Tr?ng th�i '{request.StatusId}' kh�ng h?p l?.", "StatusId");
         }
-
         input.StatusId = request.StatusId;
-
-        if(string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
         {
             input.InputDate = DateTimeOffset.UtcNow;
             input.ConfirmedBy = request.CurrentUserId;
         }
-
         updateRepository.Update(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
-
         return updated.Adapt<InputDetailResponse>();
     }
 }

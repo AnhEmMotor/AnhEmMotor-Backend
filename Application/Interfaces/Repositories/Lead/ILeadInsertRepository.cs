@@ -1,4 +1,4 @@
-using LeadEntity = AnhEmMotor.Domain.Entities.Lead;
+using LeadEntity = global::Domain.Entities.Lead;
 using System.Threading;
 using System.Threading.Tasks;
 

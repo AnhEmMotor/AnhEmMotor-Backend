@@ -22,6 +22,8 @@ public sealed record CreateOutputByManagerCommand : IRequest<Result<OrderDetailR
 
     public string? CustomerPhone { get; init; }
 
+    public int? DepositRatio { get; init; }
+
     [JsonPropertyName("products")]
     public List<CreateOutputInfoRequest> OutputInfos { get; init; } = [];
 }

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace WebAPI.Converters;
@@ -18,29 +18,69 @@ public class EmptyStringConverter : JsonConverter<string>
     /// Reads a JSON string value from the specified reader and returns it as a .NET string.
     /// </summary>
     /// <param name="reader">
-    /// A reference to the <see cref="Utf8JsonReader"/> positioned at the JSON value to read. The reader must be at a
+    /// A reference to the <see cref="Utf8JsonReader" /> positioned at the JSON value to read. The reader must be at a
     /// string token.
     /// </param>
     /// <param name="typeToConvert">The type of the value to convert. This parameter is ignored for string values.</param>
     /// <param name="options">Options to control the behavior of the JSON serializer. This parameter is not used for string values.</param>
-    /// <returns>The string value read from the JSON input. Returns <see langword="string.Empty"/> if the JSON value is null.</returns>
+    /// <returns>The string value read from the JSON input. Returns <see langword="string.Empty" /> if the JSON value is null.</returns>
     public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    { return reader.GetString() ?? string.Empty; }
+    {
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            return reader.GetString() ?? string.Empty;
+        }
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            if (reader.TryGetInt64(out long longValue))
+                return longValue.ToString();
+            if (reader.TryGetDouble(out double doubleValue))
+                return doubleValue.ToString();
+        }
+        if (reader.TokenType == JsonTokenType.True)
+            return "true";
+        if (reader.TokenType == JsonTokenType.False)
+            return "false";
+        if (reader.TokenType == JsonTokenType.Null)
+            return string.Empty;
+        return string.Empty;
+    }
 
     /// <summary>
     /// Writes the specified string value to the JSON output using the provided writer, if the value is not null or
     /// empty.
     /// </summary>
-    /// <param name="writer">The <see cref="Utf8JsonWriter"/> instance used to write the JSON value.</param>
+    /// <param name="writer">The <see cref="Utf8JsonWriter" /> instance used to write the JSON value.</param>
     /// <param name="value">The string value to write. If null or empty, no value is written.</param>
     /// <param name="options">Options to control JSON serialization behavior. This parameter can be used to customize serialization features.</param>
     public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
     {
-        if(string.IsNullOrEmpty(value))
-        {
-            return;
-        }
+        writer.WriteStringValue(value ?? string.Empty);
+    }
 
-        writer.WriteStringValue(value);
+    /// <summary>
+    /// Writes the string value as a JSON property name.
+    /// </summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <param name="value">The string value.</param>
+    /// <param name="options">The serializer options.</param>
+    public override void WriteAsPropertyName(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+    {
+        writer.WritePropertyName(value ?? string.Empty);
+    }
+
+    /// <summary>
+    /// Reads the string value as a JSON property name.
+    /// </summary>
+    /// <param name="reader">The JSON reader.</param>
+    /// <param name="typeToConvert">The type to convert.</param>
+    /// <param name="options">The serializer options.</param>
+    /// <returns>The string value.</returns>
+    public override string ReadAsPropertyName(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options)
+    {
+        return reader.GetString() ?? string.Empty;
     }
 }

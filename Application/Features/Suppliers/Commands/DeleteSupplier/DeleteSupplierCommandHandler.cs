@@ -14,20 +14,16 @@ public sealed class DeleteSupplierCommandHandler(
     public async Task<Result> Handle(DeleteSupplierCommand request, CancellationToken cancellationToken)
     {
         var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-
-        if(supplier == null)
+        if (supplier == null)
         {
             return Result.Failure(Error.NotFound($"Supplier with Id {request.Id} not found."));
         }
-
-        if(supplier.InputReceipts.Any(ir => string.Compare(ir.StatusId, InputStatus.Working) == 0))
+        if (supplier.InputReceipts.Any(ir => string.Compare(ir.StatusId, InputStatus.Working) == 0))
         {
             return Result.Failure(Error.Conflict("Cannot delete supplier with working input receipts."));
         }
-
         deleteRepository.Delete(supplier);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result.Success();
     }
 }

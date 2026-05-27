@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using System;
 
 namespace Application.Interfaces.Repositories.Role

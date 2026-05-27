@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Responses
@@ -11,6 +11,9 @@ namespace Application.ApiContracts.Product.Responses
 
         public string? Category { get; set; }
 
+        [JsonPropertyName("product_limit")]
+        public int? ProductLimit { get; set; }
+
         public string? Description { get; set; }
 
         [JsonPropertyName("short_description")]
@@ -22,7 +25,10 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("meta_description")]
         public string? MetaDescription { get; set; }
 
-        [JsonExtensionData]
+        [JsonPropertyName("highlights")]
+        public string? Highlights { get; set; }
+
+        [JsonPropertyName("specifications")]
         public Dictionary<string, object?> Specifications { get; set; } = [];
     }
 }

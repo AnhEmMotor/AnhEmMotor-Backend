@@ -1,4 +1,4 @@
-﻿
+
 namespace Application.ApiContracts.UserManager.Responses;
 
 public class UserDTOForOutputResponse

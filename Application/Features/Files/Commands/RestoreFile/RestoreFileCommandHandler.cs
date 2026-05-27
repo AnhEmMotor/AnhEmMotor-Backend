@@ -1,9 +1,8 @@
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.LocalFile;
-using Application.Interfaces.Repositories.MediaFile;
-
+using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Domain.Constants;
 using Mapster;
 using MediatR;
@@ -13,7 +12,7 @@ namespace Application.Features.Files.Commands.RestoreFile;
 public sealed class RestoreFileCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileUpdateRepository updateRepository,
-    IFileStorageService fileStorageService,
+    IFileReadService fileReadService,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreFileCommand, Result<MediaFileResponse?>>
 {
     public async Task<Result<MediaFileResponse?>> Handle(
@@ -25,18 +24,14 @@ public sealed class RestoreFileCommandHandler(
             cancellationToken,
             DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
-        if(mediaFile is null)
+        if (mediaFile is null)
         {
             return Error.NotFound();
         }
-
         updateRepository.Restore(mediaFile);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var response = mediaFile.Adapt<MediaFileResponse>();
-        response.PublicUrl = fileStorageService.GetPublicUrl(mediaFile.StoragePath!);
-
+        response.PublicUrl = fileReadService.GetPublicUrl(mediaFile.StoragePath!);
         return response;
     }
 }

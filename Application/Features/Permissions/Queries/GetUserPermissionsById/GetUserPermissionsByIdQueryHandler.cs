@@ -17,24 +17,20 @@ public class GetUserPermissionsByIdQueryHandler(
     {
         var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken)
             .ConfigureAwait(false);
-        if(user is null)
+        if (user is null)
         {
             return Error.NotFound("User not found.");
         }
-
         var userRoles = await userReadRepository.GetRolesOfUserAsync(user, cancellationToken).ConfigureAwait(false);
         var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken)
             .ConfigureAwait(false);
-
         var roleIds = roleEntities.Select(r => r.Id).ToList();
         var userPermissionNames = await roleReadRepository.GetPermissionsNameByRoleIdAsync(roleIds, cancellationToken)
             .ConfigureAwait(false);
-
         var userPermissions = userPermissionNames
             .Select(p => new { Name = p, Metadata = PermissionsList.GetMetadata(p) })
             .Select(p => p.Name)
             .ToList();
-
         return new PermissionAndRoleOfUserResponse()
         {
             UserId = request.UserId,

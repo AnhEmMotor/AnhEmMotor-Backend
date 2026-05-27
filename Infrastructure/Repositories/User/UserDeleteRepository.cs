@@ -11,10 +11,8 @@ public class UserDeleteRepository(UserManager<ApplicationUser> userManager) : IU
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
         user.DeletedAt = DateTimeOffset.UtcNow;
         var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
-
         return (result.Succeeded, result.Errors.Select(e => e.Description));
     }
 
@@ -23,10 +21,8 @@ public class UserDeleteRepository(UserManager<ApplicationUser> userManager) : IU
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
         user.DeletedAt = null;
         var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
-
         return (result.Succeeded, result.Errors.Select(e => e.Description));
     }
 }

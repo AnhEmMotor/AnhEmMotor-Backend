@@ -8,50 +8,50 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
     {
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithMessage("Product name is required.")
+            .WithMessage("Tên sản phẩm không được để trống.")
             .MaximumLength(100)
-            .WithMessage("Product name must not exceed 100 characters.");
-
+            .WithMessage("Tên sản phẩm không được vượt quá 100 ký tự.");
         RuleFor(x => x.CategoryId)
             .NotNull()
-            .WithMessage("Category ID is required.")
+            .WithMessage("ID danh mục là bắt buộc.")
             .GreaterThan(0)
-            .WithMessage("Category ID must be greater than 0.");
-
+            .WithMessage("ID danh mục phải lớn hơn 0.");
         RuleFor(x => x.BrandId)
+            .NotNull()
+            .WithMessage("Thương hiệu sản phẩm là bắt buộc.")
             .GreaterThan(0)
-            .When(x => x.BrandId.HasValue)
-            .WithMessage("Brand ID must be greater than 0 when provided.");
-
+            .WithMessage("ID thương hiệu phải lớn hơn 0.");
         RuleFor(x => x.Description)
             .MaximumLength(2000)
             .When(x => !string.IsNullOrWhiteSpace(x.Description))
-            .WithMessage("Description must not exceed 2000 characters.");
-
+            .WithMessage("Mô tả không được vượt quá 2000 ký tự.");
         RuleFor(x => x.ShortDescription)
             .MaximumLength(255)
             .When(x => !string.IsNullOrWhiteSpace(x.ShortDescription))
-            .WithMessage("Short Description must not exceed 255 characters.");
-
+            .WithMessage("Mô tả ngắn không được vượt quá 255 ký tự.");
         RuleFor(x => x.MetaTitle)
             .MaximumLength(100)
             .When(x => !string.IsNullOrWhiteSpace(x.MetaTitle))
-            .WithMessage("Meta Title must not exceed 100 characters.");
-
+            .WithMessage("Tiêu đề SEO không được vượt quá 100 ký tự.");
         RuleFor(x => x.MetaDescription)
             .MaximumLength(255)
             .When(x => !string.IsNullOrWhiteSpace(x.MetaDescription))
-            .WithMessage("Meta Description must not exceed 255 characters.");
-
-        RuleFor(x => x.Weight).GreaterThan(0).When(x => x.Weight.HasValue).WithMessage("Weight must be greater than 0.");
-
+            .WithMessage("Mô tả SEO không được vượt quá 255 ký tự.");
+        RuleFor(x => x.Weight).GreaterThan(0).When(x => x.Weight.HasValue).WithMessage("Khối lượng phải lớn hơn 0.");
+        RuleFor(x => x.FrontTireSize)
+            .Matches(@"^\d+/\d+-\d+$")
+            .When(x => !string.IsNullOrWhiteSpace(x.FrontTireSize))
+            .WithMessage("Định dạng lốp trước không hợp lệ (VD: 120/70-17).");
+        RuleFor(x => x.RearTireSize)
+            .Matches(@"^\d+/\d+-\d+$")
+            .When(x => !string.IsNullOrWhiteSpace(x.RearTireSize))
+            .WithMessage("Định dạng lốp sau không hợp lệ (VD: 120/70-17).");
         RuleFor(x => x.Variants)
             .NotEmpty()
-            .WithMessage("At least one product variant is required.")
+            .WithMessage("Sản phẩm phải có ít nhất một biến thể.")
             .Must(HaveUniqueSlugs)
-            .WithMessage("Duplicate slugs found within the request.")
+            .WithMessage("Đã tìm thấy các đường dẫn (slug) trùng lặp trong yêu cầu.")
             .Custom(ValidateVariantOptions);
-
         RuleForEach(x => x.Variants).SetValidator(new CreateProductVariantCommandValidator());
     }
 
@@ -59,31 +59,38 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
         List<CreateProductVariantRequest> variants,
         ValidationContext<CreateProductCommand> context)
     {
-        if(variants == null || variants.Count <= 1)
+        if (variants == null || variants.Count <= 1)
             return;
-
-        var hasVariantWithoutOptions = variants.Any(v => v.OptionValues == null || v.OptionValues.Count == 0);
-        if(hasVariantWithoutOptions)
+        var hasVariantWithoutOptions = variants.Any(
+            v => (v.OptionValues == null || v.OptionValues.Count == 0) &&
+                !HasColor(v) &&
+                string.IsNullOrWhiteSpace(v.VariantName));
+        if (hasVariantWithoutOptions)
         {
             context.AddFailure(
                 "Variants",
-                "Multiple variants require all variants to have options. Mixed states or empty options are not allowed.");
+                "Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt. Không được để trống thuộc tính.");
             return;
         }
-
         var optionSignatures = new HashSet<string>();
-        foreach(var variant in variants)
+        foreach (var variant in variants)
         {
-            if(variant.OptionValues == null)
-                continue;
-            var sig = string.Join(
-                "|",
-                variant.OptionValues
-                    .OrderBy(kvp => kvp.Key)
-                    .Select(kvp => $"{kvp.Key.Trim().ToLowerInvariant()}:{kvp.Value.Trim().ToLowerInvariant()}"));
-            if(!optionSignatures.Add(sig))
+            var parts = new List<string>();
+            if (variant.OptionValues != null && variant.OptionValues.Count > 0)
             {
-                context.AddFailure("Variants", "Duplicate option combinations are not allowed within the same product.");
+                parts.AddRange(
+                    variant.OptionValues
+                        .OrderBy(kvp => kvp.Key)
+                        .Select(kvp => $"{kvp.Key.Trim().ToLowerInvariant()}:{kvp.Value.Trim().ToLowerInvariant()}"));
+            }
+            if (!string.IsNullOrWhiteSpace(variant.VariantName))
+                parts.Add($"specialized_version:{variant.VariantName.Trim().ToLowerInvariant()}");
+            var sig = string.Join("|", parts);
+            if (!optionSignatures.Add(sig))
+            {
+                context.AddFailure(
+                    "Variants",
+                    "Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản.");
                 return;
             }
         }
@@ -91,11 +98,14 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
 
     private bool HaveUniqueSlugs(List<CreateProductVariantRequest> variants)
     {
-        if(variants == null)
+        if (variants == null)
             return true;
-
         var slugs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
         return variants.All(v => string.IsNullOrWhiteSpace(v.UrlSlug) || slugs.Add(v.UrlSlug.Trim()));
+    }
+
+    private static bool HasColor(CreateProductVariantRequest variant)
+    {
+        return variant.Colors.Count > 0;
     }
 }

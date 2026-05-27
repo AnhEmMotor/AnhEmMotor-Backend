@@ -14,21 +14,17 @@ public sealed class DeleteInputCommandHandler(
     public async Task<Result> Handle(DeleteInputCommand request, CancellationToken cancellationToken)
     {
         var input = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken).ConfigureAwait(false);
-
-        if(input is null)
+        if (input is null)
         {
             return Result.Failure(Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id"));
         }
-
-        if(InputStatus.IsCannotDelete(input.StatusId))
+        if (InputStatus.IsCannotDelete(input.StatusId))
         {
             return Result.Failure(
                 Error.BadRequest($"Không thể xóa đơn hàng có trạng thái '{input.StatusId}'.", "StatusId"));
         }
-
         deleteRepository.Delete(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result.Success();
     }
 }

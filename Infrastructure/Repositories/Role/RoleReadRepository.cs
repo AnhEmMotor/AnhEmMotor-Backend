@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Permission.Responses;
+using Application.ApiContracts.Permission.Responses;
 using Application.Interfaces.Repositories.Role;
 using Application.Sieve;
 using Domain.Entities;
@@ -20,12 +20,16 @@ namespace Infrastructure.Repositories.Role
         public Task<List<ApplicationRole>> GetRolesByNameAsync(
             IEnumerable<string> names,
             CancellationToken cancellationToken = default)
-        { return context.Roles.Where(r => names.Contains(r.Name!)).ToListAsync(cancellationToken); }
+        {
+            return context.Roles.Where(r => names.Contains(r.Name!)).ToListAsync(cancellationToken);
+        }
 
         public Task<List<ApplicationRole>> GetRolesByIdsAsync(
             IEnumerable<Guid> ids,
             CancellationToken cancellationToken = default)
-        { return context.Roles.Where(r => ids.Contains(r.Id)).ToListAsync(cancellationToken); }
+        {
+            return context.Roles.Where(r => ids.Contains(r.Id)).ToListAsync(cancellationToken);
+        }
 
         public Task<List<RolePermission>> GetRolesPermissionByRoleIdAsync(
             Guid roleId,
@@ -62,7 +66,7 @@ namespace Infrastructure.Repositories.Role
         public Task<List<RoleSelectResponse>> GetAllRolesSelectAsync(CancellationToken cancellationToken = default)
         {
             return context.Roles
-                .Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name })
+                .Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name, Description = r.Description })
                 .ToListAsync(cancellationToken);
         }
 
@@ -70,16 +74,14 @@ namespace Infrastructure.Repositories.Role
             SieveModel sieveModel,
             CancellationToken cancellationToken = default)
         {
-            var query = context.Roles.AsNoTracking().Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name });
-
+            var query = context.Roles
+                .AsNoTracking()
+                .Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name, Description = r.Description });
             SieveHelper.ApplyDefaultSorting(sieveModel);
-
             var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
             var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);
-
             var pagedQuery = sieveProcessor.Apply(sieveModel, query);
             var entities = await pagedQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
-
             return new PagedResult<RoleSelectResponse>(
                 entities,
                 totalCount,
@@ -119,6 +121,8 @@ namespace Infrastructure.Repositories.Role
         public Task<bool> HasAnyPermissionAsync(
             IEnumerable<Guid> roleIds,
             CancellationToken cancellationToken = default)
-        { return context.RolePermissions.Where(rp => roleIds.Contains(rp.RoleId)).AnyAsync(cancellationToken); }
+        {
+            return context.RolePermissions.Where(rp => roleIds.Contains(rp.RoleId)).AnyAsync(cancellationToken);
+        }
     }
 }

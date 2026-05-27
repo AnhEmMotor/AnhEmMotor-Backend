@@ -9,7 +9,7 @@ public class ProductVariantDetailForManagerResponse
     [JsonPropertyName("product_id")]
     public int? ProductId { get; set; }
 
-    [JsonPropertyName("url")]
+    [JsonPropertyName("url_slug")]
     public string? UrlSlug { get; set; }
 
     public decimal? Price { get; set; }
@@ -19,6 +19,48 @@ public class ProductVariantDetailForManagerResponse
 
     [JsonPropertyName("optionValues")]
     public Dictionary<string, string> OptionValues { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    [JsonPropertyName("variant_name")]
+    public string? VariantName { get; set; }
+
+    [JsonPropertyName("colors")]
+    public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
+
+    [JsonPropertyName("sku")]
+    public string? SKU { get; set; }
+
+    public decimal? Weight { get; set; }
+
+    public string? Dimensions { get; set; }
+
+    public string? Wheelbase { get; set; }
+
+    [JsonPropertyName("seat_height")]
+    public decimal? SeatHeight { get; set; }
+
+    [JsonPropertyName("ground_clearance")]
+    public decimal? GroundClearance { get; set; }
+
+    [JsonPropertyName("fuel_capacity")]
+    public decimal? FuelCapacity { get; set; }
+
+    [JsonPropertyName("tire_size")]
+    public string? TireSize { get; set; }
+
+    [JsonPropertyName("front_brake")]
+    public string? FrontBrake { get; set; }
+
+    [JsonPropertyName("rear_brake")]
+    public string? RearBrake { get; set; }
+
+    [JsonPropertyName("front_suspension")]
+    public string? FrontSuspension { get; set; }
+
+    [JsonPropertyName("rear_suspension")]
+    public string? RearSuspension { get; set; }
+
+    [JsonPropertyName("engine_type")]
+    public string? EngineType { get; set; }
 
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];

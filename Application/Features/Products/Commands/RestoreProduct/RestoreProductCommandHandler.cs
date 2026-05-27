@@ -21,32 +21,28 @@ public sealed class RestoreProductCommandHandler(
     {
         var deletedProduct = await readRepository.GetByIdAsync(command.Id, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-        if(deletedProduct == null)
+        if (deletedProduct == null)
         {
             return Error.NotFound($"Deleted product with Id {command.Id} not found.");
         }
-
         var imageFileNames = new List<string>();
-        foreach(var variant in deletedProduct.ProductVariants)
+        foreach (var variant in deletedProduct.ProductVariants)
         {
-            if(!string.IsNullOrWhiteSpace(variant.CoverImageUrl))
+            if (variant.ProductVariantColor != null &&
+                !string.IsNullOrWhiteSpace(variant.ProductVariantColor.CoverImageUrl))
             {
-                imageFileNames.Add(StringExtensions.ExtractFileName(variant.CoverImageUrl));
+                imageFileNames.Add(StringExtensions.ExtractFileName(variant.ProductVariantColor.CoverImageUrl));
             }
-
-            foreach(var photo in variant.ProductCollectionPhotos)
+            foreach (var photo in variant.ProductCollectionPhotos)
             {
-                if(!string.IsNullOrWhiteSpace(photo.ImageUrl))
+                if (!string.IsNullOrWhiteSpace(photo.ImageUrl))
                 {
                     imageFileNames.Add(StringExtensions.ExtractFileName(photo.ImageUrl));
                 }
             }
         }
-
         updateRepository.Restore(deletedProduct);
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var response = deletedProduct.Adapt<ProductDetailForManagerResponse>();
         return response;
     }

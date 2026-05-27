@@ -28,44 +28,38 @@ public static class IntegrationTestAuthHelper
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
         var targetRoleName = roleName ?? $"TestRole_{Guid.NewGuid()}";
-
-        if(!await roleManager.RoleExistsAsync(targetRoleName).ConfigureAwait(false))
+        if (!await roleManager.RoleExistsAsync(targetRoleName).ConfigureAwait(false))
         {
             var roleResult = await roleManager.CreateAsync(new ApplicationRole { Name = targetRoleName })
                 .ConfigureAwait(false);
-            if(!roleResult.Succeeded)
+            if (!roleResult.Succeeded)
             {
                 throw new Exception(
                     $"Failed to create role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
             }
         }
         var role = await roleManager.FindByNameAsync(targetRoleName).ConfigureAwait(false);
-
-        foreach(var permissionName in permissions)
+        foreach (var permissionName in permissions)
         {
             var permission = await db.Permissions
                 .FirstOrDefaultAsync(p => string.Compare(p.Name, permissionName) == 0, cancellationToken)
                 .ConfigureAwait(false);
-            if(permission == null)
+            if (permission == null)
             {
                 permission = new Permission { Name = permissionName };
                 db.Permissions.Add(permission);
                 await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-
             var existingRolePermission = await db.RolePermissions
                 .FirstOrDefaultAsync(rp => rp.RoleId == role!.Id && rp.PermissionId == permission.Id, cancellationToken)
                 .ConfigureAwait(false);
-
-            if(existingRolePermission == null)
+            if (existingRolePermission == null)
             {
                 db.RolePermissions.Add(new RolePermission { RoleId = role!.Id, PermissionId = permission.Id });
                 await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
-
         var userEmail = email ?? $"{username}@example.com";
         var user = new ApplicationUser
         {
@@ -77,12 +71,11 @@ public static class IntegrationTestAuthHelper
             PhoneNumber = phoneNumber,
             EmailConfirmed = true
         };
-
         var userResult = await userManager.CreateAsync(user, password).ConfigureAwait(false);
-        if(!userResult.Succeeded)
+        if (!userResult.Succeeded)
         {
             var passwordErrors = userResult.Errors.Where(e => e.Code.StartsWith("Password"));
-            if(passwordErrors.Any())
+            if (passwordErrors.Any())
             {
                 throw new Exception(
                     $"Password validation failed: {string.Join(", ", passwordErrors.Select(e => e.Description))}");
@@ -90,14 +83,12 @@ public static class IntegrationTestAuthHelper
             throw new Exception(
                 $"Failed to create user: {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
         }
-
         var addToRoleResult = await userManager.AddToRoleAsync(user, targetRoleName).ConfigureAwait(false);
-        if(!addToRoleResult.Succeeded)
+        if (!addToRoleResult.Succeeded)
         {
             throw new Exception(
                 $"Failed to assign role to user: {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
         }
-
         return await userManager.FindByNameAsync(username).ConfigureAwait(false) ??
             throw new Exception("User created but not found.");
     }
@@ -112,9 +103,7 @@ public static class IntegrationTestAuthHelper
             "/api/v1/Auth/login",
             new LoginCommand { UsernameOrEmail = username, Password = password })
             .ConfigureAwait(false);
-
         loginResponse.EnsureSuccessStatusCode();
-
         return await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken).ConfigureAwait(false) ??
             throw new Exception("Failed to deserialize login response");
     }

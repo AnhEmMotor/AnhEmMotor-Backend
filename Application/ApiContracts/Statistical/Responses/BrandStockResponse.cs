@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Application.ApiContracts.Statistical.Responses
 {
@@ -11,5 +11,7 @@ namespace Application.ApiContracts.Statistical.Responses
         public int LowStock { get; set; }
 
         public int OutOfStock { get; set; }
+
+        public int StockCount { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 using MediatR;
 using AnhEmMotor.Application.ApiContracts.Client.Support;
 using AnhEmMotor.Application.Interfaces.Repositories.Lead;
-using AnhEmMotor.Domain.Entities;
+using Domain.Entities;
 using AnhEmMotor.Domain.Constants;
 using System.Collections.Generic;
 using System.Threading;

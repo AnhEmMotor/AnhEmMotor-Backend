@@ -7,42 +7,40 @@ public static class OrderStatusTransitions
     {
         {
             OrderStatus.Pending,
-            [ OrderStatus.ConfirmedCod, OrderStatus.PaidProcessing, OrderStatus.WaitingDeposit, OrderStatus.WaitingInstallment, OrderStatus.Cancelled ]
+            [OrderStatus.ConfirmedCod, OrderStatus.PaidProcessing, OrderStatus.WaitingDeposit, OrderStatus.WaitingInstallment, OrderStatus.Cancelled]
         },
-        { OrderStatus.WaitingInstallment, [ OrderStatus.InstallmentApproved, OrderStatus.Cancelled ] },
+        { OrderStatus.WaitingInstallment, [OrderStatus.InstallmentApproved, OrderStatus.Cancelled] },
         {
             OrderStatus.InstallmentApproved,
-            [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding ]
+            [OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding]
         },
         {
             OrderStatus.ConfirmedCod,
-            [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Cancelled ]
+            [OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Cancelled]
         },
         {
             OrderStatus.PaidProcessing,
-            [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding ]
+            [OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding]
         },
-        { OrderStatus.WaitingDeposit, [ OrderStatus.DepositPaid, OrderStatus.Cancelled ] },
+        { OrderStatus.WaitingDeposit, [OrderStatus.DepositPaid, OrderStatus.Cancelled] },
         {
             OrderStatus.DepositPaid,
-            [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding ]
+            [OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding]
         },
-        { OrderStatus.Delivering, [ OrderStatus.Completed, OrderStatus.Refunding ] },
-        { OrderStatus.WaitingPickup, [ OrderStatus.Completed, OrderStatus.Refunding, OrderStatus.Cancelled ] },
+        { OrderStatus.Delivering, [OrderStatus.Completed, OrderStatus.Refunding] },
+        { OrderStatus.WaitingPickup, [OrderStatus.Completed, OrderStatus.Refunding, OrderStatus.Cancelled] },
         { OrderStatus.Completed, [] },
-        { OrderStatus.Refunding, [ OrderStatus.Refunded ] },
+        { OrderStatus.Refunding, [OrderStatus.Refunded] },
         { OrderStatus.Cancelled, [] },
         { OrderStatus.Refunded, [] }
     };
 
     public static bool IsTransitionAllowed(string? currentStatus, string? newStatus)
     {
-        if(string.IsNullOrWhiteSpace(currentStatus) || string.IsNullOrWhiteSpace(newStatus))
+        if (string.IsNullOrWhiteSpace(currentStatus) || string.IsNullOrWhiteSpace(newStatus))
             return false;
-
-        if(!AllowedTransitions.TryGetValue(currentStatus, out var allowedStatuses))
+        if (!AllowedTransitions.TryGetValue(currentStatus, out var allowedStatuses))
             return false;
-
         return allowedStatuses.Contains(newStatus);
     }
 
@@ -50,9 +48,8 @@ public static class OrderStatusTransitions
 
     public static HashSet<string> GetAllowedTransitions(string? currentStatus)
     {
-        if(string.IsNullOrWhiteSpace(currentStatus))
+        if (string.IsNullOrWhiteSpace(currentStatus))
             return [];
-
         return AllowedTransitions.TryGetValue(currentStatus, out var allowed) ? allowed : [];
     }
 }

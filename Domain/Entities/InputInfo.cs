@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -14,9 +14,9 @@ namespace Domain.Entities
         [ForeignKey("InputReceipt")]
         public int InputId { get; set; }
 
-        [Column("ProductId")]
+        [Column("ProductVariantId")]
         [ForeignKey("ProductVariant")]
-        public int? ProductId { get; set; }
+        public int? ProductVariantId { get; set; }
 
         [Column("Count")]
         public int? Count { get; set; }
@@ -31,10 +31,18 @@ namespace Domain.Entities
         [ForeignKey("ParentOutputInfo")]
         public int? ParentOutputInfoId { get; set; }
 
+        [Column("ProductVariantColorId")]
+        [ForeignKey("ProductVariantColor")]
+        public int? ProductVariantColorId { get; set; }
+
         public Input? InputReceipt { get; set; }
 
         public ProductVariant? ProductVariant { get; set; }
 
+        public ProductVariantColor? ProductVariantColor { get; set; }
+
         public OutputInfo? ParentOutputInfo { get; set; }
+
+        public ICollection<Vehicle> Vehicles { get; set; } = [];
     }
 }

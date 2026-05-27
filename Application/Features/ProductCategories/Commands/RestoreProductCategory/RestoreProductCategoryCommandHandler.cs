@@ -20,15 +20,12 @@ public sealed class RestoreProductCategoryCommandHandler(
     {
         var category = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
-        if(category == null)
+        if (category == null)
         {
             return Error.NotFound($"Product category with Id {request.Id} not found in deleted categories.");
         }
-
         updateRepository.Restore(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return category.Adapt<ProductCategoryResponse>();
     }
 }

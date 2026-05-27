@@ -6,5 +6,8 @@ namespace Infrastructure.Repositories.ProductCategory;
 
 public class ProductCategoryInsertRepository(ApplicationDBContext context) : IProductCategoryInsertRepository
 {
-    public void Add(CategoryEntity category) { context.ProductCategories.Add(category); }
+    public void Add(CategoryEntity category)
+    {
+        context.ProductCategories.Add(category);
+    }
 }

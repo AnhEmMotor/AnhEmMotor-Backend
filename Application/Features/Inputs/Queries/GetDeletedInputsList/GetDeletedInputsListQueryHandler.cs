@@ -1,28 +1,23 @@
-﻿using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Domain.Constants;
 using Domain.Primitives;
 using MediatR;
-using InputEntity = Domain.Entities.Input;
 
 namespace Application.Features.Inputs.Queries.GetDeletedInputsList;
 
-public sealed class GetDeletedInputsListQueryHandler(IInputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetDeletedInputsListQuery, Result<PagedResult<InputListResponse>>>
+public sealed class GetDeletedInputsListQueryHandler(IInputReadRepository repository) : IRequestHandler<GetDeletedInputsListQuery, Result<PagedResult<InputListResponse>>>
 {
     public async Task<Result<PagedResult<InputListResponse>>> Handle(
         GetDeletedInputsListQuery request,
         CancellationToken cancellationToken)
     {
-        var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
-
-        var result = await paginator.ApplyAsync<InputEntity, InputListResponse>(
-            query,
+        var result = await repository.GetPagedAsync<InputListResponse>(
             request.SieveModel!,
+            DataFetchMode.DeletedOnly,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         return result;
     }
 }

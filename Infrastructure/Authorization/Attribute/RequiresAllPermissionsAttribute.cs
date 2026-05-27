@@ -7,5 +7,7 @@ public class RequiresAllPermissionsAttribute : AuthorizeAttribute
     private const string PolicyPrefix = "RequiresAllPermissions";
 
     public RequiresAllPermissionsAttribute(params string[] permissions)
-    { Policy = $"{PolicyPrefix}{string.Join(",", permissions)}"; }
+    {
+        Policy = $"{PolicyPrefix}{string.Join(",", permissions)}";
+    }
 }

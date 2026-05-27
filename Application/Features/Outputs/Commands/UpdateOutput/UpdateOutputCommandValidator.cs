@@ -1,4 +1,4 @@
-﻿using Application.Common.Validators;
+using Application.Common.Validators;
 using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.UpdateOutput;
@@ -7,14 +7,12 @@ public sealed class UpdateOutputCommandValidator : AbstractValidator<UpdateOutpu
 {
     public UpdateOutputCommandValidator()
     {
-        RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Tên người nhận không được để trống.");
-
-        RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("Địa chỉ giao hàng không được để trống.");
-
+        RuleFor(x => x.CustomerName).NotEmpty().WithMessage("T�n ngu?i nh?n kh�ng du?c d? tr?ng.");
+        RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("�?a ch? giao h�ng kh�ng du?c d? tr?ng.");
         RuleFor(x => x.CustomerPhone)
             .NotEmpty()
-            .WithMessage("Số điện thoại không được để trống.")
+            .WithMessage("S? di?n tho?i kh�ng du?c d? tr?ng.")
             .MustBeValidPhoneNumber()
-            .WithMessage("Định dạng số điện thoại Việt Nam không hợp lệ.");
+            .WithMessage("�?nh d?ng s? di?n tho?i Vi?t Nam kh�ng h?p l?.");
     }
 }

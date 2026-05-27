@@ -1,4 +1,4 @@
-﻿namespace Application.ApiContracts.Supplier.Responses
+namespace Application.ApiContracts.Supplier.Responses
 {
     public sealed class SupplierForInputManagerResponse
     {

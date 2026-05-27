@@ -23,33 +23,26 @@ public sealed class CancelOrderByBuyerCommandHandler(
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
-        if(output is null)
+        if (output is null)
         {
             return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
-
-        if(output.BuyerId != request.CurrentUserId)
+        if (output.BuyerId != request.CurrentUserId)
         {
             return Error.Forbidden("Bạn không có quyền hủy đơn hàng này.");
         }
-
-        if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, OrderStatus.Cancelled))
+        if (!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, OrderStatus.Cancelled))
         {
             return Error.BadRequest(
                 $"Đơn hàng đang ở trạng thái '{output.StatusId}', không thể hủy trực tiếp. Vui lòng liên hệ quản trị viên để được hỗ trợ.",
                 "StatusId");
         }
-
         output.StatusId = OrderStatus.Cancelled;
         output.LastStatusChangedAt = DateTimeOffset.UtcNow;
-
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
-
         return updated.Adapt<OrderDetailResponse>();
     }
 }

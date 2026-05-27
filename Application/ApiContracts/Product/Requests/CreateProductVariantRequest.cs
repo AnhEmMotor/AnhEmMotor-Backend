@@ -5,16 +5,71 @@ namespace Application.ApiContracts.Product.Requests;
 
 public class CreateProductVariantRequest
 {
+    [JsonPropertyName("price")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Price { get; set; }
 
+    [JsonPropertyName("url_slug")]
     public string? UrlSlug { get; set; }
 
+    [JsonPropertyName("cover_image_url")]
     public string? CoverImageUrl { get; set; }
 
+    [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
 
+    [JsonPropertyName("optionValues")]
     public Dictionary<string, string> OptionValues { get; set; } = [];
+
+    [JsonPropertyName("variant_name")]
+    public string? VariantName { get; set; }
+
+    [JsonPropertyName("colors")]
+    public List<CreateProductVariantColorRequest> Colors { get; set; } = [];
+
+    [JsonPropertyName("sku")]
+    public string? SKU { get; set; }
+
+    [JsonPropertyName("weight")]
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? Weight { get; set; }
+
+    [JsonPropertyName("dimensions")]
+    public string? Dimensions { get; set; }
+
+    [JsonPropertyName("wheelbase")]
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? Wheelbase { get; set; }
+
+    [JsonPropertyName("seat_height")]
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? SeatHeight { get; set; }
+
+    [JsonPropertyName("ground_clearance")]
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? GroundClearance { get; set; }
+
+    [JsonPropertyName("fuel_capacity")]
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? FuelCapacity { get; set; }
+
+    [JsonPropertyName("tire_size")]
+    public string? TireSize { get; set; }
+
+    [JsonPropertyName("front_brake")]
+    public string? FrontBrake { get; set; }
+
+    [JsonPropertyName("rear_brake")]
+    public string? RearBrake { get; set; }
+
+    [JsonPropertyName("front_suspension")]
+    public string? FrontSuspension { get; set; }
+
+    [JsonPropertyName("rear_suspension")]
+    public string? RearSuspension { get; set; }
+
+    [JsonPropertyName("engine_type")]
+    public string? EngineType { get; set; }
 
     [JsonIgnore]
     public List<int> OptionValueIds { get; set; } = [];

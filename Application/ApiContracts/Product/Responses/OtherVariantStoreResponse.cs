@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Responses
@@ -8,8 +8,15 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("display_name")]
         public string? DisplayName { get; set; }
 
-        public string? Slug { get; set; }
+        [JsonPropertyName("url_slug")]
+        public string? UrlSlug { get; set; }
 
         public decimal? Price { get; set; }
+
+        [JsonPropertyName("cover_image_url")]
+        public string? CoverImageUrl { get; set; }
+
+        [JsonPropertyName("colors")]
+        public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
     }
 }

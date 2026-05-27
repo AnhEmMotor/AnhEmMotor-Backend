@@ -18,14 +18,12 @@ public sealed class RestoreManyProductCategoriesCommandHandler(
         RestoreManyProductCategoriesCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Ids == null || request.Ids.Count == 0)
+        if (request.Ids == null || request.Ids.Count == 0)
         {
             return Error.BadRequest("You not pass Ids to restore.");
         }
-
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<Error>();
-
         var allCategories = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
         var deletedCategories = await readRepository.GetByIdAsync(
@@ -33,32 +31,27 @@ public sealed class RestoreManyProductCategoriesCommandHandler(
             cancellationToken,
             DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
         var allCategoryMap = allCategories.ToDictionary(c => c.Id);
         var deletedCategorySet = deletedCategories.Select(c => c.Id).ToHashSet();
-
-        foreach(var id in uniqueIds)
+        foreach (var id in uniqueIds)
         {
-            if(!allCategoryMap.ContainsKey(id))
+            if (!allCategoryMap.ContainsKey(id))
             {
                 errorDetails.Add(Error.NotFound($"Product category with Id {id} not found.", "Id"));
-            } else if(!deletedCategorySet.Contains(id))
+            } else if (!deletedCategorySet.Contains(id))
             {
                 errorDetails.Add(Error.BadRequest($"Product category with Id {id} is not deleted.", "Id"));
             }
         }
-
-        if(errorDetails.Count > 0)
+        if (errorDetails.Count > 0)
         {
             return errorDetails;
         }
-
-        if(deletedCategories.ToList().Count > 0)
+        if (deletedCategories.ToList().Count > 0)
         {
             updateRepository.Restore(deletedCategories);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-
         return deletedCategories.Adapt<List<ProductCategoryResponse>>();
     }
 }

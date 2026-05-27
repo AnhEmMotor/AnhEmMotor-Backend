@@ -19,16 +19,13 @@ public sealed class UpdateVariantPriceCommandHandler(
     {
         var variant = await variantReadRepository.GetByIdWithDetailsAsync(command.VariantId, cancellationToken)
             .ConfigureAwait(false);
-
-        if(variant == null)
+        if (variant == null)
         {
             return Error.NotFound($"Biến thể với Id {command.VariantId} không tồn tại.");
         }
-
         variant.Price = command.Price;
         updateRepository.Update(variant);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var response = variant.Adapt<ProductVariantLiteResponse>();
         return response;
     }

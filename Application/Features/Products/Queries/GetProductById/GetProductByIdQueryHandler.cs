@@ -14,12 +14,10 @@ public sealed class GetProductByIdQueryHandler(IProductReadRepository readReposi
         CancellationToken cancellationToken)
     {
         var product = await readRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
-
-        if(product == null)
+        if (product == null)
         {
             return Error.NotFound($"Product with Id {request.Id} not found.");
         }
-
         var response = product.Adapt<ProductDetailForManagerResponse>();
         return response;
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Responses
@@ -7,7 +7,7 @@ namespace Application.ApiContracts.Product.Responses
     {
         public int Id { get; set; }
 
-        [JsonPropertyName("url")]
+        [JsonPropertyName("url_slug")]
         public string? UrlSlug { get; set; }
 
         public decimal? Price { get; set; }

@@ -12,4 +12,3 @@ public class AdminWarehouseReportResponse
     public IEnumerable<WarehouseTableDataResponse> WarehouseTableData { get; set; } = [];
 }
 
-

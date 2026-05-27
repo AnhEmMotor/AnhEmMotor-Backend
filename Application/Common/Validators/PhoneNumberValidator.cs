@@ -14,17 +14,16 @@ public static class PhoneNumberValidator
 
     private static bool IsValidPhoneNumber(string? phoneNumber)
     {
-        if(string.IsNullOrWhiteSpace(phoneNumber))
+        if (string.IsNullOrWhiteSpace(phoneNumber))
         {
             return true;
         }
-
         try
         {
             var phoneUtil = PhoneNumberUtil.GetInstance();
             var numberProto = phoneUtil.Parse(phoneNumber, "VN");
             return phoneUtil.IsValidNumber(numberProto);
-        } catch(NumberParseException)
+        } catch (NumberParseException)
         {
             return false;
         }

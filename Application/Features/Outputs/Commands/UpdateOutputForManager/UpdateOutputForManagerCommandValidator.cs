@@ -7,26 +7,20 @@ public sealed class UpdateOutputForManagerCommandValidator : AbstractValidator<U
 {
     public UpdateOutputForManagerCommandValidator()
     {
-        RuleFor(x => x.CurrentUserId).NotEmpty().WithMessage("CurrentUserId không được để trống.");
-
-        RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Tên khách hàng không được để trống.");
-
-        RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("Địa chỉ khách hàng không được để trống.");
-
+        RuleFor(x => x.CurrentUserId).NotEmpty().WithMessage("CurrentUserId kh�ng du?c d? tr?ng.");
+        RuleFor(x => x.CustomerName).NotEmpty().WithMessage("T�n kh�ch h�ng kh�ng du?c d? tr?ng.");
+        RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("�?a ch? kh�ch h�ng kh�ng du?c d? tr?ng.");
         RuleFor(x => x.CustomerPhone)
             .NotEmpty()
-            .WithMessage("Số điện thoại không được để trống.")
+            .WithMessage("S? di?n tho?i kh�ng du?c d? tr?ng.")
             .MustBeValidPhoneNumber()
-            .WithMessage("Định dạng số điện thoại không hợp lệ.");
-
-
-        RuleFor(x => x.OutputInfos).NotEmpty().WithMessage("Ðon xu?t hàng ph?i có ít nh?t m?t s?n ph?m.");
-
+            .WithMessage("�?nh d?ng s? di?n tho?i kh�ng h?p l?.");
+        RuleFor(x => x.OutputInfos).NotEmpty().WithMessage("�on xu?t h�ng ph?i c� �t nh?t m?t s?n ph?m.");
         RuleForEach(x => x.OutputInfos)
             .ChildRules(
                 item =>
                 {
-                    item.RuleFor(i => i.ProductId).NotEmpty().GreaterThan(0);
+                    item.RuleFor(i => i.ProductVariantId).NotEmpty().GreaterThan(0);
                     item.RuleFor(i => i.Count).NotEmpty().GreaterThan(0);
                 });
     }

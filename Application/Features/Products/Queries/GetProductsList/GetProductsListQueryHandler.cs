@@ -1,6 +1,7 @@
-﻿using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Product;
+using Domain.Constants.Product;
 using Domain.Primitives;
 using MediatR;
 
@@ -17,35 +18,62 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
             .Select(s => s.Trim())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
-
-        var (entities, totalCount, groupedOptionValueIds) = await readRepository.GetPagedProductsAsync(
+        if (normalizedStatusIds.Count == 0)
+        {
+            normalizedStatusIds.Add(ProductStatus.ForSale);
+        }
+        var (entities, totalCount, groupedOptionFilters) = await readRepository.GetPagedProductsAsync(
             request.Search,
             normalizedStatusIds,
             request.CategoryIds,
+            request.BrandIds,
             request.OptionValueIds,
+            request.MinPrice,
+            request.MaxPrice,
             request.Page,
             request.PageSize,
             request.Filters,
             request.Sorts,
             cancellationToken)
             .ConfigureAwait(false);
-
         var items = entities.Select(
             e => new ProductListStoreResponse
             {
                 Id = e.Id,
                 Name = e.Name,
+                Category = e.ProductCategory?.Name,
+                Brand = e.Brand?.Name,
+                Displacement = e.Displacement,
+                HasBeenBooked = e.Id % 20,
                 Variants =
-                    [ .. e.ProductVariants
+                    [.. e.ProductVariants
                             .Where(
-                                v => request.OptionValueIds.Count == 0 ||
-                                            (groupedOptionValueIds?.Count > 0 &&
-                                                groupedOptionValueIds.All(
-                                                    groupIds => v.VariantOptionValues
-                                                        .Any(
-                                                            vov => vov.OptionValueId != null &&
-                                                                                        groupIds.Contains(
-                                                                                            vov.OptionValueId.Value)))))
+                                v => (request.OptionValueIds.Count == 0 ||
+                                                (groupedOptionFilters?.Count > 0 &&
+                                                    groupedOptionFilters.All(
+                                                        group => v.VariantOptionValues
+                                                                .Any(
+                                                                    vov => vov.OptionValueId != null &&
+                                                                                                        group.Ids
+                                                                                                            .Contains(
+                                                                                                                vov.OptionValueId.Value)) ||
+                                                            v.ProductVariantColors
+                                                                .Any(
+                                                                    c => c.ColorName != null &&
+                                                                                                        group.Names
+                                                                                                            .Contains(
+                                                                                                                c.ColorName
+                                                                                                                                                            .Trim(
+                                                                                                                                                                )
+                                                                                                                                                            .ToLower(
+                                                                                                                                                                ))) ||
+                                                            (v.VariantName != null &&
+                                                                v.VariantName
+                                                                    .Split(',')
+                                                                    .Any(
+                                                                        vn => group.Names.Contains(vn.Trim().ToLower())))))) &&
+                                            (!request.MinPrice.HasValue || v.Price >= request.MinPrice.Value) &&
+                                            (!request.MaxPrice.HasValue || v.Price <= request.MaxPrice.Value))
                             .Select(
                                 v =>
                                 {
@@ -53,27 +81,33 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
                                         .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
                                         .Select(p => p.ImageUrl!)
                                         .ToList();
-                                    var coverImage = string.IsNullOrWhiteSpace(v.CoverImageUrl)
-                                        ? photos.FirstOrDefault()
+                                    var variantColor = v.ProductVariantColors.FirstOrDefault();
+                                    var colorName = variantColor?.ColorName;
+                                    var coverImageUrl = !string.IsNullOrWhiteSpace(variantColor?.CoverImageUrl)
+                                        ? variantColor.CoverImageUrl
                                         : v.CoverImageUrl;
-
+                                    var coverImage = string.IsNullOrWhiteSpace(coverImageUrl)
+                                        ? photos.FirstOrDefault()
+                                        : coverImageUrl;
+                                    var variantDisplayName = !string.IsNullOrWhiteSpace(v.VariantName) &&
+                                                        !string.IsNullOrWhiteSpace(colorName)
+                                        ? $"{v.VariantName} - {colorName}"
+                                        : (!string.IsNullOrWhiteSpace(v.VariantName)
+                                                        ? v.VariantName
+                                                        : (colorName ?? "Tiêu chuẩn"));
                                     return new ProductVariantListStoreResponse
                             {
                                 Id = v.Id,
                                 UrlSlug = v.UrlSlug,
                                 Price = v.Price,
                                 CoverImageUrl = coverImage,
-                                OptionValuesText =
-                                    string.Join(
-                                                    " - ",
-                                                    v.VariantOptionValues
-                                                        .Where(vov => vov.OptionValue != null)
-                                                        .Select(vov => vov.OptionValue!.Name))
+                                OptionValuesText = variantDisplayName
                             };
-                                }) ]
+                                })
+                            .OrderBy(v => v.Price)
+                            .ToList()]
             })
             .ToList();
-
         return new PagedResult<ProductListStoreResponse>(items, totalCount, request.Page, request.PageSize);
     }
 }

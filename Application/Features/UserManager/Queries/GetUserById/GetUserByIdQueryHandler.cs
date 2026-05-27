@@ -13,15 +13,12 @@ public class GetUserByIdQueryHandler(IUserReadRepository userReadRepository) : I
     {
         var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken)
             .ConfigureAwait(false);
-        if(user is null)
+        if (user is null)
         {
             return Error.NotFound("User not found.");
         }
-
         var roles = await userReadRepository.GetUserRoleIdsAsync(user, cancellationToken).ConfigureAwait(false);
-
         cancellationToken.ThrowIfCancellationRequested();
-
         return new UserDTOForManagerResponse()
         {
             Id = user.Id,

@@ -22,8 +22,8 @@ namespace AnhEmMotor.Domain.Entities
         public string Notes { get; set; } = string.Empty;
         public BookingStatus Status { get; set; }
         
-        public string AssignedSaleId { get; set; } = string.Empty;
-        public virtual ApplicationUser AssignedSale { get; set; } = null!;
+        public Guid? AssignedSaleId { get; set; }
+        public virtual ApplicationUser? AssignedSale { get; set; }
 
         public string CustomerNote { get; set; } = string.Empty;
         public string AdminNote { get; set; } = string.Empty;

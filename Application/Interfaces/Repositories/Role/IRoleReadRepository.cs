@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Permission.Responses;
+using Application.ApiContracts.Permission.Responses;
 using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;

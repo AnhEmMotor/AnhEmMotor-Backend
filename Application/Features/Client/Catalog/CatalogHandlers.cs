@@ -1,7 +1,7 @@
 using MediatR;
 using AnhEmMotor.Application.ApiContracts.Client.Catalog;
 using AnhEmMotor.Application.Interfaces.Repositories.Lead;
-using AnhEmMotor.Domain.Entities;
+using Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -47,7 +47,7 @@ namespace AnhEmMotor.Application.Features.Client.Catalog
         {
             var lead = new Lead
             {
-                InterestProduct = request.Request.ProductId.ToString(),
+                InterestedVehicle = request.Request.ProductId.ToString(),
                 Notes = request.Request.CustomerNote,
                 Source = "Catalog",
                 CreatedAt = DateTime.UtcNow,

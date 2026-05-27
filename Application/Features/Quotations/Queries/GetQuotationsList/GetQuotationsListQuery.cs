@@ -1,0 +1,16 @@
+﻿using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.Quotation.Responses;
+using Application.Common.Models;
+using Domain.Primitives;
+using MediatR;
+using Sieve.Models;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Application.Features.Quotations.Queries.GetQuotationsList;
+
+public sealed record GetQuotationsListQuery : IRequest<Result<PagedResult<QuotationSummaryResponse?>>>
+{
+    public SieveModel? SieveModel { get; init; }
+}

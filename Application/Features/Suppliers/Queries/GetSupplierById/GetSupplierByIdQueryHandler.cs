@@ -15,15 +15,12 @@ public sealed class GetSupplierByIdQueryHandler(ISupplierReadRepository reposito
         CancellationToken cancellationToken)
     {
         var supplier = await repository.GetByIdWithTotalInputAsync(request.Id, cancellationToken).ConfigureAwait(false);
-
-        if(supplier == null)
+        if (supplier == null)
         {
             return Error.NotFound($"Supplier with Id {request.Id} not found.");
         }
-
         var response = supplier.Adapt<SupplierResponse>();
         AuditColumnMapper.Apply(supplier, response, AuditColumn.CreatedAt);
-
         return response;
     }
 }

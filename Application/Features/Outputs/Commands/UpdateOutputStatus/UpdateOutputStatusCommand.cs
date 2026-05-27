@@ -11,6 +11,8 @@ public sealed record UpdateOutputStatusCommand : IRequest<Result<OrderDetailResp
 
     public string StatusId { get; init; } = string.Empty;
 
+    public List<int>? SelectedVehicleIds { get; init; }
+
     [JsonIgnore]
     public Guid? CurrentUserId { get; init; }
 }

@@ -13,20 +13,16 @@ public sealed class GetAdminProductReportQueryHandler(IStatisticalReadRepository
     {
         var performanceList = await repository.GetProductPerformanceTableAsync(cancellationToken).ConfigureAwait(false);
         var tableData = performanceList.ToList();
-
         var bestSeller = tableData.OrderByDescending(p => p.SoldCount30Days).FirstOrDefault();
         var deadStockOptions = tableData.Where(p => p.StockQuantity > 0).OrderBy(p => p.SoldCount30Days).ToList();
         var deadStock = deadStockOptions.FirstOrDefault();
-
         decimal deadStockValue = deadStock != null ? deadStock.StockQuantity * deadStock.SellPrice : 0;
-
         double avgTurnover = 0;
-        if(tableData.Any(p => p.StockQuantity > 0))
+        if (tableData.Any(p => p.StockQuantity > 0))
         {
             avgTurnover = tableData.Where(p => p.StockQuantity > 0)
                 .Average(p => (double)p.SoldCount30Days / p.StockQuantity);
         }
-
         var highlights = new ProductReportHighlightsResponse
         {
             BestSellerName = bestSeller?.ProductName ?? "Chưa có",
@@ -36,7 +32,6 @@ public sealed class GetAdminProductReportQueryHandler(IStatisticalReadRepository
             AvgTurnover = Math.Round(avgTurnover, 1),
             TotalSKUs = tableData.Count
         };
-
         var topRevenue = tableData
             .OrderByDescending(p => p.SoldCount30Days * p.SellPrice)
             .Take(5)
@@ -48,7 +43,6 @@ public sealed class GetAdminProductReportQueryHandler(IStatisticalReadRepository
                     Revenue = p.SoldCount30Days * p.SellPrice
                 })
             .ToList();
-
         var topProfit = tableData
             .OrderByDescending(p => p.SoldCount30Days * p.SellPrice * (decimal)(p.MarginPercentage / 100))
             .Take(5)
@@ -59,7 +53,6 @@ public sealed class GetAdminProductReportQueryHandler(IStatisticalReadRepository
                     Profit = p.SoldCount30Days * p.SellPrice * (decimal)(p.MarginPercentage / 100)
                 })
             .ToList();
-
         return new AdminProductReportResponse
         {
             Highlights = highlights,

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -13,8 +13,31 @@ namespace Domain.Entities
         [Column("Name")]
         public string? Name { get; set; }
 
+        [Column("Slug")]
+        public string? Slug { get; set; }
+
+        [Column("ImageUrl")]
+        public string? ImageUrl { get; set; }
+
+        [Column("IsActive")]
+        public bool IsActive { get; set; } = true;
+
         [Column("Description")]
         public string? Description { get; set; }
+
+        [Column("ParentId")]
+        public int? ParentId { get; set; }
+
+        [ForeignKey("ParentId")]
+        public ProductCategory? Parent { get; set; }
+
+        public ICollection<ProductCategory> SubCategories { get; set; } = [];
+
+        [Column("MaxPurchaseQuantity")]
+        public int? MaxPurchaseQuantity { get; set; }
+
+        [Column("ManagementType")]
+        public string ManagementType { get; set; } = "sku";
 
         public ICollection<Product> Products { get; set; } = [];
     }

@@ -23,9 +23,9 @@ namespace AnhEmMotor.Application.Features.Client.Vehicles
             // Mock current user ID
             var vehicles = await _readRepo.GetByUserIdAsync("mock-user-id", cancellationToken);
             return vehicles.Select(v => new VehicleSummaryResponse(
-                v.Id, "url_to_image", v.ModelName, v.LicensePlate, v.CurrentOdo, 
-                (v.NextMaintenanceDate - DateTime.Now).Days, 
-                v.NextMaintenanceOdo - v.CurrentOdo, 
+                v.Id, "url_to_image", v.Product?.Name ?? string.Empty, v.LicensePlate, v.CurrentOdo,
+                v.NextMaintenanceDate.HasValue ? (v.NextMaintenanceDate.Value - DateTime.Now).Days : 0,
+                (v.NextMaintenanceOdo ?? v.CurrentOdo) - v.CurrentOdo,
                 v.ElectronicWarrantyQrCode, "Active")).ToList();
         }
     }
@@ -41,7 +41,7 @@ namespace AnhEmMotor.Application.Features.Client.Vehicles
             if (vehicle == null) return null;
 
             return new VehicleDetailResponse(
-                vehicle.Id, vehicle.ModelName, vehicle.Vin, vehicle.LicensePlate, 
+                vehicle.Id, vehicle.Product?.Name ?? string.Empty, vehicle.VinNumber, vehicle.LicensePlate,
                 vehicle.Product?.Description ?? "No specs", 
                 new List<MaintenanceHistoryDto>());
         }

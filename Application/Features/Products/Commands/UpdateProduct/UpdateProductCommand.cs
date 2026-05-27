@@ -26,6 +26,7 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
 
     public string? Dimensions { get; init; }
 
+    [JsonConverter(typeof(FlexibleStringConverter))]
     public string? Wheelbase { get; init; }
 
     [JsonPropertyName("seat_height")]
@@ -71,6 +72,7 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("max_torque")]
     public string? MaxTorque { get; init; }
 
+    [JsonPropertyName("displacement")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Displacement { get; init; }
 
@@ -80,6 +82,57 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("compression_ratio")]
     public string? CompressionRatio { get; init; }
 
+    [JsonPropertyName("fuel_system")]
+    public string? FuelSystem { get; init; }
+
+    [JsonPropertyName("frame_type")]
+    public string? FrameType { get; init; }
+
+    [JsonPropertyName("front_tire_size")]
+    public string? FrontTireSize { get; init; }
+
+    [JsonPropertyName("rear_tire_size")]
+    public string? RearTireSize { get; init; }
+
+    [JsonPropertyName("front_brake")]
+    public string? FrontBrake { get; init; }
+
+    [JsonPropertyName("rear_brake")]
+    public string? RearBrake { get; init; }
+
+    [JsonPropertyName("battery_type")]
+    public string? BatteryType { get; init; }
+
+    [JsonPropertyName("lighting_system")]
+    public string? LightingSystem { get; init; }
+
+    [JsonPropertyName("dashboard_type")]
+    public string? DashboardType { get; init; }
+
+    public string? Material { get; init; }
+
+    public string? Origin { get; init; }
+
+    [JsonPropertyName("warranty_period")]
+    public string? WarrantyPeriod { get; init; }
+
+    public string? Unit { get; init; }
+
+    [JsonPropertyName("std_dot")]
+    public bool StdDot { get; init; }
+
+    [JsonPropertyName("std_ece")]
+    public bool StdEce { get; init; }
+
+    [JsonPropertyName("std_snell")]
+    public bool StdSnell { get; init; }
+
+    [JsonPropertyName("std_jis")]
+    public bool StdJis { get; init; }
+
+    [JsonPropertyName("other_standards")]
+    public string? OtherStandards { get; init; }
+
     [JsonPropertyName("short_description")]
     public string? ShortDescription { get; init; }
 
@@ -88,6 +141,12 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
 
     [JsonPropertyName("meta_description")]
     public string? MetaDescription { get; init; }
+
+    [JsonPropertyName("highlights")]
+    public string? Highlights { get; init; }
+
+    [JsonPropertyName("compatible_vehicle_model_ids")]
+    public List<int> CompatibleVehicleModelIds { get; init; } = [];
 
     public List<UpdateProductVariantRequest> Variants { get; init; } = [];
 }

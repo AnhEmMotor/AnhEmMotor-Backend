@@ -15,8 +15,10 @@ using Application.Features.Inputs.Queries.GetInputById;
 using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Inputs.Queries.GetInputsList;
 using Application.Features.Inputs.Queries.GetInputStatusList;
+using Application.Features.Inputs.Queries.GetInventoryReceiptStats;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -26,7 +28,6 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
-using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -50,6 +51,19 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetInputsListQuery() { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy thống kê cho phần phiếu nhập kho.
+    /// </summary>
+    [HttpGet("statistics")]
+    [HasPermission(Inputs.View)]
+    [ProducesResponseType(typeof(InventoryReceiptStatsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetInventoryReceiptStatsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetInventoryReceiptStatsQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -85,7 +99,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin chi tiết của phiếu nhập.
     /// </summary>
-    [HttpGet("{id:int}", Name = RouteNames.InventoryReceipts.GetById)]
+    [HttpGet("{id:int}", Name = InventoryReceipts.GetById)]
     [HasPermission(Inputs.View)]
     [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -125,14 +139,11 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateInputCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            RouteNames.InventoryReceipts.GetById,
-            new { id = result.IsSuccess ? result.Value?.Id : null });
+        return HandleCreated(result, InventoryReceipts.GetById, new { id = result.IsSuccess ? result.Value?.Id : null });
     }
 
     /// <summary>
-    /// Clone phiếu nhập từ phiếu nhập gốc. Chỉ clone các sản phẩm còn hợp lệ (chưa xoá, còn đang bán).
+    /// Clone phiếu nhập từ phiếu nhập gốc. Chỉ clone các sản phẩm còn hợp lệ (chưa xóa, còn đang bán).
     /// </summary>
     [HttpPost("{id:int}/clone")]
     [HasPermission(Inputs.Create)]
@@ -143,10 +154,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var command = new CloneInputCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            RouteNames.InventoryReceipts.GetById,
-            new { id = result.IsSuccess ? result.Value?.Id : null });
+        return HandleCreated(result, InventoryReceipts.GetById, new { id = result.IsSuccess ? result.Value?.Id : null });
     }
 
     /// <summary>
@@ -163,8 +171,8 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = request.Adapt<UpdateInputCommand>() with 
-        { 
+        var command = request.Adapt<UpdateInputCommand>() with
+        {
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
@@ -186,8 +194,8 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = request.Adapt<UpdateInputStatusCommand>() with 
-        { 
+        var command = request.Adapt<UpdateInputStatusCommand>() with
+        {
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };

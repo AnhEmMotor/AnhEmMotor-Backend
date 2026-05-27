@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.Input.Requests;
 using FluentValidation;
 
 namespace Application.Features.Inputs.Commands.UpdateInput
@@ -7,10 +7,8 @@ namespace Application.Features.Inputs.Commands.UpdateInput
     {
         public UpdateInputInfoCommandValidator()
         {
-            RuleFor(x => x.ProductId).NotNull().GreaterThan(0);
-
+            RuleFor(x => x.ProductVariantId).NotNull().GreaterThan(0);
             RuleFor(x => x.Count).NotNull().GreaterThan(0);
-
             RuleFor(x => x.InputPrice).NotNull().GreaterThanOrEqualTo(0);
         }
     }

@@ -1,4 +1,4 @@
-﻿
+
 namespace Application.ApiContracts.User.Responses;
 
 public class UserResponse

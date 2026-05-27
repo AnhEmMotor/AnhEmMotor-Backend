@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Auth.Responses;
+using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Features.Auth.Commands.FacebookLogin;
 using Application.Features.Auth.Commands.GoogleLogin;
@@ -51,14 +51,12 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     /// Đăng nhập bằng Username/Email và Password
     /// </summary>
     [HttpPost("login")]
-    [AnonymousOnly]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
         return HandleResult(result);
     }
 
@@ -93,9 +91,8 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new LogoutCommand() { UserId = userId }, cancellationToken)
             .ConfigureAwait(true);
-        if(result.IsFailure)
+        if (result.IsFailure)
             return HandleResult(result);
-
         httpTokenAccessorService.DeleteRefreshTokenFromCookie();
         return Ok(new LogoutResponse());
     }
@@ -104,7 +101,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     /// Đăng nhập bằng Google
     /// </summary>
     [HttpPost("google")]
-    [AnonymousOnly]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -120,7 +116,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     /// Đăng nhập bằng Facebook
     /// </summary>
     [HttpPost("facebook")]
-    [AnonymousOnly]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -136,7 +131,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     /// Đăng nhập bằng Username/Email và Password - Dành cho quản lý
     /// </summary>
     [HttpPost("login/for-manager")]
-    [AnonymousOnly]
     [EnableRateLimiting("public_api")]
     [SwaggerOperation(
         Summary = "Đăng nhập cho quản lý",
@@ -149,7 +143,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
         return HandleResult(result);
     }
 

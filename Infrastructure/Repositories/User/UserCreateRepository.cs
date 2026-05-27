@@ -12,9 +12,7 @@ public class UserCreateRepository(UserManager<ApplicationUser> userManager) : IU
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
         var result = await userManager.CreateAsync(user, password).ConfigureAwait(false);
-
         return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
     }
 
@@ -24,9 +22,7 @@ public class UserCreateRepository(UserManager<ApplicationUser> userManager) : IU
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
         var result = await userManager.AddToRoleAsync(user, roleName).ConfigureAwait(false);
-
         return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
     }
 
@@ -36,9 +32,7 @@ public class UserCreateRepository(UserManager<ApplicationUser> userManager) : IU
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
         var result = await userManager.AddToRolesAsync(user, roleNames).ConfigureAwait(false);
-
         return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
     }
 }

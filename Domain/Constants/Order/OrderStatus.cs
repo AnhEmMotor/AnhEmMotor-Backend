@@ -1,4 +1,4 @@
-﻿namespace Domain.Constants.Order
+namespace Domain.Constants.Order
 {
     public static class OrderStatus
     {
@@ -16,48 +16,48 @@
         public const string WaitingInstallment = "waiting_installment";
         public const string InstallmentApproved = "installment_approved";
 
-        public static readonly HashSet<string> All = [ Completed, ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, Cancelled, WaitingInstallment, InstallmentApproved ];
+        public static readonly HashSet<string> All = [Completed, ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, Cancelled, WaitingInstallment, InstallmentApproved];
 
-        public static readonly HashSet<string> BookingPhases = [ ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, WaitingInstallment, InstallmentApproved ];
+        public static readonly HashSet<string> BookingPhases = [ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, WaitingInstallment, InstallmentApproved];
 
-        public static readonly HashSet<string> NotDeletedPhases = [ Completed, Refunded, Cancelled ];
+        public static readonly HashSet<string> NotDeletedPhases = [Completed, Refunded, Cancelled];
 
         public static bool IsValid(string? value)
         {
-            if(string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
                 return false;
             return All.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsBookingStatus(string? value)
         {
-            if(string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
                 return false;
             return BookingPhases.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsCannotDelete(string? value)
         {
-            if(string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
                 return false;
             return NotDeletedPhases.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
         public static string GetDisplayName(string status) => status.ToLower() switch
         {
-            Pending => "Chờ xác nhận",
-            ConfirmedCod => "Đã xác nhận (Chờ thanh toán COD)",
-            PaidProcessing => "Đã thanh toán (Chờ xử lý)",
-            WaitingDeposit => "Chờ đặt cọc",
-            DepositPaid => "Đã đặt cọc (Chờ xử lý)",
-            WaitingInstallment => "Chờ duyệt trả góp",
-            InstallmentApproved => "Đã duyệt trả góp (Chờ xử lý)",
-            Delivering => "Đang giao hàng",
-            WaitingPickup => "Chờ lấy hàng tại cửa hàng",
-            Completed => "Đã hoàn thành",
-            Cancelled => "Đã hủy",
-            Refunding => "Đang hoàn tiền",
-            Refunded => "Đã hoàn tiền",
+            "pending" => "Chờ xác nhận",
+            "confirmedcod" => "Đã xác nhận (Chờ thanh toán COD)",
+            "paidprocessing" => "Đã thanh toán (Chờ xử lý)",
+            "waitingdeposit" => "Chờ đặt cọc",
+            "depositpaid" => "Đã đặt cọc (Chờ xử lý)",
+            "waiting_installment" => "Chờ duyệt trả góp",
+            "installment_approved" => "Đã duyệt trả góp (Chờ xử lý)",
+            "delivering" => "Đang giao hàng",
+            "waitingpickup" => "Chờ lấy hàng tại cửa hàng",
+            "completed" => "Đã hoàn thành",
+            "cancelled" => "Đã hủy",
+            "refunding" => "Đang hoàn tiền",
+            "refunded" => "Đã hoàn tiền",
             _ => status
         };
     }

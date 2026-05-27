@@ -16,4 +16,3 @@ public class AdminRevenueAnalysisResponse
     public IEnumerable<DailyRevenueTableResponse> DailyTableData { get; set; } = [];
 }
 
-
