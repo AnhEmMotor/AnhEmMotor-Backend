@@ -23,8 +23,8 @@ namespace Domain.Entities
         [Column("Status", TypeName = "varchar(30)")]
         public string? Status { get; set; }
 
-        [Column("Notes", TypeName = "nvarchar(MAX)")]
-        public string? Notes { get; set; }
+        [Column("Note", TypeName = "nvarchar(MAX)")]
+        public string? Note { get; set; }
 
         public ICollection<QuotationProductRow> QuotationProductRows { get; set; } = [];
 
