@@ -82,7 +82,8 @@ namespace Application.Features.Quotations.Commands.CreateQuotation
             {
                 ProductVariantId = int.Parse(p.ProductVariantId!),
                 ProductVariantColorId = string.IsNullOrEmpty(p.ProductVarientColorId) ? null : int.Parse(p.ProductVarientColorId),
-                QuotePrice = p.QuotePrice
+                QuotePrice = p.QuotePrice,
+                Note = p.Note
             }).ToList();
 
             insertRepository.Add(quotation);

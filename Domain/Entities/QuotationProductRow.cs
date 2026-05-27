@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -27,6 +27,9 @@ namespace Domain.Entities
 
         [Column("QuotePrice")]
         public int? QuotePrice { get; set; }
+
+        [Column("Note", TypeName = "nvarchar(MAX)")]
+        public string? Note { get; set; }
 
         public Quotation? QuotationReceipt { get; set; }
 

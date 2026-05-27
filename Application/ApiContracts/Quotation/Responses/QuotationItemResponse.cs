@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,5 +15,7 @@ namespace Application.ApiContracts.Quotation.Responses
         public string? ProductVariantColorDisplayName { get; set; }
 
         public int? QuotePrice { get; set; }
+
+        public string? Note { get; set; }
     }
 }

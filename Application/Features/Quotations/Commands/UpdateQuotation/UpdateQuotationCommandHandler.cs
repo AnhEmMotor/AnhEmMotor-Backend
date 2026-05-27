@@ -56,7 +56,8 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                     if (match is null ||
                         match.ProductVariantId != int.Parse(incomingRow.ProductVariantId!) ||
                         match.ProductVariantColorId != (string.IsNullOrEmpty(incomingRow.ProductVarientColorId) ? null : int.Parse(incomingRow.ProductVarientColorId)) ||
-                        match.QuotePrice != incomingRow.QuotePrice)
+                        match.QuotePrice != incomingRow.QuotePrice ||
+                        match.Note != incomingRow.Note)
                     {
                         return Error.BadRequest("Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.", "Products");
                     }
@@ -151,6 +152,7 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                             ? null
                             : int.Parse(incomingRow.ProductVarientColorId);
                         existingRow.QuotePrice = incomingRow.QuotePrice;
+                        existingRow.Note = incomingRow.Note;
                     }
                 }
                 else
@@ -161,7 +163,8 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                         ProductVariantColorId = string.IsNullOrEmpty(incomingRow.ProductVarientColorId)
                             ? null
                             : int.Parse(incomingRow.ProductVarientColorId),
-                        QuotePrice = incomingRow.QuotePrice
+                        QuotePrice = incomingRow.QuotePrice,
+                        Note = incomingRow.Note
                     });
                 }
             }
