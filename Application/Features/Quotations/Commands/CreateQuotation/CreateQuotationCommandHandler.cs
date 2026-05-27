@@ -76,13 +76,8 @@ namespace Application.Features.Quotations.Commands.CreateQuotation
                 }
             }
 
-            var dateStr = DateTime.UtcNow.ToString("yyyyMMdd");
-            var guidStr = Guid.NewGuid().ToString("N")[..4].ToUpper();
-            var code = $"QT-{dateStr}-{guidStr}";
-
             var quotation = request.Adapt<QuotationEntity>();
-            quotation.Code = code;
-            quotation.Status = request.Status?.ToLower();
+            quotation.Status = "draft";
             quotation.QuotationProductRows = request.Products.Select(p => new QuotationProductRow
             {
                 ProductVariantId = int.Parse(p.ProductVariantId!),

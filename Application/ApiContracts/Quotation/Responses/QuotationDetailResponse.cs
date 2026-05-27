@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,4 +17,6 @@ public class QuotationDetailResponse
     public string? Notes { get; set; }
 
     public List<QuotationItemResponse>? QuotationItems { get; set; }
+
+    public DateTimeOffset? LastUpdatedAt { get; set; }
 }

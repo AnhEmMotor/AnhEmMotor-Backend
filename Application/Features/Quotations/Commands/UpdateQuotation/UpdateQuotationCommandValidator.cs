@@ -15,11 +15,6 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
             RuleFor(x => x.SupplierId)
                 .GreaterThan(0).When(x => x.SupplierId.HasValue).WithMessage("SupplierId must be greater than 0.");
 
-            RuleFor(x => x.Status)
-                .NotEmpty().WithMessage("Status is required.")
-                .Must(status => status != null && QuotationType.All.Contains(status))
-                .WithMessage($"Status must be one of: {string.Join(", ", QuotationType.All)}");
-
             RuleFor(x => x.Notes)
                 .MaximumLength(1000).WithMessage("Notes cannot exceed 1000 characters.");
 

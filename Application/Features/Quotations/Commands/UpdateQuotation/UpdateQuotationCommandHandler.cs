@@ -32,6 +32,48 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                 return Error.NotFound($"Yêu cầu báo giá {request.Id} không tồn tại hoặc đã bị xóa.", "Id");
             }
 
+            var currentStatus = quotation.Status?.ToLower();
+            if (currentStatus == "approved" || currentStatus == "rejected")
+            {
+                if (request.SupplierId.HasValue && request.SupplierId.Value != quotation.SupplierId)
+                {
+                    return Error.BadRequest("Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.", "SupplierId");
+                }
+
+                var existingRowsList = quotation.QuotationProductRows.ToList();
+                if (request.Products.Count != existingRowsList.Count)
+                {
+                    return Error.BadRequest("Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.", "Products");
+                }
+
+                foreach (var incomingRow in request.Products)
+                {
+                    if (!incomingRow.Id.HasValue)
+                    {
+                        return Error.BadRequest("Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.", "Products");
+                    }
+                    var match = existingRowsList.FirstOrDefault(x => x.Id == incomingRow.Id.Value);
+                    if (match is null ||
+                        match.ProductVariantId != int.Parse(incomingRow.ProductVariantId!) ||
+                        match.ProductVariantColorId != (string.IsNullOrEmpty(incomingRow.ProductVarientColorId) ? null : int.Parse(incomingRow.ProductVarientColorId)) ||
+                        match.QuotePrice != incomingRow.QuotePrice)
+                    {
+                        return Error.BadRequest("Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.", "Products");
+                    }
+                }
+
+                if (request.Notes is not null)
+                {
+                    quotation.Note = request.Notes;
+                }
+
+                updateRepository.Update(quotation);
+                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                var updatedDetailed = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken).ConfigureAwait(false);
+                return updatedDetailed!.Adapt<QuotationDetailResponse>();
+            }
+
             if (request.SupplierId.HasValue && request.SupplierId.Value != quotation.SupplierId)
             {
                 var supplier = await supplierRepository.GetByIdAsync(
@@ -81,10 +123,6 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                 }
             }
 
-            if (request.Status is not null)
-            {
-                quotation.Status = request.Status.ToLower();
-            }
             if (request.Notes is not null)
             {
                 quotation.Note = request.Notes;

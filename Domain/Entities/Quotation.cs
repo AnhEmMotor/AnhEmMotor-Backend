@@ -13,9 +13,6 @@ namespace Domain.Entities
         [Column("Id")]
         public int Id { get; set; }
 
-        [Column("Code", TypeName = "nvarchar(100)")]
-        public string? Code { get; set; }
-
         [Column("SupplierId")]
         [ForeignKey("Supplier")]
         public int? SupplierId { get; set; }

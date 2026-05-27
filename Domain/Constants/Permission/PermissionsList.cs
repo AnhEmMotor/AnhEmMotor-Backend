@@ -100,6 +100,13 @@ public static class PermissionsList
         { Payroll.View, new PermissionMetadata("View Payroll", "Xem Bảng Lương") },
         { Payroll.Configure, new PermissionMetadata("Configure Payroll", "Cấu hình chính sách hoa hồng") },
         { Payroll.Approve, new PermissionMetadata("Approve Payroll", "Duyệt chi lương") },
+
+        { Quotations.View, new PermissionMetadata("View Quotations", "Xem danh sách báo giá") },
+        { Quotations.Create, new PermissionMetadata("Create Quotation", "Tạo báo giá mới") },
+        { Quotations.Edit, new PermissionMetadata("Edit Quotation", "Chỉnh sửa báo giá") },
+        { Quotations.Delete, new PermissionMetadata("Delete Quotation", "Xóa báo giá") },
+        { Quotations.Send, new PermissionMetadata("Send Quotation", "Gửi báo giá") },
+        { Quotations.Approve, new PermissionMetadata("Approve Quotation", "Xác nhận hoặc hủy báo giá") },
     };
 
     public static PermissionMetadata? GetMetadata(string permissionName)
@@ -144,6 +151,7 @@ public static class PermissionsList
         },
         { "Nhân sự", [Permissions.HR.View, Permissions.HR.Create, Permissions.HR.Edit, Permissions.HR.Delete] },
         { "Lương & Hoa hồng", [Payroll.View, Payroll.Configure, Payroll.Approve] },
+        { "Báo giá", [Quotations.View, Quotations.Create, Quotations.Edit, Quotations.Delete, Quotations.Send, Quotations.Approve] },
     };
 
     public static readonly Dictionary<string, List<string>> Conflicts = new() { };
@@ -220,6 +228,12 @@ public static class PermissionsList
 
         { Payroll.Configure, [Payroll.View] },
         { Payroll.Approve, [Payroll.View] },
+
+        { Quotations.Create, [Quotations.View] },
+        { Quotations.Edit, [Quotations.View] },
+        { Quotations.Delete, [Quotations.View] },
+        { Quotations.Send, [Quotations.View] },
+        { Quotations.Approve, [Quotations.View] },
     };
 
     public static (bool IsValid, string? ErrorMessage) ValidateRules(IEnumerable<string> permissions)

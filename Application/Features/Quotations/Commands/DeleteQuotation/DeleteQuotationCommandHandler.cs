@@ -26,6 +26,12 @@ namespace Application.Features.Quotations.Commands.DeleteQuotation
                 return Result.Failure(Error.NotFound($"Yêu cầu báo giá {request.Id} không tồn tại hoặc đã bị xóa.", "Id"));
             }
 
+            var currentStatus = quotation.Status?.ToLower();
+            if (currentStatus == "approved" && !request.HasApprovePermission)
+            {
+                return Result.Failure(Error.BadRequest("Báo giá đã xác nhận chỉ có thể xóa bởi người dùng có quyền xác nhận báo giá.", "Status"));
+            }
+
             deleteRepository.Delete(quotation);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

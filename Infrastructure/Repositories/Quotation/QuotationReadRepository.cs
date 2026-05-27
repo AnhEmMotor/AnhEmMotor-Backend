@@ -63,7 +63,9 @@ namespace Infrastructure.Repositories.Quotation
             {
                 query = query.Where(x => x.DeletedAt != null);
             }
-            return query;
+            return query
+                .Include(x => x.Supplier)
+                .Include(x => x.QuotationProductRows);
         }
     }
 }

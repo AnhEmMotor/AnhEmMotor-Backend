@@ -14,19 +14,18 @@ namespace Application.Features.Quotations.Mappings
             config.NewConfig<CreateQuotationCommand, Quotation>()
                 .Map(dest => dest.Note, src => src.Notes)
                 .Ignore(dest => dest.Id)
-                .Ignore(dest => dest.Code)
                 .Ignore(dest => dest.QuotationProductRows);
 
             config.NewConfig<UpdateQuotationCommand, Quotation>()
                 .Map(dest => dest.Note, src => src.Notes)
-                .Ignore(dest => dest.Code)
                 .Ignore(dest => dest.QuotationProductRows)
                 .IgnoreNullValues(true);
 
             config.NewConfig<Quotation, QuotationDetailResponse>()
                 .Map(dest => dest.Notes, src => src.Note)
                 .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
-                .Map(dest => dest.QuotationItems, src => src.QuotationProductRows);
+                .Map(dest => dest.QuotationItems, src => src.QuotationProductRows)
+                .Map(dest => dest.LastUpdatedAt, src => src.UpdatedAt ?? src.CreatedAt);
 
             config.NewConfig<QuotationProductRow, QuotationItemResponse>()
                 .Map(dest => dest.ProductVariantDisplayName, src => src.ProductVariant != null 

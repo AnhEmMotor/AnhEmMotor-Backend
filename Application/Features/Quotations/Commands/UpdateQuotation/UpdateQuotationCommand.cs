@@ -15,7 +15,6 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
 
         public int? SupplierId { get; init; }
 
-        public string? Status { get; init; }
 
         public string? Notes { get; init; }
 
