@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.ApiContracts.Quotation.Requests;
 using Application.ApiContracts.Quotation.Responses;
@@ -16,7 +16,7 @@ namespace Application.Features.Quotations.Commands.CreateQuotation
 
         public string? Status { get; init; }
 
-        public int? Notes { get; init; }
+        public string? Notes { get; init; }
 
         public List<CreateQuotationItemRequest> Products { get; init; } = [];
     }

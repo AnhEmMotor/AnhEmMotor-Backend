@@ -93,6 +93,11 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Vehicle>(v => v.PurchaseDate).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.Lead!.FullName).CanSort().CanFilter().HasName("FullName");
         mapper.Property<Vehicle>(v => v.Lead!.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
+        mapper.Property<Quotation>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<Quotation>(p => p.Code).CanSort().CanFilter();
+        mapper.Property<Quotation>(p => p.Status).CanSort().CanFilter();
+        mapper.Property<Quotation>(p => p.SupplierId).CanSort().CanFilter();
+        mapper.Property<Quotation>(p => p.Supplier!.Name).CanFilter().HasName("SupplierName");
         return mapper;
     }
 
