@@ -96,6 +96,11 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Quotation>(p => p.Status).CanSort().CanFilter();
         mapper.Property<Quotation>(p => p.SupplierId).CanSort().CanFilter();
         mapper.Property<Quotation>(p => p.Supplier!.Name).CanFilter().HasName("SupplierName");
+        mapper.Property<Lead>(l => l.Id).CanSort().CanFilter();
+        mapper.Property<Lead>(l => l.FullName).CanSort().CanFilter();
+        mapper.Property<Lead>(l => l.PhoneNumber).CanSort().CanFilter();
+        mapper.Property<Lead>(l => l.Tier).CanSort().CanFilter();
+        mapper.Property<Lead>(l => l.Points).CanSort().CanFilter();
         return mapper;
     }
 
@@ -110,6 +115,12 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
             "jis" => source.Where(p => p.StdJis),
             _ => source
         };
+    }
+
+    public IQueryable<Lead> Search(IQueryable<Lead> source, string op, string[] values)
+    {
+        var term = values[0];
+        return source.Where(l => l.FullName.Contains(term) || l.PhoneNumber.Contains(term));
     }
 
     private static void MapBaseProperties<T>(SievePropertyMapper mapper) where T : BaseEntity

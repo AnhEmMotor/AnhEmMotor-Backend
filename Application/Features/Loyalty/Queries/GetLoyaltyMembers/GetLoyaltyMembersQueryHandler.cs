@@ -1,31 +1,34 @@
 using Application.ApiContracts.Loyalty.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Lead.Lead;
+using Domain.Constants;
+using Domain.Entities;
+using Domain.Primitives;
 using MediatR;
+using Sieve.Models;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Application.Features.Loyalty.Queries.GetLoyaltyMembers
 {
-    public sealed class GetLoyaltyMembersQueryHandler(ILeadReadRepository leadRepository) : IRequestHandler<GetLoyaltyMembersQuery, Result<List<LoyaltyMemberResponse>>>
+    public sealed class GetLoyaltyMembersQueryHandler(ILeadReadRepository leadRepository) : IRequestHandler<GetLoyaltyMembersQuery, Result<PagedResult<LoyaltyMemberResponse>>>
     {
-        public async Task<Result<List<LoyaltyMemberResponse>>> Handle(
+        public async Task<Result<PagedResult<LoyaltyMemberResponse>>> Handle(
             GetLoyaltyMembersQuery request,
             CancellationToken cancellationToken)
         {
-            var entities = await leadRepository.GetLoyaltyMembersAsync(request.Search, cancellationToken)
+            var sieveModel = request.SieveModel ?? new SieveModel();
+            if (string.IsNullOrWhiteSpace(sieveModel.Sorts))
+            {
+                sieveModel.Sorts = $"-{nameof(Lead.Points)}";
+            }
+            var result = await leadRepository.GetPagedAsync<LoyaltyMemberResponse>(
+                sieveModel,
+                DataFetchMode.ActiveOnly,
+                cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-            var members = entities
-                .Select(
-                    l => new LoyaltyMemberResponse
-                    {
-                        Id = l.Id,
-                        FullName = l.FullName,
-                        PhoneNumber = l.PhoneNumber,
-                        Tier = l.Tier,
-                        Points = l.Points
-                    })
-                .ToList();
-            return members;
+            return result;
         }
     }
 }
