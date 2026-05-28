@@ -2,6 +2,7 @@ using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
+using DocumentFormat.OpenXml.Office2016.Excel;
 using Domain.Constants;
 using Mapster;
 using MediatR;
@@ -18,7 +19,9 @@ public sealed class RefreshTokenCommandHandler(
         RefreshTokenCommand request,
         CancellationToken cancellationToken)
     {
-        var user = await userReadRepository.GetByRefreshTokenAsync(request.RefreshToken!, cancellationToken)
+        var refreshToken = httpTokenAccessor.GetRefreshTokenFromCookie();
+        var accessToken = httpTokenAccessor.GetAccessToken();
+        var user = await userReadRepository.GetByRefreshTokenAsync(refreshToken!, cancellationToken)
             .ConfigureAwait(false);
         if (user == null)
         {
@@ -32,9 +35,9 @@ public sealed class RefreshTokenCommandHandler(
         {
             return Error.Forbidden("Account is not available.");
         }
-        if (!string.IsNullOrEmpty(request.AccessToken))
+        if (!string.IsNullOrEmpty(accessToken))
         {
-            var oldStatusClaim = tokenService.GetClaimFromToken(request.AccessToken, ClaimJWTPayload.Status);
+            var oldStatusClaim = tokenService.GetClaimFromToken(accessToken, ClaimJWTPayload.Status);
             if (!string.IsNullOrEmpty(oldStatusClaim) &&
                 !string.Equals(oldStatusClaim, user.Status, StringComparison.OrdinalIgnoreCase))
             {

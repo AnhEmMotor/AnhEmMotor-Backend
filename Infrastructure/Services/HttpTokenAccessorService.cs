@@ -1,4 +1,5 @@
 using Application.Interfaces.Services;
+using Azure.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -57,6 +58,20 @@ namespace Infrastructure.Services
         {
             return httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
                 httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
+        }
+
+        public string? GetAccessToken()
+        {
+            var authorizationHeader = httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString();
+            if (string.IsNullOrEmpty(authorizationHeader))
+            {
+                return null;
+            }
+            if (authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                return authorizationHeader[7..];
+            }
+            return authorizationHeader;
         }
     }
 }

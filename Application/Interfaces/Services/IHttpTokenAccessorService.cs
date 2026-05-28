@@ -11,5 +11,7 @@ namespace Application.Interfaces.Services
         public string? GetAuthorizationValueFromHeader();
 
         public string? GetUserId();
+
+        public string? GetAccessToken();
     }
 }

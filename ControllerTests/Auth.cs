@@ -26,7 +26,7 @@ public class Auth
     {
         _mediatorMock = new Mock<IMediator>();
         _httpTokenAccessorServiceMock = new Mock<IHttpTokenAccessorService>();
-        _controller = new AuthController(_mediatorMock.Object, _httpTokenAccessorServiceMock.Object);
+        _controller = new AuthController(_mediatorMock.Object);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
@@ -109,7 +109,7 @@ public class Auth
         _mediatorMock.Setup(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
         var result = await _controller.LogoutAsync(CancellationToken.None).ConfigureAwait(true);
-        result.Should().BeOfType<OkObjectResult>();
+        result.Should().BeOfType<NoContentResult>();
         _mediatorMock.Verify(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
