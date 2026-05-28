@@ -4,10 +4,6 @@ using Application.ApiContracts.Product.Responses;
 using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
 using Application.Features.Options.Queries.GetOptionsList;
-using Application.Features.OptionValues.Commands.CreateOptionValue;
-using Application.Features.OptionValues.Commands.DeleteOptionValue;
-using Application.Features.OptionValues.Commands.UpdateOptionValue;
-using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -37,10 +33,6 @@ using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetSitemapSlugs;
 using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
-using Application.Features.Technologies.Commands.CreateTechnology;
-using Application.Features.Technologies.Commands.CreateTechnologyCategory;
-using Application.Features.Technologies.Queries.GetAllTechnologies;
-using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Constants.Permission.Permissions;
@@ -195,20 +187,6 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
-    /// <summary>
-    /// Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value. Chỉ người dùng có quyền tạo hoặc
-    /// chỉnh sửa sản phẩm mới có thể truy cập.
-    /// </summary>
-    [HttpGet("predefined-options")]
-    [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]
-    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetPredefinedOptionsAsync(CancellationToken cancellationToken)
-    {
-        var query = new GetPredefinedOptionsListQuery();
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
 
     /// <summary>
     /// Xuất danh sách sản phẩm và biến thể ra file Excel (có hỗ trợ lọc và sắp xếp).
@@ -228,18 +206,6 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
-    /// <summary>
-    /// Lấy danh sách toàn bộ các thuộc tính (Options) và các giá trị của chúng (OptionValues).
-    /// </summary>
-    [HttpGet("all-options")]
-    [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]
-    [ProducesResponseType(typeof(List<OptionResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOptionsAsync(CancellationToken cancellationToken)
-    {
-        var query = new GetOptionsListQuery();
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
 
     /// <summary>
     /// Lấy danh sách ánh xạ trạng thái tồn kho (Key -> Tên tiếng Việt).
@@ -553,57 +519,6 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
-    /// <summary>
-    /// Tạo mới giá trị thuộc tính.
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [HttpPost("option-values")]
-    [HasPermission(Products.Create)]
-    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreateOptionValueAsync(
-        [FromBody] CreateOptionValueCommand request,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
-    /// Cập nhật giá trị thuộc tính.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="request"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [HttpPut("option-values/{id:int}")]
-    [HasPermission(Products.Edit)]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> UpdateOptionValueAsync(
-        int id,
-        [FromBody] UpdateOptionValueCommand request,
-        CancellationToken cancellationToken)
-    {
-        var command = request with { Id = id };
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
-    /// Xoá giá trị thuộc tính.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [HttpDelete("option-values/{id:int}")]
-    [HasPermission(Products.Delete)]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteOptionValueAsync(int id, CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new DeleteOptionValueCommand(id), cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
 
     /// <summary>
     /// Thiết lập danh sách xe tương thích cho phụ tùng.
@@ -635,56 +550,6 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
-    /// <summary>
-    /// Tạo mới một Công nghệ.
-    /// </summary>
-    [HttpPost("technologies")]
-    [ProducesResponseType(typeof(TechnologyResponse), StatusCodes.Status200OK)]
-    [HasPermission(Products.Edit)]
-    public async Task<IActionResult> CreateTechnologyAsync(
-        [FromBody] CreateTechnologyCommand command,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
 
-    /// <summary>
-    /// Lấy danh sách toàn bộ Công nghệ.
-    /// </summary>
-    [HttpGet("technologies")]
-    [ProducesResponseType(typeof(List<TechnologyResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllTechnologiesAsync(
-        [FromQuery] int? category_id,
-        [FromQuery] int? brand_id,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new GetAllTechnologiesQuery(category_id, brand_id), cancellationToken)
-            .ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
-    /// Lấy danh sách toàn bộ Danh mục Công nghệ.
-    /// </summary>
-    [HttpGet("technology-categories")]
-    public async Task<IActionResult> GetTechnologyCategoriesAsync(CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new GetAllTechnologyCategoriesQuery(), cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
-    /// Tạo mới một Danh mục Công nghệ.
-    /// </summary>
-    [HttpPost("technology-categories")]
-    [HasPermission(Products.Edit)]
-    public async Task<IActionResult> CreateTechnologyCategoryAsync(
-        [FromBody] CreateTechnologyCategoryCommand command,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
 }
 

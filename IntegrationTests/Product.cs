@@ -1164,7 +1164,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     new PredefinedOption { Key = "Color", Value = "Màu sắc" });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
+        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
@@ -1196,7 +1196,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
+        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -1488,7 +1488,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
-        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
+        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -1514,7 +1514,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
-        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
+        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
