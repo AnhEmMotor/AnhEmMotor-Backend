@@ -50,15 +50,18 @@ public static class ProductDataSeeder
                 if (pVariant != null)
                 {
                     variant.VariantName = pVariant.VariantName;
-                    if (pVariant.ProductVariantColor != null)
+                    if (pVariant.ProductVariantColors != null && pVariant.ProductVariantColors.Any())
                     {
-                        if (variant.ProductVariantColor == null)
+                        var color = variant.ProductVariantColors.FirstOrDefault();
+                        if (color == null)
                         {
-                            variant.ProductVariantColor = new ProductVariantColor();
+                            color = new ProductVariantColor();
+                            variant.ProductVariantColors.Add(color);
                         }
-                        variant.ProductVariantColor.ColorName = pVariant.ProductVariantColor.ColorName;
-                        variant.ProductVariantColor.ColorCode = pVariant.ProductVariantColor.ColorCode;
-                        variant.ProductVariantColor.CoverImageUrl = pVariant.ProductVariantColor.CoverImageUrl;
+                        var pColor = pVariant.ProductVariantColors.First();
+                        color.ColorName = pColor.ColorName;
+                        color.ColorCode = pColor.ColorCode;
+                        color.CoverImageUrl = pColor.CoverImageUrl;
                     }
                     variant.SKU = pVariant.SKU;
                     variant.Price = pVariant.Price;

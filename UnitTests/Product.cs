@@ -1759,7 +1759,7 @@ public class Product
         var variant = new ProductVariant
         {
             VariantName = "V1",
-            ProductVariantColor = new ProductVariantColor { ColorName = "Đỏ" },
+            ProductVariantColors = [new ProductVariantColor { ColorName = "Đỏ" }],
             Product = new ProductEntity { Name = "Bike" }
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
@@ -1767,14 +1767,14 @@ public class Product
         response.DisplayName.Should().Contain("Đỏ");
     }
 
-    [Fact(DisplayName = "PRODUCT_154 - Logic hiển thị tên mặc định khi thiếu thông tin")]
+    [Fact(DisplayName = "PRODUCT_170 - Logic hiển thị tên mặc định khi thiếu thông tin")]
     public void VariantLiteResponse_DisplayName_FallbackToName()
     {
         var variant = new ProductVariant
         {
             Product = new ProductEntity { Name = "Standard Bike" },
             VariantName = null,
-            ProductVariantColor = null
+            ProductVariantColors = []
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
         response.DisplayName.Should().NotBeNullOrEmpty();

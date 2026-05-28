@@ -69,20 +69,6 @@ namespace Domain.Entities
 
         public ICollection<ProductVariantColor> ProductVariantColors { get; set; } = [];
 
-        [NotMapped]
-        public ProductVariantColor? ProductVariantColor
-        {
-            get => ProductVariantColors.FirstOrDefault();
-            set
-            {
-                ProductVariantColors.Clear();
-                if (value is not null)
-                {
-                    ProductVariantColors.Add(value);
-                }
-            }
-        }
-
         public ICollection<InputInfo> InputInfos { get; set; } = [];
 
         public ICollection<OutputInfo> OutputInfos { get; set; } = [];

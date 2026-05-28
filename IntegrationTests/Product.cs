@@ -3395,10 +3395,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         variant.CoverImageUrl.Should().BeNull();
-        variant.ProductVariantColor.Should().NotBeNull();
-        variant.ProductVariantColor!.ColorName.Should().Be("Red");
-        variant.ProductVariantColor.ColorCode.Should().Be("#FF0000");
-        variant.ProductVariantColor.CoverImageUrl.Should().Be("https://example.com/red.jpg");
+        variant.ProductVariantColors.Should().NotBeEmpty();
+        var variantColor = variant.ProductVariantColors.First();
+        variantColor.ColorName.Should().Be("Red");
+        variantColor.ColorCode.Should().Be("#FF0000");
+        variantColor.CoverImageUrl.Should().Be("https://example.com/red.jpg");
     }
 
     [Fact(DisplayName = "PRODUCT_195 - Cập nhật sản phẩm lưu màu biến thể vào bảng ProductVariantColor")]
@@ -3479,10 +3480,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             .FirstAsync(v => v.Id == variantId, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         variant.CoverImageUrl.Should().BeNull();
-        variant.ProductVariantColor.Should().NotBeNull();
-        variant.ProductVariantColor!.ColorName.Should().Be("Blue");
-        variant.ProductVariantColor.ColorCode.Should().Be("#0000FF");
-        variant.ProductVariantColor.CoverImageUrl.Should().Be("https://example.com/blue.jpg");
+        variant.ProductVariantColors.Should().NotBeEmpty();
+        var variantColor = variant.ProductVariantColors.First();
+        variantColor.ColorName.Should().Be("Blue");
+        variantColor.ColorCode.Should().Be("#0000FF");
+        variantColor.CoverImageUrl.Should().Be("https://example.com/blue.jpg");
     }
     #pragma warning restore CRR0035
 }

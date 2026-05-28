@@ -64,7 +64,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 {
                     ProductName =
                         variant != null
-                                ? $"{variant.Product?.Name} - {variant.VariantName} ({variant.ProductVariantColor?.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                                ? $"{variant.Product?.Name} - {variant.VariantName} ({variant.ProductVariantColors.FirstOrDefault()?.ColorName?.Split(',').FirstOrDefault()})".Trim(
                                     ' ',
                                     '-',
                                     '(',
@@ -615,7 +615,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             pv => new ProductReportResponse
             {
                 ProductName =
-                    $"{pv.Product?.Name} - {pv.VariantName} ({pv.ProductVariantColor?.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                    $"{pv.Product?.Name} - {pv.VariantName} ({pv.ProductVariantColors.FirstOrDefault()?.ColorName?.Split(',').FirstOrDefault()})".Trim(
                             ' ',
                             '-',
                             '(',
@@ -689,7 +689,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 return new ProductPerformanceTableResponse
                 {
                     ProductName =
-                        $"{pv.Product?.Name} - {pv.VariantName} ({pv.ProductVariantColor?.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                        $"{pv.Product?.Name} - {pv.VariantName} ({pv.ProductVariantColors.FirstOrDefault()?.ColorName?.Split(',').FirstOrDefault()})".Trim(
                                 ' ',
                                 '-',
                                 '(',
