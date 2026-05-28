@@ -282,7 +282,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             new { month = now.Month, year = now.Year },
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
         var updatedRecord = await db.CommissionRecords
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == record.Id, TestContext.Current.CancellationToken)

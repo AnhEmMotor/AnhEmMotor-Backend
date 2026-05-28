@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.HR.Responses;
+using Application.ApiContracts.HR.Responses;
 using Application.Features.HR.Commands.ApprovePayroll;
 using Application.Features.HR.Queries.GetCommissionRecords;
 using Application.Features.HR.Queries.GetPayrollSummary;
@@ -28,10 +28,10 @@ public class CommissionController(ISender mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách các bản ghi hoa hồng.</returns>
     [HttpGet]
-    public async Task<ActionResult<List<CommissionRecord>>> GetRecordsAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetRecordsAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetCommissionRecordsQuery(), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public class CommissionController(ISender mediator) : ApiController
         CancellationToken ct)
     {
         var result = await mediator.Send(new GetPayrollSummaryQuery(month, year), ct).ConfigureAwait(true);
-        return Ok(result.Value);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -62,8 +62,6 @@ public class CommissionController(ISender mediator) : ApiController
     public async Task<IActionResult> ApprovePayrollAsync([FromBody] ApprovePayrollCommand command, CancellationToken ct)
     {
         var result = await mediator.Send(command, ct).ConfigureAwait(true);
-        if (!result.IsSuccess)
-            return BadRequest(result.Error);
-        return Ok();
+        return HandleResult(result);
     }
 }

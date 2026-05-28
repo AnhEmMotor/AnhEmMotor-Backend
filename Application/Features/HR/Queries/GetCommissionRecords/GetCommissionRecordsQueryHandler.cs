@@ -1,13 +1,15 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories.HR.Commission;
 using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.HR.Queries.GetCommissionRecords;
 
-public class GetCommissionRecordsQueryHandler(ICommissionReadRepository repository) : IRequestHandler<GetCommissionRecordsQuery, List<CommissionRecord>>
+public class GetCommissionRecordsQueryHandler(ICommissionReadRepository repository) : IRequestHandler<GetCommissionRecordsQuery, Result<List<CommissionRecord>>>
 {
-    public Task<List<CommissionRecord>> Handle(GetCommissionRecordsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<CommissionRecord>>> Handle(GetCommissionRecordsQuery request, CancellationToken cancellationToken)
     {
-        return repository.GetRecordsAsync(cancellationToken);
+        return await repository.GetRecordsAsync(cancellationToken).ConfigureAwait(false);
     }
 }
+
