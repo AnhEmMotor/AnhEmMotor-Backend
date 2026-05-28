@@ -168,15 +168,9 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteQuotationAsync(
             int id, 
-            [FromServices] IAuthorizationService authorizationService,
             CancellationToken cancellationToken)
         {
-            var authResult = await authorizationService.AuthorizeAsync(
-                User,
-                null,
-                new Infrastructure.Authorization.Requirement.PermissionRequirement(Quotations.Approve));
-
-            var command = new DeleteQuotationCommand { Id = id, HasApprovePermission = authResult.Succeeded };
+            var command = new DeleteQuotationCommand { Id = id };
             var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }

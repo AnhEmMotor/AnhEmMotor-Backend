@@ -8,9 +8,11 @@ using Application.Features.Quotations.Commands.RejectQuotation;
 using Application.Features.Quotations.Commands.SendQuotation;
 using Application.Features.Quotations.Commands.UpdateQuotation;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Quotation;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
@@ -34,6 +36,8 @@ public class Quotation
     private readonly Mock<IQuotationDeleteRepository> _deleteRepoMock;
     private readonly Mock<ISupplierReadRepository> _supplierRepoMock;
     private readonly Mock<IProductVariantReadRepository> _variantRepoMock;
+    private readonly Mock<IPermissionReadRepository> _permissionRepoMock;
+    private readonly Mock<IHttpTokenAccessorService> _httpTokenAccessorRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
     public Quotation()
@@ -44,6 +48,8 @@ public class Quotation
         _deleteRepoMock = new Mock<IQuotationDeleteRepository>();
         _supplierRepoMock = new Mock<ISupplierReadRepository>();
         _variantRepoMock = new Mock<IProductVariantReadRepository>();
+        _permissionRepoMock = new Mock<IPermissionReadRepository>();
+        _httpTokenAccessorRepoMock = new Mock<IHttpTokenAccessorService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
@@ -368,7 +374,9 @@ public class Quotation
             _updateRepoMock.Object,
             _readRepoMock.Object,
             _supplierRepoMock.Object,
-            _variantRepoMock.Object,
+            _variantRepoMock.Object, 
+            _permissionRepoMock.Object, 
+            _httpTokenAccessorRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateQuotationCommand
@@ -409,6 +417,8 @@ public class Quotation
             _readRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
+            _permissionRepoMock.Object,
+            _httpTokenAccessorRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateQuotationCommand
@@ -450,6 +460,8 @@ public class Quotation
             _readRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
+            _permissionRepoMock.Object,
+            _httpTokenAccessorRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateQuotationCommand
@@ -487,9 +499,11 @@ public class Quotation
         var handler = new DeleteQuotationCommandHandler(
             _deleteRepoMock.Object,
             _readRepoMock.Object,
+            _permissionRepoMock.Object,
+            _httpTokenAccessorRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new DeleteQuotationCommand { Id = 1, HasApprovePermission = false };
+        var command = new DeleteQuotationCommand { Id = 1 };
         var quotation = new QuotationEntity { Id = 1, Status = "draft" };
 
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
@@ -510,9 +524,11 @@ public class Quotation
         var handler = new DeleteQuotationCommandHandler(
             _deleteRepoMock.Object,
             _readRepoMock.Object,
+            _permissionRepoMock.Object,
+            _httpTokenAccessorRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new DeleteQuotationCommand { Id = 1, HasApprovePermission = true };
+        var command = new DeleteQuotationCommand { Id = 1 };
         var quotation = new QuotationEntity { Id = 1, Status = "approved" };
 
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
@@ -520,6 +536,8 @@ public class Quotation
         _deleteRepoMock.Setup(x => x.Delete(It.IsAny<QuotationEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
+        _permissionRepoMock.Setup(x => x.CheckUserPermissionsAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _httpTokenAccessorRepoMock.Setup(x => x.GetUserId()).Returns(Guid.NewGuid().ToString());
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -533,11 +551,15 @@ public class Quotation
         var handler = new DeleteQuotationCommandHandler(
             _deleteRepoMock.Object,
             _readRepoMock.Object,
+            _permissionRepoMock.Object,
+            _httpTokenAccessorRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new DeleteQuotationCommand { Id = 1, HasApprovePermission = false };
+        var command = new DeleteQuotationCommand { Id = 1 };
         var quotation = new QuotationEntity { Id = 1, Status = "approved" };
 
+        _permissionRepoMock.Setup(x => x.CheckUserPermissionsAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _httpTokenAccessorRepoMock.Setup(x => x.GetUserId()).Returns(Guid.NewGuid().ToString());
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(quotation);
 
@@ -545,7 +567,7 @@ public class Quotation
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
-        result.Error.Message.Should().Contain("Báo giá đã xác nhận chỉ có thể xóa bởi người dùng có quyền xác nhận báo giá");
+        result.Error.Message.Should().Contain("Báo giá ở trạng thái đã gửi hoặc đã duyệt chỉ có thể xóa bởi người dùng có quyền duyệt/hủy báo giá");
     }
 
     [Fact(DisplayName = "QUO_018 - Lỗi validation khi gửi yêu cầu không có sản phẩm")]

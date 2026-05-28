@@ -106,7 +106,7 @@ public static class PermissionsList
         { Quotations.Edit, new PermissionMetadata("Edit Quotation", "Chỉnh sửa báo giá") },
         { Quotations.Delete, new PermissionMetadata("Delete Quotation", "Xóa báo giá") },
         { Quotations.Send, new PermissionMetadata("Send Quotation", "Gửi báo giá") },
-        { Quotations.Approve, new PermissionMetadata("Approve Quotation", "Xác nhận hoặc hủy báo giá") },
+        { Quotations.Approve, new PermissionMetadata("Approve Quotation", "Duyệt/Từ chối báo giá; và bắt buộc đi kèm quyền Sửa/Xóa đối với báo giá đã gửi (Sent), hoặc quyền Xóa đối với báo giá đã duyệt (Approved)") },
     };
 
     public static PermissionMetadata? GetMetadata(string permissionName)

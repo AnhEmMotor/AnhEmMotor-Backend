@@ -1,13 +1,16 @@
 using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Quotation;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using Mapster;
 using MediatR;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +23,8 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
         IQuotationReadRepository readRepository,
         ISupplierReadRepository supplierRepository,
         IProductVariantReadRepository variantRepository,
+        IPermissionReadRepository permissionRepository,
+        IHttpTokenAccessorService httpTokenAccessorService,
         IUnitOfWork unitOfWork) : IRequestHandler<UpdateQuotationCommand, Result<QuotationDetailResponse?>>
     {
         public async Task<Result<QuotationDetailResponse?>> Handle(
@@ -33,6 +38,26 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
             }
 
             var currentStatus = quotation.Status?.ToLower();
+            if (currentStatus == "sent")
+            {
+                var userIdStr = httpTokenAccessorService.GetUserId();
+                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+                {
+                    return Error.Forbidden("Không xác định được danh tính người dùng.");
+                }
+
+                var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
+                    userId,
+                    [Domain.Constants.Permission.Permissions.Quotations.Approve],
+                    cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!hasApprovePermission)
+                {
+                    return Error.BadRequest("Báo giá ở trạng thái đã gửi chỉ có thể chỉnh sửa bởi người dùng có quyền duyệt/hủy báo giá.", "Status");
+                }
+            }
+
             if (currentStatus == "approved" || currentStatus == "rejected")
             {
                 if (request.SupplierId.HasValue && request.SupplierId.Value != quotation.SupplierId)

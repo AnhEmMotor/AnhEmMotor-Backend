@@ -1,8 +1,11 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Quotation;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using MediatR;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,6 +14,8 @@ namespace Application.Features.Quotations.Commands.DeleteQuotation
     public sealed class DeleteQuotationCommandHandler(
         IQuotationDeleteRepository deleteRepository,
         IQuotationReadRepository readRepository,
+        IPermissionReadRepository permissionRepository,
+        IHttpTokenAccessorService httpTokenAccessorService,
         IUnitOfWork unitOfWork) : IRequestHandler<DeleteQuotationCommand, Result>
     {
         public async Task<Result> Handle(DeleteQuotationCommand request, CancellationToken cancellationToken)
@@ -27,9 +32,24 @@ namespace Application.Features.Quotations.Commands.DeleteQuotation
             }
 
             var currentStatus = quotation.Status?.ToLower();
-            if (currentStatus == "approved" && !request.HasApprovePermission)
+            if (currentStatus == "approved" || currentStatus == "sent")
             {
-                return Result.Failure(Error.BadRequest("Báo giá đã xác nhận chỉ có thể xóa bởi người dùng có quyền xác nhận báo giá.", "Status"));
+                var userIdStr = httpTokenAccessorService.GetUserId();
+                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+                {
+                    return Result.Failure(Error.Forbidden("Không xác định được danh tính người dùng."));
+                }
+
+                var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
+                    userId,
+                    [Domain.Constants.Permission.Permissions.Quotations.Approve],
+                    cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!hasApprovePermission)
+                {
+                    return Result.Failure(Error.BadRequest("Báo giá ở trạng thái đã gửi hoặc đã duyệt chỉ có thể xóa bởi người dùng có quyền duyệt/hủy báo giá.", "Status"));
+                }
             }
 
             deleteRepository.Delete(quotation);
