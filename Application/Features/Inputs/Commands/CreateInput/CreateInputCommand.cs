@@ -11,7 +11,7 @@ public sealed record CreateInputCommand : IRequest<Result<InputDetailResponse?>>
 
     public string? StatusId { get; init; }
 
-    public int? SupplierId { get; init; }
+    public int? PurchaseRequestId { get; init; }
 
     public List<CreateInputInfoRequest> Products { get; init; } = [];
 }

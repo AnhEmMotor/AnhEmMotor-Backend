@@ -474,39 +474,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         content!.Any(x => x.VariantId == vid).Should().BeTrue();
     }
 
-    [Fact(DisplayName = "STAT_033 - Tồn kho và giá thập phân")]
-    public async Task GetStockPrice_Decimal()
-    {
-        var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
-        await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-        decimal price = 1250750.50m;
-        var vid = await SeedProductVariantAsync(db, uniqueId, price, CancellationToken.None).ConfigureAwait(true);
-        if (!await db.InputStatuses
-            .AnyAsync(
-                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
-                CancellationToken.None)
-            .ConfigureAwait(true))
-        {
-            db.InputStatuses.Add(new InputStatusEntity { Key = Domain.Constants.Input.InputStatus.Finish });
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        }
-        var inp = new InputEntity { StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedAt = DateTime.UtcNow };
-        db.InputReceipts.Add(inp);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        db.InputInfos.Add(new InputInfoEntity { InputId = inp.Id, ProductVariantId = vid, Count = 35 });
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync($"/api/v1/Statistics/product-stock-price/{vid}", CancellationToken.None)
-            .ConfigureAwait(true);
-        var content = await response!.Content
-            .ReadFromJsonAsync<ProductStockPriceResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content!.UnitPrice.Should().Be(price);
-        content.StockQuantity.Should().Be(35);
-    }
-
     [Fact(DisplayName = "STAT_034 - Tồn kho variant đã xóa (Expect 404 per current code)")]
     public async Task GetStockPrice_Deleted_Returns404()
     {
@@ -750,58 +717,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         content!.First().HasZeroCostPrice.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "STAT_092 - Bảng tồn kho kho hàng lấy cả sản phẩm Soft Delete")]
-    public async Task GetWarehouseReport_IncludesSoftDeletedVariant()
-    {
-        var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
-        await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
-        db.Brands.Add(brand);
-        var cat = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
-        db.ProductCategories.Add(cat);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var prod = new ProductEntity
-        {
-            Name = $"Prod_{uniqueId}",
-            BrandId = brand.Id,
-            CategoryId = cat.Id,
-            StatusId = "ForSale"
-        };
-        db.Products.Add(prod);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var vid = new ProductVariant { ProductId = prod.Id, Price = 100000, UrlSlug = $"slug-{uniqueId}" };
-        db.ProductVariants.Add(vid);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        if (!await db.InputStatuses
-            .AnyAsync(
-                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
-                CancellationToken.None)
-            .ConfigureAwait(true))
-        {
-            db.InputStatuses.Add(new InputStatusEntity { Key = Domain.Constants.Input.InputStatus.Finish });
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        }
-        var inp = new InputEntity { StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedAt = DateTime.UtcNow };
-        db.InputReceipts.Add(inp);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        db.InputInfos
-            .Add(new InputInfoEntity { InputId = inp.Id, ProductVariantId = vid.Id, Count = 10, InputPrice = 50000 });
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        vid.DeletedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None)
-            .ConfigureAwait(true);
-        var content = await response!.Content
-            .ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Compare(x.BrandName, brand.Name) == 0);
-        brandData.Should().NotBeNull();
-        brandData!.TotalStock.Should().Be(10);
-    }
-
     [Fact(DisplayName = "STAT_093 - Đếm số lượng Backlog bỏ qua đơn Pending quá 30 ngày (Zombie)")]
     public async Task GetDashboardStats_PendingCount_IgnoresZombieOrders()
     {
@@ -832,60 +747,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.PendingOrdersCount.Should().Be(initialCount + 1);
-    }
-
-    [Fact(DisplayName = "STAT_094 - Tính giá vốn bình quân gia quyền (WAC) trong kho hàng")]
-    public async Task GetWarehouseReport_CalculatesWAC()
-    {
-        var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
-        await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-        var brand = new BrandEntity { Name = $"Brand_WAC_{uniqueId}" };
-        db.Brands.Add(brand);
-        var cat = new ProductCategoryEntity { Name = $"Cat_WAC_{uniqueId}" };
-        db.ProductCategories.Add(cat);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var prod = new ProductEntity
-        {
-            Name = $"Prod_{uniqueId}",
-            BrandId = brand.Id,
-            CategoryId = cat.Id,
-            StatusId = "ForSale"
-        };
-        db.Products.Add(prod);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var vid = new ProductVariant { ProductId = prod.Id, Price = 200000, UrlSlug = $"wac-slug-{uniqueId}" };
-        db.ProductVariants.Add(vid);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        if (!await db.InputStatuses
-            .AnyAsync(
-                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
-                CancellationToken.None)
-            .ConfigureAwait(true))
-        {
-            db.InputStatuses.Add(new InputStatusEntity { Key = Domain.Constants.Input.InputStatus.Finish });
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        }
-        var inp1 = new InputEntity { StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedAt = DateTime.UtcNow };
-        var inp2 = new InputEntity { StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedAt = DateTime.UtcNow };
-        db.InputReceipts.AddRange(inp1, inp2);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        db.InputInfos
-            .Add(new InputInfoEntity { InputId = inp1.Id, ProductVariantId = vid.Id, Count = 10, InputPrice = 100000 });
-        db.InputInfos
-            .Add(new InputInfoEntity { InputId = inp2.Id, ProductVariantId = vid.Id, Count = 20, InputPrice = 130000 });
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None)
-            .ConfigureAwait(true);
-        var content = await response!.Content
-            .ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Compare(x.BrandName, brand.Name) == 0);
-        brandData.Should().NotBeNull();
-        brandData!.TotalStock.Should().Be(30);
-        brandData.Value.Should().Be(3600000);
     }
 
     [Fact(DisplayName = "STAT_095 - Báo cáo hiệu suất sản phẩm lấy cả dòng Soft Delete")]

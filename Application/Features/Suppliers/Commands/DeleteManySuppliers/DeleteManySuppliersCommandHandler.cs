@@ -26,8 +26,11 @@ public sealed class DeleteManySuppliersCommandHandler(
         var relevantInputs = await inputReadRepository.GetBySupplierIdsAsync(uniqueIds, cancellationToken)
             .ConfigureAwait(false);
         var suppliersWithWorkingInputsSet = relevantInputs
-            .Where(x => string.Compare(x.StatusId, InputStatus.Working) == 0 && x.SupplierId.HasValue)
-            .Select(x => x.SupplierId!.Value)
+            .Where(x => string.Compare(x.StatusId, InputStatus.Working) == 0)
+            .SelectMany(x => x.InputInfos
+                .Where(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.SupplierId.HasValue)
+                .Select(ii => ii.QuotationProductRow!.QuotationReceipt!.SupplierId!.Value))
+            .Intersect(uniqueIds)
             .ToHashSet();
         foreach (var id in uniqueIds)
         {

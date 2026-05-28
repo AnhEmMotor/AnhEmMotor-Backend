@@ -16,7 +16,7 @@ public sealed class GetSupplierPurchaseHistoryQueryHandler(IInputReadRepository 
         var result = await repository.GetPagedAsync<SupplierPurchaseHistoryResponse>(
             request.SieveModel!,
             DataFetchMode.ActiveOnly,
-            x => x.SupplierId == request.SupplierId,
+            x => x.InputInfos.Any(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.SupplierId == request.SupplierId),
             cancellationToken)
             .ConfigureAwait(false);
         return result;

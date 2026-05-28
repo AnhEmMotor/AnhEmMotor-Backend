@@ -4,14 +4,20 @@ namespace Domain.Constants.Input
 {
     public static class InputStatus
     {
-        public const string Working = "working";
-        public const string Finish = "finished";
-        public const string Cancel = "cancelled";
+        public const string Draft = "draft";
+        public const string Sent = "sent";
+        public const string Approve = "approve";
+        public const string Reject = "reject";
 
-        public static readonly string[] AllowedValues = [Working, Finish, Cancel];
-        public static readonly string[] FinishInputValues = [Finish];
-        public static readonly string[] WorkingInputValues = [Working];
-        public static readonly string[] NotEditInputValues = [Cancel, Finish];
+        // Maintain legacy values to prevent mapping errors if they are referenced elsewhere, but transition to new ones
+        public const string Working = "draft";
+        public const string Finish = "approve";
+        public const string Cancel = "reject";
+
+        public static readonly string[] AllowedValues = [Draft, Sent, Approve, Reject, "working", "finished", "cancelled"];
+        public static readonly string[] FinishInputValues = [Approve, "finished"];
+        public static readonly string[] WorkingInputValues = [Draft, Sent, "working"];
+        public static readonly string[] NotEditInputValues = [Approve, Reject, "finished", "cancelled"];
 
         public static bool IsValid(string? value)
         {
@@ -45,7 +51,8 @@ namespace Domain.Constants.Input
         {
             if (string.IsNullOrWhiteSpace(value))
                 return true;
-            return NotEditInputValues.Contains(value, StringComparer.OrdinalIgnoreCase);
+            return string.Equals(value, Approve, StringComparison.OrdinalIgnoreCase) || 
+                   string.Equals(value, "finished", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

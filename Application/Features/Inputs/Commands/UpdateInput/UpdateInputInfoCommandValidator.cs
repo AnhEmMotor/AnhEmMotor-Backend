@@ -7,9 +7,9 @@ namespace Application.Features.Inputs.Commands.UpdateInput
     {
         public UpdateInputInfoCommandValidator()
         {
-            RuleFor(x => x.ProductVariantId).NotNull().GreaterThan(0);
+            RuleFor(x => x.PurchaseRequestItemId).GreaterThan(0).When(x => x.PurchaseRequestItemId.HasValue);
+            RuleFor(x => x.QuotationProductRowId).GreaterThan(0).When(x => x.QuotationProductRowId.HasValue);
             RuleFor(x => x.Count).NotNull().GreaterThan(0);
-            RuleFor(x => x.InputPrice).NotNull().GreaterThanOrEqualTo(0);
         }
     }
 }

@@ -13,45 +13,59 @@ public sealed class InputMappingConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<CreateInputCommand, Input>();
-        config.NewConfig<CreateInputInfoRequest, InputInfo>()
-            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
-            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId);
+        config.NewConfig<CreateInputInfoRequest, InputInfo>();
         config.NewConfig<Input, InputListResponse>()
-            .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
                 dest => dest.TotalPayable,
                 src => src.InputInfos != null
-                    ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0))
+                    ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.QuotationProductRow != null ? (ii.QuotationProductRow.QuotePrice ?? 0) : 0))
                     : 0)
             .Map(dest => dest.Products, src => src.InputInfos);
         config.NewConfig<Input, InputDetailResponse>()
-            .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
-            .Map(dest => dest.SupplierPhone, src => src.Supplier != null ? src.Supplier.Phone : null)
-            .Map(dest => dest.SupplierEmail, src => src.Supplier != null ? src.Supplier.Email : null)
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
                 dest => dest.TotalPayable,
                 src => src.InputInfos != null
-                    ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0))
+                    ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.QuotationProductRow != null ? (ii.QuotationProductRow.QuotePrice ?? 0) : 0))
                     : 0)
             .Map(dest => dest.Products, src => src.InputInfos);
         config.NewConfig<InputInfo, InputInfoResponse>()
-            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
-            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId)
+            .Map(
+                dest => dest.ProductVariantId,
+                src => src.QuotationProductRow != null ? src.QuotationProductRow.ProductVariantId : (src.PurchaseRequestItem != null ? src.PurchaseRequestItem.ProductVariantId : (int?)null))
+            .Map(
+                dest => dest.ProductVariantColorId,
+                src => src.QuotationProductRow != null ? src.QuotationProductRow.ProductVariantColorId : (src.PurchaseRequestItem != null ? src.PurchaseRequestItem.ProductVariantColorId : (int?)null))
             .Map(
                 dest => dest.ProductVariantColorName,
-                src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
-            .Map(dest => dest.Name, src => BuildFullVariantName(src.ProductVariant))
+                src => src.QuotationProductRow != null && src.QuotationProductRow.ProductVariantColor != null
+                    ? src.QuotationProductRow.ProductVariantColor.ColorName
+                    : (src.PurchaseRequestItem != null && src.PurchaseRequestItem.ProductVariantColor != null ? src.PurchaseRequestItem.ProductVariantColor.ColorName : null))
+            .Map(
+                dest => dest.SupplierId,
+                src => src.QuotationProductRow != null && src.QuotationProductRow.QuotationReceipt != null ? src.QuotationProductRow.QuotationReceipt.SupplierId : (int?)null)
+            .Map(
+                dest => dest.SupplierName,
+                src => src.QuotationProductRow != null && src.QuotationProductRow.QuotationReceipt != null && src.QuotationProductRow.QuotationReceipt.Supplier != null
+                    ? src.QuotationProductRow.QuotationReceipt.Supplier.Name
+                    : null)
+            .Map(
+                dest => dest.Name,
+                src => BuildFullVariantName(src.QuotationProductRow != null ? src.QuotationProductRow.ProductVariant : (src.PurchaseRequestItem != null ? src.PurchaseRequestItem.ProductVariant : null)))
             .Map(dest => dest.Quantity, src => src.Count)
-            .Map(dest => dest.UnitPrice, src => src.InputPrice)
-            .Map(dest => dest.ImportPrice, src => src.InputPrice)
+            .Map(
+                dest => dest.UnitPrice,
+                src => src.QuotationProductRow != null ? src.QuotationProductRow.QuotePrice : 0)
+            .Map(
+                dest => dest.ImportPrice,
+                src => src.QuotationProductRow != null ? src.QuotationProductRow.QuotePrice : 0)
             .Map(dest => dest.Discount, src => 0)
-            .Map(dest => dest.Total, src => (decimal)(src.Count ?? 0) * (src.InputPrice ?? 0))
+            .Map(
+                dest => dest.Total,
+                src => (decimal)(src.Count ?? 0) * (src.QuotationProductRow != null ? (src.QuotationProductRow.QuotePrice ?? 0) : 0))
             .Map(dest => dest.Vehicles, src => src.Vehicles);
         config.NewConfig<UpdateInputInfoRequest, InputInfo>()
-            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
-            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId)
             .Ignore(dest => dest.Vehicles)
             .IgnoreNullValues(true);
         config.NewConfig<UpdateInputCommand, Input>().IgnoreNullValues(true);
@@ -63,7 +77,7 @@ public sealed class InputMappingConfig : IRegister
             .Map(
                 dest => dest.TotalPayable,
                 src => src.InputInfos != null
-                    ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0))
+                    ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.QuotationProductRow != null ? (ii.QuotationProductRow.QuotePrice ?? 0) : 0))
                     : 0)
             .Map(dest => dest.TotalItems, src => src.InputInfos != null ? src.InputInfos.Count() : 0);
         config.NewConfig<InputListResponse, SupplierPurchaseHistoryResponse>();

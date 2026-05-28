@@ -27,11 +27,11 @@ public class SupplierReadRepository(
     {
         return context.GetQuery<SupplierEntity>(mode)
             .GroupJoin(
-                context.GetQuery<Domain.Entities.Input>(DataFetchMode.ActiveOnly)
-                    .Where(i => i.StatusId == InputStatus.Finish),
-                supplier => supplier.Id,
-                input => input.SupplierId,
-                (supplier, inputs) => new { supplier, inputs })
+                context.GetQuery<Domain.Entities.InputInfo>(DataFetchMode.ActiveOnly)
+                    .Where(ii => ii.InputReceipt != null && ii.InputReceipt.StatusId == InputStatus.Finish),
+                supplier => (int?)supplier.Id,
+                inputInfo => inputInfo.QuotationProductRow != null && inputInfo.QuotationProductRow.QuotationReceipt != null ? inputInfo.QuotationProductRow.QuotationReceipt.SupplierId : null,
+                (supplier, inputInfos) => new { supplier, inputInfos })
             .Select(
                 x => new SupplierWithTotalInputResponse
                 {
@@ -48,7 +48,7 @@ public class SupplierReadRepository(
                     TaxIdentificationNumber = x.supplier.TaxIdentificationNumber,
                     PartnerTypeId = x.supplier.PartnerTypeId ?? "supplier",
                     TotalInput =
-                        x.inputs.SelectMany(i => i.InputInfos).Sum(ii => (ii.Count ?? 0) * (ii.InputPrice ?? 0))
+                        x.inputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.QuotationProductRow != null ? (ii.QuotationProductRow.QuotePrice ?? 0) : 0))
                 });
     }
 

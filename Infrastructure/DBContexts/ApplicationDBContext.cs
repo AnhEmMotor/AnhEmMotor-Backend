@@ -125,6 +125,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<QuotationProductRow> QuotationProductRows { get; set; }
 
+    public virtual DbSet<PurchaseRequest> PurchaseRequests { get; set; }
+
+    public virtual DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -248,9 +252,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(v => v.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<InputInfo>()
-            .HasOne(ii => ii.ProductVariantColor)
+            .HasOne(ii => ii.PurchaseRequestItem)
+            .WithMany(pri => pri.InputInfos)
+            .HasForeignKey(ii => ii.PurchaseRequestItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InputInfo>()
+            .HasOne(ii => ii.QuotationProductRow)
             .WithMany()
-            .HasForeignKey(ii => ii.ProductVariantColorId)
+            .HasForeignKey(ii => ii.QuotationProductRowId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<OutputInfo>()
             .HasOne(oi => oi.ProductVariantColor)
@@ -276,6 +285,27 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(oi => oi.ProductVariantColor)
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<PurchaseRequestItem>()
+            .HasOne(oi => oi.PurchaseRequest)
+            .WithMany(q => q.PurchaseRequestItems)
+            .HasForeignKey(oi => oi.PurchaseRequestId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<PurchaseRequestItem>()
+            .HasOne(oi => oi.ProductVariant)
+            .WithMany()
+            .HasForeignKey(oi => oi.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<PurchaseRequestItem>()
+            .HasOne(oi => oi.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(oi => oi.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Input>()
+            .HasOne(oi => oi.PurchaseRequest)
+            .WithMany()
+            .HasForeignKey(oi => oi.PurchaseRequestId)
             .OnDelete(DeleteBehavior.Restrict);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;

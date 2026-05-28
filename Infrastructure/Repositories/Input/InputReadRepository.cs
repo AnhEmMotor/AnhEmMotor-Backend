@@ -31,7 +31,7 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
         var totalValue = await context.InputReceipts
             .Where(x => x.DeletedAt == null && x.StatusId == InputStatus.Finish)
             .SelectMany(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .SumAsync(y => (y.Count ?? 0) * (y.InputPrice ?? 0), cancellationToken)
+            .SumAsync(y => (long)(y.Count ?? 0) * (long)(y.QuotationProductRow != null ? (y.QuotationProductRow.QuotePrice ?? 0) : 0), cancellationToken)
             .ConfigureAwait(false);
         return new InventoryReceiptStatsResponse
         {
@@ -67,18 +67,31 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
         }
         return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .ThenInclude(x => x.Vehicles)
+                .ThenInclude(x => x.Vehicles)
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .ThenInclude(x => x.ProductVariant)
-            .ThenInclude(x => x!.Product)
+                .ThenInclude(x => x.QuotationProductRow)
+                    .ThenInclude(x => x!.QuotationReceipt)
+                        .ThenInclude(x => x!.Supplier)
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .ThenInclude(x => x.ProductVariantColor)
+                .ThenInclude(x => x.QuotationProductRow)
+                    .ThenInclude(x => x!.ProductVariant)
+                        .ThenInclude(x => x!.Product)
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .ThenInclude(x => x.ProductVariant)
-            .ThenInclude(x => x!.VariantOptionValues)
-            .ThenInclude(x => x.OptionValue)
-            .ThenInclude(x => x!.Option)
-            .Include(x => x.Supplier)
+                .ThenInclude(x => x.QuotationProductRow)
+                    .ThenInclude(x => x!.ProductVariant)
+                        .ThenInclude(x => x!.VariantOptionValues)
+                            .ThenInclude(x => x.OptionValue)
+                                .ThenInclude(x => x!.Option)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.QuotationProductRow)
+                    .ThenInclude(x => x!.ProductVariantColor)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.PurchaseRequestItem)
+                    .ThenInclude(x => x!.ProductVariant)
+                        .ThenInclude(x => x!.Product)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.PurchaseRequestItem)
+                    .ThenInclude(x => x!.ProductVariantColor)
             .Include(x => x.CreatedByUser)
             .Include(x => x.InputStatus)
             .AsSplitQuery();
@@ -125,18 +138,31 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
         var query = GetQueryable(mode);
         return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .ThenInclude(x => x.Vehicles)
+                .ThenInclude(x => x.Vehicles)
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .ThenInclude(x => x.ProductVariant)
-            .ThenInclude(x => x!.Product)
+                .ThenInclude(x => x.QuotationProductRow)
+                    .ThenInclude(x => x!.QuotationReceipt)
+                        .ThenInclude(x => x!.Supplier)
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .ThenInclude(x => x.ProductVariantColor)
+                .ThenInclude(x => x.QuotationProductRow)
+                    .ThenInclude(x => x!.ProductVariant)
+                        .ThenInclude(x => x!.Product)
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .ThenInclude(x => x.ProductVariant)
-            .ThenInclude(x => x!.VariantOptionValues)
-            .ThenInclude(x => x.OptionValue)
-            .ThenInclude(x => x!.Option)
-            .Include(x => x.Supplier)
+                .ThenInclude(x => x.QuotationProductRow)
+                    .ThenInclude(x => x!.ProductVariant)
+                        .ThenInclude(x => x!.VariantOptionValues)
+                            .ThenInclude(x => x.OptionValue)
+                                .ThenInclude(x => x!.Option)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.QuotationProductRow)
+                    .ThenInclude(x => x!.ProductVariantColor)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.PurchaseRequestItem)
+                    .ThenInclude(x => x!.ProductVariant)
+                        .ThenInclude(x => x!.Product)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.PurchaseRequestItem)
+                    .ThenInclude(x => x!.ProductVariantColor)
             .Include(x => x.InputStatus)
             .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
@@ -150,10 +176,7 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
     {
         var query = GetQueryable(mode);
         return query
-            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-            .ThenInclude(x => x.ProductVariant)
-            .ThenInclude(x => x!.Product)
-            .Where(x => x.SupplierId == supplierId)
+            .Where(x => x.InputInfos.Any(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.SupplierId == supplierId))
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
     }
@@ -165,7 +188,7 @@ public class InputReadRepository(ApplicationDBContext context, ISievePaginator p
     {
         var query = GetQueryable(mode);
         return query
-            .Where(x => x.SupplierId != null && supplierIds.Contains(x.SupplierId.Value))
+            .Where(x => x.InputInfos.Any(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.SupplierId != null && supplierIds.Contains(ii.QuotationProductRow.QuotationReceipt.SupplierId.Value)))
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<InputEntity>>(t => t.Result, cancellationToken);
     }

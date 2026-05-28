@@ -11,15 +11,25 @@ public sealed class UpdateInputCommandValidator : AbstractValidator<UpdateInputC
             .Must(
                 products =>
                 {
-                    var productIds = products
-                    .Where(p => p.ProductVariantId.HasValue)
-                        .Select(p => p!.ProductVariantId!.Value)
+                    var prItemIds = products
+                        .Where(p => p.PurchaseRequestItemId.HasValue)
+                        .Select(p => p.PurchaseRequestItemId!.Value)
                         .ToList();
-                    var distinctCount = productIds.Distinct().Count();
-                    var isDuplicate = productIds.Count != distinctCount;
-                    return !isDuplicate;
+                    if (prItemIds.Count != prItemIds.Distinct().Count())
+                    {
+                        return false;
+                    }
+                    var quoteRowIds = products
+                        .Where(p => p.QuotationProductRowId.HasValue)
+                        .Select(p => p.QuotationProductRowId!.Value)
+                        .ToList();
+                    if (quoteRowIds.Count != quoteRowIds.Distinct().Count())
+                    {
+                        return false;
+                    }
+                    return true;
                 })
-            .WithMessage("Product ID cannot be duplicated in a single input.");
+            .WithMessage("Purchase Request Items or Quotation Product Rows cannot be duplicated in a single input.");
         RuleForEach(x => x.Products).SetValidator(new UpdateInputInfoCommandValidator());
     }
 }

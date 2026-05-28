@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.Quotation
 {
     public interface IQuotationInsertRepository
     {
-        void Add(QuotationEntity quotation);
+        public void Add(QuotationEntity quotation);
     }
 }

@@ -20,9 +20,9 @@ namespace Domain.Entities
         [ForeignKey("InputStatus")]
         public string? StatusId { get; set; }
 
-        [Column("SupplierId")]
-        [ForeignKey("Supplier")]
-        public int? SupplierId { get; set; }
+        [Column("PurchaseRequestId")]
+        [ForeignKey("PurchaseRequest")]
+        public int? PurchaseRequestId { get; set; }
 
         [Column("CreatedBy")]
         [ForeignKey("CreatedByUser")]
@@ -40,7 +40,7 @@ namespace Domain.Entities
 
         public Output? Output { get; set; }
 
-        public Supplier? Supplier { get; set; }
+        public PurchaseRequest? PurchaseRequest { get; set; }
 
         public ApplicationUser? CreatedByUser { get; set; }
 

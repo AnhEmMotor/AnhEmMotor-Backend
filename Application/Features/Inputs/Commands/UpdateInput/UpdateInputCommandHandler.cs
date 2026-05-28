@@ -3,8 +3,10 @@ using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.Quotation;
 
 using Domain.Constants;
 using Domain.Constants.Order;
@@ -19,6 +21,8 @@ public sealed partial class UpdateInputCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
     IInputDeleteRepository deleteRepository,
+    IPurchaseRequestReadRepository prReadRepository,
+    IQuotationReadRepository quotationRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, Result<InputDetailResponse?>>
@@ -47,30 +51,47 @@ public sealed partial class UpdateInputCommandHandler(
                     "Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy.",
                     "Products");
             }
-            if (request.SupplierId != null)
+            if (request.PurchaseRequestId != null && request.PurchaseRequestId != input.PurchaseRequestId)
             {
-                return Error.BadRequest(
-                    "Không được chỉnh nhà cung cấp trong phiếu nhập đã hoàn thành hoặc đã hủy.",
-                    "Products");
+                var pr = await prReadRepository.GetByIdAsync(request.PurchaseRequestId.Value, cancellationToken)
+                    .ConfigureAwait(false);
+                if (pr is null)
+                {
+                    return Error.NotFound($"Yêu cầu mua hàng {request.PurchaseRequestId} không tồn tại hoặc đã bị xóa.", "PurchaseRequestId");
+                }
+                if (!string.Equals(pr.Status, "approve", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Error.BadRequest($"Yêu cầu mua hàng {request.PurchaseRequestId} chưa được phê duyệt.", "PurchaseRequestId");
+                }
             }
         }
-        if (request.SupplierId.HasValue && request.SupplierId != input.SupplierId)
-        {
-            var supplier = await supplierRepository.GetByIdAsync(
-                request.SupplierId.Value,
-                cancellationToken,
-                DataFetchMode.ActiveOnly)
-                .ConfigureAwait(false);
-            if (supplier is null || string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
-            {
-                return Error.BadRequest("Nhà cung cấp không hợp lệ hoặc không còn hoạt động.", "SupplierId");
-            }
-        }
-        var variantIds = request.Products
-            .Where(p => p.ProductVariantId.HasValue)
-            .Select(p => p.ProductVariantId!.Value)
+        var prItemIds = request.Products
+            .Where(p => p.PurchaseRequestItemId.HasValue)
+            .Select(p => p.PurchaseRequestItemId!.Value)
             .Distinct()
             .ToList();
+        var prItems = prItemIds.Count > 0
+            ? await prReadRepository.GetItemsByIdsAsync(prItemIds, cancellationToken).ConfigureAwait(false)
+            : [];
+        var prItemsDict = prItems.ToDictionary(x => x.Id);
+
+        var quoteRowIds = request.Products
+            .Where(p => p.QuotationProductRowId.HasValue)
+            .Select(p => p.QuotationProductRowId!.Value)
+            .Distinct()
+            .ToList();
+        var quoteRows = quoteRowIds.Count > 0
+            ? await quotationRepository.GetRowsByIdsAsync(quoteRowIds, cancellationToken).ConfigureAwait(false)
+            : [];
+        var quoteRowsDict = quoteRows.ToDictionary(x => x.Id);
+
+        var variantIds = request.Products
+            .Select(p => p.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(p.QuotationProductRowId.Value, out var qr) ? qr.ProductVariantId : (p.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(p.PurchaseRequestItemId.Value, out var prItem) ? prItem.ProductVariantId : (int?)null))
+            .Where(id => id.HasValue)
+            .Select(id => id!.Value)
+            .Distinct()
+            .ToList();
+
         var variantsList = new List<ProductVariant>();
         if (variantIds.Count > 0)
         {
@@ -82,7 +103,7 @@ public sealed partial class UpdateInputCommandHandler(
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
                 return Error.NotFound(
-                    $"Không tìm thấy {missingIds.Count} s?n ph?m: {string.Join(", ", missingIds)}",
+                    $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}",
                     "Products");
             }
             foreach (var variant in variantsList)
@@ -96,18 +117,37 @@ public sealed partial class UpdateInputCommandHandler(
             }
             var uniqueVins = new HashSet<(string Vin, int ProductVariantId, int? ProductVariantColorId)>();
             var uniqueEngines = new HashSet<(string Engine, int ProductVariantId, int? ProductVariantColorId)>();
-            foreach (var product in request.Products.Where(p => p.ProductVariantId.HasValue))
+            foreach (var product in request.Products)
             {
-                var variant = variantsList.First(v => v.Id == product.ProductVariantId!.Value);
-                var colorValidation = ValidateVariantColor(variant, product.ProductVariantColorId);
-                if (colorValidation is not null)
+                var resolvedVariantId = product.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr) ? qr.ProductVariantId : (product.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItem) ? prItem.ProductVariantId : (int?)null);
+                var resolvedColorId = product.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr2) ? qr2.ProductVariantColorId : (product.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItem2) ? prItem2.ProductVariantColorId : (int?)null);
+                var resolvedSupplierId = product.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr3) && qr3.QuotationReceipt != null ? qr3.QuotationReceipt.SupplierId : (int?)null;
+
+                if (resolvedVariantId.HasValue)
                 {
-                    return colorValidation;
-                }
-                var vehicleValidation = ValidateVehicleIdentifiers(variant, product, uniqueVins, uniqueEngines);
-                if (vehicleValidation is not null)
-                {
-                    return vehicleValidation;
+                    if (resolvedSupplierId.HasValue)
+                    {
+                        var supplier = await supplierRepository.GetByIdAsync(
+                            resolvedSupplierId.Value,
+                            cancellationToken,
+                            DataFetchMode.ActiveOnly)
+                            .ConfigureAwait(false);
+                        if (supplier is null || string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
+                        {
+                            return Error.BadRequest($"Nhà cung cấp với ID {resolvedSupplierId.Value} không tồn tại hoặc không còn hoạt động.", "Products");
+                        }
+                    }
+                    var variant = variantsList.First(v => v.Id == resolvedVariantId.Value);
+                    var colorValidation = ValidateVariantColor(variant, resolvedColorId);
+                    if (colorValidation is not null)
+                    {
+                        return colorValidation;
+                    }
+                    var vehicleValidation = ValidateVehicleIdentifiers(variant, product, resolvedVariantId.Value, resolvedColorId, uniqueVins, uniqueEngines);
+                    if (vehicleValidation is not null)
+                    {
+                        return vehicleValidation;
+                    }
                 }
             }
         }
@@ -134,6 +174,9 @@ public sealed partial class UpdateInputCommandHandler(
         }
         foreach (var productRequest in request.Products)
         {
+            var resolvedColorId = productRequest.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(productRequest.QuotationProductRowId.Value, out var qr) ? qr.ProductVariantColorId : (productRequest.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(productRequest.PurchaseRequestItemId.Value, out var prItem) ? prItem.ProductVariantColorId : (int?)null);
+            var resolvedVariantId = productRequest.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(productRequest.QuotationProductRowId.Value, out var qrV) ? qrV.ProductVariantId : (productRequest.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(productRequest.PurchaseRequestItemId.Value, out var prItemV) ? prItemV.ProductVariantId : (int?)null);
+
             if (productRequest.Id.HasValue && productRequest.Id > 0)
             {
                 if (existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
@@ -143,15 +186,15 @@ public sealed partial class UpdateInputCommandHandler(
                     {
                         existingInfo.RemainingCount = productRequest.Count.Value;
                     }
-                    var variant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductVariantId);
-                    SyncVehicleIdentifiers(existingInfo, productRequest, variant);
+                    var variant = variantsList.FirstOrDefault(v => v.Id == resolvedVariantId);
+                    SyncVehicleIdentifiers(existingInfo, productRequest, variant, resolvedColorId);
                 }
             } else
             {
                 var newInfo = productRequest.Adapt<InputInfo>();
                 newInfo.RemainingCount = newInfo.Count ?? 0;
-                var variant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductVariantId);
-                SyncVehicleIdentifiers(newInfo, productRequest, variant);
+                var variant = variantsList.FirstOrDefault(v => v.Id == resolvedVariantId);
+                SyncVehicleIdentifiers(newInfo, productRequest, variant, resolvedColorId);
                 input.InputInfos.Add(newInfo);
             }
         }
@@ -183,6 +226,8 @@ public sealed partial class UpdateInputCommandHandler(
     private static Error? ValidateVehicleIdentifiers(
         ProductVariant variant,
         UpdateInputInfoRequest product,
+        int resolvedVariantId,
+        int? resolvedColorId,
         HashSet<(string Vin, int ProductVariantId, int? ProductVariantColorId)> uniqueVins,
         HashSet<(string Engine, int ProductVariantId, int? ProductVariantColorId)> uniqueEngines)
     {
@@ -207,12 +252,12 @@ public sealed partial class UpdateInputCommandHandler(
             }
             var vin = vehicle.VinNumber.Trim();
             var engine = vehicle.EngineNumber.Trim();
-            var normalizedVinKey = (vin.ToUpperInvariant(), product.ProductVariantId!.Value, product.ProductVariantColorId);
+            var normalizedVinKey = (vin.ToUpperInvariant(), resolvedVariantId, resolvedColorId);
             if (!uniqueVins.Add(normalizedVinKey))
             {
                 return Error.BadRequest($"Số khung trùng lặp trong yêu cầu: {vin}", "Products");
             }
-            var normalizedEngineKey = (engine.ToUpperInvariant(), product.ProductVariantId!.Value, product.ProductVariantColorId);
+            var normalizedEngineKey = (engine.ToUpperInvariant(), resolvedVariantId, resolvedColorId);
             if (!uniqueEngines.Add(normalizedEngineKey))
             {
                 return Error.BadRequest($"Số máy trùng lặp trong yêu cầu: {engine}", "Products");
@@ -224,7 +269,8 @@ public sealed partial class UpdateInputCommandHandler(
     private static void SyncVehicleIdentifiers(
         InputInfo inputInfo,
         UpdateInputInfoRequest productRequest,
-        ProductVariant? variant)
+        ProductVariant? variant,
+        int? resolvedColorId)
     {
         var managementType = variant?.Product?.ProductCategory?.ManagementType;
         if (!string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase))
@@ -244,7 +290,7 @@ public sealed partial class UpdateInputCommandHandler(
                 {
                     LicensePlate = string.Empty,
                     ProductVariantId = variant?.Id,
-                    ProductVariantColorId = productRequest.ProductVariantColorId,
+                    ProductVariantColorId = resolvedColorId,
                     LeadId = null,
                     PurchaseDate = DateTimeOffset.UtcNow,
                     IsActive = true,
@@ -253,7 +299,7 @@ public sealed partial class UpdateInputCommandHandler(
             vehicle.VinNumber = vehicleRequest.VinNumber.Trim();
             vehicle.EngineNumber = vehicleRequest.EngineNumber.Trim();
             vehicle.ProductVariantId = variant?.Id;
-            vehicle.ProductVariantColorId = productRequest.ProductVariantColorId;
+            vehicle.ProductVariantColorId = resolvedColorId;
             if (string.IsNullOrWhiteSpace(vehicle.Status))
             {
                 vehicle.Status = VehicleStatus.Available;

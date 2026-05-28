@@ -167,7 +167,7 @@ public class ProductController(ISender sender) : ApiController
     /// khi có quyền thêm hoặc sửa phiếu nhập).
     /// </summary>
     [HttpGet("variants-lite/for-input")]
-    [RequiresAnyPermissions(Inputs.Edit, Inputs.Create)]
+    [RequiresAnyPermissions(PurchaseOrders.Edit, PurchaseOrders.Create, PurchaseRequests.Edit, PurchaseRequests.Create)]
     [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponseForInput>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActiveVariantLiteProductsForInputAsync(
         [FromQuery] SieveModel request,

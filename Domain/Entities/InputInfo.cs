@@ -14,15 +14,8 @@ namespace Domain.Entities
         [ForeignKey("InputReceipt")]
         public int InputId { get; set; }
 
-        [Column("ProductVariantId")]
-        [ForeignKey("ProductVariant")]
-        public int? ProductVariantId { get; set; }
-
         [Column("Count")]
         public int? Count { get; set; }
-
-        [Column("InputPrice", TypeName = "decimal(18, 2)")]
-        public decimal? InputPrice { get; set; }
 
         [Column("RemainingCount")]
         public int? RemainingCount { get; set; }
@@ -31,15 +24,19 @@ namespace Domain.Entities
         [ForeignKey("ParentOutputInfo")]
         public int? ParentOutputInfoId { get; set; }
 
-        [Column("ProductVariantColorId")]
-        [ForeignKey("ProductVariantColor")]
-        public int? ProductVariantColorId { get; set; }
+        [Column("PurchaseRequestItemId")]
+        [ForeignKey("PurchaseRequestItem")]
+        public int? PurchaseRequestItemId { get; set; }
+
+        [Column("QuotationProductRowId")]
+        [ForeignKey("QuotationProductRow")]
+        public int? QuotationProductRowId { get; set; }
 
         public Input? InputReceipt { get; set; }
 
-        public ProductVariant? ProductVariant { get; set; }
+        public PurchaseRequestItem? PurchaseRequestItem { get; set; }
 
-        public ProductVariantColor? ProductVariantColor { get; set; }
+        public QuotationProductRow? QuotationProductRow { get; set; }
 
         public OutputInfo? ParentOutputInfo { get; set; }
 

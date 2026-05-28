@@ -5,10 +5,10 @@ namespace Application.Interfaces.Repositories.Quotation
 {
     public interface IQuotationUpdateRepository
     {
-        void Update(QuotationEntity quotation);
+        public void Update(QuotationEntity quotation);
 
-        void Restore(QuotationEntity quotation);
+        public void Restore(QuotationEntity quotation);
 
-        void Restore(IEnumerable<QuotationEntity> quotations);
+        public void Restore(IEnumerable<QuotationEntity> quotations);
     }
 }

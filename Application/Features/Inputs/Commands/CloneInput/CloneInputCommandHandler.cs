@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -17,7 +17,6 @@ namespace Application.Features.Inputs.Commands.CloneInput;
 public sealed class CloneInputCommandHandler(
     IInputReadRepository inputReadRepository,
     IInputInsertRepository inputInsertRepository,
-    ISupplierReadRepository supplierReadRepository,
     IProductVariantReadRepository variantReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CloneInputCommand, Result<InputDetailResponse?>>
 {
@@ -38,18 +37,10 @@ public sealed class CloneInputCommandHandler(
         {
             return Error.NotFound($"Phiếu nhập với Id = {command.Id.Value} không tồn tại", "Id");
         }
-        var supplier = await supplierReadRepository.GetByIdAsync(
-            originalInput.SupplierId ?? 0,
-            cancellationToken,
-            DataFetchMode.ActiveOnly)
-            .ConfigureAwait(false);
-        if (supplier is null || string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
-        {
-            return Error.BadRequest("Nhà cung cấp không tồn tại hoặc không còn hoạt động", "SupplierId");
-        }
         var productVariantIds = originalInput.InputInfos
-            .Where(p => p.ProductVariantId.HasValue)
-            .Select(p => p.ProductVariantId!.Value)
+            .Select(p => p.QuotationProductRow != null ? p.QuotationProductRow.ProductVariantId : (p.PurchaseRequestItem != null ? p.PurchaseRequestItem.ProductVariantId : (int?)null))
+            .Where(id => id.HasValue)
+            .Select(id => id!.Value)
             .Distinct()
             .ToList();
         var variants = await variantReadRepository.GetByIdAsync(
@@ -61,11 +52,12 @@ public sealed class CloneInputCommandHandler(
         var validProducts = new List<InputInfoEntity>();
         foreach (var originalProduct in originalInput.InputInfos)
         {
-            if (!originalProduct.ProductVariantId.HasValue)
+            var resolvedVariantId = originalProduct.QuotationProductRow != null ? originalProduct.QuotationProductRow.ProductVariantId : (originalProduct.PurchaseRequestItem != null ? originalProduct.PurchaseRequestItem.ProductVariantId : (int?)null);
+            if (!resolvedVariantId.HasValue)
             {
                 continue;
             }
-            if (!variantDict.TryGetValue(originalProduct.ProductVariantId.Value, out var variant))
+            if (!variantDict.TryGetValue(resolvedVariantId.Value, out var variant))
             {
                 continue;
             }
@@ -76,11 +68,10 @@ public sealed class CloneInputCommandHandler(
             validProducts.Add(
                 new InputInfoEntity
                 {
-                    ProductVariantId = originalProduct.ProductVariantId,
-                    ProductVariantColorId = originalProduct.ProductVariantColorId,
+                    PurchaseRequestItemId = originalProduct.PurchaseRequestItemId,
+                    QuotationProductRowId = originalProduct.QuotationProductRowId,
                     Count = originalProduct.Count,
                     RemainingCount = originalProduct.Count,
-                    InputPrice = originalProduct.InputPrice,
                     CreatedAt = DateTimeOffset.UtcNow,
                     UpdatedAt = DateTimeOffset.UtcNow
                 });
@@ -94,7 +85,7 @@ public sealed class CloneInputCommandHandler(
         var newInput = new InputEntity
         {
             Notes = originalInput.Notes,
-            SupplierId = originalInput.SupplierId,
+            PurchaseRequestId = originalInput.PurchaseRequestId,
             StatusId = InputStatus.Working,
             InputInfos = validProducts,
             CreatedAt = DateTimeOffset.UtcNow,

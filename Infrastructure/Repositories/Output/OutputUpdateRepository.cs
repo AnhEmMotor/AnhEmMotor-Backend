@@ -76,7 +76,7 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
                     if (remainingToDeduct <= 0)
                         break;
                     var batchRemaining = batch.RemainingCount ?? 0;
-                    var batchPrice = batch.InputPrice ?? 0;
+                    var batchPrice = batch.QuotationProductRow != null ? (batch.QuotationProductRow.QuotePrice ?? 0) : 0;
                     if (batchRemaining >= remainingToDeduct)
                     {
                         totalCost += remainingToDeduct * batchPrice;
@@ -103,9 +103,11 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
         var finishedStatuses = Domain.Constants.Input.InputStatus.FinishInputValues;
         return context.InputInfos
             .Include(ii => ii.InputReceipt)
+            .Include(ii => ii.QuotationProductRow)
+            .Include(ii => ii.PurchaseRequestItem)
             .Where(
-                ii => ii.ProductVariantId == productId &&
-                    ii.ProductVariantColorId == colorId &&
+                ii => (ii.QuotationProductRow != null ? ii.QuotationProductRow.ProductVariantId : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantId : (int?)null)) == productId &&
+                    (ii.QuotationProductRow != null ? ii.QuotationProductRow.ProductVariantColorId : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantColorId : (int?)null)) == colorId &&
                     ii.RemainingCount > 0 &&
                     ii.DeletedAt == null &&
                     ii.InputReceipt != null &&

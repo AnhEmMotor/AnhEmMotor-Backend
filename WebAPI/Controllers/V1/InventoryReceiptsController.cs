@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Features.Inputs.Commands.CloneInput;
 using Application.Features.Inputs.Commands.CreateInput;
@@ -9,7 +9,6 @@ using Application.Features.Inputs.Commands.RestoreManyInputs;
 using Application.Features.Inputs.Commands.UpdateInput;
 using Application.Features.Inputs.Commands.UpdateInputNotes;
 using Application.Features.Inputs.Commands.UpdateInputStatus;
-using Application.Features.Inputs.Commands.UpdateManyInputStatus;
 using Application.Features.Inputs.Queries.GetDeletedInputsList;
 using Application.Features.Inputs.Queries.GetInputById;
 using Application.Features.Inputs.Queries.GetInputsBySupplierId;
@@ -27,6 +26,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -44,7 +44,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Lấy danh sách phiếu nhập (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
-    [HasPermission(Inputs.View)]
+    [HasPermission(PurchaseOrders.View)]
     [ProducesResponseType(typeof(PagedResult<InputListResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInputsAsync(
         [FromQuery] SieveModel sieveModel,
@@ -59,7 +59,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Lấy thống kê cho phần phiếu nhập kho.
     /// </summary>
     [HttpGet("statistics")]
-    [HasPermission(Inputs.View)]
+    [HasPermission(PurchaseOrders.View)]
     [ProducesResponseType(typeof(InventoryReceiptStatsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInventoryReceiptStatsAsync(CancellationToken cancellationToken)
     {
@@ -72,7 +72,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Lấy danh sách trạng thái phiếu nhập.
     /// </summary>
     [HttpGet("status")]
-    [RequiresAnyPermissions(Inputs.View, Inputs.Create, Inputs.Edit)]
+    [RequiresAnyPermissions(PurchaseOrders.View, PurchaseOrders.Create, PurchaseOrders.Edit )]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInputStatusesAsync(CancellationToken cancellationToken)
     {
@@ -85,7 +85,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Lấy danh sách phiếu nhập đã bị xóa (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
-    [HasPermission(Inputs.View)]
+    [HasPermission(PurchaseOrders.View)]
     [ProducesResponseType(typeof(PagedResult<InputListResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedInputsAsync(
         [FromQuery] SieveModel sieveModel,
@@ -100,7 +100,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Lấy thông tin chi tiết của phiếu nhập.
     /// </summary>
     [HttpGet("{id:int}", Name = InventoryReceipts.GetById)]
-    [HasPermission(Inputs.View)]
+    [HasPermission(PurchaseOrders.View)]
     [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetInputByIdAsync(int id, CancellationToken cancellationToken)
@@ -114,7 +114,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Lấy danh sách phiếu nhập theo nhà cung cấp.
     /// </summary>
     [HttpGet("by-supplier/{supplierId:int}")]
-    [RequiresAllPermissions(Suppliers.View, Inputs.View)]
+    [RequiresAllPermissions(Suppliers.View, PurchaseOrders.View)]
     [ProducesResponseType(typeof(PagedResult<InputListResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInputsBySupplierIdAsync(
         int supplierId,
@@ -130,7 +130,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Tạo phiếu nhập mới.
     /// </summary>
     [HttpPost]
-    [HasPermission(Inputs.Create)]
+    [HasPermission(PurchaseOrders.Create)]
     [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateInputAsync(
@@ -146,7 +146,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Clone phiếu nhập từ phiếu nhập gốc. Chỉ clone các sản phẩm còn hợp lệ (chưa xóa, còn đang bán).
     /// </summary>
     [HttpPost("{id:int}/clone")]
-    [HasPermission(Inputs.Create)]
+    [HasPermission(PurchaseOrders.Create)]
     [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -161,7 +161,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Cập nhật phiếu nhập.
     /// </summary>
     [HttpPut("{id:int}")]
-    [HasPermission(Inputs.Edit)]
+    [HasPermission(PurchaseOrders.Edit)]
     [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -184,7 +184,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Cập nhật trạng thái của phiếu nhập.
     /// </summary>
     [HttpPatch("{id:int}/status")]
-    [HasPermission(Inputs.ChangeStatus)]
+    [HasPermission(PurchaseOrders.ApproveReject)]
     [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -207,7 +207,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Cập nhật ghi chú của phiếu nhập.
     /// </summary>
     [HttpPatch("{id:int}/notes")]
-    [HasPermission(Inputs.Edit)]
+    [HasPermission(PurchaseOrders.Edit)]
     [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateInputNotesAsync(
@@ -221,26 +221,10 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật trạng thái của nhiều phiếu nhập cùng lúc.
-    /// </summary>
-    [HttpPatch("status")]
-    [HasPermission(Inputs.ChangeStatus)]
-    [ProducesResponseType(typeof(List<InputDetailResponse>), StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateManyInputStatusAsync(
-        [FromBody] UpdateManyInputStatusCommand request,
-        CancellationToken cancellationToken)
-    {
-        var command = request.Adapt<UpdateManyInputStatusCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
     /// Xóa phiếu nhập.
     /// </summary>
     [HttpDelete("{id:int}")]
-    [HasPermission(Inputs.Delete)]
+    [HasPermission(PurchaseOrders.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteInputAsync(int id, CancellationToken cancellationToken)
@@ -254,7 +238,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Xóa nhiều phiếu nhập cùng lúc.
     /// </summary>
     [HttpDelete]
-    [HasPermission(Inputs.Delete)]
+    [HasPermission(PurchaseOrders.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteManyInputsAsync(
@@ -270,7 +254,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Khôi phục phiếu nhập đã bị xóa.
     /// </summary>
     [HttpPost("{id:int}/restore")]
-    [HasPermission(Inputs.Delete)]
+    [HasPermission(PurchaseOrders.Delete)]
     [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreInputAsync(int id, CancellationToken cancellationToken)
@@ -284,7 +268,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Khôi phục nhiều phiếu nhập đã bị xóa cùng lúc.
     /// </summary>
     [HttpPost("restore")]
-    [HasPermission(Inputs.Delete)]
+    [HasPermission(PurchaseOrders.Delete)]
     [ProducesResponseType(typeof(List<InputDetailResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyInputsAsync(

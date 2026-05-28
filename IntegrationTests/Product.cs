@@ -383,7 +383,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [Products.View, Inputs.View],
+            [Products.View, PurchaseOrders.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -490,7 +490,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [Inputs.Edit],
+            [PurchaseOrders.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -1519,100 +1519,6 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact(DisplayName = "PRODUCT_111 - Lấy thông tin chi tiết sản phẩm kiểm tra tồn kho vật lý, giữ chỗ, ATS")]
-    public async Task GetProductById_WithStockData_ReturnsCorrectStockCalculations()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var username = $"u_{uniqueId}";
-        var password = "P1@password";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            username,
-            password,
-            [Products.View],
-            CancellationToken.None,
-            $"{username}@x.com")
-            .ConfigureAwait(true);
-        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            username,
-            password,
-            CancellationToken.None)
-            .ConfigureAwait(true);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
-        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
-        db.ProductCategories.Add(cat);
-        db.Brands.Add(brand);
-        if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
-            .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
-        if (!await db.InputStatuses
-            .AnyAsync(
-                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
-                CancellationToken.None)
-            .ConfigureAwait(true))
-            db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Finish });
-        if (!await db.OutputStatuses
-            .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
-            .ConfigureAwait(true))
-            db.OutputStatuses.Add(new OutputStatus { Key = OrderStatus.Pending });
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var product = new ProductEntity
-        {
-            Name = "P_Test_Stock",
-            CategoryId = cat.Id,
-            BrandId = brand.Id,
-            StatusId = ProductStatusConstants.ForSale
-        };
-        db.Products.Add(product);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var variant = new ProductVariant { ProductId = product.Id, UrlSlug = $"v-stock-{uniqueId}", Price = 1000 };
-        db.ProductVariants.Add(variant);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var input = new Input
-        {
-            StatusId = Domain.Constants.Input.InputStatus.Finish,
-            InputDate = DateTimeOffset.UtcNow
-        };
-        db.InputReceipts.Add(input);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var inputInfo = new InputInfo
-        {
-            InputId = input.Id,
-            ProductVariantId = variant.Id,
-            Count = 100,
-            RemainingCount = 100,
-            InputPrice = 800
-        };
-        db.InputInfos.Add(inputInfo);
-        var output = new Output { StatusId = OrderStatus.Pending };
-        db.OutputOrders.Add(output);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var outputInfo = new OutputInfo
-        {
-            OutputId = output.Id,
-            ProductVariantId = variant.Id,
-            Count = 30,
-            Price = 1000
-        };
-        db.OutputInfos.Add(outputInfo);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/for-manager", CancellationToken.None)
-            .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response!.Content
-            .ReadFromJsonAsync<ProductDetailForManagerResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content!.Should().NotBeNull();
-        content!.Stock.Should().Be(100);
-        content.HasBeenBooked.Should().Be(30);
-        content.StatusStockId.Should().Be("in_stock");
-    }
-
     [Fact(DisplayName = "PRODUCT_117 - Lấy danh sách sản phẩm rút gọn trả về đúng cấu trúc lite (Happy Path)")]
     public async Task GetProductsForPriceManagement_ReturnsMinimalInfo()
     {
@@ -1779,7 +1685,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [Inputs.Edit],
+            [PurchaseOrders.Edit],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);
@@ -2135,197 +2041,6 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var item = content!.Items!.FirstOrDefault(v => v.Id == variant.Id);
         item.Should().NotBeNull();
         item!.DisplayName.Should().Be($"Solo_{uniqueId}");
-    }
-
-    [Fact(DisplayName = "PRODUCT_132 - Lấy danh sách sản phẩm manager - Filter theo InventoryStatus")]
-    public async Task GetProductsForManager_FilterByInventoryStatus_ReturnsCorrectProducts()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            "Bearer",
-            await AuthenticateForManagerAsync(uniqueId).ConfigureAwait(true));
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
-        await EnsureInventoryAlertLevelAsync(db, 5).ConfigureAwait(true);
-        var statusFinished = Domain.Constants.Input.InputStatus.Finish;
-        var statusBooking = OrderStatus.Pending;
-        await EnsureInputStatusAsync(db, statusFinished).ConfigureAwait(true);
-        await EnsureOutputStatusAsync(db, statusBooking).ConfigureAwait(true);
-        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
-        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
-        db.ProductCategories.Add(cat);
-        db.Brands.Add(brand);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var p1 = CreateProductWithStock(db, $"P1_{uniqueId}", cat.Id, brand.Id, 10, 0, statusFinished, statusBooking);
-        var p2 = CreateProductWithStock(db, $"P2_{uniqueId}", cat.Id, brand.Id, 10, 10, statusFinished, statusBooking);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync(
-            $"/api/v1/product/for-manager?filters=inventoryStatus=={Domain.Constants.InventoryStatus.OutOfStock}",
-            CancellationToken.None)
-            .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response!.Content
-            .ReadFromJsonAsync<PagedResult<ProductDetailForManagerResponse>>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content!.Should().NotBeNull();
-        content!.Items.Should().Contain(p => p.Id == p2.Id);
-        content.Items.Should().NotContain(p => p.Id == p1.Id);
-    }
-
-    [Fact(DisplayName = "PRODUCT_133 - Lấy danh sách sản phẩm manager - Sort theo InventoryStatus")]
-    public async Task GetProductsForManager_SortByInventoryStatus_ReturnsSortedProducts()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            "Bearer",
-            await AuthenticateForManagerAsync(uniqueId).ConfigureAwait(true));
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
-        await EnsureInventoryAlertLevelAsync(db, 5).ConfigureAwait(true);
-        var statusFinished = Domain.Constants.Input.InputStatus.Finish;
-        var statusBooking = OrderStatus.Pending;
-        await EnsureInputStatusAsync(db, statusFinished).ConfigureAwait(true);
-        await EnsureOutputStatusAsync(db, statusBooking).ConfigureAwait(true);
-        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
-        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
-        db.ProductCategories.Add(cat);
-        db.Brands.Add(brand);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var pIn = CreateProductWithStock(db, $"PIn_{uniqueId}", cat.Id, brand.Id, 10, 0, statusFinished, statusBooking);
-        var pLow = CreateProductWithStock(
-            db,
-            $"PLow_{uniqueId}",
-            cat.Id,
-            brand.Id,
-            10,
-            7,
-            statusFinished,
-            statusBooking);
-        var pOut = CreateProductWithStock(
-            db,
-            $"POut_{uniqueId}",
-            cat.Id,
-            brand.Id,
-            10,
-            10,
-            statusFinished,
-            statusBooking);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync(
-            $"/api/v1/product/for-manager?sorts=inventoryStatus&filters=name@=_{uniqueId}",
-            CancellationToken.None)
-            .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response!.Content
-            .ReadFromJsonAsync<PagedResult<ProductDetailForManagerResponse>>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content!.Should().NotBeNull();
-        var items = content!.Items!.ToList();
-        items.Should().HaveCount(3);
-        items[0].Id.Should().Be(pOut.Id);
-        items[1].Id.Should().Be(pLow.Id);
-        items[2].Id.Should().Be(pIn.Id);
-    }
-
-    private async Task<string> AuthenticateForManagerAsync(string uniqueId)
-    {
-        var username = $"mgr_{uniqueId}";
-        var password = "P1@password";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            username,
-            password,
-            [Products.View, Inputs.View],
-            CancellationToken.None,
-            $"{username}@x.com")
-            .ConfigureAwait(true);
-        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            username,
-            password,
-            CancellationToken.None)
-            .ConfigureAwait(true);
-        return loginResp.AccessToken;
-    }
-
-    private static async Task EnsureInventoryAlertLevelAsync(ApplicationDBContext db, long level)
-    {
-        var key = Domain.Constants.SettingKeys.InventoryAlertLevel;
-        var setting = await db.Settings
-            .FirstOrDefaultAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
-            .ConfigureAwait(true);
-        if (setting is null)
-        {
-            db.Settings.Add(new Domain.Entities.Setting { Key = key, Value = level.ToString() });
-        } else
-        {
-            setting.Value = level.ToString();
-        }
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-    }
-
-    private static async Task EnsureInputStatusAsync(ApplicationDBContext db, string key)
-    {
-        if (!await db.InputStatuses
-            .AnyAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
-            .ConfigureAwait(true))
-        {
-            db.InputStatuses.Add(new InputStatus { Key = key });
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        }
-    }
-
-    private static async Task EnsureOutputStatusAsync(ApplicationDBContext db, string key)
-    {
-        if (!await db.OutputStatuses
-            .AnyAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
-            .ConfigureAwait(true))
-        {
-            db.OutputStatuses.Add(new OutputStatus { Key = key });
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        }
-    }
-
-    private static ProductEntity CreateProductWithStock(
-        ApplicationDBContext db,
-        string name,
-        int catId,
-        int brandId,
-        int stock,
-        int booked,
-        string statusFinished,
-        string statusBooking)
-    {
-        var product = new ProductEntity
-        {
-            Name = name,
-            CategoryId = catId,
-            BrandId = brandId,
-            StatusId = ProductStatusConstants.ForSale
-        };
-        db.Products.Add(product);
-        db.SaveChanges();
-        var variant = new ProductVariant { ProductId = product.Id, Price = 100, UrlSlug = $"v_{Guid.NewGuid():N}" };
-        db.ProductVariants.Add(variant);
-        db.SaveChanges();
-        if (stock > 0)
-        {
-            var receipt = new Input { StatusId = statusFinished };
-            db.InputReceipts.Add(receipt);
-            db.SaveChanges();
-            db.InputInfos
-                .Add(new InputInfo { ProductVariantId = variant.Id, InputId = receipt.Id, RemainingCount = stock });
-        }
-        if (booked > 0)
-        {
-            var order = new Output { StatusId = statusBooking };
-            db.OutputOrders.Add(order);
-            db.SaveChanges();
-            db.OutputInfos.Add(new OutputInfo { ProductVariantId = variant.Id, OutputId = order.Id, Count = booked });
-        }
-        return product;
     }
 
     [Fact(DisplayName = "PRODUCT_134 - Lấy danh sách Options thành công")]

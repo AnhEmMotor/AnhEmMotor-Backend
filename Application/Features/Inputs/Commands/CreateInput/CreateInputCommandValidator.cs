@@ -6,22 +6,32 @@ public sealed class CreateInputCommandValidator : AbstractValidator<CreateInputC
 {
     public CreateInputCommandValidator()
     {
-        RuleFor(x => x.SupplierId).NotNull().GreaterThan(0).WithMessage("SupplierId must be greater than 0.");
+        RuleFor(x => x.PurchaseRequestId).GreaterThan(0).When(x => x.PurchaseRequestId.HasValue).WithMessage("PurchaseRequestId must be greater than 0.");
         RuleFor(x => x.Notes).MaximumLength(1000).WithMessage("Notes cannot exceed 1000 characters.");
         RuleFor(x => x.Products).NotEmpty().WithMessage("Input must contain at least one product.");
         RuleFor(x => x.Products)
             .Must(
                 products =>
                 {
-                    var productIds = products
-                    .Where(p => p.ProductVariantId.HasValue)
-                        .Select(p => p!.ProductVariantId!.Value)
+                    var prItemIds = products
+                        .Where(p => p.PurchaseRequestItemId.HasValue)
+                        .Select(p => p.PurchaseRequestItemId!.Value)
                         .ToList();
-                    var distinctCount = productIds.Distinct().Count();
-                    var isDuplicate = productIds.Count != distinctCount;
-                    return !isDuplicate;
+                    if (prItemIds.Count != prItemIds.Distinct().Count())
+                    {
+                        return false;
+                    }
+                    var quoteRowIds = products
+                        .Where(p => p.QuotationProductRowId.HasValue)
+                        .Select(p => p.QuotationProductRowId!.Value)
+                        .ToList();
+                    if (quoteRowIds.Count != quoteRowIds.Distinct().Count())
+                    {
+                        return false;
+                    }
+                    return true;
                 })
-            .WithMessage("Product ID cannot be duplicated in a single input.");
+            .WithMessage("Purchase Request Items or Quotation Product Rows cannot be duplicated in a single input.");
         RuleForEach(x => x.Products).SetValidator(new CreateInputInfoCommandValidator());
     }
 }
