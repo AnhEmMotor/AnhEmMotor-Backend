@@ -25,7 +25,7 @@ public sealed partial class UpdateInputCommandHandler(
     IQuotationReadRepository quotationRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork, IHttpTokenAccessorService httpTokenAccessorService) : IRequestHandler<UpdateInputCommand, Result<InputDetailResponse?>>
+    IUnitOfWork unitOfWork, ICurrentUserContext currentUserContext) : IRequestHandler<UpdateInputCommand, Result<InputDetailResponse?>>
 {
     [GeneratedRegex("<.*?>")]
     private static partial Regex HtmlTagRegex();
@@ -161,7 +161,7 @@ public sealed partial class UpdateInputCommandHandler(
             Domain.Constants.Input.InputStatus.Finish,
             StringComparison.OrdinalIgnoreCase))
         {
-            var currentUserId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
+            var currentUserId = currentUserContext.GetUserId();
             input.InputDate = DateTimeOffset.UtcNow;
             input.ConfirmedBy = currentUserId;
         }

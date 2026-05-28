@@ -1,5 +1,5 @@
 using Application.Common.Models;
-using Application.Interfaces.Services.HR;
+using Application.Interfaces.Services;
 using Domain.Constants.HR.CommissionPolicy;
 using Domain.Entities;
 using Infrastructure.DBContexts;

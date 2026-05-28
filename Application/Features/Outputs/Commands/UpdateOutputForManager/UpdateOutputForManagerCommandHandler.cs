@@ -4,7 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.User;
-using Application.Interfaces.Services.HR;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;

@@ -15,7 +15,7 @@ namespace Application.Features.Quotations.Commands.DeleteQuotation
         IQuotationDeleteRepository deleteRepository,
         IQuotationReadRepository readRepository,
         IPermissionReadRepository permissionRepository,
-        IHttpTokenAccessorService httpTokenAccessorService,
+        ICurrentUserContext currentUserContext,
         IUnitOfWork unitOfWork) : IRequestHandler<DeleteQuotationCommand, Result>
     {
         public async Task<Result> Handle(DeleteQuotationCommand request, CancellationToken cancellationToken)
@@ -34,12 +34,7 @@ namespace Application.Features.Quotations.Commands.DeleteQuotation
             var currentStatus = quotation.Status?.ToLower();
             if (currentStatus == "approved" || currentStatus == "sent")
             {
-                var userIdStr = httpTokenAccessorService.GetUserId();
-                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
-                {
-                    return Result.Failure(Error.Forbidden("Không xác định được danh tính người dùng."));
-                }
-
+                Guid userId = currentUserContext.GetUserId();
                 var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                     userId,
                     [Domain.Constants.Permission.Permissions.Quotations.Approve],

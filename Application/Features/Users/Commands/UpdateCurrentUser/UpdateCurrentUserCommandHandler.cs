@@ -10,14 +10,14 @@ namespace Application.Features.Users.Commands.UpdateCurrentUser;
 public class UpdateCurrentUserCommandHandler(
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,
-            IHttpTokenAccessorService httpTokenAccessorService,
+    ICurrentUserContext currentUserContext,
     IUserStreamService userStreamService) : IRequestHandler<UpdateCurrentUserCommand, Result<UserDTOForManagerResponse>>
 {
     public async Task<Result<UserDTOForManagerResponse>> Handle(
         UpdateCurrentUserCommand request,
         CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
+        var userId = currentUserContext.GetUserId();
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {

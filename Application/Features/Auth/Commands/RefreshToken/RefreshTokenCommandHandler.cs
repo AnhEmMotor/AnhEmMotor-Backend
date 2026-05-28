@@ -13,14 +13,15 @@ public sealed class RefreshTokenCommandHandler(
     ITokenManagerService tokenService,
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,
-    IHttpTokenAccessorService httpTokenAccessor) : IRequestHandler<RefreshTokenCommand, Result<GetAccessTokenFromRefreshTokenResponse>>
+    ICookieTokenManager cookieTokenManager,
+    ICurrentUserContext currentUserContext) : IRequestHandler<RefreshTokenCommand, Result<GetAccessTokenFromRefreshTokenResponse>>
 {
     public async Task<Result<GetAccessTokenFromRefreshTokenResponse>> Handle(
         RefreshTokenCommand request,
         CancellationToken cancellationToken)
     {
-        var refreshToken = httpTokenAccessor.GetRefreshTokenFromCookie();
-        var accessToken = httpTokenAccessor.GetAccessToken();
+        var refreshToken = cookieTokenManager.GetRefreshToken();
+        var accessToken = currentUserContext.GetAccessToken();
         var user = await userReadRepository.GetByRefreshTokenAsync(refreshToken!, cancellationToken)
             .ConfigureAwait(false);
         if (user == null)
@@ -58,7 +59,7 @@ public sealed class RefreshTokenCommandHandler(
             refreshTokenExpiresAt,
             cancellationToken)
             .ConfigureAwait(false);
-        httpTokenAccessor.SetRefreshTokenToCookie(newRefreshToken, refreshTokenExpiresAt);
+        cookieTokenManager.SetRefreshToken(newRefreshToken, refreshTokenExpiresAt);
         return new GetAccessTokenFromRefreshTokenResponse
         {
             AccessToken = newAccessToken,

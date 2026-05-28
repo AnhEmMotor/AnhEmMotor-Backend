@@ -21,7 +21,7 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
         IPurchaseRequestInsertRepository insertRepository,
         IPurchaseRequestReadRepository readRepository,
         IProductVariantReadRepository variantRepository,
-        IHttpTokenAccessorService httpTokenAccessorService,
+        ICurrentUserContext currentUserContext,
         IUnitOfWork unitOfWork) : IRequestHandler<CreatePurchaseRequestCommand, Result<PurchaseRequestDetailResponse?>>
     {
         public async Task<Result<PurchaseRequestDetailResponse?>> Handle(
@@ -82,7 +82,7 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
                 }
             }
 
-            var currentUserId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
+            var currentUserId = currentUserContext.GetUserId();
             var purchaseRequest = new PurchaseRequestEntity
             {
                 Status = "draft",

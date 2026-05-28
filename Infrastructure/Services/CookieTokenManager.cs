@@ -1,20 +1,20 @@
-using Application.Interfaces.Services;
-using Azure.Core;
+﻿using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Security.Claims;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Infrastructure.Services
 {
-    public class HttpTokenAccessorService(IHttpContextAccessor httpContextAccessor, IConfiguration configuration) : IHttpTokenAccessorService
+    public class CookieTokenManager(IHttpContextAccessor httpContextAccessor, IConfiguration configuration): ICookieTokenManager
     {
-        public string? GetRefreshTokenFromCookie()
+        public string? GetRefreshToken()
         {
             return httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"];
         }
 
-        public void SetRefreshTokenToCookie(string token, DateTimeOffset expiresAt)
+        public void SetRefreshToken(string token, DateTimeOffset expiresAt)
         {
             var cookieDomain = configuration["CookieDomain"];
             var cookieOptions = new CookieOptions
@@ -32,7 +32,7 @@ namespace Infrastructure.Services
             httpContextAccessor.HttpContext?.Response.Cookies.Append("refreshToken", token, cookieOptions);
         }
 
-        public void DeleteRefreshTokenFromCookie()
+        public void DeleteRefreshToken()
         {
             var cookieDomain = configuration["CookieDomain"];
             var cookieOptions = new CookieOptions
@@ -47,31 +47,6 @@ namespace Infrastructure.Services
                 cookieOptions.Domain = cookieDomain;
             }
             httpContextAccessor.HttpContext?.Response.Cookies.Delete("refreshToken", cookieOptions);
-        }
-
-        public string? GetAuthorizationValueFromHeader()
-        {
-            return httpContextAccessor.HttpContext?.Request.Headers.Authorization;
-        }
-
-        public string? GetUserId()
-        {
-            return httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
-                httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
-        }
-
-        public string? GetAccessToken()
-        {
-            var authorizationHeader = httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString();
-            if (string.IsNullOrEmpty(authorizationHeader))
-            {
-                return null;
-            }
-            if (authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-            {
-                return authorizationHeader[7..];
-            }
-            return authorizationHeader;
         }
     }
 }

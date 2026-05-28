@@ -4,7 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Vehicle;
-using Application.Interfaces.Services.HR;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Lead;
 using Domain.Constants.Order;

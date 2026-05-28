@@ -13,7 +13,7 @@ namespace Application.Features.Inputs.Commands.UpdateInputStatus;
 public sealed class UpdateInputStatusCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IHttpTokenAccessorService httpTokenAccessorService,
+    ICurrentUserContext currentUserContext,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputStatusCommand, Result<InputDetailResponse>>
 {
     public async Task<Result<InputDetailResponse>> Handle(
@@ -27,20 +27,20 @@ public sealed class UpdateInputStatusCommandHandler(
             .ConfigureAwait(false);
         if (input is null)
         {
-            return Error.NotFound($"Kh�ng t�m th?y phi?u nh?p c� ID {request.Id}.", "Id");
+            return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
         if (InputStatus.IsCannotEdit(input.StatusId))
         {
-            return Error.BadRequest("Kh�ng th? s?a tr?ng th�i phi?u nh?p d� ho�n th�nh ho?c d� h?y.", "StatusId");
+            return Error.BadRequest("Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy.", "StatusId");
         }
         if (!InputStatus.IsValid(request.StatusId))
         {
-            return Error.BadRequest($"Tr?ng th�i '{request.StatusId}' kh�ng h?p l?.", "StatusId");
+            return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
         input.StatusId = request.StatusId;
         if (string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
         {
-            var currentUserId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
+            var currentUserId = currentUserContext.GetUserId();
             input.InputDate = DateTimeOffset.UtcNow;
             input.ConfirmedBy = currentUserId;
         }

@@ -35,13 +35,13 @@ public class PermissionAndRole
 {
     private readonly Mock<IUserReadRepository> _userReadRepositoryMock;
     private readonly Mock<IRoleReadRepository> _roleReadRepositoryMock;
-    private readonly Mock<IHttpTokenAccessorService> _httpTokenAccessorMock;
+    private readonly Mock<ICurrentUserContext> _currentUserContextMock;
 
     public PermissionAndRole()
     {
         _userReadRepositoryMock = new Mock<IUserReadRepository>();
         _roleReadRepositoryMock = new Mock<IRoleReadRepository>();
-        _httpTokenAccessorMock = new Mock<IHttpTokenAccessorService>();
+        _currentUserContextMock = new Mock<ICurrentUserContext>();
     }
 
     #pragma warning disable IDE0079
@@ -76,8 +76,8 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
-        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
-        var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object, _httpTokenAccessorMock.Object);
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
+        var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object, _currentUserContextMock.Object);
         var query = new GetMyPermissionsQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -100,8 +100,8 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
-        var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object, _httpTokenAccessorMock.Object);
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
+        var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object, _currentUserContextMock.Object);
         var query = new GetMyPermissionsQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -713,7 +713,7 @@ public class PermissionAndRole
     [Fact(DisplayName = "USR_PERM_002 - L?y quy?n c?a ngu?i dùng hi?n t?i (GetMyPermissions) tr? v? danh sách chu?i ID")]
     public async Task GetMyPermissions_ReturnsListOfStringIds()
     {
-        var handler = new GetMyPermissionsQueryHandler(_roleReadRepositoryMock.Object, _userReadRepositoryMock.Object, _httpTokenAccessorMock.Object);
+        var handler = new GetMyPermissionsQueryHandler(_roleReadRepositoryMock.Object, _userReadRepositoryMock.Object, _currentUserContextMock.Object);
         var userId = Guid.NewGuid();
         var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
         var roles = new List<string> { "Manager" };
@@ -728,7 +728,7 @@ public class PermissionAndRole
         _roleReadRepositoryMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissionNames);
-        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
         var query = new GetMyPermissionsQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();

@@ -27,19 +27,13 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
         IPurchaseRequestDeleteRepository deleteRepository,
         IProductVariantReadRepository variantRepository,
         IPermissionReadRepository permissionReadRepository,
-        IHttpTokenAccessorService httpTokenAccessorService,
+        ICurrentUserContext currentUserContext,
         IUnitOfWork unitOfWork) : IRequestHandler<UpdatePurchaseRequestCommand, Result<PurchaseRequestDetailResponse?>>
     {
         public async Task<Result<PurchaseRequestDetailResponse?>> Handle(
             UpdatePurchaseRequestCommand request,
             CancellationToken cancellationToken)
         {
-            //var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            //Guid? currentUserId = Guid.TryParse(userIdClaim, out var guid) ? guid : null;
-
-            //var authResult = await authorizationService.AuthorizeAsync(User, PurchaseRequests.ApproveReject)
-            //    .ConfigureAwait(true);
-
             var pr = await readRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
             if (pr is null)
             {
@@ -49,8 +43,8 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
             // State and permission checks:
             if (string.Equals(pr.Status, "sent", StringComparison.OrdinalIgnoreCase))
             {
-                var userId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
-                if (await permissionReadRepository.CheckUserPermissionsAsync(userId, [Domain.Constants.Permission.Permissions.PurchaseRequests.ApproveReject], cancellationToken))
+                var userId = currentUserContext.GetUserId();
+                if (!await permissionReadRepository.CheckUserPermissionsAsync(userId, [Domain.Constants.Permission.Permissions.PurchaseRequests.ApproveReject], cancellationToken))
                 {
                     return Error.BadRequest("Bạn không có quyền chỉnh sửa yêu cầu mua hàng khi đã ở trạng thái Sent.", "Status");
                 }

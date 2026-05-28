@@ -1,6 +1,6 @@
 using Application.Common.Models;
 
-namespace Application.Interfaces.Services.HR;
+namespace Application.Interfaces.Services;
 
 public interface ICommissionService
 {

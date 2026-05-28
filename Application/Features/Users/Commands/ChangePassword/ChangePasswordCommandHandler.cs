@@ -9,14 +9,14 @@ namespace Application.Features.Users.Commands.ChangePassword;
 
 public class ChangePasswordCommandHandler(
     IUserReadRepository userReadRepository,
-    IHttpTokenAccessorService httpTokenAccessorService,
+    ICurrentUserContext currentUserContext,
     IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordCommand, Result<ChangePasswordByUserResponse>>
 {
     public async Task<Result<ChangePasswordByUserResponse>> Handle(
         ChangePasswordCommand request,
         CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
+        var userId = currentUserContext.GetUserId();
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {

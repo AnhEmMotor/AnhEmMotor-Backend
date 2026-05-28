@@ -24,7 +24,7 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
         ISupplierReadRepository supplierRepository,
         IProductVariantReadRepository variantRepository,
         IPermissionReadRepository permissionRepository,
-        IHttpTokenAccessorService httpTokenAccessorService,
+        ICurrentUserContext currentUserContext,
         IUnitOfWork unitOfWork) : IRequestHandler<UpdateQuotationCommand, Result<QuotationDetailResponse?>>
     {
         public async Task<Result<QuotationDetailResponse?>> Handle(
@@ -40,12 +40,7 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
             var currentStatus = quotation.Status?.ToLower();
             if (currentStatus == "sent")
             {
-                var userIdStr = httpTokenAccessorService.GetUserId();
-                if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
-                {
-                    return Error.Forbidden("Không xác định được danh tính người dùng.");
-                }
-
+                Guid userId = currentUserContext.GetUserId();
                 var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                     userId,
                     [Domain.Constants.Permission.Permissions.Quotations.Approve],

@@ -9,13 +9,13 @@ namespace Application.Features.Permissions.Queries.GetMyPermissions;
 
 public class GetMyPermissionsQueryHandler(
     IRoleReadRepository roleReadRepository,
-    IUserReadRepository userReadRepository, IHttpTokenAccessorService httpTokenAccessorService) : IRequestHandler<GetMyPermissionsQuery, Result<PermissionAndRoleOfUserResponse>>
+    IUserReadRepository userReadRepository, ICurrentUserContext currentUserContext) : IRequestHandler<GetMyPermissionsQuery, Result<PermissionAndRoleOfUserResponse>>
 {
     public async Task<Result<PermissionAndRoleOfUserResponse>> Handle(
         GetMyPermissionsQuery request,
         CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
+        var userId = currentUserContext.GetUserId();
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {

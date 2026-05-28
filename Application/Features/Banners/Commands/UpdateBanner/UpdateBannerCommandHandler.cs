@@ -11,7 +11,7 @@ public sealed class UpdateBannerCommandHandler(
     IBannerReadRepository bannerReadRepository,
     IBannerInsertRepository bannerInsertRepository,
     IBannerUpdateRepository bannerUpdateRepository,
-    IHttpTokenAccessorService tokenAccessorService,
+    ICurrentUserContext currentUserContext,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateBannerCommand, Result<Unit>>
 {
     public async Task<Result<Unit>> Handle(UpdateBannerCommand request, CancellationToken cancellationToken)
@@ -38,7 +38,7 @@ public sealed class UpdateBannerCommandHandler(
             {
                 Banner = banner,
                 Action = action,
-                ChangedBy = tokenAccessorService.GetUserId() ?? "Unknown",
+                ChangedBy = currentUserContext.GetUserId().ToString(),
                 Details = $"Updated banner '{banner.Title}'"
             });
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

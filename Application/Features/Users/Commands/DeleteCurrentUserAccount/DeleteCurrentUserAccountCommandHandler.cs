@@ -10,14 +10,14 @@ namespace Application.Features.Users.Commands.DeleteCurrentUserAccount;
 public class DeleteCurrentUserAccountCommandHandler(
     IUserReadRepository userReadRepository,
     IUserDeleteRepository userDeleteRepository,
-    IHttpTokenAccessorService httpTokenAccessorService,
+    ICurrentUserContext currentUserContext,
     IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteCurrentUserAccountCommand, Result<DeleteAccountByUserReponse>>
 {
     public async Task<Result<DeleteAccountByUserReponse>> Handle(
         DeleteCurrentUserAccountCommand request,
         CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
+        var userId = currentUserContext.GetUserId();
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {

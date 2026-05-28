@@ -17,21 +17,21 @@ public class Auth
     private readonly Mock<IExternalAuthService> _externalAuthServiceMock = new();
     private readonly Mock<IIdentityService> _identityServiceMock = new();
     private readonly Mock<ITokenManagerService> _tokenManagerServiceMock = new();
-    private readonly Mock<IHttpTokenAccessorService> _httpTokenAccessorServiceMock = new();
+    private readonly Mock<ICookieTokenManager> _cookieTokenManagerMock = new();
     private readonly Mock<IUserUpdateRepository> _userUpdateRepositoryMock = new();
 
     private GoogleLoginCommandHandler GetGoogleHandler() => new(
         _externalAuthServiceMock.Object,
         _identityServiceMock.Object,
         _tokenManagerServiceMock.Object,
-        _httpTokenAccessorServiceMock.Object,
+        _cookieTokenManagerMock.Object,
         _userUpdateRepositoryMock.Object);
 
     private FacebookLoginCommandHandler GetFacebookHandler() => new(
         _externalAuthServiceMock.Object,
         _identityServiceMock.Object,
         _tokenManagerServiceMock.Object,
-        _httpTokenAccessorServiceMock.Object,
+        _cookieTokenManagerMock.Object,
         _userUpdateRepositoryMock.Object);
 
     #pragma warning disable IDE0079 

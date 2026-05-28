@@ -1,4 +1,4 @@
-using Application.ApiContracts.Quotation.Requests;
+﻿using Application.ApiContracts.Quotation.Requests;
 using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
 using Application.Features.Quotations.Commands.ApproveQuotation;
@@ -37,7 +37,7 @@ public class Quotation
     private readonly Mock<ISupplierReadRepository> _supplierRepoMock;
     private readonly Mock<IProductVariantReadRepository> _variantRepoMock;
     private readonly Mock<IPermissionReadRepository> _permissionRepoMock;
-    private readonly Mock<IHttpTokenAccessorService> _httpTokenAccessorRepoMock;
+    private readonly Mock<ICurrentUserContext> _currentUserContextMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
     public Quotation()
@@ -49,7 +49,7 @@ public class Quotation
         _supplierRepoMock = new Mock<ISupplierReadRepository>();
         _variantRepoMock = new Mock<IProductVariantReadRepository>();
         _permissionRepoMock = new Mock<IPermissionReadRepository>();
-        _httpTokenAccessorRepoMock = new Mock<IHttpTokenAccessorService>();
+        _currentUserContextMock = new Mock<ICurrentUserContext>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
@@ -376,7 +376,7 @@ public class Quotation
             _supplierRepoMock.Object,
             _variantRepoMock.Object, 
             _permissionRepoMock.Object, 
-            _httpTokenAccessorRepoMock.Object,
+            _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateQuotationCommand
@@ -418,7 +418,7 @@ public class Quotation
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
-            _httpTokenAccessorRepoMock.Object,
+            _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateQuotationCommand
@@ -461,7 +461,7 @@ public class Quotation
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
-            _httpTokenAccessorRepoMock.Object,
+            _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateQuotationCommand
@@ -500,7 +500,7 @@ public class Quotation
             _deleteRepoMock.Object,
             _readRepoMock.Object,
             _permissionRepoMock.Object,
-            _httpTokenAccessorRepoMock.Object,
+            _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new DeleteQuotationCommand { Id = 1 };
@@ -525,7 +525,7 @@ public class Quotation
             _deleteRepoMock.Object,
             _readRepoMock.Object,
             _permissionRepoMock.Object,
-            _httpTokenAccessorRepoMock.Object,
+            _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new DeleteQuotationCommand { Id = 1 };
@@ -537,7 +537,7 @@ public class Quotation
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         _permissionRepoMock.Setup(x => x.CheckUserPermissionsAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        _httpTokenAccessorRepoMock.Setup(x => x.GetUserId()).Returns(Guid.NewGuid().ToString());
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(Guid.NewGuid());
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -552,14 +552,14 @@ public class Quotation
             _deleteRepoMock.Object,
             _readRepoMock.Object,
             _permissionRepoMock.Object,
-            _httpTokenAccessorRepoMock.Object,
+            _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new DeleteQuotationCommand { Id = 1 };
         var quotation = new QuotationEntity { Id = 1, Status = "approved" };
 
         _permissionRepoMock.Setup(x => x.CheckUserPermissionsAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        _httpTokenAccessorRepoMock.Setup(x => x.GetUserId()).Returns(Guid.NewGuid().ToString());
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(Guid.NewGuid());
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(quotation);
 

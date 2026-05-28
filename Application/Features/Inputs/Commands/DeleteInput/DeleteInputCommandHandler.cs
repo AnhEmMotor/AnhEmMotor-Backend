@@ -13,7 +13,7 @@ public sealed class DeleteInputCommandHandler(
     IInputReadRepository readRepository,
     IInputDeleteRepository deleteRepository,
     IPermissionReadRepository permissionRepository,
-    IHttpTokenAccessorService httpTokenAccessorService,
+    ICurrentUserContext currentUserContext,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteInputCommand, Result>
 {
     public async Task<Result> Handle(DeleteInputCommand request, CancellationToken cancellationToken)
@@ -30,11 +30,7 @@ public sealed class DeleteInputCommandHandler(
         }
         if (!string.Equals(input.StatusId, InputStatus.Draft, StringComparison.OrdinalIgnoreCase))
         {
-            var userIdStr = httpTokenAccessorService.GetUserId();
-            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
-            {
-                return Result.Failure(Error.Forbidden("Không xác định được danh tính người dùng."));
-            }
+            Guid userId = currentUserContext.GetUserId();
 
             var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                 userId,

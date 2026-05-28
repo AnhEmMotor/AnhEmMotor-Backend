@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
-using Application.Interfaces.Services.HR;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Authorization;
@@ -202,7 +201,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
                 services.AddSingleton<IUserStreamService, UserStreamService>();
                 services.AddScoped<ITokenManagerService, TokenManagerService>();
-                services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
+                services.AddScoped<ICookieTokenManager, CookieTokenManager>();
+                services.AddScoped<ICurrentUserContext, CurrentUserContext>();
                 services.AddScoped<IIdentityService, IdentityService>();
                 services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
                 services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();

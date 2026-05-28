@@ -2,7 +2,7 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
-using Application.Interfaces.Services.HR;
+using Application.Interfaces.Services;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
 using Mapster;
