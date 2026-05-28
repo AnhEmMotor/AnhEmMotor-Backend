@@ -170,12 +170,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         [FromBody] UpdateInputCommand request,
         CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = request.Adapt<UpdateInputCommand>() with
-        {
-            Id = id,
-            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
-        };
+        var command = request.Adapt<UpdateInputCommand>() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -193,12 +188,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         [FromBody] UpdateInputStatusCommand request,
         CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = request.Adapt<UpdateInputStatusCommand>() with
-        {
-            Id = id,
-            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
-        };
+        var command = request.Adapt<UpdateInputStatusCommand>() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

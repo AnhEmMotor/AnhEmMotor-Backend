@@ -3,11 +3,11 @@ using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
-using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.ProductVariant;
-using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.Quotation;
-
+using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -25,7 +25,7 @@ public sealed partial class UpdateInputCommandHandler(
     IQuotationReadRepository quotationRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, Result<InputDetailResponse?>>
+    IUnitOfWork unitOfWork, IHttpTokenAccessorService httpTokenAccessorService) : IRequestHandler<UpdateInputCommand, Result<InputDetailResponse?>>
 {
     [GeneratedRegex("<.*?>")]
     private static partial Regex HtmlTagRegex();
@@ -161,8 +161,9 @@ public sealed partial class UpdateInputCommandHandler(
             Domain.Constants.Input.InputStatus.Finish,
             StringComparison.OrdinalIgnoreCase))
         {
+            var currentUserId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
             input.InputDate = DateTimeOffset.UtcNow;
-            input.ConfirmedBy = request.CurrentUserId;
+            input.ConfirmedBy = currentUserId;
         }
         var existingInfoDict = input.InputInfos.ToDictionary(ii => ii.Id);
         var requestInfoDict = request.Products.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);

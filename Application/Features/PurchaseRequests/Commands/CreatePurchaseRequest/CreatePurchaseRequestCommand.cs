@@ -12,7 +12,5 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
         public string? Note { get; init; }
 
         public List<CreatePurchaseRequestItemRequest> Items { get; init; } = [];
-
-        public Guid? CurrentUserId { get; init; }
     }
 }

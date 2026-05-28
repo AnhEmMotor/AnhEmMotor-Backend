@@ -1,15 +1,20 @@
 using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
+using Application.Interfaces.Services;
 using Domain.Constants;
+using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using PurchaseRequestEntity = Domain.Entities.PurchaseRequest;
@@ -21,12 +26,20 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
         IPurchaseRequestUpdateRepository updateRepository,
         IPurchaseRequestDeleteRepository deleteRepository,
         IProductVariantReadRepository variantRepository,
+        IPermissionReadRepository permissionReadRepository,
+        IHttpTokenAccessorService httpTokenAccessorService,
         IUnitOfWork unitOfWork) : IRequestHandler<UpdatePurchaseRequestCommand, Result<PurchaseRequestDetailResponse?>>
     {
         public async Task<Result<PurchaseRequestDetailResponse?>> Handle(
             UpdatePurchaseRequestCommand request,
             CancellationToken cancellationToken)
         {
+            //var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            //Guid? currentUserId = Guid.TryParse(userIdClaim, out var guid) ? guid : null;
+
+            //var authResult = await authorizationService.AuthorizeAsync(User, PurchaseRequests.ApproveReject)
+            //    .ConfigureAwait(true);
+
             var pr = await readRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
             if (pr is null)
             {
@@ -36,7 +49,8 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
             // State and permission checks:
             if (string.Equals(pr.Status, "sent", StringComparison.OrdinalIgnoreCase))
             {
-                if (!request.HasApproveRejectPermission)
+                var userId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
+                if (await permissionReadRepository.CheckUserPermissionsAsync(userId, [Domain.Constants.Permission.Permissions.PurchaseRequests.ApproveReject], cancellationToken))
                 {
                     return Error.BadRequest("Bạn không có quyền chỉnh sửa yêu cầu mua hàng khi đã ở trạng thái Sent.", "Status");
                 }

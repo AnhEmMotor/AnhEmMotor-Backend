@@ -16,6 +16,4 @@ public sealed record UpdateInputCommand : IRequest<Result<InputDetailResponse?>>
     public string? Notes { get; init; }
 
     public ICollection<UpdateInputInfoRequest> Products { get; init; } = [];
-
-    public Guid? CurrentUserId { get; init; }
 }

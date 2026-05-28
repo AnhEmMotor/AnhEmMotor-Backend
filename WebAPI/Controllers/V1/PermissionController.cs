@@ -74,8 +74,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMyPermissionsAsync(CancellationToken cancellationToken)
     {
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new GetMyPermissionsQuery() { UserId = userIdClaim }, cancellationToken)
+        var result = await mediator.Send(new GetMyPermissionsQuery(), cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }

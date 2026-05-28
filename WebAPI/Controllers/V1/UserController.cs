@@ -108,8 +108,7 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
         [FromBody] UpdateCurrentUserCommand model,
         CancellationToken cancellationToken)
     {
-        var modelToSend = model with { UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) };
-        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(model, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -126,8 +125,7 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
         [FromBody] ChangePasswordCommand model,
         CancellationToken cancellationToken)
     {
-        var modelToSend = model with { UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) };
-        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(model, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -142,8 +140,7 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteCurrentUserAccountAsync(CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new DeleteCurrentUserAccountCommand() { UserId = userId }, cancellationToken)
+        var result = await mediator.Send(new DeleteCurrentUserAccountCommand(), cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -172,7 +169,6 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadAvatarAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(file);
         var command = new UploadAvatarCommand
         {
             UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),

@@ -24,6 +24,7 @@ public class User
     private readonly Mock<IProtectedEntityManagerService> _protectedEntityManagerServiceMock;
     private readonly Mock<IRoleReadRepository> _roleReadRepositoryMock;
     private readonly Mock<IUserStreamService> _userStreamServiceMock;
+    private readonly Mock<IHttpTokenAccessorService> _httpTokenAccessorMock;
 
     public User()
     {
@@ -33,10 +34,11 @@ public class User
         _protectedEntityManagerServiceMock = new Mock<IProtectedEntityManagerService>();
         _roleReadRepositoryMock = new Mock<IRoleReadRepository>();
         _userStreamServiceMock = new Mock<IUserStreamService>();
+        _httpTokenAccessorMock = new Mock<IHttpTokenAccessorService>();
     }
 
-    #pragma warning disable IDE0079 
-    #pragma warning disable CRR0035
+#pragma warning disable IDE0079
+#pragma warning disable CRR0035
     [Fact(DisplayName = "USER_001 - L?y thông tin ngu?i dùng hi?n t?i thành công")]
     public async Task GetCurrentUser_Success_ReturnsUserResponse()
     {
@@ -191,13 +193,14 @@ public class User
         _userUpdateRepositoryMock.Setup(
             x => x.UpdateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, Array.Empty<string>()));
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new UpdateCurrentUserCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _userStreamServiceMock.Object);
         var command = new UpdateCurrentUserCommand()
         {
-            UserId = userId.ToString(),
             FullName = "New Name",
             Gender = GenderStatus.Female,
             PhoneNumber = "0987654321"
@@ -231,10 +234,11 @@ public class User
         var handler = new UpdateCurrentUserCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _userStreamServiceMock.Object);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var command = new UpdateCurrentUserCommand()
         {
-            UserId = userId.ToString(),
             FullName = null,
             Gender = null,
             PhoneNumber = null
@@ -257,13 +261,14 @@ public class User
         _userUpdateRepositoryMock.Setup(
             x => x.UpdateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, Array.Empty<string>()));
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new UpdateCurrentUserCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _userStreamServiceMock.Object);
         var command = new UpdateCurrentUserCommand()
         {
-            UserId = userId.ToString(),
             FullName = "  Trimmed Name  ",
             PhoneNumber = "  0999888777  "
         };
@@ -284,13 +289,14 @@ public class User
         _userUpdateRepositoryMock.Setup(
             x => x.UpdateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, Array.Empty<string>()));
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new UpdateCurrentUserCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _userStreamServiceMock.Object);
         var command = new UpdateCurrentUserCommand()
         {
-            UserId = userId.ToString(),
             FullName = "<script>alert('XSS')</script>",
             Gender = GenderStatus.Male
         };
@@ -307,11 +313,13 @@ public class User
         var user = new ApplicationUser { Id = userId, Status = UserStatus.Active, DeletedAt = null };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new UpdateCurrentUserCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _userStreamServiceMock.Object);
-        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), Gender = "InvalidGender" };
+        var command = new UpdateCurrentUserCommand() { Gender = "InvalidGender" };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -323,11 +331,13 @@ public class User
         var user = new ApplicationUser { Id = userId, Status = UserStatus.Active, DeletedAt = null };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new UpdateCurrentUserCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _userStreamServiceMock.Object);
-        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), PhoneNumber = "abcd1234" };
+        var command = new UpdateCurrentUserCommand() { PhoneNumber = "abcd1234" };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -339,11 +349,13 @@ public class User
         var user = new ApplicationUser { Id = userId, DeletedAt = DateTimeOffset.UtcNow.AddDays(-1) };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new UpdateCurrentUserCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _userStreamServiceMock.Object);
-        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
+        var command = new UpdateCurrentUserCommand() { FullName = "Test" };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -355,11 +367,13 @@ public class User
         var user = new ApplicationUser { Id = userId, Status = UserStatus.Banned, DeletedAt = null };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new UpdateCurrentUserCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _userStreamServiceMock.Object);
-        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
+        var command = new UpdateCurrentUserCommand() { FullName = "Test" };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -380,11 +394,13 @@ public class User
         _userUpdateRepositoryMock.Setup(
             x => x.UpdateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, Array.Empty<string>()));
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new UpdateCurrentUserCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _userStreamServiceMock.Object);
-        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
+        var command = new UpdateCurrentUserCommand() { FullName = "Test" };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         _userUpdateRepositoryMock.Verify(
@@ -412,10 +428,10 @@ public class User
         _userUpdateRepositoryMock.Setup(
             x => x.ChangePasswordAsync(user, "OldPass123!", "NewPass456!", It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, Array.Empty<string>()));
-        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
+        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _httpTokenAccessorMock.Object, _userUpdateRepositoryMock.Object);
         var command = new ChangePasswordCommand()
         {
-            UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
             NewPassword = "NewPass456!"
         };
@@ -437,10 +453,10 @@ public class User
             .ReturnsAsync(user);
         _userReadRepositoryMock.Setup(x => x.CheckPasswordAsync(user, "WrongPass", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
+        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _httpTokenAccessorMock.Object, _userUpdateRepositoryMock.Object);
         var command = new ChangePasswordCommand()
         {
-            UserId = userId.ToString(),
             CurrentPassword = "WrongPass",
             NewPassword = "NewPass456!"
         };
@@ -457,10 +473,10 @@ public class User
             .ReturnsAsync(user);
         _userReadRepositoryMock.Setup(x => x.CheckPasswordAsync(user, "OldPass123!", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
+        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _httpTokenAccessorMock.Object, _userUpdateRepositoryMock.Object);
         var command = new ChangePasswordCommand()
         {
-            UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
             NewPassword = "123"
         };
@@ -475,10 +491,10 @@ public class User
         var user = new ApplicationUser { Id = userId, DeletedAt = DateTimeOffset.UtcNow.AddDays(-1) };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
+        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _httpTokenAccessorMock.Object, _userUpdateRepositoryMock.Object);
         var command = new ChangePasswordCommand()
         {
-            UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
             NewPassword = "NewPass456!"
         };
@@ -502,11 +518,13 @@ public class User
         _userDeleteRepositoryMock.Setup(
             x => x.SoftDeleteUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, Array.Empty<string>()));
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new DeleteCurrentUserAccountCommandHandler(
             _userReadRepositoryMock.Object,
             _userDeleteRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _protectedEntityManagerServiceMock.Object);
-        var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
+        var command = new DeleteCurrentUserAccountCommand();
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
@@ -523,11 +541,13 @@ public class User
         var user = new ApplicationUser { Id = userId, Status = UserStatus.Banned, DeletedAt = null };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new DeleteCurrentUserAccountCommandHandler(
             _userReadRepositoryMock.Object,
             _userDeleteRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _protectedEntityManagerServiceMock.Object);
-        var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
+        var command = new DeleteCurrentUserAccountCommand();
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -539,16 +559,16 @@ public class User
         var user = new ApplicationUser { Id = userId, DeletedAt = DateTimeOffset.UtcNow.AddDays(-2) };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
+        _httpTokenAccessorMock.Setup(x => x.GetUserId()).Returns(userId.ToString());
         var handler = new DeleteCurrentUserAccountCommandHandler(
             _userReadRepositoryMock.Object,
             _userDeleteRepositoryMock.Object,
+            _httpTokenAccessorMock.Object,
             _protectedEntityManagerServiceMock.Object);
-        var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
+        var command = new DeleteCurrentUserAccountCommand();
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
-
-    
 
     [Fact(DisplayName = "USER_079 - Kiểm tra độ mạnh của mật khẩu (Validation)")]
     public void CreateUserCommandValidator_ShouldFail_WhenPasswordTooShort()

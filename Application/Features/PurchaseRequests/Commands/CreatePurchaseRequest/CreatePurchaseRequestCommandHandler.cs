@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using Mapster;
@@ -20,6 +21,7 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
         IPurchaseRequestInsertRepository insertRepository,
         IPurchaseRequestReadRepository readRepository,
         IProductVariantReadRepository variantRepository,
+        IHttpTokenAccessorService httpTokenAccessorService,
         IUnitOfWork unitOfWork) : IRequestHandler<CreatePurchaseRequestCommand, Result<PurchaseRequestDetailResponse?>>
     {
         public async Task<Result<PurchaseRequestDetailResponse?>> Handle(
@@ -80,17 +82,18 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
                 }
             }
 
+            var currentUserId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
             var purchaseRequest = new PurchaseRequestEntity
             {
                 Status = "draft",
                 Note = request.Note,
-                CreatedBy = request.CurrentUserId,
-                PurchaseRequestItems = request.Items.Select(item => new PurchaseRequestItem
+                CreatedBy = currentUserId,
+                PurchaseRequestItems = [.. request.Items.Select(item => new PurchaseRequestItem
                 {
                     ProductVariantId = item.ProductVariantId!.Value,
                     ProductVariantColorId = item.ProductVariantColorId,
                     Quantity = item.Quantity!.Value
-                }).ToList()
+                })]
             };
 
             insertRepository.Add(purchaseRequest);

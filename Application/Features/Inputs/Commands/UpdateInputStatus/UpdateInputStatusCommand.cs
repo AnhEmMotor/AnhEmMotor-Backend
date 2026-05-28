@@ -10,8 +10,5 @@ public sealed record UpdateInputStatusCommand : IRequest<Result<InputDetailRespo
     public int Id { get; init; }
 
     public string StatusId { get; init; } = string.Empty;
-
-    [JsonIgnore]
-    public Guid? CurrentUserId { get; init; }
 }
 

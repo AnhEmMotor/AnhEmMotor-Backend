@@ -14,9 +14,5 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
         public string? Note { get; init; }
 
         public List<UpdatePurchaseRequestItemRequest> Items { get; init; } = [];
-
-        public Guid? CurrentUserId { get; init; }
-
-        public bool HasApproveRejectPermission { get; init; }
     }
 }

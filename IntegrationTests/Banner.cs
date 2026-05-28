@@ -284,7 +284,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Domain.Constants.Permission.Permissions.Banners.Update"],
+            [Domain.Constants.Permission.Permissions.Banners.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -317,7 +317,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Domain.Constants.Permission.Permissions.Banners.Update", "Domain.Constants.Permission.Permissions.Banners.View"],
+            [Domain.Constants.Permission.Permissions.Banners.Edit, Domain.Constants.Permission.Permissions.Banners.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(

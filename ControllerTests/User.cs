@@ -112,11 +112,6 @@ public class User
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
-        _mediatorMock.Verify(
-            m => m.Send(
-                It.Is<UpdateCurrentUserCommand>(c => string.Compare(c.UserId, userId.ToString()) == 0),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
     }
 
     [Fact(DisplayName = "USER_039 - Controller - PUT /api/v1/User/me v?i body null ho?c r?ng")]
@@ -162,14 +157,6 @@ public class User
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
-        _mediatorMock.Verify(
-            m => m.Send(
-                It.Is<ChangePasswordCommand>(
-                    c => string.Compare(c.UserId, userId.ToString()) == 0 &&
-                        string.Compare(c.NewPassword, "New") == 0 &&
-                        string.Compare(c.CurrentPassword, "Old") == 0),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
     }
 
     [Fact(DisplayName = "USER_042 - Controller - POST /api/v1/User/change-password v?i body thi?u tru?ng")]

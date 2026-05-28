@@ -9,6 +9,7 @@ using Application.Features.News.Queries.GetNewsList;
 using Asp.Versioning;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
@@ -65,7 +66,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// Cập nhật bài viết
     /// </summary>
     /// <param name="id">Mã bài viết</param>
-    /// <param name="command">Dữ liệu cập nhật</param>
+    /// <param name="request">Dữ liệu cập nhật</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPut("{id}")]
@@ -73,11 +74,10 @@ public class NewsController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Cập nhật bài viết")]
     public async Task<IActionResult> UpdateAsync(
         int id,
-        [FromBody] UpdateNewsCommand command,
+        [FromBody] UpdateNewsCommand request,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
-            return BadRequest("ID mismatch");
+        var command = request.Adapt<UpdateNewsCommand>() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -117,7 +117,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// Cập nhật trạng thái hiển thị bài viết
     /// </summary>
     /// <param name="id">Mã bài viết</param>
-    /// <param name="command">Trạng thái mới</param>
+    /// <param name="request">Trạng thái mới</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPatch("{id}/status")]
@@ -125,11 +125,10 @@ public class NewsController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Cập nhật trạng thái hiển thị bài viết")]
     public async Task<IActionResult> UpdateStatusAsync(
         int id,
-        [FromBody] UpdateNewsStatusCommand command,
+        [FromBody] UpdateNewsStatusCommand request,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
-            return BadRequest("ID mismatch");
+        var command = request.Adapt<UpdateNewsStatusCommand>() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

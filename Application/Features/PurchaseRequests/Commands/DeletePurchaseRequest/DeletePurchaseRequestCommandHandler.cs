@@ -1,6 +1,8 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.PurchaseRequest;
+using Application.Interfaces.Services;
 using MediatR;
 using System;
 using System.Threading;
@@ -10,7 +12,8 @@ namespace Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest
 {
     public sealed class DeletePurchaseRequestCommandHandler(
         IPurchaseRequestReadRepository readRepository,
-        IPurchaseRequestDeleteRepository deleteRepository,
+        IPurchaseRequestDeleteRepository deleteRepository, IPermissionReadRepository permissionReadRepository,
+        IHttpTokenAccessorService httpTokenAccessorService,
         IUnitOfWork unitOfWork) : IRequestHandler<DeletePurchaseRequestCommand, Result>
     {
         public async Task<Result> Handle(DeletePurchaseRequestCommand request, CancellationToken cancellationToken)
@@ -26,7 +29,8 @@ namespace Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest
             // 2. If status is Sent, Approve, or Reject: requires both Delete and ApproveReject.
             if (!string.Equals(pr.Status, "draft", StringComparison.OrdinalIgnoreCase))
             {
-                if (!request.HasApproveRejectPermission)
+                var userId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
+                if (await permissionReadRepository.CheckUserPermissionsAsync(userId, [Domain.Constants.Permission.Permissions.PurchaseRequests.ApproveReject], cancellationToken))
                 {
                     return Result.Failure(Error.BadRequest($"Để xóa yêu cầu mua hàng ở trạng thái '{pr.Status}', bạn cần có thêm quyền phê duyệt (Approve/Reject).", "Status"));
                 }

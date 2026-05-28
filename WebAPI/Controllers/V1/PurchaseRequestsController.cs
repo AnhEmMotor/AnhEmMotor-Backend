@@ -35,7 +35,7 @@ namespace WebAPI.Controllers.V1
     [SwaggerTag("Quản lý Yêu cầu mua hàng (PR)")]
     [Route("api/v{version:apiVersion}/purchase-requests")]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-    public class PurchaseRequestsController(IMediator mediator, IAuthorizationService authorizationService) : ApiController
+    public class PurchaseRequestsController(IMediator mediator) : ApiController
     {
         /// <summary>
         /// Tạo mới một yêu cầu mua hàng.
@@ -48,15 +48,11 @@ namespace WebAPI.Controllers.V1
             [FromBody] CreatePurchaseRequestCommand command,
             CancellationToken cancellationToken)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Guid? currentUserId = Guid.TryParse(userIdClaim, out var guid) ? guid : null;
-
             var result = await mediator.Send(
                 new CreatePurchaseRequestCommand
                 {
                     Note = command.Note,
                     Items = command.Items,
-                    CurrentUserId = currentUserId
                 },
                 cancellationToken)
                 .ConfigureAwait(true);
@@ -77,20 +73,12 @@ namespace WebAPI.Controllers.V1
             [FromBody] UpdatePurchaseRequestCommand command,
             CancellationToken cancellationToken)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Guid? currentUserId = Guid.TryParse(userIdClaim, out var guid) ? guid : null;
-
-            var authResult = await authorizationService.AuthorizeAsync(User, PurchaseRequests.ApproveReject)
-                .ConfigureAwait(true);
-
             var result = await mediator.Send(
                 new UpdatePurchaseRequestCommand
                 {
                     Id = id,
                     Note = command.Note,
-                    Items = command.Items,
-                    CurrentUserId = currentUserId,
-                    HasApproveRejectPermission = authResult.Succeeded
+                    Items = command.Items
                 },
                 cancellationToken)
                 .ConfigureAwait(true);
@@ -108,10 +96,7 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            var authResult = await authorizationService.AuthorizeAsync(User, PurchaseRequests.ApproveReject)
-                .ConfigureAwait(true);
-
-            var result = await mediator.Send(new DeletePurchaseRequestCommand(id, authResult.Succeeded), cancellationToken)
+            var result = await mediator.Send(new DeletePurchaseRequestCommand(id), cancellationToken)
                 .ConfigureAwait(true);
 
             return HandleResult(result);

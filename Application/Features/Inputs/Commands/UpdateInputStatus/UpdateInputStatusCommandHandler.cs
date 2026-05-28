@@ -2,6 +2,7 @@ using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Input;
 using Mapster;
@@ -12,6 +13,7 @@ namespace Application.Features.Inputs.Commands.UpdateInputStatus;
 public sealed class UpdateInputStatusCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
+    IHttpTokenAccessorService httpTokenAccessorService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputStatusCommand, Result<InputDetailResponse>>
 {
     public async Task<Result<InputDetailResponse>> Handle(
@@ -38,8 +40,9 @@ public sealed class UpdateInputStatusCommandHandler(
         input.StatusId = request.StatusId;
         if (string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
         {
+            var currentUserId = Guid.Parse(httpTokenAccessorService.GetUserId()!);
             input.InputDate = DateTimeOffset.UtcNow;
-            input.ConfirmedBy = request.CurrentUserId;
+            input.ConfirmedBy = currentUserId;
         }
         updateRepository.Update(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
