@@ -2,18 +2,16 @@ using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services;
 using MediatR;
 
 namespace Application.Features.Users.Queries.GetCurrentUser;
 
-public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository, IRoleReadRepository roleReadRepository) : IRequestHandler<GetCurrentUserQuery, Result<UserResponse>>
+public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository, IRoleReadRepository roleReadRepository, ICurrentUserContext currentUserContext) : IRequestHandler<GetCurrentUserQuery, Result<UserResponse>>
 {
     public async Task<Result<UserResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
-        {
-            return Error.BadRequest("Invalid user ID.");
-        }
+        var userId = currentUserContext.GetUserId();
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {

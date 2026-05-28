@@ -1,4 +1,4 @@
-﻿using Application.Features.Permissions.Queries.GetMyPermissions;
+using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.Users.Commands.ChangePassword;
@@ -63,8 +63,9 @@ public class User
         _roleReadRepositoryMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
@@ -81,8 +82,9 @@ public class User
     {
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ApplicationUser?)null);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery() { UserId = null };
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(Guid.Empty);
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -99,8 +101,9 @@ public class User
         };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -119,8 +122,9 @@ public class User
         _roleReadRepositoryMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.Status.Should().Be(UserStatus.Banned);
@@ -143,8 +147,9 @@ public class User
         _roleReadRepositoryMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.Permissions.Should().NotBeNullOrEmpty();
@@ -166,8 +171,9 @@ public class User
         _roleReadRepositoryMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.Permissions.Should().BeNull();

@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Features.Users.Queries.GetCurrentUser;
 
-public record GetCurrentUserQuery : IRequest<Result<UserResponse>>;
+public record GetCurrentUserStreamQuery : IRequest<IAsyncEnumerable<Result<UserResponse>>>;

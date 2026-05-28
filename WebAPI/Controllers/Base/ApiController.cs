@@ -80,6 +80,14 @@ public abstract class ApiController : ControllerBase
         return MapErrorsToResponse(result);
     }
 
+    /// <summary>
+    /// Handles SSE stream results.
+    /// </summary>
+    protected IActionResult HandleSseResult<T>(IAsyncEnumerable<Result<T>> stream)
+    {
+        return new SseResult<T>(stream);
+    }
+
     private IActionResult MapErrorsToResponse(Result result)
     {
         var error = result.Errors?.FirstOrDefault() ?? result.Error;

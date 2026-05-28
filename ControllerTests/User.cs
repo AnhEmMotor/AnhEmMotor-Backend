@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.Users.Commands.ChangePassword;
@@ -23,19 +23,12 @@ namespace ControllerTests;
 public class User
 {
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IUserStreamService> _userStreamServiceMock;
-    private readonly Mock<IServiceProvider> _serviceProviderMock;
     private readonly UserController _controller;
 
     public User()
     {
         _mediatorMock = new Mock<IMediator>();
-        _userStreamServiceMock = new Mock<IUserStreamService>();
-        _serviceProviderMock = new Mock<IServiceProvider>();
-        _controller = new UserController(
-            _mediatorMock.Object,
-            _userStreamServiceMock.Object,
-            _serviceProviderMock.Object);
+        _controller = new UserController(_mediatorMock.Object);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
