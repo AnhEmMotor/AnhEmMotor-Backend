@@ -1,3 +1,4 @@
+using Application.ApiContracts.File.Requests;
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
@@ -134,15 +135,10 @@ public class MediaFileController(IMediator mediator) : ApiController
         List<IFormFile> files,
         CancellationToken cancellationToken)
     {
-        var fileDtos = new List<(Stream FileContent, string FileName)>();
-        foreach (var file in files)
+        var command = new UploadManyProductImagesCommand
         {
-            if (file.Length > 0)
-            {
-                fileDtos.Add((file.OpenReadStream(), file.FileName));
-            }
-        }
-        var command = new UploadManyProductImagesCommand { Files = fileDtos };
+            Files = files.Select(f => new FileParameter { Content = f.OpenReadStream(), FileName = f.FileName }).ToList()
+        };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result);
     }
@@ -219,16 +215,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     {
         var query = new ViewImageQuery { StoragePath = storagePath, Width = width };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if (result.IsFailure)
-        {
-            return HandleResult(result);
-        }
-        if (result.Value is { } imageData)
-        {
-            var (fileStream, contentType) = imageData;
-            return File(fileStream, contentType);
-        }
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return HandleResult(result);
     }
 }
 

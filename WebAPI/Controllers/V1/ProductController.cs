@@ -225,12 +225,7 @@ public class ProductController(ISender sender) : ApiController
     {
         var query = new ExportProductsQuery { SieveModel = sieveModel };
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
-        if (!result.IsSuccess)
-        {
-            return HandleResult(result);
-        }
-        var fileResult = result.Value;
-        return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
+        return HandleResult(result);
     }
 
     /// <summary>

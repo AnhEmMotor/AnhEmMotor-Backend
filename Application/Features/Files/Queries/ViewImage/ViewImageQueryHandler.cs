@@ -1,13 +1,14 @@
 
+using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.MediaFile.File;
 using MediatR;
 
 namespace Application.Features.Files.Queries.ViewImage;
 
-public sealed class ViewImageQueryHandler(IFileReadService fileReadService) : IRequestHandler<ViewImageQuery, Result<(Stream FileStream, string ContentType)?>>
+public sealed class ViewImageQueryHandler(IFileReadService fileReadService) : IRequestHandler<ViewImageQuery, Result<ViewImageResponse?>>
 {
-    public async Task<Result<(Stream FileStream, string ContentType)?>> Handle(
+    public async Task<Result<ViewImageResponse?>> Handle(
         ViewImageQuery request,
         CancellationToken cancellationToken)
     {
@@ -21,6 +22,6 @@ public sealed class ViewImageQueryHandler(IFileReadService fileReadService) : IR
         using var inputStream = new MemoryStream(fileBytes);
         var processedStream = await fileReadService.ReadImageAsync(inputStream, request.Width, cancellationToken)
             .ConfigureAwait(false);
-        return (processedStream, "image/webp");
+        return new ViewImageResponse { FileStream = processedStream, ContentType = "image/webp" };
     }
 }

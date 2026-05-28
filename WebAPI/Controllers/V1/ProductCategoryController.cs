@@ -70,12 +70,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     {
         var query = new ExportProductCategoriesQuery { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if (!result.IsSuccess)
-        {
-            return HandleResult(result);
-        }
-        var fileResult = result.Value;
-        return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
+        return HandleResult(result);
     }
 
     /// <summary>
