@@ -88,6 +88,19 @@ public abstract class ApiController : ControllerBase
         return new SseResult<T>(stream);
     }
 
+    /// <summary>
+    /// Handles redirection after payment callback based on result status.
+    /// </summary>
+    protected IActionResult HandlePaymentRedirect<T>(
+        Result<T> result,
+        string method,
+        Func<T?, string?> getOrderId,
+        string? fallbackOrderId = null,
+        Func<T?, bool>? checkCustomSuccess = null)
+    {
+        return new PaymentRedirectResult<T>(result, method, getOrderId, fallbackOrderId, checkCustomSuccess);
+    }
+
     private IActionResult MapErrorsToResponse(Result result)
     {
         var error = result.Errors?.FirstOrDefault() ?? result.Error;
