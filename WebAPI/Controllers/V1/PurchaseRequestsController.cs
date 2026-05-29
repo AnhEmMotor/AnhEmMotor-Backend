@@ -8,6 +8,7 @@ using Application.Features.PurchaseRequests.Commands.SendPurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequests;
+using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequests;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;
 using Application.Features.PurchaseRequests.Queries.GetQuotedPricesForPR;
 using Asp.Versioning;
@@ -143,6 +144,23 @@ namespace WebAPI.Controllers.V1
         {
             var result = await mediator.Send(
                 new GetPurchaseRequestsQuery { SieveModel = sieveModel },
+                cancellationToken)
+                .ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu nhập).
+        /// </summary>
+        [HttpGet("approved")]
+        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [ProducesResponseType(typeof(PagedResult<PurchaseRequestListResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetApprovedAsync(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(
+                new GetApprovedPurchaseRequestsQuery { SieveModel = sieveModel },
                 cancellationToken)
                 .ConfigureAwait(true);
             return HandleResult(result);

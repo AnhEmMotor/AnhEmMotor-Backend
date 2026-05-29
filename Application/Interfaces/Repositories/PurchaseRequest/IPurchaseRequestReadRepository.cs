@@ -13,6 +13,11 @@ namespace Application.Interfaces.Repositories.PurchaseRequest
             DataFetchMode mode = DataFetchMode.ActiveOnly,
             CancellationToken cancellationToken = default);
 
+        public Task<PagedResult<TResponse>> GetApprovedPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            CancellationToken cancellationToken = default);
+
         public Task<PurchaseRequestEntity?> GetByIdAsync(
             int id,
             CancellationToken cancellationToken,

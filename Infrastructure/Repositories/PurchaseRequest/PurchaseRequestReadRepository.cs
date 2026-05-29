@@ -24,6 +24,18 @@ namespace Infrastructure.Repositories.PurchaseRequest
             return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 
+        public Task<PagedResult<TResponse>> GetApprovedPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            CancellationToken cancellationToken = default)
+        {
+            var query = GetQueryable(mode)
+                .Include(x => x.CreatedByUser)
+                .Include(x => x.PurchaseRequestItems)
+                .Where(x => x.Status == PurchaseRequestStatus.Approve);
+            return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+        }
+
         public Task<PurchaseRequestEntity?> GetByIdAsync(
             int id,
             CancellationToken cancellationToken,
