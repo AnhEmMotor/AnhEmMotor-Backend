@@ -24,6 +24,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
             genericMethod.Invoke(null, [mapper]);
         }
         mapper.Property<Brand>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<PurchaseRequest>(p => p.Id).CanSort().CanFilter();
         mapper.Property<InventoryReceipt>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Output>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Product>(p => p.Id).CanSort().CanFilter();

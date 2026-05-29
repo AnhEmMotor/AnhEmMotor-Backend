@@ -96,7 +96,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             .ConfigureAwait(false);
         await context.Database
             .ExecuteSqlRawAsync(
-                "INSERT INTO \"InventoryReceiptStatus\" (\"Key\") VALUES ('working'), ('finished'), ('cancelled') ON CONFLICT (\"Key\") DO NOTHING;")
+                "INSERT INTO \"InventoryReceiptStatus\" (\"Key\") VALUES ('draft'), ('sent'), ('approve'), ('reject') ON CONFLICT (\"Key\") DO NOTHING;")
             .ConfigureAwait(false);
         await context.Database
             .ExecuteSqlRawAsync(
