@@ -388,33 +388,20 @@ public sealed class UpdateProductCommandHandler(
             }
         }
         var existingTechs = product.ProductTechnologies.ToList();
-        var newTechList = new List<TechnologyJsonRequest>();
-        if (!string.IsNullOrWhiteSpace(command.Highlights))
+        var newTechList = command.ProductTechnologies ?? [];
+        if (newTechList.Count > 0)
         {
-            try
+            newTechList = newTechList.GroupBy(x => x.TechnologyId).Select(g => g.First()).ToList();
+            var techIds = newTechList.Select(x => x.TechnologyId).ToList();
+            var validTechs = await technologyReadRepository.GetByIdsAsync(techIds, cancellationToken)
+                .ConfigureAwait(false);
+            var validTechIds = validTechs.Select(t => t.Id).ToHashSet();
+            var invalidIds = techIds.Where(id => !validTechIds.Contains(id)).ToList();
+            if (invalidIds.Count > 0)
             {
-                var deserialized = (JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
-                        command.Highlights,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ??
-                    [])
-                    .GroupBy(x => x.TechnologyId)
-                    .Select(g => g.First())
-                    .ToList();
-                var techIds = deserialized.Select(x => x.TechnologyId).ToList();
-                var validTechs = await technologyReadRepository.GetByIdsAsync(techIds, cancellationToken)
-                    .ConfigureAwait(false);
-                var validTechIds = validTechs.Select(t => t.Id).ToHashSet();
-                var invalidIds = techIds.Where(id => !validTechIds.Contains(id)).ToList();
-                if (invalidIds.Count > 0)
-                {
-                    return Error.BadRequest(
-                        $"Các công nghệ sau không tồn tại: {string.Join(", ", invalidIds)}.",
-                        nameof(command.Highlights));
-                }
-                newTechList = deserialized;
-            } catch
-            {
-                newTechList = [];
+                return Error.BadRequest(
+                    $"Các công nghệ sau không tồn tại: {string.Join(", ", invalidIds)}.",
+                    nameof(command.ProductTechnologies));
             }
         }
         foreach (var existing in existingTechs)

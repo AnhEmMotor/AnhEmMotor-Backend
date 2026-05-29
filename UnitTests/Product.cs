@@ -1808,14 +1808,6 @@ public class Product
         decoded.Should().Be("xe-may honda");
     }
 
-    [Fact(DisplayName = "PRODUCT_164 - Xử lý lỗi khi định dạng JSON Highlights sai")]
-    public void CreateProduct_InvalidHighlightsJson_GracefulDegradation()
-    {
-        var command = new CreateProductCommand { Highlights = "invalid-json" };
-        var validator = new CreateProductCommandValidator();
-        var result = validator.Validate(command);
-        result.IsValid.Should().BeFalse();
-    }
 
     [Fact(DisplayName = "PRODUCT_165 - Mapping ưu tiên tiêu đề tùy chỉnh (Custom Title)")]
     public void ProductTechnology_Mapping_PriorityToCustom()

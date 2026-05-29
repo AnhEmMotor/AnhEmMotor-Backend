@@ -2734,7 +2734,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             name = "Tech Bike",
             category_id = cat.Id,
             brand_id = brand.Id,
-            highlights = $"[{{\"technology_id\":{tech.Id}, \"custom_title\":\"Cool ABS\"}}]",
+            product_technologies = new[]
+            {
+                new { technology_id = tech.Id, custom_title = "Cool ABS" }
+            },
             variants = new[]
             {
                 new { url_slug = "tech-bike", price = 1000, variant_name = "V1", cover_image_url = "image.jpg" }
@@ -2792,7 +2795,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Name = "P",
             CategoryId = cat.Id,
             BrandId = brand.Id,
-            Highlights = $"[{{\"technology_id\":{t1.Id}}}, {{\"technology_id\":{t2.Id}}}]",
+            ProductTechnologies = [new TechnologyJsonRequest { TechnologyId = t1.Id }, new TechnologyJsonRequest { TechnologyId = t2.Id }],
             Variants =
                 [new UpdateProductVariantRequest
                 {
@@ -2862,7 +2865,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Name = "P",
             CategoryId = cat.Id,
             BrandId = brand.Id,
-            Highlights = "[]",
+            ProductTechnologies = [],
             Variants =
                 [new UpdateProductVariantRequest
                 {
@@ -2934,7 +2937,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Name = "P",
             CategoryId = cat.Id,
             BrandId = brand.Id,
-            Highlights = $"[{{\"technology_id\":{t1.Id}, \"custom_title\":\"New\"}}]",
+            ProductTechnologies = [new TechnologyJsonRequest { TechnologyId = t1.Id, CustomTitle = "New" }],
             Variants =
                 [new UpdateProductVariantRequest
                 {
@@ -3005,8 +3008,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var content = await response!.Content
             .ReadFromJsonAsync<ProductDetailForManagerResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var highlights = JsonSerializer.Deserialize<List<JsonElement>>(content!.Highlights!);
-        highlights![0].GetProperty("technologyId").GetInt32().Should().Be(t2.Id);
+        var highlights = content!.ProductTechnologies;
+        highlights![0].TechnologyId.Should().Be(t2.Id);
     }
 
     [Fact(DisplayName = "PRODUCT_171 - Tìm kiếm sản phẩm theo giá tối thiểu (MinPrice)")]
@@ -3108,7 +3111,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var payload = new
         {
             name = product.Name,
-            highlights = JsonSerializer.Serialize(highlights),
+            product_technologies = highlights,
             variants = new[] { new { price = 1000, variant_name = "V1", cover_image_url = "image.jpg" } }
         };
         var response = await HttpClientJsonExtensions.PutAsJsonAsync(
