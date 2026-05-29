@@ -9,4 +9,6 @@ namespace Application.Features.Outputs.Queries.GetOutputsList;
 public sealed record GetOutputsListQuery : IRequest<Result<PagedResult<OutputItemResponse>>>
 {
     public SieveModel? SieveModel { get; init; }
+
+    public IReadOnlyCollection<string> StatusIds { get; init; } = [];
 }
