@@ -8,6 +8,7 @@ using Application.Features.Quotations.Commands.SendQuotation;
 using Application.Features.Quotations.Commands.UpdateQuotation;
 using Application.Features.Quotations.Queries.GetQuotationById;
 using Application.Features.Quotations.Queries.GetQuotationsList;
+using Application.Features.Quotations.Queries.GetQuotationStatusList;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -44,6 +45,18 @@ namespace WebAPI.Controllers.V1
         {
             var query = new GetQuotationsListQuery { SieveModel = sieveModel };
             var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy danh sách các trạng thái của yêu cầu báo giá.
+        /// </summary>
+        [HttpGet("status")]
+        [RequiresAnyPermissions(Quotations.View, Quotations.Create, Quotations.Edit)]
+        [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetQuotationStatusesAsync(CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetQuotationStatusListQuery(), cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
 

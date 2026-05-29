@@ -4,6 +4,8 @@ namespace Application.ApiContracts.Quotation.Responses
 {
     public class QuotationItemResponse
     {
+        public int Id { get; set; }
+
         public int? ProductVariantId { get; set; }
 
         public string? ProductVariantDisplayName { get; set; }

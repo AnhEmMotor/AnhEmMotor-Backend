@@ -71,7 +71,7 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                     if (!incomingRow.Id.HasValue)
                     {
                         return Error.BadRequest(
-                            "Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.",
+                            "ID của mặt hàng của dòng chỉnh sửa không có. Vui lòng liên hệ với lập trình viên.",
                             "Products");
                     }
                     var match = existingRowsList.FirstOrDefault(x => x.Id == incomingRow.Id.Value);

@@ -10,13 +10,13 @@ namespace Application.Features.PurchaseRequests.Mappings
         public void Register(TypeAdapterConfig config)
         {
             config.NewConfig<PurchaseRequest, PurchaseRequestDetailResponse>()
-                .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null)
+                .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? (!string.IsNullOrEmpty(src.CreatedByUser.FullName) ? src.CreatedByUser.FullName : src.CreatedByUser.UserName) : null)
                 .Map(
                     dest => dest.ApprovedByName,
-                    src => src.ApprovedByUser != null ? src.ApprovedByUser.FullName : null)
+                    src => src.ApprovedByUser != null ? (!string.IsNullOrEmpty(src.ApprovedByUser.FullName) ? src.ApprovedByUser.FullName : src.ApprovedByUser.UserName) : null)
                 .Map(dest => dest.Items, src => src.PurchaseRequestItems);
             config.NewConfig<PurchaseRequest, PurchaseRequestListResponse>()
-                .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null)
+                .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? (!string.IsNullOrEmpty(src.CreatedByUser.FullName) ? src.CreatedByUser.FullName : src.CreatedByUser.UserName) : null)
                 .Map(
                     dest => dest.TotalItems,
                     src => src.PurchaseRequestItems != null ? src.PurchaseRequestItems.Count : 0);

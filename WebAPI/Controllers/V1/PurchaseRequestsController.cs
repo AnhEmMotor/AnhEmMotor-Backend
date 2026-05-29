@@ -8,6 +8,7 @@ using Application.Features.PurchaseRequests.Commands.SendPurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequests;
+using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;
 using Application.Features.PurchaseRequests.Queries.GetQuotedPricesForPR;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
@@ -115,6 +116,18 @@ namespace WebAPI.Controllers.V1
                 new ApproveRejectPurchaseRequestCommand(id, request.Status),
                 cancellationToken)
                 .ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy danh sách các trạng thái của yêu cầu mua hàng.
+        /// </summary>
+        [HttpGet("status")]
+        [RequiresAnyPermissions(PurchaseRequests.View, PurchaseRequests.Create, PurchaseRequests.Edit)]
+        [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPurchaseRequestStatusesAsync(CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetPurchaseRequestStatusListQuery(), cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
 

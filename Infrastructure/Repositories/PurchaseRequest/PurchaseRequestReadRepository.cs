@@ -18,7 +18,9 @@ namespace Infrastructure.Repositories.PurchaseRequest
             DataFetchMode mode = DataFetchMode.ActiveOnly,
             CancellationToken cancellationToken = default)
         {
-            var query = GetQueryable(mode);
+            var query = GetQueryable(mode)
+                .Include(x => x.CreatedByUser)
+                .Include(x => x.PurchaseRequestItems);
             return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 
