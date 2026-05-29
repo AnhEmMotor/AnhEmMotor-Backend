@@ -14,7 +14,6 @@ using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
-using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Domain.Constants.Order;
 using Domain.Primitives;
@@ -81,18 +80,6 @@ public class SalesOrder
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()),
             Times.Once);
-    }
-
-    [Fact(DisplayName = "SO_083 - GetOutputs - L?y danh s?ch don h?ng")]
-    public async Task GetOutputs_WithSieveModel_ReturnsOrdersList()
-    {
-        var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
-        var result = await _controller.GetOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-        result.Should().NotBeNull();
-        _mediatorMock.Verify(m => m.Send(It.IsAny<GetOutputsListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "SO_084 - GetDeletedOutputs - L?y danh s?ch don h?ng d? x?a")]

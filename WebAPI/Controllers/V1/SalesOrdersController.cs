@@ -95,21 +95,6 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách đơn hàng (có phân trang, lọc, sắp xếp).
-    /// </summary>
-    [HttpGet]
-    [HasPermission(Outputs.View)]
-    [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOutputsAsync(
-        [FromQuery] SieveModel sieveModel,
-        CancellationToken cancellationToken)
-    {
-        var query = new GetOutputsListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
     /// Lấy danh sách phiếu bán hàng đã xác nhận.
     /// </summary>
     [HttpGet("confirmed")]

@@ -915,7 +915,7 @@ public class SalesOrder
             Times.Once);
     }
 
-    [Fact(DisplayName = "SO_030A - GetOutputsList lọc theo nhóm trạng thái xác nhận")]
+    [Fact(DisplayName = "SO_115 - GetOutputsList lọc theo nhóm trạng thái xác nhận")]
     public async Task GetOutputsList_WithStatusIds_ShouldApplyRepositoryFilter()
     {
         var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _settingRepoMock.Object);
@@ -941,7 +941,7 @@ public class SalesOrder
         predicate(new Output { StatusId = OrderStatus.ConfirmedCod }).Should().BeFalse();
     }
 
-    [Fact(DisplayName = "SO_030B - OrderStatus khai báo nhóm đã/chưa xác nhận")]
+    [Fact(DisplayName = "SO_116 - OrderStatus khai báo nhóm đã/chưa xác nhận")]
     public void OrderStatus_ShouldExposeConfirmedAndUnconfirmedStatusGroups()
     {
         var confirmedStatuses = typeof(OrderStatus)
