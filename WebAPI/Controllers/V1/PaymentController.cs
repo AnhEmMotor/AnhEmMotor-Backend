@@ -60,14 +60,12 @@ public class PaymentController(ISender sender) : ApiController
     {
         var result = await sender.Send(new ProcessVNPayIPNCommand(Request.Query), cancellationToken)
             .ConfigureAwait(true);
-
         return HandlePaymentRedirect(
             result,
             method: "VNPay",
             getOrderId: val => val?.OrderId,
             fallbackOrderId: null,
-            checkCustomSuccess: val => string.Compare(val?.VnPayResponseCode, "00") == 0
-        );
+            checkCustomSuccess: val => string.Compare(val?.VnPayResponseCode, "00") == 0);
     }
 
     /// <summary>
@@ -80,14 +78,11 @@ public class PaymentController(ISender sender) : ApiController
     public async Task<IActionResult> PayOSCallback([FromQuery] long? orderCode, CancellationToken cancellationToken)
     {
         var command = new ProcessPayOSCallbackCommand(orderCode);
-        var result = await sender.Send(command, cancellationToken)
-            .ConfigureAwait(true);
-
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandlePaymentRedirect(
             result,
             method: "PayOS",
             getOrderId: val => val.ToString(),
-            fallbackOrderId: command.OrderId.ToString()
-        );
+            fallbackOrderId: command.OrderId.ToString());
     }
 }

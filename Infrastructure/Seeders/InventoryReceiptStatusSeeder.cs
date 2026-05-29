@@ -1,4 +1,3 @@
-using Domain.Constants;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -14,14 +13,18 @@ public static class InventoryReceiptStatusSeeder
         {
             return;
         }
-        var existingStatuses = await context.Set<Domain.Entities.InventoryReceiptStatus>().ToListAsync(cancellationToken).ConfigureAwait(false);
+        var existingStatuses = await context.Set<Domain.Entities.InventoryReceiptStatus>()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         var newStatuses = allStatuses
             .Except(existingStatuses.Select(s => s.Key), StringComparer.OrdinalIgnoreCase)
             .Select(key => new Domain.Entities.InventoryReceiptStatus { Key = key })
             .ToList();
         if (newStatuses.Count != 0)
         {
-            await context.Set<Domain.Entities.InventoryReceiptStatus>().AddRangeAsync(newStatuses, cancellationToken).ConfigureAwait(false);
+            await context.Set<Domain.Entities.InventoryReceiptStatus>()
+                .AddRangeAsync(newStatuses, cancellationToken)
+                .ConfigureAwait(false);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
         var statusesToDelete = existingStatuses
@@ -31,7 +34,9 @@ public static class InventoryReceiptStatusSeeder
         {
             var statusKeys = statusesToDelete.Select(s => s.Key).ToList();
             var hasReferences = await context.Set<InventoryReceipt>()
-                .AnyAsync(i => i.StatusId != null && statusKeys.Any(k => string.Compare(k, i.StatusId) == 0), cancellationToken)
+                .AnyAsync(
+                    i => i.StatusId != null && statusKeys.Any(k => string.Compare(k, i.StatusId) == 0),
+                    cancellationToken)
                 .ConfigureAwait(false);
             if (!hasReferences)
             {

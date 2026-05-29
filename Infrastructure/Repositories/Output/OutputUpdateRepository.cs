@@ -106,8 +106,14 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
             .Include(ii => ii.QuotationProductRow)
             .Include(ii => ii.PurchaseRequestItem)
             .Where(
-                ii => (ii.QuotationProductRow != null ? ii.QuotationProductRow.ProductVariantId : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantId : (int?)null)) == productId &&
-                    (ii.QuotationProductRow != null ? ii.QuotationProductRow.ProductVariantColorId : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantColorId : (int?)null)) == colorId &&
+                ii => (ii.QuotationProductRow != null
+                        ? ii.QuotationProductRow.ProductVariantId
+                        : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantId : (int?)null)) ==
+                    productId &&
+                    (ii.QuotationProductRow != null
+                        ? ii.QuotationProductRow.ProductVariantColorId
+                        : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantColorId : (int?)null)) ==
+                    colorId &&
                     ii.RemainingCount > 0 &&
                     ii.DeletedAt == null &&
                     ii.InventoryReceiptReceipt != null &&

@@ -13,7 +13,8 @@ public sealed class GetInventoryReceiptByIdQueryHandler(IInventoryReceiptReadRep
         GetInventoryReceiptByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var InventoryReceipt = await repository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var InventoryReceipt = await repository.GetByIdWithDetailsAsync(request.Id, cancellationToken)
+            .ConfigureAwait(false);
         if (InventoryReceipt is null)
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.");

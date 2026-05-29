@@ -1,5 +1,6 @@
 using Application.ApiContracts.Banner.Responses;
 using Application.Features.Banners.Commands.UpdateBanner;
+using Domain.Constants.Permission.Permissions;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
@@ -284,7 +285,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Banners.Edit],
+            [Banners.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -317,7 +318,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Banners.Edit, Domain.Constants.Permission.Permissions.Banners.View],
+            [Banners.Edit, Banners.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(

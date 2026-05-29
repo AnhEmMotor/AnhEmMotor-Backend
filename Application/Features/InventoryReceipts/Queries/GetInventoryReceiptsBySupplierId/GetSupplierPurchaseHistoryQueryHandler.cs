@@ -16,7 +16,11 @@ public sealed class GetSupplierPurchaseHistoryQueryHandler(IInventoryReceiptRead
         var result = await repository.GetPagedAsync<SupplierPurchaseHistoryResponse>(
             request.SieveModel!,
             DataFetchMode.ActiveOnly,
-            x => x.InventoryReceiptInfos.Any(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.SupplierId == request.SupplierId),
+            x => x.InventoryReceiptInfos
+                .Any(
+                    ii => ii.QuotationProductRow != null &&
+                            ii.QuotationProductRow.QuotationReceipt != null &&
+                            ii.QuotationProductRow.QuotationReceipt.SupplierId == request.SupplierId),
             cancellationToken)
             .ConfigureAwait(false);
         return result;

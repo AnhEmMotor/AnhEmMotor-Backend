@@ -14,16 +14,10 @@ using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1
@@ -49,14 +43,9 @@ namespace WebAPI.Controllers.V1
             CancellationToken cancellationToken)
         {
             var result = await mediator.Send(
-                new CreatePurchaseRequestCommand
-                {
-                    Note = command.Note,
-                    Items = command.Items,
-                },
+                new CreatePurchaseRequestCommand { Note = command.Note, Items = command.Items, },
                 cancellationToken)
                 .ConfigureAwait(true);
-
             return HandleResult(result);
         }
 
@@ -74,15 +63,9 @@ namespace WebAPI.Controllers.V1
             CancellationToken cancellationToken)
         {
             var result = await mediator.Send(
-                new UpdatePurchaseRequestCommand
-                {
-                    Id = id,
-                    Note = command.Note,
-                    Items = command.Items
-                },
+                new UpdatePurchaseRequestCommand { Id = id, Note = command.Note, Items = command.Items },
                 cancellationToken)
                 .ConfigureAwait(true);
-
             return HandleResult(result);
         }
 
@@ -98,7 +81,6 @@ namespace WebAPI.Controllers.V1
         {
             var result = await mediator.Send(new DeletePurchaseRequestCommand(id), cancellationToken)
                 .ConfigureAwait(true);
-
             return HandleResult(result);
         }
 
@@ -112,9 +94,7 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> SendAsync(int id, CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new SendPurchaseRequestCommand(id), cancellationToken)
-                .ConfigureAwait(true);
-
+            var result = await mediator.Send(new SendPurchaseRequestCommand(id), cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
 
@@ -131,9 +111,10 @@ namespace WebAPI.Controllers.V1
             [FromBody] ApproveRejectPurchaseRequestRequest request,
             CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new ApproveRejectPurchaseRequestCommand(id, request.Status), cancellationToken)
+            var result = await mediator.Send(
+                new ApproveRejectPurchaseRequestCommand(id, request.Status),
+                cancellationToken)
                 .ConfigureAwait(true);
-
             return HandleResult(result);
         }
 
@@ -147,9 +128,10 @@ namespace WebAPI.Controllers.V1
             [FromQuery] SieveModel sieveModel,
             CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new GetPurchaseRequestsQuery { SieveModel = sieveModel }, cancellationToken)
+            var result = await mediator.Send(
+                new GetPurchaseRequestsQuery { SieveModel = sieveModel },
+                cancellationToken)
                 .ConfigureAwait(true);
-
             return HandleResult(result);
         }
 
@@ -164,7 +146,6 @@ namespace WebAPI.Controllers.V1
         {
             var result = await mediator.Send(new GetPurchaseRequestByIdQuery(id), cancellationToken)
                 .ConfigureAwait(true);
-
             return HandleResult(result);
         }
 
@@ -177,9 +158,7 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetQuotedPricesAsync(int id, CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new GetQuotedPricesForPRQuery(id), cancellationToken)
-                .ConfigureAwait(true);
-
+            var result = await mediator.Send(new GetQuotedPricesForPRQuery(id), cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
     }

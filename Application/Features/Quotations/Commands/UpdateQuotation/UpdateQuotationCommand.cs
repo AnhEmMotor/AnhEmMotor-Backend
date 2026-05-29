@@ -1,11 +1,8 @@
-using Application.ApiContracts.InventoryReceipt.Requests;
 using Application.ApiContracts.Quotation.Requests;
 using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.Quotations.Commands.UpdateQuotation
 {
@@ -14,7 +11,6 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
         public int? Id { get; init; }
 
         public int? SupplierId { get; init; }
-
 
         public string? Notes { get; init; }
 

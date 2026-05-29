@@ -1,5 +1,4 @@
 using Application.ApiContracts.HR.Responses;
-using Application.Features.Banners.Commands.UpdateBanner;
 using Application.Features.HR.Commands.CreateEmployee;
 using Application.Features.HR.Commands.UpdateEmployee;
 using Application.Features.HR.Queries.GetEmployees;

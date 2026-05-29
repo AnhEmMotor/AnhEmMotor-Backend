@@ -2,12 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Services
 {
-    public class CookieTokenManager(IHttpContextAccessor httpContextAccessor, IConfiguration configuration): ICookieTokenManager
+    public class CookieTokenManager(IHttpContextAccessor httpContextAccessor, IConfiguration configuration) : ICookieTokenManager
     {
         public string? GetRefreshToken()
         {

@@ -1,5 +1,3 @@
-using Application.Features.Permissions.Queries.GetMyPermissions;
-using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.Users.Commands.ChangePassword;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
@@ -9,7 +7,6 @@ using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
-using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
@@ -37,8 +34,8 @@ public class User
         _currentUserContextMock = new Mock<ICurrentUserContext>();
     }
 
-#pragma warning disable IDE0079
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "USER_001 - L?y thông tin ngu?i dùng hi?n t?i thành công")]
     public async Task GetCurrentUser_Success_ReturnsUserResponse()
     {
@@ -64,7 +61,10 @@ public class User
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var handler = new GetCurrentUserQueryHandler(
+            _userReadRepositoryMock.Object,
+            _roleReadRepositoryMock.Object,
+            _currentUserContextMock.Object);
         var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -83,7 +83,10 @@ public class User
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ApplicationUser?)null);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(Guid.Empty);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var handler = new GetCurrentUserQueryHandler(
+            _userReadRepositoryMock.Object,
+            _roleReadRepositoryMock.Object,
+            _currentUserContextMock.Object);
         var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -102,7 +105,10 @@ public class User
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var handler = new GetCurrentUserQueryHandler(
+            _userReadRepositoryMock.Object,
+            _roleReadRepositoryMock.Object,
+            _currentUserContextMock.Object);
         var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -123,7 +129,10 @@ public class User
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var handler = new GetCurrentUserQueryHandler(
+            _userReadRepositoryMock.Object,
+            _roleReadRepositoryMock.Object,
+            _currentUserContextMock.Object);
         var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -148,7 +157,10 @@ public class User
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var handler = new GetCurrentUserQueryHandler(
+            _userReadRepositoryMock.Object,
+            _roleReadRepositoryMock.Object,
+            _currentUserContextMock.Object);
         var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -172,7 +184,10 @@ public class User
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var handler = new GetCurrentUserQueryHandler(
+            _userReadRepositoryMock.Object,
+            _roleReadRepositoryMock.Object,
+            _currentUserContextMock.Object);
         var query = new GetCurrentUserQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -243,12 +258,7 @@ public class User
             _currentUserContextMock.Object,
             _userStreamServiceMock.Object);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var command = new UpdateCurrentUserCommand()
-        {
-            FullName = null,
-            Gender = null,
-            PhoneNumber = null
-        };
+        var command = new UpdateCurrentUserCommand() { FullName = null, Gender = null, PhoneNumber = null };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
@@ -273,11 +283,7 @@ public class User
             _userUpdateRepositoryMock.Object,
             _currentUserContextMock.Object,
             _userStreamServiceMock.Object);
-        var command = new UpdateCurrentUserCommand()
-        {
-            FullName = "  Trimmed Name  ",
-            PhoneNumber = "  0999888777  "
-        };
+        var command = new UpdateCurrentUserCommand() { FullName = "  Trimmed Name  ", PhoneNumber = "  0999888777  " };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
@@ -435,12 +441,11 @@ public class User
             x => x.ChangePasswordAsync(user, "OldPass123!", "NewPass456!", It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, Array.Empty<string>()));
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _currentUserContextMock.Object, _userUpdateRepositoryMock.Object);
-        var command = new ChangePasswordCommand()
-        {
-            CurrentPassword = "OldPass123!",
-            NewPassword = "NewPass456!"
-        };
+        var handler = new ChangePasswordCommandHandler(
+            _userReadRepositoryMock.Object,
+            _currentUserContextMock.Object,
+            _userUpdateRepositoryMock.Object);
+        var command = new ChangePasswordCommand() { CurrentPassword = "OldPass123!", NewPassword = "NewPass456!" };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
@@ -460,12 +465,11 @@ public class User
         _userReadRepositoryMock.Setup(x => x.CheckPasswordAsync(user, "WrongPass", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _currentUserContextMock.Object, _userUpdateRepositoryMock.Object);
-        var command = new ChangePasswordCommand()
-        {
-            CurrentPassword = "WrongPass",
-            NewPassword = "NewPass456!"
-        };
+        var handler = new ChangePasswordCommandHandler(
+            _userReadRepositoryMock.Object,
+            _currentUserContextMock.Object,
+            _userUpdateRepositoryMock.Object);
+        var command = new ChangePasswordCommand() { CurrentPassword = "WrongPass", NewPassword = "NewPass456!" };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -480,12 +484,11 @@ public class User
         _userReadRepositoryMock.Setup(x => x.CheckPasswordAsync(user, "OldPass123!", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _currentUserContextMock.Object, _userUpdateRepositoryMock.Object);
-        var command = new ChangePasswordCommand()
-        {
-            CurrentPassword = "OldPass123!",
-            NewPassword = "123"
-        };
+        var handler = new ChangePasswordCommandHandler(
+            _userReadRepositoryMock.Object,
+            _currentUserContextMock.Object,
+            _userUpdateRepositoryMock.Object);
+        var command = new ChangePasswordCommand() { CurrentPassword = "OldPass123!", NewPassword = "123" };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -498,12 +501,11 @@ public class User
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new ChangePasswordCommandHandler(_userReadRepositoryMock.Object, _currentUserContextMock.Object, _userUpdateRepositoryMock.Object);
-        var command = new ChangePasswordCommand()
-        {
-            CurrentPassword = "OldPass123!",
-            NewPassword = "NewPass456!"
-        };
+        var handler = new ChangePasswordCommandHandler(
+            _userReadRepositoryMock.Object,
+            _currentUserContextMock.Object,
+            _userUpdateRepositoryMock.Object);
+        var command = new ChangePasswordCommand() { CurrentPassword = "OldPass123!", NewPassword = "NewPass456!" };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }

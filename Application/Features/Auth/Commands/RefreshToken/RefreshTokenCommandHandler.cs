@@ -2,7 +2,6 @@ using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
-using DocumentFormat.OpenXml.Office2016.Excel;
 using Domain.Constants;
 using Mapster;
 using MediatR;

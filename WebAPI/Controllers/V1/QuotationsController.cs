@@ -1,12 +1,11 @@
+using Application.ApiContracts.Quotation.Requests;
 using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
+using Application.Features.Quotations.Commands.ApproveRejectQuotation;
 using Application.Features.Quotations.Commands.CreateQuotation;
 using Application.Features.Quotations.Commands.DeleteQuotation;
-using Application.Features.Quotations.Commands.UpdateQuotation;
-using Microsoft.AspNetCore.Authorization;
 using Application.Features.Quotations.Commands.SendQuotation;
-using Application.Features.Quotations.Commands.ApproveRejectQuotation;
-using Application.ApiContracts.Quotation.Requests;
+using Application.Features.Quotations.Commands.UpdateQuotation;
 using Application.Features.Quotations.Queries.GetQuotationById;
 using Application.Features.Quotations.Queries.GetQuotationsList;
 using Asp.Versioning;
@@ -14,12 +13,9 @@ using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Threading;
-using System.Threading.Tasks;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1
@@ -154,9 +150,7 @@ namespace WebAPI.Controllers.V1
         [HasPermission(Quotations.Delete)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteQuotationAsync(
-            int id, 
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteQuotationAsync(int id, CancellationToken cancellationToken)
         {
             var command = new DeleteQuotationCommand { Id = id };
             var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);

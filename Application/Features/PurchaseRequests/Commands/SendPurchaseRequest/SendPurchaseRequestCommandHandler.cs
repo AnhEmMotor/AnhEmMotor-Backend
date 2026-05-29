@@ -3,8 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.PurchaseRequests.Commands.SendPurchaseRequest
 {
@@ -20,16 +18,14 @@ namespace Application.Features.PurchaseRequests.Commands.SendPurchaseRequest
             {
                 return Result.Failure(Error.NotFound($"Không tìm thấy yêu cầu mua hàng có ID {request.Id}.", "Id"));
             }
-
             if (!string.Equals(pr.Status, "draft", StringComparison.OrdinalIgnoreCase))
             {
-                return Result.Failure(Error.BadRequest("Chỉ có thể gửi yêu cầu mua hàng đang ở trạng thái Nháp (Draft).", "Status"));
+                return Result.Failure(
+                    Error.BadRequest("Chỉ có thể gửi yêu cầu mua hàng đang ở trạng thái Nháp (Draft).", "Status"));
             }
-
             pr.Status = "sent";
             updateRepository.Update(pr);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return Result.Success();
         }
     }

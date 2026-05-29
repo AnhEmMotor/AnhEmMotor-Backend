@@ -12,9 +12,6 @@ using Mapster;
 using MediatR;
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using QuotationEntity = Domain.Entities.Quotation;
 
 namespace Application.Features.Quotations.Commands.UpdateQuotation
 {
@@ -31,70 +28,77 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
             UpdateQuotationCommand request,
             CancellationToken cancellationToken)
         {
-            var quotation = await readRepository.GetByIdWithDetailsAsync(request.Id!.Value, cancellationToken).ConfigureAwait(false);
+            var quotation = await readRepository.GetByIdWithDetailsAsync(request.Id!.Value, cancellationToken)
+                .ConfigureAwait(false);
             if (quotation is null)
             {
                 return Error.NotFound($"Yêu cầu báo giá {request.Id} không tồn tại hoặc đã bị xóa.", "Id");
             }
-
             var currentStatus = quotation.Status?.ToLower();
             if (string.Compare(currentStatus, QuotationType.Sent) == 0)
-             {
+            {
                 Guid userId = currentUserContext.GetUserId();
                 var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                     userId,
                     [Domain.Constants.Permission.Permissions.Quotations.Approve],
                     cancellationToken)
                     .ConfigureAwait(false);
-
                 if (!hasApprovePermission)
                 {
-                    return Error.BadRequest("Báo giá ở trạng thái đã gửi chỉ có thể chỉnh sửa bởi người dùng có quyền duyệt/hủy báo giá.", "Status");
+                    return Error.BadRequest(
+                        "Báo giá ở trạng thái đã gửi chỉ có thể chỉnh sửa bởi người dùng có quyền duyệt/hủy báo giá.",
+                        "Status");
                 }
             }
-
-            if (string.Compare(currentStatus, QuotationType.Approved) == 0 || string.Compare(currentStatus, QuotationType.Rejected) == 0)
+            if (string.Compare(currentStatus, QuotationType.Approved) == 0 ||
+                string.Compare(currentStatus, QuotationType.Rejected) == 0)
             {
                 if (request.SupplierId.HasValue && request.SupplierId.Value != quotation.SupplierId)
                 {
-                    return Error.BadRequest("Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.", "SupplierId");
+                    return Error.BadRequest(
+                        "Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.",
+                        "SupplierId");
                 }
-
                 var existingRowsList = quotation.QuotationProductRows.ToList();
                 if (request.Products.Count != existingRowsList.Count)
                 {
-                    return Error.BadRequest("Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.", "Products");
+                    return Error.BadRequest(
+                        "Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.",
+                        "Products");
                 }
-
                 foreach (var incomingRow in request.Products)
                 {
                     if (!incomingRow.Id.HasValue)
                     {
-                        return Error.BadRequest("Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.", "Products");
+                        return Error.BadRequest(
+                            "Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.",
+                            "Products");
                     }
                     var match = existingRowsList.FirstOrDefault(x => x.Id == incomingRow.Id.Value);
                     if (match is null ||
                         match.ProductVariantId != int.Parse(incomingRow.ProductVariantId!) ||
-                        match.ProductVariantColorId != (string.IsNullOrEmpty(incomingRow.ProductVarientColorId) ? null : int.Parse(incomingRow.ProductVarientColorId)) ||
+                        match.ProductVariantColorId !=
+                        (string.IsNullOrEmpty(incomingRow.ProductVarientColorId)
+                            ? null
+                            : int.Parse(incomingRow.ProductVarientColorId)) ||
                         match.QuotePrice != incomingRow.QuotePrice ||
                         string.Compare(match.Note, incomingRow.Note) != 0)
                     {
-                        return Error.BadRequest("Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.", "Products");
+                        return Error.BadRequest(
+                            "Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.",
+                            "Products");
                     }
                 }
-
                 if (request.Notes is not null)
                 {
                     quotation.Note = request.Notes;
                 }
-
                 updateRepository.Update(quotation);
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                var updatedDetailed = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken).ConfigureAwait(false);
+                var updatedDetailed = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken)
+                    .ConfigureAwait(false);
                 return updatedDetailed!.Adapt<QuotationDetailResponse>();
             }
-
             if (request.SupplierId.HasValue && request.SupplierId.Value != quotation.SupplierId)
             {
                 var supplier = await supplierRepository.GetByIdAsync(
@@ -104,7 +108,9 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                     .ConfigureAwait(false);
                 if (supplier is null)
                 {
-                    return Error.NotFound($"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa.", "SupplierId");
+                    return Error.NotFound(
+                        $"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa.",
+                        "SupplierId");
                 }
                 if (string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
                 {
@@ -112,7 +118,6 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                 }
                 quotation.SupplierId = request.SupplierId.Value;
             }
-
             foreach (var product in request.Products)
             {
                 if (int.TryParse(product.ProductVariantId, out var variantId))
@@ -129,7 +134,6 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                             $"Biến thể sản phẩm {product.ProductVariantId} không tồn tại hoặc đã bị xóa.",
                             "Products");
                     }
-
                     if (!string.IsNullOrEmpty(product.ProductVarientColorId) &&
                         int.TryParse(product.ProductVarientColorId, out var colorId))
                     {
@@ -143,15 +147,12 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                     }
                 }
             }
-
             if (request.Notes is not null)
             {
                 quotation.Note = request.Notes;
             }
-
             var existingRows = quotation.QuotationProductRows.ToList();
             var incomingRows = request.Products;
-
             foreach (var existingRow in existingRows)
             {
                 if (!incomingRows.Any(x => x.Id.HasValue && x.Id.Value == existingRow.Id))
@@ -159,7 +160,6 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                     quotation.QuotationProductRows.Remove(existingRow);
                 }
             }
-
             foreach (var incomingRow in incomingRows)
             {
                 if (incomingRow.Id.HasValue && incomingRow.Id.Value > 0)
@@ -174,25 +174,26 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                         existingRow.QuotePrice = incomingRow.QuotePrice;
                         existingRow.Note = incomingRow.Note;
                     }
-                }
-                else
+                } else
                 {
-                    quotation.QuotationProductRows.Add(new QuotationProductRow
-                    {
-                        ProductVariantId = int.Parse(incomingRow.ProductVariantId!),
-                        ProductVariantColorId = string.IsNullOrEmpty(incomingRow.ProductVarientColorId)
-                            ? null
-                            : int.Parse(incomingRow.ProductVarientColorId),
-                        QuotePrice = incomingRow.QuotePrice,
-                        Note = incomingRow.Note
-                    });
+                    quotation.QuotationProductRows
+                        .Add(
+                            new QuotationProductRow
+                            {
+                                ProductVariantId = int.Parse(incomingRow.ProductVariantId!),
+                                ProductVariantColorId =
+                                    string.IsNullOrEmpty(incomingRow.ProductVarientColorId)
+                                            ? null
+                                            : int.Parse(incomingRow.ProductVarientColorId),
+                                QuotePrice = incomingRow.QuotePrice,
+                                Note = incomingRow.Note
+                            });
                 }
             }
-
             updateRepository.Update(quotation);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            var updated = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken).ConfigureAwait(false);
+            var updated = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken)
+                .ConfigureAwait(false);
             return updated!.Adapt<QuotationDetailResponse>();
         }
     }

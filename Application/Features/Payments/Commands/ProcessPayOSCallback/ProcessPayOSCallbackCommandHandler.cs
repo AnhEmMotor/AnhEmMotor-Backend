@@ -26,7 +26,8 @@ namespace Application.Features.Payments.Commands.ProcessPayOSCallback
             {
                 return Result<int>.Failure(Error.NotFound("Không tìm thấy thông tin thanh toán từ PayOS", "Payment"));
             }
-            var order = await readRepository.GetByIdWithDetailsAsync(request.OrderId, cancellationToken).ConfigureAwait(false);
+            var order = await readRepository.GetByIdWithDetailsAsync(request.OrderId, cancellationToken)
+                .ConfigureAwait(false);
             if (order is null)
             {
                 return Result<int>.Failure(Error.NotFound("Không tìm thấy đơn hàng", "Order"));

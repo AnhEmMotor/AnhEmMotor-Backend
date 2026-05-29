@@ -3,7 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
-using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
 using Domain.Constants.Product;
 using Mapster;
@@ -37,7 +36,10 @@ public sealed class CloneInventoryReceiptCommandHandler(
             return Error.NotFound($"Phiếu nhập với Id = {command.Id.Value} không tồn tại", "Id");
         }
         var productVariantIds = originalInventoryReceipt.InventoryReceiptInfos
-            .Select(p => p.QuotationProductRow != null ? p.QuotationProductRow.ProductVariantId : (p.PurchaseRequestItem != null ? p.PurchaseRequestItem.ProductVariantId : (int?)null))
+            .Select(
+                p => p.QuotationProductRow != null
+                    ? p.QuotationProductRow.ProductVariantId
+                    : (p.PurchaseRequestItem != null ? p.PurchaseRequestItem.ProductVariantId : (int?)null))
             .Where(id => id.HasValue)
             .Select(id => id!.Value)
             .Distinct()
@@ -51,7 +53,11 @@ public sealed class CloneInventoryReceiptCommandHandler(
         var validProducts = new List<InventoryReceiptInfoEntity>();
         foreach (var originalProduct in originalInventoryReceipt.InventoryReceiptInfos)
         {
-            var resolvedVariantId = originalProduct.QuotationProductRow != null ? originalProduct.QuotationProductRow.ProductVariantId : (originalProduct.PurchaseRequestItem != null ? originalProduct.PurchaseRequestItem.ProductVariantId : (int?)null);
+            var resolvedVariantId = originalProduct.QuotationProductRow != null
+                ? originalProduct.QuotationProductRow.ProductVariantId
+                : (originalProduct.PurchaseRequestItem != null
+                    ? originalProduct.PurchaseRequestItem.ProductVariantId
+                    : (int?)null);
             if (!resolvedVariantId.HasValue)
             {
                 continue;
@@ -92,7 +98,9 @@ public sealed class CloneInventoryReceiptCommandHandler(
         };
         InventoryReceiptInsertRepository.Add(newInventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var createdInventoryReceipt = await InventoryReceiptReadRepository.GetByIdWithDetailsAsync(newInventoryReceipt.Id, cancellationToken)
+        var createdInventoryReceipt = await InventoryReceiptReadRepository.GetByIdWithDetailsAsync(
+            newInventoryReceipt.Id,
+            cancellationToken)
             .ConfigureAwait(false);
         return createdInventoryReceipt!.Adapt<InventoryReceiptDetailResponse>();
     }

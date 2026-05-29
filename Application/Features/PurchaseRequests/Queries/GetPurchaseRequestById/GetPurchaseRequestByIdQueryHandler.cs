@@ -3,13 +3,10 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Mapster;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById
 {
-    public sealed class GetPurchaseRequestByIdQueryHandler(IPurchaseRequestReadRepository repository)
-        : IRequestHandler<GetPurchaseRequestByIdQuery, Result<PurchaseRequestDetailResponse?>>
+    public sealed class GetPurchaseRequestByIdQueryHandler(IPurchaseRequestReadRepository repository) : IRequestHandler<GetPurchaseRequestByIdQuery, Result<PurchaseRequestDetailResponse?>>
     {
         public async Task<Result<PurchaseRequestDetailResponse?>> Handle(
             GetPurchaseRequestByIdQuery request,

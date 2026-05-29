@@ -1,7 +1,5 @@
-using Application.ApiContracts.InventoryReceipt.Requests;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
-using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -17,29 +15,24 @@ using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Mappings;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.GetProductAttributeLabels;
-using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
-using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Option;
 using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
-using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Technology;
 using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
-using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
 using FluentAssertions;
 using Mapster;
 using Moq;
-using Sieve.Models;
 using System.Net;
 using ProductEntity = Domain.Entities.Product;
 
@@ -1338,7 +1331,8 @@ public class Product
         result.IsValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "PRODUCT_CALC_001 - CalculateTotalStock tính tổng RemainingCount từ InventoryReceipt receipt Finished")]
+    [Fact(
+        DisplayName = "PRODUCT_CALC_001 - CalculateTotalStock tính tổng RemainingCount từ InventoryReceipt receipt Finished")]
     public void MapProductToDetailForManagerResponse_CalculatesTotalStockCorrectly()
     {
         var product = new ProductEntity
@@ -1353,11 +1347,13 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 10,
-                                InventoryReceiptReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }, new InventoryReceiptInfo
                             {
                                 RemainingCount = 5,
-                                InventoryReceiptReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Draft }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Draft }
                             }]
                 }, new ProductVariant
                 {
@@ -1366,7 +1362,8 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 15,
-                                InventoryReceiptReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }]
                 }]
         };
@@ -1416,7 +1413,8 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 50,
-                                InventoryReceiptReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos =
                         [new OutputInfo { Count = 10, OutputOrder = new Output { StatusId = OrderStatus.Pending } }]
@@ -1607,7 +1605,8 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 10,
-                                InventoryReceiptReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
                 }, new ProductVariant
@@ -1616,7 +1615,8 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 3,
-                                InventoryReceiptReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
                 }, new ProductVariant
@@ -1625,7 +1625,8 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 0,
-                                InventoryReceiptReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
                 }]
@@ -1789,11 +1790,13 @@ public class Product
                 [new InventoryReceiptInfo
                 {
                     RemainingCount = 5,
-                    InventoryReceiptReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
+                    InventoryReceiptReceipt =
+                        new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                 }, new InventoryReceiptInfo
                 {
                     RemainingCount = 10,
-                    InventoryReceiptReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
+                    InventoryReceiptReceipt =
+                        new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                 }]
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
@@ -1807,7 +1810,6 @@ public class Product
         var decoded = WebUtility.UrlDecode(slug);
         decoded.Should().Be("xe-may honda");
     }
-
 
     [Fact(DisplayName = "PRODUCT_165 - Mapping ưu tiên tiêu đề tùy chỉnh (Custom Title)")]
     public void ProductTechnology_Mapping_PriorityToCustom()

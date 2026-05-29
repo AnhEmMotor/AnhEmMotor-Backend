@@ -6,7 +6,10 @@ public sealed class CreateInventoryReceiptCommandValidator : AbstractValidator<C
 {
     public CreateInventoryReceiptCommandValidator()
     {
-        RuleFor(x => x.PurchaseRequestId).GreaterThan(0).When(x => x.PurchaseRequestId.HasValue).WithMessage("PurchaseRequestId must be greater than 0.");
+        RuleFor(x => x.PurchaseRequestId)
+            .GreaterThan(0)
+            .When(x => x.PurchaseRequestId.HasValue)
+            .WithMessage("PurchaseRequestId must be greater than 0.");
         RuleFor(x => x.Notes).MaximumLength(1000).WithMessage("Notes cannot exceed 1000 characters.");
         RuleFor(x => x.Products).NotEmpty().WithMessage("InventoryReceipt must contain at least one product.");
         RuleFor(x => x.Products)
@@ -31,7 +34,8 @@ public sealed class CreateInventoryReceiptCommandValidator : AbstractValidator<C
                     }
                     return true;
                 })
-            .WithMessage("Purchase Request Items or Quotation Product Rows cannot be duplicated in a single InventoryReceipt.");
+            .WithMessage(
+                "Purchase Request Items or Quotation Product Rows cannot be duplicated in a single InventoryReceipt.");
         RuleForEach(x => x.Products).SetValidator(new CreateInventoryReceiptInfoCommandValidator());
     }
 }

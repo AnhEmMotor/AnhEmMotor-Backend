@@ -17,30 +17,30 @@ public sealed class DeleteInventoryReceiptCommandHandler(
 {
     public async Task<Result> Handle(DeleteInventoryReceiptCommand request, CancellationToken cancellationToken)
     {
-        var InventoryReceipt = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken).ConfigureAwait(false);
+        var InventoryReceipt = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken)
+            .ConfigureAwait(false);
         if (InventoryReceipt is null)
         {
             return Result.Failure(Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id"));
         }
         if (InventoryReceiptStatus.IsCannotDelete(InventoryReceipt.StatusId))
         {
-            return Result.Failure(
-                Error.BadRequest($"Không cho phép xóa đơn hàng đã hoàn tất (Approve).", "StatusId"));
+            return Result.Failure(Error.BadRequest($"Không cho phép xóa đơn hàng đã hoàn tất (Approve).", "StatusId"));
         }
         if (!string.Equals(InventoryReceipt.StatusId, InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase))
         {
             Guid userId = currentUserContext.GetUserId();
-
             var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                 userId,
                 [Domain.Constants.Permission.Permissions.InventoryReceipts.ApproveReject],
                 cancellationToken)
                 .ConfigureAwait(false);
-
             if (!hasApprovePermission)
             {
                 return Result.Failure(
-                   Error.BadRequest($"Để xóa đơn hàng ở trạng thái '{InventoryReceipt.StatusId}', bạn cần có thêm quyền phê duyệt (Approve/Reject).", "StatusId"));
+                    Error.BadRequest(
+                        $"Để xóa đơn hàng ở trạng thái '{InventoryReceipt.StatusId}', bạn cần có thêm quyền phê duyệt (Approve/Reject).",
+                        "StatusId"));
             }
         }
         deleteRepository.Delete(InventoryReceipt);

@@ -114,7 +114,8 @@ public sealed class OutputMappingConfig : IRegister
     {
         if (variant == null)
             return null;
-        if (variant.ProductVariantColors != null && !string.IsNullOrEmpty(variant.ProductVariantColors.FirstOrDefault()?.CoverImageUrl))
+        if (variant.ProductVariantColors != null &&
+            !string.IsNullOrEmpty(variant.ProductVariantColors.FirstOrDefault()?.CoverImageUrl))
             return variant.ProductVariantColors.FirstOrDefault()?.CoverImageUrl;
         if (!string.IsNullOrEmpty(variant.CoverImageUrl))
             return variant.CoverImageUrl;

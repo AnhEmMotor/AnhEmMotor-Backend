@@ -45,7 +45,8 @@ public sealed class UpdateInventoryReceiptStatusCommandHandler(
         }
         updateRepository.Update(InventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken).ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken)
+            .ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
         return updated.Adapt<InventoryReceiptDetailResponse>();
     }

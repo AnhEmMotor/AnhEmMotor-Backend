@@ -27,9 +27,14 @@ public class SupplierReadRepository(
         return context.GetQuery<SupplierEntity>(mode)
             .GroupJoin(
                 context.GetQuery<Domain.Entities.InventoryReceiptInfo>(DataFetchMode.ActiveOnly)
-                    .Where(ii => ii.InventoryReceiptReceipt != null && ii.InventoryReceiptReceipt.StatusId == InventoryReceiptStatus.Approve),
+                    .Where(
+                        ii => ii.InventoryReceiptReceipt != null &&
+                                ii.InventoryReceiptReceipt.StatusId == InventoryReceiptStatus.Approve),
                 supplier => (int?)supplier.Id,
-                InventoryReceiptInfo => InventoryReceiptInfo.QuotationProductRow != null && InventoryReceiptInfo.QuotationProductRow.QuotationReceipt != null ? InventoryReceiptInfo.QuotationProductRow.QuotationReceipt.SupplierId : null,
+                InventoryReceiptInfo => InventoryReceiptInfo.QuotationProductRow != null &&
+                        InventoryReceiptInfo.QuotationProductRow.QuotationReceipt != null
+                    ? InventoryReceiptInfo.QuotationProductRow.QuotationReceipt.SupplierId
+                    : null,
                 (supplier, InventoryReceiptInfos) => new { supplier, InventoryReceiptInfos })
             .Select(
                 x => new SupplierWithTotalInventoryReceiptResponse
@@ -47,7 +52,12 @@ public class SupplierReadRepository(
                     TaxIdentificationNumber = x.supplier.TaxIdentificationNumber,
                     PartnerTypeId = x.supplier.PartnerTypeId ?? "supplier",
                     TotalInventoryReceipt =
-                        x.InventoryReceiptInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.QuotationProductRow != null ? (ii.QuotationProductRow.QuotePrice ?? 0) : 0))
+                        x.InventoryReceiptInfos
+                                .Sum(
+                                    ii => (long)(ii.Count ?? 0) *
+                                                (long)(ii.QuotationProductRow != null
+                                                    ? (ii.QuotationProductRow.QuotePrice ?? 0)
+                                                    : 0))
                 });
     }
 

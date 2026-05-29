@@ -2,7 +2,6 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
 using Application.Features.Outputs.Commands.RestoreManyOutputs;
-using Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 using Application.Features.Outputs.Commands.UpdateOutputForManager;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Domain.Constants.Order;
@@ -22,8 +21,6 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using BrandEntity = Domain.Entities.Brand;
-using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
-using InventoryReceiptStatusEntity = Domain.Entities.InventoryReceiptStatus;
 using OutputEntity = Domain.Entities.Output;
 using OutputStatusEntity = Domain.Entities.OutputStatus;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
@@ -205,7 +202,6 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         order.Should().NotBeNull();
         order!.StatusId.Should().Be(OrderStatus.Pending);
     }
-
 
     [Fact(DisplayName = "SO_066 - CreateOutputForAdmin được gọi bởi Manager")]
     public async Task CreateOutputForAdmin_ByManager_CreatesSuccessfully()

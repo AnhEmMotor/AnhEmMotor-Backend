@@ -17,7 +17,6 @@ using Domain.Constants;
 using Domain.Entities;
 using Mapster;
 using MediatR;
-using System.Text.Json;
 using OptionEntity = Domain.Entities.Option;
 using OptionValueEntity = Domain.Entities.OptionValue;
 
@@ -279,7 +278,9 @@ public sealed class UpdateProductCommandHandler(
             }
         }
         var currentVariants = product.ProductVariants.ToList();
-        var InventoryReceiptVariantIds = InventoryReceiptVariants.Where(v => v.Id.HasValue).Select(v => v.Id!.Value).ToHashSet();
+        var InventoryReceiptVariantIds = InventoryReceiptVariants.Where(v => v.Id.HasValue)
+            .Select(v => v.Id!.Value)
+            .ToHashSet();
         var variantsToDelete = currentVariants.Where(v => !InventoryReceiptVariantIds.Contains(v.Id)).ToList();
         foreach (var v in variantsToDelete)
         {

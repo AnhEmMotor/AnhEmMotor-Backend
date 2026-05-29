@@ -1,7 +1,6 @@
 using Application.Common.Models;
 using MediatR;
 using System;
-using System.IO;
 
 namespace Application.Features.UserManager.Commands.UploadAvatarForAdmin;
 

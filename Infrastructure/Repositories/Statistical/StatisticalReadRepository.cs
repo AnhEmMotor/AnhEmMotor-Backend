@@ -296,9 +296,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var monthVehicles = await GetVehiclesSold(currentMonthStart, now).ConfigureAwait(false);
         var confirmedInventoryReceipts = await context.InventoryReceiptInfos
             .IgnoreQueryFilters()
-            .Join(context.InventoryReceiptReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
+            .Join(
+                context.InventoryReceiptReceipts.IgnoreQueryFilters(),
+                ii => ii.InventoryReceiptId,
+                i => i.Id,
+                (ii, i) => new { ii, i })
             .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
-            .GroupBy(x => x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
+            .GroupBy(
+                x => x.ii.QuotationProductRow != null
+                    ? x.ii.QuotationProductRow.ProductVariantId
+                    : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -350,9 +357,17 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var sixtyDaysAgo = now.AddDays(-60);
         var oldInventoryReceiptVariants = await context.InventoryReceiptInfos
             .IgnoreQueryFilters()
-            .Join(context.InventoryReceiptReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
-            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
-            .Select(x => x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
+            .Join(
+                context.InventoryReceiptReceipts.IgnoreQueryFilters(),
+                ii => ii.InventoryReceiptId,
+                i => i.Id,
+                (ii, i) => new { ii, i })
+            .Where(
+                x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
+            .Select(
+                x => x.ii.QuotationProductRow != null
+                    ? x.ii.QuotationProductRow.ProductVariantId
+                    : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Distinct()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -575,9 +590,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             TimeSpan.Zero);
         var confirmedInventoryReceipts = await context.InventoryReceiptInfos
             .IgnoreQueryFilters()
-            .Join(context.InventoryReceiptReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
+            .Join(
+                context.InventoryReceiptReceipts.IgnoreQueryFilters(),
+                ii => ii.InventoryReceiptId,
+                i => i.Id,
+                (ii, i) => new { ii, i })
             .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
-            .GroupBy(x => x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
+            .GroupBy(
+                x => x.ii.QuotationProductRow != null
+                    ? x.ii.QuotationProductRow.ProductVariantId
+                    : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -638,7 +660,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
                     x.i.DeletedAt == null)
-            .GroupBy(x => x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
+            .GroupBy(
+                x => x.ii.QuotationProductRow != null
+                    ? x.ii.QuotationProductRow.ProductVariantId
+                    : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -720,13 +745,20 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
                     x.i.DeletedAt == null)
-            .GroupBy(x => x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
+            .GroupBy(
+                x => x.ii.QuotationProductRow != null
+                    ? x.ii.QuotationProductRow.ProductVariantId
+                    : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Select(
                 g => new
                 {
                     VariantId = g.Key,
                     TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)),
-                    AvgInventoryReceiptPrice = g.Sum(x => (decimal)(x.ii.QuotationProductRow != null ? (x.ii.QuotationProductRow.QuotePrice ?? 0) : 0) * (x.ii.Count ?? 0)) /
+                    AvgInventoryReceiptPrice = g.Sum(
+                                x => (decimal)(x.ii.QuotationProductRow != null
+                                        ? (x.ii.QuotationProductRow.QuotePrice ?? 0)
+                                        : 0) *
+                                    (x.ii.Count ?? 0)) /
                         (g.Sum(x => (long)(x.ii.Count ?? 0)) == 0 ? 1M : (decimal)(g.Sum(x => (long)(x.ii.Count ?? 0))))
                 })
             .ToListAsync(cancellationToken)
@@ -789,8 +821,17 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         }
         var totalInventoryReceipt = await context.InventoryReceiptInfos
                 .IgnoreQueryFilters()
-                .Join(context.InventoryReceiptReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
-                .Where(x => (x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null)) == variantId && string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
+                .Join(
+                    context.InventoryReceiptReceipts.IgnoreQueryFilters(),
+                    ii => ii.InventoryReceiptId,
+                    i => i.Id,
+                    (ii, i) => new { ii, i })
+                .Where(
+                    x => (x.ii.QuotationProductRow != null
+                                ? x.ii.QuotationProductRow.ProductVariantId
+                                : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null)) ==
+                            variantId &&
+                            string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
                 .SumAsync(x => (long?)(x.ii.Count ?? 0), cancellationToken)
                 .ConfigureAwait(false) ??
             0;

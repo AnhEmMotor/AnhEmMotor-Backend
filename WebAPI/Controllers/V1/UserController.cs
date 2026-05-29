@@ -9,13 +9,10 @@ using Application.Features.Users.Commands.UploadAvatarCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
 using Application.Features.Users.Queries.GetGenderOptions;
 using Asp.Versioning;
-using Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
-using System.Text.Json;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -46,8 +43,7 @@ public class UserController(IMediator mediator) : ApiController
             return HandleSseResult(stream);
         } else
         {
-            var result = await mediator.Send(new GetCurrentUserQuery(), cancellationToken)
-                .ConfigureAwait(false);
+            var result = await mediator.Send(new GetCurrentUserQuery(), cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
     }
@@ -97,8 +93,7 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteCurrentUserAccountAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteCurrentUserAccountCommand(), cancellationToken)
-            .ConfigureAwait(false);
+        var result = await mediator.Send(new DeleteCurrentUserAccountCommand(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

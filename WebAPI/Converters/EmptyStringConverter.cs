@@ -23,7 +23,10 @@ public class EmptyStringConverter : JsonConverter<string>
     /// </param>
     /// <param name="typeToConvert">The type of the value to convert. This parameter is ignored for string values.</param>
     /// <param name="options">Options to control the behavior of the JSON serializer. This parameter is not used for string values.</param>
-    /// <returns>The string value read from the JSON InventoryReceipt. Returns <see langword="string.Empty" /> if the JSON value is null.</returns>
+    /// <returns>
+    /// The string value read from the JSON InventoryReceipt. Returns <see langword="string.Empty" /> if the JSON value
+    /// is null.
+    /// </returns>
     public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.String)

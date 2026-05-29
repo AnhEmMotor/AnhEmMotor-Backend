@@ -4,7 +4,6 @@ using Application.Features.HR.Commands.UpdateCommissionPolicy;
 using Application.Features.HR.Queries.GetCommissionPolicies;
 using Application.Features.HR.Queries.GetCommissionPolicyAuditLogs;
 using Asp.Versioning;
-using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -74,9 +73,7 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách lịch sử thay đổi.</returns>
     [HttpGet("{id}/audit-logs")]
-    public async Task<IActionResult> GetAuditLogsAsync(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAuditLogsAsync(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetCommissionPolicyAuditLogsQuery(id), cancellationToken)
             .ConfigureAwait(true);

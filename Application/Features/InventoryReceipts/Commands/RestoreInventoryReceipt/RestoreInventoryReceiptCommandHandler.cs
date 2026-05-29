@@ -18,7 +18,10 @@ public sealed class RestoreInventoryReceiptCommandHandler(
         RestoreInventoryReceiptCommand request,
         CancellationToken cancellationToken)
     {
-        var InventoryReceipt = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken, DataFetchMode.DeletedOnly)
+        var InventoryReceipt = await readRepository.GetByIdAsync(
+            request.Id!.Value,
+            cancellationToken,
+            DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
         if (InventoryReceipt is null)
         {

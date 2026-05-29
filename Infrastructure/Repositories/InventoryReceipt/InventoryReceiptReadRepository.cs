@@ -18,19 +18,27 @@ public class InventoryReceiptReadRepository(ApplicationDBContext context, ISieve
         var now = DateTimeOffset.UtcNow;
         var startOfMonth = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
         var totalVehicles = await context.InventoryReceiptReceipts
-            .Where(x => x.DeletedAt == null && x.StatusId == InventoryReceiptStatus.Approve && x.InventoryReceiptDate >= startOfMonth)
+            .Where(
+                x => x.DeletedAt == null &&
+                    x.StatusId == InventoryReceiptStatus.Approve &&
+                    x.InventoryReceiptDate >= startOfMonth)
             .SelectMany(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
             .SumAsync(y => y.Count ?? 0, cancellationToken)
             .ConfigureAwait(false);
         var processingReceipts = await context.InventoryReceiptReceipts
             .CountAsync(
-                x => x.DeletedAt == null && (string.Compare(x.StatusId, InventoryReceiptStatus.Draft) == 0 || string.Compare(x.StatusId, InventoryReceiptStatus.Sent) == 0),
+                x => x.DeletedAt == null &&
+                    (string.Compare(x.StatusId, InventoryReceiptStatus.Draft) == 0 ||
+                        string.Compare(x.StatusId, InventoryReceiptStatus.Sent) == 0),
                 cancellationToken)
             .ConfigureAwait(false);
         var totalValue = await context.InventoryReceiptReceipts
             .Where(x => x.DeletedAt == null && x.StatusId == InventoryReceiptStatus.Approve)
             .SelectMany(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-            .SumAsync(y => (long)(y.Count ?? 0) * (long)(y.QuotationProductRow != null ? (y.QuotationProductRow.QuotePrice ?? 0) : 0), cancellationToken)
+            .SumAsync(
+                y => (long)(y.Count ?? 0) *
+                    (long)(y.QuotationProductRow != null ? (y.QuotationProductRow.QuotePrice ?? 0) : 0),
+                cancellationToken)
             .ConfigureAwait(false);
         return new InventoryReceiptStatsResponse
         {
@@ -66,31 +74,31 @@ public class InventoryReceiptReadRepository(ApplicationDBContext context, ISieve
         }
         return query
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.Vehicles)
+            .ThenInclude(x => x.Vehicles)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.QuotationProductRow)
-                    .ThenInclude(x => x!.QuotationReceipt)
-                        .ThenInclude(x => x!.Supplier)
+            .ThenInclude(x => x.QuotationProductRow)
+            .ThenInclude(x => x!.QuotationReceipt)
+            .ThenInclude(x => x!.Supplier)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.QuotationProductRow)
-                    .ThenInclude(x => x!.ProductVariant)
-                        .ThenInclude(x => x!.Product)
+            .ThenInclude(x => x.QuotationProductRow)
+            .ThenInclude(x => x!.ProductVariant)
+            .ThenInclude(x => x!.Product)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.QuotationProductRow)
-                    .ThenInclude(x => x!.ProductVariant)
-                        .ThenInclude(x => x!.VariantOptionValues)
-                            .ThenInclude(x => x.OptionValue)
-                                .ThenInclude(x => x!.Option)
+            .ThenInclude(x => x.QuotationProductRow)
+            .ThenInclude(x => x!.ProductVariant)
+            .ThenInclude(x => x!.VariantOptionValues)
+            .ThenInclude(x => x.OptionValue)
+            .ThenInclude(x => x!.Option)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.QuotationProductRow)
-                    .ThenInclude(x => x!.ProductVariantColor)
+            .ThenInclude(x => x.QuotationProductRow)
+            .ThenInclude(x => x!.ProductVariantColor)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.PurchaseRequestItem)
-                    .ThenInclude(x => x!.ProductVariant)
-                        .ThenInclude(x => x!.Product)
+            .ThenInclude(x => x.PurchaseRequestItem)
+            .ThenInclude(x => x!.ProductVariant)
+            .ThenInclude(x => x!.Product)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.PurchaseRequestItem)
-                    .ThenInclude(x => x!.ProductVariantColor)
+            .ThenInclude(x => x.PurchaseRequestItem)
+            .ThenInclude(x => x!.ProductVariantColor)
             .Include(x => x.CreatedByUser)
             .Include(x => x.InventoryReceiptStatus)
             .AsSplitQuery();
@@ -137,31 +145,31 @@ public class InventoryReceiptReadRepository(ApplicationDBContext context, ISieve
         var query = GetQueryable(mode);
         return query
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.Vehicles)
+            .ThenInclude(x => x.Vehicles)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.QuotationProductRow)
-                    .ThenInclude(x => x!.QuotationReceipt)
-                        .ThenInclude(x => x!.Supplier)
+            .ThenInclude(x => x.QuotationProductRow)
+            .ThenInclude(x => x!.QuotationReceipt)
+            .ThenInclude(x => x!.Supplier)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.QuotationProductRow)
-                    .ThenInclude(x => x!.ProductVariant)
-                        .ThenInclude(x => x!.Product)
+            .ThenInclude(x => x.QuotationProductRow)
+            .ThenInclude(x => x!.ProductVariant)
+            .ThenInclude(x => x!.Product)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.QuotationProductRow)
-                    .ThenInclude(x => x!.ProductVariant)
-                        .ThenInclude(x => x!.VariantOptionValues)
-                            .ThenInclude(x => x.OptionValue)
-                                .ThenInclude(x => x!.Option)
+            .ThenInclude(x => x.QuotationProductRow)
+            .ThenInclude(x => x!.ProductVariant)
+            .ThenInclude(x => x!.VariantOptionValues)
+            .ThenInclude(x => x.OptionValue)
+            .ThenInclude(x => x!.Option)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.QuotationProductRow)
-                    .ThenInclude(x => x!.ProductVariantColor)
+            .ThenInclude(x => x.QuotationProductRow)
+            .ThenInclude(x => x!.ProductVariantColor)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.PurchaseRequestItem)
-                    .ThenInclude(x => x!.ProductVariant)
-                        .ThenInclude(x => x!.Product)
+            .ThenInclude(x => x.PurchaseRequestItem)
+            .ThenInclude(x => x!.ProductVariant)
+            .ThenInclude(x => x!.Product)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.PurchaseRequestItem)
-                    .ThenInclude(x => x!.ProductVariantColor)
+            .ThenInclude(x => x.PurchaseRequestItem)
+            .ThenInclude(x => x!.ProductVariantColor)
             .Include(x => x.InventoryReceiptStatus)
             .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
@@ -175,7 +183,12 @@ public class InventoryReceiptReadRepository(ApplicationDBContext context, ISieve
     {
         var query = GetQueryable(mode);
         return query
-            .Where(x => x.InventoryReceiptInfos.Any(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.SupplierId == supplierId))
+            .Where(
+                x => x.InventoryReceiptInfos
+                    .Any(
+                        ii => ii.QuotationProductRow != null &&
+                                ii.QuotationProductRow.QuotationReceipt != null &&
+                                ii.QuotationProductRow.QuotationReceipt.SupplierId == supplierId))
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
     }
@@ -187,7 +200,13 @@ public class InventoryReceiptReadRepository(ApplicationDBContext context, ISieve
     {
         var query = GetQueryable(mode);
         return query
-            .Where(x => x.InventoryReceiptInfos.Any(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.SupplierId != null && supplierIds.Contains(ii.QuotationProductRow.QuotationReceipt.SupplierId.Value)))
+            .Where(
+                x => x.InventoryReceiptInfos
+                    .Any(
+                        ii => ii.QuotationProductRow != null &&
+                                ii.QuotationProductRow.QuotationReceipt != null &&
+                                ii.QuotationProductRow.QuotationReceipt.SupplierId != null &&
+                                supplierIds.Contains(ii.QuotationProductRow.QuotationReceipt.SupplierId.Value)))
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<InventoryReceiptEntity>>(t => t.Result, cancellationToken);
     }

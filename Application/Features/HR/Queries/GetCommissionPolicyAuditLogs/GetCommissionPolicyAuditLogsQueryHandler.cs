@@ -12,7 +12,6 @@ public class GetCommissionPolicyAuditLogsQueryHandler(ICommissionPolicyReadRepos
         CancellationToken cancellationToken)
     {
         var auditLogs = await repository.GetAuditLogsAsync(request.PolicyId, cancellationToken).ConfigureAwait(false);
-
         return auditLogs;
     }
 }

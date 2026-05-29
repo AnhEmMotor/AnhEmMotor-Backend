@@ -1,7 +1,7 @@
-﻿using System;
-using System.Security.Claims;
-using Application.Interfaces.Services;
+﻿using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
+using System;
+using System.Security.Claims;
 
 namespace Infrastructure.Services
 {
@@ -9,17 +9,18 @@ namespace Infrastructure.Services
     {
         public string GetAuthorizationHeader()
         {
-            var httpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HTTP context is unavailable.");
+            var httpContext = httpContextAccessor.HttpContext ??
+                throw new InvalidOperationException("HTTP context is unavailable.");
             return httpContext.Request.Headers.Authorization.ToString();
         }
 
         public Guid GetUserId()
         {
-            var httpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HTTP context is unavailable.");
-            var userIdClaim = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                              ?? httpContext.User?.FindFirst("sub")?.Value
-                              ?? throw new UnauthorizedAccessException("User identity claim is missing.");
-
+            var httpContext = httpContextAccessor.HttpContext ??
+                throw new InvalidOperationException("HTTP context is unavailable.");
+            var userIdClaim = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                httpContext.User?.FindFirst("sub")?.Value ??
+                throw new UnauthorizedAccessException("User identity claim is missing.");
             return Guid.Parse(userIdClaim);
         }
 

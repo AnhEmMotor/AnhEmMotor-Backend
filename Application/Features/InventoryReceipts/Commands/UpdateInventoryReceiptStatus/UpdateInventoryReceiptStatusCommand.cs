@@ -1,7 +1,6 @@
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using MediatR;
-using System.Text.Json.Serialization;
 
 namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
 

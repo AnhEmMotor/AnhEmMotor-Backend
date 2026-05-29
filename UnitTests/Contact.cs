@@ -8,8 +8,6 @@ using Domain.Entities;
 using FluentAssertions;
 using Moq;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace UnitTests;
 
@@ -40,9 +38,7 @@ public class Contact
             PhoneNumber = "0123456789",
             Message = "Msg"
         };
-        var handler = new CreateContactCommandHandler(
-            _contactInsertRepoMock.Object,
-            _unitOfWorkMock.Object);
+        var handler = new CreateContactCommandHandler(_contactInsertRepoMock.Object, _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
     }

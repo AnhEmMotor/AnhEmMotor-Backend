@@ -1,13 +1,12 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Domain.Constants;
+using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using PurchaseRequestEntity = Domain.Entities.PurchaseRequest;
 
 namespace Infrastructure.Repositories.PurchaseRequest
@@ -41,15 +40,14 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.ApprovedByUser)
                 .Include(x => x.PurchaseRequestItems)
-                    .ThenInclude(r => r.ProductVariant)
-                    .ThenInclude(pv => pv!.Product)
+                .ThenInclude(r => r.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
                 .Include(x => x.PurchaseRequestItems)
-                    .ThenInclude(r => r.ProductVariantColor)
+                .ThenInclude(r => r.ProductVariantColor)
                 .Include(x => x.PurchaseRequestItems)
-                    .ThenInclude(r => r.InventoryReceiptInfos)
-                        .ThenInclude(ii => ii.InventoryReceiptReceipt)
+                .ThenInclude(r => r.InventoryReceiptInfos)
+                .ThenInclude(ii => ii.InventoryReceiptReceipt)
                 .AsSplitQuery();
-
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
@@ -59,21 +57,20 @@ namespace Infrastructure.Repositories.PurchaseRequest
             if (mode == DataFetchMode.ActiveOnly)
             {
                 query = query.Where(x => x.DeletedAt == null);
-            }
-            else if (mode == DataFetchMode.DeletedOnly)
+            } else if (mode == DataFetchMode.DeletedOnly)
             {
                 query = query.Where(x => x.DeletedAt != null);
             }
             return query;
         }
 
-        public Task<List<Domain.Entities.PurchaseRequestItem>> GetItemsByIdsAsync(
+        public Task<List<PurchaseRequestItem>> GetItemsByIdsAsync(
             IEnumerable<int> ids,
             CancellationToken cancellationToken)
         {
             return context.PurchaseRequestItems
                 .Include(x => x.ProductVariant)
-                    .ThenInclude(pv => pv!.Product)
+                .ThenInclude(pv => pv!.Product)
                 .Include(x => x.ProductVariantColor)
                 .Where(x => ids.Contains(x.Id))
                 .ToListAsync(cancellationToken);

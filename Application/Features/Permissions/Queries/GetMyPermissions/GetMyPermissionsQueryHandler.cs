@@ -9,7 +9,8 @@ namespace Application.Features.Permissions.Queries.GetMyPermissions;
 
 public class GetMyPermissionsQueryHandler(
     IRoleReadRepository roleReadRepository,
-    IUserReadRepository userReadRepository, ICurrentUserContext currentUserContext) : IRequestHandler<GetMyPermissionsQuery, Result<PermissionAndRoleOfUserResponse>>
+    IUserReadRepository userReadRepository,
+    ICurrentUserContext currentUserContext) : IRequestHandler<GetMyPermissionsQuery, Result<PermissionAndRoleOfUserResponse>>
 {
     public async Task<Result<PermissionAndRoleOfUserResponse>> Handle(
         GetMyPermissionsQuery request,

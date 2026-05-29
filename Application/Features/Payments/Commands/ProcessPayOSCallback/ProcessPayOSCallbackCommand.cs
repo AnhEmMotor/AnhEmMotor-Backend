@@ -9,7 +9,8 @@ public sealed record ProcessPayOSCallbackCommand(long? OrderCode) : IRequest<Res
     {
         get
         {
-            if (OrderCode is null) return 0;
+            if (OrderCode is null)
+                return 0;
             var id = (int)(OrderCode.Value / 100000);
             return id == 0 ? (int)OrderCode.Value : id;
         }

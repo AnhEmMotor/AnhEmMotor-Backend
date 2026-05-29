@@ -26,7 +26,9 @@ public class LoyaltyController(IMediator mediator) : ApiController
     [HttpGet("members")]
     [Authorize]
     [SwaggerOperation(Summary = "Lấy danh sách hội viên và điểm thưởng")]
-    public async Task<IActionResult> GetMembersAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetMembersAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetLoyaltyMembersQuery { SieveModel = sieveModel }, cancellationToken)
             .ConfigureAwait(true);

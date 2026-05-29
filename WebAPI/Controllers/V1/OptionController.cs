@@ -1,9 +1,9 @@
 using Application.ApiContracts.Option.Responses;
 using Application.Common.Models;
+using Application.Features.Options.Queries.GetOptionsList;
 using Application.Features.OptionValues.Commands.CreateOptionValue;
 using Application.Features.OptionValues.Commands.DeleteOptionValue;
 using Application.Features.OptionValues.Commands.UpdateOptionValue;
-using Application.Features.Options.Queries.GetOptionsList;
 using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;

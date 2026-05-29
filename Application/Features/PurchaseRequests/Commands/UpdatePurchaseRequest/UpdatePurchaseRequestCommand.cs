@@ -3,7 +3,6 @@ using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Common.Models;
 using MediatR;
 using System;
-using System.Collections.Generic;
 
 namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
 {

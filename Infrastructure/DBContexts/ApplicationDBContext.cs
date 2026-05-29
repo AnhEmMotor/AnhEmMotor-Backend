@@ -286,7 +286,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
-
         modelBuilder.Entity<PurchaseRequestItem>()
             .HasOne(oi => oi.PurchaseRequest)
             .WithMany(q => q.PurchaseRequestItems)

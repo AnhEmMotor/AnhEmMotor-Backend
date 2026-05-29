@@ -22,13 +22,19 @@ public sealed class DeleteManySuppliersCommandHandler(
         var activeSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
         var allSupplierMap = allSuppliers.ToDictionary(s => s.Id);
         var activeSupplierSet = activeSuppliers.Select(s => s.Id).ToHashSet();
-        var relevantInventoryReceipts = await InventoryReceiptReadRepository.GetBySupplierIdsAsync(uniqueIds, cancellationToken)
+        var relevantInventoryReceipts = await InventoryReceiptReadRepository.GetBySupplierIdsAsync(
+            uniqueIds,
+            cancellationToken)
             .ConfigureAwait(false);
         var suppliersWithWorkingInventoryReceiptsSet = relevantInventoryReceipts
             .Where(x => InventoryReceiptStatus.IsCanEdit(x.StatusId))
-            .SelectMany(x => x.InventoryReceiptInfos
-                .Where(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.SupplierId.HasValue)
-                .Select(ii => ii.QuotationProductRow!.QuotationReceipt!.SupplierId!.Value))
+            .SelectMany(
+                x => x.InventoryReceiptInfos
+                    .Where(
+                        ii => ii.QuotationProductRow != null &&
+                                ii.QuotationProductRow.QuotationReceipt != null &&
+                                ii.QuotationProductRow.QuotationReceipt.SupplierId.HasValue)
+                    .Select(ii => ii.QuotationProductRow!.QuotationReceipt!.SupplierId!.Value))
             .Intersect(uniqueIds)
             .ToHashSet();
         foreach (var id in uniqueIds)

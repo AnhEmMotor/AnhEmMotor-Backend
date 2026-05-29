@@ -29,7 +29,8 @@ public sealed class UpdateInventoryReceiptCommandValidator : AbstractValidator<U
                     }
                     return true;
                 })
-            .WithMessage("Purchase Request Items or Quotation Product Rows cannot be duplicated in a single InventoryReceipt.");
+            .WithMessage(
+                "Purchase Request Items or Quotation Product Rows cannot be duplicated in a single InventoryReceipt.");
         RuleForEach(x => x.Products).SetValidator(new UpdateInventoryReceiptInfoCommandValidator());
     }
 }

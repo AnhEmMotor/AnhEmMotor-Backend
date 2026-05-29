@@ -1,9 +1,6 @@
-using Application.ApiContracts.Option.Responses;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
-using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
-using Application.Features.Options.Queries.GetOptionsList;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -43,7 +40,6 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Net;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -155,7 +151,11 @@ public class ProductController(ISender sender) : ApiController
     /// khi có quyền thêm hoặc sửa phiếu nhập).
     /// </summary>
     [HttpGet("variants-lite/for-InventoryReceipt")]
-    [RequiresAnyPermissions(Domain.Constants.Permission.Permissions.InventoryReceipts.Edit, Domain.Constants.Permission.Permissions.InventoryReceipts.Create, PurchaseRequests.Edit, PurchaseRequests.Create)]
+    [RequiresAnyPermissions(
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Edit,
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Create,
+        PurchaseRequests.Edit,
+        PurchaseRequests.Create)]
     [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponseForInventoryReceipt>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActiveVariantLiteProductsForInventoryReceiptAsync(
         [FromQuery] SieveModel request,
@@ -183,7 +183,6 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
-
     /// <summary>
     /// Xuất danh sách sản phẩm và biến thể ra file Excel (có hỗ trợ lọc và sắp xếp).
     /// </summary>
@@ -201,7 +200,6 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
-
 
     /// <summary>
     /// Lấy danh sách ánh xạ trạng thái tồn kho (Key -> Tên tiếng Việt).
@@ -515,7 +513,6 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
-
     /// <summary>
     /// Thiết lập danh sách xe tương thích cho phụ tùng.
     /// </summary>
@@ -545,7 +542,5 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
-
-
 }
 

@@ -18,7 +18,10 @@ public sealed class RestoreManyInventoryReceiptsCommandHandler(
         RestoreManyInventoryReceiptsCommand request,
         CancellationToken cancellationToken)
     {
-        var InventoryReceipts = await readRepository.GetByIdAsync(request.Ids, cancellationToken, DataFetchMode.DeletedOnly)
+        var InventoryReceipts = await readRepository.GetByIdAsync(
+            request.Ids,
+            cancellationToken,
+            DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
         var InventoryReceiptsList = InventoryReceipts.ToList();
         if (InventoryReceiptsList.Count != request.Ids.Count)

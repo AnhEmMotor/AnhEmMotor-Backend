@@ -1,5 +1,4 @@
 using Application.ApiContracts.File.Requests;
-using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
@@ -452,10 +451,12 @@ public class MediaFile
         var stream2 = new MemoryStream();
         var command = new UploadManyProductImagesCommand
         {
-            Files = [
-                new FileParameter { Content = stream1, FileName = "test1.jpg" },
-                new FileParameter { Content = stream2, FileName = "test2.png" }
-            ]
+            Files =
+                [new FileParameter { Content = stream1, FileName = "test1.jpg" }, new FileParameter
+                {
+                    Content = stream2,
+                    FileName = "test2.png"
+                }]
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Value.Should().HaveCount(2);

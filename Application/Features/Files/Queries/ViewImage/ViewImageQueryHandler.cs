@@ -8,9 +8,7 @@ namespace Application.Features.Files.Queries.ViewImage;
 
 public sealed class ViewImageQueryHandler(IFileReadService fileReadService) : IRequestHandler<ViewImageQuery, Result<ViewImageResponse?>>
 {
-    public async Task<Result<ViewImageResponse?>> Handle(
-        ViewImageQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<ViewImageResponse?>> Handle(ViewImageQuery request, CancellationToken cancellationToken)
     {
         var fileResult = await fileReadService.GetFileAsync(request.StoragePath, cancellationToken)
             .ConfigureAwait(false);
@@ -20,7 +18,10 @@ public sealed class ViewImageQueryHandler(IFileReadService fileReadService) : IR
         }
         var (fileBytes, _) = fileResult.Value;
         using var InventoryReceiptStream = new MemoryStream(fileBytes);
-        var processedStream = await fileReadService.ReadImageAsync(InventoryReceiptStream, request.Width, cancellationToken)
+        var processedStream = await fileReadService.ReadImageAsync(
+            InventoryReceiptStream,
+            request.Width,
+            cancellationToken)
             .ConfigureAwait(false);
         return new ViewImageResponse { FileStream = processedStream, ContentType = "image/webp" };
     }

@@ -3,7 +3,6 @@ using Application.Features.HR.Commands.ApprovePayroll;
 using Application.Features.HR.Queries.GetCommissionRecords;
 using Application.Features.HR.Queries.GetPayrollSummary;
 using Asp.Versioning;
-using Domain.Entities;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

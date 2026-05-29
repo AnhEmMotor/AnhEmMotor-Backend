@@ -5,13 +5,10 @@ using Domain.Constants;
 using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Quotations.Queries.GetQuotationsList
 {
-    public sealed class GetQuotationsListQueryHandler(
-        IQuotationReadRepository readRepository) : IRequestHandler<GetQuotationsListQuery, Result<PagedResult<QuotationSummaryResponse?>>>
+    public sealed class GetQuotationsListQueryHandler(IQuotationReadRepository readRepository) : IRequestHandler<GetQuotationsListQuery, Result<PagedResult<QuotationSummaryResponse?>>>
     {
         public async Task<Result<PagedResult<QuotationSummaryResponse?>>> Handle(
             GetQuotationsListQuery request,
@@ -23,7 +20,6 @@ namespace Application.Features.Quotations.Queries.GetQuotationsList
                 DataFetchMode.ActiveOnly,
                 cancellationToken)
                 .ConfigureAwait(false);
-
             return result;
         }
     }

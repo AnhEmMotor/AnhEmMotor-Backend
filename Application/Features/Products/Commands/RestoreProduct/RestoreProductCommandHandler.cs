@@ -31,7 +31,8 @@ public sealed class RestoreProductCommandHandler(
             if (variant.ProductVariantColors != null &&
                 !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()?.CoverImageUrl))
             {
-                imageFileNames.Add(StringExtensions.ExtractFileName(variant.ProductVariantColors.FirstOrDefault()?.CoverImageUrl!));
+                imageFileNames.Add(
+                    StringExtensions.ExtractFileName(variant.ProductVariantColors.FirstOrDefault()?.CoverImageUrl!));
             }
             foreach (var photo in variant.ProductCollectionPhotos)
             {

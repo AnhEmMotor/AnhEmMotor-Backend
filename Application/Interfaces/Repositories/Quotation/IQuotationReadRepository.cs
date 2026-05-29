@@ -1,9 +1,7 @@
 using Domain.Constants;
+using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using QuotationEntity = Domain.Entities.Quotation;
 
 namespace Application.Interfaces.Repositories.Quotation
@@ -25,11 +23,11 @@ namespace Application.Interfaces.Repositories.Quotation
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        public Task<List<Domain.Entities.QuotationProductRow>> GetApprovedQuotationRowsByVariantsAsync(
+        public Task<List<QuotationProductRow>> GetApprovedQuotationRowsByVariantsAsync(
             IEnumerable<int> variantIds,
             CancellationToken cancellationToken);
 
-        public Task<List<Domain.Entities.QuotationProductRow>> GetRowsByIdsAsync(
+        public Task<List<QuotationProductRow>> GetRowsByIdsAsync(
             IEnumerable<int> ids,
             CancellationToken cancellationToken);
     }

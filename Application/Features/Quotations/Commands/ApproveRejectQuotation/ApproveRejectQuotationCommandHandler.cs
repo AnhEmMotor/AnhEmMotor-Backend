@@ -6,8 +6,6 @@ using Domain.Constants;
 using Mapster;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Quotations.Commands.ApproveRejectQuotation
 {
@@ -20,29 +18,29 @@ namespace Application.Features.Quotations.Commands.ApproveRejectQuotation
             ApproveRejectQuotationCommand request,
             CancellationToken cancellationToken)
         {
-            var quotation = await readRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
+            var quotation = await readRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken)
+                .ConfigureAwait(false);
             if (quotation is null)
             {
                 return Error.NotFound($"Yêu cầu báo giá {request.Id} không tồn tại hoặc đã bị xóa.", "Id");
             }
-
             if (!string.Equals(request.Status, QuotationType.Approved, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(request.Status, QuotationType.Rejected, StringComparison.OrdinalIgnoreCase))
             {
                 return Error.BadRequest("Trạng thái phê duyệt không hợp lệ.", "Status");
             }
-
             var currentStatus = quotation.Status?.ToLower();
             if (string.Compare(currentStatus, QuotationType.Sent) != 0)
             {
-                return Error.BadRequest($"Không thể cập nhật trạng thái báo giá đang ở trạng thái '{quotation.Status}'. Chỉ cho phép cập nhật báo giá ở trạng thái Đã gửi (sent).", "Status");
+                return Error.BadRequest(
+                    $"Không thể cập nhật trạng thái báo giá đang ở trạng thái '{quotation.Status}'. Chỉ cho phép cập nhật báo giá ở trạng thái Đã gửi (sent).",
+                    "Status");
             }
-
             quotation.Status = request.Status.ToLower();
             updateRepository.Update(quotation);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            var updated = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken).ConfigureAwait(false);
+            var updated = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken)
+                .ConfigureAwait(false);
             return updated!.Adapt<QuotationDetailResponse>();
         }
     }

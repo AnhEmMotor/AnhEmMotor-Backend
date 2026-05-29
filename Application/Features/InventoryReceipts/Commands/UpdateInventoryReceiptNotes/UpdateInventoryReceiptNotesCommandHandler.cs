@@ -30,7 +30,8 @@ public sealed class UpdateInventoryReceiptNotesCommandHandler(
         InventoryReceipt.Notes = request.Notes;
         updateRepository.Update(InventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken).ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken)
+            .ConfigureAwait(false);
         return updated!.Adapt<InventoryReceiptDetailResponse>();
     }
 }

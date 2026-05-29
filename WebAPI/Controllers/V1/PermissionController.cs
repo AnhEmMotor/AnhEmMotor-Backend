@@ -20,7 +20,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -74,8 +73,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMyPermissionsAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetMyPermissionsQuery(), cancellationToken)
-            .ConfigureAwait(true);
+        var result = await mediator.Send(new GetMyPermissionsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

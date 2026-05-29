@@ -5,15 +5,12 @@ using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Quotation;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
+using Domain.Entities;
 using Mapster;
 using MediatR;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using QuotationEntity = Domain.Entities.Quotation;
-using Domain.Entities;
 
 namespace Application.Features.Quotations.Commands.CreateQuotation
 {
@@ -37,14 +34,15 @@ namespace Application.Features.Quotations.Commands.CreateQuotation
                     .ConfigureAwait(false);
                 if (supplier is null)
                 {
-                    return Error.NotFound($"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa.", "SupplierId");
+                    return Error.NotFound(
+                        $"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa.",
+                        "SupplierId");
                 }
                 if (string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
                 {
                     return Error.BadRequest($"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'.", "SupplierId");
                 }
             }
-
             foreach (var product in request.Products)
             {
                 if (int.TryParse(product.ProductVariantId, out var variantId))
@@ -61,7 +59,6 @@ namespace Application.Features.Quotations.Commands.CreateQuotation
                             $"Biến thể sản phẩm {product.ProductVariantId} không tồn tại hoặc đã bị xóa.",
                             "Products");
                     }
-
                     if (!string.IsNullOrEmpty(product.ProductVarientColorId) &&
                         int.TryParse(product.ProductVarientColorId, out var colorId))
                     {
@@ -75,21 +72,23 @@ namespace Application.Features.Quotations.Commands.CreateQuotation
                     }
                 }
             }
-
             var quotation = request.Adapt<QuotationEntity>();
             quotation.Status = "draft";
-            quotation.QuotationProductRows = request.Products.Select(p => new QuotationProductRow
-            {
-                ProductVariantId = int.Parse(p.ProductVariantId!),
-                ProductVariantColorId = string.IsNullOrEmpty(p.ProductVarientColorId) ? null : int.Parse(p.ProductVarientColorId),
-                QuotePrice = p.QuotePrice,
-                Note = p.Note
-            }).ToList();
-
+            quotation.QuotationProductRows = request.Products
+                .Select(
+                    p => new QuotationProductRow
+                    {
+                        ProductVariantId = int.Parse(p.ProductVariantId!),
+                        ProductVariantColorId =
+                            string.IsNullOrEmpty(p.ProductVarientColorId) ? null : int.Parse(p.ProductVarientColorId),
+                        QuotePrice = p.QuotePrice,
+                        Note = p.Note
+                    })
+                .ToList();
             insertRepository.Add(quotation);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            var created = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken).ConfigureAwait(false);
+            var created = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken)
+                .ConfigureAwait(false);
             return created!.Adapt<QuotationDetailResponse>();
         }
     }

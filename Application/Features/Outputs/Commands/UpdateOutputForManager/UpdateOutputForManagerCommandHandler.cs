@@ -1,11 +1,10 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.User;
-using Application.Interfaces.Repositories.HR.Commission;
-using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;

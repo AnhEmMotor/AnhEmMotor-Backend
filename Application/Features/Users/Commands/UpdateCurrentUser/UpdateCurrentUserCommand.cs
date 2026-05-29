@@ -1,7 +1,6 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using MediatR;
-using System.Text.Json.Serialization;
 
 namespace Application.Features.Users.Commands.UpdateCurrentUser;
 

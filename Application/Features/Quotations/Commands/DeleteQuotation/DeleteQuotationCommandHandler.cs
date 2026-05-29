@@ -6,8 +6,6 @@ using Application.Interfaces.Services;
 using Domain.Constants;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Quotations.Commands.DeleteQuotation
 {
@@ -25,14 +23,14 @@ namespace Application.Features.Quotations.Commands.DeleteQuotation
                 cancellationToken,
                 DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
-
             if (quotation is null)
             {
-                return Result.Failure(Error.NotFound($"Yêu cầu báo giá {request.Id} không tồn tại hoặc đã bị xóa.", "Id"));
+                return Result.Failure(
+                    Error.NotFound($"Yêu cầu báo giá {request.Id} không tồn tại hoặc đã bị xóa.", "Id"));
             }
-
             var currentStatus = quotation.Status?.ToLower();
-            if (string.Compare(currentStatus, QuotationType.Approved) == 0 || string.Compare(currentStatus, QuotationType.Sent) == 0)
+            if (string.Compare(currentStatus, QuotationType.Approved) == 0 ||
+                string.Compare(currentStatus, QuotationType.Sent) == 0)
             {
                 Guid userId = currentUserContext.GetUserId();
                 var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
@@ -40,16 +38,16 @@ namespace Application.Features.Quotations.Commands.DeleteQuotation
                     [Domain.Constants.Permission.Permissions.Quotations.Approve],
                     cancellationToken)
                     .ConfigureAwait(false);
-
                 if (!hasApprovePermission)
                 {
-                    return Result.Failure(Error.BadRequest("Báo giá ở trạng thái đã gửi hoặc đã duyệt chỉ có thể xóa bởi người dùng có quyền duyệt/hủy báo giá.", "Status"));
+                    return Result.Failure(
+                        Error.BadRequest(
+                            "Báo giá ở trạng thái đã gửi hoặc đã duyệt chỉ có thể xóa bởi người dùng có quyền duyệt/hủy báo giá.",
+                            "Status"));
                 }
             }
-
             deleteRepository.Delete(quotation);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return Result.Success();
         }
     }

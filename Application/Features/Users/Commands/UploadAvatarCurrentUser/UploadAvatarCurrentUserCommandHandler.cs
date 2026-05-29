@@ -23,7 +23,9 @@ public class UploadAvatarCurrentUserCommandHandler(
     ICurrentUserContext currentUserContext,
     IUserStreamService userStreamService) : IRequestHandler<UploadAvatarCurrentUserCommand, Result<string>>
 {
-    public async Task<Result<string>> Handle(UploadAvatarCurrentUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(
+        UploadAvatarCurrentUserCommand request,
+        CancellationToken cancellationToken)
     {
         var userId = currentUserContext.GetUserId();
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);

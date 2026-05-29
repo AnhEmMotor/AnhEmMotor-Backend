@@ -6,6 +6,7 @@ namespace Application.Interfaces.Repositories.PurchaseRequest
     public interface IPurchaseRequestDeleteRepository
     {
         public void Delete(PurchaseRequestEntity purchaseRequest);
+
         public void DeleteItem(PurchaseRequestItemEntity item);
     }
 }

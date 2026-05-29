@@ -147,7 +147,9 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
                 .ThenInclude(ov => ov!.Option)
-                .Include(v => v.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null && ii.InventoryReceiptReceipt!.DeletedAt == null))
+                .Include(
+                    v => v.InventoryReceiptInfos
+                        .Where(ii => ii.DeletedAt == null && ii.InventoryReceiptReceipt!.DeletedAt == null))
                 .ThenInclude(ii => ii.InventoryReceiptReceipt)
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
                 .ThenInclude(oi => oi.OutputOrder);

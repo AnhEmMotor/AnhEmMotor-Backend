@@ -137,7 +137,8 @@ public class MediaFileController(IMediator mediator) : ApiController
     {
         var command = new UploadManyProductImagesCommand
         {
-            Files = files.Select(f => new FileParameter { Content = f.OpenReadStream(), FileName = f.FileName }).ToList()
+            Files =
+                files.Select(f => new FileParameter { Content = f.OpenReadStream(), FileName = f.FileName }).ToList()
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result);

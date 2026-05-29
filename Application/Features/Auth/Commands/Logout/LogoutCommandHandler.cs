@@ -5,7 +5,10 @@ using MediatR;
 
 namespace Application.Features.Auth.Commands.Logout;
 
-public class LogoutCommandHandler(IUserUpdateRepository userUpdateRepository, ICookieTokenManager cookieTokenManager, ICurrentUserContext currentUserContext) : IRequestHandler<LogoutCommand, Result>
+public class LogoutCommandHandler(
+    IUserUpdateRepository userUpdateRepository,
+    ICookieTokenManager cookieTokenManager,
+    ICurrentUserContext currentUserContext) : IRequestHandler<LogoutCommand, Result>
 {
     public async Task<Result> Handle(LogoutCommand request, CancellationToken cancellationToken)
     {

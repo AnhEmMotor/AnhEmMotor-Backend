@@ -123,8 +123,14 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         var currentStock = await context.InventoryReceiptInfos
             .AsNoTracking()
             .Where(
-                ii => (ii.QuotationProductRow != null ? ii.QuotationProductRow.ProductVariantId : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantId : (int?)null)) == variantId &&
-                    (ii.QuotationProductRow != null ? ii.QuotationProductRow.ProductVariantColorId : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantColorId : (int?)null)) == colorId &&
+                ii => (ii.QuotationProductRow != null
+                        ? ii.QuotationProductRow.ProductVariantId
+                        : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantId : (int?)null)) ==
+                    variantId &&
+                    (ii.QuotationProductRow != null
+                        ? ii.QuotationProductRow.ProductVariantColorId
+                        : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantColorId : (int?)null)) ==
+                    colorId &&
                     ii.DeletedAt == null)
             .Join(context.InventoryReceiptReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => x.i.DeletedAt == null && validStatusIds.Contains(x.i.StatusId))

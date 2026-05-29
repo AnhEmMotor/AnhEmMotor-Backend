@@ -1,7 +1,4 @@
-﻿using Application.ApiContracts.InventoryReceipt.Responses;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
 namespace Application.ApiContracts.Quotation.Responses;
 

@@ -61,7 +61,10 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp.</returns>
     [HttpGet]
-    [RequiresAnyPermissions(Suppliers.View, Domain.Constants.Permission.Permissions.Quotations.Edit, Domain.Constants.Permission.Permissions.Quotations.Create)]
+    [RequiresAnyPermissions(
+        Suppliers.View,
+        Domain.Constants.Permission.Permissions.Quotations.Edit,
+        Domain.Constants.Permission.Permissions.Quotations.Create)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersAsync(
         [FromQuery] SieveModel sieveModel,
@@ -152,7 +155,9 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp cho việc nhập hàng.</returns>
     [HttpGet("for-InventoryReceipt")]
-    [RequiresAnyPermissions(Domain.Constants.Permission.Permissions.InventoryReceipts.Create, Domain.Constants.Permission.Permissions.InventoryReceipts.Edit)]
+    [RequiresAnyPermissions(
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Create,
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Edit)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersForInventoryReceiptAsync(
         [FromQuery] SieveModel sieveModel,
@@ -302,7 +307,10 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thống kê số lượng nhà cung cấp.</returns>
     [HttpGet("statistics")]
-    [RequiresAnyPermissions(Suppliers.View, Domain.Constants.Permission.Permissions.InventoryReceipts.Edit, Domain.Constants.Permission.Permissions.InventoryReceipts.Create)]
+    [RequiresAnyPermissions(
+        Suppliers.View,
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Edit,
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Create)]
     [ProducesResponseType(typeof(SupplierStatisticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSupplierStatisticsAsync(CancellationToken cancellationToken)
     {

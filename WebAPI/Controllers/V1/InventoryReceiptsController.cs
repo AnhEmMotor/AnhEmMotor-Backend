@@ -13,11 +13,10 @@ using Application.Features.InventoryReceipts.Queries.GetDeletedInventoryReceipts
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptById;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsList;
-using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStatusList;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStats;
+using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStatusList;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
-using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -70,7 +69,10 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Lấy danh sách trạng thái phiếu nhập.
     /// </summary>
     [HttpGet("status")]
-    [RequiresAnyPermissions(Domain.Constants.Permission.Permissions.InventoryReceipts.View, Domain.Constants.Permission.Permissions.InventoryReceipts.Create, Domain.Constants.Permission.Permissions.InventoryReceipts.Edit )]
+    [RequiresAnyPermissions(
+        Domain.Constants.Permission.Permissions.InventoryReceipts.View,
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Create,
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInventoryReceiptStatusesAsync(CancellationToken cancellationToken)
     {
@@ -137,7 +139,10 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateInventoryReceiptCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, Domain.Constants.RouteNames.InventoryReceipts.GetById, new { id = result.IsSuccess ? result.Value?.Id : null });
+        return HandleCreated(
+            result,
+            Domain.Constants.RouteNames.InventoryReceipts.GetById,
+            new { id = result.IsSuccess ? result.Value?.Id : null });
     }
 
     /// <summary>
@@ -152,7 +157,10 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var command = new CloneInventoryReceiptCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, Domain.Constants.RouteNames.InventoryReceipts.GetById, new { id = result.IsSuccess ? result.Value?.Id : null });
+        return HandleCreated(
+            result,
+            Domain.Constants.RouteNames.InventoryReceipts.GetById,
+            new { id = result.IsSuccess ? result.Value?.Id : null });
     }
 
     /// <summary>

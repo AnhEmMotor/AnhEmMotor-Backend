@@ -1,6 +1,5 @@
 using Application.Common.Models;
 using MediatR;
-using System.IO;
 
 namespace Application.Features.Users.Commands.UploadAvatarCurrentUser;
 

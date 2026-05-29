@@ -25,7 +25,8 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
     IQuotationReadRepository quotationRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork, ICurrentUserContext currentUserContext) : IRequestHandler<UpdateInventoryReceiptCommand, Result<InventoryReceiptDetailResponse?>>
+    IUnitOfWork unitOfWork,
+    ICurrentUserContext currentUserContext) : IRequestHandler<UpdateInventoryReceiptCommand, Result<InventoryReceiptDetailResponse?>>
 {
     [GeneratedRegex("<.*?>")]
     private static partial Regex HtmlTagRegex();
@@ -57,11 +58,15 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     .ConfigureAwait(false);
                 if (pr is null)
                 {
-                    return Error.NotFound($"Yêu cầu mua hàng {request.PurchaseRequestId} không tồn tại hoặc đã bị xóa.", "PurchaseRequestId");
+                    return Error.NotFound(
+                        $"Yêu cầu mua hàng {request.PurchaseRequestId} không tồn tại hoặc đã bị xóa.",
+                        "PurchaseRequestId");
                 }
                 if (!string.Equals(pr.Status, "approve", StringComparison.OrdinalIgnoreCase))
                 {
-                    return Error.BadRequest($"Yêu cầu mua hàng {request.PurchaseRequestId} chưa được phê duyệt.", "PurchaseRequestId");
+                    return Error.BadRequest(
+                        $"Yêu cầu mua hàng {request.PurchaseRequestId} chưa được phê duyệt.",
+                        "PurchaseRequestId");
                 }
             }
         }
@@ -74,7 +79,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             ? await prReadRepository.GetItemsByIdsAsync(prItemIds, cancellationToken).ConfigureAwait(false)
             : [];
         var prItemsDict = prItems.ToDictionary(x => x.Id);
-
         var quoteRowIds = request.Products
             .Where(p => p.QuotationProductRowId.HasValue)
             .Select(p => p.QuotationProductRowId!.Value)
@@ -84,14 +88,19 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             ? await quotationRepository.GetRowsByIdsAsync(quoteRowIds, cancellationToken).ConfigureAwait(false)
             : [];
         var quoteRowsDict = quoteRows.ToDictionary(x => x.Id);
-
         var variantIds = request.Products
-            .Select(p => p.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(p.QuotationProductRowId.Value, out var qr) ? qr.ProductVariantId : (p.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(p.PurchaseRequestItemId.Value, out var prItem) ? prItem.ProductVariantId : (int?)null))
+            .Select(
+                p => p.QuotationProductRowId.HasValue &&
+                        quoteRowsDict.TryGetValue(p.QuotationProductRowId.Value, out var qr)
+                    ? qr.ProductVariantId
+                    : (p.PurchaseRequestItemId.HasValue &&
+                            prItemsDict.TryGetValue(p.PurchaseRequestItemId.Value, out var prItem)
+                        ? prItem.ProductVariantId
+                        : (int?)null))
             .Where(id => id.HasValue)
             .Select(id => id!.Value)
             .Distinct()
             .ToList();
-
         var variantsList = new List<ProductVariant>();
         if (variantIds.Count > 0)
         {
@@ -119,10 +128,25 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             var uniqueEngines = new HashSet<(string Engine, int ProductVariantId, int? ProductVariantColorId)>();
             foreach (var product in request.Products)
             {
-                var resolvedVariantId = product.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr) ? qr.ProductVariantId : (product.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItem) ? prItem.ProductVariantId : (int?)null);
-                var resolvedColorId = product.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr2) ? qr2.ProductVariantColorId : (product.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItem2) ? prItem2.ProductVariantColorId : (int?)null);
-                var resolvedSupplierId = product.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr3) && qr3.QuotationReceipt != null ? qr3.QuotationReceipt.SupplierId : (int?)null;
-
+                var resolvedVariantId = product.QuotationProductRowId.HasValue &&
+                        quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr)
+                    ? qr.ProductVariantId
+                    : (product.PurchaseRequestItemId.HasValue &&
+                            prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItem)
+                        ? prItem.ProductVariantId
+                        : (int?)null);
+                var resolvedColorId = product.QuotationProductRowId.HasValue &&
+                        quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr2)
+                    ? qr2.ProductVariantColorId
+                    : (product.PurchaseRequestItemId.HasValue &&
+                            prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItem2)
+                        ? prItem2.ProductVariantColorId
+                        : (int?)null);
+                var resolvedSupplierId = product.QuotationProductRowId.HasValue &&
+                        quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr3) &&
+                        qr3.QuotationReceipt != null
+                    ? qr3.QuotationReceipt.SupplierId
+                    : (int?)null;
                 if (resolvedVariantId.HasValue)
                 {
                     if (resolvedSupplierId.HasValue)
@@ -132,9 +156,12 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                             cancellationToken,
                             DataFetchMode.ActiveOnly)
                             .ConfigureAwait(false);
-                        if (supplier is null || string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
+                        if (supplier is null ||
+                            string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
                         {
-                            return Error.BadRequest($"Nhà cung cấp với ID {resolvedSupplierId.Value} không tồn tại hoặc không còn hoạt động.", "Products");
+                            return Error.BadRequest(
+                                $"Nhà cung cấp với ID {resolvedSupplierId.Value} không tồn tại hoặc không còn hoạt động.",
+                                "Products");
                         }
                     }
                     var variant = variantsList.First(v => v.Id == resolvedVariantId.Value);
@@ -143,7 +170,13 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     {
                         return colorValidation;
                     }
-                    var vehicleValidation = ValidateVehicleIdentifiers(variant, product, resolvedVariantId.Value, resolvedColorId, uniqueVins, uniqueEngines);
+                    var vehicleValidation = ValidateVehicleIdentifiers(
+                        variant,
+                        product,
+                        resolvedVariantId.Value,
+                        resolvedColorId,
+                        uniqueVins,
+                        uniqueEngines);
                     if (vehicleValidation is not null)
                     {
                         return vehicleValidation;
@@ -175,9 +208,20 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         }
         foreach (var productRequest in request.Products)
         {
-            var resolvedColorId = productRequest.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(productRequest.QuotationProductRowId.Value, out var qr) ? qr.ProductVariantColorId : (productRequest.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(productRequest.PurchaseRequestItemId.Value, out var prItem) ? prItem.ProductVariantColorId : (int?)null);
-            var resolvedVariantId = productRequest.QuotationProductRowId.HasValue && quoteRowsDict.TryGetValue(productRequest.QuotationProductRowId.Value, out var qrV) ? qrV.ProductVariantId : (productRequest.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(productRequest.PurchaseRequestItemId.Value, out var prItemV) ? prItemV.ProductVariantId : (int?)null);
-
+            var resolvedColorId = productRequest.QuotationProductRowId.HasValue &&
+                    quoteRowsDict.TryGetValue(productRequest.QuotationProductRowId.Value, out var qr)
+                ? qr.ProductVariantColorId
+                : (productRequest.PurchaseRequestItemId.HasValue &&
+                        prItemsDict.TryGetValue(productRequest.PurchaseRequestItemId.Value, out var prItem)
+                    ? prItem.ProductVariantColorId
+                    : (int?)null);
+            var resolvedVariantId = productRequest.QuotationProductRowId.HasValue &&
+                    quoteRowsDict.TryGetValue(productRequest.QuotationProductRowId.Value, out var qrV)
+                ? qrV.ProductVariantId
+                : (productRequest.PurchaseRequestItemId.HasValue &&
+                        prItemsDict.TryGetValue(productRequest.PurchaseRequestItemId.Value, out var prItemV)
+                    ? prItemV.ProductVariantId
+                    : (int?)null);
             if (productRequest.Id.HasValue && productRequest.Id > 0)
             {
                 if (existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
@@ -201,7 +245,8 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         }
         updateRepository.Update(InventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken).ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken)
+            .ConfigureAwait(false);
         return updated!.Adapt<InventoryReceiptDetailResponse>();
     }
 

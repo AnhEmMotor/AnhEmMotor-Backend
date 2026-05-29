@@ -7,7 +7,10 @@ using MediatR;
 
 namespace Application.Features.Users.Queries.GetCurrentUser;
 
-public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository, IRoleReadRepository roleReadRepository, ICurrentUserContext currentUserContext) : IRequestHandler<GetCurrentUserQuery, Result<UserResponse>>
+public class GetCurrentUserQueryHandler(
+    IUserReadRepository userReadRepository,
+    IRoleReadRepository roleReadRepository,
+    ICurrentUserContext currentUserContext) : IRequestHandler<GetCurrentUserQuery, Result<UserResponse>>
 {
     public async Task<Result<UserResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {

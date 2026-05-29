@@ -4,7 +4,6 @@ using Application.ApiContracts.Product.Responses;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.UpdateManyProductStatuses;
 using Application.Features.Products.Commands.UpdateProduct;
-using Domain.Constants.Order;
 using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using Domain.Primitives;
@@ -479,7 +478,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         content!.Items.Should().Contain(p => p.Id == deletedProduct.Id);
     }
 
-    [Fact(DisplayName = "PRODUCT_069 - Lấy variants-lite/for-InventoryReceipt chỉ trả về Id, Name, CoverImageUrl, Price")]
+    [Fact(
+        DisplayName = "PRODUCT_069 - Lấy variants-lite/for-InventoryReceipt chỉ trả về Id, Name, CoverImageUrl, Price")]
     public async Task GetVariantsLiteForInventoryReceipt_ReturnsOnlyRequiredFields()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -526,7 +526,9 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var variant = new ProductVariant { ProductId = product.Id, Price = 100, UrlSlug = $"v-{uniqueId}" };
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/product/variants-lite/for-InventoryReceipt", CancellationToken.None)
+        var response = await _client.GetAsync(
+            "/api/v1/product/variants-lite/for-InventoryReceipt",
+            CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
@@ -1164,8 +1166,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     new PredefinedOption { Key = "Color", Value = "Màu sắc" });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None).ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
             .ReadFromJsonAsync<Dictionary<string, string>>(CancellationToken.None)
@@ -1196,8 +1197,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None).ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -1488,8 +1488,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
-        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None).ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -1514,8 +1513,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
-        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/option/predefined", CancellationToken.None).ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -1931,7 +1929,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
 
     [Fact(DisplayName = "PRODUCT_126 - Hiển thị DisplayName có dịch tiếng Việt (Nhiều option)")]
-    public async Task GetVariantsLiteForInventoryReceipt_VariantWithMultipleOptions_DisplayNameContainsAllTranslatedLabels()
+    public async Task GetVariantsLiteForInventoryReceipt_VariantWithMultipleOptions_DisplayNameContainsAllTranslatedLabels(
+        )
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
@@ -2734,10 +2733,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             name = "Tech Bike",
             category_id = cat.Id,
             brand_id = brand.Id,
-            product_technologies = new[]
-            {
-                new { technology_id = tech.Id, custom_title = "Cool ABS" }
-            },
+            product_technologies = new[] { new { technology_id = tech.Id, custom_title = "Cool ABS" } },
             variants = new[]
             {
                 new { url_slug = "tech-bike", price = 1000, variant_name = "V1", cover_image_url = "image.jpg" }
@@ -2795,7 +2791,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Name = "P",
             CategoryId = cat.Id,
             BrandId = brand.Id,
-            ProductTechnologies = [new TechnologyJsonRequest { TechnologyId = t1.Id }, new TechnologyJsonRequest { TechnologyId = t2.Id }],
+            ProductTechnologies =
+                [new TechnologyJsonRequest { TechnologyId = t1.Id }, new TechnologyJsonRequest { TechnologyId = t2.Id }],
             Variants =
                 [new UpdateProductVariantRequest
                 {

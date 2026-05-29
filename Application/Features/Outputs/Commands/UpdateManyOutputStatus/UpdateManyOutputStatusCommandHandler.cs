@@ -1,9 +1,8 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.HR.Commission;
-using Application.Interfaces.Services;
+using Application.Interfaces.Repositories.Output;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
 using Mapster;
@@ -41,7 +40,6 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                         $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}",
                         "StatusId"));
             }
-
             if (OrderVehicleAssignmentStatus.RequiresVehicleAssignment(request.StatusId))
             {
                 var containsVehicleManagedProduct = output.OutputInfos

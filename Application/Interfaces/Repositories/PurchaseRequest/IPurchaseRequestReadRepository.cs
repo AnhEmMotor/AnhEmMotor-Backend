@@ -1,8 +1,7 @@
 using Domain.Constants;
+using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
-using System.Threading;
-using System.Threading.Tasks;
 using PurchaseRequestEntity = Domain.Entities.PurchaseRequest;
 
 namespace Application.Interfaces.Repositories.PurchaseRequest
@@ -24,7 +23,7 @@ namespace Application.Interfaces.Repositories.PurchaseRequest
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        public Task<List<Domain.Entities.PurchaseRequestItem>> GetItemsByIdsAsync(
+        public Task<List<PurchaseRequestItem>> GetItemsByIdsAsync(
             IEnumerable<int> ids,
             CancellationToken cancellationToken);
     }

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using QuotationEntity = Domain.Entities.Quotation;
 
 namespace Application.Interfaces.Repositories.Quotation

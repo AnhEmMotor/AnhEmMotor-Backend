@@ -1,5 +1,4 @@
 using Application.ApiContracts.Leads.Responses;
-using Application.Features.Brands.Commands.UpdateBrand;
 using Application.Features.Leads.Commands.AddLeadActivity;
 using Application.Features.Leads.Commands.AssignLead;
 using Application.Features.Leads.Commands.CreateLead;

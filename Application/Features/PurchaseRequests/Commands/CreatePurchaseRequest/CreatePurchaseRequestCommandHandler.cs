@@ -9,10 +9,7 @@ using Domain.Entities;
 using Mapster;
 using MediatR;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using PurchaseRequestEntity = Domain.Entities.PurchaseRequest;
 
 namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
@@ -32,74 +29,75 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
             {
                 return Error.BadRequest("Danh sách sản phẩm yêu cầu không được trống.", "Items");
             }
-
             var variantIds = request.Items
                 .Where(x => x.ProductVariantId.HasValue)
                 .Select(x => x.ProductVariantId!.Value)
                 .Distinct()
                 .ToList();
-
             var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
             var variantDict = variants.ToDictionary(v => v.Id);
-
             foreach (var item in request.Items)
             {
                 if (!item.ProductVariantId.HasValue)
                 {
                     return Error.BadRequest("ProductVariantId không được để trống.", "Items");
                 }
-
                 if (!variantDict.TryGetValue(item.ProductVariantId.Value, out var variant))
                 {
-                    return Error.NotFound($"Không tìm thấy biến thể sản phẩm có ID {item.ProductVariantId.Value}.", "Items");
+                    return Error.NotFound(
+                        $"Không tìm thấy biến thể sản phẩm có ID {item.ProductVariantId.Value}.",
+                        "Items");
                 }
-
-                // Rule: Nếu có màu sắc bên trong biến thể sản phẩm thì bắt buộc phải chọn, không thì không chọn
                 var colors = variant.ProductVariantColors ?? [];
                 if (colors.Count > 0)
                 {
                     if (!item.ProductVariantColorId.HasValue)
                     {
-                        return Error.BadRequest($"Sản phẩm '{variant.Product?.Name ?? variant.VariantName}' yêu cầu chọn màu sắc.", "Items");
+                        return Error.BadRequest(
+                            $"Sản phẩm '{variant.Product?.Name ?? variant.VariantName}' yêu cầu chọn màu sắc.",
+                            "Items");
                     }
                     if (colors.All(c => c.Id != item.ProductVariantColorId.Value))
                     {
-                        return Error.BadRequest($"Màu sắc đã chọn không thuộc sản phẩm '{variant.Product?.Name ?? variant.VariantName}'.", "Items");
+                        return Error.BadRequest(
+                            $"Màu sắc đã chọn không thuộc sản phẩm '{variant.Product?.Name ?? variant.VariantName}'.",
+                            "Items");
                     }
-                }
-                else
+                } else
                 {
                     if (item.ProductVariantColorId.HasValue)
                     {
-                        return Error.BadRequest($"Sản phẩm '{variant.Product?.Name ?? variant.VariantName}' không hỗ trợ chọn màu sắc.", "Items");
+                        return Error.BadRequest(
+                            $"Sản phẩm '{variant.Product?.Name ?? variant.VariantName}' không hỗ trợ chọn màu sắc.",
+                            "Items");
                     }
                 }
-
                 if (!item.Quantity.HasValue || item.Quantity.Value <= 0)
                 {
                     return Error.BadRequest("Số lượng sản phẩm yêu cầu phải lớn hơn 0.", "Items");
                 }
             }
-
             var currentUserId = currentUserContext.GetUserId();
             var purchaseRequest = new PurchaseRequestEntity
             {
                 Status = "draft",
                 Note = request.Note,
                 CreatedBy = currentUserId,
-                PurchaseRequestItems = [.. request.Items.Select(item => new PurchaseRequestItem
-                {
-                    ProductVariantId = item.ProductVariantId!.Value,
-                    ProductVariantColorId = item.ProductVariantColorId,
-                    Quantity = item.Quantity!.Value
-                })]
+                PurchaseRequestItems =
+                    [.. request.Items
+                        .Select(
+                            item => new PurchaseRequestItem
+                        {
+                            ProductVariantId = item.ProductVariantId!.Value,
+                            ProductVariantColorId = item.ProductVariantColorId,
+                            Quantity = item.Quantity!.Value
+                        })]
             };
-
             insertRepository.Add(purchaseRequest);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            var created = await readRepository.GetByIdWithDetailsAsync(purchaseRequest.Id, cancellationToken).ConfigureAwait(false);
+            var created = await readRepository.GetByIdWithDetailsAsync(purchaseRequest.Id, cancellationToken)
+                .ConfigureAwait(false);
             return created!.Adapt<PurchaseRequestDetailResponse?>();
         }
     }

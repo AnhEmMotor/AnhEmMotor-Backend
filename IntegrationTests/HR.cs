@@ -1,8 +1,5 @@
 using Application.Features.HR.Commands.CreateCommissionPolicy;
 using Application.Features.HR.Commands.CreateEmployee;
-using Application.Features.Outputs.Commands.UpdateOutputStatus;
-using Domain.Constants.Order;
-using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -12,9 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using BrandEntity = Domain.Entities.Brand;
 using OutputEntity = Domain.Entities.Output;
-using ProductCategoryEntity = Domain.Entities.ProductCategory;
 using ProductEntity = Domain.Entities.Product;
 
 namespace IntegrationTests;

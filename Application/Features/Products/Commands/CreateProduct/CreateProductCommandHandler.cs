@@ -15,7 +15,6 @@ using Domain.Constants;
 using Domain.Entities;
 using Mapster;
 using MediatR;
-using System.Text.Json;
 using OptionEntity = Domain.Entities.Option;
 using OptionValueEntity = Domain.Entities.OptionValue;
 using ProductEntity = Domain.Entities.Product;

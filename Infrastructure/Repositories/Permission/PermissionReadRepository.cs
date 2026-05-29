@@ -3,10 +3,7 @@ using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using PermissionEntity = Domain.Entities.Permission;
 
 namespace Infrastructure.Repositories.Permission
@@ -40,13 +37,11 @@ namespace Infrastructure.Repositories.Permission
                 .Select(ur => ur.RoleId)
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             var hasPermission = await context.RolePermissions
                 .Where(rp => roleIds.Contains(rp.RoleId))
                 .Where(rp => rp.Permission != null && permissionNames.Contains(rp.Permission.Name))
                 .AnyAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             return hasPermission;
         }
     }

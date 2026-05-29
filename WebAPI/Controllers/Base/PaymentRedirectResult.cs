@@ -29,16 +29,10 @@ public class PaymentRedirectResult<T>(
                 return failRedirect.ExecuteResultAsync(context);
             }
         }
-
-        var orderId = result.IsSuccess && result.Value is not null
-            ? getOrderId(result.Value)
-            : fallbackOrderId;
-
+        var orderId = result.IsSuccess && result.Value is not null ? getOrderId(result.Value) : fallbackOrderId;
         var isSuccess = result.IsSuccess && (checkCustomSuccess == null || checkCustomSuccess(result.Value));
         var status = isSuccess ? "success" : "failed";
-
         var redirectUrl = $"http://localhost:3000/payment-processing?id={orderId}&status={status}&method={method}";
-        
         var redirectResult = new RedirectResult(redirectUrl);
         return redirectResult.ExecuteResultAsync(context);
     }

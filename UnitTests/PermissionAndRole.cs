@@ -77,7 +77,10 @@ public class PermissionAndRole
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object, _currentUserContextMock.Object);
+        var handler = new GetMyPermissionsQueryHandler(
+            roleReadRepoMock.Object,
+            userReadRepoMock.Object,
+            _currentUserContextMock.Object);
         var query = new GetMyPermissionsQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -101,7 +104,10 @@ public class PermissionAndRole
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
-        var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object, _currentUserContextMock.Object);
+        var handler = new GetMyPermissionsQueryHandler(
+            roleReadRepoMock.Object,
+            userReadRepoMock.Object,
+            _currentUserContextMock.Object);
         var query = new GetMyPermissionsQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -713,7 +719,10 @@ public class PermissionAndRole
     [Fact(DisplayName = "USR_PERM_002 - L?y quy?n c?a ngu?i dùng hi?n t?i (GetMyPermissions) tr? v? danh sách chu?i ID")]
     public async Task GetMyPermissions_ReturnsListOfStringIds()
     {
-        var handler = new GetMyPermissionsQueryHandler(_roleReadRepositoryMock.Object, _userReadRepositoryMock.Object, _currentUserContextMock.Object);
+        var handler = new GetMyPermissionsQueryHandler(
+            _roleReadRepositoryMock.Object,
+            _userReadRepositoryMock.Object,
+            _currentUserContextMock.Object);
         var userId = Guid.NewGuid();
         var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
         var roles = new List<string> { "Manager" };

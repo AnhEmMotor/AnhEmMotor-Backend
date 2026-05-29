@@ -1,6 +1,4 @@
 using Application.ApiContracts.Quotation.Requests;
-using Application.ApiContracts.Quotation.Responses;
-using Application.Common.Models;
 using Application.Features.Quotations.Commands.ApproveRejectQuotation;
 using Application.Features.Quotations.Commands.CreateQuotation;
 using Application.Features.Quotations.Commands.DeleteQuotation;
@@ -18,10 +16,7 @@ using FluentAssertions;
 using FluentValidation.TestHelper;
 using Moq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using QuotationEntity = Domain.Entities.Quotation;
 using SupplierEntity = Domain.Entities.Supplier;
 
@@ -61,42 +56,36 @@ public class Quotation
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateQuotationCommand
         {
             SupplierId = 1,
             Notes = "Valid notes",
             Products =
-            [
-                new CreateQuotationItemRequest
+                [new CreateQuotationItemRequest
                 {
                     ProductVariantId = "1",
                     ProductVarientColorId = "2",
                     QuotePrice = 100,
                     Note = "Item note"
-                }
-            ]
+                }]
         };
-
-        var supplier = new SupplierEntity { Id = 1, StatusId = Domain.Constants.SupplierStatus.Active, Name = "Active Supplier" };
-        var variant = new ProductVariant
+        var supplier = new SupplierEntity
         {
             Id = 1,
-            ProductVariantColors = [new ProductVariantColor { Id = 2 }]
+            StatusId = Domain.Constants.SupplierStatus.Active,
+            Name = "Active Supplier"
         };
-
+        var variant = new ProductVariant { Id = 1, ProductVariantColors = [new ProductVariantColor { Id = 2 }] };
         _supplierRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(supplier);
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync([variant]);
         _insertRepoMock.Setup(x => x.Add(It.IsAny<QuotationEntity>()));
-        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new QuotationEntity { Id = 1, Status = "draft" });
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.Status.Should().Be("draft");
@@ -113,18 +102,14 @@ public class Quotation
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateQuotationCommand
         {
             SupplierId = 999,
             Products = [new CreateQuotationItemRequest { ProductVariantId = "1", QuotePrice = 100 }]
         };
-
         _supplierRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync((SupplierEntity?)null);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error.Message.Should().Contain("không tồn tại");
@@ -139,20 +124,15 @@ public class Quotation
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateQuotationCommand
         {
             SupplierId = 1,
             Products = [new CreateQuotationItemRequest { ProductVariantId = "1", QuotePrice = 100 }]
         };
-
         var supplier = new SupplierEntity { Id = 1, StatusId = "inactive", Name = "Inactive Supplier" };
-
         _supplierRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(supplier);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error.Message.Should().Contain("không ở trạng thái 'active'");
@@ -167,22 +147,23 @@ public class Quotation
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateQuotationCommand
         {
             SupplierId = 1,
             Products = [new CreateQuotationItemRequest { ProductVariantId = "999", QuotePrice = 100 }]
         };
-
-        var supplier = new SupplierEntity { Id = 1, StatusId = Domain.Constants.SupplierStatus.Active, Name = "Active Supplier" };
-
+        var supplier = new SupplierEntity
+        {
+            Id = 1,
+            StatusId = Domain.Constants.SupplierStatus.Active,
+            Name = "Active Supplier"
+        };
         _supplierRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(supplier);
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync([]);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error.Message.Should().Contain("không tồn tại");
@@ -197,35 +178,30 @@ public class Quotation
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateQuotationCommand
         {
             SupplierId = 1,
             Products =
-            [
-                new CreateQuotationItemRequest
+                [new CreateQuotationItemRequest
                 {
                     ProductVariantId = "1",
                     ProductVarientColorId = "99",
                     QuotePrice = 100
-                }
-            ]
+                }]
         };
-
-        var supplier = new SupplierEntity { Id = 1, StatusId = Domain.Constants.SupplierStatus.Active, Name = "Active Supplier" };
-        var variant = new ProductVariant
+        var supplier = new SupplierEntity
         {
             Id = 1,
-            ProductVariantColors = [new ProductVariantColor { Id = 2 }]
+            StatusId = Domain.Constants.SupplierStatus.Active,
+            Name = "Active Supplier"
         };
-
+        var variant = new ProductVariant { Id = 1, ProductVariantColors = [new ProductVariantColor { Id = 2 }] };
         _supplierRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(supplier);
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync([variant]);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error.Message.Should().Contain("không thuộc biến thể sản phẩm");
@@ -238,18 +214,12 @@ public class Quotation
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new SendQuotationCommand(1);
         var quotation = new QuotationEntity { Id = 1, Status = "draft" };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(quotation);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(quotation);
         _updateRepoMock.Setup(x => x.Update(It.IsAny<QuotationEntity>()));
-        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         quotation.Status.Should().Be("sent");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<QuotationEntity>()), Times.Once);
@@ -262,15 +232,10 @@ public class Quotation
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new SendQuotationCommand(1);
         var quotation = new QuotationEntity { Id = 1, Status = "sent" };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(quotation);
-
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(quotation);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error.Message.Should().Contain("Chỉ cho phép gửi báo giá ở trạng thái Nháp");
@@ -283,18 +248,12 @@ public class Quotation
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new ApproveRejectQuotationCommand(1, "approved");
         var quotation = new QuotationEntity { Id = 1, Status = "sent" };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(quotation);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(quotation);
         _updateRepoMock.Setup(x => x.Update(It.IsAny<QuotationEntity>()));
-        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         quotation.Status.Should().Be("approved");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<QuotationEntity>()), Times.Once);
@@ -307,15 +266,10 @@ public class Quotation
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new ApproveRejectQuotationCommand(1, "approved");
         var quotation = new QuotationEntity { Id = 1, Status = "draft" };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(quotation);
-
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(quotation);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error.Message.Should().Contain("Chỉ cho phép cập nhật báo giá ở trạng thái Đã gửi");
@@ -328,18 +282,12 @@ public class Quotation
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new ApproveRejectQuotationCommand(1, "rejected");
         var quotation = new QuotationEntity { Id = 1, Status = "sent" };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(quotation);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(quotation);
         _updateRepoMock.Setup(x => x.Update(It.IsAny<QuotationEntity>()));
-        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         quotation.Status.Should().Be("rejected");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<QuotationEntity>()), Times.Once);
@@ -352,15 +300,10 @@ public class Quotation
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new ApproveRejectQuotationCommand(1, "rejected");
         var quotation = new QuotationEntity { Id = 1, Status = "approved" };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(quotation);
-
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(quotation);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error.Message.Should().Contain("Chỉ cho phép cập nhật báo giá ở trạng thái Đã gửi");
@@ -373,11 +316,10 @@ public class Quotation
             _updateRepoMock.Object,
             _readRepoMock.Object,
             _supplierRepoMock.Object,
-            _variantRepoMock.Object, 
-            _permissionRepoMock.Object, 
+            _variantRepoMock.Object,
+            _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new UpdateQuotationCommand
         {
             Id = 1,
@@ -385,23 +327,23 @@ public class Quotation
             Notes = "Updated Notes",
             Products = [new UpdateQuotationItemRequest { ProductVariantId = "1", QuotePrice = 200 }]
         };
-
         var quotation = new QuotationEntity { Id = 1, SupplierId = 1, Status = "draft" };
-        var supplier = new SupplierEntity { Id = 2, StatusId = Domain.Constants.SupplierStatus.Active, Name = "Active Supplier" };
+        var supplier = new SupplierEntity
+        {
+            Id = 2,
+            StatusId = Domain.Constants.SupplierStatus.Active,
+            Name = "Active Supplier"
+        };
         var variant = new ProductVariant { Id = 1 };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(quotation);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(quotation);
         _supplierRepoMock.Setup(x => x.GetByIdAsync(2, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(supplier);
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync([variant]);
         _updateRepoMock.Setup(x => x.Update(It.IsAny<QuotationEntity>()));
-        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         quotation.SupplierId.Should().Be(2);
         quotation.Note.Should().Be("Updated Notes");
@@ -419,34 +361,26 @@ public class Quotation
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new UpdateQuotationCommand
         {
             Id = 1,
             SupplierId = 1,
             Notes = "Only Update Notes",
-            Products = [new UpdateQuotationItemRequest { Id = 10, ProductVariantId = "1", QuotePrice = 100, Note = "Row note" }]
+            Products =
+                [new UpdateQuotationItemRequest { Id = 10, ProductVariantId = "1", QuotePrice = 100, Note = "Row note" }]
         };
-
         var quotation = new QuotationEntity
         {
             Id = 1,
             SupplierId = 1,
             Status = "approved",
             QuotationProductRows =
-            [
-                new QuotationProductRow { Id = 10, ProductVariantId = 1, QuotePrice = 100, Note = "Row note" }
-            ]
+                [new QuotationProductRow { Id = 10, ProductVariantId = 1, QuotePrice = 100, Note = "Row note" }]
         };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(quotation);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(quotation);
         _updateRepoMock.Setup(x => x.Update(It.IsAny<QuotationEntity>()));
-        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         quotation.Note.Should().Be("Only Update Notes");
     }
@@ -462,7 +396,6 @@ public class Quotation
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new UpdateQuotationCommand
         {
             Id = 1,
@@ -470,23 +403,15 @@ public class Quotation
             Notes = "Update Notes",
             Products = [new UpdateQuotationItemRequest { Id = 10, ProductVariantId = "1", QuotePrice = 100 }]
         };
-
         var quotation = new QuotationEntity
         {
             Id = 1,
             SupplierId = 1,
             Status = "approved",
-            QuotationProductRows =
-            [
-                new QuotationProductRow { Id = 10, ProductVariantId = 1, QuotePrice = 100 }
-            ]
+            QuotationProductRows = [new QuotationProductRow { Id = 10, ProductVariantId = 1, QuotePrice = 100 }]
         };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(quotation);
-
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(quotation);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error.Message.Should().Contain("Chỉ cho phép cập nhật ghi chú");
@@ -501,18 +426,13 @@ public class Quotation
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new DeleteQuotationCommand { Id = 1 };
         var quotation = new QuotationEntity { Id = 1, Status = "draft" };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(quotation);
         _deleteRepoMock.Setup(x => x.Delete(It.IsAny<QuotationEntity>()));
-        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         _deleteRepoMock.Verify(x => x.Delete(It.IsAny<QuotationEntity>()), Times.Once);
     }
@@ -526,20 +446,20 @@ public class Quotation
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new DeleteQuotationCommand { Id = 1 };
         var quotation = new QuotationEntity { Id = 1, Status = "approved" };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(quotation);
         _deleteRepoMock.Setup(x => x.Delete(It.IsAny<QuotationEntity>()));
-        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-        _permissionRepoMock.Setup(x => x.CheckUserPermissionsAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        _permissionRepoMock.Setup(
+            x => x.CheckUserPermissionsAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(Guid.NewGuid());
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         _deleteRepoMock.Verify(x => x.Delete(It.IsAny<QuotationEntity>()), Times.Once);
     }
@@ -553,34 +473,32 @@ public class Quotation
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new DeleteQuotationCommand { Id = 1 };
         var quotation = new QuotationEntity { Id = 1, Status = "approved" };
-
-        _permissionRepoMock.Setup(x => x.CheckUserPermissionsAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _permissionRepoMock.Setup(
+            x => x.CheckUserPermissionsAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(Guid.NewGuid());
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(quotation);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
-        result.Error.Message.Should().Contain("Báo giá ở trạng thái đã gửi hoặc đã duyệt chỉ có thể xóa bởi người dùng có quyền duyệt/hủy báo giá");
+        result.Error.Message
+            .Should()
+            .Contain(
+                "Báo giá ở trạng thái đã gửi hoặc đã duyệt chỉ có thể xóa bởi người dùng có quyền duyệt/hủy báo giá");
     }
 
     [Fact(DisplayName = "QUO_018 - Lỗi validation khi gửi yêu cầu không có sản phẩm")]
     public void CreateQuotation_EmptyProducts_FailsValidation()
     {
         var validator = new CreateQuotationCommandValidator();
-        var command = new CreateQuotationCommand
-        {
-            SupplierId = 1,
-            Products = []
-        };
-
+        var command = new CreateQuotationCommand { SupplierId = 1, Products = [] };
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Products)
             .WithErrorMessage("Quotation must contain at least one product.");
     }
@@ -593,14 +511,19 @@ public class Quotation
         {
             SupplierId = 1,
             Products =
-            [
-                new CreateQuotationItemRequest { ProductVariantId = "1", ProductVarientColorId = "2", QuotePrice = 100 },
-                new CreateQuotationItemRequest { ProductVariantId = "1", ProductVarientColorId = "2", QuotePrice = 200 }
-            ]
+                [new CreateQuotationItemRequest
+                {
+                    ProductVariantId = "1",
+                    ProductVarientColorId = "2",
+                    QuotePrice = 100
+                }, new CreateQuotationItemRequest
+                {
+                    ProductVariantId = "1",
+                    ProductVarientColorId = "2",
+                    QuotePrice = 200
+                }]
         };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Products)
             .WithErrorMessage("Product Variant and Color combination cannot be duplicated in a single quotation.");
     }
@@ -612,14 +535,9 @@ public class Quotation
         var command = new CreateQuotationCommand
         {
             SupplierId = 1,
-            Products =
-            [
-                new CreateQuotationItemRequest { ProductVariantId = "1", QuotePrice = -100 }
-            ]
+            Products = [new CreateQuotationItemRequest { ProductVariantId = "1", QuotePrice = -100 }]
         };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor("Products[0].QuotePrice")
             .WithErrorMessage("QuotePrice must be greater than or equal to 0.");
     }
@@ -634,10 +552,7 @@ public class Quotation
             Notes = new string('A', 1001),
             Products = [new CreateQuotationItemRequest { ProductVariantId = "1", QuotePrice = 100 }]
         };
-
         var result = validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(x => x.Notes)
-            .WithErrorMessage("Notes cannot exceed 1000 characters.");
+        result.ShouldHaveValidationErrorFor(x => x.Notes).WithErrorMessage("Notes cannot exceed 1000 characters.");
     }
 }
