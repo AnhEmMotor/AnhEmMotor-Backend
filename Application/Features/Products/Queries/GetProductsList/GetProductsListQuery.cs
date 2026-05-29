@@ -103,7 +103,7 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
             {
                 continue;
             }
-            var remaining = trimmedPart.Slice(key.Length).Trim();
+            var remaining = trimmedPart[key.Length..].Trim();
             string? foundOp = null;
             foreach (var o in operators)
             {
@@ -119,7 +119,7 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
                 {
                     continue;
                 }
-                return remaining.Slice(foundOp.Length).Trim().ToString();
+                return remaining[foundOp.Length..].Trim().ToString();
             }
         }
         return null;

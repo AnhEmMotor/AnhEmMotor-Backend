@@ -1,5 +1,5 @@
 using Application.Common.Models;
-using Application.Interfaces.Services;
+using Application.Interfaces.Repositories.HR.Commission;
 using Domain.Constants.HR.CommissionPolicy;
 using Domain.Entities;
 using Infrastructure.DBContexts;
@@ -9,11 +9,11 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Repositories.HR.Commission;
 
-public class CommissionService(ApplicationDBContext context) : ICommissionService
+public class CommissionUpdateRepository(ApplicationDBContext context) : ICommissionUpdateRepository
 {
-    private Task<CommissionPolicy?> GetActivePolicyAsync(
+    private Task<Domain.Entities.CommissionPolicy?> GetActivePolicyAsync(
         int productId,
         int? categoryId,
         string? jobTitle,

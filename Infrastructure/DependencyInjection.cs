@@ -1,4 +1,6 @@
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.HR.Commission;
+using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
 using Domain.Entities;
@@ -90,8 +92,6 @@ public static class DependencyInjection
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<ICommissionService, CommissionService>();
-        services.AddScoped<ILeadAssignmentService, LeadAssignmentService>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient();
         services.Scan(

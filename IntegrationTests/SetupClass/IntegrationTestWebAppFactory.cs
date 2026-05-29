@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Infrastructure;
@@ -217,7 +218,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IExternalAuthService, ExternalAuthService>();
                 services.AddScoped<IVNPayService, VNPayService>();
                 services.AddScoped<IPayOSService, PayOSService>();
-                services.AddScoped<ICommissionService, CommissionService>();
                 services.Scan(
                     scan => scan
                         .FromAssemblies(typeof(DependencyInjection).Assembly)
