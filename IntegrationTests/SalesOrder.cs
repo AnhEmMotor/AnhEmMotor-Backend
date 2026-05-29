@@ -562,7 +562,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Outputs.ViewUnconfirmed],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -594,7 +594,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
         var response = await _client.GetAsync(
-            $"/api/v1/SalesOrders?filters=status=={OrderStatus.Pending},Notes@={uniqueId}",
+            $"/api/v1/SalesOrders/unconfirmed?filters=status=={OrderStatus.Pending},Notes@={uniqueId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -697,7 +697,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Outputs.ViewUnconfirmed],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -741,7 +741,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
         var response = await _client.GetAsync(
-            $"/api/v1/SalesOrders?sorts=-createdAt&filters=Notes@={uniqueId}",
+            $"/api/v1/SalesOrders/unconfirmed?sorts=-createdAt&filters=Notes@={uniqueId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -762,7 +762,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Outputs.ViewUnconfirmed],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -790,7 +790,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
         var response = await _client.GetAsync(
-            $"/api/v1/SalesOrders?page=1&pageSize=10&filters=Notes@={uniqueId}",
+            $"/api/v1/SalesOrders/unconfirmed?page=1&pageSize=10&filters=Notes@={uniqueId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1549,7 +1549,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact(DisplayName = "SO_071 - Tạo đơn hàng vượt quá giới hạn số lượng của thể loại sản phẩm")]
+    [Fact(DisplayName = "SO_105 - Tạo đơn hàng vượt quá giới hạn số lượng của thể loại sản phẩm")]
     public async Task CreateOutput_ExceedCategoryLimit_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];

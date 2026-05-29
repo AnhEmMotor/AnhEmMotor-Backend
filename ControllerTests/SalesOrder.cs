@@ -17,13 +17,16 @@ using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Domain.Constants.Order;
+using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using FluentAssertions;
+using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Sieve.Models;
+using System.Reflection;
 using System.Security.Claims;
 using WebAPI.Controllers.V1;
 
@@ -81,18 +84,6 @@ public class SalesOrder
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()),
             Times.Once);
-    }
-
-    [Fact(DisplayName = "SO_083 - GetOutputs - L?y danh s?ch don h?ng")]
-    public async Task GetOutputs_WithSieveModel_ReturnsOrdersList()
-    {
-        var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
-        var result = await _controller.GetOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-        result.Should().NotBeNull();
-        _mediatorMock.Verify(m => m.Send(It.IsAny<GetOutputsListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "SO_084 - GetDeletedOutputs - L?y danh s?ch don h?ng d? x?a")]
@@ -351,6 +342,135 @@ public class SalesOrder
         var okResult = result as OkObjectResult;
         okResult.Should().NotBeNull();
         okResult!.Value.Should().BeEquivalentTo(expectedStatuses);
+    }
+
+    [Fact(DisplayName = "SO_117 - SalesOrders exposes split confirmed and unconfirmed list endpoints")]
+    public void SalesOrdersController_ShouldExposeSplitListEndpointsWithNewPermissions()
+    {
+        var viewConfirmedPermission = typeof(Outputs).GetField("ViewConfirmed")?.GetRawConstantValue() as string;
+        var viewUnconfirmedPermission = typeof(Outputs).GetField("ViewUnconfirmed")?.GetRawConstantValue() as string;
+        viewConfirmedPermission.Should().Be("Permissions.Outputs.ViewConfirmed");
+        viewUnconfirmedPermission.Should().Be("Permissions.Outputs.ViewUnconfirmed");
+
+        var confirmedMethod = typeof(SalesOrdersController).GetMethod(nameof(SalesOrdersController.GetConfirmedOutputsAsync));
+        var unconfirmedMethod = typeof(SalesOrdersController).GetMethod(nameof(SalesOrdersController.GetUnconfirmedOutputsAsync));
+        confirmedMethod.Should().NotBeNull();
+        unconfirmedMethod.Should().NotBeNull();
+
+        confirmedMethod!.GetCustomAttribute<HttpGetAttribute>()?.Template.Should().Be("confirmed");
+        unconfirmedMethod!.GetCustomAttribute<HttpGetAttribute>()?.Template.Should().Be("unconfirmed");
+        confirmedMethod.GetCustomAttribute<HasPermissionAttribute>()?.Policy
+            .Should().Be($"HasPermission{viewConfirmedPermission}");
+        unconfirmedMethod.GetCustomAttribute<HasPermissionAttribute>()?.Policy
+            .Should().Be($"HasPermission{viewUnconfirmedPermission}");
+    }
+
+    [Fact(DisplayName = "SO_118 - GetConfirmedOutputs returns confirmed sales orders")]
+    public async Task GetConfirmedOutputs_WithSieveModel_ReturnsConfirmedOutputs()
+    {
+        var sieveModel = new SieveModel
+        {
+            Page = 1,
+            PageSize = 10
+        };
+        var expectedResponse = new PagedResult<OutputItemResponse>([], 0, 1, 10);
+        _mediatorMock.Setup(m => m.Send(
+            It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Success(expectedResponse));
+
+        var result = await _controller.GetConfirmedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
+
+        result.Should().NotBeNull();
+        _mediatorMock.Verify(
+            m => m.Send(
+                It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact(DisplayName = "SO_119 - GetUnconfirmedOutputs returns unconfirmed sales orders")]
+    public async Task GetUnconfirmedOutputs_WithSieveModel_ReturnsUnconfirmedOutputs()
+    {
+        var sieveModel = new SieveModel
+        {
+            Page = 1,
+            PageSize = 10
+        };
+        var expectedResponse = new PagedResult<OutputItemResponse>([], 0, 1, 10);
+        _mediatorMock.Setup(m => m.Send(
+            It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Success(expectedResponse));
+
+        var result = await _controller.GetUnconfirmedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
+
+        result.Should().NotBeNull();
+        _mediatorMock.Verify(
+            m => m.Send(
+                It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact(DisplayName = "SO_120 - SalesOrders does not expose all-orders list endpoint")]
+    public void SalesOrdersController_ShouldNotExposeUnfilteredListEndpoint()
+    {
+        var rootGetMethods = typeof(SalesOrdersController)
+            .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+            .Where(method => method.GetCustomAttributes<HttpGetAttribute>()
+                .Any(attribute => string.IsNullOrEmpty(attribute.Template)))
+            .Select(method => method.Name);
+
+        rootGetMethods.Should().BeEmpty();
+    }
+
+    [Fact(DisplayName = "SO_121 - GetConfirmedOutputs returns failure when mediator fails")]
+    public async Task GetConfirmedOutputs_WhenMediatorFails_ReturnsFailureResult()
+    {
+        var sieveModel = new SieveModel
+        {
+            Page = 1,
+            PageSize = 10
+        };
+        var expectedError = Error.Failure("Test failure");
+        _mediatorMock.Setup(m => m.Send(
+            It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Failure(expectedError));
+
+        var result = await _controller.GetConfirmedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
+
+        result.Should().NotBeNull();
+        _mediatorMock.Verify(
+            m => m.Send(
+                It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact(DisplayName = "SO_122 - GetUnconfirmedOutputs returns failure when mediator fails")]
+    public async Task GetUnconfirmedOutputs_WhenMediatorFails_ReturnsFailureResult()
+    {
+        var sieveModel = new SieveModel
+        {
+            Page = 1,
+            PageSize = 10
+        };
+        var expectedError = Error.Failure("Test failure");
+        _mediatorMock.Setup(m => m.Send(
+            It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Failure(expectedError));
+
+        var result = await _controller.GetUnconfirmedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
+
+        result.Should().NotBeNull();
+        _mediatorMock.Verify(
+            m => m.Send(
+                It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
