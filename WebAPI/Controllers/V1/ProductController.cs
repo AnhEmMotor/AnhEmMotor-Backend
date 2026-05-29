@@ -62,15 +62,11 @@ public class ProductController(ISender sender) : ApiController
     /// bảo mật.
     /// </summary>
     [HttpGet("sitemap-slugs")]
+    [LocalhostOnly]
     [ProducesResponseType(typeof(SitemapSlugsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetSitemapSlugsAsync(CancellationToken cancellationToken)
     {
-        var remoteIp = HttpContext.Connection.RemoteIpAddress;
-        if (remoteIp != null && !IPAddress.IsLoopback(remoteIp))
-        {
-            return StatusCode(StatusCodes.Status403Forbidden);
-        }
         var result = await sender.Send(new GetSitemapSlugsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
