@@ -50,9 +50,9 @@ public class ProductMappingConfig : IRegister
                     .ToList())
             .Map(
                 dest => dest.Stock,
-                src => src.InputInfos != null
-                    ? src.InputInfos
-                            .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                src => src.InventoryReceiptInfos != null
+                    ? src.InventoryReceiptInfos
+                            .Where(ii => ii.InventoryReceiptReceipt != null && InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
                             .Sum(ii => ii.RemainingCount) ??
                         0
                     : 0)
@@ -88,8 +88,8 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.PhotoCollection, src => src.Photos);
         config.NewConfig<ProductVariantEntity, ProductVariantLiteResponse>()
             .MapWith(src => BuildVariantLiteResponse(src));
-        config.NewConfig<ProductVariantEntity, ProductVariantLiteResponseForInput>()
-            .MapWith(src => BuildVariantLiteResponseForInput(src, null));
+        config.NewConfig<ProductVariantEntity, ProductVariantLiteResponseForInventoryReceipt>()
+            .MapWith(src => BuildVariantLiteResponseForInventoryReceipt(src, null));
         config.NewConfig<ProductVariantEntity, VariantCartDetailResponse>()
             .MapWith(src => BuildVariantCartDetailResponse(src));
         config.NewConfig<ProductEntity, ProductInfoStoreResponse>()
@@ -366,8 +366,8 @@ public class ProductMappingConfig : IRegister
         var displayName = string.IsNullOrWhiteSpace(variantName)
             ? productName ?? string.Empty
             : $"{productName} ({variantName})";
-        var stock = variant.InputInfos
-                .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+        var stock = variant.InventoryReceiptInfos
+                .Where(ii => ii.InventoryReceiptReceipt != null && InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
                 .Sum(ii => ii.RemainingCount) ??
             0;
         var photos = variant.ProductCollectionPhotos
@@ -407,7 +407,7 @@ public class ProductMappingConfig : IRegister
         return string.Join(" - ", parts);
     }
 
-    public static ProductVariantLiteResponseForInput BuildVariantLiteResponseForInput(
+    public static ProductVariantLiteResponseForInventoryReceipt BuildVariantLiteResponseForInventoryReceipt(
         ProductVariantEntity variant,
         Dictionary<string, string>? translations)
     {
@@ -447,7 +447,7 @@ public class ProductMappingConfig : IRegister
                 .ToList();
             displayName = $"{productName} ({string.Join(", ", parts)})";
         }
-        return new ProductVariantLiteResponseForInput
+        return new ProductVariantLiteResponseForInventoryReceipt
         {
             Id = variant.Id,
             ProductId = variant.ProductId,
@@ -498,9 +498,9 @@ public class ProductMappingConfig : IRegister
     private static long CalculateTotalStock(ProductEntity product)
     {
         return product.ProductVariants
-            .Where(v => v.InputInfos != null)
-            .SelectMany(variant => variant.InputInfos!)
-            .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+            .Where(v => v.InventoryReceiptInfos != null)
+            .SelectMany(variant => variant.InventoryReceiptInfos!)
+            .Where(ii => ii.InventoryReceiptReceipt != null && InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
             .Sum(info => info.RemainingCount ?? 0);
     }
 
@@ -548,8 +548,8 @@ public class ProductMappingConfig : IRegister
             .Select(
                 variant =>
                 {
-                    var stock = variant.InputInfos
-                        .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                    var stock = variant.InventoryReceiptInfos
+                        .Where(ii => ii.InventoryReceiptReceipt != null && InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
                         .Sum(ii => ii.RemainingCount ?? 0);
                     var booked = variant.OutputInfos
                         .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))

@@ -2,7 +2,7 @@ using System;
 
 namespace Application.ApiContracts.Product.Responses
 {
-    public class ProductVariantLiteResponseForInput
+    public class ProductVariantLiteResponseForInventoryReceipt
     {
         public int? Id { get; set; }
 

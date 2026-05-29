@@ -1,22 +1,22 @@
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Infrastructure.DBContexts;
-using InputEntity = Domain.Entities.InventoryReceipt;
+using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
 
 namespace Infrastructure.Repositories.InventoryReceipt;
 
-public class InputUpdateRepository(ApplicationDBContext context) : IInputUpdateRepository
+public class InventoryReceiptUpdateRepository(ApplicationDBContext context) : IInventoryReceiptUpdateRepository
 {
-    public void Update(InputEntity InventoryReceipt)
+    public void Update(InventoryReceiptEntity InventoryReceipt)
     {
-        context.InputReceipts.Update(InventoryReceipt);
+        context.InventoryReceiptReceipts.Update(InventoryReceipt);
     }
 
-    public void Restore(InputEntity InventoryReceipt)
+    public void Restore(InventoryReceiptEntity InventoryReceipt)
     {
         context.Restore(InventoryReceipt);
     }
 
-    public void Restore(IEnumerable<InputEntity> InventoryReceipts)
+    public void Restore(IEnumerable<InventoryReceiptEntity> InventoryReceipts)
     {
         context.RestoreDeleteUsingSetColumnRange(InventoryReceipts);
     }

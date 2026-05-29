@@ -22,7 +22,7 @@ public class Banner
     }
 
     [Fact(DisplayName = "BANN_007 - Tự động cắt khoảng trắng trong dữ liệu đầu vào")]
-    public async Task CreateBanner_WhitespaceInInput_ShouldTrimValues()
+    public async Task CreateBanner_WhitespaceInInventoryReceipt_ShouldTrimValues()
     {
         var command = new CreateBannerCommand
         {

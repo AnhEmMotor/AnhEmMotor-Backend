@@ -4,15 +4,15 @@ using Application.Interfaces.Repositories.Supplier;
 using Domain.Primitives;
 using MediatR;
 
-namespace Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
+namespace Application.Features.Suppliers.Queries.GetSuppliersListForInventoryReceiptManager;
 
-public sealed class GetSuppliersListForInputManagerQueryHandler(ISupplierReadRepository repository) : IRequestHandler<GetSuppliersListForInputManagerQuery, Result<PagedResult<SupplierForInputManagerResponse>>>
+public sealed class GetSuppliersListForInventoryReceiptManagerQueryHandler(ISupplierReadRepository repository) : IRequestHandler<GetSuppliersListForInventoryReceiptManagerQuery, Result<PagedResult<SupplierForInventoryReceiptManagerResponse>>>
 {
-    public async Task<Result<PagedResult<SupplierForInputManagerResponse>>> Handle(
-        GetSuppliersListForInputManagerQuery request,
+    public async Task<Result<PagedResult<SupplierForInventoryReceiptManagerResponse>>> Handle(
+        GetSuppliersListForInventoryReceiptManagerQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await repository.GetPagedWithTotalInputAsync<SupplierForInputManagerResponse>(
+        var result = await repository.GetPagedWithTotalInventoryReceiptAsync<SupplierForInventoryReceiptManagerResponse>(
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);

@@ -27,14 +27,14 @@ namespace Application.Features.PurchaseRequests.Mappings
                 .Map(dest => dest.ProductVariantColorName, src => src.ProductVariantColor != null
                     ? src.ProductVariantColor.ColorName
                     : null)
-                .Map(dest => dest.ImportedQuantity, src => src.InputInfos != null
-                    ? src.InputInfos.Where(ii => ii.InputReceipt != null && (ii.InputReceipt.StatusId == "approve" || ii.InputReceipt.StatusId == "finished")).Sum(ii => ii.Count ?? 0)
+                .Map(dest => dest.ImportedQuantity, src => src.InventoryReceiptInfos != null
+                    ? src.InventoryReceiptInfos.Where(ii => ii.InventoryReceiptReceipt != null && (ii.InventoryReceiptReceipt.StatusId == "approve" || ii.InventoryReceiptReceipt.StatusId == "finished")).Sum(ii => ii.Count ?? 0)
                     : 0)
-                .Map(dest => dest.PendingQuantity, src => src.InputInfos != null
-                    ? src.InputInfos.Where(ii => ii.InputReceipt != null && (ii.InputReceipt.StatusId == "draft" || ii.InputReceipt.StatusId == "sent" || ii.InputReceipt.StatusId == "working")).Sum(ii => ii.Count ?? 0)
+                .Map(dest => dest.PendingQuantity, src => src.InventoryReceiptInfos != null
+                    ? src.InventoryReceiptInfos.Where(ii => ii.InventoryReceiptReceipt != null && (ii.InventoryReceiptReceipt.StatusId == "draft" || ii.InventoryReceiptReceipt.StatusId == "sent" || ii.InventoryReceiptReceipt.StatusId == "working")).Sum(ii => ii.Count ?? 0)
                     : 0)
-                .Map(dest => dest.UnimportedQuantity, src => src.Quantity - (src.InputInfos != null
-                    ? src.InputInfos.Where(ii => ii.InputReceipt != null && (ii.InputReceipt.StatusId == "approve" || ii.InputReceipt.StatusId == "finished")).Sum(ii => ii.Count ?? 0)
+                .Map(dest => dest.UnimportedQuantity, src => src.Quantity - (src.InventoryReceiptInfos != null
+                    ? src.InventoryReceiptInfos.Where(ii => ii.InventoryReceiptReceipt != null && (ii.InventoryReceiptReceipt.StatusId == "approve" || ii.InventoryReceiptReceipt.StatusId == "finished")).Sum(ii => ii.Count ?? 0)
                     : 0));
         }
     }

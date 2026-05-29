@@ -20,7 +20,7 @@ using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.ExportProducts;
-using Application.Features.Products.Queries.GetActiveVariantLiteListForInput;
+using Application.Features.Products.Queries.GetActiveVariantLiteListForInventoryReceipt;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
@@ -156,12 +156,12 @@ public class ProductController(ISender sender) : ApiController
     /// </summary>
     [HttpGet("variants-lite/for-InventoryReceipt")]
     [RequiresAnyPermissions(Domain.Constants.Permission.Permissions.InventoryReceipts.Edit, Domain.Constants.Permission.Permissions.InventoryReceipts.Create, PurchaseRequests.Edit, PurchaseRequests.Create)]
-    [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponseForInput>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetActiveVariantLiteProductsForInputAsync(
+    [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponseForInventoryReceipt>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetActiveVariantLiteProductsForInventoryReceiptAsync(
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
     {
-        var query = GetActiveVariantLiteListForInputQuery
+        var query = GetActiveVariantLiteListForInventoryReceiptQuery
             .FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);

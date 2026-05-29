@@ -10,9 +10,9 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForOutpu
 {
     public class GetActiveVariantLiteListForOutputQueryHandler(
         IProductVariantReadRepository repository,
-        IPredefinedOptionReadRepository predefinedOptionReadRepository) : IRequestHandler<GetActiveVariantLiteListForOutputQuery, Result<PagedResult<ProductVariantLiteResponseForInput>>>
+        IPredefinedOptionReadRepository predefinedOptionReadRepository) : IRequestHandler<GetActiveVariantLiteListForOutputQuery, Result<PagedResult<ProductVariantLiteResponseForInventoryReceipt>>>
     {
-        public async Task<Result<PagedResult<ProductVariantLiteResponseForInput>>> Handle(
+        public async Task<Result<PagedResult<ProductVariantLiteResponseForInventoryReceipt>>> Handle(
             GetActiveVariantLiteListForOutputQuery request,
             CancellationToken cancellationToken)
         {
@@ -30,9 +30,9 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForOutpu
                 search: request.Search)
                 .ConfigureAwait(false);
             var responses = variants
-                .Select(v => ProductMappingConfig.BuildVariantLiteResponseForInput(v, translations))
+                .Select(v => ProductMappingConfig.BuildVariantLiteResponseForInventoryReceipt(v, translations))
                 .ToList();
-            return new PagedResult<ProductVariantLiteResponseForInput>(responses, totalCount, page, pageSize);
+            return new PagedResult<ProductVariantLiteResponseForInventoryReceipt>(responses, totalCount, page, pageSize);
         }
     }
 }

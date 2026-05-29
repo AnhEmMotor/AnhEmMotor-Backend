@@ -1,19 +1,19 @@
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
-using Application.Features.InventoryReceipts.Commands.CloneInput;
-using Application.Features.InventoryReceipts.Commands.CreateInput;
-using Application.Features.InventoryReceipts.Commands.DeleteInput;
-using Application.Features.InventoryReceipts.Commands.DeleteManyInputs;
-using Application.Features.InventoryReceipts.Commands.RestoreInput;
-using Application.Features.InventoryReceipts.Commands.RestoreManyInputs;
-using Application.Features.InventoryReceipts.Commands.UpdateInput;
-using Application.Features.InventoryReceipts.Commands.UpdateInputNotes;
-using Application.Features.InventoryReceipts.Commands.UpdateInputStatus;
-using Application.Features.InventoryReceipts.Queries.GetDeletedInputsList;
-using Application.Features.InventoryReceipts.Queries.GetInputById;
-using Application.Features.InventoryReceipts.Queries.GetInputsBySupplierId;
-using Application.Features.InventoryReceipts.Queries.GetInputsList;
-using Application.Features.InventoryReceipts.Queries.GetInputStatusList;
+using Application.Features.InventoryReceipts.Commands.CloneInventoryReceipt;
+using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
+using Application.Features.InventoryReceipts.Commands.DeleteInventoryReceipt;
+using Application.Features.InventoryReceipts.Commands.DeleteManyInventoryReceipts;
+using Application.Features.InventoryReceipts.Commands.RestoreInventoryReceipt;
+using Application.Features.InventoryReceipts.Commands.RestoreManyInventoryReceipts;
+using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
+using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptNotes;
+using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
+using Application.Features.InventoryReceipts.Queries.GetDeletedInventoryReceiptsList;
+using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptById;
+using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId;
+using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsList;
+using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStatusList;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStats;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
@@ -43,12 +43,12 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet]
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.View)]
-    [ProducesResponseType(typeof(PagedResult<InputListResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetInputsAsync(
+    [ProducesResponseType(typeof(PagedResult<InventoryReceiptListResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetInventoryReceiptsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetInputsListQuery() { SieveModel = sieveModel };
+        var query = new GetInventoryReceiptsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -72,9 +72,9 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [HttpGet("status")]
     [RequiresAnyPermissions(Domain.Constants.Permission.Permissions.InventoryReceipts.View, Domain.Constants.Permission.Permissions.InventoryReceipts.Create, Domain.Constants.Permission.Permissions.InventoryReceipts.Edit )]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetInputStatusesAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetInventoryReceiptStatusesAsync(CancellationToken cancellationToken)
     {
-        var query = new GetInputStatusListQuery();
+        var query = new GetInventoryReceiptStatusListQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -84,12 +84,12 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("deleted")]
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.View)]
-    [ProducesResponseType(typeof(PagedResult<InputListResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDeletedInputsAsync(
+    [ProducesResponseType(typeof(PagedResult<InventoryReceiptListResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDeletedInventoryReceiptsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetDeletedInputsListQuery() { SieveModel = sieveModel };
+        var query = new GetDeletedInventoryReceiptsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -99,11 +99,11 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.InventoryReceipts.GetById)]
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.View)]
-    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetInputByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetInventoryReceiptByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var query = new GetInputByIdQuery() { Id = id };
+        var query = new GetInventoryReceiptByIdQuery() { Id = id };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -113,13 +113,13 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("by-supplier/{supplierId:int}")]
     [RequiresAllPermissions(Suppliers.View, Domain.Constants.Permission.Permissions.InventoryReceipts.View)]
-    [ProducesResponseType(typeof(PagedResult<InputListResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetInputsBySupplierIdAsync(
+    [ProducesResponseType(typeof(PagedResult<InventoryReceiptListResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetInventoryReceiptsBySupplierIdAsync(
         int supplierId,
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetInputsBySupplierIdQuery() { SieveModel = sieveModel, SupplierId = supplierId };
+        var query = new GetInventoryReceiptsBySupplierIdQuery() { SieveModel = sieveModel, SupplierId = supplierId };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -129,13 +129,13 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost]
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.Create)]
-    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateInputAsync(
-        [FromBody] CreateInputCommand request,
+    public async Task<IActionResult> CreateInventoryReceiptAsync(
+        [FromBody] CreateInventoryReceiptCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<CreateInputCommand>();
+        var command = request.Adapt<CreateInventoryReceiptCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result, Domain.Constants.RouteNames.InventoryReceipts.GetById, new { id = result.IsSuccess ? result.Value?.Id : null });
     }
@@ -145,12 +145,12 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("{id:int}/clone")]
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.Create)]
-    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CloneInputAsync(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> CloneInventoryReceiptAsync(int id, CancellationToken cancellationToken)
     {
-        var command = new CloneInputCommand() { Id = id };
+        var command = new CloneInventoryReceiptCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result, Domain.Constants.RouteNames.InventoryReceipts.GetById, new { id = result.IsSuccess ? result.Value?.Id : null });
     }
@@ -160,15 +160,15 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPut("{id:int}")]
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.Edit)]
-    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateInputAsync(
+    public async Task<IActionResult> UpdateInventoryReceiptAsync(
         int id,
-        [FromBody] UpdateInputCommand request,
+        [FromBody] UpdateInventoryReceiptCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<UpdateInputCommand>() with { Id = id };
+        var command = request.Adapt<UpdateInventoryReceiptCommand>() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -178,15 +178,15 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPatch("{id:int}/status")]
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.ApproveReject)]
-    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateInputStatusAsync(
+    public async Task<IActionResult> UpdateInventoryReceiptStatusAsync(
         int id,
-        [FromBody] UpdateInputStatusCommand request,
+        [FromBody] UpdateInventoryReceiptStatusCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<UpdateInputStatusCommand>() with { Id = id };
+        var command = request.Adapt<UpdateInventoryReceiptStatusCommand>() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -196,11 +196,11 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPatch("{id:int}/notes")]
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.Edit)]
-    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateInputNotesAsync(
+    public async Task<IActionResult> UpdateInventoryReceiptNotesAsync(
         int id,
-        [FromBody] UpdateInputNotesCommand request,
+        [FromBody] UpdateInventoryReceiptNotesCommand request,
         CancellationToken cancellationToken)
     {
         var command = request with { Id = id };
@@ -215,9 +215,9 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteInputAsync(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteInventoryReceiptAsync(int id, CancellationToken cancellationToken)
     {
-        var command = new DeleteInputCommand() { Id = id };
+        var command = new DeleteInventoryReceiptCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -229,11 +229,11 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteManyInputsAsync(
-        [FromBody] DeleteManyInputsCommand request,
+    public async Task<IActionResult> DeleteManyInventoryReceiptsAsync(
+        [FromBody] DeleteManyInventoryReceiptsCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<DeleteManyInputsCommand>();
+        var command = request.Adapt<DeleteManyInventoryReceiptsCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -243,11 +243,11 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("{id:int}/restore")]
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.Delete)]
-    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RestoreInputAsync(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> RestoreInventoryReceiptAsync(int id, CancellationToken cancellationToken)
     {
-        var command = new RestoreInputCommand() { Id = id };
+        var command = new RestoreInventoryReceiptCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -257,13 +257,13 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("restore")]
     [HasPermission(Domain.Constants.Permission.Permissions.InventoryReceipts.Delete)]
-    [ProducesResponseType(typeof(List<InputDetailResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<InventoryReceiptDetailResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RestoreManyInputsAsync(
-        [FromBody] RestoreManyInputsCommand request,
+    public async Task<IActionResult> RestoreManyInventoryReceiptsAsync(
+        [FromBody] RestoreManyInventoryReceiptsCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<RestoreManyInputsCommand>();
+        var command = request.Adapt<RestoreManyInventoryReceiptsCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

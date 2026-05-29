@@ -120,14 +120,14 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         int? colorId,
         CancellationToken cancellationToken)
     {
-        var validStatusIds = InputStatus.FinishInputValues;
-        var currentStock = await context.InputInfos
+        var validStatusIds = InventoryReceiptStatus.FinishInventoryReceiptValues;
+        var currentStock = await context.InventoryReceiptInfos
             .AsNoTracking()
             .Where(
                 ii => (ii.QuotationProductRow != null ? ii.QuotationProductRow.ProductVariantId : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantId : (int?)null)) == variantId &&
                     (ii.QuotationProductRow != null ? ii.QuotationProductRow.ProductVariantColorId : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantColorId : (int?)null)) == colorId &&
                     ii.DeletedAt == null)
-            .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
+            .Join(context.InventoryReceiptReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => x.i.DeletedAt == null && validStatusIds.Contains(x.i.StatusId))
             .SumAsync(x => x.ii.RemainingCount ?? 0, cancellationToken)
             .ConfigureAwait(false);

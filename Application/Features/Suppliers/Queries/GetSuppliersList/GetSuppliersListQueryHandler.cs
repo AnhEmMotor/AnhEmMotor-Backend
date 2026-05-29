@@ -12,7 +12,7 @@ public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository reposit
         GetSuppliersListQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await repository.GetPagedWithTotalInputAsync<SupplierResponse>(
+        var result = await repository.GetPagedWithTotalInventoryReceiptAsync<SupplierResponse>(
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);

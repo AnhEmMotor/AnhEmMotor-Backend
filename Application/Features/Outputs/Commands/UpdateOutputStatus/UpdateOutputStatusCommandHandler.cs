@@ -183,7 +183,7 @@ public sealed class UpdateOutputStatusCommandHandler(
                         $"Xe có số khung (VIN) {vehicle.VinNumber} đang ở trạng thái không hoạt động.",
                         "SelectedVehicleIds"));
             }
-            if (vehicle.InputInfoId == null)
+            if (vehicle.InventoryReceiptInfoId == null)
             {
                 return Result.Failure(
                     Error.BadRequest(

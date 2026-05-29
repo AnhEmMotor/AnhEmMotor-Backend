@@ -11,7 +11,7 @@ namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
 public sealed class DeleteManySuppliersCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierDeleteRepository deleteRepository,
-    IInputReadRepository inputReadRepository,
+    IInventoryReceiptReadRepository InventoryReceiptReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteManySuppliersCommand, Result>
 {
     public async Task<Result> Handle(DeleteManySuppliersCommand request, CancellationToken cancellationToken)
@@ -23,11 +23,11 @@ public sealed class DeleteManySuppliersCommandHandler(
         var activeSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
         var allSupplierMap = allSuppliers.ToDictionary(s => s.Id);
         var activeSupplierSet = activeSuppliers.Select(s => s.Id).ToHashSet();
-        var relevantInputs = await inputReadRepository.GetBySupplierIdsAsync(uniqueIds, cancellationToken)
+        var relevantInventoryReceipts = await InventoryReceiptReadRepository.GetBySupplierIdsAsync(uniqueIds, cancellationToken)
             .ConfigureAwait(false);
-        var suppliersWithWorkingInputsSet = relevantInputs
-            .Where(x => string.Compare(x.StatusId, InputStatus.Working) == 0)
-            .SelectMany(x => x.InputInfos
+        var suppliersWithWorkingInventoryReceiptsSet = relevantInventoryReceipts
+            .Where(x => string.Compare(x.StatusId, InventoryReceiptStatus.Working) == 0)
+            .SelectMany(x => x.InventoryReceiptInfos
                 .Where(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.SupplierId.HasValue)
                 .Select(ii => ii.QuotationProductRow!.QuotationReceipt!.SupplierId!.Value))
             .Intersect(uniqueIds)
@@ -40,7 +40,7 @@ public sealed class DeleteManySuppliersCommandHandler(
             } else if (!activeSupplierSet.Contains(id))
             {
                 errorDetails.Add(Error.BadRequest($"Supplier with Id {id} has already been deleted.", "Id"));
-            } else if (suppliersWithWorkingInputsSet.Contains(id))
+            } else if (suppliersWithWorkingInventoryReceiptsSet.Contains(id))
             {
                 errorDetails.Add(
                     Error.BadRequest(

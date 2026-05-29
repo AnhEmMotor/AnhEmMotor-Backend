@@ -1,7 +1,7 @@
 ﻿using Application.ApiContracts.InventoryReceipt.Requests;
 using Application.ApiContracts.InventoryReceipt.Responses;
-using Application.Features.InventoryReceipts.Commands.CreateInput;
-using Application.Features.InventoryReceipts.Commands.UpdateInput;
+using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
+using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
 using Application.Features.InventoryReceipts.Mappings;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;

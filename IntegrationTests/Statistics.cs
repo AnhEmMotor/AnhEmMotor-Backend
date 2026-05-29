@@ -13,9 +13,9 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using BrandEntity = Domain.Entities.Brand;
-using InputEntity = Domain.Entities.InventoryReceipt;
-using InputInfoEntity = Domain.Entities.InputInfo;
-using InputStatusEntity = Domain.Entities.InputStatus;
+using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
+using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
+using InventoryReceiptStatusEntity = Domain.Entities.InventoryReceiptStatus;
 using OutputEntity = Domain.Entities.Output;
 using OutputInfoEntity = Domain.Entities.OutputInfo;
 using OutputStatusEntity = Domain.Entities.OutputStatus;
@@ -53,8 +53,8 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
     {
         db.OutputInfos.RemoveRange(db.OutputInfos);
         db.OutputOrders.RemoveRange(db.OutputOrders);
-        db.InputInfos.RemoveRange(db.InputInfos);
-        db.InputReceipts.RemoveRange(db.InputReceipts);
+        db.InventoryReceiptInfos.RemoveRange(db.InventoryReceiptInfos);
+        db.InventoryReceiptReceipts.RemoveRange(db.InventoryReceiptReceipts);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 

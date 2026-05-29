@@ -1,13 +1,13 @@
 
 namespace Domain.Constants.InventoryReceipt;
 
-public static class InputStatusTransitions
+public static class InventoryReceiptStatusTransitions
 {
     private static readonly Dictionary<string, HashSet<string>> AllowedTransitions = new()
     {
-        { InputStatus.Working, [InputStatus.Finish, InputStatus.Cancel] },
-        { InputStatus.Finish, [] },
-        { InputStatus.Cancel, [] }
+        { InventoryReceiptStatus.Working, [InventoryReceiptStatus.Finish, InventoryReceiptStatus.Cancel] },
+        { InventoryReceiptStatus.Finish, [] },
+        { InventoryReceiptStatus.Cancel, [] }
     };
 
     public static bool IsTransitionAllowed(string? currentStatus, string? newStatus)

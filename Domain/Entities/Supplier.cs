@@ -40,7 +40,7 @@ namespace Domain.Entities
 
         public SupplierStatus? SupplierStatus { get; set; }
 
-        public ICollection<InventoryReceipt> InputReceipts { get; set; } = [];
+        public ICollection<InventoryReceipt> InventoryReceiptReceipts { get; set; } = [];
 
         public ICollection<SupplierContact> SupplierContacts { get; set; } = [];
     }

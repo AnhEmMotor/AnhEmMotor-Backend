@@ -14,7 +14,7 @@ using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Queries.CheckSlugAvailability;
-using Application.Features.Products.Queries.GetActiveVariantLiteListForInput;
+using Application.Features.Products.Queries.GetActiveVariantLiteListForInventoryReceipt;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductsList;
@@ -211,12 +211,12 @@ public class Product
     }
 
     [Fact(DisplayName = "PRODUCT_097 - API variants-lite/for-InventoryReceipt trả về 403 khi user không có quyền InventoryReceipt")]
-    public async Task GetActiveVariantLiteProductsForInput_UserNoPermission_ReturnsForbidden()
+    public async Task GetActiveVariantLiteProductsForInventoryReceipt_UserNoPermission_ReturnsForbidden()
     {
-        _senderMock.Setup(m => m.Send(It.IsAny<GetActiveVariantLiteListForInputQuery>(), It.IsAny<CancellationToken>()))
+        _senderMock.Setup(m => m.Send(It.IsAny<GetActiveVariantLiteListForInventoryReceiptQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetActiveVariantLiteProductsForInputAsync(new SieveModel(), CancellationToken.None))
+            () => _controller.GetActiveVariantLiteProductsForInventoryReceiptAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
     }
 

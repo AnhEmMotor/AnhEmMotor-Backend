@@ -36,7 +36,7 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var errors = new List<Error>();
-        var transactions = new List<(OutputInfo Info, List<InputInfo> Batches, int Quantity)>();
+        var transactions = new List<(OutputInfo Info, List<InventoryReceiptInfo> Batches, int Quantity)>();
         foreach (var outputInfo in outputInfos)
         {
             if (outputInfo.ProductVariantId is null || outputInfo.Count is null || outputInfo.Count <= 0)
@@ -95,14 +95,14 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
         return true;
     }
 
-    private Task<List<InputInfo>> GetAvailableBatchesAsync(
+    private Task<List<InventoryReceiptInfo>> GetAvailableBatchesAsync(
         int productId,
         int? colorId,
         CancellationToken cancellationToken)
     {
-        var finishedStatuses = Domain.Constants.InventoryReceipt.InputStatus.FinishInputValues;
-        return context.InputInfos
-            .Include(ii => ii.InputReceipt)
+        var finishedStatuses = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.FinishInventoryReceiptValues;
+        return context.InventoryReceiptInfos
+            .Include(ii => ii.InventoryReceiptReceipt)
             .Include(ii => ii.QuotationProductRow)
             .Include(ii => ii.PurchaseRequestItem)
             .Where(
@@ -110,9 +110,9 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
                     (ii.QuotationProductRow != null ? ii.QuotationProductRow.ProductVariantColorId : (ii.PurchaseRequestItem != null ? ii.PurchaseRequestItem.ProductVariantColorId : (int?)null)) == colorId &&
                     ii.RemainingCount > 0 &&
                     ii.DeletedAt == null &&
-                    ii.InputReceipt != null &&
-                    ii.InputReceipt.DeletedAt == null &&
-                    finishedStatuses.Contains(ii.InputReceipt.StatusId))
+                    ii.InventoryReceiptReceipt != null &&
+                    ii.InventoryReceiptReceipt.DeletedAt == null &&
+                    finishedStatuses.Contains(ii.InventoryReceiptReceipt.StatusId))
             .OrderBy(ii => ii.CreatedAt)
             .ToListAsync(cancellationToken);
     }

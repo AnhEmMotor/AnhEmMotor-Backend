@@ -10,14 +10,14 @@ namespace Domain.Entities
         [Column("Id")]
         public int Id { get; set; }
 
-        [Column("InputDate")]
-        public DateTimeOffset? InputDate { get; set; }
+        [Column("InventoryReceiptDate")]
+        public DateTimeOffset? InventoryReceiptDate { get; set; }
 
         [Column("Notes", TypeName = "nvarchar(MAX)")]
         public string? Notes { get; set; }
 
         [Column("StatusId")]
-        [ForeignKey("InputStatus")]
+        [ForeignKey("InventoryReceiptStatus")]
         public string? StatusId { get; set; }
 
         [Column("PurchaseRequestId")]
@@ -36,7 +36,7 @@ namespace Domain.Entities
         [ForeignKey("Output")]
         public int? SourceOrderId { get; set; }
 
-        public InputStatus? InputStatus { get; set; }
+        public InventoryReceiptStatus? InventoryReceiptStatus { get; set; }
 
         public Output? Output { get; set; }
 
@@ -46,6 +46,6 @@ namespace Domain.Entities
 
         public ApplicationUser? ConfirmedByUser { get; set; }
 
-        public ICollection<InputInfo> InputInfos { get; set; } = [];
+        public ICollection<InventoryReceiptInfo> InventoryReceiptInfos { get; set; } = [];
     }
 }

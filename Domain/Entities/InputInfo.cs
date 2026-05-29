@@ -3,16 +3,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
-    [Table("InputInfo")]
-    public class InputInfo : BaseEntity
+    [Table("InventoryReceiptInfo")]
+    public class InventoryReceiptInfo : BaseEntity
     {
         [Key]
         [Column("Id")]
         public int Id { get; set; }
 
-        [Column("InputId")]
-        [ForeignKey("InputReceipt")]
-        public int InputId { get; set; }
+        [Column("InventoryReceiptId")]
+        [ForeignKey("InventoryReceiptReceipt")]
+        public int InventoryReceiptId { get; set; }
 
         [Column("Count")]
         public int? Count { get; set; }
@@ -32,7 +32,7 @@ namespace Domain.Entities
         [ForeignKey("QuotationProductRow")]
         public int? QuotationProductRowId { get; set; }
 
-        public InventoryReceipt? InputReceipt { get; set; }
+        public InventoryReceipt? InventoryReceiptReceipt { get; set; }
 
         public PurchaseRequestItem? PurchaseRequestItem { get; set; }
 

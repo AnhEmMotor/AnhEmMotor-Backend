@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using InputStatus = Domain.Entities.InputStatus;
+using InventoryReceiptStatus = Domain.Entities.InventoryReceiptStatus;
 using ProductStatus = Domain.Entities.ProductStatus;
 using SupplierStatus = Domain.Entities.SupplierStatus;
 
@@ -27,11 +27,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<Brand> Brands { get; set; }
 
-    public virtual DbSet<InventoryReceipt> InputReceipts { get; set; }
+    public virtual DbSet<InventoryReceipt> InventoryReceiptReceipts { get; set; }
 
-    public virtual DbSet<InputInfo> InputInfos { get; set; }
+    public virtual DbSet<InventoryReceiptInfo> InventoryReceiptInfos { get; set; }
 
-    public virtual DbSet<InputStatus> InputStatuses { get; set; }
+    public virtual DbSet<InventoryReceiptStatus> InventoryReceiptStatuses { get; set; }
 
     public virtual DbSet<OptionValue> OptionValues { get; set; }
 
@@ -183,7 +183,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<ProductStatus>().HasKey(ps => ps.Key);
         modelBuilder.Entity<ProductStatus>()
             .HasData(new ProductStatus { Key = "for-sale" }, new ProductStatus { Key = "out-of-business" });
-        modelBuilder.Entity<InputStatus>().HasKey(ins => ins.Key);
+        modelBuilder.Entity<InventoryReceiptStatus>().HasKey(ins => ins.Key);
         modelBuilder.Entity<Domain.Entities.PartnerType>().HasKey(pt => pt.Key);
         modelBuilder.Entity<Domain.Entities.PartnerType>()
             .HasData(
@@ -232,9 +232,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(vd => vd.VehicleId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Vehicle>()
-            .HasOne(v => v.InputInfo)
+            .HasOne(v => v.InventoryReceiptInfo)
             .WithMany(ii => ii.Vehicles)
-            .HasForeignKey(v => v.InputInfoId)
+            .HasForeignKey(v => v.InventoryReceiptInfoId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Vehicle>()
             .HasOne(v => v.OutputInfo)
@@ -251,12 +251,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(v => v.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<InputInfo>()
+        modelBuilder.Entity<InventoryReceiptInfo>()
             .HasOne(ii => ii.PurchaseRequestItem)
-            .WithMany(pri => pri.InputInfos)
+            .WithMany(pri => pri.InventoryReceiptInfos)
             .HasForeignKey(ii => ii.PurchaseRequestItemId)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<InputInfo>()
+        modelBuilder.Entity<InventoryReceiptInfo>()
             .HasOne(ii => ii.QuotationProductRow)
             .WithMany()
             .HasForeignKey(ii => ii.QuotationProductRowId)

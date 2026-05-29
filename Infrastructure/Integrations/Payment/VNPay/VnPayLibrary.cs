@@ -52,11 +52,11 @@ public class VnPayLibrary
         return baseUrl;
     }
 
-    public bool ValidateSignature(string inputHash, string secretKey)
+    public bool ValidateSignature(string InventoryReceiptHash, string secretKey)
     {
         var rspRaw = GetResponseRaw();
         var myChecksum = VNPayUtils.HmacSHA512(secretKey, rspRaw);
-        return myChecksum.Equals(inputHash, StringComparison.InvariantCultureIgnoreCase);
+        return myChecksum.Equals(InventoryReceiptHash, StringComparison.InvariantCultureIgnoreCase);
     }
 
     private string GetResponseRaw()

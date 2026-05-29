@@ -9,7 +9,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
-using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
+using Application.Features.Suppliers.Queries.GetSuppliersListForInventoryReceiptManager;
 using Domain.Primitives;
 using FluentAssertions;
 using MediatR;
@@ -88,8 +88,8 @@ public class Supplier
         var sieveModel = new SieveModel();
         var items = new List<SupplierResponse>
         {
-            new() { Id = 1, Name = "Supplier 1", StatusId = "active", TotalInput = 1000000 },
-            new() { Id = 2, Name = "Supplier 2", StatusId = "inactive", TotalInput = 2000000 }
+            new() { Id = 1, Name = "Supplier 1", StatusId = "active", TotalInventoryReceipt = 1000000 },
+            new() { Id = 2, Name = "Supplier 2", StatusId = "inactive", TotalInventoryReceipt = 2000000 }
         };
         var expectedResponse = new PagedResult<SupplierResponse>(items, 15, 1, 10);
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersListQuery>(), It.IsAny<CancellationToken>()))
@@ -99,32 +99,32 @@ public class Supplier
         var response = okResult.Value.Should().BeOfType<PagedResult<SupplierResponse>>().Subject;
         response.Items.Should().HaveCount(2);
         response.TotalCount.Should().Be(15);
-        response.Items.First().TotalInput.Should().NotBeNull();
+        response.Items.First().TotalInventoryReceipt.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "SUP_050 - L?y danh s�ch Supplier foInventoryReceiptut ch? tr? v? active")]
-    public async Task GetSuppliersForInput_ReturnsOnlyActiveSuppliers()
+    public async Task GetSuppliersForInventoryReceipt_ReturnsOnlyActiveSuppliers()
     {
         var sieveModel = new SieveModel();
-        var items = new List<SupplierForInputManagerResponse>
+        var items = new List<SupplierForInventoryReceiptManagerResponse>
         {
             new() { Id = 1, Name = "Supplier 1" },
             new() { Id = 2, Name = "Supplier 2" }
         };
-        var expectedResponse = new PagedResult<SupplierForInputManagerResponse>(items, 10, 1, 10);
+        var expectedResponse = new PagedResult<SupplierForInventoryReceiptManagerResponse>(items, 10, 1, 10);
         _mediatorMock.Setup(
-            m => m.Send(It.IsAny<GetSuppliersListForInputManagerQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PagedResult<SupplierForInputManagerResponse>>.Success(expectedResponse));
-        var result = await _controller.GetSuppliersForInputAsync(sieveModel, CancellationToken.None)
+            m => m.Send(It.IsAny<GetSuppliersListForInventoryReceiptManagerQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PagedResult<SupplierForInventoryReceiptManagerResponse>>.Success(expectedResponse));
+        var result = await _controller.GetSuppliersForInventoryReceiptAsync(sieveModel, CancellationToken.None)
             .ConfigureAwait(true);
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = okResult.Value.Should().BeOfType<PagedResult<SupplierForInputManagerResponse>>().Subject;
+        var response = okResult.Value.Should().BeOfType<PagedResult<SupplierForInventoryReceiptManagerResponse>>().Subject;
         response.Items.Should().HaveCount(2);
     }
 
     [Fact(
-        DisplayName = "SUP_051 - L?y danh s�ch Supplier th�nh c�ng khi kh�ng c� quy?n (ch? active, kh�ng c� TotalInputValue)")]
-    public async Task GetSuppliers_NoPermission_ReturnsOnlyActiveWithoutTotalInput()
+        DisplayName = "SUP_051 - L?y danh s�ch Supplier th�nh c�ng khi kh�ng c� quy?n (ch? active, kh�ng c� TotalInventoryReceiptValue)")]
+    public async Task GetSuppliers_NoPermission_ReturnsOnlyActiveWithoutTotalInventoryReceipt()
     {
         var sieveModel = new SieveModel();
         var items = new List<SupplierResponse>
@@ -139,18 +139,18 @@ public class Supplier
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var response = okResult.Value.Should().BeOfType<PagedResult<SupplierResponse>>().Subject;
         response.Items.Should().OnlyContain(s => string.Compare(s.StatusId, "active") == 0);
-        response.Items.Should().OnlyContain(s => s.TotalInput == null);
+        response.Items.Should().OnlyContain(s => s.TotalInventoryReceipt == null);
     }
 
     [Fact(DisplayName = "SUP_052 - L?y chi ti?t Supplier th�nh c�ng v?i quy?n View Supplier")]
-    public async Task GetSupplierById_WithViewPermission_ReturnsSupplierWithTotalInput()
+    public async Task GetSupplierById_WithViewPermission_ReturnsSupplierWithTotalInventoryReceipt()
     {
         var expectedResponse = new SupplierResponse
         {
             Id = 1,
             Name = "Supplier Detail",
             StatusId = "active",
-            TotalInput = 5000000
+            TotalInventoryReceipt = 5000000
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<SupplierResponse?>.Success(expectedResponse));
@@ -158,18 +158,18 @@ public class Supplier
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var response = okResult.Value.Should().BeOfType<SupplierResponse>().Subject;
         response.Id.Should().Be(1);
-        response.TotalInput.Should().Be(5000000);
+        response.TotalInventoryReceipt.Should().Be(5000000);
     }
 
     [Fact(DisplayName = "SUP_053 - L?y chi ti?t Supplier th�nh c�ng khi kh�ng c� quy?n (ch? active)")]
-    public async Task GetSupplierById_NoPermission_ReturnsActiveSupplierWithTotalInput()
+    public async Task GetSupplierById_NoPermission_ReturnsActiveSupplierWithTotalInventoryReceipt()
     {
         var expectedResponse = new SupplierResponse
         {
             Id = 1,
             Name = "Supplier Detail",
             StatusId = "active",
-            TotalInput = 5000000
+            TotalInventoryReceipt = 5000000
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<SupplierResponse?>.Success(expectedResponse));
@@ -177,7 +177,7 @@ public class Supplier
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var response = okResult.Value.Should().BeOfType<SupplierResponse>().Subject;
         response.StatusId.Should().Be("active");
-        response.TotalInput.Should().NotBeNull();
+        response.TotalInventoryReceipt.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "SUP_054 - L?y chi ti?t Supplier th?t b?i khi kh�ng c� quy?n v� Supplier kh�ng active")]

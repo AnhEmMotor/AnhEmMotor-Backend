@@ -17,11 +17,11 @@ public class Vehicle : BaseEntity
 
     public Lead? Lead { get; set; }
 
-    [Column("InputInfoId")]
-    [ForeignKey("InputInfo")]
-    public int? InputInfoId { get; set; }
+    [Column("InventoryReceiptInfoId")]
+    [ForeignKey("InventoryReceiptInfo")]
+    public int? InventoryReceiptInfoId { get; set; }
 
-    public InputInfo? InputInfo { get; set; }
+    public InventoryReceiptInfo? InventoryReceiptInfo { get; set; }
 
     [Column("OutputInfoId")]
     [ForeignKey("OutputInfo")]

@@ -2,7 +2,7 @@ using System;
 
 namespace Domain.Constants.InventoryReceipt
 {
-    public static class InputStatus
+    public static class InventoryReceiptStatus
     {
         public const string Draft = "draft";
         public const string Sent = "sent";
@@ -15,9 +15,9 @@ namespace Domain.Constants.InventoryReceipt
         public const string Cancel = "reject";
 
         public static readonly string[] AllowedValues = [Draft, Sent, Approve, Reject, "working", "finished", "cancelled"];
-        public static readonly string[] FinishInputValues = [Approve, "finished"];
-        public static readonly string[] WorkingInputValues = [Draft, Sent, "working"];
-        public static readonly string[] NotEditInputValues = [Approve, Reject, "finished", "cancelled"];
+        public static readonly string[] FinishInventoryReceiptValues = [Approve, "finished"];
+        public static readonly string[] WorkingInventoryReceiptValues = [Draft, Sent, "working"];
+        public static readonly string[] NotEditInventoryReceiptValues = [Approve, Reject, "finished", "cancelled"];
 
         public static bool IsValid(string? value)
         {
@@ -30,21 +30,21 @@ namespace Domain.Constants.InventoryReceipt
         {
             if (string.IsNullOrWhiteSpace(value))
                 return false;
-            return FinishInputValues.Contains(value, StringComparer.OrdinalIgnoreCase);
+            return FinishInventoryReceiptValues.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsCanEdit(string? value)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return false;
-            return WorkingInputValues.Contains(value, StringComparer.OrdinalIgnoreCase);
+            return WorkingInventoryReceiptValues.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsCannotEdit(string? value)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return true;
-            return NotEditInputValues.Contains(value, StringComparer.OrdinalIgnoreCase);
+            return NotEditInventoryReceiptValues.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsCannotDelete(string? value)

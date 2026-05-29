@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
-    [Table("InputStatus")]
-    public class InputStatus : BaseEntity
+    [Table("InventoryReceiptStatus")]
+    public class InventoryReceiptStatus : BaseEntity
     {
         [Key]
         [Column("Key")]
         public string Key { get; set; } = string.Empty;
 
-        public ICollection<InventoryReceipt> InputReceipts { get; set; } = [];
+        public ICollection<InventoryReceipt> InventoryReceiptReceipts { get; set; } = [];
     }
 }

@@ -69,7 +69,7 @@ namespace Domain.Entities
 
         public ICollection<ProductVariantColor> ProductVariantColors { get; set; } = [];
 
-        public ICollection<InputInfo> InputInfos { get; set; } = [];
+        public ICollection<InventoryReceiptInfo> InventoryReceiptInfos { get; set; } = [];
 
         public ICollection<OutputInfo> OutputInfos { get; set; } = [];
 

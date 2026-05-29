@@ -58,7 +58,7 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
     {
         return context.Vehicles
             .Include(v => v.Lead)
-            .Include(v => v.InputInfo)
+            .Include(v => v.InventoryReceiptInfo)
             .Include(v => v.OutputInfo)
             .Where(v => ids.Contains(v.Id))
             .ToListAsync(cancellationToken);
@@ -70,7 +70,7 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
     {
         var ids = productVariantIds.Distinct().ToList();
         return context.Vehicles
-            .Include(v => v.InputInfo)
+            .Include(v => v.InventoryReceiptInfo)
             .Include(v => v.OutputInfo)
             .Where(v => v.ProductVariantId.HasValue && ids.Contains(v.ProductVariantId.Value))
             .ToListAsync(cancellationToken);

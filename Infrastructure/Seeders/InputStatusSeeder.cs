@@ -4,23 +4,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Seeders;
 
-public static class InputStatusSeeder
+public static class InventoryReceiptStatusSeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        var allStatuses = Domain.Constants.InventoryReceipt.InputStatus.AllowedValues;
+        var allStatuses = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.AllowedValues;
         if (allStatuses.Length == 0)
         {
             return;
         }
-        var existingStatuses = await context.Set<InputStatus>().ToListAsync(cancellationToken).ConfigureAwait(false);
+        var existingStatuses = await context.Set<InventoryReceiptStatus>().ToListAsync(cancellationToken).ConfigureAwait(false);
         var newStatuses = allStatuses
             .Except(existingStatuses.Select(s => s.Key), StringComparer.OrdinalIgnoreCase)
-            .Select(key => new InputStatus { Key = key })
+            .Select(key => new InventoryReceiptStatus { Key = key })
             .ToList();
         if (newStatuses.Count != 0)
         {
-            await context.Set<InputStatus>().AddRangeAsync(newStatuses, cancellationToken).ConfigureAwait(false);
+            await context.Set<InventoryReceiptStatus>().AddRangeAsync(newStatuses, cancellationToken).ConfigureAwait(false);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
         var statusesToDelete = existingStatuses
@@ -34,7 +34,7 @@ public static class InputStatusSeeder
                 .ConfigureAwait(false);
             if (!hasReferences)
             {
-                context.Set<InputStatus>().RemoveRange(statusesToDelete);
+                context.Set<InventoryReceiptStatus>().RemoveRange(statusesToDelete);
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }

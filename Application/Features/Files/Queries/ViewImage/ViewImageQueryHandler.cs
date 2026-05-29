@@ -19,8 +19,8 @@ public sealed class ViewImageQueryHandler(IFileReadService fileReadService) : IR
             return Error.NotFound("Image not found.");
         }
         var (fileBytes, _) = fileResult.Value;
-        using var inputStream = new MemoryStream(fileBytes);
-        var processedStream = await fileReadService.ReadImageAsync(inputStream, request.Width, cancellationToken)
+        using var InventoryReceiptStream = new MemoryStream(fileBytes);
+        var processedStream = await fileReadService.ReadImageAsync(InventoryReceiptStream, request.Width, cancellationToken)
             .ConfigureAwait(false);
         return new ViewImageResponse { FileStream = processedStream, ContentType = "image/webp" };
     }

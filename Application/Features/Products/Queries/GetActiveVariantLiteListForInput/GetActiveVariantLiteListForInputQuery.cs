@@ -4,9 +4,9 @@ using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
 
-namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInput
+namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInventoryReceipt
 {
-    public class GetActiveVariantLiteListForInputQuery : IRequest<Result<PagedResult<ProductVariantLiteResponseForInput>>>
+    public class GetActiveVariantLiteListForInventoryReceiptQuery : IRequest<Result<PagedResult<ProductVariantLiteResponseForInventoryReceipt>>>
     {
         public int Page { get; init; } = 1;
 
@@ -20,7 +20,7 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInput
 
         public string? Filters { get; init; }
 
-        public static GetActiveVariantLiteListForInputQuery FromRequest(SieveModel request)
+        public static GetActiveVariantLiteListForInventoryReceiptQuery FromRequest(SieveModel request)
         {
             var search = ExtractFilterValue(request.Filters, "search");
             var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(
@@ -28,7 +28,7 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInput
                     StringSplitOptions.RemoveEmptyEntries)
                     .ToList() ??
                 [];
-            return new GetActiveVariantLiteListForInputQuery
+            return new GetActiveVariantLiteListForInventoryReceiptQuery
             {
                 Page = request.Page ?? 1,
                 PageSize = request.PageSize ?? 10,

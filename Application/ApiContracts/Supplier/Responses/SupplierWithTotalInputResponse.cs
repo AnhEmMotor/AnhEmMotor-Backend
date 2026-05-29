@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Supplier.Responses
 {
-    public sealed class SupplierWithTotalInputResponse
+    public sealed class SupplierWithTotalInventoryReceiptResponse
     {
         public int Id { get; set; }
 
@@ -22,7 +22,7 @@ namespace Application.ApiContracts.Supplier.Responses
 
         public DateTimeOffset? DeletedAt { get; set; }
 
-        public decimal TotalInput { get; set; }
+        public decimal TotalInventoryReceipt { get; set; }
 
         public string? Notes { get; set; }
 

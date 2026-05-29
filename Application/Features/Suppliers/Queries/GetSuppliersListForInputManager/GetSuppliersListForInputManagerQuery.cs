@@ -5,9 +5,9 @@ using MediatR;
 using Sieve.Models;
 using System;
 
-namespace Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
+namespace Application.Features.Suppliers.Queries.GetSuppliersListForInventoryReceiptManager;
 
-public sealed record GetSuppliersListForInputManagerQuery : IRequest<Result<PagedResult<SupplierForInputManagerResponse>>>
+public sealed record GetSuppliersListForInventoryReceiptManagerQuery : IRequest<Result<PagedResult<SupplierForInventoryReceiptManagerResponse>>>
 {
     public SieveModel? SieveModel { get; init; }
 }

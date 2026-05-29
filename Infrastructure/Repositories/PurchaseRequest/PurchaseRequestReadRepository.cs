@@ -46,8 +46,8 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .Include(x => x.PurchaseRequestItems)
                     .ThenInclude(r => r.ProductVariantColor)
                 .Include(x => x.PurchaseRequestItems)
-                    .ThenInclude(r => r.InputInfos)
-                        .ThenInclude(ii => ii.InputReceipt)
+                    .ThenInclude(r => r.InventoryReceiptInfos)
+                        .ThenInclude(ii => ii.InventoryReceiptReceipt)
                 .AsSplitQuery();
 
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);

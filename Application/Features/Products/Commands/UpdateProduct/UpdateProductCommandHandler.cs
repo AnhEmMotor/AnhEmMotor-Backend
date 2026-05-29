@@ -117,12 +117,12 @@ public sealed class UpdateProductCommandHandler(
         command.Adapt(product);
         var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>();
         var optionNameMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        var inputVariants = command.Variants ?? [];
-        if (inputVariants.Count > 0)
+        var InventoryReceiptVariants = command.Variants ?? [];
+        if (InventoryReceiptVariants.Count > 0)
         {
             var allOptionValues = new Dictionary<int, HashSet<string>>();
             var potentialOptionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var variantReq in inputVariants)
+            foreach (var variantReq in InventoryReceiptVariants)
             {
                 if (!string.IsNullOrWhiteSpace(variantReq.VariantName))
                     potentialOptionNames.Add("Phiên bản");
@@ -201,7 +201,7 @@ public sealed class UpdateProductCommandHandler(
                     }
                 }
             }
-            foreach (var variantReq in inputVariants)
+            foreach (var variantReq in InventoryReceiptVariants)
             {
                 if (!string.IsNullOrWhiteSpace(variantReq.VariantName) &&
                     optionNameMap.TryGetValue("Phiên bản", out var versionOptId))
@@ -279,14 +279,14 @@ public sealed class UpdateProductCommandHandler(
             }
         }
         var currentVariants = product.ProductVariants.ToList();
-        var inputVariantIds = inputVariants.Where(v => v.Id.HasValue).Select(v => v.Id!.Value).ToHashSet();
-        var variantsToDelete = currentVariants.Where(v => !inputVariantIds.Contains(v.Id)).ToList();
+        var InventoryReceiptVariantIds = InventoryReceiptVariants.Where(v => v.Id.HasValue).Select(v => v.Id!.Value).ToHashSet();
+        var variantsToDelete = currentVariants.Where(v => !InventoryReceiptVariantIds.Contains(v.Id)).ToList();
         foreach (var v in variantsToDelete)
         {
             productVariantDeleteRepository.Delete(v);
             product.ProductVariants.Remove(v);
         }
-        foreach (var variantReq in inputVariants)
+        foreach (var variantReq in InventoryReceiptVariants)
         {
             ProductVariant variantEntity;
             if (variantReq.Id.HasValue && variantReq.Id > 0)

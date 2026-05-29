@@ -22,18 +22,18 @@ public class SupplierReadRepository(
         return context.GetQuery<SupplierEntity>(mode);
     }
 
-    internal IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
+    internal IQueryable<SupplierWithTotalInventoryReceiptResponse> GetQueryableWithTotalInventoryReceipt(
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<SupplierEntity>(mode)
             .GroupJoin(
-                context.GetQuery<Domain.Entities.InputInfo>(DataFetchMode.ActiveOnly)
-                    .Where(ii => ii.InputReceipt != null && ii.InputReceipt.StatusId == InputStatus.Finish),
+                context.GetQuery<Domain.Entities.InventoryReceiptInfo>(DataFetchMode.ActiveOnly)
+                    .Where(ii => ii.InventoryReceiptReceipt != null && ii.InventoryReceiptReceipt.StatusId == InventoryReceiptStatus.Finish),
                 supplier => (int?)supplier.Id,
-                inputInfo => inputInfo.QuotationProductRow != null && inputInfo.QuotationProductRow.QuotationReceipt != null ? inputInfo.QuotationProductRow.QuotationReceipt.SupplierId : null,
-                (supplier, inputInfos) => new { supplier, inputInfos })
+                InventoryReceiptInfo => InventoryReceiptInfo.QuotationProductRow != null && InventoryReceiptInfo.QuotationProductRow.QuotationReceipt != null ? InventoryReceiptInfo.QuotationProductRow.QuotationReceipt.SupplierId : null,
+                (supplier, InventoryReceiptInfos) => new { supplier, InventoryReceiptInfos })
             .Select(
-                x => new SupplierWithTotalInputResponse
+                x => new SupplierWithTotalInventoryReceiptResponse
                 {
                     Id = x.supplier.Id,
                     Name = x.supplier.Name!,
@@ -47,8 +47,8 @@ public class SupplierReadRepository(
                     Notes = x.supplier.Notes,
                     TaxIdentificationNumber = x.supplier.TaxIdentificationNumber,
                     PartnerTypeId = x.supplier.PartnerTypeId ?? "supplier",
-                    TotalInput =
-                        x.inputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.QuotationProductRow != null ? (ii.QuotationProductRow.QuotePrice ?? 0) : 0))
+                    TotalInventoryReceipt =
+                        x.InventoryReceiptInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.QuotationProductRow != null ? (ii.QuotationProductRow.QuotePrice ?? 0) : 0))
                 });
     }
 
@@ -61,25 +61,25 @@ public class SupplierReadRepository(
         return paginator.ApplyAsync<SupplierEntity, TResponse>(query, sieveModel, mode, cancellationToken);
     }
 
-    public Task<PagedResult<TResponse>> GetPagedWithTotalInputAsync<TResponse>(
+    public Task<PagedResult<TResponse>> GetPagedWithTotalInventoryReceiptAsync<TResponse>(
         SieveModel sieveModel,
         DataFetchMode mode = DataFetchMode.ActiveOnly,
         CancellationToken cancellationToken = default)
     {
-        var query = GetQueryableWithTotalInput(mode);
-        return paginator.ApplyAsync<SupplierWithTotalInputResponse, TResponse>(
+        var query = GetQueryableWithTotalInventoryReceipt(mode);
+        return paginator.ApplyAsync<SupplierWithTotalInventoryReceiptResponse, TResponse>(
             query,
             sieveModel,
             mode,
             cancellationToken);
     }
 
-    public Task<SupplierWithTotalInputResponse?> GetByIdWithTotalInputAsync(
+    public Task<SupplierWithTotalInventoryReceiptResponse?> GetByIdWithTotalInventoryReceiptAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return GetQueryableWithTotalInput(mode).FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        return GetQueryableWithTotalInventoryReceipt(mode).FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
     public Task<List<SupplierEntity>> GetAllAsync(

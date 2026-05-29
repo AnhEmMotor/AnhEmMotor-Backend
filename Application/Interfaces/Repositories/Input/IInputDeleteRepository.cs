@@ -1,13 +1,13 @@
-using InputEntity = Domain.Entities.InventoryReceipt;
-using InputInfoEntity = Domain.Entities.InputInfo;
+using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
+using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
 
 namespace Application.Interfaces.Repositories.InventoryReceipt;
 
-public interface IInputDeleteRepository
+public interface IInventoryReceiptDeleteRepository
 {
-    public void Delete(InputEntity InventoryReceipt);
+    public void Delete(InventoryReceiptEntity InventoryReceipt);
 
-    public void Delete(IEnumerable<InputEntity> InventoryReceipts);
+    public void Delete(IEnumerable<InventoryReceiptEntity> InventoryReceipts);
 
-    public void DeleteInputInfo(InputInfoEntity inputInfo);
+    public void DeleteInventoryReceiptInfo(InventoryReceiptInfoEntity InventoryReceiptInfo);
 }

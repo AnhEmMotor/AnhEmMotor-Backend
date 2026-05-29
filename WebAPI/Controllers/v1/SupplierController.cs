@@ -1,6 +1,6 @@
 using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
-using Application.Features.InventoryReceipts.Queries.GetInputsBySupplierId;
+using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
@@ -14,7 +14,7 @@ using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetPartnerTypesList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
-using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
+using Application.Features.Suppliers.Queries.GetSuppliersListForInventoryReceiptManager;
 using Application.Features.Suppliers.Queries.GetSupplierStatistics;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
@@ -154,11 +154,11 @@ public class SupplierController(IMediator mediator) : ApiController
     [HttpGet("for-InventoryReceipt")]
     [RequiresAnyPermissions(Domain.Constants.Permission.Permissions.InventoryReceipts.Create, Domain.Constants.Permission.Permissions.InventoryReceipts.Edit)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetSuppliersForInputAsync(
+    public async Task<IActionResult> GetSuppliersForInventoryReceiptAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetSuppliersListForInputManagerQuery() { SieveModel = sieveModel };
+        var query = new GetSuppliersListForInventoryReceiptManagerQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

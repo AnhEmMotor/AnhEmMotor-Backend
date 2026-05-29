@@ -480,7 +480,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
 
     [Fact(DisplayName = "PRODUCT_069 - Lấy variants-lite/for-InventoryReceipt chỉ trả về Id, Name, CoverImageUrl, Price")]
-    public async Task GetVariantsLiteForInput_ReturnsOnlyRequiredFields()
+    public async Task GetVariantsLiteForInventoryReceipt_ReturnsOnlyRequiredFields()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
@@ -1677,7 +1677,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         content!.Items.Should().BeEmpty();
     }
 
-    private async Task<string> AuthenticateForInputAsync(string uniqueId)
+    private async Task<string> AuthenticateForInventoryReceiptAsync(string uniqueId)
     {
         var username = $"u_{uniqueId}";
         var password = "P1@password";
@@ -1710,12 +1710,12 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
 
     [Fact(DisplayName = "PRODUCT_122 - Tìm kiếm biến thể theo tên sản phẩm cha")]
-    public async Task GetVariantsLiteForInput_SearchByParentProductName_ReturnsOnlyMatchingVariants()
+    public async Task GetVariantsLiteForInventoryReceipt_SearchByParentProductName_ReturnsOnlyMatchingVariants()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer",
-            await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+            await AuthenticateForInventoryReceiptAsync(uniqueId).ConfigureAwait(true));
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
@@ -1753,7 +1753,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
-            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInventoryReceipt>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(3);
@@ -1762,12 +1762,12 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
 
     [Fact(DisplayName = "PRODUCT_123 - Phân trang khi tìm lọc sản phẩm (trang 1)")]
-    public async Task GetVariantsLiteForInput_SearchWithPagination_Page1ReturnsCorrectVariants()
+    public async Task GetVariantsLiteForInventoryReceipt_SearchWithPagination_Page1ReturnsCorrectVariants()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer",
-            await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+            await AuthenticateForInventoryReceiptAsync(uniqueId).ConfigureAwait(true));
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
@@ -1807,7 +1807,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
-            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInventoryReceipt>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.TotalCount.Should().Be(11);
@@ -1816,12 +1816,12 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
 
     [Fact(DisplayName = "PRODUCT_124 - Phân trang lấy các phần tử còn lại (trang 2)")]
-    public async Task GetVariantsLiteForInput_SearchWithPagination_Page2ReturnsRemainingVariants()
+    public async Task GetVariantsLiteForInventoryReceipt_SearchWithPagination_Page2ReturnsRemainingVariants()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer",
-            await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+            await AuthenticateForInventoryReceiptAsync(uniqueId).ConfigureAwait(true));
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
@@ -1861,7 +1861,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
-            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInventoryReceipt>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.TotalCount.Should().Be(11);
@@ -1870,12 +1870,12 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
 
     [Fact(DisplayName = "PRODUCT_125 - Hiển thị DisplayName có dịch tiếng Việt (1 option)")]
-    public async Task GetVariantsLiteForInput_VariantWithSingleOption_DisplayNameContainsVietnameseLabel()
+    public async Task GetVariantsLiteForInventoryReceipt_VariantWithSingleOption_DisplayNameContainsVietnameseLabel()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer",
-            await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+            await AuthenticateForInventoryReceiptAsync(uniqueId).ConfigureAwait(true));
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
@@ -1922,7 +1922,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
-            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInventoryReceipt>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         var item = content!.Items!.FirstOrDefault(v => v.Id == variant.Id);
@@ -1931,12 +1931,12 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
 
     [Fact(DisplayName = "PRODUCT_126 - Hiển thị DisplayName có dịch tiếng Việt (Nhiều option)")]
-    public async Task GetVariantsLiteForInput_VariantWithMultipleOptions_DisplayNameContainsAllTranslatedLabels()
+    public async Task GetVariantsLiteForInventoryReceipt_VariantWithMultipleOptions_DisplayNameContainsAllTranslatedLabels()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer",
-            await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+            await AuthenticateForInventoryReceiptAsync(uniqueId).ConfigureAwait(true));
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
@@ -1992,7 +1992,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
-            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInventoryReceipt>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         var item = content.Items?.FirstOrDefault(v => v.Id == variant.Id);
@@ -2003,12 +2003,12 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
 
     [Fact(DisplayName = "PRODUCT_127 - Hiển thị DisplayName khi không có option")]
-    public async Task GetVariantsLiteForInput_VariantWithNoOptions_DisplayNameEqualsProductName()
+    public async Task GetVariantsLiteForInventoryReceipt_VariantWithNoOptions_DisplayNameEqualsProductName()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer",
-            await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+            await AuthenticateForInventoryReceiptAsync(uniqueId).ConfigureAwait(true));
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
@@ -2035,7 +2035,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
-            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInventoryReceipt>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         var item = content!.Items!.FirstOrDefault(v => v.Id == variant.Id);
