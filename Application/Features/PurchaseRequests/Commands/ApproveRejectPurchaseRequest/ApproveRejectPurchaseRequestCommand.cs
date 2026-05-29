@@ -4,5 +4,5 @@ using System;
 
 namespace Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRequest
 {
-    public sealed record ApproveRejectPurchaseRequestCommand(int Id, bool Approve, Guid? CurrentUserId) : IRequest<Result>;
+    public sealed record ApproveRejectPurchaseRequestCommand(int Id, string Status) : IRequest<Result>;
 }

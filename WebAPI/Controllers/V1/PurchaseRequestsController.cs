@@ -119,38 +119,19 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
-        /// Phê duyệt yêu cầu mua hàng (Sent -> Approved).
+        /// Phê duyệt hoặc từ chối yêu cầu mua hàng (Sent -> Approved/Rejected).
         /// </summary>
-        [HttpPost("{id:int}/approve")]
+        [HttpPatch("{id:int}/status")]
         [HasPermission(PurchaseRequests.ApproveReject)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> ApproveAsync(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> ApproveRejectAsync(
+            int id,
+            [FromBody] ApproveRejectPurchaseRequestRequest request,
+            CancellationToken cancellationToken)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Guid? currentUserId = Guid.TryParse(userIdClaim, out var guid) ? guid : null;
-
-            var result = await mediator.Send(new ApproveRejectPurchaseRequestCommand(id, true, currentUserId), cancellationToken)
-                .ConfigureAwait(true);
-
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Từ chối yêu cầu mua hàng (Sent -> Rejected).
-        /// </summary>
-        [HttpPost("{id:int}/reject")]
-        [HasPermission(PurchaseRequests.ApproveReject)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> RejectAsync(int id, CancellationToken cancellationToken)
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Guid? currentUserId = Guid.TryParse(userIdClaim, out var guid) ? guid : null;
-
-            var result = await mediator.Send(new ApproveRejectPurchaseRequestCommand(id, false, currentUserId), cancellationToken)
+            var result = await mediator.Send(new ApproveRejectPurchaseRequestCommand(id, request.Status), cancellationToken)
                 .ConfigureAwait(true);
 
             return HandleResult(result);

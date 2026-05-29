@@ -5,8 +5,8 @@ using Application.Features.Quotations.Commands.DeleteQuotation;
 using Application.Features.Quotations.Commands.UpdateQuotation;
 using Microsoft.AspNetCore.Authorization;
 using Application.Features.Quotations.Commands.SendQuotation;
-using Application.Features.Quotations.Commands.ApproveQuotation;
-using Application.Features.Quotations.Commands.RejectQuotation;
+using Application.Features.Quotations.Commands.ApproveRejectQuotation;
+using Application.ApiContracts.Quotation.Requests;
 using Application.Features.Quotations.Queries.GetQuotationById;
 using Application.Features.Quotations.Queries.GetQuotationsList;
 using Asp.Versioning;
@@ -127,31 +127,19 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
-        /// Xác nhận yêu cầu báo giá (sent -> approved).
+        /// Phê duyệt hoặc từ chối yêu cầu báo giá (sent -> approved/rejected).
         /// </summary>
-        [HttpPatch("{id:int}/approve")]
+        [HttpPatch("{id:int}/status")]
         [HasPermission(Quotations.Approve)]
         [ProducesResponseType(typeof(QuotationDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ApproveQuotationAsync(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> ApproveRejectQuotationAsync(
+            int id,
+            [FromBody] ApproveRejectQuotationRequest request,
+            CancellationToken cancellationToken)
         {
-            var command = new ApproveQuotationCommand(id);
-            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Hủy yêu cầu báo giá (sent -> rejected).
-        /// </summary>
-        [HttpPatch("{id:int}/reject")]
-        [HasPermission(Quotations.Approve)]
-        [ProducesResponseType(typeof(QuotationDetailResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> RejectQuotationAsync(int id, CancellationToken cancellationToken)
-        {
-            var command = new RejectQuotationCommand(id);
+            var command = new ApproveRejectQuotationCommand(id, request.Status);
             var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }

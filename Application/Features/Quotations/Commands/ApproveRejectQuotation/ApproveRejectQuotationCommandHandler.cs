@@ -2,21 +2,22 @@ using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Quotation;
+using Domain.Constants;
 using Mapster;
 using MediatR;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Application.Features.Quotations.Commands.ApproveQuotation
+namespace Application.Features.Quotations.Commands.ApproveRejectQuotation
 {
-    public sealed class ApproveQuotationCommandHandler(
+    public sealed class ApproveRejectQuotationCommandHandler(
         IQuotationReadRepository readRepository,
         IQuotationUpdateRepository updateRepository,
-        IUnitOfWork unitOfWork) : IRequestHandler<ApproveQuotationCommand, Result<QuotationDetailResponse?>>
+        IUnitOfWork unitOfWork) : IRequestHandler<ApproveRejectQuotationCommand, Result<QuotationDetailResponse?>>
     {
         public async Task<Result<QuotationDetailResponse?>> Handle(
-            ApproveQuotationCommand request,
+            ApproveRejectQuotationCommand request,
             CancellationToken cancellationToken)
         {
             var quotation = await readRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
@@ -25,13 +26,19 @@ namespace Application.Features.Quotations.Commands.ApproveQuotation
                 return Error.NotFound($"Yêu cầu báo giá {request.Id} không tồn tại hoặc đã bị xóa.", "Id");
             }
 
-            var currentStatus = quotation.Status?.ToLower();
-            if (currentStatus != "sent")
+            if (!string.Equals(request.Status, QuotationStatus.Approved, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(request.Status, QuotationStatus.Rejected, StringComparison.OrdinalIgnoreCase))
             {
-                return Error.BadRequest($"Không thể xác nhận báo giá đang ở trạng thái '{quotation.Status}'. Chỉ cho phép xác nhận báo giá ở trạng thái Đã gửi (sent).", "Status");
+                return Error.BadRequest("Trạng thái phê duyệt không hợp lệ.", "Status");
             }
 
-            quotation.Status = "approved";
+            var currentStatus = quotation.Status?.ToLower();
+            if (currentStatus != QuotationStatus.Sent)
+            {
+                return Error.BadRequest($"Không thể cập nhật trạng thái báo giá đang ở trạng thái '{quotation.Status}'. Chỉ cho phép cập nhật báo giá ở trạng thái Đã gửi (sent).", "Status");
+            }
+
+            quotation.Status = request.Status.ToLower();
             updateRepository.Update(quotation);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

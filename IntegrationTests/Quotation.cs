@@ -360,7 +360,11 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         db.Quotations.Add(quotation);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var response = await _client.PatchAsync($"/api/v1/Quotations/{quotation.Id}/approve", null, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await HttpClientJsonExtensions.PatchAsJsonAsync(
+            _client, 
+            $"/api/v1/Quotations/{quotation.Id}/status", 
+            new { Status = "approved" }, 
+            TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<QuotationDetailResponse>(TestContext.Current.CancellationToken).ConfigureAwait(true);

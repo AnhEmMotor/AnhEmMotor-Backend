@@ -1,10 +1,9 @@
-﻿using Application.ApiContracts.Quotation.Requests;
+using Application.ApiContracts.Quotation.Requests;
 using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
-using Application.Features.Quotations.Commands.ApproveQuotation;
+using Application.Features.Quotations.Commands.ApproveRejectQuotation;
 using Application.Features.Quotations.Commands.CreateQuotation;
 using Application.Features.Quotations.Commands.DeleteQuotation;
-using Application.Features.Quotations.Commands.RejectQuotation;
 using Application.Features.Quotations.Commands.SendQuotation;
 using Application.Features.Quotations.Commands.UpdateQuotation;
 using Application.Interfaces.Repositories;
@@ -280,12 +279,12 @@ public class Quotation
     [Fact(DisplayName = "QUO_008 - Xác nhận báo giá thành công khi ở trạng thái Đã gửi")]
     public async Task ApproveQuotation_FromSent_Success()
     {
-        var handler = new ApproveQuotationCommandHandler(
+        var handler = new ApproveRejectQuotationCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new ApproveQuotationCommand(1);
+        var command = new ApproveRejectQuotationCommand(1, "approved");
         var quotation = new QuotationEntity { Id = 1, Status = "sent" };
 
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
@@ -304,12 +303,12 @@ public class Quotation
     [Fact(DisplayName = "QUO_009 - Xác nhận báo giá thất bại khi không ở trạng thái Đã gửi")]
     public async Task ApproveQuotation_NotFromSent_ReturnsBadRequest()
     {
-        var handler = new ApproveQuotationCommandHandler(
+        var handler = new ApproveRejectQuotationCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new ApproveQuotationCommand(1);
+        var command = new ApproveRejectQuotationCommand(1, "approved");
         var quotation = new QuotationEntity { Id = 1, Status = "draft" };
 
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
@@ -319,18 +318,18 @@ public class Quotation
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
-        result.Error.Message.Should().Contain("Chỉ cho phép xác nhận báo giá ở trạng thái Đã gửi");
+        result.Error.Message.Should().Contain("Chỉ cho phép cập nhật báo giá ở trạng thái Đã gửi");
     }
 
     [Fact(DisplayName = "QUO_010 - Hủy báo giá thành công khi ở trạng thái Đã gửi")]
     public async Task RejectQuotation_FromSent_Success()
     {
-        var handler = new RejectQuotationCommandHandler(
+        var handler = new ApproveRejectQuotationCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new RejectQuotationCommand(1);
+        var command = new ApproveRejectQuotationCommand(1, "rejected");
         var quotation = new QuotationEntity { Id = 1, Status = "sent" };
 
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
@@ -349,12 +348,12 @@ public class Quotation
     [Fact(DisplayName = "QUO_011 - Hủy báo giá thất bại khi không ở trạng thái Đã gửi")]
     public async Task RejectQuotation_NotFromSent_ReturnsBadRequest()
     {
-        var handler = new RejectQuotationCommandHandler(
+        var handler = new ApproveRejectQuotationCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new RejectQuotationCommand(1);
+        var command = new ApproveRejectQuotationCommand(1, "rejected");
         var quotation = new QuotationEntity { Id = 1, Status = "approved" };
 
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
@@ -364,7 +363,7 @@ public class Quotation
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
-        result.Error.Message.Should().Contain("Chỉ cho phép hủy báo giá ở trạng thái Đã gửi");
+        result.Error.Message.Should().Contain("Chỉ cho phép cập nhật báo giá ở trạng thái Đã gửi");
     }
 
     [Fact(DisplayName = "QUO_012 - Cập nhật toàn bộ thông tin báo giá Nháp thành công")]
