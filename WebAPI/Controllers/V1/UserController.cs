@@ -5,7 +5,7 @@ using Application.Features.Users.Commands.ChangePassword;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
-using Application.Features.Users.Commands.UploadAvatar;
+using Application.Features.Users.Commands.UploadAvatarCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
 using Application.Features.Users.Queries.GetGenderOptions;
 using Asp.Versioning;
@@ -126,9 +126,8 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadAvatarAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        var command = new UploadAvatarCommand
+        var command = new UploadAvatarCurrentUserCommand
         {
-            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
             FileContent = file.OpenReadStream(),
             FileName = file.FileName
         };

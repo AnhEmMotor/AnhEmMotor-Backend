@@ -8,9 +8,9 @@ using Domain.Constants;
 using Domain.Entities;
 using MediatR;
 
-namespace Application.Features.Users.Commands.UploadAvatar;
+namespace Application.Features.Users.Commands.UploadAvatarCurrentUser;
 
-public class UploadAvatarCommandHandler(
+public class UploadAvatarCurrentUserCommandHandler(
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,
     IFileReadService fileReadService,
@@ -20,14 +20,12 @@ public class UploadAvatarCommandHandler(
     IMediaFileReadRepository mediaFileReadRepository,
     IMediaFileUpdateRepository mediaFileUpdateRepository,
     IUnitOfWork unitOfWork,
-    IUserStreamService userStreamService) : IRequestHandler<UploadAvatarCommand, Result<string>>
+    ICurrentUserContext currentUserContext,
+    IUserStreamService userStreamService) : IRequestHandler<UploadAvatarCurrentUserCommand, Result<string>>
 {
-    public async Task<Result<string>> Handle(UploadAvatarCommand request, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(UploadAvatarCurrentUserCommand request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
-        {
-            return Error.BadRequest("Invalid user ID.");
-        }
+        var userId = currentUserContext.GetUserId();
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {
@@ -84,7 +82,7 @@ public class UploadAvatarCommandHandler(
         return user.AvatarUrl;
     }
 
-    private string? ExtractStoragePath(string? publicUrl)
+    private static string? ExtractStoragePath(string? publicUrl)
     {
         if (string.IsNullOrEmpty(publicUrl))
             return null;
