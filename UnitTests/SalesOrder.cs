@@ -1447,7 +1447,7 @@ public class SalesOrder
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "SO_057 - UpdateOutputStatus from PaidProcessing to Refunding succeeds")]
+    [Fact(DisplayName = "SO_056 - UpdateOutputStatus from PaidProcessing to Refunding succeeds")]
     public async Task UpdateOutputStatus_PaidProcessingToRefunding_ShouldSucceed()
     {
         var outputId = 1;

@@ -1549,7 +1549,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact(DisplayName = "SO_071 - Tạo đơn hàng vượt quá giới hạn số lượng của thể loại sản phẩm")]
+    [Fact(DisplayName = "SO_105 - Tạo đơn hàng vượt quá giới hạn số lượng của thể loại sản phẩm")]
     public async Task CreateOutput_ExceedCategoryLimit_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];

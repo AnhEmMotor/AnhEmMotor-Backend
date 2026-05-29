@@ -50,18 +50,6 @@ public class SalesOrderSplitEndpoints
             .Should().Be($"HasPermission{viewUnconfirmedPermission}");
     }
 
-    [Fact(DisplayName = "SO_120 - SalesOrders không expose endpoint lấy tất cả đơn hàng")]
-    public void SalesOrdersController_ShouldNotExposeUnfilteredListEndpoint()
-    {
-        var rootGetMethods = typeof(SalesOrdersController)
-            .GetMethods(BindingFlags.Instance | BindingFlags.Public)
-            .Where(method => method.GetCustomAttributes<HttpGetAttribute>()
-                .Any(attribute => string.IsNullOrEmpty(attribute.Template)))
-            .Select(method => method.Name);
-
-        rootGetMethods.Should().BeEmpty();
-    }
-
     [Fact(DisplayName = "SO_118 - GetConfirmedOutputs trả về danh sách phiếu bán hàng đã xác nhận")]
     public async Task GetConfirmedOutputs_WithSieveModel_ReturnsConfirmedOutputs()
     {
@@ -108,6 +96,18 @@ public class SalesOrderSplitEndpoints
                 It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
                 It.IsAny<CancellationToken>()),
             Times.Once);
+    }
+
+    [Fact(DisplayName = "SO_120 - SalesOrders không expose endpoint lấy tất cả đơn hàng")]
+    public void SalesOrdersController_ShouldNotExposeUnfilteredListEndpoint()
+    {
+        var rootGetMethods = typeof(SalesOrdersController)
+            .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+            .Where(method => method.GetCustomAttributes<HttpGetAttribute>()
+                .Any(attribute => string.IsNullOrEmpty(attribute.Template)))
+            .Select(method => method.Name);
+
+        rootGetMethods.Should().BeEmpty();
     }
 
     [Fact(DisplayName = "SO_121 - GetConfirmedOutputs trả về lỗi khi mediator trả về thất bại")]
