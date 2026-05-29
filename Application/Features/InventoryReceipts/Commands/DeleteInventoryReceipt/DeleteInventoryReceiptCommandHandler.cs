@@ -25,7 +25,7 @@ public sealed class DeleteInventoryReceiptCommandHandler(
         }
         if (InventoryReceiptStatus.IsCannotDelete(InventoryReceipt.StatusId))
         {
-            return Result.Failure(Error.BadRequest($"Không cho phép xóa đơn hàng đã hoàn tất (Approve).", "StatusId"));
+            return Result.Failure(Error.BadRequest("Khi đã phê duyệt hoặc từ chối thì không được xoá phiếu.", "StatusId"));
         }
         if (!string.Equals(InventoryReceipt.StatusId, InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase))
         {
@@ -39,7 +39,7 @@ public sealed class DeleteInventoryReceiptCommandHandler(
             {
                 return Result.Failure(
                     Error.BadRequest(
-                        $"Để xóa đơn hàng ở trạng thái '{InventoryReceipt.StatusId}', bạn cần có thêm quyền phê duyệt (Approve/Reject).",
+                        $"Để xóa phiếu nhập ở trạng thái '{InventoryReceipt.StatusId}', bạn cần có quyền phê duyệt/từ chối (Approve/Reject).",
                         "StatusId"));
             }
         }

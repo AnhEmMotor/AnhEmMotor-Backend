@@ -9,8 +9,6 @@ public sealed record UpdateInventoryReceiptCommand : IRequest<Result<InventoryRe
 {
     public int Id { get; init; }
 
-    public string? StatusId { get; init; }
-
     public int? PurchaseRequestId { get; init; }
 
     public string? Notes { get; init; }

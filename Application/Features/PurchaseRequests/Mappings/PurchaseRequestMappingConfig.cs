@@ -73,6 +73,45 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                         0))
                                 .Sum(ii => ii.Count ?? 0)
                             : 0));
+
+            config.NewConfig<PurchaseRequest, ApprovedPurchaseRequestDetailResponse>()
+                .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? (!string.IsNullOrEmpty(src.CreatedByUser.FullName) ? src.CreatedByUser.FullName : src.CreatedByUser.UserName) : null)
+                .Map(
+                    dest => dest.ApprovedByName,
+                    src => src.ApprovedByUser != null ? (!string.IsNullOrEmpty(src.ApprovedByUser.FullName) ? src.ApprovedByUser.FullName : src.ApprovedByUser.UserName) : null)
+                .Map(dest => dest.Items, src => src.PurchaseRequestItems);
+
+            config.NewConfig<PurchaseRequestItem, ApprovedPurchaseRequestItemResponse>()
+                .Map(
+                    dest => dest.ProductName,
+                    src => src.ProductVariant != null
+                        ? (src.ProductVariant.Product != null
+                            ? $"{src.ProductVariant.Product.Name} {src.ProductVariant.VariantName}".Trim()
+                            : src.ProductVariant.VariantName)
+                        : null)
+                .Map(
+                    dest => dest.ProductVariantColorName,
+                    src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
+                .Map(
+                    dest => dest.UnimportedQuantity,
+                    src => src.Quantity -
+                        (src.InventoryReceiptInfos != null
+                            ? src.InventoryReceiptInfos
+                                .Where(
+                                    ii => ii.InventoryReceiptReceipt != null &&
+                                                    (string.Compare(
+                                                            ii.InventoryReceiptReceipt.StatusId,
+                                                            Domain.Constants.InventoryReceiptStatus.Approve) ==
+                                                        0))
+                                .Sum(ii => ii.Count ?? 0)
+                            : 0))
+                .Map(
+                    dest => dest.NeedVin,
+                    src => src.ProductVariant != null &&
+                           src.ProductVariant.Product != null &&
+                           src.ProductVariant.Product.ProductCategory != null &&
+                           string.Compare(src.ProductVariant.Product.ProductCategory.ManagementType, Domain.Constants.Product.ProductManagementType.VinNumber, StringComparison.OrdinalIgnoreCase) == 0);
         }
     }
 }
+

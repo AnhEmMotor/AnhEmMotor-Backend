@@ -483,6 +483,142 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
         string.Compare(responseData.ApprovedByName, adminUser.FullName).Should().Be(0);
     }
 
+    [Fact(DisplayName = "PR_039 - Integration: Lấy chi tiết PR đã duyệt thành công")]
+    public async Task PR_039_GetApprovedPurchaseRequestById_Integration_Success()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [Domain.Constants.Permission.Permissions.InventoryReceipts.Create],
+            TestContext.Current.CancellationToken,
+            email)
+            .ConfigureAwait(true);
+
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+
+        var variantId = await SeedProductVariantAsync().ConfigureAwait(true);
+        int purchaseRequestId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var purchaseRequest = new PurchaseRequestEntities
+            {
+                Status = "approve",
+                Note = "Approved Details Test PR Note",
+                CreatedBy = user.Id,
+                ApprovedBy = user.Id,
+                PurchaseRequestItems =
+                [
+                    new Domain.Entities.PurchaseRequestItem
+                    {
+                        ProductVariantId = variantId,
+                        Quantity = 10
+                    }
+                ]
+            };
+            db.Set<PurchaseRequestEntities>().Add(purchaseRequest);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            purchaseRequestId = purchaseRequest.Id;
+        }
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/purchase-requests/approved/{purchaseRequestId}");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var responseData = await response.Content
+            .ReadFromJsonAsync<ApprovedPurchaseRequestDetailResponse>(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        responseData.Should().NotBeNull();
+        responseData!.Id.Should().Be(purchaseRequestId);
+        string.Compare(responseData.Note, "Approved Details Test PR Note").Should().Be(0);
+        responseData.Items.Should().ContainSingle();
+        responseData.Items[0].UnimportedQuantity.Should().Be(10);
+    }
+
+    [Fact(DisplayName = "PR_040 - Integration: Lấy chi tiết PR chưa duyệt báo lỗi")]
+    public async Task PR_040_GetApprovedPurchaseRequestById_NotApproved_ReturnsBadRequest()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [Domain.Constants.Permission.Permissions.InventoryReceipts.Create],
+            TestContext.Current.CancellationToken,
+            email)
+            .ConfigureAwait(true);
+
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+
+        int purchaseRequestId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var purchaseRequest = new PurchaseRequestEntities
+            {
+                Status = "draft",
+                Note = "Draft PR Note",
+                CreatedBy = user.Id
+            };
+            db.Set<PurchaseRequestEntities>().Add(purchaseRequest);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            purchaseRequestId = purchaseRequest.Id;
+        }
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/purchase-requests/approved/{purchaseRequestId}");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact(DisplayName = "PR_041 - Integration: Lấy chi tiết PR không tồn tại báo lỗi")]
+    public async Task PR_041_GetApprovedPurchaseRequestById_NotFound_ReturnsNotFound()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [Domain.Constants.Permission.Permissions.InventoryReceipts.Create],
+            TestContext.Current.CancellationToken,
+            email)
+            .ConfigureAwait(true);
+
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/purchase-requests/approved/-1");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }

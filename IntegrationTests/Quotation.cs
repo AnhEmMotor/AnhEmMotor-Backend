@@ -1,4 +1,5 @@
 using Application.ApiContracts.Quotation.Responses;
+using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Features.Quotations.Commands.CreateQuotation;
 using Application.Features.Quotations.Commands.UpdateQuotation;
 using Domain.Constants.Permission.Permissions;
@@ -584,6 +585,65 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         var dbQuotation = await assertDb.Quotations
             .FirstOrDefaultAsync(q => q.Id == quotation.Id, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        dbQuotation.Should().NotBeNull();
+    }
+
+    [Fact(DisplayName = "PR_042 - Integration: Lấy danh sách báo giá đã duyệt theo variantId và colorId")]
+    public async Task PR_042_GetApprovedPricesForVariant_Integration_Success()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "Password123!";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [Quotations.View, Domain.Constants.Permission.Permissions.InventoryReceipts.Create],
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+        
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        
+        var quotation = new QuotationEntity
+        {
+            SupplierId = seeded.Supplier.Id,
+            Status = "approved",
+            QuotationProductRows =
+            [
+                new Domain.Entities.QuotationProductRow
+                {
+                    ProductVariantId = seeded.Variant.Id,
+                    ProductVariantColorId = seeded.Color.Id,
+                    QuotePrice = 120000,
+                    Note = "Approved Price Note"
+                }
+            ]
+        };
+        db.Quotations.Add(quotation);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+
+        var response = await _client.GetAsync(
+            $"/api/v1/Quotations/approved-prices?variantId={seeded.Variant.Id}&colorId={seeded.Color.Id}",
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var data = await response.Content
+            .ReadFromJsonAsync<List<PurchaseRequestQuotedPriceResponse>>(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        data.Should().NotBeNull();
+        data.Should().ContainSingle();
+        data[0].ProductVariantId.Should().Be(seeded.Variant.Id);
+        data[0].ProductVariantColorId.Should().Be(seeded.Color.Id);
+        data[0].QuotePrice.Should().Be(120000);
+        string.Compare(data[0].Note, "Approved Price Note").Should().Be(0);
     }
 }

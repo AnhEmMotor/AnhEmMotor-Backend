@@ -56,6 +56,7 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .Include(x => x.PurchaseRequestItems)
                 .ThenInclude(r => r.ProductVariant)
                 .ThenInclude(pv => pv!.Product)
+                .ThenInclude(p => p!.ProductCategory)
                 .Include(x => x.PurchaseRequestItems)
                 .ThenInclude(r => r.ProductVariantColor)
                 .Include(x => x.PurchaseRequestItems)
@@ -85,6 +86,7 @@ namespace Infrastructure.Repositories.PurchaseRequest
             return context.PurchaseRequestItems
                 .Include(x => x.ProductVariant)
                 .ThenInclude(pv => pv!.Product)
+                .ThenInclude(p => p!.ProductCategory)
                 .Include(x => x.ProductVariantColor)
                 .Where(x => ids.Contains(x.Id))
                 .ToListAsync(cancellationToken);

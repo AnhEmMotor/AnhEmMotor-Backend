@@ -73,7 +73,7 @@ namespace Infrastructure.Repositories.Quotation
                 .ThenInclude(q => q!.Supplier)
                 .Where(
                     r => r.QuotationReceipt != null &&
-                        r.QuotationReceipt.Status == "approve" &&
+                        r.QuotationReceipt.Status == "approved" &&
                         r.ProductVariantId != null &&
                         variantIds.Contains(r.ProductVariantId.Value))
                 .ToListAsync(cancellationToken);

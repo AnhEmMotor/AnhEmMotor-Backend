@@ -8,6 +8,7 @@ using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptNote
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
+using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.Quotation;
@@ -44,6 +45,7 @@ public class InventoryReceipts
     private readonly Mock<IVehicleReadRepository> _vehicleReadRepoMock;
     private readonly Mock<ICurrentUserContext> _currentUserContextMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IPermissionReadRepository> _permissionRepoMock;
 
     public InventoryReceipts()
     {
@@ -58,6 +60,7 @@ public class InventoryReceipts
         _vehicleReadRepoMock = new Mock<IVehicleReadRepository>();
         _currentUserContextMock = new Mock<ICurrentUserContext>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _permissionRepoMock = new Mock<IPermissionReadRepository>();
     }
 
     #pragma warning disable IDE0079 
@@ -388,6 +391,7 @@ public class InventoryReceipts
             _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
+            _permissionRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
 
@@ -431,6 +435,7 @@ public class InventoryReceipts
             _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
+            _permissionRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
 

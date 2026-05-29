@@ -46,7 +46,18 @@ namespace Domain.Constants
         {
             if (string.IsNullOrWhiteSpace(value))
                 return true;
-            return string.Equals(value, Approve, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(value, Approve, StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(value, Reject, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsDraft(string? value)
+        {
+            return string.Equals(value, Draft, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsSent(string? value)
+        {
+            return string.Equals(value, Sent, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

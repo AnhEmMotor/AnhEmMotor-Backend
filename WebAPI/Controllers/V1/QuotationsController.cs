@@ -9,6 +9,8 @@ using Application.Features.Quotations.Commands.UpdateQuotation;
 using Application.Features.Quotations.Queries.GetQuotationById;
 using Application.Features.Quotations.Queries.GetQuotationsList;
 using Application.Features.Quotations.Queries.GetQuotationStatusList;
+using Application.Features.Quotations.Queries.GetApprovedPricesForVariant;
+using Application.ApiContracts.PurchaseRequest.Responses;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -167,6 +169,26 @@ namespace WebAPI.Controllers.V1
         {
             var command = new DeleteQuotationCommand { Id = id };
             var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy danh sách các giá báo giá đã được approve của biến thể và màu sắc đó.
+        /// </summary>
+        /// <param name="variantId">ID biến thể sản phẩm.</param>
+        /// <param name="colorId">ID màu sắc biến thể (không bắt buộc).</param>
+        /// <param name="cancellationToken">Token hủy bỏ.</param>
+        /// <returns>Danh sách báo giá đã được phê duyệt.</returns>
+        [HttpGet("approved-prices")]
+        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [ProducesResponseType(typeof(List<PurchaseRequestQuotedPriceResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetApprovedPricesAsync(
+            [FromQuery] int variantId,
+            [FromQuery] int? colorId,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetApprovedPricesForVariantQuery(variantId, colorId);
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
     }

@@ -13,6 +13,7 @@ using Domain.Constants.Order;
 using Domain.Entities;
 using Mapster;
 using MediatR;
+using Application.Interfaces.Repositories.Permission;
 using System.Text.RegularExpressions;
 
 namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
@@ -25,6 +26,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
     IQuotationReadRepository quotationRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
+    IPermissionReadRepository permissionRepository,
     IUnitOfWork unitOfWork,
     ICurrentUserContext currentUserContext) : IRequestHandler<UpdateInventoryReceiptCommand, Result<InventoryReceiptDetailResponse?>>
 {
@@ -46,28 +48,32 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         }
         if (Domain.Constants.InventoryReceiptStatus.IsCannotEdit(InventoryReceipt.StatusId))
         {
-            if (request.Products.Count != 0)
+            return Error.BadRequest("Khi đã phê duyệt hoặc từ chối thì không được sửa phiếu.", "StatusId");
+        }
+
+        Guid userId = currentUserContext.GetUserId();
+        if (string.Equals(InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent, StringComparison.OrdinalIgnoreCase))
+        {
+            var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
+                userId,
+                [Domain.Constants.Permission.Permissions.InventoryReceipts.ApproveReject],
+                cancellationToken)
+                .ConfigureAwait(false);
+            if (!hasApprovePermission)
             {
-                return Error.BadRequest(
-                    "Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy.",
-                    "Products");
+                return Error.BadRequest("Chỉ người có quyền phê duyệt/từ chối mới được sửa phiếu nhập ở trạng thái đã gửi.", "StatusId");
             }
-            if (request.PurchaseRequestId != null && request.PurchaseRequestId != InventoryReceipt.PurchaseRequestId)
+        }
+        else if (string.Equals(InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase))
+        {
+            var hasEditOrApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
+                userId,
+                [Domain.Constants.Permission.Permissions.InventoryReceipts.Edit, Domain.Constants.Permission.Permissions.InventoryReceipts.ApproveReject],
+                cancellationToken)
+                .ConfigureAwait(false);
+            if (!hasEditOrApprovePermission)
             {
-                var pr = await prReadRepository.GetByIdAsync(request.PurchaseRequestId.Value, cancellationToken)
-                    .ConfigureAwait(false);
-                if (pr is null)
-                {
-                    return Error.NotFound(
-                        $"Yêu cầu mua hàng {request.PurchaseRequestId} không tồn tại hoặc đã bị xóa.",
-                        "PurchaseRequestId");
-                }
-                if (!string.Equals(pr.Status, "approve", StringComparison.OrdinalIgnoreCase))
-                {
-                    return Error.BadRequest(
-                        $"Yêu cầu mua hàng {request.PurchaseRequestId} chưa được phê duyệt.",
-                        "PurchaseRequestId");
-                }
+                return Error.BadRequest("Bạn không có quyền chỉnh sửa phiếu nhập này.", "StatusId");
             }
         }
         var prItemIds = request.Products
@@ -188,15 +194,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         if (!string.IsNullOrEmpty(InventoryReceipt.Notes))
         {
             InventoryReceipt.Notes = HtmlTagRegex().Replace(InventoryReceipt.Notes, string.Empty);
-        }
-        if (string.Equals(
-            request.StatusId,
-            Domain.Constants.InventoryReceiptStatus.Approve,
-            StringComparison.OrdinalIgnoreCase))
-        {
-            var currentUserId = currentUserContext.GetUserId();
-            InventoryReceipt.InventoryReceiptDate = DateTimeOffset.UtcNow;
-            InventoryReceipt.ConfirmedBy = currentUserId;
         }
         var existingInfoDict = InventoryReceipt.InventoryReceiptInfos.ToDictionary(ii => ii.Id);
         var requestInfoDict = request.Products.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);

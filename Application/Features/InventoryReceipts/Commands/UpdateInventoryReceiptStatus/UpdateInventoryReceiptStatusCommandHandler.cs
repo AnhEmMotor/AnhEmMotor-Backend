@@ -28,13 +28,14 @@ public sealed class UpdateInventoryReceiptStatusCommandHandler(
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
-        if (InventoryReceiptStatus.IsCannotEdit(InventoryReceipt.StatusId))
+        if (!string.Equals(InventoryReceipt.StatusId, InventoryReceiptStatus.Sent, StringComparison.OrdinalIgnoreCase))
         {
-            return Error.BadRequest("Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy.", "StatusId");
+            return Error.BadRequest("Chỉ có thể duyệt hoặc từ chối phiếu nhập đang ở trạng thái đã gửi (sent).", "StatusId");
         }
-        if (!InventoryReceiptStatus.IsValid(request.StatusId))
+        if (!string.Equals(request.StatusId, InventoryReceiptStatus.Approve, StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(request.StatusId, InventoryReceiptStatus.Reject, StringComparison.OrdinalIgnoreCase))
         {
-            return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
+            return Error.BadRequest("Trạng thái mới phải là phê duyệt (approve) hoặc từ chối (reject).", "StatusId");
         }
         InventoryReceipt.StatusId = request.StatusId;
         if (string.Equals(request.StatusId, InventoryReceiptStatus.Approve, StringComparison.OrdinalIgnoreCase))

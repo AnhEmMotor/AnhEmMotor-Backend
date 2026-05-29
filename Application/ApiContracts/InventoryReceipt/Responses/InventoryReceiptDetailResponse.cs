@@ -5,17 +5,11 @@ public class InventoryReceiptDetailResponse
 {
     public int? Id { get; set; }
 
+    public int? PurchaseRequestId { get; set; }
+
     public string? Notes { get; set; }
 
     public string? StatusId { get; set; }
-
-    public int? SupplierId { get; set; }
-
-    public string? SupplierName { get; set; }
-
-    public string? SupplierPhone { get; set; }
-
-    public string? SupplierEmail { get; set; }
 
     public DateTimeOffset? CreatedAt { get; set; }
 

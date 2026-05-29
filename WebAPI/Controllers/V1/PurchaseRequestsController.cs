@@ -9,8 +9,8 @@ using Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequests;
 using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequests;
+using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequestById;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;
-using Application.Features.PurchaseRequests.Queries.GetQuotedPricesForPR;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -167,6 +167,21 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
+        /// Lấy chi tiết yêu cầu mua hàng đã duyệt theo ID.
+        /// </summary>
+        [HttpGet("approved/{id:int}")]
+        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [ProducesResponseType(typeof(ApprovedPurchaseRequestDetailResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetApprovedByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetApprovedPurchaseRequestByIdQuery(id), cancellationToken)
+                .ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
         /// Lấy chi tiết yêu cầu mua hàng theo ID.
         /// </summary>
         [HttpGet("{id:int}")]
@@ -177,19 +192,6 @@ namespace WebAPI.Controllers.V1
         {
             var result = await mediator.Send(new GetPurchaseRequestByIdQuery(id), cancellationToken)
                 .ConfigureAwait(true);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Lấy danh sách các giá báo giá hợp lệ cho các mặt hàng trong PR.
-        /// </summary>
-        [HttpGet("{id:int}/quoted-prices")]
-        [HasPermission(PurchaseRequests.View)]
-        [ProducesResponseType(typeof(List<PurchaseRequestQuotedPriceResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetQuotedPricesAsync(int id, CancellationToken cancellationToken)
-        {
-            var result = await mediator.Send(new GetQuotedPricesForPRQuery(id), cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
     }
