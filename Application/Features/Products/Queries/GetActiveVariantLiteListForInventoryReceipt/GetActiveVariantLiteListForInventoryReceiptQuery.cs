@@ -23,11 +23,20 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInven
         public static GetActiveVariantLiteListForInventoryReceiptQuery FromRequest(SieveModel request)
         {
             var search = ExtractFilterValue(request.Filters, "search");
+            var displayName = ExtractFilterValue(request.Filters, "DisplayName");
+            if (string.IsNullOrWhiteSpace(search) && !string.IsNullOrWhiteSpace(displayName))
+            {
+                search = displayName;
+            }
+
             var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(
                     ',',
                     StringSplitOptions.RemoveEmptyEntries)
                     .ToList() ??
                 [];
+
+            var cleanFilters = RemoveFilter(request.Filters, "DisplayName");
+
             return new GetActiveVariantLiteListForInventoryReceiptQuery
             {
                 Page = request.Page ?? 1,
@@ -35,8 +44,28 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInven
                 Search = search,
                 StatusIds = statusIds,
                 Sorts = request.Sorts,
-                Filters = request.Filters
+                Filters = cleanFilters
             };
+        }
+
+        private static string? RemoveFilter(string? filters, string key)
+        {
+            if (string.IsNullOrWhiteSpace(filters))
+            {
+                return null;
+            }
+            var parts = filters.Split(',');
+            var remainingParts = new List<string>();
+            foreach (var part in parts)
+            {
+                var keyValue = part.Split(['=', '@', '!'], 2);
+                if (keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                remainingParts.Add(part);
+            }
+            return remainingParts.Count > 0 ? string.Join(",", remainingParts) : null;
         }
 
         private static string? ExtractFilterValue(string? filters, string key)

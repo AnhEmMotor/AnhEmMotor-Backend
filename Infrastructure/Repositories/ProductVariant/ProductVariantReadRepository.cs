@@ -119,6 +119,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 query = query.Where(
                     v => v.Product != null &&
                         (EF.Functions.Like(v.Product.Name!, searchPattern) ||
+                            (v.VariantName != null && EF.Functions.Like(v.VariantName, searchPattern)) ||
                             v.VariantOptionValues
                                 .Any(
                                     vov => vov.OptionValue != null &&
