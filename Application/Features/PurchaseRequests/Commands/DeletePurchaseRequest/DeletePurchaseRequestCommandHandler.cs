@@ -30,7 +30,7 @@ namespace Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest
             if (!string.Equals(pr.Status, "draft", StringComparison.OrdinalIgnoreCase))
             {
                 var userId = currentUserContext.GetUserId();
-                if (!await permissionReadRepository.CheckUserPermissionsAsync(userId, [Domain.Constants.Permission.Permissions.PurchaseRequests.ApproveReject], cancellationToken))
+                if (!await permissionReadRepository.CheckUserPermissionsAsync(userId, [Domain.Constants.Permission.Permissions.PurchaseRequests.ApproveReject], cancellationToken).ConfigureAwait(false))
                 {
                     return Result.Failure(Error.BadRequest($"Để xóa yêu cầu mua hàng ở trạng thái '{pr.Status}', bạn cần có thêm quyền phê duyệt (Approve/Reject).", "Status"));
                 }

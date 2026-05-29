@@ -3,7 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Constants.InventoryReceipt;
 using MediatR;
 
 namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
@@ -26,7 +25,7 @@ public sealed class DeleteManySuppliersCommandHandler(
         var relevantInventoryReceipts = await InventoryReceiptReadRepository.GetBySupplierIdsAsync(uniqueIds, cancellationToken)
             .ConfigureAwait(false);
         var suppliersWithWorkingInventoryReceiptsSet = relevantInventoryReceipts
-            .Where(x => string.Compare(x.StatusId, InventoryReceiptStatus.Working) == 0)
+            .Where(x => InventoryReceiptStatus.IsCanEdit(x.StatusId))
             .SelectMany(x => x.InventoryReceiptInfos
                 .Where(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.SupplierId.HasValue)
                 .Select(ii => ii.QuotationProductRow!.QuotationReceipt!.SupplierId!.Value))

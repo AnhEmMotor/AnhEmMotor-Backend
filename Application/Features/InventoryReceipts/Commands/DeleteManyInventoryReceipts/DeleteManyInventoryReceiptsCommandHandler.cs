@@ -1,7 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
-using Domain.Constants.InventoryReceipt;
+using Domain.Constants;
 using MediatR;
 
 namespace Application.Features.InventoryReceipts.Commands.DeleteManyInventoryReceipts;

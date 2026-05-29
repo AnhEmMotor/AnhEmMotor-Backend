@@ -38,8 +38,8 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
             }
 
             var currentStatus = quotation.Status?.ToLower();
-            if (currentStatus == "sent")
-            {
+            if (string.Compare(currentStatus, QuotationType.Sent) == 0)
+             {
                 Guid userId = currentUserContext.GetUserId();
                 var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                     userId,
@@ -53,7 +53,7 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                 }
             }
 
-            if (currentStatus == "approved" || currentStatus == "rejected")
+            if (string.Compare(currentStatus, QuotationType.Approved) == 0 || string.Compare(currentStatus, QuotationType.Rejected) == 0)
             {
                 if (request.SupplierId.HasValue && request.SupplierId.Value != quotation.SupplierId)
                 {
@@ -77,7 +77,7 @@ namespace Application.Features.Quotations.Commands.UpdateQuotation
                         match.ProductVariantId != int.Parse(incomingRow.ProductVariantId!) ||
                         match.ProductVariantColorId != (string.IsNullOrEmpty(incomingRow.ProductVarientColorId) ? null : int.Parse(incomingRow.ProductVarientColorId)) ||
                         match.QuotePrice != incomingRow.QuotePrice ||
-                        match.Note != incomingRow.Note)
+                        string.Compare(match.Note, incomingRow.Note) != 0)
                     {
                         return Error.BadRequest("Chỉ cho phép cập nhật ghi chú cho báo giá đã được xác nhận hoặc hủy.", "Products");
                     }

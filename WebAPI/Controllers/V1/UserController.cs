@@ -141,7 +141,7 @@ public class UserController(IMediator mediator) : ApiController
     [HttpGet("gender-options")]
     [Authorize]
     [ProducesResponseType(typeof(IEnumerable<GenderOptionResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetGenderOptions(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetGenderOptionsAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetGenderOptionsQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);

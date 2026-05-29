@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Services;
 using Domain.Constants;
-using Domain.Constants.InventoryReceipt;
 using Mapster;
 using MediatR;
 
@@ -38,7 +37,7 @@ public sealed class UpdateInventoryReceiptStatusCommandHandler(
             return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
         InventoryReceipt.StatusId = request.StatusId;
-        if (string.Equals(request.StatusId, InventoryReceiptStatus.Finish, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(request.StatusId, InventoryReceiptStatus.Approve, StringComparison.OrdinalIgnoreCase))
         {
             var currentUserId = currentUserContext.GetUserId();
             InventoryReceipt.InventoryReceiptDate = DateTimeOffset.UtcNow;

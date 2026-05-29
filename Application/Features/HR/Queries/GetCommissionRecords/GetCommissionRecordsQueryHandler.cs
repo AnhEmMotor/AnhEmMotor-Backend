@@ -9,7 +9,8 @@ public class GetCommissionRecordsQueryHandler(ICommissionReadRepository reposito
 {
     public async Task<Result<List<CommissionRecord>>> Handle(GetCommissionRecordsQuery request, CancellationToken cancellationToken)
     {
-        return await repository.GetRecordsAsync(cancellationToken).ConfigureAwait(false);
+        var records = await repository.GetRecordsAsync(cancellationToken).ConfigureAwait(false);
+
+        return records;
     }
 }
-

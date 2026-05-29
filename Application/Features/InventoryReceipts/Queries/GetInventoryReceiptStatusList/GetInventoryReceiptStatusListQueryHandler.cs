@@ -1,5 +1,5 @@
 using Application.Common.Models;
-using Domain.Constants.InventoryReceipt;
+using Domain.Constants;
 using MediatR;
 
 namespace Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStatusList;
@@ -7,7 +7,12 @@ namespace Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStat
 public sealed class GetInventoryReceiptStatusListQueryHandler : IRequestHandler<GetInventoryReceiptStatusListQuery, Result<Dictionary<string, string>>>
 {
     private static readonly Dictionary<string, string> Statuses = new()
-    { { InventoryReceiptStatus.Working, "Phiếu tạm" }, { InventoryReceiptStatus.Finish, "Hoàn thành" }, { InventoryReceiptStatus.Cancel, "Đã huỷ" }, };
+    {
+        { InventoryReceiptStatus.Draft, "Phiếu tạm" },
+        { InventoryReceiptStatus.Sent, "Đã gửi" },
+        { InventoryReceiptStatus.Approve, "Đã duyệt" },
+        { InventoryReceiptStatus.Reject, "Đã từ chối" }
+    };
 
     public Task<Result<Dictionary<string, string>>> Handle(
         GetInventoryReceiptStatusListQuery request,

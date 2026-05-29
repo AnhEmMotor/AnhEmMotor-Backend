@@ -2,7 +2,6 @@ using Application.ApiContracts.Supplier.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Constants.InventoryReceipt;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +27,7 @@ public class SupplierReadRepository(
         return context.GetQuery<SupplierEntity>(mode)
             .GroupJoin(
                 context.GetQuery<Domain.Entities.InventoryReceiptInfo>(DataFetchMode.ActiveOnly)
-                    .Where(ii => ii.InventoryReceiptReceipt != null && ii.InventoryReceiptReceipt.StatusId == InventoryReceiptStatus.Finish),
+                    .Where(ii => ii.InventoryReceiptReceipt != null && ii.InventoryReceiptReceipt.StatusId == InventoryReceiptStatus.Approve),
                 supplier => (int?)supplier.Id,
                 InventoryReceiptInfo => InventoryReceiptInfo.QuotationProductRow != null && InventoryReceiptInfo.QuotationProductRow.QuotationReceipt != null ? InventoryReceiptInfo.QuotationProductRow.QuotationReceipt.SupplierId : null,
                 (supplier, InventoryReceiptInfos) => new { supplier, InventoryReceiptInfos })

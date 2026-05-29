@@ -32,6 +32,7 @@ public class VehicleController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Lấy chi tiết xe của khách hàng")]
     public async Task<IActionResult> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         return Ok(new VehicleResponse { Id = id });
     }
 

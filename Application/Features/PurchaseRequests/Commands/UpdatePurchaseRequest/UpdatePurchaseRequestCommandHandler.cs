@@ -44,7 +44,7 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
             if (string.Equals(pr.Status, "sent", StringComparison.OrdinalIgnoreCase))
             {
                 var userId = currentUserContext.GetUserId();
-                if (!await permissionReadRepository.CheckUserPermissionsAsync(userId, [Domain.Constants.Permission.Permissions.PurchaseRequests.ApproveReject], cancellationToken))
+                if (!await permissionReadRepository.CheckUserPermissionsAsync(userId, [Domain.Constants.Permission.Permissions.PurchaseRequests.ApproveReject], cancellationToken).ConfigureAwait(false))
                 {
                     return Error.BadRequest("Bạn không có quyền chỉnh sửa yêu cầu mua hàng khi đã ở trạng thái Sent.", "Status");
                 }

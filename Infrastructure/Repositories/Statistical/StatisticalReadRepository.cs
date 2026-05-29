@@ -1,6 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Interfaces.Repositories.Statistical;
-using Domain.Constants.InventoryReceipt;
+using Domain.Constants;
 using Domain.Constants.Order;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -297,7 +297,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var confirmedInventoryReceipts = await context.InventoryReceiptInfos
             .IgnoreQueryFilters()
             .Join(context.InventoryReceiptReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
-            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Finish) == 0)
+            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
             .GroupBy(x => x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
@@ -351,7 +351,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var oldInventoryReceiptVariants = await context.InventoryReceiptInfos
             .IgnoreQueryFilters()
             .Join(context.InventoryReceiptReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
-            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Finish) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
+            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
             .Select(x => x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Distinct()
             .ToListAsync(cancellationToken)
@@ -576,7 +576,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var confirmedInventoryReceipts = await context.InventoryReceiptInfos
             .IgnoreQueryFilters()
             .Join(context.InventoryReceiptReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
-            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Finish) == 0)
+            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
             .GroupBy(x => x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
@@ -635,7 +635,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var confirmedInventoryReceipts = await context.InventoryReceiptInfos
             .Join(context.InventoryReceiptReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
             .Where(
-                x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Finish) == 0 &&
+                x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
                     x.i.DeletedAt == null)
             .GroupBy(x => x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
@@ -717,7 +717,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var confirmedInventoryReceipts = await context.InventoryReceiptInfos
             .Join(context.InventoryReceiptReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
             .Where(
-                x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Finish) == 0 &&
+                x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
                     x.i.DeletedAt == null)
             .GroupBy(x => x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
@@ -790,7 +790,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var totalInventoryReceipt = await context.InventoryReceiptInfos
                 .IgnoreQueryFilters()
                 .Join(context.InventoryReceiptReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
-                .Where(x => (x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null)) == variantId && string.Compare(x.i.StatusId, InventoryReceiptStatus.Finish) == 0)
+                .Where(x => (x.ii.QuotationProductRow != null ? x.ii.QuotationProductRow.ProductVariantId : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null)) == variantId && string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
                 .SumAsync(x => (long?)(x.ii.Count ?? 0), cancellationToken)
                 .ConfigureAwait(false) ??
             0;

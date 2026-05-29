@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.InventoryReceipt.Requests;
+using Application.ApiContracts.InventoryReceipt.Requests;
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
@@ -8,8 +8,6 @@ using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
-using Domain.Constants;
-using Domain.Constants.InventoryReceipt;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;

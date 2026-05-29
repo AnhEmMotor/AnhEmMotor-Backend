@@ -3,7 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Services;
-using Domain.Constants.InventoryReceipt;
+using Domain.Constants;
 using MediatR;
 
 namespace Application.Features.InventoryReceipts.Commands.DeleteInventoryReceipt;

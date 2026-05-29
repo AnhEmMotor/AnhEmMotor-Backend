@@ -30,7 +30,7 @@ namespace Application.Features.Quotations.Mappings
             config.NewConfig<QuotationProductRow, QuotationItemResponse>()
                 .Map(dest => dest.ProductVariantDisplayName, src => src.ProductVariant != null 
                     ? (src.ProductVariant.Product != null 
-                        ? (src.ProductVariant.Product.Name + " " + src.ProductVariant.VariantName).Trim() 
+                        ? $"{src.ProductVariant.Product.Name} {src.ProductVariant.VariantName}".Trim() 
                         : src.ProductVariant.VariantName) 
                     : null)
                 .Map(dest => dest.ProductVariantColorDisplayName, src => src.ProductVariantColor != null 

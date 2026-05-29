@@ -5,7 +5,6 @@ using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Product;
 using Mapster;
 using MediatR;
@@ -86,7 +85,7 @@ public sealed class CloneInventoryReceiptCommandHandler(
         {
             Notes = originalInventoryReceipt.Notes,
             PurchaseRequestId = originalInventoryReceipt.PurchaseRequestId,
-            StatusId = InventoryReceiptStatus.Working,
+            StatusId = InventoryReceiptStatus.Draft,
             InventoryReceiptInfos = validProducts,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow

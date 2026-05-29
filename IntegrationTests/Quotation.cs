@@ -46,16 +46,16 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
     private async Task<(SupplierEntity Supplier, ProductVariant Variant, ProductVariantColor Color)> SeedBaseDataAsync(
         ApplicationDBContext db,
-        string uniqueId)
+        string uniqueId, CancellationToken cancellationToken)
     {
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
-        if (!await db.SupplierStatuses.AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken).ConfigureAwait(true))
+        if (!await db.SupplierStatuses.AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, cancellationToken).ConfigureAwait(true))
         {
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         }
 
         var productStatusId = Domain.Constants.Product.ProductStatus.ForSale;
-        if (!await db.ProductStatuses.AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken).ConfigureAwait(true))
+        if (!await db.ProductStatuses.AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, cancellationToken).ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         }
@@ -132,7 +132,7 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var seeded = await SeedBaseDataAsync(db, uniqueId).ConfigureAwait(true);
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var command = new CreateQuotationCommand
         {
@@ -211,7 +211,7 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var seeded = await SeedBaseDataAsync(db, uniqueId).ConfigureAwait(true);
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var quotation = new QuotationEntity
         {
@@ -249,7 +249,7 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var seeded = await SeedBaseDataAsync(db, uniqueId).ConfigureAwait(true);
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var quotation = new QuotationEntity
         {
@@ -309,7 +309,7 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var seeded = await SeedBaseDataAsync(db, uniqueId).ConfigureAwait(true);
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var quotation = new QuotationEntity
         {
@@ -350,7 +350,7 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var seeded = await SeedBaseDataAsync(db, uniqueId).ConfigureAwait(true);
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var quotation = new QuotationEntity
         {
@@ -395,7 +395,7 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var seeded = await SeedBaseDataAsync(db, uniqueId).ConfigureAwait(true);
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var quotation = new QuotationEntity
         {
@@ -456,7 +456,7 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var seeded = await SeedBaseDataAsync(db, uniqueId).ConfigureAwait(true);
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var quotation = new QuotationEntity
         {
@@ -515,7 +515,7 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var seeded = await SeedBaseDataAsync(db, uniqueId).ConfigureAwait(true);
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var quotation = new QuotationEntity
         {
@@ -554,7 +554,7 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var seeded = await SeedBaseDataAsync(db, uniqueId).ConfigureAwait(true);
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var quotation = new QuotationEntity
         {
@@ -593,7 +593,7 @@ public class Quotation : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var seeded = await SeedBaseDataAsync(db, uniqueId).ConfigureAwait(true);
+        var seeded = await SeedBaseDataAsync(db, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var quotation = new QuotationEntity
         {

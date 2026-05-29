@@ -8,7 +8,6 @@ using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Repositories.Quotation;
 using Domain.Constants;
-using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Mapster;
 using MediatR;
@@ -171,7 +170,7 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
         {
             InventoryReceipt.Notes = HtmlTagRegex().Replace(InventoryReceipt.Notes, string.Empty);
         }
-        InventoryReceipt.StatusId = InventoryReceiptStatus.Working;
+        InventoryReceipt.StatusId = InventoryReceiptStatus.Draft;
         var InventoryReceiptInfos = new List<InventoryReceiptInfoEntity>();
         foreach (var p in request.Products)
         {

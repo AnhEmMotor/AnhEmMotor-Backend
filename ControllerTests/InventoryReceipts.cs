@@ -13,8 +13,6 @@ using Application.Features.InventoryReceipts.Queries.GetDeletedInventoryReceipts
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptById;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsList;
-using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStatusList;
-using Domain.Constants.InventoryReceipt;
 using Domain.Primitives;
 using FluentAssertions;
 using FluentValidation;

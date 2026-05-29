@@ -1,6 +1,6 @@
 using System;
 
-namespace Domain.Constants.InventoryReceipt
+namespace Domain.Constants
 {
     public static class InventoryReceiptStatus
     {
@@ -9,15 +9,10 @@ namespace Domain.Constants.InventoryReceipt
         public const string Approve = "approve";
         public const string Reject = "reject";
 
-        // Maintain legacy values to prevent mapping errors if they are referenced elsewhere, but transition to new ones
-        public const string Working = "draft";
-        public const string Finish = "approve";
-        public const string Cancel = "reject";
-
-        public static readonly string[] AllowedValues = [Draft, Sent, Approve, Reject, "working", "finished", "cancelled"];
-        public static readonly string[] FinishInventoryReceiptValues = [Approve, "finished"];
-        public static readonly string[] WorkingInventoryReceiptValues = [Draft, Sent, "working"];
-        public static readonly string[] NotEditInventoryReceiptValues = [Approve, Reject, "finished", "cancelled"];
+        public static readonly string[] AllowedValues = [Draft, Sent, Approve, Reject];
+        public static readonly string[] FinishInventoryReceiptValues = [Approve];
+        public static readonly string[] WorkingInventoryReceiptValues = [Draft, Sent];
+        public static readonly string[] NotEditInventoryReceiptValues = [Approve, Reject];
 
         public static bool IsValid(string? value)
         {
@@ -51,8 +46,7 @@ namespace Domain.Constants.InventoryReceipt
         {
             if (string.IsNullOrWhiteSpace(value))
                 return true;
-            return string.Equals(value, Approve, StringComparison.OrdinalIgnoreCase) || 
-                   string.Equals(value, "finished", StringComparison.OrdinalIgnoreCase);
+            return string.Equals(value, Approve, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

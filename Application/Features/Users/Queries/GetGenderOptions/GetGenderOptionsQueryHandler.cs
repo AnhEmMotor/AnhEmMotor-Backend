@@ -9,6 +9,7 @@ public class GetGenderOptionsQueryHandler : IRequestHandler<GetGenderOptionsQuer
 {
     public Task<Result<IEnumerable<GenderOptionResponse>>> Handle(GetGenderOptionsQuery request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var options = new List<GenderOptionResponse>
         {
             new() { Key = GenderStatus.Male, Label = "Nam" },

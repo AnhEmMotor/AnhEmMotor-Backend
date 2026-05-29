@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
-using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Domain.Primitives;
 using Infrastructure.DBContexts;

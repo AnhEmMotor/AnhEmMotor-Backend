@@ -43,7 +43,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
-        if (Domain.Constants.InventoryReceipt.InventoryReceiptStatus.IsCannotEdit(InventoryReceipt.StatusId))
+        if (Domain.Constants.InventoryReceiptStatus.IsCannotEdit(InventoryReceipt.StatusId))
         {
             if (request.Products.Count != 0)
             {
@@ -158,7 +158,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         }
         if (string.Equals(
             request.StatusId,
-            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Finish,
+            Domain.Constants.InventoryReceiptStatus.Approve,
             StringComparison.OrdinalIgnoreCase))
         {
             var currentUserId = currentUserContext.GetUserId();

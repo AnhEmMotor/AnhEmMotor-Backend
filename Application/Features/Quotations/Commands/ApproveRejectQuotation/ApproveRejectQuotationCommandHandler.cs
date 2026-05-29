@@ -26,14 +26,14 @@ namespace Application.Features.Quotations.Commands.ApproveRejectQuotation
                 return Error.NotFound($"Yêu cầu báo giá {request.Id} không tồn tại hoặc đã bị xóa.", "Id");
             }
 
-            if (!string.Equals(request.Status, QuotationStatus.Approved, StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(request.Status, QuotationStatus.Rejected, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(request.Status, QuotationType.Approved, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(request.Status, QuotationType.Rejected, StringComparison.OrdinalIgnoreCase))
             {
                 return Error.BadRequest("Trạng thái phê duyệt không hợp lệ.", "Status");
             }
 
             var currentStatus = quotation.Status?.ToLower();
-            if (currentStatus != QuotationStatus.Sent)
+            if (string.Compare(currentStatus, QuotationType.Sent) != 0)
             {
                 return Error.BadRequest($"Không thể cập nhật trạng thái báo giá đang ở trạng thái '{quotation.Status}'. Chỉ cho phép cập nhật báo giá ở trạng thái Đã gửi (sent).", "Status");
             }

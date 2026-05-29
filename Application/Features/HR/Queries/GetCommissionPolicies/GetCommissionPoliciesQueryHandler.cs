@@ -9,7 +9,8 @@ public class GetCommissionPoliciesQueryHandler(ICommissionPolicyReadRepository r
 {
     public async Task<Result<List<CommissionPolicy>>> Handle(GetCommissionPoliciesQuery request, CancellationToken cancellationToken)
     {
-        return await repository.GetPoliciesAsync(cancellationToken).ConfigureAwait(false);
+        var policies = await repository.GetPoliciesAsync(cancellationToken).ConfigureAwait(false);
+
+        return policies;
     }
 }
-

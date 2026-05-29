@@ -26,7 +26,7 @@ namespace Application.Features.Quotations.Commands.SendQuotation
             }
 
             var currentStatus = quotation.Status?.ToLower();
-            if (currentStatus != "draft")
+            if (string.Compare(currentStatus, Domain.Constants.QuotationType.Draft) != 0)
             {
                 return Error.BadRequest($"Không thể gửi báo giá đang ở trạng thái '{quotation.Status}'. Chỉ cho phép gửi báo giá ở trạng thái Nháp (draft).", "Status");
             }

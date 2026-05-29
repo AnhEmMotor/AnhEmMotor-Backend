@@ -32,7 +32,7 @@ namespace Application.Features.Quotations.Commands.DeleteQuotation
             }
 
             var currentStatus = quotation.Status?.ToLower();
-            if (currentStatus == "approved" || currentStatus == "sent")
+            if (string.Compare(currentStatus, QuotationType.Approved) == 0 || string.Compare(currentStatus, QuotationType.Sent) == 0)
             {
                 Guid userId = currentUserContext.GetUserId();
                 var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(

@@ -2,7 +2,6 @@ using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Constants;
-using Domain.Constants.InventoryReceipt;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -19,17 +18,17 @@ public class InventoryReceiptReadRepository(ApplicationDBContext context, ISieve
         var now = DateTimeOffset.UtcNow;
         var startOfMonth = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
         var totalVehicles = await context.InventoryReceiptReceipts
-            .Where(x => x.DeletedAt == null && x.StatusId == InventoryReceiptStatus.Finish && x.InventoryReceiptDate >= startOfMonth)
+            .Where(x => x.DeletedAt == null && x.StatusId == InventoryReceiptStatus.Approve && x.InventoryReceiptDate >= startOfMonth)
             .SelectMany(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
             .SumAsync(y => y.Count ?? 0, cancellationToken)
             .ConfigureAwait(false);
         var processingReceipts = await context.InventoryReceiptReceipts
             .CountAsync(
-                x => x.DeletedAt == null && string.Compare(x.StatusId, InventoryReceiptStatus.Working) == 0,
+                x => x.DeletedAt == null && (string.Compare(x.StatusId, InventoryReceiptStatus.Draft) == 0 || string.Compare(x.StatusId, InventoryReceiptStatus.Sent) == 0),
                 cancellationToken)
             .ConfigureAwait(false);
         var totalValue = await context.InventoryReceiptReceipts
-            .Where(x => x.DeletedAt == null && x.StatusId == InventoryReceiptStatus.Finish)
+            .Where(x => x.DeletedAt == null && x.StatusId == InventoryReceiptStatus.Approve)
             .SelectMany(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
             .SumAsync(y => (long)(y.Count ?? 0) * (long)(y.QuotationProductRow != null ? (y.QuotationProductRow.QuotePrice ?? 0) : 0), cancellationToken)
             .ConfigureAwait(false);
