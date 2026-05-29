@@ -4,7 +4,7 @@ using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
 
-namespace Application.Features.Inputs.Queries.GetInputsBySupplierId;
+namespace Application.Features.InventoryReceipts.Queries.GetInputsBySupplierId;
 
 public sealed record GetSupplierPurchaseHistoryQuery : IRequest<Result<PagedResult<SupplierPurchaseHistoryResponse>>>
 {

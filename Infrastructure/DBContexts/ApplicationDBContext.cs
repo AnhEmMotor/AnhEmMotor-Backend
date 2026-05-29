@@ -27,7 +27,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<Brand> Brands { get; set; }
 
-    public virtual DbSet<Input> InputReceipts { get; set; }
+    public virtual DbSet<InventoryReceipt> InputReceipts { get; set; }
 
     public virtual DbSet<InputInfo> InputInfos { get; set; }
 
@@ -302,7 +302,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<Input>()
+        modelBuilder.Entity<InventoryReceipt>()
             .HasOne(oi => oi.PurchaseRequest)
             .WithMany()
             .HasForeignKey(oi => oi.PurchaseRequestId)

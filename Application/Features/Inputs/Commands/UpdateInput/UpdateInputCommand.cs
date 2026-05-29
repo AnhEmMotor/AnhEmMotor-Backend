@@ -1,9 +1,9 @@
-using Application.ApiContracts.Input.Requests;
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Requests;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.UpdateInput;
+namespace Application.Features.InventoryReceipts.Commands.UpdateInput;
 
 public sealed record UpdateInputCommand : IRequest<Result<InputDetailResponse?>>
 {

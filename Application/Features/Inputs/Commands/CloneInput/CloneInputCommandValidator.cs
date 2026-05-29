@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Application.Features.Inputs.Commands.CloneInput;
+namespace Application.Features.InventoryReceipts.Commands.CloneInput;
 
 public sealed class CloneInputCommandValidator : AbstractValidator<CloneInputCommand>
 {

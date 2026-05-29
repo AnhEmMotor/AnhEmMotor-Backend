@@ -383,7 +383,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [Products.View, PurchaseOrders.View],
+            [Products.View, Domain.Constants.Permission.Permissions.InventoryReceipts.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -479,7 +479,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         content!.Items.Should().Contain(p => p.Id == deletedProduct.Id);
     }
 
-    [Fact(DisplayName = "PRODUCT_069 - Lấy variants-lite/for-input chỉ trả về Id, Name, CoverImageUrl, Price")]
+    [Fact(DisplayName = "PRODUCT_069 - Lấy variants-lite/for-InventoryReceipt chỉ trả về Id, Name, CoverImageUrl, Price")]
     public async Task GetVariantsLiteForInput_ReturnsOnlyRequiredFields()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -490,7 +490,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PurchaseOrders.Edit],
+            [Domain.Constants.Permission.Permissions.InventoryReceipts.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -526,7 +526,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var variant = new ProductVariant { ProductId = product.Id, Price = 100, UrlSlug = $"v-{uniqueId}" };
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/product/variants-lite/for-input", CancellationToken.None)
+        var response = await _client.GetAsync("/api/v1/product/variants-lite/for-InventoryReceipt", CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
@@ -1685,7 +1685,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [PurchaseOrders.Edit],
+            [Domain.Constants.Permission.Permissions.InventoryReceipts.Edit],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);
@@ -1748,7 +1748,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductVariants.AddRange(v1, v2, v3, v4, v5);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync(
-            $"/api/v1/product/variants-lite/for-input?filters=search@=Honda_{uniqueId}",
+            $"/api/v1/product/variants-lite/for-InventoryReceipt?filters=search@=Honda_{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1802,7 +1802,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductVariants.AddRange(variantsD);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync(
-            $"/api/v1/product/variants-lite/for-input?filters=search@=_Paged_{uniqueId}&page=1&pageSize=10",
+            $"/api/v1/product/variants-lite/for-InventoryReceipt?filters=search@=_Paged_{uniqueId}&page=1&pageSize=10",
             CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1856,7 +1856,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductVariants.AddRange(variantsD);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync(
-            $"/api/v1/product/variants-lite/for-input?filters=search@=_P2_{uniqueId}&page=2&pageSize=10",
+            $"/api/v1/product/variants-lite/for-InventoryReceipt?filters=search@=_P2_{uniqueId}&page=2&pageSize=10",
             CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1917,7 +1917,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.VariantOptionValues.Add(new VariantOptionValue { VariantId = variant.Id, OptionValueId = doOption.Id });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync(
-            $"/api/v1/product/variants-lite/for-input?filters=search@=Prod_{uniqueId}",
+            $"/api/v1/product/variants-lite/for-InventoryReceipt?filters=search@=Prod_{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1987,7 +1987,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.VariantOptionValues.Add(new VariantOptionValue { VariantId = variant.Id, OptionValueId = cc150OV.Id });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync(
-            $"/api/v1/product/variants-lite/for-input?filters=search@=Prod_{uniqueId}",
+            $"/api/v1/product/variants-lite/for-InventoryReceipt?filters=search@=Prod_{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -2030,7 +2030,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync(
-            $"/api/v1/product/variants-lite/for-input?filters=search@=Solo_{uniqueId}",
+            $"/api/v1/product/variants-lite/for-InventoryReceipt?filters=search@=Solo_{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);

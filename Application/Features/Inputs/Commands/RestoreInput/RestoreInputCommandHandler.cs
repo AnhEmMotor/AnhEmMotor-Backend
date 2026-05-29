@@ -1,13 +1,13 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 
 using Domain.Constants;
 using Mapster;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.RestoreInput;
+namespace Application.Features.InventoryReceipts.Commands.RestoreInput;
 
 public sealed class RestoreInputCommandHandler(
     IInputReadRepository readRepository,
@@ -18,15 +18,15 @@ public sealed class RestoreInputCommandHandler(
         RestoreInputCommand request,
         CancellationToken cancellationToken)
     {
-        var input = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken, DataFetchMode.DeletedOnly)
+        var InventoryReceipt = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-        if (input is null)
+        if (InventoryReceipt is null)
         {
-            return Error.NotFound($"Không tìm th?y phi?u nh?p dã xóa có ID {request.Id}.", "Id");
+            return Error.NotFound($"Khï¿½ng tï¿½m th?y phi?u nh?p dï¿½ xï¿½a cï¿½ ID {request.Id}.", "Id");
         }
-        updateRepository.Restore(input);
+        updateRepository.Restore(InventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return input.Adapt<InputDetailResponse>();
+        return InventoryReceipt.Adapt<InputDetailResponse>();
     }
 }
 

@@ -1,7 +1,7 @@
-using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.InventoryReceipt.Requests;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
-using Application.Features.Inputs.Commands.CreateInput;
+using Application.Features.InventoryReceipts.Commands.CreateInput;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -21,7 +21,7 @@ using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Option;
 using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.PredefinedOption;
@@ -1338,7 +1338,7 @@ public class Product
         result.IsValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "PRODUCT_CALC_001 - CalculateTotalStock tính tổng RemainingCount từ Input receipt Finished")]
+    [Fact(DisplayName = "PRODUCT_CALC_001 - CalculateTotalStock tính tổng RemainingCount từ InventoryReceipt receipt Finished")]
     public void MapProductToDetailForManagerResponse_CalculatesTotalStockCorrectly()
     {
         var product = new ProductEntity
@@ -1353,11 +1353,11 @@ public class Product
                         [new InputInfo
                             {
                                 RemainingCount = 10,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InputReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InputStatus.Finish }
                             }, new InputInfo
                             {
                                 RemainingCount = 5,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Working }
+                                InputReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InputStatus.Working }
                             }]
                 }, new ProductVariant
                 {
@@ -1366,7 +1366,7 @@ public class Product
                         [new InputInfo
                             {
                                 RemainingCount = 15,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InputReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InputStatus.Finish }
                             }]
                 }]
         };
@@ -1416,7 +1416,7 @@ public class Product
                         [new InputInfo
                             {
                                 RemainingCount = 50,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InputReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InputStatus.Finish }
                             }],
                     OutputInfos =
                         [new OutputInfo { Count = 10, OutputOrder = new Output { StatusId = OrderStatus.Pending } }]
@@ -1607,7 +1607,7 @@ public class Product
                         [new InputInfo
                             {
                                 RemainingCount = 10,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InputReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InputStatus.Finish }
                             }],
                     OutputInfos = []
                 }, new ProductVariant
@@ -1616,7 +1616,7 @@ public class Product
                         [new InputInfo
                             {
                                 RemainingCount = 3,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InputReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InputStatus.Finish }
                             }],
                     OutputInfos = []
                 }, new ProductVariant
@@ -1625,7 +1625,7 @@ public class Product
                         [new InputInfo
                             {
                                 RemainingCount = 0,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InputReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InputStatus.Finish }
                             }],
                     OutputInfos = []
                 }]
@@ -1789,11 +1789,11 @@ public class Product
                 [new InputInfo
                 {
                     RemainingCount = 5,
-                    InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                    InputReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InputStatus.Finish }
                 }, new InputInfo
                 {
                     RemainingCount = 10,
-                    InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                    InputReceipt = new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InputStatus.Finish }
                 }]
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();

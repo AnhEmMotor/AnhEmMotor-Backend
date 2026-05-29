@@ -1,5 +1,5 @@
 
-namespace Application.ApiContracts.Input.Responses;
+namespace Application.ApiContracts.InventoryReceipt.Responses;
 
 public class InventoryReceiptStatsResponse
 {

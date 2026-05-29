@@ -24,7 +24,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
             genericMethod.Invoke(null, [mapper]);
         }
         mapper.Property<Brand>(p => p.Id).CanSort().CanFilter();
-        mapper.Property<Input>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<InventoryReceipt>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Output>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Product>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Product>(p => p.Name).CanSort().CanFilter();
@@ -47,10 +47,10 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Brand>(b => b.Name).CanSort().CanFilter();
         mapper.Property<Brand>(b => b.Origin).CanSort().CanFilter();
         mapper.Property<Brand>(b => b.Description).CanFilter();
-        mapper.Property<Input>(i => i.InputDate).CanSort().CanFilter();
-        mapper.Property<Input>(i => i.StatusId).CanSort().CanFilter();
-        mapper.Property<Input>(i => i.PurchaseRequestId).CanSort().CanFilter();
-        mapper.Property<Input>(i => i.Notes).CanFilter();
+        mapper.Property<InventoryReceipt>(i => i.InputDate).CanSort().CanFilter();
+        mapper.Property<InventoryReceipt>(i => i.StatusId).CanSort().CanFilter();
+        mapper.Property<InventoryReceipt>(i => i.PurchaseRequestId).CanSort().CanFilter();
+        mapper.Property<InventoryReceipt>(i => i.Notes).CanFilter();
         mapper.Property<Output>(o => o.StatusId).CanSort().CanFilter();
         mapper.Property<Output>(o => o.Notes).CanFilter();
         mapper.Property<ProductCategory>(c => c.Id).CanSort().CanFilter();

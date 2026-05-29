@@ -1,26 +1,26 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Repositories.Quotation;
 using Domain.Constants;
-using Domain.Constants.Input;
+using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Mapster;
 using MediatR;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using InputEntity = Domain.Entities.Input;
+using InputEntity = Domain.Entities.InventoryReceipt;
 using InputInfoEntity = Domain.Entities.InputInfo;
 using ProductVariant = Domain.Entities.ProductVariant;
 using Vehicle = Domain.Entities.Vehicle;
 
-namespace Application.Features.Inputs.Commands.CreateInput;
+namespace Application.Features.InventoryReceipts.Commands.CreateInput;
 
 public sealed partial class CreateInputCommandHandler(
     IInputInsertRepository insertRepository,
@@ -166,12 +166,12 @@ public sealed partial class CreateInputCommandHandler(
                 }
             }
         }
-        var input = request.Adapt<InputEntity>();
-        if (!string.IsNullOrEmpty(input.Notes))
+        var InventoryReceipt = request.Adapt<InputEntity>();
+        if (!string.IsNullOrEmpty(InventoryReceipt.Notes))
         {
-            input.Notes = HtmlTagRegex().Replace(input.Notes, string.Empty);
+            InventoryReceipt.Notes = HtmlTagRegex().Replace(InventoryReceipt.Notes, string.Empty);
         }
-        input.StatusId = InputStatus.Working;
+        InventoryReceipt.StatusId = InputStatus.Working;
         var inputInfos = new List<InputInfoEntity>();
         foreach (var p in request.Products)
         {
@@ -204,10 +204,10 @@ public sealed partial class CreateInputCommandHandler(
             }
             inputInfos.Add(inputInfo);
         }
-        input.InputInfos = inputInfos;
-        insertRepository.Add(input);
+        InventoryReceipt.InputInfos = inputInfos;
+        insertRepository.Add(InventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var created = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
+        var created = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken).ConfigureAwait(false);
         return created!.Adapt<InputDetailResponse>();
     }
 

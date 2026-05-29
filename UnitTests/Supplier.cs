@@ -563,7 +563,7 @@ public class Supplier
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "SUP_025 - Xóa Supplier thành công khi không có Input Receipt nào")]
+    [Fact(DisplayName = "SUP_025 - Xóa Supplier thành công khi không có InventoryReceipt Receipt nào")]
     public async Task DeleteSupplier_NoInputReceipts_Success()
     {
         var handler = new DeleteSupplierCommandHandler(
@@ -578,7 +578,7 @@ public class Supplier
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "SUP_027 - Xóa Supplier thành công khi có Input Receipt nhưng không ở trạng thái Working")]
+    [Fact(DisplayName = "SUP_027 - Xóa Supplier thành công khi có InventoryReceipt Receipt nhưng không ở trạng thái Working")]
     public async Task DeleteSupplier_HasCompletedInputReceipt_Success()
     {
         var handler = new DeleteSupplierCommandHandler(

@@ -1,9 +1,9 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using MediatR;
 
-namespace Application.Features.Inputs.Queries.GetInventoryReceiptStats;
+namespace Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStats;
 
 public sealed class GetInventoryReceiptStatsQueryHandler(IInputReadRepository repository) : IRequestHandler<GetInventoryReceiptStatsQuery, Result<InventoryReceiptStatsResponse>>
 {

@@ -22,7 +22,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using BrandEntity = Domain.Entities.Brand;
-using InputEntity = Domain.Entities.Input;
+using InputEntity = Domain.Entities.InventoryReceipt;
 using InputStatusEntity = Domain.Entities.InputStatus;
 using OutputEntity = Domain.Entities.Output;
 using OutputStatusEntity = Domain.Entities.OutputStatus;

@@ -1,8 +1,8 @@
-using Application.ApiContracts.Input.Requests;
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Requests;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.Quotation;
@@ -15,7 +15,7 @@ using Mapster;
 using MediatR;
 using System.Text.RegularExpressions;
 
-namespace Application.Features.Inputs.Commands.UpdateInput;
+namespace Application.Features.InventoryReceipts.Commands.UpdateInput;
 
 public sealed partial class UpdateInputCommandHandler(
     IInputReadRepository readRepository,
@@ -34,16 +34,16 @@ public sealed partial class UpdateInputCommandHandler(
         UpdateInputCommand request,
         CancellationToken cancellationToken)
     {
-        var input = await readRepository.GetByIdWithDetailsAsync(
+        var InventoryReceipt = await readRepository.GetByIdWithDetailsAsync(
             request.Id,
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-        if (input is null)
+        if (InventoryReceipt is null)
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
-        if (Domain.Constants.Input.InputStatus.IsCannotEdit(input.StatusId))
+        if (Domain.Constants.InventoryReceipt.InputStatus.IsCannotEdit(InventoryReceipt.StatusId))
         {
             if (request.Products.Count != 0)
             {
@@ -51,7 +51,7 @@ public sealed partial class UpdateInputCommandHandler(
                     "Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy.",
                     "Products");
             }
-            if (request.PurchaseRequestId != null && request.PurchaseRequestId != input.PurchaseRequestId)
+            if (request.PurchaseRequestId != null && request.PurchaseRequestId != InventoryReceipt.PurchaseRequestId)
             {
                 var pr = await prReadRepository.GetByIdAsync(request.PurchaseRequestId.Value, cancellationToken)
                     .ConfigureAwait(false);
@@ -151,27 +151,27 @@ public sealed partial class UpdateInputCommandHandler(
                 }
             }
         }
-        request.Adapt(input);
-        if (!string.IsNullOrEmpty(input.Notes))
+        request.Adapt(InventoryReceipt);
+        if (!string.IsNullOrEmpty(InventoryReceipt.Notes))
         {
-            input.Notes = HtmlTagRegex().Replace(input.Notes, string.Empty);
+            InventoryReceipt.Notes = HtmlTagRegex().Replace(InventoryReceipt.Notes, string.Empty);
         }
         if (string.Equals(
             request.StatusId,
-            Domain.Constants.Input.InputStatus.Finish,
+            Domain.Constants.InventoryReceipt.InputStatus.Finish,
             StringComparison.OrdinalIgnoreCase))
         {
             var currentUserId = currentUserContext.GetUserId();
-            input.InputDate = DateTimeOffset.UtcNow;
-            input.ConfirmedBy = currentUserId;
+            InventoryReceipt.InputDate = DateTimeOffset.UtcNow;
+            InventoryReceipt.ConfirmedBy = currentUserId;
         }
-        var existingInfoDict = input.InputInfos.ToDictionary(ii => ii.Id);
+        var existingInfoDict = InventoryReceipt.InputInfos.ToDictionary(ii => ii.Id);
         var requestInfoDict = request.Products.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
-        var toDelete = input.InputInfos.Where(ii => !requestInfoDict.ContainsKey(ii.Id)).ToList();
+        var toDelete = InventoryReceipt.InputInfos.Where(ii => !requestInfoDict.ContainsKey(ii.Id)).ToList();
         foreach (var info in toDelete)
         {
             deleteRepository.DeleteInputInfo(info);
-            input.InputInfos.Remove(info);
+            InventoryReceipt.InputInfos.Remove(info);
         }
         foreach (var productRequest in request.Products)
         {
@@ -196,12 +196,12 @@ public sealed partial class UpdateInputCommandHandler(
                 newInfo.RemainingCount = newInfo.Count ?? 0;
                 var variant = variantsList.FirstOrDefault(v => v.Id == resolvedVariantId);
                 SyncVehicleIdentifiers(newInfo, productRequest, variant, resolvedColorId);
-                input.InputInfos.Add(newInfo);
+                InventoryReceipt.InputInfos.Add(newInfo);
             }
         }
-        updateRepository.Update(input);
+        updateRepository.Update(InventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken).ConfigureAwait(false);
         return updated!.Adapt<InputDetailResponse>();
     }
 

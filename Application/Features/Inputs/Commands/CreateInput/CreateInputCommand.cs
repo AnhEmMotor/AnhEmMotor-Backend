@@ -1,9 +1,9 @@
-using Application.ApiContracts.Input.Requests;
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Requests;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.CreateInput;
+namespace Application.Features.InventoryReceipts.Commands.CreateInput;
 
 public sealed record CreateInputCommand : IRequest<Result<InputDetailResponse?>>
 {

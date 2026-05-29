@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Application.Features.Inputs.Commands.CreateInput;
+namespace Application.Features.InventoryReceipts.Commands.CreateInput;
 
 public sealed class CreateInputCommandValidator : AbstractValidator<CreateInputCommand>
 {
@@ -8,7 +8,7 @@ public sealed class CreateInputCommandValidator : AbstractValidator<CreateInputC
     {
         RuleFor(x => x.PurchaseRequestId).GreaterThan(0).When(x => x.PurchaseRequestId.HasValue).WithMessage("PurchaseRequestId must be greater than 0.");
         RuleFor(x => x.Notes).MaximumLength(1000).WithMessage("Notes cannot exceed 1000 characters.");
-        RuleFor(x => x.Products).NotEmpty().WithMessage("Input must contain at least one product.");
+        RuleFor(x => x.Products).NotEmpty().WithMessage("InventoryReceipt must contain at least one product.");
         RuleFor(x => x.Products)
             .Must(
                 products =>
@@ -31,7 +31,7 @@ public sealed class CreateInputCommandValidator : AbstractValidator<CreateInputC
                     }
                     return true;
                 })
-            .WithMessage("Purchase Request Items or Quotation Product Rows cannot be duplicated in a single input.");
+            .WithMessage("Purchase Request Items or Quotation Product Rows cannot be duplicated in a single InventoryReceipt.");
         RuleForEach(x => x.Products).SetValidator(new CreateInputInfoCommandValidator());
     }
 }

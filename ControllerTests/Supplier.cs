@@ -36,7 +36,7 @@ public class Supplier
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "SUP_046 - T?o Supplier thành công qua API")]
+    [Fact(DisplayName = "SUP_046 - T?o Supplier thï¿½nh cï¿½ng qua API")]
     public async Task CreateSupplier_Success_ReturnsCreatedSupplier()
     {
         var request = new CreateSupplierCommand { Name = "API Supplier", Phone = "0123456789", Address = "API Street" };
@@ -60,7 +60,7 @@ public class Supplier
         response.StatusId.Should().Be("active");
     }
 
-    [Fact(DisplayName = "SUP_047 - T?o Supplier th?t b?i khi không có quy?n")]
+    [Fact(DisplayName = "SUP_047 - T?o Supplier th?t b?i khi khï¿½ng cï¿½ quy?n")]
     public async Task CreateSupplier_NoPermission_ReturnsForbidden()
     {
         var request = new CreateSupplierCommand { Name = "No Permission", Phone = "0123456789", Address = "123 Street" };
@@ -82,7 +82,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_049 - L?y danh sách Supplier thành công v?i quy?n View Supplier")]
+    [Fact(DisplayName = "SUP_049 - L?y danh sï¿½ch Supplier thï¿½nh cï¿½ng v?i quy?n View Supplier")]
     public async Task GetSuppliers_WithViewPermission_ReturnsSupplierList()
     {
         var sieveModel = new SieveModel();
@@ -102,7 +102,7 @@ public class Supplier
         response.Items.First().TotalInput.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "SUP_050 - L?y danh sách Supplier for-input ch? tr? v? active")]
+    [Fact(DisplayName = "SUP_050 - L?y danh sï¿½ch Supplier foInventoryReceiptut ch? tr? v? active")]
     public async Task GetSuppliersForInput_ReturnsOnlyActiveSuppliers()
     {
         var sieveModel = new SieveModel();
@@ -123,7 +123,7 @@ public class Supplier
     }
 
     [Fact(
-        DisplayName = "SUP_051 - L?y danh sách Supplier thành công khi không có quy?n (ch? active, không có TotalInputValue)")]
+        DisplayName = "SUP_051 - L?y danh sï¿½ch Supplier thï¿½nh cï¿½ng khi khï¿½ng cï¿½ quy?n (ch? active, khï¿½ng cï¿½ TotalInputValue)")]
     public async Task GetSuppliers_NoPermission_ReturnsOnlyActiveWithoutTotalInput()
     {
         var sieveModel = new SieveModel();
@@ -142,7 +142,7 @@ public class Supplier
         response.Items.Should().OnlyContain(s => s.TotalInput == null);
     }
 
-    [Fact(DisplayName = "SUP_052 - L?y chi ti?t Supplier thành công v?i quy?n View Supplier")]
+    [Fact(DisplayName = "SUP_052 - L?y chi ti?t Supplier thï¿½nh cï¿½ng v?i quy?n View Supplier")]
     public async Task GetSupplierById_WithViewPermission_ReturnsSupplierWithTotalInput()
     {
         var expectedResponse = new SupplierResponse
@@ -161,7 +161,7 @@ public class Supplier
         response.TotalInput.Should().Be(5000000);
     }
 
-    [Fact(DisplayName = "SUP_053 - L?y chi ti?t Supplier thành công khi không có quy?n (ch? active)")]
+    [Fact(DisplayName = "SUP_053 - L?y chi ti?t Supplier thï¿½nh cï¿½ng khi khï¿½ng cï¿½ quy?n (ch? active)")]
     public async Task GetSupplierById_NoPermission_ReturnsActiveSupplierWithTotalInput()
     {
         var expectedResponse = new SupplierResponse
@@ -180,7 +180,7 @@ public class Supplier
         response.TotalInput.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "SUP_054 - L?y chi ti?t Supplier th?t b?i khi không có quy?n và Supplier không active")]
+    [Fact(DisplayName = "SUP_054 - L?y chi ti?t Supplier th?t b?i khi khï¿½ng cï¿½ quy?n vï¿½ Supplier khï¿½ng active")]
     public async Task GetSupplierById_NoPermissionAndInactive_ReturnsForbidden()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
@@ -190,7 +190,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_055 - C?p nh?t Supplier th?t b?i khi không có quy?n")]
+    [Fact(DisplayName = "SUP_055 - C?p nh?t Supplier th?t b?i khi khï¿½ng cï¿½ quy?n")]
     public async Task UpdateSupplier_NoPermission_ReturnsForbidden()
     {
         var request = new UpdateSupplierCommand { Name = "Updated" };
@@ -201,7 +201,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_056 - Xóa Supplier th?t b?i khi không có quy?n")]
+    [Fact(DisplayName = "SUP_056 - Xï¿½a Supplier th?t b?i khi khï¿½ng cï¿½ quy?n")]
     public async Task DeleteSupplier_NoPermission_ReturnsForbidden()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteSupplierCommand>(), It.IsAny<CancellationToken>()))
@@ -211,7 +211,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_057 - L?y danh sách deleted Supplier th?t b?i khi không có quy?n")]
+    [Fact(DisplayName = "SUP_057 - L?y danh sï¿½ch deleted Supplier th?t b?i khi khï¿½ng cï¿½ quy?n")]
     public async Task GetDeletedSuppliers_NoPermission_ReturnsForbidden()
     {
         var sieveModel = new SieveModel();
@@ -222,18 +222,18 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_058 - Xóa nhi?u Supplier v?i m?t ph?n thành công và m?t ph?n th?t b?i")]
+    [Fact(DisplayName = "SUP_058 - Xï¿½a nhi?u Supplier v?i m?t ph?n thï¿½nh cï¿½ng vï¿½ m?t ph?n th?t b?i")]
     public async Task DeleteManySuppliers_PartialFailure_ReturnsError()
     {
         var request = new DeleteManySuppliersCommand { Ids = [1, 2, 3] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManySuppliersCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new InvalidOperationException("Cannot delete supplier with working input receipts"));
+            .ThrowsAsync(new InvalidOperationException("Cannot delete supplier with working InventoryReceipt receipts"));
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => _controller.DeleteSuppliersAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_059 - Khôi ph?c Supplier th?t b?i khi không có quy?n")]
+    [Fact(DisplayName = "SUP_059 - Khï¿½i ph?c Supplier th?t b?i khi khï¿½ng cï¿½ quy?n")]
     public async Task RestoreSupplier_NoPermission_ReturnsForbidden()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreSupplierCommand>(), It.IsAny<CancellationToken>()))
@@ -243,7 +243,7 @@ public class Supplier
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SUP_060 - C?p nh?t tr?ng thái nhi?u Supplier th?t b?i khi không có quy?n")]
+    [Fact(DisplayName = "SUP_060 - C?p nh?t tr?ng thï¿½i nhi?u Supplier th?t b?i khi khï¿½ng cï¿½ quy?n")]
     public async Task UpdateManySupplierStatus_NoPermission_ReturnsForbidden()
     {
         var request = new UpdateManySupplierStatusCommand { Ids = [1, 2], StatusId = "inactive" };

@@ -1,4 +1,4 @@
-namespace Application.ApiContracts.Input.Requests
+namespace Application.ApiContracts.InventoryReceipt.Requests
 {
     public class UpdateInputInfoRequest
     {

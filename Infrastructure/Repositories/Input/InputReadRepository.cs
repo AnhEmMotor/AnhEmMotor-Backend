@@ -1,16 +1,16 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Constants;
-using Domain.Constants.Input;
+using Domain.Constants.InventoryReceipt;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using System.Linq.Expressions;
-using InputEntity = Domain.Entities.Input;
+using InputEntity = Domain.Entities.InventoryReceipt;
 
-namespace Infrastructure.Repositories.Input;
+namespace Infrastructure.Repositories.InventoryReceipt;
 
 public class InputReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IInputReadRepository
 {

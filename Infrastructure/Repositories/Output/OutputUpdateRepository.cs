@@ -100,7 +100,7 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
         int? colorId,
         CancellationToken cancellationToken)
     {
-        var finishedStatuses = Domain.Constants.Input.InputStatus.FinishInputValues;
+        var finishedStatuses = Domain.Constants.InventoryReceipt.InputStatus.FinishInputValues;
         return context.InputInfos
             .Include(ii => ii.InputReceipt)
             .Include(ii => ii.QuotationProductRow)

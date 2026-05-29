@@ -1,6 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Interfaces.Repositories.Statistical;
-using Domain.Constants.Input;
+using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -341,10 +341,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Take(5)
             .ToList();
         int lowStockCount = 0;
-        foreach (var input in confirmedInputs)
+        foreach (var InventoryReceipt in confirmedInputs)
         {
-            var sold = soldOutputs.FirstOrDefault(x => x.VariantId == input.VariantId)?.TotalOut ?? 0;
-            if (input.TotalIn - sold < 3)
+            var sold = soldOutputs.FirstOrDefault(x => x.VariantId == InventoryReceipt.VariantId)?.TotalOut ?? 0;
+            if (InventoryReceipt.TotalIn - sold < 3)
                 lowStockCount++;
         }
         var sixtyDaysAgo = now.AddDays(-60);

@@ -1,11 +1,11 @@
 using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Constants;
 using Domain.Primitives;
 using MediatR;
 
-namespace Application.Features.Inputs.Queries.GetInputsBySupplierId;
+namespace Application.Features.InventoryReceipts.Queries.GetInputsBySupplierId;
 
 public sealed class GetSupplierPurchaseHistoryQueryHandler(IInputReadRepository repository) : IRequestHandler<GetSupplierPurchaseHistoryQuery, Result<PagedResult<SupplierPurchaseHistoryResponse>>>
 {

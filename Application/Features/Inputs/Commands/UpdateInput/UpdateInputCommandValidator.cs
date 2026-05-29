@@ -1,12 +1,12 @@
 using FluentValidation;
 
-namespace Application.Features.Inputs.Commands.UpdateInput;
+namespace Application.Features.InventoryReceipts.Commands.UpdateInput;
 
 public sealed class UpdateInputCommandValidator : AbstractValidator<UpdateInputCommand>
 {
     public UpdateInputCommandValidator()
     {
-        RuleFor(x => x.Products).NotEmpty().WithMessage("Input must contain at least one product.");
+        RuleFor(x => x.Products).NotEmpty().WithMessage("InventoryReceipt must contain at least one product.");
         RuleFor(x => x.Products)
             .Must(
                 products =>
@@ -29,7 +29,7 @@ public sealed class UpdateInputCommandValidator : AbstractValidator<UpdateInputC
                     }
                     return true;
                 })
-            .WithMessage("Purchase Request Items or Quotation Product Rows cannot be duplicated in a single input.");
+            .WithMessage("Purchase Request Items or Quotation Product Rows cannot be duplicated in a single InventoryReceipt.");
         RuleForEach(x => x.Products).SetValidator(new UpdateInputInfoCommandValidator());
     }
 }

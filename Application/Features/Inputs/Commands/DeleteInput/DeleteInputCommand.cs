@@ -2,7 +2,7 @@
 using Application.Common.Models;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.DeleteInput;
+namespace Application.Features.InventoryReceipts.Commands.DeleteInput;
 
 public sealed record DeleteInputCommand : IRequest<Result>
 {

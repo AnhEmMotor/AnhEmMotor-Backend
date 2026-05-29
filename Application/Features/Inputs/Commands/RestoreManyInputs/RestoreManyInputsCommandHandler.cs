@@ -1,13 +1,13 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 
 using Domain.Constants;
 using Mapster;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.RestoreManyInputs;
+namespace Application.Features.InventoryReceipts.Commands.RestoreManyInputs;
 
 public sealed class RestoreManyInputsCommandHandler(
     IInputReadRepository readRepository,
@@ -18,9 +18,9 @@ public sealed class RestoreManyInputsCommandHandler(
         RestoreManyInputsCommand request,
         CancellationToken cancellationToken)
     {
-        var inputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken, DataFetchMode.DeletedOnly)
+        var InventoryReceipts = await readRepository.GetByIdAsync(request.Ids, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-        var inputsList = inputs.ToList();
+        var inputsList = InventoryReceipts.ToList();
         if (inputsList.Count != request.Ids.Count)
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
@@ -31,6 +31,6 @@ public sealed class RestoreManyInputsCommandHandler(
         }
         updateRepository.Restore(inputsList);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return inputs.Adapt<List<InputDetailResponse>>();
+        return InventoryReceipts.Adapt<List<InputDetailResponse>>();
     }
 }

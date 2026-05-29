@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
-    [Table("Input")]
-    public class Input : BaseEntity
+    [Table("InventoryReceipt")]
+    public class InventoryReceipt : BaseEntity
     {
         [Key]
         [Column("Id")]

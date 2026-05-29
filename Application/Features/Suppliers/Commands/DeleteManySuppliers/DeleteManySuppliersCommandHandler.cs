@@ -1,9 +1,9 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Constants.Input;
+using Domain.Constants.InventoryReceipt;
 using MediatR;
 
 namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
@@ -44,7 +44,7 @@ public sealed class DeleteManySuppliersCommandHandler(
             {
                 errorDetails.Add(
                     Error.BadRequest(
-                        $"Supplier with Id {id} cannot be deleted because it has working input receipts.",
+                        $"Supplier with Id {id} cannot be deleted because it has working InventoryReceipt receipts.",
                         "Id"));
             }
         }

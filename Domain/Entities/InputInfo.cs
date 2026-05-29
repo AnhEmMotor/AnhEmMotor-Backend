@@ -32,7 +32,7 @@ namespace Domain.Entities
         [ForeignKey("QuotationProductRow")]
         public int? QuotationProductRowId { get; set; }
 
-        public Input? InputReceipt { get; set; }
+        public InventoryReceipt? InputReceipt { get; set; }
 
         public PurchaseRequestItem? PurchaseRequestItem { get; set; }
 

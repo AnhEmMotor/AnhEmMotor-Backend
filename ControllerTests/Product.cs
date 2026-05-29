@@ -210,7 +210,7 @@ public class Product
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PRODUCT_097 - API variants-lite/for-input trả về 403 khi user không có quyền input")]
+    [Fact(DisplayName = "PRODUCT_097 - API variants-lite/for-InventoryReceipt trả về 403 khi user không có quyền InventoryReceipt")]
     public async Task GetActiveVariantLiteProductsForInput_UserNoPermission_ReturnsForbidden()
     {
         _senderMock.Setup(m => m.Send(It.IsAny<GetActiveVariantLiteListForInputQuery>(), It.IsAny<CancellationToken>()))

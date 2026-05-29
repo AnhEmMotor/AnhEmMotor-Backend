@@ -1,11 +1,11 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Domain.Constants;
 using Domain.Primitives;
 using Sieve.Models;
 using System.Linq.Expressions;
-using InputEntity = Domain.Entities.Input;
+using InputEntity = Domain.Entities.InventoryReceipt;
 
-namespace Application.Interfaces.Repositories.Input;
+namespace Application.Interfaces.Repositories.InventoryReceipt;
 
 public interface IInputReadRepository
 {

@@ -1,8 +1,8 @@
 using Application.Common.Models;
-using Domain.Constants.Input;
+using Domain.Constants.InventoryReceipt;
 using MediatR;
 
-namespace Application.Features.Inputs.Queries.GetInputStatusList;
+namespace Application.Features.InventoryReceipts.Queries.GetInputStatusList;
 
 public sealed class GetInputStatusListQueryHandler : IRequestHandler<GetInputStatusListQuery, Result<Dictionary<string, string>>>
 {

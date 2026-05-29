@@ -1,14 +1,14 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Services;
 using Domain.Constants;
-using Domain.Constants.Input;
+using Domain.Constants.InventoryReceipt;
 using Mapster;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.UpdateInputStatus;
+namespace Application.Features.InventoryReceipts.Commands.UpdateInputStatus;
 
 public sealed class UpdateInputStatusCommandHandler(
     IInputReadRepository readRepository,
@@ -20,16 +20,16 @@ public sealed class UpdateInputStatusCommandHandler(
         UpdateInputStatusCommand request,
         CancellationToken cancellationToken)
     {
-        var input = await readRepository.GetByIdWithDetailsAsync(
+        var InventoryReceipt = await readRepository.GetByIdWithDetailsAsync(
             request.Id,
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-        if (input is null)
+        if (InventoryReceipt is null)
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
-        if (InputStatus.IsCannotEdit(input.StatusId))
+        if (InputStatus.IsCannotEdit(InventoryReceipt.StatusId))
         {
             return Error.BadRequest("Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy.", "StatusId");
         }
@@ -37,16 +37,16 @@ public sealed class UpdateInputStatusCommandHandler(
         {
             return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
-        input.StatusId = request.StatusId;
+        InventoryReceipt.StatusId = request.StatusId;
         if (string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
         {
             var currentUserId = currentUserContext.GetUserId();
-            input.InputDate = DateTimeOffset.UtcNow;
-            input.ConfirmedBy = currentUserId;
+            InventoryReceipt.InputDate = DateTimeOffset.UtcNow;
+            InventoryReceipt.ConfirmedBy = currentUserId;
         }
-        updateRepository.Update(input);
+        updateRepository.Update(InventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
         return updated.Adapt<InputDetailResponse>();
     }

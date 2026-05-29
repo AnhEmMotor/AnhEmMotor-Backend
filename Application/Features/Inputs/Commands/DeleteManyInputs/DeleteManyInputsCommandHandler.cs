@@ -1,10 +1,10 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
-using Domain.Constants.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
+using Domain.Constants.InventoryReceipt;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.DeleteManyInputs;
+namespace Application.Features.InventoryReceipts.Commands.DeleteManyInputs;
 
 public sealed class DeleteManyInputsCommandHandler(
     IInputReadRepository readRepository,
@@ -13,8 +13,8 @@ public sealed class DeleteManyInputsCommandHandler(
 {
     public async Task<Result> Handle(DeleteManyInputsCommand request, CancellationToken cancellationToken)
     {
-        var inputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken).ConfigureAwait(false);
-        var inputsList = inputs.ToList();
+        var InventoryReceipts = await readRepository.GetByIdAsync(request.Ids, cancellationToken).ConfigureAwait(false);
+        var inputsList = InventoryReceipts.ToList();
         if (inputsList.Count != request.Ids.Count)
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();

@@ -154,8 +154,8 @@ public class ProductController(ISender sender) : ApiController
     /// `Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
     /// khi có quyền thêm hoặc sửa phiếu nhập).
     /// </summary>
-    [HttpGet("variants-lite/for-input")]
-    [RequiresAnyPermissions(PurchaseOrders.Edit, PurchaseOrders.Create, PurchaseRequests.Edit, PurchaseRequests.Create)]
+    [HttpGet("variants-lite/for-InventoryReceipt")]
+    [RequiresAnyPermissions(Domain.Constants.Permission.Permissions.InventoryReceipts.Edit, Domain.Constants.Permission.Permissions.InventoryReceipts.Create, PurchaseRequests.Edit, PurchaseRequests.Create)]
     [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponseForInput>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActiveVariantLiteProductsForInputAsync(
         [FromQuery] SieveModel request,

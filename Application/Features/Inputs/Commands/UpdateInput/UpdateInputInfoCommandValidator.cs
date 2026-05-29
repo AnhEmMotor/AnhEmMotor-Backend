@@ -1,7 +1,7 @@
-using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.InventoryReceipt.Requests;
 using FluentValidation;
 
-namespace Application.Features.Inputs.Commands.UpdateInput
+namespace Application.Features.InventoryReceipts.Commands.UpdateInput
 {
     public sealed class UpdateInputInfoCommandValidator : AbstractValidator<UpdateInputInfoRequest>
     {

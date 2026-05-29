@@ -1,6 +1,6 @@
 using System;
 
-namespace Domain.Constants.Input
+namespace Domain.Constants.InventoryReceipt
 {
     public static class InputStatus
     {

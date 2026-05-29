@@ -1,8 +1,8 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.RestoreManyInputs;
+namespace Application.Features.InventoryReceipts.Commands.RestoreManyInputs;
 
 public sealed record RestoreManyInputsCommand : IRequest<Result<List<InputDetailResponse>>>
 {

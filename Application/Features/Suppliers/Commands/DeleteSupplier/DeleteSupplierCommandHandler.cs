@@ -1,7 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
-using Domain.Constants.Input;
+using Domain.Constants.InventoryReceipt;
 using MediatR;
 
 namespace Application.Features.Suppliers.Commands.DeleteSupplier;
@@ -20,7 +20,7 @@ public sealed class DeleteSupplierCommandHandler(
         }
         if (supplier.InputReceipts.Any(ir => string.Compare(ir.StatusId, InputStatus.Working) == 0))
         {
-            return Result.Failure(Error.Conflict("Cannot delete supplier with working input receipts."));
+            return Result.Failure(Error.Conflict("Cannot delete supplier with working InventoryReceipt receipts."));
         }
         deleteRepository.Delete(supplier);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

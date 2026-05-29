@@ -1,10 +1,10 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
 
-namespace Application.Features.Inputs.Queries.GetInputsList;
+namespace Application.Features.InventoryReceipts.Queries.GetInputsList;
 
 public sealed record GetInputsListQuery : IRequest<Result<PagedResult<InputListResponse>>>
 {

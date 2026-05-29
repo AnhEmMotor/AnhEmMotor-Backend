@@ -1,11 +1,11 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Constants;
 using Domain.Primitives;
 using MediatR;
 
-namespace Application.Features.Inputs.Queries.GetInputsBySupplierId;
+namespace Application.Features.InventoryReceipts.Queries.GetInputsBySupplierId;
 
 public sealed class GetInputsBySupplierIdQueryHandler(IInputReadRepository repository) : IRequestHandler<GetInputsBySupplierIdQuery, Result<PagedResult<InputListResponse>>>
 {

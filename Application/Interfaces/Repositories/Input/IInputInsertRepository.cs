@@ -1,8 +1,8 @@
-using InputEntity = Domain.Entities.Input;
+using InputEntity = Domain.Entities.InventoryReceipt;
 
-namespace Application.Interfaces.Repositories.Input;
+namespace Application.Interfaces.Repositories.InventoryReceipt;
 
 public interface IInputInsertRepository
 {
-    public void Add(InputEntity input);
+    public void Add(InputEntity InventoryReceipt);
 }

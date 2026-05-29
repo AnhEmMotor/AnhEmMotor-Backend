@@ -1,12 +1,12 @@
-using InputEntity = Domain.Entities.Input;
+using InputEntity = Domain.Entities.InventoryReceipt;
 
-namespace Application.Interfaces.Repositories.Input;
+namespace Application.Interfaces.Repositories.InventoryReceipt;
 
 public interface IInputUpdateRepository
 {
-    public void Update(InputEntity input);
+    public void Update(InputEntity InventoryReceipt);
 
-    public void Restore(InputEntity input);
+    public void Restore(InputEntity InventoryReceipt);
 
-    public void Restore(IEnumerable<InputEntity> inputs);
+    public void Restore(IEnumerable<InputEntity> InventoryReceipts);
 }

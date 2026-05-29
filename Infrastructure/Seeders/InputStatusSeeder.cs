@@ -8,7 +8,7 @@ public static class InputStatusSeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        var allStatuses = Domain.Constants.Input.InputStatus.AllowedValues;
+        var allStatuses = Domain.Constants.InventoryReceipt.InputStatus.AllowedValues;
         if (allStatuses.Length == 0)
         {
             return;
@@ -29,7 +29,7 @@ public static class InputStatusSeeder
         if (statusesToDelete.Count != 0)
         {
             var statusKeys = statusesToDelete.Select(s => s.Key).ToList();
-            var hasReferences = await context.Set<Input>()
+            var hasReferences = await context.Set<InventoryReceipt>()
                 .AnyAsync(i => i.StatusId != null && statusKeys.Contains(i.StatusId), cancellationToken)
                 .ConfigureAwait(false);
             if (!hasReferences)

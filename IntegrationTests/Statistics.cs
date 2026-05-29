@@ -13,7 +13,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using BrandEntity = Domain.Entities.Brand;
-using InputEntity = Domain.Entities.Input;
+using InputEntity = Domain.Entities.InventoryReceipt;
 using InputInfoEntity = Domain.Entities.InputInfo;
 using InputStatusEntity = Domain.Entities.InputStatus;
 using OutputEntity = Domain.Entities.Output;

@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.InventoryReceipt.Requests;
 using Application.ApiContracts.Quotation.Requests;
 using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;

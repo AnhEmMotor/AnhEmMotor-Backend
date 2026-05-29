@@ -1,11 +1,11 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Constants;
 using Domain.Primitives;
 using MediatR;
 
-namespace Application.Features.Inputs.Queries.GetDeletedInputsList;
+namespace Application.Features.InventoryReceipts.Queries.GetDeletedInputsList;
 
 public sealed class GetDeletedInputsListQueryHandler(IInputReadRepository repository) : IRequestHandler<GetDeletedInputsListQuery, Result<PagedResult<InputListResponse>>>
 {

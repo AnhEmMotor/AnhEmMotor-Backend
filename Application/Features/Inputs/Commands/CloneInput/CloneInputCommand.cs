@@ -1,8 +1,8 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.CloneInput;
+namespace Application.Features.InventoryReceipts.Commands.CloneInput;
 
 public sealed record CloneInputCommand : IRequest<Result<InputDetailResponse?>>
 {

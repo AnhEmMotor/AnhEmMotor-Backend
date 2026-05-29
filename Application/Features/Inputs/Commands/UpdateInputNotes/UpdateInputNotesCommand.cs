@@ -1,8 +1,8 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.UpdateInputNotes;
+namespace Application.Features.InventoryReceipts.Commands.UpdateInputNotes;
 
 public sealed record UpdateInputNotesCommand : IRequest<Result<InputDetailResponse>>
 {

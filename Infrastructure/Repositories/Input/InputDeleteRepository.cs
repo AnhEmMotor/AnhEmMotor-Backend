@@ -1,20 +1,20 @@
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Infrastructure.DBContexts;
-using InputEntity = Domain.Entities.Input;
+using InputEntity = Domain.Entities.InventoryReceipt;
 using InputInfoEntity = Domain.Entities.InputInfo;
 
-namespace Infrastructure.Repositories.Input;
+namespace Infrastructure.Repositories.InventoryReceipt;
 
 public class InputDeleteRepository(ApplicationDBContext context) : IInputDeleteRepository
 {
-    public void Delete(InputEntity input)
+    public void Delete(InputEntity InventoryReceipt)
     {
-        context.SoftDeleteUsingSetColumn(input);
+        context.SoftDeleteUsingSetColumn(InventoryReceipt);
     }
 
-    public void Delete(IEnumerable<InputEntity> inputs)
+    public void Delete(IEnumerable<InputEntity> InventoryReceipts)
     {
-        context.SoftDeleteUsingSetColumnRange(inputs);
+        context.SoftDeleteUsingSetColumnRange(InventoryReceipts);
     }
 
     public void DeleteInputInfo(InputInfoEntity inputInfo)

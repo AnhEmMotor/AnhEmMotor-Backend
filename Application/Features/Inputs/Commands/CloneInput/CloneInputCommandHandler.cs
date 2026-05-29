@@ -1,18 +1,18 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Constants.Input;
+using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Product;
 using Mapster;
 using MediatR;
-using InputEntity = Domain.Entities.Input;
+using InputEntity = Domain.Entities.InventoryReceipt;
 using InputInfoEntity = Domain.Entities.InputInfo;
 
-namespace Application.Features.Inputs.Commands.CloneInput;
+namespace Application.Features.InventoryReceipts.Commands.CloneInput;
 
 public sealed class CloneInputCommandHandler(
     IInputReadRepository inputReadRepository,

@@ -1,13 +1,13 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 
 using Domain.Constants;
 using Mapster;
 using MediatR;
 
-namespace Application.Features.Inputs.Commands.UpdateInputNotes;
+namespace Application.Features.InventoryReceipts.Commands.UpdateInputNotes;
 
 public sealed class UpdateInputNotesCommandHandler(
     IInputReadRepository readRepository,
@@ -18,19 +18,19 @@ public sealed class UpdateInputNotesCommandHandler(
         UpdateInputNotesCommand request,
         CancellationToken cancellationToken)
     {
-        var input = await readRepository.GetByIdWithDetailsAsync(
+        var InventoryReceipt = await readRepository.GetByIdWithDetailsAsync(
             request.Id,
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-        if (input is null)
+        if (InventoryReceipt is null)
         {
-            return Error.NotFound($"Không tìm th?y phi?u nh?p có ID {request.Id}.", "Id");
+            return Error.NotFound($"Khï¿½ng tï¿½m th?y phi?u nh?p cï¿½ ID {request.Id}.", "Id");
         }
-        input.Notes = request.Notes;
-        updateRepository.Update(input);
+        InventoryReceipt.Notes = request.Notes;
+        updateRepository.Update(InventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken).ConfigureAwait(false);
         return updated!.Adapt<InputDetailResponse>();
     }
 }

@@ -1,7 +1,7 @@
-using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.InventoryReceipt.Requests;
 using FluentValidation;
 
-namespace Application.Features.Inputs.Commands.CreateInput
+namespace Application.Features.InventoryReceipts.Commands.CreateInput
 {
     public sealed class CreateInputInfoCommandValidator : AbstractValidator<CreateInputInfoRequest>
     {

@@ -1,13 +1,13 @@
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Infrastructure.DBContexts;
-using InputEntity = Domain.Entities.Input;
+using InputEntity = Domain.Entities.InventoryReceipt;
 
-namespace Infrastructure.Repositories.Input;
+namespace Infrastructure.Repositories.InventoryReceipt;
 
 public class InputInsertRepository(ApplicationDBContext context) : IInputInsertRepository
 {
-    public void Add(InputEntity input)
+    public void Add(InputEntity InventoryReceipt)
     {
-        context.InputReceipts.Add(input);
+        context.InputReceipts.Add(InventoryReceipt);
     }
 }

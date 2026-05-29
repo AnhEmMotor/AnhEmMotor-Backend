@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
 using Domain.Primitives;

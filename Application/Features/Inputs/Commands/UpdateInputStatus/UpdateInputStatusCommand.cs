@@ -1,9 +1,9 @@
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using MediatR;
 using System.Text.Json.Serialization;
 
-namespace Application.Features.Inputs.Commands.UpdateInputStatus;
+namespace Application.Features.InventoryReceipts.Commands.UpdateInputStatus;
 
 public sealed record UpdateInputStatusCommand : IRequest<Result<InputDetailResponse>>
 {

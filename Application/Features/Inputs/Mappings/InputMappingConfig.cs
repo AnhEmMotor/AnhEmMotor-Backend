@@ -1,20 +1,20 @@
-using Application.ApiContracts.Input.Requests;
-using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.InventoryReceipt.Requests;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.ApiContracts.Supplier.Responses;
-using Application.Features.Inputs.Commands.CreateInput;
-using Application.Features.Inputs.Commands.UpdateInput;
+using Application.Features.InventoryReceipts.Commands.CreateInput;
+using Application.Features.InventoryReceipts.Commands.UpdateInput;
 using Domain.Entities;
 using Mapster;
 
-namespace Application.Features.Inputs.Mappings;
+namespace Application.Features.InventoryReceipts.Mappings;
 
 public sealed class InputMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<CreateInputCommand, Input>();
+        config.NewConfig<CreateInputCommand, InventoryReceipt>();
         config.NewConfig<CreateInputInfoRequest, InputInfo>();
-        config.NewConfig<Input, InputListResponse>()
+        config.NewConfig<InventoryReceipt, InputListResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
                 dest => dest.TotalPayable,
@@ -22,7 +22,7 @@ public sealed class InputMappingConfig : IRegister
                     ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.QuotationProductRow != null ? (ii.QuotationProductRow.QuotePrice ?? 0) : 0))
                     : 0)
             .Map(dest => dest.Products, src => src.InputInfos);
-        config.NewConfig<Input, InputDetailResponse>()
+        config.NewConfig<InventoryReceipt, InputDetailResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
                 dest => dest.TotalPayable,
@@ -68,11 +68,11 @@ public sealed class InputMappingConfig : IRegister
         config.NewConfig<UpdateInputInfoRequest, InputInfo>()
             .Ignore(dest => dest.Vehicles)
             .IgnoreNullValues(true);
-        config.NewConfig<UpdateInputCommand, Input>().IgnoreNullValues(true);
+        config.NewConfig<UpdateInputCommand, InventoryReceipt>().IgnoreNullValues(true);
         config.NewConfig<Vehicle, InputVehicleResponse>()
             .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
             .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId);
-        config.NewConfig<Input, SupplierPurchaseHistoryResponse>()
+        config.NewConfig<InventoryReceipt, SupplierPurchaseHistoryResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
                 dest => dest.TotalPayable,

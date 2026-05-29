@@ -1,11 +1,11 @@
 namespace Domain.Constants.Permission.Permissions;
 
-public static class PurchaseOrders
+public static class InventoryReceipts
 {
-    public const string View = "Permissions.PurchaseOrders.View";
-    public const string Create = "Permissions.PurchaseOrders.Create";
-    public const string Edit = "Permissions.PurchaseOrders.Edit";
-    public const string Delete = "Permissions.PurchaseOrders.Delete";
-    public const string Send = "Permissions.PurchaseOrders.Send";
-    public const string ApproveReject = "Permissions.PurchaseOrders.ApproveReject";
+    public const string View = "Permissions.InventoryReceipts.View";
+    public const string Create = "Permissions.InventoryReceipts.Create";
+    public const string Edit = "Permissions.InventoryReceipts.Edit";
+    public const string Delete = "Permissions.InventoryReceipts.Delete";
+    public const string Send = "Permissions.InventoryReceipts.Send";
+    public const string ApproveReject = "Permissions.InventoryReceipts.ApproveReject";
 }
