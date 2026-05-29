@@ -290,12 +290,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(oi => oi.PurchaseRequest)
             .WithMany(q => q.PurchaseRequestItems)
             .HasForeignKey(oi => oi.PurchaseRequestId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired(false);;
         modelBuilder.Entity<PurchaseRequestItem>()
             .HasOne(oi => oi.ProductVariant)
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
         modelBuilder.Entity<PurchaseRequestItem>()
             .HasOne(oi => oi.ProductVariantColor)
             .WithMany()
