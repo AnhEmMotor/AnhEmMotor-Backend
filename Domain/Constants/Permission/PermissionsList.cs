@@ -32,6 +32,8 @@ public static class PermissionsList
         { Suppliers.Delete, new PermissionMetadata("Delete Supplier", "Xóa nhà cung cấp") },
 
         { Outputs.View, new PermissionMetadata("View Outputs", "Xem danh sách đơn xuất hàng") },
+        { Outputs.ViewConfirmed, new PermissionMetadata("View Confirmed Outputs", "Xem danh sách phiếu bán hàng đã xác nhận") },
+        { Outputs.ViewUnconfirmed, new PermissionMetadata("View Unconfirmed Outputs", "Xem danh sách phiếu tạm chưa xác nhận") },
         { Outputs.Create, new PermissionMetadata("Create Output", "Tạo đơn xuất hàng mới") },
         { Outputs.Edit, new PermissionMetadata("Edit Output", "Chỉnh sửa đơn xuất hàng") },
         { Outputs.Delete, new PermissionMetadata("Delete Output", "Xóa đơn xuất hàng") },
@@ -158,7 +160,7 @@ public static class PermissionsList
             [ProductCategories.View, ProductCategories.Create, ProductCategories.Edit, ProductCategories.Delete]
         },
         { "Nhà cung cấp", [Suppliers.View, Suppliers.Create, Suppliers.Edit, Suppliers.Delete] },
-        { "Xuất hàng", [Outputs.View, Outputs.Create, Outputs.Edit, Outputs.Delete, Outputs.ChangeStatus] },
+        { "Xuất hàng", [Outputs.View, Outputs.ViewConfirmed, Outputs.ViewUnconfirmed, Outputs.Create, Outputs.Edit, Outputs.Delete, Outputs.ChangeStatus] },
         { "Tệp tin", [Files.View, Files.Upload, Files.Delete] },
         { "Cài đặt", [Settings.View, Settings.Edit] },
         { "Thống kê", [Statistical.View, Statistical.Export] },

@@ -23,6 +23,7 @@ using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentStatuses;
 using Asp.Versioning;
+using Domain.Constants.Order;
 using Domain.Constants.Permission.Permissions;
 using Domain.Constants.RouteNames;
 using Domain.Primitives;
@@ -94,18 +95,37 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách đơn hàng (có phân trang, lọc, sắp xếp).
+    /// Lấy danh sách phiếu bán hàng đã xác nhận.
     /// </summary>
-    [HttpGet]
-    [HasPermission(Outputs.View)]
+    [HttpGet("confirmed")]
+    [HasPermission(Outputs.ViewConfirmed)]
     [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOutputsAsync(
+    public async Task<IActionResult> GetConfirmedOutputsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetOutputsListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return await GetOutputsByStatusesAsync(
+            sieveModel,
+            OrderStatus.ConfirmedOrderStatuses,
+            cancellationToken)
+            .ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Lấy danh sách phiếu tạm chưa xác nhận.
+    /// </summary>
+    [HttpGet("unconfirmed")]
+    [HasPermission(Outputs.ViewUnconfirmed)]
+    [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetUnconfirmedOutputsAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
+    {
+        return await GetOutputsByStatusesAsync(
+            sieveModel,
+            OrderStatus.UnconfirmedOrderStatuses,
+            cancellationToken)
+            .ConfigureAwait(true);
     }
 
     /// <summary>
@@ -431,6 +451,16 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<RestoreManyOutputsCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    private async Task<IActionResult> GetOutputsByStatusesAsync(
+        SieveModel sieveModel,
+        IReadOnlyCollection<string> statusIds,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetOutputsListQuery { SieveModel = sieveModel, StatusIds = statusIds };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

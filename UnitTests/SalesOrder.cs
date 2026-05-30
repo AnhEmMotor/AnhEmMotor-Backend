@@ -915,6 +915,51 @@ public class SalesOrder
             Times.Once);
     }
 
+    [Fact(DisplayName = "SO_115 - GetOutputsList lọc theo nhóm trạng thái xác nhận")]
+    public async Task GetOutputsList_WithStatusIds_ShouldApplyRepositoryFilter()
+    {
+        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _settingRepoMock.Object);
+        var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Page = 1, PageSize = 10 } };
+        var statusIdsProperty = typeof(GetOutputsListQuery).GetProperty("StatusIds");
+        statusIdsProperty.Should().NotBeNull("GetOutputsListQuery cần nhận nhóm trạng thái để tách phiếu tạm và phiếu bán hàng");
+        statusIdsProperty!.SetValue(query, new[] { OrderStatus.Pending, OrderStatus.WaitingDeposit });
+        Expression<Func<Output, bool>>? capturedFilter = null;
+        _readRepoMock.Setup(
+            x => x.GetPagedAsync<OutputItemResponse>(
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode>(),
+                It.IsAny<Expression<Func<Output, bool>>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<SieveModel, DataFetchMode, Expression<Func<Output, bool>>?, CancellationToken>(
+                (_, _, filter, _) => capturedFilter = filter)
+            .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 10));
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.Should().NotBeNull();
+        capturedFilter.Should().NotBeNull();
+        var predicate = capturedFilter!.Compile();
+        predicate(new Output { StatusId = OrderStatus.Pending }).Should().BeTrue();
+        predicate(new Output { StatusId = OrderStatus.ConfirmedCod }).Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "SO_116 - OrderStatus khai báo nhóm đã/chưa xác nhận")]
+    public void OrderStatus_ShouldExposeConfirmedAndUnconfirmedStatusGroups()
+    {
+        var confirmedStatuses = typeof(OrderStatus)
+            .GetField("ConfirmedOrderStatuses")
+            ?.GetValue(null) as IEnumerable<string>;
+        var unconfirmedStatuses = typeof(OrderStatus)
+            .GetField("UnconfirmedOrderStatuses")
+            ?.GetValue(null) as IEnumerable<string>;
+        confirmedStatuses.Should().NotBeNull();
+        unconfirmedStatuses.Should().NotBeNull();
+        confirmedStatuses!.Should().Contain(OrderStatus.ConfirmedCod);
+        confirmedStatuses.Should().Contain(OrderStatus.Completed);
+        confirmedStatuses.Should().NotContain(OrderStatus.Pending);
+        unconfirmedStatuses!.Should().Contain(OrderStatus.Pending);
+        unconfirmedStatuses.Should().Contain(OrderStatus.WaitingDeposit);
+        unconfirmedStatuses.Should().NotContain(OrderStatus.ConfirmedCod);
+    }
+
     [Fact(DisplayName = "SO_031 - GetOutputsList sort theo CreatedAt")]
     public async Task GetOutputsList_ShouldSortByCreatedAt()
     {
@@ -1402,7 +1447,7 @@ public class SalesOrder
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "SO_057 - UpdateOutputStatus from PaidProcessing to Refunding succeeds")]
+    [Fact(DisplayName = "SO_056 - UpdateOutputStatus from PaidProcessing to Refunding succeeds")]
     public async Task UpdateOutputStatus_PaidProcessingToRefunding_ShouldSucceed()
     {
         var outputId = 1;
