@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using InputStatus = Domain.Entities.InputStatus;
+using InventoryReceiptStatus = Domain.Entities.InventoryReceiptStatus;
 using ProductStatus = Domain.Entities.ProductStatus;
 using SupplierStatus = Domain.Entities.SupplierStatus;
 
@@ -28,11 +28,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<Brand> Brands { get; set; }
 
-    public virtual DbSet<Input> InputReceipts { get; set; }
+    public virtual DbSet<InventoryReceipt> InventoryReceiptReceipts { get; set; }
 
-    public virtual DbSet<InputInfo> InputInfos { get; set; }
+    public virtual DbSet<InventoryReceiptInfo> InventoryReceiptInfos { get; set; }
 
-    public virtual DbSet<InputStatus> InputStatuses { get; set; }
+    public virtual DbSet<InventoryReceiptStatus> InventoryReceiptStatuses { get; set; }
 
     public virtual DbSet<OptionValue> OptionValues { get; set; }
 
@@ -145,6 +145,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<Quotation> Quotations { get; set; }
 
     public virtual DbSet<QuotationProductRow> QuotationProductRows { get; set; }
+
+    public virtual DbSet<PurchaseRequest> PurchaseRequests { get; set; }
+
+    public virtual DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -343,7 +347,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<ProductStatus>().HasKey(ps => ps.Key);
         modelBuilder.Entity<ProductStatus>()
             .HasData(new ProductStatus { Key = "for-sale" }, new ProductStatus { Key = "out-of-business" });
-        modelBuilder.Entity<InputStatus>().HasKey(ins => ins.Key);
+        modelBuilder.Entity<InventoryReceiptStatus>().HasKey(ins => ins.Key);
         modelBuilder.Entity<Domain.Entities.PartnerType>().HasKey(pt => pt.Key);
         modelBuilder.Entity<Domain.Entities.PartnerType>()
             .HasData(
@@ -392,9 +396,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(vd => vd.VehicleId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Vehicle>()
-            .HasOne(v => v.InputInfo)
+            .HasOne(v => v.InventoryReceiptInfo)
             .WithMany(ii => ii.Vehicles)
-            .HasForeignKey(v => v.InputInfoId)
+            .HasForeignKey(v => v.InventoryReceiptInfoId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Vehicle>()
             .HasOne(v => v.OutputInfo)
@@ -411,10 +415,15 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(v => v.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<InputInfo>()
-            .HasOne(ii => ii.ProductVariantColor)
+        modelBuilder.Entity<InventoryReceiptInfo>()
+            .HasOne(ii => ii.PurchaseRequestItem)
+            .WithMany(pri => pri.InventoryReceiptInfos)
+            .HasForeignKey(ii => ii.PurchaseRequestItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryReceiptInfo>()
+            .HasOne(ii => ii.QuotationProductRow)
             .WithMany()
-            .HasForeignKey(ii => ii.ProductVariantColorId)
+            .HasForeignKey(ii => ii.QuotationProductRowId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<OutputInfo>()
             .HasOne(oi => oi.ProductVariantColor)
@@ -440,6 +449,28 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(oi => oi.ProductVariantColor)
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<PurchaseRequestItem>()
+            .HasOne(oi => oi.PurchaseRequest)
+            .WithMany(q => q.PurchaseRequestItems)
+            .HasForeignKey(oi => oi.PurchaseRequestId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired(false);;
+        modelBuilder.Entity<PurchaseRequestItem>()
+            .HasOne(oi => oi.ProductVariant)
+            .WithMany()
+            .HasForeignKey(oi => oi.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
+        modelBuilder.Entity<PurchaseRequestItem>()
+            .HasOne(oi => oi.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(oi => oi.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryReceipt>()
+            .HasOne(oi => oi.PurchaseRequest)
+            .WithMany()
+            .HasForeignKey(oi => oi.PurchaseRequestId)
             .OnDelete(DeleteBehavior.Restrict);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;

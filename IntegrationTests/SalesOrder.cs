@@ -2,7 +2,6 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
 using Application.Features.Outputs.Commands.RestoreManyOutputs;
-using Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 using Application.Features.Outputs.Commands.UpdateOutputForManager;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Domain.Constants.Order;
@@ -22,8 +21,6 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using BrandEntity = Domain.Entities.Brand;
-using InputEntity = Domain.Entities.Input;
-using InputStatusEntity = Domain.Entities.InputStatus;
 using OutputEntity = Domain.Entities.Output;
 using OutputStatusEntity = Domain.Entities.OutputStatus;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
@@ -82,41 +79,6 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return variant.Id;
-    }
-
-    private async Task SeedInventoryAsync(
-        int variantId,
-        int quantity,
-        string uniqueId,
-        CancellationToken cancellationToken = default)
-    {
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        if (!await db.InputStatuses
-            .AnyAsync(x => string.Compare(x.Key, "finished") == 0, cancellationToken)
-            .ConfigureAwait(false))
-        {
-            db.InputStatuses.Add(new InputStatusEntity { Key = "finished" });
-            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
-        var input = new InputEntity
-        {
-            InputDate = DateTimeOffset.UtcNow,
-            Notes = $"Test inventory for {uniqueId}",
-            StatusId = "finished"
-        };
-        db.InputReceipts.Add(input);
-        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var inputInfo = new InputInfo
-        {
-            InputId = input.Id,
-            ProductVariantId = variantId,
-            Count = quantity,
-            RemainingCount = quantity,
-            InputPrice = 50000
-        };
-        db.InputInfos.Add(inputInfo);
-        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     #pragma warning disable IDE0079
@@ -241,262 +203,6 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         order!.StatusId.Should().Be(OrderStatus.Pending);
     }
 
-    [Fact(DisplayName = "SO_063 - Luồng COD đầy đủ: Pending -> ConfirmedCod -> Delivering -> Completed")]
-    public async Task UpdateOutputStatus_CODFlow_CompletesSuccessfully()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var username = $"user_{uniqueId}";
-        var email = $"user_{uniqueId}@gmail.com";
-        var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            username,
-            password,
-            [Outputs.Create, Outputs.ChangeStatus],
-            TestContext.Current.CancellationToken,
-            email)
-            .ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            username,
-            password,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var statuses = new[]
-            {
-                OrderStatus.Pending,
-                OrderStatus.ConfirmedCod,
-                OrderStatus.Delivering,
-                OrderStatus.Completed
-            };
-            foreach (var s in statuses)
-            {
-                if (!await db.OutputStatuses
-                    .AnyAsync(x => string.Compare(x.Key, s) == 0, TestContext.Current.CancellationToken)
-                    .ConfigureAwait(true))
-                    db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
-            }
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        }
-        var variantId = await SeedProductVariantAsync(uniqueId, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        await SeedInventoryAsync(variantId, 10, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var jsonContent = JsonSerializer
-            .Serialize(
-                new
-                {
-                    buyerId = user.Id,
-                    customerName = "Khách hàng Test",
-                    customerPhone = "0987654321",
-                    customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
-                });
-        var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-        var createResponse = await _client.PostAsync(
-            "/api/v1/SalesOrders",
-            httpContent,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var order = await createResponse!.Content
-            .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        int orderId = order!.Id!.Value;
-        var updateRequest1 = new UpdateOutputStatusCommand { StatusId = OrderStatus.ConfirmedCod };
-        var response1 = await _client.PatchAsJsonAsync(
-            $"/api/v1/SalesOrders/{orderId}/status",
-            updateRequest1,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        response1.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updateRequest2 = new UpdateOutputStatusCommand { StatusId = OrderStatus.Delivering };
-        var response2 = await _client.PatchAsJsonAsync(
-            $"/api/v1/SalesOrders/{orderId}/status",
-            updateRequest2,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        response2.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updateRequest3 = new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed };
-        var response3 = await _client.PatchAsJsonAsync(
-            $"/api/v1/SalesOrders/{orderId}/status",
-            updateRequest3,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        response3.StatusCode.Should().Be(HttpStatusCode.OK);
-        var finalOrder = await response3.Content
-            .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        finalOrder!.StatusId.Should().Be(OrderStatus.Completed);
-    }
-
-    [Fact(DisplayName = "SO_064 - Luồng Deposit đầy đủ: Pending -> Deposit50 -> Confirmed50 -> Delivering -> Completed")]
-    public async Task UpdateOutputStatus_DepositFlow_CompletesSuccessfully()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var username = $"user_{uniqueId}";
-        var email = $"user_{uniqueId}@gmail.com";
-        var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            username,
-            password,
-            [Outputs.Create, Outputs.ChangeStatus],
-            TestContext.Current.CancellationToken,
-            email)
-            .ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            username,
-            password,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var statuses = new[]
-            {
-                OrderStatus.Pending,
-                OrderStatus.WaitingDeposit,
-                OrderStatus.DepositPaid,
-                OrderStatus.Delivering,
-                OrderStatus.Completed
-            };
-            foreach (var s in statuses)
-            {
-                if (!await db.OutputStatuses
-                    .AnyAsync(x => string.Compare(x.Key, s) == 0, TestContext.Current.CancellationToken)
-                    .ConfigureAwait(true))
-                    db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
-            }
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        }
-        var variantId = await SeedProductVariantAsync(uniqueId, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        await SeedInventoryAsync(variantId, 10, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var jsonContent = JsonSerializer
-            .Serialize(
-                new
-                {
-                    buyerId = user.Id,
-                    customerName = "Khách hàng Test",
-                    customerPhone = "0987654321",
-                    customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
-                });
-        var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-        var createResponse = await _client.PostAsync(
-            "/api/v1/SalesOrders",
-            httpContent,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var order = await createResponse!.Content
-            .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        int orderId = order!.Id!.Value;
-        await _client.PatchAsJsonAsync(
-            $"/api/v1/SalesOrders/{orderId}/status",
-            new UpdateOutputStatusCommand { StatusId = OrderStatus.WaitingDeposit },
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        await _client.PatchAsJsonAsync(
-            $"/api/v1/SalesOrders/{orderId}/status",
-            new UpdateOutputStatusCommand { StatusId = OrderStatus.DepositPaid },
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        await _client.PatchAsJsonAsync(
-            $"/api/v1/SalesOrders/{orderId}/status",
-            new UpdateOutputStatusCommand { StatusId = OrderStatus.Delivering },
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var finalResponse = await _client.PatchAsJsonAsync(
-            $"/api/v1/SalesOrders/{orderId}/status",
-            new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed },
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        finalResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact(DisplayName = "SO_065 - Luồng Refund: Pending -> ConfirmedCod -> Refund")]
-    public async Task UpdateOutputStatus_RefundFlow_CompletesSuccessfully()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var username = $"user_{uniqueId}";
-        var email = $"user_{uniqueId}@gmail.com";
-        var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            username,
-            password,
-            [Outputs.Create, Outputs.ChangeStatus],
-            TestContext.Current.CancellationToken,
-            email)
-            .ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            username,
-            password,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var statuses = new[]
-            {
-                OrderStatus.Pending,
-                OrderStatus.PaidProcessing,
-                OrderStatus.Refunding,
-                OrderStatus.Refunded
-            };
-            foreach (var s in statuses)
-            {
-                if (!await db.OutputStatuses
-                    .AnyAsync(x => string.Compare(x.Key, s) == 0, TestContext.Current.CancellationToken)
-                    .ConfigureAwait(true))
-                    db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
-            }
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        }
-        var variantId = await SeedProductVariantAsync(uniqueId, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        await SeedInventoryAsync(variantId, 10, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var jsonContent = JsonSerializer
-            .Serialize(
-                new
-                {
-                    buyerId = user.Id,
-                    customerName = "Khách hàng Test",
-                    customerPhone = "0987654321",
-                    customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
-                });
-        var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-        var createResponse = await _client.PostAsync(
-            "/api/v1/SalesOrders",
-            httpContent,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var order = await createResponse!.Content
-            .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        int orderId = order!.Id!.Value;
-        await _client.PatchAsJsonAsync(
-            $"/api/v1/SalesOrders/{orderId}/status",
-            new UpdateOutputStatusCommand { StatusId = OrderStatus.PaidProcessing },
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var refundResponse = await _client.PatchAsJsonAsync(
-            $"/api/v1/SalesOrders/{orderId}/status",
-            new UpdateOutputStatusCommand { StatusId = OrderStatus.Refunding },
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        refundResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
     [Fact(DisplayName = "SO_066 - CreateOutputForAdmin được gọi bởi Manager")]
     public async Task CreateOutputForAdmin_ByManager_CreatesSuccessfully()
     {
@@ -562,7 +268,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Outputs.ViewUnconfirmed],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -594,7 +300,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
         var response = await _client.GetAsync(
-            $"/api/v1/SalesOrders?filters=status=={OrderStatus.Pending},Notes@={uniqueId}",
+            $"/api/v1/SalesOrders/unconfirmed?filters=status=={OrderStatus.Pending},Notes@={uniqueId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -697,7 +403,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Outputs.ViewUnconfirmed],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -741,7 +447,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
         var response = await _client.GetAsync(
-            $"/api/v1/SalesOrders?sorts=-createdAt&filters=Notes@={uniqueId}",
+            $"/api/v1/SalesOrders/unconfirmed?sorts=-createdAt&filters=Notes@={uniqueId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -762,7 +468,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Outputs.ViewUnconfirmed],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -790,7 +496,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
         var response = await _client.GetAsync(
-            $"/api/v1/SalesOrders?page=1&pageSize=10&filters=Notes@={uniqueId}",
+            $"/api/v1/SalesOrders/unconfirmed?page=1&pageSize=10&filters=Notes@={uniqueId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1210,79 +916,6 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
 
-    [Fact(DisplayName = "SO_078 - UpdateManyOutputStatus cập nhật trạng thái nhiều đơn")]
-    public async Task UpdateManyOutputStatus_ValidIds_UpdatesAllStatuses()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var username = $"user_{uniqueId}";
-        var email = $"user_{uniqueId}@gmail.com";
-        var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            username,
-            password,
-            [Outputs.Create, Outputs.ChangeStatus],
-            TestContext.Current.CancellationToken,
-            email)
-            .ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            username,
-            password,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var statuses = new[] { OrderStatus.Pending, OrderStatus.ConfirmedCod };
-            foreach (var s in statuses)
-            {
-                if (!await db.OutputStatuses
-                    .AnyAsync(x => string.Compare(x.Key, s) == 0, TestContext.Current.CancellationToken)
-                    .ConfigureAwait(true))
-                    db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
-            }
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        }
-        var variantId = await SeedProductVariantAsync(uniqueId, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        await SeedInventoryAsync(variantId, 10, uniqueId, TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var jsonContent = JsonSerializer
-            .Serialize(
-                new
-                {
-                    buyerId = user.Id,
-                    customerName = "Khách hàng Test",
-                    customerPhone = "0987654321",
-                    customerAddress = "Số 123, Đường Test, Hà Nội",
-                    products = new[] { new { ProductVariantId = variantId, count = 1 } }
-                });
-        var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-        var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var o1 = await r1.Content
-            .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var httpContent2 = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-        var r2 = await _client.PostAsync("/api/v1/SalesOrders", httpContent2, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var o2 = await r2.Content
-            .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var request = new UpdateManyOutputStatusCommand
-        {
-            Ids = [o1!.Id!.Value, o2!.Id!.Value],
-            StatusId = OrderStatus.ConfirmedCod
-        };
-        var response = await _client.PatchAsJsonAsync(
-            "/api/v1/SalesOrders/status",
-            request,
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
-    }
-
     [Fact(DisplayName = "SO_079 - GetMyPurchases chỉ trả về đơn của user đăng nhập")]
     public async Task GetMyPurchases_AuthenticatedUser_ReturnsUserOrders()
     {
@@ -1549,7 +1182,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact(DisplayName = "SO_071 - Tạo đơn hàng vượt quá giới hạn số lượng của thể loại sản phẩm")]
+    [Fact(DisplayName = "SO_105 - Tạo đơn hàng vượt quá giới hạn số lượng của thể loại sản phẩm")]
     public async Task CreateOutput_ExceedCategoryLimit_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];

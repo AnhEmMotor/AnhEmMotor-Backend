@@ -9,7 +9,7 @@ namespace Application.Features.Banners.Commands.CreateBanner;
 
 public sealed class CreateBannerCommandHandler(
     IBannerInsertRepository bannerInsertRepository,
-    IHttpTokenAccessorService tokenAccessorService,
+    ICurrentUserContext currentUserContext,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateBannerCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(CreateBannerCommand request, CancellationToken cancellationToken)
@@ -34,7 +34,7 @@ public sealed class CreateBannerCommandHandler(
             {
                 Banner = banner,
                 Action = "Create",
-                ChangedBy = tokenAccessorService.GetUserId() ?? "Unknown",
+                ChangedBy = currentUserContext.GetUserId().ToString(),
                 Details = $"Created banner '{banner.Title}'"
             });
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

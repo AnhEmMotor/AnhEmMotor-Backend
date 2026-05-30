@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -15,8 +15,7 @@ namespace Infrastructure.Migrations
                 name: "Quotations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     SupplierId = table.Column<int>(type: "int", nullable: true),
                     Status = table.Column<string>(type: "varchar(30)", nullable: true),
                     Note = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
@@ -34,13 +33,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
-
             migrationBuilder.CreateTable(
                 name: "QuotationProductRows",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     QuotationId = table.Column<int>(type: "int", nullable: true),
                     ProductVariantId = table.Column<int>(type: "int", nullable: true),
                     ProductVariantColorId = table.Column<int>(type: "int", nullable: true),
@@ -69,36 +66,26 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_QuotationProductRows_ProductVariantColorId",
                 table: "QuotationProductRows",
                 column: "ProductVariantColorId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_QuotationProductRows_ProductVariantId",
                 table: "QuotationProductRows",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_QuotationProductRows_QuotationId",
                 table: "QuotationProductRows",
                 column: "QuotationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Quotations_SupplierId",
-                table: "Quotations",
-                column: "SupplierId");
+            migrationBuilder.CreateIndex(name: "IX_Quotations_SupplierId", table: "Quotations", column: "SupplierId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "QuotationProductRows");
-
-            migrationBuilder.DropTable(
-                name: "Quotations");
+            migrationBuilder.DropTable(name: "QuotationProductRows");
+            migrationBuilder.DropTable(name: "Quotations");
         }
     }
 }

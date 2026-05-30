@@ -5,6 +5,7 @@ using Application.Features.HR.Queries.GetEmployees;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -56,7 +57,7 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// Updates an employee profile.
     /// </summary>
     /// <param name="id">The employee ID.</param>
-    /// <param name="command">The update command.</param>
+    /// <param name="request">The update command.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The updated employee ID.</returns>
     [HttpPut("{id}")]
@@ -64,13 +65,10 @@ public class EmployeeController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateEmployeeAsync(
         int id,
-        [FromBody] UpdateEmployeeCommand command,
+        [FromBody] UpdateEmployeeCommand request,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
-        {
-            return BadRequest("ID mismatch.");
-        }
+        var command = request.Adapt<UpdateEmployeeCommand>() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

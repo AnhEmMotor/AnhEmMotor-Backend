@@ -1,10 +1,10 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Vehicle;
-using Application.Interfaces.Services.HR;
 using Domain.Constants;
 using Domain.Constants.Lead;
 using Domain.Constants.Order;
@@ -21,7 +21,7 @@ namespace Application.Features.Outputs.Commands.UpdateOutputStatus;
 public sealed class UpdateOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    ICommissionService commissionService,
+    ICommissionUpdateRepository commissionUpdateRepository,
     IUnitOfWork unitOfWork,
     IVehicleReadRepository? vehicleReadRepository = null,
     IVehicleUpdateRepository? vehicleUpdateRepository = null,
@@ -96,7 +96,7 @@ public sealed class UpdateOutputStatusCommandHandler(
             case OrderStatus.Cancelled:
             case OrderStatus.Refunding:
             case OrderStatus.Refunded:
-                await commissionService.VoidCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
+                await commissionUpdateRepository.VoidCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
                 break;
             case OrderStatus.PaidProcessing:
                 break;
@@ -126,7 +126,7 @@ public sealed class UpdateOutputStatusCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         if (isCompleting)
         {
-            await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
+            await commissionUpdateRepository.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
                 .ConfigureAwait(false);
         }
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
@@ -182,7 +182,7 @@ public sealed class UpdateOutputStatusCommandHandler(
                         $"Xe có số khung (VIN) {vehicle.VinNumber} đang ở trạng thái không hoạt động.",
                         "SelectedVehicleIds"));
             }
-            if (vehicle.InputInfoId == null)
+            if (vehicle.InventoryReceiptInfoId == null)
             {
                 return Result.Failure(
                     Error.BadRequest(

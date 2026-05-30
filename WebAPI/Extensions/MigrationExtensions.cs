@@ -46,7 +46,7 @@ public static class MigrationExtensions
                 var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
                 var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                 await ProductCategorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
-                await InputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await InventoryReceiptStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
@@ -57,8 +57,6 @@ public static class MigrationExtensions
                 await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await NewsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await TechnologyDataMigrationSeeder.MigrateExistingHighlightsAsync(dbContext, cancellationToken)
-                    .ConfigureAwait(false);
                 await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
                     dbContext,

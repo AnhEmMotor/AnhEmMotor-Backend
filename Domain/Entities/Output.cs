@@ -80,7 +80,7 @@ namespace Domain.Entities
         public ICollection<OutputInfo> OutputInfos { get; set; } = [];
 
         [InverseProperty("Output")]
-        public ICollection<Input> Returns { get; set; } = [];
+        public ICollection<InventoryReceipt> Returns { get; set; } = [];
 
         public ICollection<OrderStatusHistory> StatusHistories { get; set; } = [];
 

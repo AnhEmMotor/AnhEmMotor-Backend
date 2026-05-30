@@ -12,7 +12,7 @@ public class CreateContactReplyCommandHandler(
     IContactInsertRepository contactInsertRepository,
     IContactUpdateRepository contactUpdateRepository,
     IUnitOfWork unitOfWork,
-    IHttpTokenAccessorService tokenAccessor) : IRequestHandler<CreateContactReplyCommand, Result<int>>
+    ICurrentUserContext currentUserContext) : IRequestHandler<CreateContactReplyCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(CreateContactReplyCommand request, CancellationToken cancellationToken)
     {
@@ -22,11 +22,7 @@ public class CreateContactReplyCommandHandler(
         {
             return Result<int>.Failure(Error.NotFound("Liên hệ không tồn tại."));
         }
-        var userIdString = tokenAccessor.GetUserId();
-        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
-        {
-            return Result<int>.Failure(Error.Unauthorized("Không thể xác định người dùng thực hiện phản hồi."));
-        }
+        Guid userId = currentUserContext.GetUserId();
         var reply = new ContactReply { ContactId = contact.Id, Message = request.Message, RepliedById = userId };
         contactInsertRepository.AddReply(reply);
         if (request.MarkAsProcessed)

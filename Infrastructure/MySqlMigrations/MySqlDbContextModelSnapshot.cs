@@ -695,7 +695,7 @@ namespace Infrastructure.MySqlMigrations
                     b.ToTable("EmployeeProfile");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Input", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -718,13 +718,17 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<long?>("DeletedAt")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("InputDate")
+                    b.Property<long?>("InventoryReceiptDate")
                         .HasColumnType("bigint")
-                        .HasColumnName("InputDate");
+                        .HasColumnName("InventoryReceiptDate");
 
                     b.Property<string>("Notes")
                         .HasColumnType("longtext")
                         .HasColumnName("Notes");
+
+                    b.Property<int?>("PurchaseRequestId")
+                        .HasColumnType("int")
+                        .HasColumnName("PurchaseRequestId");
 
                     b.Property<int?>("SourceOrderId")
                         .HasColumnType("int")
@@ -735,8 +739,7 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnName("StatusId");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("int")
-                        .HasColumnName("SupplierId");
+                        .HasColumnType("int");
 
                     b.Property<long?>("UpdatedAt")
                         .HasColumnType("bigint");
@@ -747,16 +750,18 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("CreatedBy");
 
+                    b.HasIndex("PurchaseRequestId");
+
                     b.HasIndex("SourceOrderId");
 
                     b.HasIndex("StatusId");
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Input");
+                    b.ToTable("InventoryReceipt");
                 });
 
-            modelBuilder.Entity("Domain.Entities.InputInfo", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -775,25 +780,24 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<long?>("DeletedAt")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("InputId")
+                    b.Property<int>("InventoryReceiptId")
                         .HasColumnType("int")
-                        .HasColumnName("InputId");
-
-                    b.Property<decimal?>("InputPrice")
-                        .HasColumnType("decimal(18, 2)")
-                        .HasColumnName("InputPrice");
+                        .HasColumnName("InventoryReceiptId");
 
                     b.Property<int?>("ParentOutputInfoId")
                         .HasColumnType("int")
                         .HasColumnName("ParentOutputInfoId");
 
-                    b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("int")
-                        .HasColumnName("ProductVariantColorId");
-
                     b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PurchaseRequestItemId")
                         .HasColumnType("int")
-                        .HasColumnName("ProductVariantId");
+                        .HasColumnName("PurchaseRequestItemId");
+
+                    b.Property<int?>("QuotationProductRowId")
+                        .HasColumnType("int")
+                        .HasColumnName("QuotationProductRowId");
 
                     b.Property<int?>("RemainingCount")
                         .HasColumnType("int")
@@ -804,18 +808,20 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InputId");
+                    b.HasIndex("InventoryReceiptId");
 
                     b.HasIndex("ParentOutputInfoId");
 
-                    b.HasIndex("ProductVariantColorId");
-
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("InputInfo");
+                    b.HasIndex("PurchaseRequestItemId");
+
+                    b.HasIndex("QuotationProductRowId");
+
+                    b.ToTable("InventoryReceiptInfo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.InputStatus", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
                 {
                     b.Property<string>("Key")
                         .HasColumnType("varchar(255)")
@@ -832,7 +838,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("InputStatus");
+                    b.ToTable("InventoryReceiptStatus");
                 });
 
             modelBuilder.Entity("Domain.Entities.KPI", b =>
@@ -1726,10 +1732,6 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("decimal(65,30)")
                         .HasColumnName("GroundClearance");
 
-                    b.Property<string>("Highlights")
-                        .HasColumnType("longtext")
-                        .HasColumnName("Highlights");
-
                     b.Property<string>("LightingSystem")
                         .HasColumnType("longtext")
                         .HasColumnName("LightingSystem");
@@ -2203,6 +2205,86 @@ namespace Infrastructure.MySqlMigrations
                     b.ToTable("ProductVariantColor");
                 });
 
+            modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("ApprovedBy");
+
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("longtext")
+                        .HasColumnName("Note");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("Status");
+
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedBy");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("PurchaseRequest");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseRequestItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ProductVariantColorId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantColorId");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantId");
+
+                    b.Property<int>("PurchaseRequestId")
+                        .HasColumnType("int")
+                        .HasColumnName("PurchaseRequestId");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int")
+                        .HasColumnName("Quantity");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantColorId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("PurchaseRequestId");
+
+                    b.ToTable("PurchaseRequestItem");
+                });
+
             modelBuilder.Entity("Domain.Entities.Quotation", b =>
                 {
                     b.Property<int>("Id")
@@ -2611,9 +2693,9 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("longtext")
                         .HasColumnName("EngineNumber");
 
-                    b.Property<int?>("InputInfoId")
+                    b.Property<int?>("InventoryReceiptInfoId")
                         .HasColumnType("int")
-                        .HasColumnName("InputInfoId");
+                        .HasColumnName("InventoryReceiptInfoId");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)")
@@ -2662,7 +2744,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InputInfoId");
+                    b.HasIndex("InventoryReceiptInfoId");
 
                     b.HasIndex("LeadId");
 
@@ -2924,7 +3006,7 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Input", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
                 {
                     b.HasOne("Domain.Entities.ApplicationUser", "ConfirmedByUser")
                         .WithMany()
@@ -2934,34 +3016,39 @@ namespace Infrastructure.MySqlMigrations
                         .WithMany()
                         .HasForeignKey("CreatedBy");
 
+                    b.HasOne("Domain.Entities.PurchaseRequest", "PurchaseRequest")
+                        .WithMany()
+                        .HasForeignKey("PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Domain.Entities.Output", "Output")
                         .WithMany("Returns")
                         .HasForeignKey("SourceOrderId");
 
-                    b.HasOne("Domain.Entities.InputStatus", "InputStatus")
-                        .WithMany("InputReceipts")
+                    b.HasOne("Domain.Entities.InventoryReceiptStatus", "InventoryReceiptStatus")
+                        .WithMany("InventoryReceiptReceipts")
                         .HasForeignKey("StatusId");
 
-                    b.HasOne("Domain.Entities.Supplier", "Supplier")
-                        .WithMany("InputReceipts")
+                    b.HasOne("Domain.Entities.Supplier", null)
+                        .WithMany("InventoryReceiptReceipts")
                         .HasForeignKey("SupplierId");
 
                     b.Navigation("ConfirmedByUser");
 
                     b.Navigation("CreatedByUser");
 
-                    b.Navigation("InputStatus");
+                    b.Navigation("InventoryReceiptStatus");
 
                     b.Navigation("Output");
 
-                    b.Navigation("Supplier");
+                    b.Navigation("PurchaseRequest");
                 });
 
-            modelBuilder.Entity("Domain.Entities.InputInfo", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
                 {
-                    b.HasOne("Domain.Entities.Input", "InputReceipt")
-                        .WithMany("InputInfos")
-                        .HasForeignKey("InputId")
+                    b.HasOne("Domain.Entities.InventoryReceipt", "InventoryReceiptReceipt")
+                        .WithMany("InventoryReceiptInfos")
+                        .HasForeignKey("InventoryReceiptId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2969,22 +3056,27 @@ namespace Infrastructure.MySqlMigrations
                         .WithMany("Returns")
                         .HasForeignKey("ParentOutputInfoId");
 
-                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantColorId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany("InputInfos")
+                    b.HasOne("Domain.Entities.ProductVariant", null)
+                        .WithMany("InventoryReceiptInfos")
                         .HasForeignKey("ProductVariantId");
 
-                    b.Navigation("InputReceipt");
+                    b.HasOne("Domain.Entities.PurchaseRequestItem", "PurchaseRequestItem")
+                        .WithMany("InventoryReceiptInfos")
+                        .HasForeignKey("PurchaseRequestItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.QuotationProductRow", "QuotationProductRow")
+                        .WithMany()
+                        .HasForeignKey("QuotationProductRowId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("InventoryReceiptReceipt");
 
                     b.Navigation("ParentOutputInfo");
 
-                    b.Navigation("ProductVariant");
+                    b.Navigation("PurchaseRequestItem");
 
-                    b.Navigation("ProductVariantColor");
+                    b.Navigation("QuotationProductRow");
                 });
 
             modelBuilder.Entity("Domain.Entities.KPI", b =>
@@ -3227,6 +3319,45 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "ApprovedByUser")
+                        .WithMany()
+                        .HasForeignKey("ApprovedBy");
+
+                    b.HasOne("Domain.Entities.ApplicationUser", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy");
+
+                    b.Navigation("ApprovedByUser");
+
+                    b.Navigation("CreatedByUser");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseRequestItem", b =>
+                {
+                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantColorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.PurchaseRequest", "PurchaseRequest")
+                        .WithMany("PurchaseRequestItems")
+                        .HasForeignKey("PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("ProductVariantColor");
+
+                    b.Navigation("PurchaseRequest");
+                });
+
             modelBuilder.Entity("Domain.Entities.Quotation", b =>
                 {
                     b.HasOne("Domain.Entities.Supplier", "Supplier")
@@ -3349,9 +3480,9 @@ namespace Infrastructure.MySqlMigrations
 
             modelBuilder.Entity("Domain.Entities.Vehicle", b =>
                 {
-                    b.HasOne("Domain.Entities.InputInfo", "InputInfo")
+                    b.HasOne("Domain.Entities.InventoryReceiptInfo", "InventoryReceiptInfo")
                         .WithMany("Vehicles")
-                        .HasForeignKey("InputInfoId")
+                        .HasForeignKey("InventoryReceiptInfoId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Domain.Entities.Lead", "Lead")
@@ -3377,7 +3508,7 @@ namespace Infrastructure.MySqlMigrations
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("InputInfo");
+                    b.Navigation("InventoryReceiptInfo");
 
                     b.Navigation("Lead");
 
@@ -3483,19 +3614,19 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("KPIs");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Input", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
                 {
-                    b.Navigation("InputInfos");
+                    b.Navigation("InventoryReceiptInfos");
                 });
 
-            modelBuilder.Entity("Domain.Entities.InputInfo", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
                 {
                     b.Navigation("Vehicles");
                 });
 
-            modelBuilder.Entity("Domain.Entities.InputStatus", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
                 {
-                    b.Navigation("InputReceipts");
+                    b.Navigation("InventoryReceiptReceipts");
                 });
 
             modelBuilder.Entity("Domain.Entities.Lead", b =>
@@ -3572,7 +3703,7 @@ namespace Infrastructure.MySqlMigrations
 
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
                 {
-                    b.Navigation("InputInfos");
+                    b.Navigation("InventoryReceiptInfos");
 
                     b.Navigation("OutputInfos");
 
@@ -3583,6 +3714,16 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("VariantOptionValues");
                 });
 
+            modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
+                {
+                    b.Navigation("PurchaseRequestItems");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseRequestItem", b =>
+                {
+                    b.Navigation("InventoryReceiptInfos");
+                });
+
             modelBuilder.Entity("Domain.Entities.Quotation", b =>
                 {
                     b.Navigation("QuotationProductRows");
@@ -3590,7 +3731,7 @@ namespace Infrastructure.MySqlMigrations
 
             modelBuilder.Entity("Domain.Entities.Supplier", b =>
                 {
-                    b.Navigation("InputReceipts");
+                    b.Navigation("InventoryReceiptReceipts");
 
                     b.Navigation("SupplierContacts");
                 });

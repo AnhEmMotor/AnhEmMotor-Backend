@@ -1,6 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Interfaces.Repositories.Statistical;
-using Domain.Constants.Input;
+using Domain.Constants;
 using Domain.Constants.Order;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -64,7 +64,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 {
                     ProductName =
                         variant != null
-                                ? $"{variant.Product?.Name} - {variant.VariantName} ({variant.ProductVariantColor?.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                                ? $"{variant.Product?.Name} - {variant.VariantName} ({variant.ProductVariantColors.FirstOrDefault()?.ColorName?.Split(',').FirstOrDefault()})".Trim(
                                     ' ',
                                     '-',
                                     '(',
@@ -294,11 +294,18 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 
         var todayVehicles = await GetVehiclesSold(todayStart, now).ConfigureAwait(false);
         var monthVehicles = await GetVehiclesSold(currentMonthStart, now).ConfigureAwait(false);
-        var confirmedInputs = await context.InputInfos
+        var confirmedInventoryReceipts = await context.InventoryReceiptInfos
             .IgnoreQueryFilters()
-            .Join(context.InputReceipts.IgnoreQueryFilters(), ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
-            .Where(x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0)
-            .GroupBy(x => x.ii.ProductVariantId)
+            .Join(
+                context.InventoryReceiptReceipts.IgnoreQueryFilters(),
+                ii => ii.InventoryReceiptId,
+                i => i.Id,
+                (ii, i) => new { ii, i })
+            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
+            .GroupBy(
+                x => x.ii.QuotationProductRow != null
+                    ? x.ii.QuotationProductRow.ProductVariantId
+                    : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -313,7 +320,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(g => new { VariantId = g.Key, TotalOut = g.Sum(x => (long)(x.oi.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-        var totalInventory = confirmedInputs.Sum(i => i.TotalIn) - soldOutputs.Sum(o => o.TotalOut);
+        var totalInventory = confirmedInventoryReceipts.Sum(i => i.TotalIn) - soldOutputs.Sum(o => o.TotalOut);
         var brandData = await context.Products
             .IgnoreQueryFilters()
             .Join(context.Brands.IgnoreQueryFilters(), p => p.BrandId, b => b.Id, (p, b) => new { p, b })
@@ -331,7 +338,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 {
                     BrandName = x.Name,
                     StockCount =
-                        (int)((confirmedInputs.FirstOrDefault(i => i.VariantId == x.VariantId)?.TotalIn ?? 0) -
+                        (int)((confirmedInventoryReceipts.FirstOrDefault(i => i.VariantId == x.VariantId)?.TotalIn ?? 0) -
                                 (soldOutputs.FirstOrDefault(o => o.VariantId == x.VariantId)?.TotalOut ?? 0))
                 })
             .GroupBy(x => x.BrandName)
@@ -341,25 +348,33 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Take(5)
             .ToList();
         int lowStockCount = 0;
-        foreach (var input in confirmedInputs)
+        foreach (var InventoryReceipt in confirmedInventoryReceipts)
         {
-            var sold = soldOutputs.FirstOrDefault(x => x.VariantId == input.VariantId)?.TotalOut ?? 0;
-            if (input.TotalIn - sold < 3)
+            var sold = soldOutputs.FirstOrDefault(x => x.VariantId == InventoryReceipt.VariantId)?.TotalOut ?? 0;
+            if (InventoryReceipt.TotalIn - sold < 3)
                 lowStockCount++;
         }
         var sixtyDaysAgo = now.AddDays(-60);
-        var oldInputVariants = await context.InputInfos
+        var oldInventoryReceiptVariants = await context.InventoryReceiptInfos
             .IgnoreQueryFilters()
-            .Join(context.InputReceipts.IgnoreQueryFilters(), ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
-            .Where(x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
-            .Select(x => x.ii.ProductVariantId)
+            .Join(
+                context.InventoryReceiptReceipts.IgnoreQueryFilters(),
+                ii => ii.InventoryReceiptId,
+                i => i.Id,
+                (ii, i) => new { ii, i })
+            .Where(
+                x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
+            .Select(
+                x => x.ii.QuotationProductRow != null
+                    ? x.ii.QuotationProductRow.ProductVariantId
+                    : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Distinct()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         int overstockCount = 0;
-        foreach (var vId in oldInputVariants)
+        foreach (var vId in oldInventoryReceiptVariants)
         {
-            var tin = confirmedInputs.FirstOrDefault(x => x.VariantId == vId)?.TotalIn ?? 0;
+            var tin = confirmedInventoryReceipts.FirstOrDefault(x => x.VariantId == vId)?.TotalIn ?? 0;
             var tout = soldOutputs.FirstOrDefault(x => x.VariantId == vId)?.TotalOut ?? 0;
             if (tin > tout)
                 overstockCount++;
@@ -573,11 +588,18 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             0,
             0,
             TimeSpan.Zero);
-        var confirmedInputs = await context.InputInfos
+        var confirmedInventoryReceipts = await context.InventoryReceiptInfos
             .IgnoreQueryFilters()
-            .Join(context.InputReceipts.IgnoreQueryFilters(), ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
-            .Where(x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0)
-            .GroupBy(x => x.ii.ProductVariantId)
+            .Join(
+                context.InventoryReceiptReceipts.IgnoreQueryFilters(),
+                ii => ii.InventoryReceiptId,
+                i => i.Id,
+                (ii, i) => new { ii, i })
+            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
+            .GroupBy(
+                x => x.ii.QuotationProductRow != null
+                    ? x.ii.QuotationProductRow.ProductVariantId
+                    : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -615,14 +637,14 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             pv => new ProductReportResponse
             {
                 ProductName =
-                    $"{pv.Product?.Name} - {pv.VariantName} ({pv.ProductVariantColor?.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                    $"{pv.Product?.Name} - {pv.VariantName} ({pv.ProductVariantColors.FirstOrDefault()?.ColorName?.Split(',').FirstOrDefault()})".Trim(
                             ' ',
                             '-',
                             '(',
                             ')'),
                 VariantId = pv.Id,
                 StockQuantity =
-                    (int)((confirmedInputs.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -
+                    (int)((confirmedInventoryReceipts.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -
                             (soldOutputsAll.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalOut ?? 0)),
                 SoldLastMonth = (int)(soldLastMonth.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalSold ?? 0)
             });
@@ -632,13 +654,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CancellationToken cancellationToken)
     {
         var last30Days = new DateTimeOffset(DateTime.UtcNow.AddDays(-30), TimeSpan.Zero);
-        var confirmedInputs = await context.InputInfos
-            .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
+        var confirmedInventoryReceipts = await context.InventoryReceiptInfos
+            .Join(context.InventoryReceiptReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
             .Where(
-                x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0 &&
+                x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
                     x.i.DeletedAt == null)
-            .GroupBy(x => x.ii.ProductVariantId)
+            .GroupBy(
+                x => x.ii.QuotationProductRow != null
+                    ? x.ii.QuotationProductRow.ProductVariantId
+                    : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -678,7 +703,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         return[.. variants.Select(
             pv =>
             {
-                var stock = (int)((confirmedInputs.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -
+                var stock = (int)((confirmedInventoryReceipts.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -
                     (soldOutputsAll.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalOut ?? 0));
                 var sold30 = (int)(soldLast30Days.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalSold ?? 0);
                 var variantOutputs = outputsData.Where(x => x.ProductVariantId == pv.Id).ToList();
@@ -689,7 +714,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 return new ProductPerformanceTableResponse
                 {
                     ProductName =
-                        $"{pv.Product?.Name} - {pv.VariantName} ({pv.ProductVariantColor?.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                        $"{pv.Product?.Name} - {pv.VariantName} ({pv.ProductVariantColors.FirstOrDefault()?.ColorName?.Split(',').FirstOrDefault()})".Trim(
                                 ' ',
                                 '-',
                                 '(',
@@ -714,19 +739,26 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ThenInclude(p => p!.Brand)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-        var confirmedInputs = await context.InputInfos
-            .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
+        var confirmedInventoryReceipts = await context.InventoryReceiptInfos
+            .Join(context.InventoryReceiptReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
             .Where(
-                x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0 &&
+                x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
                     x.i.DeletedAt == null)
-            .GroupBy(x => x.ii.ProductVariantId)
+            .GroupBy(
+                x => x.ii.QuotationProductRow != null
+                    ? x.ii.QuotationProductRow.ProductVariantId
+                    : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null))
             .Select(
                 g => new
                 {
                     VariantId = g.Key,
                     TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)),
-                    AvgInputPrice = g.Sum(x => (x.ii.InputPrice ?? 0) * (x.ii.Count ?? 0)) /
+                    AvgInventoryReceiptPrice = g.Sum(
+                                x => (decimal)(x.ii.QuotationProductRow != null
+                                        ? (x.ii.QuotationProductRow.QuotePrice ?? 0)
+                                        : 0) *
+                                    (x.ii.Count ?? 0)) /
                         (g.Sum(x => (long)(x.ii.Count ?? 0)) == 0 ? 1M : (decimal)(g.Sum(x => (long)(x.ii.Count ?? 0))))
                 })
             .ToListAsync(cancellationToken)
@@ -745,10 +777,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var variantDatas = variants.Select(
             pv =>
             {
-                var confirmedInput = confirmedInputs.FirstOrDefault(x => x.VariantId == pv.Id);
-                var stock = (int)((confirmedInput?.TotalIn ?? 0) -
+                var confirmedInventoryReceipt = confirmedInventoryReceipts.FirstOrDefault(x => x.VariantId == pv.Id);
+                var stock = (int)((confirmedInventoryReceipt?.TotalIn ?? 0) -
                     (soldOutputsAll.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalOut ?? 0));
-                var costPrice = confirmedInput?.AvgInputPrice ?? 0;
+                var costPrice = confirmedInventoryReceipt?.AvgInventoryReceiptPrice ?? 0;
                 return new { BrandName = pv.Product?.Brand?.Name, Stock = stock, Value = stock * costPrice };
             });
         var grouped = variantDatas
@@ -787,10 +819,19 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         {
             return null;
         }
-        var totalInput = await context.InputInfos
+        var totalInventoryReceipt = await context.InventoryReceiptInfos
                 .IgnoreQueryFilters()
-                .Join(context.InputReceipts.IgnoreQueryFilters(), ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
-                .Where(x => x.ii.ProductVariantId == variantId && string.Compare(x.i.StatusId, InputStatus.Finish) == 0)
+                .Join(
+                    context.InventoryReceiptReceipts.IgnoreQueryFilters(),
+                    ii => ii.InventoryReceiptId,
+                    i => i.Id,
+                    (ii, i) => new { ii, i })
+                .Where(
+                    x => (x.ii.QuotationProductRow != null
+                                ? x.ii.QuotationProductRow.ProductVariantId
+                                : (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : null)) ==
+                            variantId &&
+                            string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
                 .SumAsync(x => (long?)(x.ii.Count ?? 0), cancellationToken)
                 .ConfigureAwait(false) ??
             0;
@@ -808,7 +849,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         return new ProductStockPriceResponse
         {
             UnitPrice = variant.Price ?? 0,
-            StockQuantity = (int)totalInput - (int)totalOutput
+            StockQuantity = (int)totalInventoryReceipt - (int)totalOutput
         };
     }
 }

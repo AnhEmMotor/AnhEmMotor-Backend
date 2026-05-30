@@ -7,6 +7,7 @@ using Application.Features.Technologies.Queries.GetAllTechnologies;
 using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
 using Application.Features.Technologies.Queries.GetTechnologiesList;
 using Asp.Versioning;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -85,20 +86,17 @@ public class TechnologiesController(IMediator mediator) : ApiController
     /// Cập nhật thông tin công nghệ.
     /// </summary>
     /// <param name="id">ID công nghệ.</param>
-    /// <param name="command">Lệnh cập nhật công nghệ.</param>
+    /// <param name="request">Lệnh cập nhật công nghệ.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả cập nhật.</returns>
     [HttpPut("{id:int}")]
     [Authorize]
     public async Task<IActionResult> UpdateAsync(
         int id,
-        [FromBody] UpdateTechnologyCommand command,
+        [FromBody] UpdateTechnologyCommand request,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
-        {
-            return BadRequest("ID không khớp.");
-        }
+        var command = request.Adapt<UpdateTechnologyCommand>() with { Id = id };
         return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(true));
     }
 

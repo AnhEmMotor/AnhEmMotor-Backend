@@ -6,7 +6,7 @@ using Sieve.Models;
 
 namespace Application.Features.Products.Queries.GetActiveVariantLiteListForOutput
 {
-    public class GetActiveVariantLiteListForOutputQuery : IRequest<Result<PagedResult<ProductVariantLiteResponseForInput>>>
+    public class GetActiveVariantLiteListForOutputQuery : IRequest<Result<PagedResult<ProductVariantLiteResponseForInventoryReceipt>>>
     {
         public int Page { get; init; } = 1;
 

@@ -10,20 +10,9 @@ public class FacebookLoginCommandHandler(
     IExternalAuthService externalAuthService,
     IIdentityService identityService,
     ITokenManagerService tokenManagerService,
-    IHttpTokenAccessorService httpTokenAccessorService,
+    ICookieTokenManager cookieTokenManager,
     IUserUpdateRepository userUpdateRepository) : IRequestHandler<FacebookLoginCommand, Result<LoginResponse>>
 {
-    private readonly IExternalAuthService externalAuthService = externalAuthService ??
-        throw new ArgumentNullException(nameof(externalAuthService));
-    private readonly IIdentityService identityService = identityService ??
-        throw new ArgumentNullException(nameof(identityService));
-    private readonly ITokenManagerService tokenManagerService = tokenManagerService ??
-        throw new ArgumentNullException(nameof(tokenManagerService));
-    private readonly IHttpTokenAccessorService httpTokenAccessorService = httpTokenAccessorService ??
-        throw new ArgumentNullException(nameof(httpTokenAccessorService));
-    private readonly IUserUpdateRepository userUpdateRepository = userUpdateRepository ??
-        throw new ArgumentNullException(nameof(userUpdateRepository));
-
     public async Task<Result<LoginResponse>> Handle(FacebookLoginCommand request, CancellationToken cancellationToken)
     {
         var externalUserResult = await externalAuthService.ValidateFacebookTokenAsync(
@@ -55,7 +44,7 @@ public class FacebookLoginCommandHandler(
             expiryRefreshTokenDate,
             cancellationToken)
             .ConfigureAwait(false);
-        httpTokenAccessorService.SetRefreshTokenToCookie(refreshToken, expiryRefreshTokenDate);
+        cookieTokenManager.SetRefreshToken(refreshToken, expiryRefreshTokenDate);
         return new LoginResponse { AccessToken = accessToken, ExpiresAt = expiryAccessTokenDate };
     }
 }

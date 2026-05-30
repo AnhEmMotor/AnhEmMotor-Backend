@@ -148,9 +148,6 @@ namespace Domain.Entities
         [Column("Description", TypeName = "nvarchar(MAX)")]
         public string? Description { get; set; }
 
-        [Column("Highlights", TypeName = "nvarchar(MAX)")]
-        public string? Highlights { get; set; }
-
         public Brand? Brand { get; set; }
 
         public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];

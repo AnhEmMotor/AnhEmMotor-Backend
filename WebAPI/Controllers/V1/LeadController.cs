@@ -8,6 +8,7 @@ using Application.Features.Leads.Queries.GetLeadById;
 using Application.Features.Leads.Queries.GetLeadPipeline;
 using Application.Features.Leads.Queries.GetLeads;
 using Asp.Versioning;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -82,11 +83,10 @@ public class LeadController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateLeadAsync(
         int id,
-        [FromBody] UpdateLeadCommand command,
+        [FromBody] UpdateLeadCommand request,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
-            return BadRequest();
+        var command = request.Adapt<UpdateLeadCommand>() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -99,11 +99,10 @@ public class LeadController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> AddActivityAsync(
         int id,
-        [FromBody] AddLeadActivityCommand command,
+        [FromBody] AddLeadActivityCommand request,
         CancellationToken cancellationToken)
     {
-        if (id != command.LeadId)
-            return BadRequest();
+        var command = request.Adapt<AddLeadActivityCommand>() with { LeadId = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }

@@ -24,7 +24,8 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
             genericMethod.Invoke(null, [mapper]);
         }
         mapper.Property<Brand>(p => p.Id).CanSort().CanFilter();
-        mapper.Property<Input>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<PurchaseRequest>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<InventoryReceipt>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Output>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Product>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Product>(p => p.Name).CanSort().CanFilter();
@@ -47,11 +48,10 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Brand>(b => b.Name).CanSort().CanFilter();
         mapper.Property<Brand>(b => b.Origin).CanSort().CanFilter();
         mapper.Property<Brand>(b => b.Description).CanFilter();
-        mapper.Property<Input>(i => i.InputDate).CanSort().CanFilter();
-        mapper.Property<Input>(i => i.StatusId).CanSort().CanFilter();
-        mapper.Property<Input>(i => i.SupplierId).CanSort().CanFilter();
-        mapper.Property<Input>(i => i.Supplier!.Name).CanFilter().HasName("SupplierName");
-        mapper.Property<Input>(i => i.Notes).CanFilter();
+        mapper.Property<InventoryReceipt>(i => i.InventoryReceiptDate).CanSort().CanFilter();
+        mapper.Property<InventoryReceipt>(i => i.StatusId).CanSort().CanFilter();
+        mapper.Property<InventoryReceipt>(i => i.PurchaseRequestId).CanSort().CanFilter();
+        mapper.Property<InventoryReceipt>(i => i.Notes).CanFilter();
         mapper.Property<Output>(o => o.StatusId).CanSort().CanFilter();
         mapper.Property<Output>(o => o.Notes).CanFilter();
         mapper.Property<ProductCategory>(c => c.Id).CanSort().CanFilter();
@@ -64,17 +64,17 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Supplier>(s => s.StatusId).CanSort().CanFilter();
         mapper.Property<Supplier>(s => s.Address).CanFilter();
         mapper.Property<Supplier>(s => s.PartnerTypeId).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.Id).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.Name).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.Phone).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.Email).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.Address).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.StatusId).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.CreatedAt).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.UpdatedAt).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.DeletedAt).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.TotalInput).CanSort().CanFilter();
-        mapper.Property<SupplierWithTotalInputResponse>(s => s.PartnerTypeId).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.Id).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.Name).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.Phone).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.Email).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.Address).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.StatusId).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.CreatedAt).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.UpdatedAt).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.DeletedAt).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.TotalInventoryReceipt).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInventoryReceiptResponse>(s => s.PartnerTypeId).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.Id).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.UserName).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.FullName).CanSort().CanFilter();
@@ -97,6 +97,11 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Quotation>(p => p.Status).CanSort().CanFilter();
         mapper.Property<Quotation>(p => p.SupplierId).CanSort().CanFilter();
         mapper.Property<Quotation>(p => p.Supplier!.Name).CanFilter().HasName("SupplierName");
+        mapper.Property<Lead>(l => l.Id).CanSort().CanFilter();
+        mapper.Property<Lead>(l => l.FullName).CanSort().CanFilter();
+        mapper.Property<Lead>(l => l.PhoneNumber).CanSort().CanFilter();
+        mapper.Property<Lead>(l => l.Tier).CanSort().CanFilter();
+        mapper.Property<Lead>(l => l.Points).CanSort().CanFilter();
         return mapper;
     }
 
@@ -111,6 +116,12 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
             "jis" => source.Where(p => p.StdJis),
             _ => source
         };
+    }
+
+    public IQueryable<Lead> Search(IQueryable<Lead> source, string op, string[] values)
+    {
+        var term = values[0];
+        return source.Where(l => l.FullName.Contains(term) || l.PhoneNumber.Contains(term));
     }
 
     private static void MapBaseProperties<T>(SievePropertyMapper mapper) where T : BaseEntity

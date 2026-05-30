@@ -1,7 +1,5 @@
-using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
-using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -17,29 +15,24 @@ using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Mappings;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.GetProductAttributeLabels;
-using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
-using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.Option;
 using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
-using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Technology;
 using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
-using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
 using FluentAssertions;
 using Mapster;
 using Moq;
-using Sieve.Models;
 using System.Net;
 using ProductEntity = Domain.Entities.Product;
 
@@ -1338,7 +1331,8 @@ public class Product
         result.IsValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "PRODUCT_CALC_001 - CalculateTotalStock tính tổng RemainingCount từ Input receipt Finished")]
+    [Fact(
+        DisplayName = "PRODUCT_CALC_001 - CalculateTotalStock tính tổng RemainingCount từ InventoryReceipt receipt Finished")]
     public void MapProductToDetailForManagerResponse_CalculatesTotalStockCorrectly()
     {
         var product = new ProductEntity
@@ -1349,24 +1343,27 @@ public class Product
                 [new ProductVariant
                 {
                     Id = 1,
-                    InputInfos =
-                        [new InputInfo
+                    InventoryReceiptInfos =
+                        [new InventoryReceiptInfo
                             {
                                 RemainingCount = 10,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                            }, new InputInfo
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
+                            }, new InventoryReceiptInfo
                             {
                                 RemainingCount = 5,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Working }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Draft }
                             }]
                 }, new ProductVariant
                 {
                     Id = 2,
-                    InputInfos =
-                        [new InputInfo
+                    InventoryReceiptInfos =
+                        [new InventoryReceiptInfo
                             {
                                 RemainingCount = 15,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }]
                 }]
         };
@@ -1412,11 +1409,12 @@ public class Product
                 [new ProductVariant
                 {
                     Id = 1,
-                    InputInfos =
-                        [new InputInfo
+                    InventoryReceiptInfos =
+                        [new InventoryReceiptInfo
                             {
                                 RemainingCount = 50,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos =
                         [new OutputInfo { Count = 10, OutputOrder = new Output { StatusId = OrderStatus.Pending } }]
@@ -1567,65 +1565,6 @@ public class Product
                     .Contains("Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản."));
     }
 
-    [Fact(DisplayName = "PRODUCT_120 - Handler ánh xạ đúng từ Entity sang DTO lite cho price management")]
-    public async Task Handle_ValidData_ReturnsMappedDto()
-    {
-        var products = new List<ProductEntity>
-        {
-            new()
-            {
-                Id = 1,
-                Name = "Test Product",
-                ProductVariants =
-                    [new()
-                    {
-                        Id = 101,
-                        Price = 50000,
-                        VariantOptionValues =
-                            [new VariantOptionValue { OptionValue = new OptionValue { Name = "Red" } }, new VariantOptionValue
-                                {
-                                    OptionValue = new OptionValue { Name = "XL" }
-                                }],
-                        InputInfos =
-                            [new InputInfo
-                                {
-                                    InputPrice = 45000,
-                                    InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-1) }
-                                }, new InputInfo
-                                {
-                                    InputPrice = 40000,
-                                    InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-2) }
-                                }]
-                    }, new() { Id = 102, Price = 0, VariantOptionValues = [], InputInfos = [] }]
-            }
-        };
-        _productReadRepoMock.Setup(
-            x => x.GetPagedProductsForPriceManagementAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<string?>(),
-                It.IsAny<string?>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync((products, products.Count));
-        var query = new GetProductsListForPriceManagementQuery
-        {
-            SieveModel = new SieveModel { Page = 1, PageSize = 10 }
-        };
-        GetProductsListForPriceManagementQueryHandler _handler = new(_productReadRepoMock.Object);
-        var result = await _handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Items.Should().HaveCount(1);
-        var productDto = result.Value.Items.First();
-        productDto.Name.Should().Be("Test Product");
-        productDto.Variants.Should().HaveCount(2);
-        var v1 = productDto.Variants.First(v => v.Id == 101);
-        v1.Name.Should().Be("Red / XL");
-        v1.Price.Should().Be(50000);
-        var v2 = productDto.Variants.First(v => v.Id == 102);
-        v2.Name.Should().Be("Mặc định");
-        v2.Price.Should().Be(0);
-    }
-
     [Fact(DisplayName = "PRODUCT_128 - CalculateInventoryStatus - Trường hợp Còn hàng")]
     public void CalculateInventoryStatus_AvailableMoreThanAlert_ReturnsInStock()
     {
@@ -1662,29 +1601,32 @@ public class Product
             ProductVariants =
                 [new ProductVariant
                 {
-                    InputInfos =
-                        [new InputInfo
+                    InventoryReceiptInfos =
+                        [new InventoryReceiptInfo
                             {
                                 RemainingCount = 10,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
                 }, new ProductVariant
                 {
-                    InputInfos =
-                        [new InputInfo
+                    InventoryReceiptInfos =
+                        [new InventoryReceiptInfo
                             {
                                 RemainingCount = 3,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
                 }, new ProductVariant
                 {
-                    InputInfos =
-                        [new InputInfo
+                    InventoryReceiptInfos =
+                        [new InventoryReceiptInfo
                             {
                                 RemainingCount = 0,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InventoryReceiptReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
                 }]
@@ -1818,7 +1760,7 @@ public class Product
         var variant = new ProductVariant
         {
             VariantName = "V1",
-            ProductVariantColor = new ProductVariantColor { ColorName = "Đỏ" },
+            ProductVariantColors = [new ProductVariantColor { ColorName = "Đỏ" }],
             Product = new ProductEntity { Name = "Bike" }
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
@@ -1826,14 +1768,14 @@ public class Product
         response.DisplayName.Should().Contain("Đỏ");
     }
 
-    [Fact(DisplayName = "PRODUCT_154 - Logic hiển thị tên mặc định khi thiếu thông tin")]
+    [Fact(DisplayName = "PRODUCT_170 - Logic hiển thị tên mặc định khi thiếu thông tin")]
     public void VariantLiteResponse_DisplayName_FallbackToName()
     {
         var variant = new ProductVariant
         {
             Product = new ProductEntity { Name = "Standard Bike" },
             VariantName = null,
-            ProductVariantColor = null
+            ProductVariantColors = []
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
         response.DisplayName.Should().NotBeNullOrEmpty();
@@ -1844,15 +1786,17 @@ public class Product
     {
         var variant = new ProductVariant
         {
-            InputInfos =
-                [new InputInfo
+            InventoryReceiptInfos =
+                [new InventoryReceiptInfo
                 {
                     RemainingCount = 5,
-                    InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                }, new InputInfo
+                    InventoryReceiptReceipt =
+                        new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
+                }, new InventoryReceiptInfo
                 {
                     RemainingCount = 10,
-                    InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                    InventoryReceiptReceipt =
+                        new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                 }]
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
@@ -1865,15 +1809,6 @@ public class Product
         var slug = "xe-may%20honda";
         var decoded = WebUtility.UrlDecode(slug);
         decoded.Should().Be("xe-may honda");
-    }
-
-    [Fact(DisplayName = "PRODUCT_164 - Xử lý lỗi khi định dạng JSON Highlights sai")]
-    public void CreateProduct_InvalidHighlightsJson_GracefulDegradation()
-    {
-        var command = new CreateProductCommand { Highlights = "invalid-json" };
-        var validator = new CreateProductCommandValidator();
-        var result = validator.Validate(command);
-        result.IsValid.Should().BeFalse();
     }
 
     [Fact(DisplayName = "PRODUCT_165 - Mapping ưu tiên tiêu đề tùy chỉnh (Custom Title)")]
@@ -2085,164 +2020,6 @@ public class Product
         var validator = new CreateProductVariantCommandValidator();
         var result = validator.Validate(request);
         result.IsValid.Should().BeFalse();
-    }
-
-    [Fact(DisplayName = "PRODUCT_196 - Tạo phiếu nhập với sản phẩm quản lý theo số khung nhưng thiếu thông tin xe")]
-    public async Task CreateInputHandler_VinManagedProduct_MissingVehicles_ReturnsError()
-    {
-        var mockInsertRepo = new Mock<IInputInsertRepository>();
-        var mockReadRepo = new Mock<IInputReadRepository>();
-        var mockVariantRepo = new Mock<IProductVariantReadRepository>();
-        var mockVehicleReadRepo = new Mock<IVehicleReadRepository>();
-        var mockUnitOfWork = new Mock<IUnitOfWork>();
-        var variant = new ProductVariant
-        {
-            ProductId = 1,
-            Product =
-                new ProductEntity
-                {
-                    Name = "Xe máy Test",
-                    ProductCategory = new Domain.Entities.ProductCategory { ManagementType = "vin_number" }
-                }
-        };
-        mockVariantRepo.Setup(
-            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync([variant]);
-        var handler = new CreateInputCommandHandler(
-            mockInsertRepo.Object,
-            mockReadRepo.Object,
-            Mock.Of<ISupplierReadRepository>(),
-            mockVariantRepo.Object,
-            mockVehicleReadRepo.Object,
-            mockUnitOfWork.Object);
-        var command = new CreateInputCommand
-        {
-            SupplierId = null,
-            Products =
-                [new CreateInputInfoRequest { ProductVariantId = 1, Count = 2, InputPrice = 100000, Vehicles = null }]
-        };
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
-        result.Error?.Message.Should().Contain("Vehicles");
-    }
-
-    [Fact(
-        DisplayName = "PRODUCT_197 - Tạo phiếu nhập với sản phẩm quản lý theo số khung trùng lặp số khung hoặc số máy")]
-    public async Task CreateInputHandler_VinManagedProduct_DuplicateVehicles_ReturnsError()
-    {
-        var mockInsertRepo = new Mock<IInputInsertRepository>();
-        var mockReadRepo = new Mock<IInputReadRepository>();
-        var mockVariantRepo = new Mock<IProductVariantReadRepository>();
-        var mockVehicleReadRepo = new Mock<IVehicleReadRepository>();
-        var mockUnitOfWork = new Mock<IUnitOfWork>();
-        var variant = new ProductVariant
-        {
-            ProductId = 1,
-            Product =
-                new ProductEntity
-                {
-                    Name = "Xe máy Test",
-                    ProductCategory = new Domain.Entities.ProductCategory { ManagementType = "vin_number" }
-                }
-        };
-        mockVariantRepo.Setup(
-            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync([variant]);
-        mockVehicleReadRepo
-            .Setup(x => x.ExistsByVinAsync("VIN123", 1, null, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        var handler = new CreateInputCommandHandler(
-            mockInsertRepo.Object,
-            mockReadRepo.Object,
-            Mock.Of<ISupplierReadRepository>(),
-            mockVariantRepo.Object,
-            mockVehicleReadRepo.Object,
-            mockUnitOfWork.Object);
-        var command = new CreateInputCommand
-        {
-            SupplierId = null,
-            Products =
-                [new CreateInputInfoRequest
-                {
-                    ProductVariantId = 1,
-                    Count = 2,
-                    InputPrice = 100000,
-                    Vehicles =
-                        [new VehicleInputRequest { VinNumber = "VIN123", EngineNumber = "ENG123" }, new VehicleInputRequest
-                            {
-                                VinNumber = "VIN456",
-                                EngineNumber = "ENG456"
-                            }]
-                }]
-        };
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
-        result.Error?.Message.Should().Contain("VIN123");
-    }
-
-    [Fact(DisplayName = "PRODUCT_198 - Tạo phiếu nhập cho phép trùng số khung hoặc số máy khi khác cặp biến thể và màu")]
-    public async Task CreateInputHandler_VinManagedProduct_DuplicateIdentifiersInDifferentVariantColorPair_Succeeds()
-    {
-        var mockInsertRepo = new Mock<IInputInsertRepository>();
-        var mockReadRepo = new Mock<IInputReadRepository>();
-        var mockVariantRepo = new Mock<IProductVariantReadRepository>();
-        var mockVehicleReadRepo = new Mock<IVehicleReadRepository>();
-        var mockUnitOfWork = new Mock<IUnitOfWork>();
-        var variant = new ProductVariant
-        {
-            Id = 2,
-            ProductId = 1,
-            Product =
-                new ProductEntity
-                {
-                    Name = "Xe máy Test",
-                    ProductCategory = new Domain.Entities.ProductCategory { ManagementType = "vin_number" }
-                },
-            ProductVariantColors = [new ProductVariantColor { Id = 20, ProductVariantId = 2, ColorName = "Đỏ" }]
-        };
-        mockVariantRepo
-            .Setup(
-                x => x.GetByIdAsync(
-                    It.IsAny<IEnumerable<int>>(),
-                    It.IsAny<CancellationToken>(),
-                    It.IsAny<DataFetchMode>()))
-            .ReturnsAsync([variant]);
-        mockVehicleReadRepo
-            .Setup(x => x.ExistsByVinAsync("VIN123", 2, 20, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
-        mockVehicleReadRepo
-            .Setup(x => x.ExistsByEngineNumberAsync("ENG123", 2, 20, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
-        var savedInput = default(Input);
-        mockInsertRepo
-            .Setup(x => x.Add(It.IsAny<Input>()))
-            .Callback<Input>(input => savedInput = input);
-        mockReadRepo
-            .Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => savedInput);
-        var handler = new CreateInputCommandHandler(
-            mockInsertRepo.Object,
-            mockReadRepo.Object,
-            Mock.Of<ISupplierReadRepository>(),
-            mockVariantRepo.Object,
-            mockVehicleReadRepo.Object,
-            mockUnitOfWork.Object);
-        var command = new CreateInputCommand
-        {
-            SupplierId = null,
-            Products =
-                [new CreateInputInfoRequest
-                {
-                    ProductVariantId = 2,
-                    ProductVariantColorId = 20,
-                    Count = 1,
-                    InputPrice = 100000,
-                    Vehicles = [new VehicleInputRequest { VinNumber = "VIN123", EngineNumber = "ENG123" }]
-                }]
-        };
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsSuccess.Should().BeTrue();
-        savedInput!.InputInfos.Single().Vehicles.Single().VinNumber.Should().Be("VIN123");
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

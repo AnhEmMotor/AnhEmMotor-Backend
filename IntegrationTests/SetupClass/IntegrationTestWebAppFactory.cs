@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
-using Application.Interfaces.Services.HR;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Authorization;
@@ -97,7 +96,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             .ConfigureAwait(false);
         await context.Database
             .ExecuteSqlRawAsync(
-                "INSERT INTO \"InputStatus\" (\"Key\") VALUES ('working'), ('finished'), ('cancelled') ON CONFLICT (\"Key\") DO NOTHING;")
+                "INSERT INTO \"InventoryReceiptStatus\" (\"Key\") VALUES ('draft'), ('sent'), ('approve'), ('reject') ON CONFLICT (\"Key\") DO NOTHING;")
             .ConfigureAwait(false);
         await context.Database
             .ExecuteSqlRawAsync(
@@ -202,7 +201,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
                 services.AddSingleton<IUserStreamService, UserStreamService>();
                 services.AddScoped<ITokenManagerService, TokenManagerService>();
-                services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
+                services.AddScoped<ICookieTokenManager, CookieTokenManager>();
+                services.AddScoped<ICurrentUserContext, CurrentUserContext>();
                 services.AddScoped<IIdentityService, IdentityService>();
                 services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
                 services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
@@ -217,7 +217,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IExternalAuthService, ExternalAuthService>();
                 services.AddScoped<IVNPayService, VNPayService>();
                 services.AddScoped<IPayOSService, PayOSService>();
-                services.AddScoped<ICommissionService, CommissionService>();
                 services.Scan(
                     scan => scan
                         .FromAssemblies(typeof(DependencyInjection).Assembly)

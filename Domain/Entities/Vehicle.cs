@@ -23,11 +23,11 @@ public class Vehicle : BaseEntity
 
     public ApplicationUser? User { get; set; }
 
-    [Column("InputInfoId")]
-    [ForeignKey("InputInfo")]
-    public int? InputInfoId { get; set; }
+    [Column("InventoryReceiptInfoId")]
+    [ForeignKey("InventoryReceiptInfo")]
+    public int? InventoryReceiptInfoId { get; set; }
 
-    public InputInfo? InputInfo { get; set; }
+    public InventoryReceiptInfo? InventoryReceiptInfo { get; set; }
 
     [Column("OutputInfoId")]
     [ForeignKey("OutputInfo")]

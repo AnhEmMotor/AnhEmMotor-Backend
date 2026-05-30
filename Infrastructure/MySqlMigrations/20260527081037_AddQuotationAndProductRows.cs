@@ -20,8 +20,7 @@ namespace Infrastructure.MySqlMigrations
                     SupplierId = table.Column<int>(type: "int", nullable: true),
                     Status = table.Column<string>(type: "varchar(30)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Note = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Note = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
                     DeletedAt = table.Column<long>(type: "bigint", nullable: true)
@@ -37,7 +36,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "QuotationProductRows",
                 columns: table => new
@@ -48,8 +46,7 @@ namespace Infrastructure.MySqlMigrations
                     ProductVariantId = table.Column<int>(type: "int", nullable: true),
                     ProductVariantColorId = table.Column<int>(type: "int", nullable: true),
                     QuotePrice = table.Column<int>(type: "int", nullable: true),
-                    Note = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                    Note = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -74,36 +71,26 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateIndex(
                 name: "IX_QuotationProductRows_ProductVariantColorId",
                 table: "QuotationProductRows",
                 column: "ProductVariantColorId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_QuotationProductRows_ProductVariantId",
                 table: "QuotationProductRows",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_QuotationProductRows_QuotationId",
                 table: "QuotationProductRows",
                 column: "QuotationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Quotations_SupplierId",
-                table: "Quotations",
-                column: "SupplierId");
+            migrationBuilder.CreateIndex(name: "IX_Quotations_SupplierId", table: "Quotations", column: "SupplierId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "QuotationProductRows");
-
-            migrationBuilder.DropTable(
-                name: "Quotations");
+            migrationBuilder.DropTable(name: "QuotationProductRows");
+            migrationBuilder.DropTable(name: "Quotations");
         }
     }
 }

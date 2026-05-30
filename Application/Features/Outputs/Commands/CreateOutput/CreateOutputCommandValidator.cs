@@ -8,7 +8,7 @@ namespace Application.Features.Outputs.Commands.CreateOutput
     {
         public CreateOutputCommandValidator()
         {
-            RuleFor(x => x.OutputInfos).NotEmpty().WithMessage("Input must contain at least one product.");
+            RuleFor(x => x.OutputInfos).NotEmpty().WithMessage("InventoryReceipt must contain at least one product.");
             RuleFor(x => x.OutputInfos)
                 .Must(HaveUniqueProducts)
                 .WithMessage("Product ID cannot be duplicated in a single output.");

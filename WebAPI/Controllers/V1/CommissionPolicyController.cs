@@ -1,10 +1,9 @@
-﻿using Application.Features.HR.Commands.CreateCommissionPolicy;
+using Application.Features.HR.Commands.CreateCommissionPolicy;
 using Application.Features.HR.Commands.DeleteCommissionPolicy;
 using Application.Features.HR.Commands.UpdateCommissionPolicy;
 using Application.Features.HR.Queries.GetCommissionPolicies;
 using Application.Features.HR.Queries.GetCommissionPolicyAuditLogs;
 using Asp.Versioning;
-using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -27,10 +26,10 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách chính sách hoa hồng.</returns>
     [HttpGet]
-    public async Task<ActionResult<List<CommissionPolicy>>> GetPoliciesAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetPoliciesAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetCommissionPoliciesQuery(), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -45,9 +44,7 @@ public class CommissionPolicyController(ISender mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (!result.IsSuccess)
-            return BadRequest(result.Error);
-        return Ok(result.Value);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -66,9 +63,7 @@ public class CommissionPolicyController(ISender mediator) : ApiController
         if (id != command.Id)
             return BadRequest();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (!result.IsSuccess)
-            return BadRequest(result.Error);
-        return NoContent();
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -78,13 +73,11 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách lịch sử thay đổi.</returns>
     [HttpGet("{id}/audit-logs")]
-    public async Task<ActionResult<List<CommissionPolicyAuditLog>>> GetAuditLogsAsync(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAuditLogsAsync(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetCommissionPolicyAuditLogsQuery(id), cancellationToken)
             .ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -97,8 +90,6 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     public async Task<IActionResult> DeletePolicyAsync(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new DeleteCommissionPolicyCommand(id), cancellationToken).ConfigureAwait(true);
-        if (!result.IsSuccess)
-            return HandleResult(result);
-        return NoContent();
+        return HandleResult(result);
     }
 }

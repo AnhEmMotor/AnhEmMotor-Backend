@@ -1,12 +1,10 @@
 using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Responses;
 using Domain.Constants;
-using Domain.Constants.Input;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
 using Mapster;
 using System.Reflection;
-using System.Text.Json;
 using ProductEntity = Domain.Entities.Product;
 using ProductVariantEntity = Domain.Entities.ProductVariant;
 
@@ -28,9 +26,10 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.Colors, src => MapVariantColors(src))
             .Map(
                 dest => dest.CoverImageUrl,
-                src => src.ProductVariantColor != null &&
-                        !string.IsNullOrWhiteSpace(src.ProductVariantColor.CoverImageUrl)
-                    ? src.ProductVariantColor.CoverImageUrl
+                src => src.ProductVariantColors != null &&
+                        src.ProductVariantColors.FirstOrDefault() != null &&
+                        !string.IsNullOrWhiteSpace(src.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
+                    ? src.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
                     : src.CoverImageUrl)
             .Map(
                 dest => dest.Photos,
@@ -50,9 +49,11 @@ public class ProductMappingConfig : IRegister
                     .ToList())
             .Map(
                 dest => dest.Stock,
-                src => src.InputInfos != null
-                    ? src.InputInfos
-                            .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                src => src.InventoryReceiptInfos != null
+                    ? src.InventoryReceiptInfos
+                            .Where(
+                                ii => ii.InventoryReceiptReceipt != null &&
+                                                InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
                             .Sum(ii => ii.RemainingCount) ??
                         0
                     : 0)
@@ -88,8 +89,8 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.PhotoCollection, src => src.Photos);
         config.NewConfig<ProductVariantEntity, ProductVariantLiteResponse>()
             .MapWith(src => BuildVariantLiteResponse(src));
-        config.NewConfig<ProductVariantEntity, ProductVariantLiteResponseForInput>()
-            .MapWith(src => BuildVariantLiteResponseForInput(src, null));
+        config.NewConfig<ProductVariantEntity, ProductVariantLiteResponseForInventoryReceipt>()
+            .MapWith(src => BuildVariantLiteResponseForInventoryReceipt(src, null));
         config.NewConfig<ProductVariantEntity, VariantCartDetailResponse>()
             .MapWith(src => BuildVariantCartDetailResponse(src));
         config.NewConfig<ProductEntity, ProductInfoStoreResponse>()
@@ -98,7 +99,7 @@ public class ProductMappingConfig : IRegister
             .Map(
                 dest => dest.ProductLimit,
                 src => src.ProductCategory != null ? src.ProductCategory.MaxPurchaseQuantity : null)
-            .Map(dest => dest.Highlights, src => MapProductHighlights(src))
+            .Map(dest => dest.ProductTechnologies, src => MapProductTechnologiesList(src))
             .AfterMapping(
                 (src, dest) =>
                 {
@@ -121,9 +122,10 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.Colors, src => MapVariantColors(src))
             .Map(
                 dest => dest.CoverImageUrl,
-                src => src.ProductVariantColor != null &&
-                        !string.IsNullOrWhiteSpace(src.ProductVariantColor.CoverImageUrl)
-                    ? src.ProductVariantColor.CoverImageUrl
+                src => src.ProductVariantColors != null &&
+                        src.ProductVariantColors.FirstOrDefault() != null &&
+                        !string.IsNullOrWhiteSpace(src.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
+                    ? src.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
                     : (!string.IsNullOrWhiteSpace(src.CoverImageUrl)
                         ? src.CoverImageUrl
                         : src.ProductCollectionPhotos
@@ -259,30 +261,7 @@ public class ProductMappingConfig : IRegister
             MetaDescription = product.MetaDescription,
             CompatibleVehicleModelIds = [.. product.CompatibleWith.Select(c => c.CompatibleVehicleModelId)],
             StatusId = product.StatusId,
-            Highlights =
-                product.ProductTechnologies?.Count > 0
-                    ? JsonSerializer.Serialize(
-                        product.ProductTechnologies
-                            .OrderBy(t => t.DisplayOrder)
-                            .Select(
-                                t => new
-                                            {
-                                                technologyId = t.TechnologyId,
-                                                customTitle = t.CustomTitle,
-                                                customDescription = t.CustomDescription,
-                                                customImageUrl = t.CustomImageUrl,
-                                                title = t.CustomTitle ??
-                                                    t.Technology?.DefaultTitle ??
-                                                    t.Technology?.Name,
-                                                tag = t.Technology?.Category?.Name ?? "TECHNOLOGY",
-                                                description = t.CustomDescription ?? t.Technology?.DefaultDescription,
-                                                image = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl,
-                                                _defaultTitle = t.Technology?.DefaultTitle,
-                                                _defaultDescription = t.Technology?.DefaultDescription,
-                                                _defaultImageUrl = t.Technology?.DefaultImageUrl,
-                                                _categoryName = t.Technology?.Category?.Name
-                                            }))
-                    : product.Highlights,
+            ProductTechnologies = MapProductTechnologiesList(product),
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
             Stock = (int)totalStock,
             HasBeenBooked = totalBooked,
@@ -350,26 +329,7 @@ public class ProductMappingConfig : IRegister
             MetaTitle = product.MetaTitle,
             MetaDescription = product.MetaDescription,
             CompatibleVehicleModelIds = [.. product.CompatibleWith.Select(c => c.CompatibleVehicleModelId)],
-            Highlights =
-                product.ProductTechnologies?.Count > 0
-                    ? JsonSerializer.Serialize(
-                        product.ProductTechnologies
-                            .OrderBy(t => t.DisplayOrder)
-                            .Select(
-                                t => new
-                                            {
-                                                technologyId = t.TechnologyId,
-                                                customTitle = t.CustomTitle,
-                                                customDescription = t.CustomDescription,
-                                                customImageUrl = t.CustomImageUrl,
-                                                title = t.CustomTitle ??
-                                                    t.Technology?.DefaultTitle ??
-                                                    t.Technology?.Name,
-                                                tag = t.Technology?.Category?.Name ?? "TECHNOLOGY",
-                                                description = t.CustomDescription ?? t.Technology?.DefaultDescription,
-                                                image = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl
-                                            }))
-                    : product.Highlights,
+            ProductTechnologies = MapProductTechnologiesList(product),
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
             Variants = variantResponses
         };
@@ -389,8 +349,10 @@ public class ProductMappingConfig : IRegister
         var extraParts = new List<string>();
         if (!string.IsNullOrWhiteSpace(variant.VariantName))
             extraParts.Add(variant.VariantName);
-        if (variant.ProductVariantColor != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColor.ColorName))
-            extraParts.Add(variant.ProductVariantColor.ColorName);
+        if (variant.ProductVariantColors != null &&
+            variant.ProductVariantColors.FirstOrDefault() != null &&
+            !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.ColorName))
+            extraParts.Add(variant.ProductVariantColors.FirstOrDefault()!.ColorName!);
         if (extraParts.Count > 0)
         {
             var extra = string.Join(" - ", extraParts);
@@ -398,8 +360,9 @@ public class ProductMappingConfig : IRegister
             {
                 variantName = extra;
             } else if (!variantName.Contains(variant.VariantName ?? "NONE") &&
-                (variant.ProductVariantColor == null ||
-                    !variantName.Contains(variant.ProductVariantColor.ColorName ?? "NONE")))
+                (variant.ProductVariantColors == null ||
+                    variant.ProductVariantColors.FirstOrDefault() == null ||
+                    !variantName.Contains(variant.ProductVariantColors.FirstOrDefault()!.ColorName ?? "NONE")))
             {
                 variantName = $"{variantName} - {extra}";
             }
@@ -408,17 +371,20 @@ public class ProductMappingConfig : IRegister
         var displayName = string.IsNullOrWhiteSpace(variantName)
             ? productName ?? string.Empty
             : $"{productName} ({variantName})";
-        var stock = variant.InputInfos
-                .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+        var stock = variant.InventoryReceiptInfos
+                .Where(
+                    ii => ii.InventoryReceiptReceipt != null &&
+                            InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
                 .Sum(ii => ii.RemainingCount) ??
             0;
         var photos = variant.ProductCollectionPhotos
             .Select(p => p.ImageUrl ?? string.Empty)
             .Where(url => !string.IsNullOrWhiteSpace(url))
             .ToList();
-        var coverImage = variant.ProductVariantColor != null &&
-                !string.IsNullOrWhiteSpace(variant.ProductVariantColor.CoverImageUrl)
-            ? variant.ProductVariantColor.CoverImageUrl
+        var coverImage = variant.ProductVariantColors != null &&
+                variant.ProductVariantColors.FirstOrDefault() != null &&
+                !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
+            ? variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
             : (!string.IsNullOrWhiteSpace(variant.CoverImageUrl) ? variant.CoverImageUrl : photos.FirstOrDefault());
         return new ProductVariantLiteResponse
         {
@@ -449,7 +415,7 @@ public class ProductMappingConfig : IRegister
         return string.Join(" - ", parts);
     }
 
-    public static ProductVariantLiteResponseForInput BuildVariantLiteResponseForInput(
+    public static ProductVariantLiteResponseForInventoryReceipt BuildVariantLiteResponseForInventoryReceipt(
         ProductVariantEntity variant,
         Dictionary<string, string>? translations)
     {
@@ -489,16 +455,17 @@ public class ProductMappingConfig : IRegister
                 .ToList();
             displayName = $"{productName} ({string.Join(", ", parts)})";
         }
-        return new ProductVariantLiteResponseForInput
+        return new ProductVariantLiteResponseForInventoryReceipt
         {
             Id = variant.Id,
             ProductId = variant.ProductId,
             DisplayName = displayName,
             Price = variant.Price,
             CoverImageUrl =
-                variant.ProductVariantColor != null &&
-                        !string.IsNullOrWhiteSpace(variant.ProductVariantColor.CoverImageUrl)
-                    ? variant.ProductVariantColor.CoverImageUrl
+                variant.ProductVariantColors != null &&
+                        variant.ProductVariantColors.FirstOrDefault() != null &&
+                        !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
+                    ? variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
                     : variant.CoverImageUrl,
             CategoryId = variant.Product?.CategoryId,
             ManagementType = variant.Product?.ProductCategory?.ManagementType,
@@ -508,7 +475,7 @@ public class ProductMappingConfig : IRegister
 
     private static List<ProductVariantColorLiteResponse> MapVariantColors(ProductVariantEntity variant)
     {
-        return variant.ProductVariantColors
+        return[.. variant.ProductVariantColors
             .Select(
                 c => new ProductVariantColorLiteResponse
                 {
@@ -516,8 +483,7 @@ public class ProductMappingConfig : IRegister
                     ColorName = c.ColorName,
                     ColorCode = c.ColorCode,
                     CoverImageUrl = c.CoverImageUrl
-                })
-            .ToList();
+                })];
     }
 
     public static string CalculateInventoryStatus(long availableStock, long alertLevel)
@@ -541,9 +507,11 @@ public class ProductMappingConfig : IRegister
     private static long CalculateTotalStock(ProductEntity product)
     {
         return product.ProductVariants
-            .Where(v => v.InputInfos != null)
-            .SelectMany(variant => variant.InputInfos!)
-            .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+            .Where(v => v.InventoryReceiptInfos != null)
+            .SelectMany(variant => variant.InventoryReceiptInfos!)
+            .Where(
+                ii => ii.InventoryReceiptReceipt != null &&
+                    InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
             .Sum(info => info.RemainingCount ?? 0);
     }
 
@@ -569,9 +537,10 @@ public class ProductMappingConfig : IRegister
         var variantName = BuildVariantName(optionPairs);
         var productName = variant.Product?.Name ?? string.Empty;
         var displayName = string.IsNullOrWhiteSpace(variantName) ? productName : $"{productName} ({variantName})";
-        var coverImage = variant.ProductVariantColor != null &&
-                !string.IsNullOrWhiteSpace(variant.ProductVariantColor.CoverImageUrl)
-            ? variant.ProductVariantColor.CoverImageUrl
+        var coverImage = variant.ProductVariantColors != null &&
+                variant.ProductVariantColors.FirstOrDefault() != null &&
+                !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
+            ? variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
             : (!string.IsNullOrWhiteSpace(variant.CoverImageUrl)
                 ? variant.CoverImageUrl
                 : variant.ProductCollectionPhotos.FirstOrDefault()?.ImageUrl);
@@ -591,8 +560,10 @@ public class ProductMappingConfig : IRegister
             .Select(
                 variant =>
                 {
-                    var stock = variant.InputInfos
-                        .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                    var stock = variant.InventoryReceiptInfos
+                        .Where(
+                            ii => ii.InventoryReceiptReceipt != null &&
+                                    InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
                         .Sum(ii => ii.RemainingCount ?? 0);
                     var booked = variant.OutputInfos
                         .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
@@ -603,26 +574,36 @@ public class ProductMappingConfig : IRegister
         return statuses.Count == 0 ? InventoryStatus.OutOfStock : statuses.MinBy(InventoryStatus.GetSeverity)!;
     }
 
-    private static string? MapProductHighlights(ProductEntity product)
+    private static List<ProductTechnologyResponse> MapProductTechnologiesList(ProductEntity product)
     {
-        return product.ProductTechnologies?.Count > 0
-            ? JsonSerializer.Serialize(
-                product.ProductTechnologies
-                    .OrderBy(t => t.DisplayOrder)
-                    .Select(
-                        t => new
-                                {
-                                    title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? t.Technology?.Name,
-                                    tag = t.Technology?.Category?.Name ?? "TECHNOLOGY",
-                                    description = t.CustomDescription ?? t.Technology?.DefaultDescription,
-                                    image = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl
-                                }))
-            : null;
+        return product.ProductTechnologies != null
+            ? product.ProductTechnologies
+                .OrderBy(t => t.DisplayOrder)
+                .Select(
+                    t => new ProductTechnologyResponse
+                        {
+                            TechnologyId = t.TechnologyId,
+                            CustomTitle = t.CustomTitle,
+                            CustomDescription = t.CustomDescription,
+                            CustomImageUrl = t.CustomImageUrl,
+                            DisplayOrder = t.DisplayOrder,
+                            Title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? t.Technology?.Name,
+                            Description = t.CustomDescription ?? t.Technology?.DefaultDescription,
+                            ImageUrl = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl,
+                            DefaultTitle = t.Technology?.DefaultTitle,
+                            DefaultDescription = t.Technology?.DefaultDescription,
+                            DefaultImageUrl = t.Technology?.DefaultImageUrl,
+                            CategoryName = t.Technology?.Category?.Name ?? "TECHNOLOGY"
+                        })
+                .ToList()
+            : [];
     }
 
     private static string BuildStoreVariantDisplayName(ProductVariantEntity variant, bool isOtherVariant = false)
     {
-        var colorName = variant.ProductVariantColor != null ? variant.ProductVariantColor.ColorName : null;
+        var colorName = variant.ProductVariantColors != null
+            ? variant.ProductVariantColors.FirstOrDefault()?.ColorName
+            : null;
         if (!string.IsNullOrWhiteSpace(variant.VariantName) && !string.IsNullOrWhiteSpace(colorName))
         {
             return $"{variant.VariantName} - {colorName}";
