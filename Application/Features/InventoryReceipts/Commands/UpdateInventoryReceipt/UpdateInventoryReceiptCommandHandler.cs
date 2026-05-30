@@ -64,7 +64,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                 return Error.BadRequest("Chỉ người có quyền phê duyệt/từ chối mới được sửa phiếu nhập ở trạng thái đã gửi.", "StatusId");
             }
         }
-        else if (string.Equals(InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase))
+        else if (!string.Equals(InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase))
         {
             var hasEditOrApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                 userId,
