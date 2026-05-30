@@ -45,4 +45,8 @@ public interface IInventoryReceiptReadRepository
         IEnumerable<int> supplierIds,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<Domain.Entities.InventoryReceiptInfo?> GetInfoByIdAsync(
+        int id,
+        CancellationToken cancellationToken);
 }

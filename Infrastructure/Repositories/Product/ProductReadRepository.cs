@@ -414,4 +414,48 @@ public class ProductReadRepository(
     {
         return context.Products.AnyAsync(p => p.Id == id, cancellationToken);
     }
+
+    public async Task<List<Domain.Entities.Product>> GetAllProductsWithInventoryDetailsAsync(CancellationToken cancellationToken)
+    {
+        return await context.Products
+            .Where(p => p.DeletedAt == null)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.ProductVariantColors)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.InventoryReceiptReceipt)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.QuotationProductRow)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.PurchaseRequestItem)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<Domain.Entities.ProductVariant?> GetVariantByIdWithDetailsAsync(int variantId, CancellationToken cancellationToken)
+    {
+        return await context.ProductVariants
+            .Where(v => v.Id == variantId && v.DeletedAt == null)
+            .Include(v => v.Product)
+            .Include(v => v.ProductVariantColors)
+            .Include(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.InventoryReceiptReceipt)
+            .ThenInclude(r => r.SupplierDebts)
+            .ThenInclude(sd => sd.Supplier)
+            .Include(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.QuotationProductRow)
+            .ThenInclude(qpr => qpr.QuotationReceipt)
+            .ThenInclude(q => q.Supplier)
+            .Include(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

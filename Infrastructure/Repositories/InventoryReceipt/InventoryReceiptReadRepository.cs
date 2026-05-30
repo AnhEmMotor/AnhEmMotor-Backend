@@ -73,6 +73,8 @@ public class InventoryReceiptReadRepository(ApplicationDBContext context, ISieve
             query = query.Where(x => x.DeletedAt != null);
         }
         return query
+            .Include(x => x.SupplierDebts)
+                .ThenInclude(sd => sd.Supplier)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.Vehicles)
             .Include(x => x.InventoryReceiptInfos.Where(y => y.DeletedAt == null))
@@ -209,5 +211,18 @@ public class InventoryReceiptReadRepository(ApplicationDBContext context, ISieve
                                 supplierIds.Contains(ii.QuotationProductRow.QuotationReceipt.SupplierId.Value)))
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<InventoryReceiptEntity>>(t => t.Result, cancellationToken);
+    }
+
+    public async Task<Domain.Entities.InventoryReceiptInfo?> GetInfoByIdAsync(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        return await context.InventoryReceiptInfos
+            .Include(ii => ii.InventoryReceiptReceipt)
+                .ThenInclude(ir => ir!.SupplierDebts)
+            .Include(ii => ii.QuotationProductRow)
+                .ThenInclude(qp => qp!.QuotationReceipt)
+            .FirstOrDefaultAsync(ii => ii.Id == id, cancellationToken)
+            .ConfigureAwait(false);
     }
 }

@@ -10,17 +10,13 @@ using MediatR;
 namespace Application.Features.Products.Queries.GetProductsListForManager;
 
 public sealed class GetProductsListForManagerQueryHandler(
-    IProductReadRepository readRepository,
-    ISettingRepository settingRepository) : IRequestHandler<GetProductsListForManagerQuery, Result<PagedResult<ProductDetailForManagerResponse>>>
+    IProductReadRepository readRepository) : IRequestHandler<GetProductsListForManagerQuery, Result<PagedResult<ProductDetailForManagerResponse>>>
 {
     public async Task<Result<PagedResult<ProductDetailForManagerResponse>>> Handle(
         GetProductsListForManagerQuery request,
         CancellationToken cancellationToken)
     {
-        var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        var alertLevelStr = settings.FirstOrDefault(
-            s => string.Equals(s.Key, SettingKeys.InventoryAlertLevel, StringComparison.OrdinalIgnoreCase))?.Value;
-        long.TryParse(alertLevelStr, out var alertLevel);
+        long alertLevel = 0;
         var normalizedStatusIds = request.StatusIds
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Select(s => s.Trim())

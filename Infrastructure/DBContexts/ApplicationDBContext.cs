@@ -129,6 +129,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
 
+    public virtual DbSet<InventoryLedger> InventoryLedgers { get; set; }
+
+    public virtual DbSet<SupplierDebt> SupplierDebts { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -307,6 +311,26 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(oi => oi.PurchaseRequest)
             .WithMany()
             .HasForeignKey(oi => oi.PurchaseRequestId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<SupplierDebt>()
+            .HasOne(sd => sd.InventoryReceipt)
+            .WithMany(r => r.SupplierDebts)
+            .HasForeignKey(sd => sd.InventoryReceiptId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<SupplierDebt>()
+            .HasOne(sd => sd.Supplier)
+            .WithMany(s => s.SupplierDebts)
+            .HasForeignKey(sd => sd.SupplierId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryLedger>()
+            .HasOne(il => il.ProductVariant)
+            .WithMany()
+            .HasForeignKey(il => il.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryLedger>()
+            .HasOne(il => il.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(il => il.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;

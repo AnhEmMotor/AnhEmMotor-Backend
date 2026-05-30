@@ -42,10 +42,12 @@ namespace Domain.Entities
 
         public PurchaseRequest? PurchaseRequest { get; set; }
 
+        public ICollection<InventoryReceiptInfo> InventoryReceiptInfos { get; set; } = [];
+
         public ApplicationUser? CreatedByUser { get; set; }
 
         public ApplicationUser? ConfirmedByUser { get; set; }
 
-        public ICollection<InventoryReceiptInfo> InventoryReceiptInfos { get; set; } = [];
+        public ICollection<SupplierDebt> SupplierDebts { get; set; } = [];
     }
 }

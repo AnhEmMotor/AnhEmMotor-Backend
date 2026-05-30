@@ -8,6 +8,7 @@ using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptNote
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
+using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
@@ -19,6 +20,7 @@ using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
+using Mapster;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,6 +48,8 @@ public class InventoryReceipts
     private readonly Mock<ICurrentUserContext> _currentUserContextMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IPermissionReadRepository> _permissionRepoMock;
+    private readonly Mock<IInventoryLedgerRepository> _ledgerRepoMock;
+    private readonly Mock<ISupplierDebtRepository> _supplierDebtRepoMock;
 
     public InventoryReceipts()
     {
@@ -61,6 +65,8 @@ public class InventoryReceipts
         _currentUserContextMock = new Mock<ICurrentUserContext>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _permissionRepoMock = new Mock<IPermissionReadRepository>();
+        _ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
+        _supplierDebtRepoMock = new Mock<ISupplierDebtRepository>();
     }
 
     #pragma warning disable IDE0079 
@@ -469,6 +475,8 @@ public class InventoryReceipts
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _currentUserContextMock.Object,
+            _ledgerRepoMock.Object,
+            _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateInventoryReceiptStatusCommand
@@ -507,6 +515,8 @@ public class InventoryReceipts
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _currentUserContextMock.Object,
+            _ledgerRepoMock.Object,
+            _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateInventoryReceiptStatusCommand

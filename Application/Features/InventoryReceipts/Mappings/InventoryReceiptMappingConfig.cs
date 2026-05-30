@@ -17,6 +17,21 @@ public sealed class InventoryReceiptMappingConfig : IRegister
         config.NewConfig<InventoryReceipt, InventoryReceiptListResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
+                dest => dest.SupplierId,
+                src => src.SupplierDebts.Any()
+                    ? (int?)src.SupplierDebts.First().SupplierId
+                    : (src.InventoryReceiptInfos.FirstOrDefault(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null) != null
+                        ? src.InventoryReceiptInfos.FirstOrDefault(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null)!.QuotationProductRow!.QuotationReceipt!.SupplierId
+                        : (int?)null))
+            .Map(
+                dest => dest.SupplierName,
+                src => src.SupplierDebts.Any(sd => sd.Supplier != null && sd.Supplier.Name != null)
+                    ? src.SupplierDebts.First(sd => sd.Supplier != null && sd.Supplier.Name != null).Supplier!.Name
+                    : (src.InventoryReceiptInfos.FirstOrDefault(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.Supplier != null) != null
+                        ? src.InventoryReceiptInfos.FirstOrDefault(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.Supplier != null)!.QuotationProductRow!.QuotationReceipt!.Supplier!.Name
+                        : null))
+            .Map(dest => dest.PaidAmount, src => src.SupplierDebts.Any() ? src.SupplierDebts.Sum(sd => sd.PaidAmount) : src.InventoryReceiptInfos.Sum(ii => ii.PaidAmount))
+            .Map(
                 dest => dest.TotalPayable,
                 src => src.InventoryReceiptInfos != null
                     ? src.InventoryReceiptInfos
@@ -29,6 +44,21 @@ public sealed class InventoryReceiptMappingConfig : IRegister
             .Map(dest => dest.Products, src => src.InventoryReceiptInfos);
         config.NewConfig<InventoryReceipt, InventoryReceiptDetailResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
+            .Map(
+                dest => dest.SupplierId,
+                src => src.SupplierDebts.Any()
+                    ? (int?)src.SupplierDebts.First().SupplierId
+                    : (src.InventoryReceiptInfos.FirstOrDefault(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null) != null
+                        ? src.InventoryReceiptInfos.FirstOrDefault(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null)!.QuotationProductRow!.QuotationReceipt!.SupplierId
+                        : (int?)null))
+            .Map(
+                dest => dest.SupplierName,
+                src => src.SupplierDebts.Any(sd => sd.Supplier != null && sd.Supplier.Name != null)
+                    ? src.SupplierDebts.First(sd => sd.Supplier != null && sd.Supplier.Name != null).Supplier!.Name
+                    : (src.InventoryReceiptInfos.FirstOrDefault(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.Supplier != null) != null
+                        ? src.InventoryReceiptInfos.FirstOrDefault(ii => ii.QuotationProductRow != null && ii.QuotationProductRow.QuotationReceipt != null && ii.QuotationProductRow.QuotationReceipt.Supplier != null)!.QuotationProductRow!.QuotationReceipt!.Supplier!.Name
+                        : null))
+            .Map(dest => dest.PaidAmount, src => src.SupplierDebts.Any() ? src.SupplierDebts.Sum(sd => sd.PaidAmount) : src.InventoryReceiptInfos.Sum(ii => ii.PaidAmount))
             .Map(
                 dest => dest.TotalPayable,
                 src => src.InventoryReceiptInfos != null
@@ -83,6 +113,7 @@ public sealed class InventoryReceiptMappingConfig : IRegister
             .Map(
                 dest => dest.ImportPrice,
                 src => src.QuotationProductRow != null ? src.QuotationProductRow.QuotePrice : 0)
+            .Map(dest => dest.PaidAmount, src => src.PaidAmount)
             .Map(dest => dest.Discount, src => 0)
             .Map(
                 dest => dest.Total,

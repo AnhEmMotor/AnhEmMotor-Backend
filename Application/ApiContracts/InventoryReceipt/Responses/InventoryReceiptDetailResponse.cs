@@ -11,6 +11,12 @@ public class InventoryReceiptDetailResponse
 
     public string? StatusId { get; set; }
 
+    public int? SupplierId { get; set; }
+
+    public string? SupplierName { get; set; }
+
+    public decimal? PaidAmount { get; set; }
+
     public DateTimeOffset? CreatedAt { get; set; }
 
     public long? TotalPayable { get; set; }

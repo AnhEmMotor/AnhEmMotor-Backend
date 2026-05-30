@@ -21,6 +21,7 @@ public class Supplier
     private readonly Mock<ISupplierUpdateRepository> _updateRepoMock;
     private readonly Mock<ISupplierDeleteRepository> _deleteRepoMock;
     private readonly Mock<ISupplierReadRepository> _readRepoMock;
+    private readonly Mock<ISupplierDebtRepository> _supplierDebtRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
     public Supplier()
@@ -29,6 +30,7 @@ public class Supplier
         _updateRepoMock = new Mock<ISupplierUpdateRepository>();
         _deleteRepoMock = new Mock<ISupplierDeleteRepository>();
         _readRepoMock = new Mock<ISupplierReadRepository>();
+        _supplierDebtRepoMock = new Mock<ISupplierDebtRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
@@ -569,17 +571,20 @@ public class Supplier
         var handler = new DeleteSupplierCommandHandler(
             _readRepoMock.Object,
             _deleteRepoMock.Object,
+            _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
             Name = "Supplier",
-            StatusId = "active",
-            InventoryReceiptReceipts = []
+            StatusId = "active"
         };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
+        _supplierDebtRepoMock.Setup(x => x.GetBySupplierIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Domain.Entities.SupplierDebt>());
+
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -591,17 +596,23 @@ public class Supplier
         var handler = new DeleteSupplierCommandHandler(
             _readRepoMock.Object,
             _deleteRepoMock.Object,
+            _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
             Name = "Supplier",
-            StatusId = "active",
-            InventoryReceiptReceipts = [new() { StatusId = "completed" }]
+            StatusId = "active"
         };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
+        _supplierDebtRepoMock.Setup(x => x.GetBySupplierIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Domain.Entities.SupplierDebt>
+            {
+                new() { InventoryReceipt = new() { StatusId = "completed" } }
+            });
+
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -612,6 +623,7 @@ public class Supplier
         var handler = new DeleteSupplierCommandHandler(
             _readRepoMock.Object,
             _deleteRepoMock.Object,
+            _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))

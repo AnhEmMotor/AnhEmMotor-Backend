@@ -23,6 +23,8 @@ public class InventoryReceiptInfoResponse
 
     public decimal? ImportPrice { get; set; }
 
+    public decimal? PaidAmount { get; set; }
+
     public decimal? Discount { get; set; }
 
     public decimal? Total { get; set; }

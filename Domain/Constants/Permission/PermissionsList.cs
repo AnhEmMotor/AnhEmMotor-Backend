@@ -131,6 +131,8 @@ public static class PermissionsList
             InventoryReceipts.ApproveReject,
             new PermissionMetadata("Approve/Reject Purchase Order", "Phê duyệt/Từ chối đơn chốt mua và nhập hàng")
         },
+        { DebtPayments.View, new PermissionMetadata("View Debt Payments", "Xem quản lý công nợ và danh sách nợ") },
+        { DebtPayments.Create, new PermissionMetadata("Create Debt Payment", "Tạo phiếu trả nợ nhà cung cấp") },
     };
 
     public static PermissionMetadata? GetMetadata(string permissionName)
@@ -185,6 +187,10 @@ public static class PermissionsList
         {
             "Đơn chốt mua (PO)",
             [InventoryReceipts.View, InventoryReceipts.Create, InventoryReceipts.Edit, InventoryReceipts.Delete, InventoryReceipts.Send, InventoryReceipts.ApproveReject]
+        },
+        {
+            "Quản lý công nợ",
+            [DebtPayments.View, DebtPayments.Create]
         },
     };
 
@@ -275,6 +281,7 @@ public static class PermissionsList
         { InventoryReceipts.Delete, [InventoryReceipts.View] },
         { InventoryReceipts.Send, [InventoryReceipts.View] },
         { InventoryReceipts.ApproveReject, [InventoryReceipts.View] },
+        { DebtPayments.Create, [DebtPayments.View] },
     };
 
     public static (bool IsValid, string? ErrorMessage) ValidateRules(IEnumerable<string> permissions)

@@ -32,6 +32,9 @@ namespace Domain.Entities
         [ForeignKey("QuotationProductRow")]
         public int? QuotationProductRowId { get; set; }
 
+        [Column("PaidAmount", TypeName = "decimal(18, 2)")]
+        public decimal PaidAmount { get; set; }
+
         public InventoryReceipt? InventoryReceiptReceipt { get; set; }
 
         public PurchaseRequestItem? PurchaseRequestItem { get; set; }
