@@ -37,7 +37,7 @@ namespace Domain.Entities
 
         public ProductVariantColor? ProductVariantColor { get; set; }
 
-        public ICollection<InputInfo> Returns { get; set; } = [];
+        public ICollection<InventoryReceiptInfo> Returns { get; set; } = [];
 
         public ICollection<Vehicle> Vehicles { get; set; } = [];
     }

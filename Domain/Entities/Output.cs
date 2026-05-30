@@ -80,7 +80,7 @@ namespace Domain.Entities
         public ICollection<OutputInfo> OutputInfos { get; set; } = [];
 
         [InverseProperty("Output")]
-        public ICollection<Input> Returns { get; set; } = [];
+        public ICollection<InventoryReceipt> Returns { get; set; } = [];
 
         [NotMapped]
         public decimal Total => OutputInfos?.Sum(x => (x.Price ?? 0) * (x.Count ?? 0)) ?? 0;

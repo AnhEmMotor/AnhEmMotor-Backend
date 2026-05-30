@@ -8,14 +8,14 @@ namespace Infrastructure.Integrations.Payment.VNPay;
 
 public static class VNPayUtils
 {
-    public static string HmacSHA512(string key, string inputData)
+    public static string HmacSHA512(string key, string InventoryReceiptData)
     {
         var hash = new StringBuilder();
         var keyBytes = Encoding.UTF8.GetBytes(key);
-        var inputBytes = Encoding.UTF8.GetBytes(inputData);
+        var InventoryReceiptBytes = Encoding.UTF8.GetBytes(InventoryReceiptData);
         using (var hmac = new HMACSHA512(keyBytes))
         {
-            var hashValue = hmac.ComputeHash(inputBytes);
+            var hashValue = hmac.ComputeHash(InventoryReceiptBytes);
             foreach (var theByte in hashValue)
             {
                 hash.Append(theByte.ToString("x2"));

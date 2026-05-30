@@ -17,7 +17,6 @@ using Domain.Constants;
 using Domain.Entities;
 using Mapster;
 using MediatR;
-using System.Text.Json;
 using OptionEntity = Domain.Entities.Option;
 using OptionValueEntity = Domain.Entities.OptionValue;
 
@@ -117,12 +116,12 @@ public sealed class UpdateProductCommandHandler(
         command.Adapt(product);
         var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>();
         var optionNameMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        var inputVariants = command.Variants ?? [];
-        if (inputVariants.Count > 0)
+        var InventoryReceiptVariants = command.Variants ?? [];
+        if (InventoryReceiptVariants.Count > 0)
         {
             var allOptionValues = new Dictionary<int, HashSet<string>>();
             var potentialOptionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var variantReq in inputVariants)
+            foreach (var variantReq in InventoryReceiptVariants)
             {
                 if (!string.IsNullOrWhiteSpace(variantReq.VariantName))
                     potentialOptionNames.Add("Phiên bản");
@@ -201,7 +200,7 @@ public sealed class UpdateProductCommandHandler(
                     }
                 }
             }
-            foreach (var variantReq in inputVariants)
+            foreach (var variantReq in InventoryReceiptVariants)
             {
                 if (!string.IsNullOrWhiteSpace(variantReq.VariantName) &&
                     optionNameMap.TryGetValue("Phiên bản", out var versionOptId))
@@ -279,14 +278,16 @@ public sealed class UpdateProductCommandHandler(
             }
         }
         var currentVariants = product.ProductVariants.ToList();
-        var inputVariantIds = inputVariants.Where(v => v.Id.HasValue).Select(v => v.Id!.Value).ToHashSet();
-        var variantsToDelete = currentVariants.Where(v => !inputVariantIds.Contains(v.Id)).ToList();
+        var InventoryReceiptVariantIds = InventoryReceiptVariants.Where(v => v.Id.HasValue)
+            .Select(v => v.Id!.Value)
+            .ToHashSet();
+        var variantsToDelete = currentVariants.Where(v => !InventoryReceiptVariantIds.Contains(v.Id)).ToList();
         foreach (var v in variantsToDelete)
         {
             productVariantDeleteRepository.Delete(v);
             product.ProductVariants.Remove(v);
         }
-        foreach (var variantReq in inputVariants)
+        foreach (var variantReq in InventoryReceiptVariants)
         {
             ProductVariant variantEntity;
             if (variantReq.Id.HasValue && variantReq.Id > 0)
@@ -388,33 +389,20 @@ public sealed class UpdateProductCommandHandler(
             }
         }
         var existingTechs = product.ProductTechnologies.ToList();
-        var newTechList = new List<TechnologyJsonRequest>();
-        if (!string.IsNullOrWhiteSpace(command.Highlights))
+        var newTechList = command.ProductTechnologies ?? [];
+        if (newTechList.Count > 0)
         {
-            try
+            newTechList = newTechList.GroupBy(x => x.TechnologyId).Select(g => g.First()).ToList();
+            var techIds = newTechList.Select(x => x.TechnologyId).ToList();
+            var validTechs = await technologyReadRepository.GetByIdsAsync(techIds, cancellationToken)
+                .ConfigureAwait(false);
+            var validTechIds = validTechs.Select(t => t.Id).ToHashSet();
+            var invalidIds = techIds.Where(id => !validTechIds.Contains(id)).ToList();
+            if (invalidIds.Count > 0)
             {
-                var deserialized = (JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
-                        command.Highlights,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ??
-                    [])
-                    .GroupBy(x => x.TechnologyId)
-                    .Select(g => g.First())
-                    .ToList();
-                var techIds = deserialized.Select(x => x.TechnologyId).ToList();
-                var validTechs = await technologyReadRepository.GetByIdsAsync(techIds, cancellationToken)
-                    .ConfigureAwait(false);
-                var validTechIds = validTechs.Select(t => t.Id).ToHashSet();
-                var invalidIds = techIds.Where(id => !validTechIds.Contains(id)).ToList();
-                if (invalidIds.Count > 0)
-                {
-                    return Error.BadRequest(
-                        $"Các công nghệ sau không tồn tại: {string.Join(", ", invalidIds)}.",
-                        nameof(command.Highlights));
-                }
-                newTechList = deserialized;
-            } catch
-            {
-                newTechList = [];
+                return Error.BadRequest(
+                    $"Các công nghệ sau không tồn tại: {string.Join(", ", invalidIds)}.",
+                    nameof(command.ProductTechnologies));
             }
         }
         foreach (var existing in existingTechs)

@@ -6,10 +6,10 @@ using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.UserManager.Commands.UpdateUser;
+using Application.Features.UserManager.Commands.UploadAvatarForAdmin;
 using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Application.Features.UserManager.Queries.GetUsersListForOutput;
-using Application.Features.Users.Commands.UploadAvatar;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -219,9 +219,9 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
-        var command = new UploadAvatarCommand
+        var command = new UploadAvatarForAdminCommand
         {
-            UserId = userId.ToString(),
+            UserId = userId,
             FileContent = file.OpenReadStream(),
             FileName = file.FileName
         };

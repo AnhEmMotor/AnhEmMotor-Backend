@@ -12,13 +12,16 @@ public sealed class RefreshTokenCommandHandler(
     ITokenManagerService tokenService,
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,
-    IHttpTokenAccessorService httpTokenAccessor) : IRequestHandler<RefreshTokenCommand, Result<GetAccessTokenFromRefreshTokenResponse>>
+    ICookieTokenManager cookieTokenManager,
+    ICurrentUserContext currentUserContext) : IRequestHandler<RefreshTokenCommand, Result<GetAccessTokenFromRefreshTokenResponse>>
 {
     public async Task<Result<GetAccessTokenFromRefreshTokenResponse>> Handle(
         RefreshTokenCommand request,
         CancellationToken cancellationToken)
     {
-        var user = await userReadRepository.GetByRefreshTokenAsync(request.RefreshToken!, cancellationToken)
+        var refreshToken = cookieTokenManager.GetRefreshToken();
+        var accessToken = currentUserContext.GetAccessToken();
+        var user = await userReadRepository.GetByRefreshTokenAsync(refreshToken!, cancellationToken)
             .ConfigureAwait(false);
         if (user == null)
         {
@@ -32,9 +35,9 @@ public sealed class RefreshTokenCommandHandler(
         {
             return Error.Forbidden("Account is not available.");
         }
-        if (!string.IsNullOrEmpty(request.AccessToken))
+        if (!string.IsNullOrEmpty(accessToken))
         {
-            var oldStatusClaim = tokenService.GetClaimFromToken(request.AccessToken, ClaimJWTPayload.Status);
+            var oldStatusClaim = tokenService.GetClaimFromToken(accessToken, ClaimJWTPayload.Status);
             if (!string.IsNullOrEmpty(oldStatusClaim) &&
                 !string.Equals(oldStatusClaim, user.Status, StringComparison.OrdinalIgnoreCase))
             {
@@ -55,7 +58,7 @@ public sealed class RefreshTokenCommandHandler(
             refreshTokenExpiresAt,
             cancellationToken)
             .ConfigureAwait(false);
-        httpTokenAccessor.SetRefreshTokenToCookie(newRefreshToken, refreshTokenExpiresAt);
+        cookieTokenManager.SetRefreshToken(newRefreshToken, refreshTokenExpiresAt);
         return new GetAccessTokenFromRefreshTokenResponse
         {
             AccessToken = newAccessToken,

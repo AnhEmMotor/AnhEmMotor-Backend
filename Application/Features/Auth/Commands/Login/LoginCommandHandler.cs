@@ -9,7 +9,7 @@ namespace Application.Features.Auth.Commands.Login;
 public sealed class LoginCommandHandler(
     IIdentityService identityService,
     ITokenManagerService tokenManagerService,
-    IHttpTokenAccessorService httpTokenAccessorService,
+    ICookieTokenManager cookieTokenManager,
     IUserUpdateRepository userUpdateRepository) : IRequestHandler<LoginCommand, Result<LoginResponse>>
 {
     public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -36,7 +36,7 @@ public sealed class LoginCommandHandler(
             expiryRefreshTokenDate,
             cancellationToken)
             .ConfigureAwait(false);
-        httpTokenAccessorService.SetRefreshTokenToCookie(refreshToken, expiryRefreshTokenDate);
+        cookieTokenManager.SetRefreshToken(refreshToken, expiryRefreshTokenDate);
         return new LoginResponse { AccessToken = accessToken, ExpiresAt = expiryAccessTokenDate };
     }
 }

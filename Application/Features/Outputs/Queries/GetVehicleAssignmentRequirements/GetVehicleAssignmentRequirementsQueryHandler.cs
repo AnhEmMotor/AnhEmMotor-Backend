@@ -74,7 +74,7 @@ public sealed class GetVehicleAssignmentRequirementsQueryHandler(
                         string.Equals(v.Status, VehicleStatus.Available, StringComparison.OrdinalIgnoreCase) &&
                         v.OutputInfoId == null &&
                         v.IsActive &&
-                        v.InputInfoId != null)
+                        v.InventoryReceiptInfoId != null)
                 .Select(ToOption)
                 .ToList();
             var requiredCount = info.Count ?? 0;

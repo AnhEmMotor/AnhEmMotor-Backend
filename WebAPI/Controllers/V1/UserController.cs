@@ -1,21 +1,18 @@
-﻿using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.Users.Commands.ChangePassword;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
-using Application.Features.Users.Commands.UploadAvatar;
+using Application.Features.Users.Commands.UploadAvatarCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
-using Application.Interfaces.Services;
+using Application.Features.Users.Queries.GetGenderOptions;
 using Asp.Versioning;
-using Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
-using System.Text.Json;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -27,14 +24,8 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class UserController(IMediator mediator, IUserStreamService userStreamService, IServiceProvider serviceProvider) : ApiController
+public class UserController(IMediator mediator) : ApiController
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false
-    };
-
     /// <summary>
     /// Lấy thông tin người dùng hiện tại từ JWT (Hỗ trợ SSE nếu Accept: text/event-stream)
     /// </summary>
@@ -45,53 +36,15 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetCurrentUserAsync(CancellationToken cancellationToken)
     {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
-        {
-            return Unauthorized(Error.Validation("Invalid User ID", "UserId"));
-        }
         bool isSse = Request.Headers.Accept.ToString().Contains("text/event-stream");
         if (isSse)
         {
-            Response.Headers.Append("Content-Type", "text/event-stream");
-            Response.Headers.Append("Cache-Control", "no-cache");
-            Response.Headers.Append("X-Accel-Buffering", "no");
-            try
-            {
-                await SendUserDataAsync(mediator, userIdString, cancellationToken).ConfigureAwait(false);
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    await userStreamService.WaitForUpdateAsync(userId, cancellationToken).ConfigureAwait(true);
-                    using var scope = serviceProvider.CreateScope();
-                    var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                    await SendUserDataAsync(scopedMediator, userIdString, cancellationToken).ConfigureAwait(false);
-                }
-            } catch (OperationCanceledException)
-            {
-            }
-            return new EmptyResult();
+            var stream = await mediator.Send(new GetCurrentUserStreamQuery(), cancellationToken).ConfigureAwait(false);
+            return HandleSseResult(stream);
         } else
         {
-            var result = await mediator.Send(new GetCurrentUserQuery() { UserId = userIdString }, cancellationToken)
-                .ConfigureAwait(false);
+            var result = await mediator.Send(new GetCurrentUserQuery(), cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
-        }
-    }
-
-    private async Task SendUserDataAsync(IMediator mediatorToUse, string userId, CancellationToken cancellationToken)
-    {
-        var result = await mediatorToUse.Send(new GetCurrentUserQuery() { UserId = userId }, cancellationToken)
-            .ConfigureAwait(false);
-        if (result.IsSuccess)
-        {
-            var json = JsonSerializer.Serialize(result.Value, _jsonSerializerOptions);
-            await Response.WriteAsync($"data: {json}\n\n", cancellationToken).ConfigureAwait(true);
-            await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(true);
-        } else
-        {
-            var errorJson = JsonSerializer.Serialize(result.Error, _jsonSerializerOptions);
-            await Response.WriteAsync($"event: error\ndata: {errorJson}\n\n", cancellationToken).ConfigureAwait(true);
-            await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(true);
         }
     }
 
@@ -108,8 +61,7 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
         [FromBody] UpdateCurrentUserCommand model,
         CancellationToken cancellationToken)
     {
-        var modelToSend = model with { UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) };
-        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(model, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -126,8 +78,7 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
         [FromBody] ChangePasswordCommand model,
         CancellationToken cancellationToken)
     {
-        var modelToSend = model with { UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) };
-        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(model, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -142,9 +93,7 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteCurrentUserAccountAsync(CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new DeleteCurrentUserAccountCommand() { UserId = userId }, cancellationToken)
-            .ConfigureAwait(false);
+        var result = await mediator.Send(new DeleteCurrentUserAccountCommand(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -172,10 +121,8 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadAvatarAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(file);
-        var command = new UploadAvatarCommand
+        var command = new UploadAvatarCurrentUserCommand
         {
-            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
             FileContent = file.OpenReadStream(),
             FileName = file.FileName
         };
@@ -188,15 +135,10 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     /// </summary>
     [HttpGet("gender-options")]
     [Authorize]
-    [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
-    public IActionResult GetGenderOptions()
+    [ProducesResponseType(typeof(IEnumerable<GenderOptionResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetGenderOptionsAsync(CancellationToken cancellationToken)
     {
-        var options = new[]
-        {
-            new { key = nameof(GenderStatus.Male), label = "Nam" },
-            new { key = nameof(GenderStatus.Female), label = "Nữ" },
-            new { key = nameof(GenderStatus.Other), label = "Khác" }
-        };
-        return Ok(options);
+        var result = await mediator.Send(new GetGenderOptionsQuery(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 }

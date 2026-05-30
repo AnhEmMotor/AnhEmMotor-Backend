@@ -36,10 +36,8 @@ public class GetOutputsByUserIdQueryHandler(
             foreach (var item in pagedResult.Items.Where(i => i.DepositRatio == null))
             {
                 item.DepositRatio = defaultRatio;
-                if (item.DepositAmount == null)
-                    item.DepositAmount = item.Total * (defaultRatio / 100m);
-                if (item.RemainingAmount == null)
-                    item.RemainingAmount = item.Total - (item.DepositAmount ?? 0);
+                item.DepositAmount ??= item.Total * (defaultRatio / 100m);
+                item.RemainingAmount ??= item.Total - (item.DepositAmount ?? 0);
             }
         }
         return pagedResult;

@@ -2,19 +2,21 @@ using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services;
 using MediatR;
 
 namespace Application.Features.Permissions.Queries.GetMyPermissions;
 
 public class GetMyPermissionsQueryHandler(
     IRoleReadRepository roleReadRepository,
-    IUserReadRepository userReadRepository) : IRequestHandler<GetMyPermissionsQuery, Result<PermissionAndRoleOfUserResponse>>
+    IUserReadRepository userReadRepository,
+    ICurrentUserContext currentUserContext) : IRequestHandler<GetMyPermissionsQuery, Result<PermissionAndRoleOfUserResponse>>
 {
     public async Task<Result<PermissionAndRoleOfUserResponse>> Handle(
         GetMyPermissionsQuery request,
         CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(request.UserId!);
+        var userId = currentUserContext.GetUserId();
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {
@@ -26,7 +28,7 @@ public class GetMyPermissionsQueryHandler(
         var roleIds = roleEntities.Select(r => r.Id).ToList();
         var userPermissionNames = await roleReadRepository.GetPermissionsNameByRoleIdAsync(roleIds, cancellationToken)
                 .ConfigureAwait(false) ??
-            new List<string>();
+            [];
         var userPermissions = userPermissionNames.ToList();
         return new PermissionAndRoleOfUserResponse()
         {

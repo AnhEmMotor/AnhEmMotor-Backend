@@ -8,4 +8,6 @@ public interface ILeadUpdateRepository
     public Task UpdateAsync(Domain.Entities.Lead LeadEntity, CancellationToken cancellationToken = default);
 
     public void Restore(Domain.Entities.Lead LeadEntity);
+
+    public Task AssignLeadAsync(Domain.Entities.Lead lead, CancellationToken cancellationToken = default);
 }

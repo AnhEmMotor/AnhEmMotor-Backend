@@ -48,17 +48,17 @@ public class Lead
     [Fact(DisplayName = "LEAD_006 - Chuẩn hóa Slug từ tên khách hàng hoặc tiêu đề")]
     public void SlugHelper_GenerateSlug_ReturnsCorrectSlug()
     {
-        var input = "Nguyễn Văn A - Lái Thử";
+        var InventoryReceipt = "Nguyễn Văn A - Lái Thử";
         var expected = "nguyen-van-a-lai-thu";
-        var result = SlugHelper.GenerateSlug(input);
+        var result = SlugHelper.GenerateSlug(InventoryReceipt);
         result.Should().Be(expected);
     }
 
     [Fact(DisplayName = "LEAD_007 - SlugHelper xử lý ký tự đặc biệt và độ dài chuỗi")]
     public void SlugHelper_LongAndSpecialChars_ReturnsSanitizedSlug()
     {
-        var input = $"{new string('a', 300)}!@#$%^&*()";
-        var result = SlugHelper.GenerateSlug(input);
+        var InventoryReceipt = $"{new string('a', 300)}!@#$%^&*()";
+        var result = SlugHelper.GenerateSlug(InventoryReceipt);
         result.Length.Should().BeLessThanOrEqualTo(255);
         result.Should().NotContainAny("!", "@", "#", "$", "%", "^", "&", "*", "(", ")");
     }

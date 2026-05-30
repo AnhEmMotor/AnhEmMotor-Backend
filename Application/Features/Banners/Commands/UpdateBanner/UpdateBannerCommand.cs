@@ -6,6 +6,7 @@ namespace Application.Features.Banners.Commands.UpdateBanner;
 
 public sealed record UpdateBannerCommand : IRequest<Result<Unit>>
 {
+    [JsonIgnore]
     public int Id { get; init; }
 
     public string Title { get; init; } = string.Empty;

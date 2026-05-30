@@ -25,8 +25,8 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("meta_description")]
         public string? MetaDescription { get; set; }
 
-        [JsonPropertyName("highlights")]
-        public string? Highlights { get; set; }
+        [JsonPropertyName("product_technologies")]
+        public List<ProductTechnologyResponse> ProductTechnologies { get; set; } = [];
 
         [JsonPropertyName("specifications")]
         public Dictionary<string, object?> Specifications { get; set; } = [];

@@ -10,18 +10,19 @@ namespace UnitTests;
 public class Banner
 {
     private readonly Mock<IBannerInsertRepository> _bannerInsertRepoMock;
-    private readonly Mock<IHttpTokenAccessorService> _tokenAccessorMock;
+    private readonly Mock<ICurrentUserContext> _tokenAccessorMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
     public Banner()
     {
         _bannerInsertRepoMock = new Mock<IBannerInsertRepository>();
-        _tokenAccessorMock = new Mock<IHttpTokenAccessorService>();
+        _tokenAccessorMock = new Mock<ICurrentUserContext>();
+        _tokenAccessorMock.Setup(x => x.GetUserId()).Returns(Guid.NewGuid());
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
     [Fact(DisplayName = "BANN_007 - Tự động cắt khoảng trắng trong dữ liệu đầu vào")]
-    public async Task CreateBanner_WhitespaceInInput_ShouldTrimValues()
+    public async Task CreateBanner_WhitespaceInInventoryReceipt_ShouldTrimValues()
     {
         var command = new CreateBannerCommand
         {

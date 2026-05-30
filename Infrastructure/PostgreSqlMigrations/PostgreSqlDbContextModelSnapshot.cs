@@ -695,7 +695,7 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("EmployeeProfile");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Input", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -718,13 +718,17 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTimeOffset?>("InputDate")
+                    b.Property<DateTimeOffset?>("InventoryReceiptDate")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("InputDate");
+                        .HasColumnName("InventoryReceiptDate");
 
                     b.Property<string>("Notes")
                         .HasColumnType("text")
                         .HasColumnName("Notes");
+
+                    b.Property<int?>("PurchaseRequestId")
+                        .HasColumnType("integer")
+                        .HasColumnName("PurchaseRequestId");
 
                     b.Property<int?>("SourceOrderId")
                         .HasColumnType("integer")
@@ -735,8 +739,7 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnName("StatusId");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("integer")
-                        .HasColumnName("SupplierId");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -747,16 +750,18 @@ namespace Infrastructure.PostgreSqlMigrations
 
                     b.HasIndex("CreatedBy");
 
+                    b.HasIndex("PurchaseRequestId");
+
                     b.HasIndex("SourceOrderId");
 
                     b.HasIndex("StatusId");
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Input");
+                    b.ToTable("InventoryReceipt");
                 });
 
-            modelBuilder.Entity("Domain.Entities.InputInfo", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -775,25 +780,24 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("InputId")
+                    b.Property<int>("InventoryReceiptId")
                         .HasColumnType("integer")
-                        .HasColumnName("InputId");
-
-                    b.Property<decimal?>("InputPrice")
-                        .HasColumnType("decimal(18, 2)")
-                        .HasColumnName("InputPrice");
+                        .HasColumnName("InventoryReceiptId");
 
                     b.Property<int?>("ParentOutputInfoId")
                         .HasColumnType("integer")
                         .HasColumnName("ParentOutputInfoId");
 
-                    b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer")
-                        .HasColumnName("ProductVariantColorId");
-
                     b.Property<int?>("ProductVariantId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PurchaseRequestItemId")
                         .HasColumnType("integer")
-                        .HasColumnName("ProductVariantId");
+                        .HasColumnName("PurchaseRequestItemId");
+
+                    b.Property<int?>("QuotationProductRowId")
+                        .HasColumnType("integer")
+                        .HasColumnName("QuotationProductRowId");
 
                     b.Property<int?>("RemainingCount")
                         .HasColumnType("integer")
@@ -804,18 +808,20 @@ namespace Infrastructure.PostgreSqlMigrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InputId");
+                    b.HasIndex("InventoryReceiptId");
 
                     b.HasIndex("ParentOutputInfoId");
 
-                    b.HasIndex("ProductVariantColorId");
-
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("InputInfo");
+                    b.HasIndex("PurchaseRequestItemId");
+
+                    b.HasIndex("QuotationProductRowId");
+
+                    b.ToTable("InventoryReceiptInfo");
                 });
 
-            modelBuilder.Entity("Domain.Entities.InputStatus", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
                 {
                     b.Property<string>("Key")
                         .HasColumnType("text")
@@ -832,7 +838,7 @@ namespace Infrastructure.PostgreSqlMigrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("InputStatus");
+                    b.ToTable("InventoryReceiptStatus");
                 });
 
             modelBuilder.Entity("Domain.Entities.KPI", b =>
@@ -1726,10 +1732,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("numeric")
                         .HasColumnName("GroundClearance");
 
-                    b.Property<string>("Highlights")
-                        .HasColumnType("text")
-                        .HasColumnName("Highlights");
-
                     b.Property<string>("LightingSystem")
                         .HasColumnType("text")
                         .HasColumnName("LightingSystem");
@@ -2201,6 +2203,86 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("ProductVariantColor");
                 });
 
+            modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ApprovedBy");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("Note");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("Status");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedBy");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("PurchaseRequest");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseRequestItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ProductVariantColorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ProductVariantColorId");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ProductVariantId");
+
+                    b.Property<int>("PurchaseRequestId")
+                        .HasColumnType("integer")
+                        .HasColumnName("PurchaseRequestId");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("Quantity");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantColorId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("PurchaseRequestId");
+
+                    b.ToTable("PurchaseRequestItem");
+                });
+
             modelBuilder.Entity("Domain.Entities.Quotation", b =>
                 {
                     b.Property<int>("Id")
@@ -2609,9 +2691,9 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("text")
                         .HasColumnName("EngineNumber");
 
-                    b.Property<int?>("InputInfoId")
+                    b.Property<int?>("InventoryReceiptInfoId")
                         .HasColumnType("integer")
-                        .HasColumnName("InputInfoId");
+                        .HasColumnName("InventoryReceiptInfoId");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
@@ -2660,7 +2742,7 @@ namespace Infrastructure.PostgreSqlMigrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InputInfoId");
+                    b.HasIndex("InventoryReceiptInfoId");
 
                     b.HasIndex("LeadId");
 
@@ -2922,7 +3004,7 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Input", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
                 {
                     b.HasOne("Domain.Entities.ApplicationUser", "ConfirmedByUser")
                         .WithMany()
@@ -2932,34 +3014,39 @@ namespace Infrastructure.PostgreSqlMigrations
                         .WithMany()
                         .HasForeignKey("CreatedBy");
 
+                    b.HasOne("Domain.Entities.PurchaseRequest", "PurchaseRequest")
+                        .WithMany()
+                        .HasForeignKey("PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Domain.Entities.Output", "Output")
                         .WithMany("Returns")
                         .HasForeignKey("SourceOrderId");
 
-                    b.HasOne("Domain.Entities.InputStatus", "InputStatus")
-                        .WithMany("InputReceipts")
+                    b.HasOne("Domain.Entities.InventoryReceiptStatus", "InventoryReceiptStatus")
+                        .WithMany("InventoryReceiptReceipts")
                         .HasForeignKey("StatusId");
 
-                    b.HasOne("Domain.Entities.Supplier", "Supplier")
-                        .WithMany("InputReceipts")
+                    b.HasOne("Domain.Entities.Supplier", null)
+                        .WithMany("InventoryReceiptReceipts")
                         .HasForeignKey("SupplierId");
 
                     b.Navigation("ConfirmedByUser");
 
                     b.Navigation("CreatedByUser");
 
-                    b.Navigation("InputStatus");
+                    b.Navigation("InventoryReceiptStatus");
 
                     b.Navigation("Output");
 
-                    b.Navigation("Supplier");
+                    b.Navigation("PurchaseRequest");
                 });
 
-            modelBuilder.Entity("Domain.Entities.InputInfo", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
                 {
-                    b.HasOne("Domain.Entities.Input", "InputReceipt")
-                        .WithMany("InputInfos")
-                        .HasForeignKey("InputId")
+                    b.HasOne("Domain.Entities.InventoryReceipt", "InventoryReceiptReceipt")
+                        .WithMany("InventoryReceiptInfos")
+                        .HasForeignKey("InventoryReceiptId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2967,22 +3054,27 @@ namespace Infrastructure.PostgreSqlMigrations
                         .WithMany("Returns")
                         .HasForeignKey("ParentOutputInfoId");
 
-                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantColorId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany("InputInfos")
+                    b.HasOne("Domain.Entities.ProductVariant", null)
+                        .WithMany("InventoryReceiptInfos")
                         .HasForeignKey("ProductVariantId");
 
-                    b.Navigation("InputReceipt");
+                    b.HasOne("Domain.Entities.PurchaseRequestItem", "PurchaseRequestItem")
+                        .WithMany("InventoryReceiptInfos")
+                        .HasForeignKey("PurchaseRequestItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.QuotationProductRow", "QuotationProductRow")
+                        .WithMany()
+                        .HasForeignKey("QuotationProductRowId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("InventoryReceiptReceipt");
 
                     b.Navigation("ParentOutputInfo");
 
-                    b.Navigation("ProductVariant");
+                    b.Navigation("PurchaseRequestItem");
 
-                    b.Navigation("ProductVariantColor");
+                    b.Navigation("QuotationProductRow");
                 });
 
             modelBuilder.Entity("Domain.Entities.KPI", b =>
@@ -3225,6 +3317,45 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "ApprovedByUser")
+                        .WithMany()
+                        .HasForeignKey("ApprovedBy");
+
+                    b.HasOne("Domain.Entities.ApplicationUser", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy");
+
+                    b.Navigation("ApprovedByUser");
+
+                    b.Navigation("CreatedByUser");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseRequestItem", b =>
+                {
+                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantColorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.PurchaseRequest", "PurchaseRequest")
+                        .WithMany("PurchaseRequestItems")
+                        .HasForeignKey("PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("ProductVariantColor");
+
+                    b.Navigation("PurchaseRequest");
+                });
+
             modelBuilder.Entity("Domain.Entities.Quotation", b =>
                 {
                     b.HasOne("Domain.Entities.Supplier", "Supplier")
@@ -3347,9 +3478,9 @@ namespace Infrastructure.PostgreSqlMigrations
 
             modelBuilder.Entity("Domain.Entities.Vehicle", b =>
                 {
-                    b.HasOne("Domain.Entities.InputInfo", "InputInfo")
+                    b.HasOne("Domain.Entities.InventoryReceiptInfo", "InventoryReceiptInfo")
                         .WithMany("Vehicles")
-                        .HasForeignKey("InputInfoId")
+                        .HasForeignKey("InventoryReceiptInfoId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Domain.Entities.Lead", "Lead")
@@ -3375,7 +3506,7 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("InputInfo");
+                    b.Navigation("InventoryReceiptInfo");
 
                     b.Navigation("Lead");
 
@@ -3481,19 +3612,19 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("KPIs");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Input", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
                 {
-                    b.Navigation("InputInfos");
+                    b.Navigation("InventoryReceiptInfos");
                 });
 
-            modelBuilder.Entity("Domain.Entities.InputInfo", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
                 {
                     b.Navigation("Vehicles");
                 });
 
-            modelBuilder.Entity("Domain.Entities.InputStatus", b =>
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
                 {
-                    b.Navigation("InputReceipts");
+                    b.Navigation("InventoryReceiptReceipts");
                 });
 
             modelBuilder.Entity("Domain.Entities.Lead", b =>
@@ -3570,7 +3701,7 @@ namespace Infrastructure.PostgreSqlMigrations
 
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
                 {
-                    b.Navigation("InputInfos");
+                    b.Navigation("InventoryReceiptInfos");
 
                     b.Navigation("OutputInfos");
 
@@ -3581,6 +3712,16 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("VariantOptionValues");
                 });
 
+            modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
+                {
+                    b.Navigation("PurchaseRequestItems");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseRequestItem", b =>
+                {
+                    b.Navigation("InventoryReceiptInfos");
+                });
+
             modelBuilder.Entity("Domain.Entities.Quotation", b =>
                 {
                     b.Navigation("QuotationProductRows");
@@ -3588,7 +3729,7 @@ namespace Infrastructure.PostgreSqlMigrations
 
             modelBuilder.Entity("Domain.Entities.Supplier", b =>
                 {
-                    b.Navigation("InputReceipts");
+                    b.Navigation("InventoryReceiptReceipts");
 
                     b.Navigation("SupplierContacts");
                 });

@@ -1,6 +1,5 @@
 using Application.Interfaces.Repositories.Quotation;
 using Infrastructure.DBContexts;
-using System.Collections.Generic;
 using QuotationEntity = Domain.Entities.Quotation;
 
 namespace Infrastructure.Repositories.Quotation

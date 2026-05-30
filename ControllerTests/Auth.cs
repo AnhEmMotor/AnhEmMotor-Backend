@@ -19,21 +19,19 @@ namespace ControllerTests;
 public class Auth
 {
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IHttpTokenAccessorService> _httpTokenAccessorServiceMock;
     private readonly AuthController _controller;
 
     public Auth()
     {
         _mediatorMock = new Mock<IMediator>();
-        _httpTokenAccessorServiceMock = new Mock<IHttpTokenAccessorService>();
-        _controller = new AuthController(_mediatorMock.Object, _httpTokenAccessorServiceMock.Object);
+        _controller = new AuthController(_mediatorMock.Object);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "AUTH_REG_002 - Ðang ký th?t b?i (Validation) - TH1: Thi?u Password")]
+    [Fact(DisplayName = "AUTH_REG_002 - Dang ky th?t b?i (Validation) - TH1: Thi?u Password")]
     public async Task AUTH_REG_002_1_Register_MissingPassword()
     {
         var request = new RegisterCommand
@@ -49,7 +47,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_REG_002 - Ðang ký th?t b?i (Validation) - TH2: Thi?u Email và Username")]
+    [Fact(DisplayName = "AUTH_REG_002 - Dang ky th?t b?i (Validation) - TH2: Thi?u Email v Username")]
     public async Task AUTH_REG_002_2_Register_MissingEmailAndUsername()
     {
         var request = new RegisterCommand
@@ -65,7 +63,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_REG_002 - Ðang ký th?t b?i (Validation) - TH3: Thi?u FullName")]
+    [Fact(DisplayName = "AUTH_REG_002 - Dang ky th?t b?i (Validation) - TH3: Thi?u FullName")]
     public async Task AUTH_REG_002_3_Register_MissingFullName()
     {
         var request = new RegisterCommand
@@ -81,7 +79,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_LOG_002 - Ðang nh?p sai thông tin")]
+    [Fact(DisplayName = "AUTH_LOG_002 - Dang nh?p sai thng tin")]
     public async Task AUTH_LOG_002_Login_Fail_WrongCreds()
     {
         var request = new LoginCommand { UsernameOrEmail = "user", Password = "wrong" };
@@ -103,17 +101,17 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_OUT_001 - Ðang xu?t")]
+    [Fact(DisplayName = "AUTH_OUT_001 - Dang xu?t")]
     public async Task AUTH_OUT_001_Logout_Success()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
         var result = await _controller.LogoutAsync(CancellationToken.None).ConfigureAwait(true);
-        result.Should().BeOfType<OkObjectResult>();
+        result.Should().BeOfType<NoContentResult>();
         _mediatorMock.Verify(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "AUTH_022 - Google Login API - Thành công (200)")]
+    [Fact(DisplayName = "AUTH_022 - Google Login API - Thnh cng (200)")]
     public async Task AUTH_022_GoogleLogin_Api_Success()
     {
         var command = new GoogleLoginCommand { IdToken = "valid_token" };

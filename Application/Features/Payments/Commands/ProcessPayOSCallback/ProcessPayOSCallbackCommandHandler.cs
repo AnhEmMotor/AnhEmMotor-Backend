@@ -16,16 +16,18 @@ namespace Application.Features.Payments.Commands.ProcessPayOSCallback
     {
         public async Task<Result<int>> Handle(ProcessPayOSCallbackCommand request, CancellationToken cancellationToken)
         {
-            var payosData = await payosService.GetPaymentDetailsAsync(request.OrderCode, cancellationToken)
+            if (request.OrderCode is null)
+            {
+                return Result<int>.Failure(Error.BadRequest("Mã đơn hàng không hợp lệ", "InvalidOrderCode"));
+            }
+            var payosData = await payosService.GetPaymentDetailsAsync(request.OrderCode.Value, cancellationToken)
                 .ConfigureAwait(false);
             if (payosData == null)
             {
                 return Result<int>.Failure(Error.NotFound("Không tìm thấy thông tin thanh toán từ PayOS", "Payment"));
             }
-            var orderId = (int)(request.OrderCode / 100000);
-            if (orderId == 0)
-                orderId = (int)request.OrderCode;
-            var order = await readRepository.GetByIdWithDetailsAsync(orderId, cancellationToken).ConfigureAwait(false);
+            var order = await readRepository.GetByIdWithDetailsAsync(request.OrderId, cancellationToken)
+                .ConfigureAwait(false);
             if (order is null)
             {
                 return Result<int>.Failure(Error.NotFound("Không tìm thấy đơn hàng", "Order"));

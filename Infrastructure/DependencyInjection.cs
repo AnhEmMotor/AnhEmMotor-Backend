@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
-using Application.Interfaces.Services.HR;
 using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
@@ -76,7 +75,8 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
         services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
         services.AddScoped<ITokenManagerService, TokenManagerService>();
-        services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
+        services.AddScoped<ICookieTokenManager, CookieTokenManager>();
+        services.AddScoped<ICurrentUserContext, CurrentUserContext>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
@@ -90,8 +90,6 @@ public static class DependencyInjection
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<ICommissionService, CommissionService>();
-        services.AddScoped<ILeadAssignmentService, LeadAssignmentService>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient();
         services.Scan(

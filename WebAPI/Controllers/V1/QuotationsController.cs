@@ -1,25 +1,24 @@
+using Application.ApiContracts.Quotation.Requests;
 using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
+using Application.Features.Quotations.Commands.ApproveRejectQuotation;
 using Application.Features.Quotations.Commands.CreateQuotation;
 using Application.Features.Quotations.Commands.DeleteQuotation;
-using Application.Features.Quotations.Commands.UpdateQuotation;
-using Microsoft.AspNetCore.Authorization;
 using Application.Features.Quotations.Commands.SendQuotation;
-using Application.Features.Quotations.Commands.ApproveQuotation;
-using Application.Features.Quotations.Commands.RejectQuotation;
+using Application.Features.Quotations.Commands.UpdateQuotation;
 using Application.Features.Quotations.Queries.GetQuotationById;
 using Application.Features.Quotations.Queries.GetQuotationsList;
+using Application.Features.Quotations.Queries.GetQuotationStatusList;
+using Application.Features.Quotations.Queries.GetApprovedPricesForVariant;
+using Application.ApiContracts.PurchaseRequest.Responses;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Threading;
-using System.Threading.Tasks;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1
@@ -48,6 +47,18 @@ namespace WebAPI.Controllers.V1
         {
             var query = new GetQuotationsListQuery { SieveModel = sieveModel };
             var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy danh sách các trạng thái của yêu cầu báo giá.
+        /// </summary>
+        [HttpGet("status")]
+        [RequiresAnyPermissions(Quotations.View, Quotations.Create, Quotations.Edit)]
+        [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetQuotationStatusesAsync(CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetQuotationStatusListQuery(), cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
 
@@ -127,31 +138,19 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
-        /// Xác nhận yêu cầu báo giá (sent -> approved).
+        /// Phê duyệt hoặc từ chối yêu cầu báo giá (sent -> approved/rejected).
         /// </summary>
-        [HttpPatch("{id:int}/approve")]
+        [HttpPatch("{id:int}/status")]
         [HasPermission(Quotations.Approve)]
         [ProducesResponseType(typeof(QuotationDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ApproveQuotationAsync(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> ApproveRejectQuotationAsync(
+            int id,
+            [FromBody] ApproveRejectQuotationRequest request,
+            CancellationToken cancellationToken)
         {
-            var command = new ApproveQuotationCommand(id);
-            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-            return HandleResult(result);
-        }
-
-        /// <summary>
-        /// Hủy yêu cầu báo giá (sent -> rejected).
-        /// </summary>
-        [HttpPatch("{id:int}/reject")]
-        [HasPermission(Quotations.Approve)]
-        [ProducesResponseType(typeof(QuotationDetailResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> RejectQuotationAsync(int id, CancellationToken cancellationToken)
-        {
-            var command = new RejectQuotationCommand(id);
+            var command = new ApproveRejectQuotationCommand(id, request.Status);
             var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
@@ -166,18 +165,30 @@ namespace WebAPI.Controllers.V1
         [HasPermission(Quotations.Delete)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteQuotationAsync(
-            int id, 
-            [FromServices] IAuthorizationService authorizationService,
+        public async Task<IActionResult> DeleteQuotationAsync(int id, CancellationToken cancellationToken)
+        {
+            var command = new DeleteQuotationCommand { Id = id };
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy danh sách các giá báo giá đã được approve của biến thể và màu sắc đó.
+        /// </summary>
+        /// <param name="variantId">ID biến thể sản phẩm.</param>
+        /// <param name="colorId">ID màu sắc biến thể (không bắt buộc).</param>
+        /// <param name="cancellationToken">Token hủy bỏ.</param>
+        /// <returns>Danh sách báo giá đã được phê duyệt.</returns>
+        [HttpGet("approved-prices")]
+        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [ProducesResponseType(typeof(List<PurchaseRequestQuotedPriceResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetApprovedPricesAsync(
+            [FromQuery] int variantId,
+            [FromQuery] int? colorId,
             CancellationToken cancellationToken)
         {
-            var authResult = await authorizationService.AuthorizeAsync(
-                User,
-                null,
-                new Infrastructure.Authorization.Requirement.PermissionRequirement(Quotations.Approve));
-
-            var command = new DeleteQuotationCommand { Id = id, HasApprovePermission = authResult.Succeeded };
-            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+            var query = new GetApprovedPricesForVariantQuery(variantId, colorId);
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
     }

@@ -8,11 +8,6 @@ public sealed class UpdateCurrentUserCommandValidator : AbstractValidator<Update
 {
     public UpdateCurrentUserCommandValidator()
     {
-        RuleFor(x => x.UserId)
-            .NotEmpty()
-            .WithMessage("User ID is missing.")
-            .Must(id => Guid.TryParse(id, out _))
-            .WithMessage("Invalid User ID format.");
         RuleFor(x => x.Gender)
             .Must(GenderStatus.IsValid)
             .WithMessage("Invalid gender. Please check again.")

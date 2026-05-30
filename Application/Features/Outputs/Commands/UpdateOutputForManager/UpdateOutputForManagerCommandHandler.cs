@@ -1,10 +1,10 @@
-﻿using Application.ApiContracts.Output.Responses;
+using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.User;
-using Application.Interfaces.Services.HR;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -19,7 +19,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
     IOutputDeleteRepository deleteRepository,
     IProductVariantReadRepository variantRepository,
     IUserReadRepository userReadRepository,
-    ICommissionService commissionService,
+    ICommissionUpdateRepository commissionUpdateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputForManagerCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -183,7 +183,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         if (string.Compare(output.StatusId, OrderStatus.Completed) == 0)
         {
-            await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
+            await commissionUpdateRepository.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
                 .ConfigureAwait(false);
         }
         return Result<OrderDetailResponse>.Success(output.Adapt<OrderDetailResponse>());

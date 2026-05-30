@@ -1,6 +1,6 @@
 using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
-using Application.Features.Inputs.Queries.GetInputsBySupplierId;
+using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
@@ -14,7 +14,7 @@ using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetPartnerTypesList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
-using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
+using Application.Features.Suppliers.Queries.GetSuppliersListForInventoryReceiptManager;
 using Application.Features.Suppliers.Queries.GetSupplierStatistics;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
@@ -61,7 +61,10 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp.</returns>
     [HttpGet]
-    [RequiresAnyPermissions(Suppliers.View, Inputs.Edit, Inputs.Create)]
+    [RequiresAnyPermissions(
+        Suppliers.View,
+        Domain.Constants.Permission.Permissions.Quotations.Edit,
+        Domain.Constants.Permission.Permissions.Quotations.Create)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersAsync(
         [FromQuery] SieveModel sieveModel,
@@ -151,14 +154,16 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp cho việc nhập hàng.</returns>
-    [HttpGet("for-input")]
-    [RequiresAnyPermissions(Inputs.Create, Inputs.Edit)]
+    [HttpGet("for-InventoryReceipt")]
+    [RequiresAnyPermissions(
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Create,
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Edit)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetSuppliersForInputAsync(
+    public async Task<IActionResult> GetSuppliersForInventoryReceiptAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetSuppliersListForInputManagerQuery() { SieveModel = sieveModel };
+        var query = new GetSuppliersListForInventoryReceiptManagerQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -302,7 +307,10 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thống kê số lượng nhà cung cấp.</returns>
     [HttpGet("statistics")]
-    [RequiresAnyPermissions(Suppliers.View, Inputs.Edit, Inputs.Create)]
+    [RequiresAnyPermissions(
+        Suppliers.View,
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Edit,
+        Domain.Constants.Permission.Permissions.InventoryReceipts.Create)]
     [ProducesResponseType(typeof(SupplierStatisticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSupplierStatisticsAsync(CancellationToken cancellationToken)
     {
@@ -326,11 +334,6 @@ public class SupplierController(IMediator mediator) : ApiController
     {
         var query = new ExportSuppliersQuery { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if (!result.IsSuccess)
-        {
-            return HandleResult(result);
-        }
-        var fileResult = result.Value;
-        return File(fileResult.FileContents, fileResult.ContentType, fileResult.FileName);
+        return HandleResult(result);
     }
 }

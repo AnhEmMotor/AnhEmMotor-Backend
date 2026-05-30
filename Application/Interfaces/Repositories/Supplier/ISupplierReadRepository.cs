@@ -13,7 +13,7 @@ public interface ISupplierReadRepository
         DataFetchMode mode = DataFetchMode.ActiveOnly,
         CancellationToken cancellationToken = default);
 
-    public Task<PagedResult<TResponse>> GetPagedWithTotalInputAsync<TResponse>(
+    public Task<PagedResult<TResponse>> GetPagedWithTotalInventoryReceiptAsync<TResponse>(
         SieveModel sieveModel,
         DataFetchMode mode = DataFetchMode.ActiveOnly,
         CancellationToken cancellationToken = default);
@@ -37,7 +37,7 @@ public interface ISupplierReadRepository
         DataFetchMode mode = DataFetchMode.ActiveOnly,
         CancellationToken cancellationToken = default);
 
-    public Task<SupplierWithTotalInputResponse?> GetByIdWithTotalInputAsync(
+    public Task<SupplierWithTotalInventoryReceiptResponse?> GetByIdWithTotalInventoryReceiptAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
