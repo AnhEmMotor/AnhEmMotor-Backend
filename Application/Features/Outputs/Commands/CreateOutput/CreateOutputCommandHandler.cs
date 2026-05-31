@@ -58,20 +58,22 @@ public sealed class CreateOutputCommandHandler(
             {
                 errors.Add(colorValidation);
             }
-            if (variant?.Product?.ProductCategory != null &&
-                variant.Product.ProductCategory.MaxPurchaseQuantity.HasValue)
+            if (variant?.Product?.ProductCategory != null)
             {
-                var category = variant.Product.ProductCategory;
-                var maxAllowed = category.MaxPurchaseQuantity.Value;
-                var totalCountForProduct = request.OutputInfos
-                    .Where(oi => oi.ProductVariantId == info.ProductVariantId)
-                    .Sum(oi => oi.Count ?? 0);
-                if (totalCountForProduct > maxAllowed)
+                var effectiveMax = GetEffectiveMaxPurchaseQuantity(variant.Product.ProductCategory);
+                if (effectiveMax.HasValue)
                 {
-                    errors.Add(
-                        Error.BadRequest(
-                            $"Số lượng mua tối đa cho sản phẩm '{variant.Product.Name}' là {maxAllowed} sản phẩm.",
-                            $"products[{i}]"));
+                    var maxAllowed = effectiveMax.Value;
+                    var totalCountForProduct = request.OutputInfos
+                        .Where(oi => oi.ProductVariantId == info.ProductVariantId)
+                        .Sum(oi => oi.Count ?? 0);
+                    if (totalCountForProduct > maxAllowed)
+                    {
+                        errors.Add(
+                            Error.BadRequest(
+                                $"Số lượng mua tối đa cho sản phẩm '{variant.Product.Name}' là {maxAllowed} sản phẩm.",
+                                $"products[{i}]"));
+                    }
                 }
             }
         }
@@ -106,7 +108,8 @@ public sealed class CreateOutputCommandHandler(
         if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
         {
             output.DepositRatio = parsedRatio;
-        } else
+        }
+        else
         {
             output.DepositRatio = 50;
         }
@@ -143,5 +146,18 @@ public sealed class CreateOutputCommandHandler(
             ? null
             : Error.BadRequest("ProductVariantColorId không thuộc biến thể sản phẩm đã chọn.", "ProductVariantColorId");
     }
-}
 
+    private static int? GetEffectiveMaxPurchaseQuantity(ProductCategory category)
+    {
+        var current = category;
+        while (current != null)
+        {
+            if (current.MaxPurchaseQuantity.HasValue)
+            {
+                return current.MaxPurchaseQuantity.Value;
+            }
+            current = current.Parent;
+        }
+        return null;
+    }
+}
