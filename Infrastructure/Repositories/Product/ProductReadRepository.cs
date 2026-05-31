@@ -415,7 +415,7 @@ public class ProductReadRepository(
         return context.Products.AnyAsync(p => p.Id == id, cancellationToken);
     }
 
-    public async Task<List<Domain.Entities.Product>> GetAllProductsWithInventoryDetailsAsync(CancellationToken cancellationToken)
+    public async Task<List<ProductEntity>> GetAllProductsWithInventoryDetailsAsync(CancellationToken cancellationToken)
     {
         return await context.Products
             .Where(p => p.DeletedAt == null)
@@ -446,12 +446,12 @@ public class ProductReadRepository(
             .Include(v => v.ProductVariantColors)
             .Include(v => v.InventoryReceiptInfos)
             .ThenInclude(ii => ii.InventoryReceiptReceipt)
-            .ThenInclude(r => r.SupplierDebts)
+            .ThenInclude(r => r!.SupplierDebts)
             .ThenInclude(sd => sd.Supplier)
             .Include(v => v.InventoryReceiptInfos)
             .ThenInclude(ii => ii.QuotationProductRow)
-            .ThenInclude(qpr => qpr.QuotationReceipt)
-            .ThenInclude(q => q.Supplier)
+            .ThenInclude(qpr => qpr!.QuotationReceipt)
+            .ThenInclude(q => q!.Supplier)
             .Include(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()

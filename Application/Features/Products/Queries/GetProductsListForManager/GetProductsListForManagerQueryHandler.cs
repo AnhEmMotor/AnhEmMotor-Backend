@@ -39,16 +39,7 @@ public sealed class GetProductsListForManagerQueryHandler(
         var allItems = entities
             .Select(e => ProductMappingConfig.MapProductToDetailForManagerResponseWithAlertLevel(e, alertLevel))
             .ToList();
-        var filtered = string.IsNullOrWhiteSpace(request.InventoryStatusFilter)
-            ? allItems
-            : [.. allItems.Where(i => string.Compare(i.InventoryStatus, request.InventoryStatusFilter) == 0)];
-        var sortedItems = request.SortByInventoryStatus switch
-        {
-            SortDirection.Ascending => filtered.OrderBy(i => InventoryStatus.GetSeverity(i.InventoryStatus)).ToList(),
-            SortDirection.Descending => filtered.OrderByDescending(i => InventoryStatus.GetSeverity(i.InventoryStatus))
-                .ToList(),
-            _ => filtered
-        };
+        var sortedItems = allItems;
         return new PagedResult<ProductDetailForManagerResponse>(sortedItems, totalCount, request.Page, request.PageSize);
     }
 }

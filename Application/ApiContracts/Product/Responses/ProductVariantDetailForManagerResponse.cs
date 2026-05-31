@@ -65,15 +65,5 @@ public class ProductVariantDetailForManagerResponse
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
 
-    public int Stock { get; set; }
-
-    [JsonPropertyName("has_been_booked")]
-    public int HasBeenBooked { get; set; }
-
-    [JsonPropertyName("status_stock_id")]
-    public string StatusStockId { get; set; } = string.Empty;
-
-    [JsonPropertyName("inventory_status")]
-    public string InventoryStatus { get; set; } = Domain.Constants.InventoryStatus.InStock;
 }
 

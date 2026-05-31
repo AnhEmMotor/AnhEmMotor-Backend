@@ -306,19 +306,55 @@ public sealed class UpdateProductCommandHandler(
             variantReq.Adapt(variantEntity);
             if (HasColorRequests(variantReq))
             {
-                variantEntity.ProductVariantColors.Clear();
-                foreach (var color in GetColorRequests(variantReq))
+                var incomingColors = GetColorRequests(variantReq);
+                var existingColors = variantEntity.ProductVariantColors.ToList();
+
+                var incomingColorIds = incomingColors
+                    .Where(c => c.Id.HasValue && c.Id > 0)
+                    .Select(c => c.Id!.Value)
+                    .ToHashSet();
+
+                foreach (var existingColor in existingColors)
                 {
-                    variantEntity.ProductVariantColors
-                        .Add(
-                            new ProductVariantColor
+                    if (existingColor.Id > 0 && !incomingColorIds.Contains(existingColor.Id))
+                    {
+                        variantEntity.ProductVariantColors.Remove(existingColor);
+                    }
+                }
+
+                foreach (var color in incomingColors)
+                {
+                    if (color.Id.HasValue && color.Id > 0)
+                    {
+                        var existingColor = existingColors.FirstOrDefault(c => c.Id == color.Id.Value);
+                        if (existingColor != null)
+                        {
+                            existingColor.ColorName = color.ColorName?.Trim();
+                            existingColor.ColorCode = color.ColorCode?.Trim();
+                            existingColor.CoverImageUrl = color.CoverImageUrl?.Trim();
+                        }
+                        else
+                        {
+                            variantEntity.ProductVariantColors.Add(new ProductVariantColor
                             {
-                                Id = color.Id ?? 0,
+                                Id = color.Id.Value,
                                 ProductVariantId = variantEntity.Id,
                                 ColorName = color.ColorName?.Trim(),
                                 ColorCode = color.ColorCode?.Trim(),
                                 CoverImageUrl = color.CoverImageUrl?.Trim()
                             });
+                        }
+                    }
+                    else
+                    {
+                        variantEntity.ProductVariantColors.Add(new ProductVariantColor
+                        {
+                            ProductVariantId = variantEntity.Id,
+                            ColorName = color.ColorName?.Trim(),
+                            ColorCode = color.ColorCode?.Trim(),
+                            CoverImageUrl = color.CoverImageUrl?.Trim()
+                        });
+                    }
                 }
                 variantEntity.CoverImageUrl = null;
             } else

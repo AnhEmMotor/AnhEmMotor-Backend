@@ -141,17 +141,6 @@ public class ProductDetailForManagerResponse
     [JsonPropertyName("cover_image_url")]
     public string? CoverImageUrl { get; set; }
 
-    public int Stock { get; set; }
-
-    [JsonPropertyName("has_been_booked")]
-    public long HasBeenBooked { get; set; }
-
-    [JsonPropertyName("status_stock_id")]
-    public string StatusStockId { get; set; } = string.Empty;
-
-    [JsonPropertyName("inventory_status")]
-    public string InventoryStatus { get; set; } = Domain.Constants.InventoryStatus.InStock;
-
     [JsonPropertyName("product_technologies")]
     public List<ProductTechnologyResponse> ProductTechnologies { get; set; } = [];
 

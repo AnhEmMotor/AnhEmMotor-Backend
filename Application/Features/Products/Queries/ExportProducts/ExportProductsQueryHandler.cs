@@ -182,8 +182,8 @@ public sealed class ExportProductsQueryHandler(IProductReadRepository repository
                     worksheet.Cell(rowIndex, 20).Value = variant.SKU ?? string.Empty;
                     worksheet.Cell(rowIndex, 21).Value = FormatVariantName(variant);
                     worksheet.Cell(rowIndex, 22).Value = variant.Price?.ToString("N0") ?? "0";
-                    worksheet.Cell(rowIndex, 23).Value = variant.Stock;
-                    worksheet.Cell(rowIndex, 24).Value = variant.InventoryStatus ?? string.Empty;
+                    worksheet.Cell(rowIndex, 23).Value = 0;
+                    worksheet.Cell(rowIndex, 24).Value = string.Empty;
                     var variantImages = string.Join(", ", variant.PhotoCollection.Take(5));
                     worksheet.Cell(rowIndex, 25).Value = variantImages;
                     worksheet.Cell(rowIndex, 26).Value = variant.Weight?.ToString("N0") ?? "0";
@@ -222,11 +222,11 @@ public sealed class ExportProductsQueryHandler(IProductReadRepository repository
                 worksheet.Cell(rowIndex, 17).Value = product.TireSize ?? string.Empty;
                 worksheet.Cell(rowIndex, 18).Value = product.TransmissionType ?? string.Empty;
                 worksheet.Cell(rowIndex, 19).Value = product.StarterSystem ?? string.Empty;
-                worksheet.Cell(rowIndex, 20).Value = product.Stock > 0 ? "Co hang" : "Khong co";
+                worksheet.Cell(rowIndex, 20).Value = "N/A";
                 worksheet.Cell(rowIndex, 21).Value = "N/A";
                 worksheet.Cell(rowIndex, 22).Value = "N/A";
-                worksheet.Cell(rowIndex, 23).Value = product.Stock;
-                worksheet.Cell(rowIndex, 24).Value = product.InventoryStatus ?? string.Empty;
+                worksheet.Cell(rowIndex, 23).Value = 0;
+                worksheet.Cell(rowIndex, 24).Value = string.Empty;
                 worksheet.Cell(rowIndex, 25).Value = string.Empty;
                 for (int col = 26; col <= 36; col++)
                 {

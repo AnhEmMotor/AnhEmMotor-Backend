@@ -49,4 +49,9 @@ public interface IInventoryReceiptReadRepository
     public Task<Domain.Entities.InventoryReceiptInfo?> GetInfoByIdAsync(
         int id,
         CancellationToken cancellationToken);
+
+    public Task<List<Domain.Entities.InventoryReceiptInfo>> GetInfosByVariantAsync(
+        int variantId,
+        int? colorId,
+        CancellationToken cancellationToken);
 }

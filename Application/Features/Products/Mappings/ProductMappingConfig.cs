@@ -62,9 +62,7 @@ public class ProductMappingConfig : IRegister
                                 !string.IsNullOrWhiteSpace(pair.OptionValue))
                     .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase))
-            .Map(dest => dest.PhotoCollection, src => src.Photos)
-            .Map(dest => dest.StatusStockId, src => GetStockStatus(src.Stock - src.HasBeenBooked))
-            .Map(dest => dest.InventoryStatus, src => InventoryStatus.OutOfStock);
+            .Map(dest => dest.PhotoCollection, src => src.Photos);
         config.NewConfig<VariantRow, ProductVariantDetailResponse>()
             .Map(
                 dest => dest.OptionValues,
@@ -146,7 +144,6 @@ public class ProductMappingConfig : IRegister
                 row =>
                 {
                     var available = row.Stock - row.HasBeenBooked;
-                    var inventoryStatus = CalculateInventoryStatus(available, alertLevel);
                     var coverImage = string.IsNullOrWhiteSpace(row.CoverImageUrl)
                         ? row.Photos.FirstOrDefault()
                         : row.CoverImageUrl;
@@ -168,8 +165,6 @@ public class ProductMappingConfig : IRegister
                                         g => g.First().OptionValue!,
                                         StringComparer.OrdinalIgnoreCase),
                         PhotoCollection = row.Photos,
-                        Stock = row.Stock,
-                        HasBeenBooked = row.HasBeenBooked,
                         VariantName = row.VariantName,
                         Colors = row.Colors,
                         SKU = row.SKU,
@@ -184,20 +179,11 @@ public class ProductMappingConfig : IRegister
                         RearBrake = row.RearBrake,
                         FrontSuspension = row.FrontSuspension,
                         RearSuspension = row.RearSuspension,
-                        EngineType = row.EngineType,
-                        StatusStockId = GetStockStatus(available),
-                        InventoryStatus = inventoryStatus
+                        EngineType = row.EngineType
                     };
                 })
-            .OrderBy(v => InventoryStatus.GetSeverity(v.InventoryStatus))
-            .ThenBy(v => v.UrlSlug)
+            .OrderBy(v => v.UrlSlug)
             .ToList();
-        var totalStock = variantRows.Sum(v => (long)v.Stock);
-        var totalBooked = variantRows.Sum(v => (long)v.HasBeenBooked);
-        var productAvailable = totalStock - totalBooked;
-        var productInventoryStatus = variantResponses.Count == 0
-            ? InventoryStatus.OutOfStock
-            : variantResponses.MinBy(v => InventoryStatus.GetSeverity(v.InventoryStatus))!.InventoryStatus;
         return new ProductDetailForManagerResponse
         {
             Id = product.Id,
@@ -251,10 +237,6 @@ public class ProductMappingConfig : IRegister
             StatusId = product.StatusId,
             ProductTechnologies = MapProductTechnologiesList(product),
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
-            Stock = (int)totalStock,
-            HasBeenBooked = totalBooked,
-            StatusStockId = GetStockStatus(productAvailable),
-            InventoryStatus = productInventoryStatus,
             Variants = variantResponses
         };
     }
@@ -465,22 +447,7 @@ public class ProductMappingConfig : IRegister
                     Id = c.Id,
                     ColorName = c.ColorName,
                     ColorCode = c.ColorCode,
-                    CoverImageUrl = c.CoverImageUrl,
-                    Stock = variant.InventoryReceiptInfos != null
-                        ? variant.InventoryReceiptInfos
-                            .Where(ii => ii.InventoryReceiptReceipt != null &&
-                                         InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId) &&
-                                         ((ii.QuotationProductRow != null && ii.QuotationProductRow.ProductVariantColorId == c.Id) ||
-                                          (ii.PurchaseRequestItem != null && ii.PurchaseRequestItem.ProductVariantColorId == c.Id)))
-                            .Sum(ii => ii.RemainingCount) ?? 0
-                        : 0,
-                    HasBeenBooked = variant.OutputInfos != null
-                        ? (int)(variant.OutputInfos
-                            .Where(oi => oi.OutputOrder != null &&
-                                         OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId) &&
-                                         oi.ProductVariantColorId == c.Id)
-                            .Sum(oi => (long?)oi.Count) ?? 0)
-                        : 0
+                    CoverImageUrl = c.CoverImageUrl
                 })];
     }
 

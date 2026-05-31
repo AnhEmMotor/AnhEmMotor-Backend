@@ -225,4 +225,21 @@ public class InventoryReceiptReadRepository(ApplicationDBContext context, ISieve
             .FirstOrDefaultAsync(ii => ii.Id == id, cancellationToken)
             .ConfigureAwait(false);
     }
+
+    public async Task<List<Domain.Entities.InventoryReceiptInfo>> GetInfosByVariantAsync(
+        int variantId,
+        int? colorId,
+        CancellationToken cancellationToken)
+    {
+        return await context.InventoryReceiptInfos
+            .Include(ii => ii.InventoryReceiptReceipt)
+            .Include(ii => ii.QuotationProductRow)
+                .ThenInclude(qp => qp!.QuotationReceipt)
+                    .ThenInclude(q => q!.Supplier)
+            .Include(ii => ii.PurchaseRequestItem)
+            .Where(ii => (ii.QuotationProductRow != null && ii.QuotationProductRow.ProductVariantId == variantId && (colorId == null || ii.QuotationProductRow.ProductVariantColorId == colorId)) ||
+                         (ii.PurchaseRequestItem != null && ii.PurchaseRequestItem.ProductVariantId == variantId && (colorId == null || ii.PurchaseRequestItem.ProductVariantColorId == colorId)))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

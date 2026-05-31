@@ -6,10 +6,10 @@ namespace Application.Interfaces.Repositories.InventoryLedger
 {
     public interface IInventoryLedgerRepository
     {
-        Task AddAsync(Domain.Entities.InventoryLedger ledger, CancellationToken cancellationToken);
+        public Task AddAsync(Domain.Entities.InventoryLedger ledger, CancellationToken cancellationToken);
 
-        Task<Domain.Entities.InventoryLedger?> GetLastEntryAsync(int productVariantId, int? productVariantColorId, CancellationToken cancellationToken);
+        public Task<Domain.Entities.InventoryLedger?> GetLastEntryAsync(int productVariantId, int? productVariantColorId, CancellationToken cancellationToken);
 
-        Task<List<Domain.Entities.InventoryLedger>> GetAllWithDetailsAsync(CancellationToken cancellationToken);
+        public Task<List<Domain.Entities.InventoryLedger>> GetAllWithDetailsAsync(CancellationToken cancellationToken);
     }
 }

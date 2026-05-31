@@ -1,3 +1,4 @@
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.ApiContracts.InventoryReport.Responses;
 using Application.Common.Models;
 using Application.Features.InventoryReports.Queries.GetInventoryReportDetail;
@@ -17,16 +18,20 @@ namespace UnitTests
     public class InventoryReports
     {
         private readonly Mock<IProductReadRepository> _productRepoMock;
+        private readonly Mock<IInventoryReceiptReadRepository> _receiptRepoMock;
 
         public InventoryReports()
         {
             _productRepoMock = new Mock<IProductReadRepository>();
+            _receiptRepoMock = new Mock<IInventoryReceiptReadRepository>();
+            _receiptRepoMock.Setup(x => x.GetInfosByVariantAsync(It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync([]);
         }
 
         [Fact(DisplayName = "IRP_004 - Ngăn chặn lấy chi tiết biến thể có màu sắc nhưng thiếu tham số colorId")]
         public async Task IRP_004_GetReportDetail_MissingColorId_BadRequest()
         {
-            var handler = new GetInventoryReportDetailQueryHandler(_productRepoMock.Object);
+            var handler = new GetInventoryReportDetailQueryHandler(_productRepoMock.Object, _receiptRepoMock.Object);
 
             var query = new GetInventoryReportDetailQuery
             {
@@ -55,7 +60,7 @@ namespace UnitTests
         [Fact(DisplayName = "IRP_005 - Cho phép lấy chi tiết biến thể không có màu sắc khi không truyền colorId")]
         public async Task IRP_005_GetReportDetail_NoColors_Success()
         {
-            var handler = new GetInventoryReportDetailQueryHandler(_productRepoMock.Object);
+            var handler = new GetInventoryReportDetailQueryHandler(_productRepoMock.Object, _receiptRepoMock.Object);
 
             var query = new GetInventoryReportDetailQuery
             {
@@ -83,7 +88,7 @@ namespace UnitTests
         [Fact(DisplayName = "IRP_006 - Lấy chi tiết báo cáo trả về NotFound khi ID biến thể không tồn tại")]
         public async Task IRP_006_GetReportDetail_VariantNotFound_NotFound()
         {
-            var handler = new GetInventoryReportDetailQueryHandler(_productRepoMock.Object);
+            var handler = new GetInventoryReportDetailQueryHandler(_productRepoMock.Object, _receiptRepoMock.Object);
 
             var query = new GetInventoryReportDetailQuery
             {

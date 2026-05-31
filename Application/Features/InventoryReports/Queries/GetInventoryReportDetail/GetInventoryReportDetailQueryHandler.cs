@@ -1,6 +1,7 @@
 using Application.ApiContracts.InventoryReport.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Constants;
 using Domain.Constants.Order;
 using MediatR;
@@ -12,7 +13,9 @@ using System.Threading.Tasks;
 
 namespace Application.Features.InventoryReports.Queries.GetInventoryReportDetail
 {
-    public sealed class GetInventoryReportDetailQueryHandler(IProductReadRepository productRepository)
+    public sealed class GetInventoryReportDetailQueryHandler(
+        IProductReadRepository productRepository,
+        IInventoryReceiptReadRepository receiptRepository)
         : IRequestHandler<GetInventoryReportDetailQuery, Result<InventoryReportDetailResponse>>
     {
         public async Task<Result<InventoryReportDetailResponse>> Handle(
@@ -31,19 +34,18 @@ namespace Application.Features.InventoryReports.Queries.GetInventoryReportDetail
                 return Error.BadRequest("Mã màu sắc (colorId) là bắt buộc đối với biến thể có nhiều màu sắc");
             }
 
-            var imports = variant.InventoryReceiptInfos
+            var receiptInfos = await receiptRepository.GetInfosByVariantAsync(request.VariantId, request.ColorId, cancellationToken).ConfigureAwait(false);
+
+            var imports = receiptInfos
                 .Where(ii => ii.InventoryReceiptReceipt != null &&
                              InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
-                .Where(ii => !hasColors ||
-                             (ii.QuotationProductRow != null && ii.QuotationProductRow.ProductVariantColorId == request.ColorId) ||
-                             (ii.PurchaseRequestItem != null && ii.PurchaseRequestItem.ProductVariantColorId == request.ColorId))
                 .Select(ii => new InventoryTransactionResponse
                 {
                     PartnerName = ii.QuotationProductRow?.QuotationReceipt?.Supplier?.Name ??
                                   "Nhà cung cấp",
                     Qty = ii.Count ?? 0,
                     Price = ii.QuotationProductRow?.QuotePrice ?? 0,
-                    Date = ii.InventoryReceiptReceipt.InventoryReceiptDate ?? ii.InventoryReceiptReceipt.CreatedAt ?? DateTimeOffset.MinValue
+                    Date = ii.InventoryReceiptReceipt!.InventoryReceiptDate ?? ii.InventoryReceiptReceipt.CreatedAt ?? DateTimeOffset.MinValue
                 })
                 .OrderByDescending(x => x.Date)
                 .ToList();
