@@ -51,7 +51,7 @@ namespace Infrastructure.Repositories.PurchaseInvoice
                     .ThenInclude(po => po!.Supplier)
                 .Include(x => x.PurchaseInvoiceItems)
                     .ThenInclude(pii => pii.ProductVariant)
-                        .ThenInclude(pv => pv.Product)
+                        .ThenInclude(pv => pv!.Product)
                 .Include(x => x.PurchaseInvoiceItems)
                     .ThenInclude(pii => pii.ProductVariantColor)
                 .AsSplitQuery();
