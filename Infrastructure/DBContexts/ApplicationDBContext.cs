@@ -27,7 +27,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<Brand> Brands { get; set; }
 
-    public virtual DbSet<InventoryReceipt> InventoryReceiptReceipts { get; set; }
+    public virtual DbSet<InventoryReceipt> InventoryReceipts { get; set; }
 
     public virtual DbSet<InventoryReceiptInfo> InventoryReceiptInfos { get; set; }
 
@@ -132,6 +132,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<InventoryLedger> InventoryLedgers { get; set; }
 
     public virtual DbSet<SupplierDebt> SupplierDebts { get; set; }
+
+    public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+
+    public virtual DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
+
+    public virtual DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
+
+    public virtual DbSet<PurchaseInvoiceItem> PurchaseInvoiceItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -256,14 +264,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(v => v.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<InventoryReceiptInfo>()
-            .HasOne(ii => ii.PurchaseRequestItem)
-            .WithMany(pri => pri.InventoryReceiptInfos)
-            .HasForeignKey(ii => ii.PurchaseRequestItemId)
-            .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<InventoryReceiptInfo>()
-            .HasOne(ii => ii.QuotationProductRow)
+            .HasOne(ii => ii.PurchaseOrderItem)
             .WithMany()
-            .HasForeignKey(ii => ii.QuotationProductRowId)
+            .HasForeignKey(ii => ii.PurchaseOrderItemId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<OutputInfo>()
             .HasOne(oi => oi.ProductVariantColor)
@@ -308,20 +311,60 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(oi => oi.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<InventoryReceipt>()
-            .HasOne(oi => oi.PurchaseRequest)
-            .WithMany()
-            .HasForeignKey(oi => oi.PurchaseRequestId)
+            .HasOne(oi => oi.PurchaseOrder)
+            .WithMany(po => po.InventoryReceipts)
+            .HasForeignKey(oi => oi.PurchaseOrderId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<SupplierDebt>()
-            .HasOne(sd => sd.InventoryReceipt)
+            .HasOne(sd => sd.PurchaseInvoice)
             .WithMany(r => r.SupplierDebts)
-            .HasForeignKey(sd => sd.InventoryReceiptId)
+            .HasForeignKey(sd => sd.PurchaseInvoiceId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<SupplierDebt>()
             .HasOne(sd => sd.Supplier)
             .WithMany(s => s.SupplierDebts)
             .HasForeignKey(sd => sd.SupplierId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<PurchaseOrderItem>()
+            .HasOne(poi => poi.PurchaseOrder)
+            .WithMany(po => po.PurchaseOrderItems)
+            .HasForeignKey(poi => poi.PurchaseOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<PurchaseInvoiceItem>()
+            .HasOne(pii => pii.PurchaseInvoice)
+            .WithMany(pi => pi.PurchaseInvoiceItems)
+            .HasForeignKey(pii => pii.PurchaseInvoiceId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<PurchaseInvoice>()
+            .HasOne(pi => pi.PurchaseOrder)
+            .WithMany(po => po.PurchaseInvoices)
+            .HasForeignKey(pi => pi.PurchaseOrderId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<PurchaseOrderItem>()
+            .HasOne(poi => poi.PurchaseRequestItem)
+            .WithMany()
+            .HasForeignKey(poi => poi.PurchaseRequestItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<PurchaseInvoiceItem>()
+            .HasOne(pii => pii.PurchaseOrderItem)
+            .WithMany()
+            .HasForeignKey(pii => pii.PurchaseOrderItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<PurchaseInvoiceItem>()
+            .HasOne(pii => pii.InventoryReceiptInfo)
+            .WithMany()
+            .HasForeignKey(pii => pii.InventoryReceiptItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<InventoryReceiptInfo>()
+            .HasOne(ii => ii.InventoryReceipt)
+            .WithMany(ir => ir.InventoryReceiptInfos)
+            .HasForeignKey(ii => ii.InventoryReceiptId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<InventoryLedger>()
             .HasOne(il => il.ProductVariant)
             .WithMany()

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,9 +22,9 @@ namespace Domain.Entities
         [ForeignKey("InventoryReceiptStatus")]
         public string? StatusId { get; set; }
 
-        [Column("PurchaseRequestId")]
-        [ForeignKey("PurchaseRequest")]
-        public int? PurchaseRequestId { get; set; }
+        [Column("PurchaseOrderId")]
+        [ForeignKey("PurchaseOrder")]
+        public int? PurchaseOrderId { get; set; }
 
         [Column("CreatedBy")]
         [ForeignKey("CreatedByUser")]
@@ -52,7 +54,7 @@ namespace Domain.Entities
 
         public Output? Output { get; set; }
 
-        public PurchaseRequest? PurchaseRequest { get; set; }
+        public PurchaseOrder? PurchaseOrder { get; set; }
 
         public ICollection<InventoryReceiptInfo> InventoryReceiptInfos { get; set; } = [];
 
@@ -65,7 +67,5 @@ namespace Domain.Entities
         public ApplicationUser? ApprovedByUser { get; set; }
 
         public ApplicationUser? RejectedByUser { get; set; }
-
-        public ICollection<SupplierDebt> SupplierDebts { get; set; } = [];
     }
 }

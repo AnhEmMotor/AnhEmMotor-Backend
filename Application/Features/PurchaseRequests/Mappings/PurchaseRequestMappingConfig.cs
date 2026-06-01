@@ -39,9 +39,9 @@ namespace Application.Features.PurchaseRequests.Mappings
                     src => src.InventoryReceiptInfos != null
                         ? src.InventoryReceiptInfos
                             .Where(
-                                ii => ii.InventoryReceiptReceipt != null &&
+                                ii => ii.InventoryReceipt != null &&
                                             (string.Compare(
-                                                    ii.InventoryReceiptReceipt.StatusId,
+                                                    ii.InventoryReceipt.StatusId,
                                                     Domain.Constants.InventoryReceiptStatus.Approve) ==
                                                 0))
                             .Sum(ii => ii.Count ?? 0)
@@ -51,16 +51,16 @@ namespace Application.Features.PurchaseRequests.Mappings
                     src => src.InventoryReceiptInfos != null
                         ? src.InventoryReceiptInfos
                             .Where(
-                                ii => ii.InventoryReceiptReceipt != null &&
+                                ii => ii.InventoryReceipt != null &&
                                             (string.Compare(
-                                                    ii.InventoryReceiptReceipt.StatusId,
+                                                    ii.InventoryReceipt.StatusId,
                                                     Domain.Constants.InventoryReceiptStatus.Draft) ==
                                                 0 ||
                                                 string.Compare(
-                                                    ii.InventoryReceiptReceipt.StatusId,
+                                                    ii.InventoryReceipt.StatusId,
                                                     Domain.Constants.InventoryReceiptStatus.Sent) ==
                                                 0 ||
-                                                string.Compare(ii.InventoryReceiptReceipt.StatusId, "working") == 0))
+                                                string.Compare(ii.InventoryReceipt.StatusId, "working") == 0))
                             .Sum(ii => ii.Count ?? 0)
                         : 0)
                 .Map(
@@ -69,9 +69,9 @@ namespace Application.Features.PurchaseRequests.Mappings
                         (src.InventoryReceiptInfos != null
                             ? src.InventoryReceiptInfos
                                 .Where(
-                                    ii => ii.InventoryReceiptReceipt != null &&
+                                    ii => ii.InventoryReceipt != null &&
                                                     (string.Compare(
-                                                            ii.InventoryReceiptReceipt.StatusId,
+                                                            ii.InventoryReceipt.StatusId,
                                                             Domain.Constants.InventoryReceiptStatus.Approve) ==
                                                         0))
                                 .Sum(ii => ii.Count ?? 0)
@@ -97,9 +97,9 @@ namespace Application.Features.PurchaseRequests.Mappings
                         (src.InventoryReceiptInfos != null
                             ? src.InventoryReceiptInfos
                                 .Where(
-                                    ii => ii.InventoryReceiptReceipt != null &&
+                                    ii => ii.InventoryReceipt != null &&
                                                     (string.Compare(
-                                                            ii.InventoryReceiptReceipt.StatusId,
+                                                            ii.InventoryReceipt.StatusId,
                                                             Domain.Constants.InventoryReceiptStatus.Approve) ==
                                                         0))
                                 .Sum(ii => ii.Count ?? 0)

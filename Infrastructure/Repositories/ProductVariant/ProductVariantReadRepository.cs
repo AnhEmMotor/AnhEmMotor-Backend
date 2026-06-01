@@ -150,8 +150,8 @@ namespace Infrastructure.Repositories.ProductVariant
                 .ThenInclude(ov => ov!.Option)
                 .Include(
                     v => v.InventoryReceiptInfos
-                        .Where(ii => ii.DeletedAt == null && ii.InventoryReceiptReceipt!.DeletedAt == null))
-                .ThenInclude(ii => ii.InventoryReceiptReceipt)
+                        .Where(ii => ii.DeletedAt == null && ii.InventoryReceipt!.DeletedAt == null))
+                .ThenInclude(ii => ii.InventoryReceipt)
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
                 .ThenInclude(oi => oi.OutputOrder);
             if (string.IsNullOrWhiteSpace(sorts))

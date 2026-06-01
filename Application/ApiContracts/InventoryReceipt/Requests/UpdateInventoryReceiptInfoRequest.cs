@@ -10,8 +10,6 @@ namespace Application.ApiContracts.InventoryReceipt.Requests
 
         public int? Count { get; set; }
 
-        public decimal PaidAmount { get; set; }
-
         public List<VehicleInventoryReceiptRequest>? Vehicles { get; set; }
     }
 }

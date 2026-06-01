@@ -10,6 +10,6 @@ namespace Domain.Entities
         [Column("Key")]
         public string Key { get; set; } = string.Empty;
 
-        public ICollection<InventoryReceipt> InventoryReceiptReceipts { get; set; } = [];
+        public ICollection<InventoryReceipt> InventoryReceipts { get; set; } = [];
     }
 }

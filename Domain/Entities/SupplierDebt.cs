@@ -10,9 +10,9 @@ namespace Domain.Entities
         [Column("Id")]
         public int Id { get; set; }
 
-        [Column("InventoryReceiptId")]
-        [ForeignKey("InventoryReceipt")]
-        public int InventoryReceiptId { get; set; }
+        [Column("PurchaseInvoiceId")]
+        [ForeignKey("PurchaseInvoice")]
+        public int PurchaseInvoiceId { get; set; }
 
         [Column("SupplierId")]
         [ForeignKey("Supplier")]
@@ -24,7 +24,7 @@ namespace Domain.Entities
         [Column("PaidAmount", TypeName = "decimal(18, 2)")]
         public decimal PaidAmount { get; set; }
 
-        public InventoryReceipt? InventoryReceipt { get; set; }
+        public PurchaseInvoice? PurchaseInvoice { get; set; }
         public Supplier? Supplier { get; set; }
     }
 }

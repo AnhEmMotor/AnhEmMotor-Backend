@@ -475,8 +475,8 @@ public class ProductMappingConfig : IRegister
             .Where(v => v.InventoryReceiptInfos != null)
             .SelectMany(variant => variant.InventoryReceiptInfos!)
             .Where(
-                ii => ii.InventoryReceiptReceipt != null &&
-                    InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
+                ii => ii.InventoryReceipt != null &&
+                    InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId))
             .Sum(info => info.RemainingCount ?? 0);
     }
 
@@ -540,18 +540,17 @@ public class ProductMappingConfig : IRegister
             return variant.ProductVariantColors.Sum(c =>
                 variant.InventoryReceiptInfos != null
                     ? variant.InventoryReceiptInfos
-                        .Where(ii => ii.InventoryReceiptReceipt != null &&
-                                     InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId) &&
-                                     ((ii.QuotationProductRow != null && ii.QuotationProductRow.ProductVariantColorId == c.Id) ||
-                                      (ii.PurchaseRequestItem != null && ii.PurchaseRequestItem.ProductVariantColorId == c.Id)))
+                        .Where(ii => ii.InventoryReceipt != null &&
+                                     InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId) &&
+                                     (ii.PurchaseOrderItem != null && ii.PurchaseOrderItem.ProductVariantColorId == c.Id))
                         .Sum(ii => ii.RemainingCount) ?? 0
                     : 0);
         }
 
         return variant.InventoryReceiptInfos != null
             ? variant.InventoryReceiptInfos
-                .Where(ii => ii.InventoryReceiptReceipt != null &&
-                             InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
+                .Where(ii => ii.InventoryReceipt != null &&
+                             InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId))
                 .Sum(ii => ii.RemainingCount) ?? 0
             : 0;
     }

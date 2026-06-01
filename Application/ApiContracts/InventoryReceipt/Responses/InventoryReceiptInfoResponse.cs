@@ -19,16 +19,6 @@ public class InventoryReceiptInfoResponse
 
     public int? Quantity { get; set; }
 
-    public decimal? UnitPrice { get; set; }
-
-    public decimal? ImportPrice { get; set; }
-
-    public decimal? PaidAmount { get; set; }
-
-    public decimal? Discount { get; set; }
-
-    public decimal? Total { get; set; }
-
     public int? RemainingCount { get; set; }
 
     public List<InventoryReceiptVehicleResponse> Vehicles { get; set; } = [];

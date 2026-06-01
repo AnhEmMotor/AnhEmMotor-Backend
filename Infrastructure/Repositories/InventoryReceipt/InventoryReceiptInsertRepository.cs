@@ -8,6 +8,6 @@ public class InventoryReceiptInsertRepository(ApplicationDBContext context) : II
 {
     public void Add(InventoryReceiptEntity InventoryReceipt)
     {
-        context.InventoryReceiptReceipts.Add(InventoryReceipt);
+        context.InventoryReceipts.Add(InventoryReceipt);
     }
 }

@@ -35,7 +35,7 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .Where(x => x.Status == PurchaseRequestStatus.Approve)
                 .Where(x => x.PurchaseRequestItems.Any(item =>
                     item.Quantity > item.InventoryReceiptInfos
-                        .Where(ii => ii.InventoryReceiptReceipt != null && ii.InventoryReceiptReceipt.StatusId == Domain.Constants.InventoryReceiptStatus.Approve)
+                        .Where(ii => ii.InventoryReceipt != null && ii.InventoryReceipt.StatusId == Domain.Constants.InventoryReceiptStatus.Approve)
                         .Sum(ii => ii.Count ?? 0)
                 ));
             return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
@@ -66,7 +66,7 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .ThenInclude(r => r.ProductVariantColor)
                 .Include(x => x.PurchaseRequestItems)
                 .ThenInclude(r => r.InventoryReceiptInfos)
-                .ThenInclude(ii => ii.InventoryReceiptReceipt)
+                .ThenInclude(ii => ii.InventoryReceipt)
                 .AsSplitQuery();
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
