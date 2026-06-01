@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Domain.Entities
 {
     [Table("PurchaseRequestItem")]
-    public class PurchaseRequestItem
+    public class PurchaseRequestItem : BaseEntity
     {
         [Key]
         [Column("Id")]

@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Quotation;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using Mapster;
@@ -19,7 +20,8 @@ namespace Application.Features.Quotations.Commands.CreateQuotation
         IQuotationReadRepository readRepository,
         ISupplierReadRepository supplierRepository,
         IProductVariantReadRepository variantRepository,
-        IUnitOfWork unitOfWork) : IRequestHandler<CreateQuotationCommand, Result<QuotationDetailResponse?>>
+        IUnitOfWork unitOfWork,
+        ICurrentUserContext? currentUserContext = null) : IRequestHandler<CreateQuotationCommand, Result<QuotationDetailResponse?>>
     {
         public async Task<Result<QuotationDetailResponse?>> Handle(
             CreateQuotationCommand request,
@@ -74,6 +76,7 @@ namespace Application.Features.Quotations.Commands.CreateQuotation
             }
             var quotation = request.Adapt<QuotationEntity>();
             quotation.Status = "draft";
+            quotation.CreatedBy = currentUserContext?.GetUserId();
             quotation.QuotationProductRows = request.Products
                 .Select(
                     p => new QuotationProductRow

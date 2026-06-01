@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PurchaseRequest;
+using Application.Interfaces.Services;
 using MediatR;
 using System;
 
@@ -9,7 +10,8 @@ namespace Application.Features.PurchaseRequests.Commands.SendPurchaseRequest
     public sealed class SendPurchaseRequestCommandHandler(
         IPurchaseRequestReadRepository readRepository,
         IPurchaseRequestUpdateRepository updateRepository,
-        IUnitOfWork unitOfWork) : IRequestHandler<SendPurchaseRequestCommand, Result>
+        IUnitOfWork unitOfWork,
+        ICurrentUserContext? currentUserContext = null) : IRequestHandler<SendPurchaseRequestCommand, Result>
     {
         public async Task<Result> Handle(SendPurchaseRequestCommand request, CancellationToken cancellationToken)
         {
@@ -24,6 +26,7 @@ namespace Application.Features.PurchaseRequests.Commands.SendPurchaseRequest
                     Error.BadRequest("Chỉ có thể gửi yêu cầu mua hàng đang ở trạng thái Nháp (Draft).", "Status"));
             }
             pr.Status = "sent";
+            pr.SentBy = currentUserContext?.GetUserId();
             updateRepository.Update(pr);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();

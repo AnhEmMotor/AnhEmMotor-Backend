@@ -751,7 +751,7 @@ public class PurchaseRequests
 
         result.IsSuccess.Should().BeTrue();
         string.Compare(existingPR.Status, "reject").Should().Be(0);
-        existingPR.ApprovedBy.Should().Be(currentUserId);
+        existingPR.RejectedBy.Should().Be(currentUserId);
         _updateRepoMock.Verify(x => x.Update(existingPR), Times.Once);
     }
 
@@ -807,6 +807,71 @@ public class PurchaseRequests
 
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
+    }
+
+    [Fact(DisplayName = "PR_043 - Gửi PR thành công và lưu người gửi")]
+    public async Task PR_043_SendPurchaseRequest_SaveSentBy_Success()
+    {
+        var handler = new SendPurchaseRequestCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _currentUserContextMock.Object);
+        var command = new SendPurchaseRequestCommand(1);
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "draft" };
+        var currentUserId = Guid.NewGuid();
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        string.Compare(existingPR.Status, "sent").Should().Be(0);
+        existingPR.SentBy.Should().Be(currentUserId);
+        _updateRepoMock.Verify(x => x.Update(existingPR), Times.Once);
+    }
+
+    [Fact(DisplayName = "PR_044 - Phê duyệt PR thành công và lưu người duyệt")]
+    public async Task PR_044_ApprovePurchaseRequest_SaveApprovedBy_Success()
+    {
+        var handler = new ApproveRejectPurchaseRequestCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _currentUserContextMock.Object);
+        var command = new ApproveRejectPurchaseRequestCommand(1, "approve");
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "sent" };
+        var currentUserId = Guid.NewGuid();
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        string.Compare(existingPR.Status, "approve").Should().Be(0);
+        existingPR.ApprovedBy.Should().Be(currentUserId);
+        existingPR.RejectedBy.Should().BeNull();
+        _updateRepoMock.Verify(x => x.Update(existingPR), Times.Once);
+    }
+
+    [Fact(DisplayName = "PR_045 - Từ chối PR thành công và lưu người từ chối")]
+    public async Task PR_045_RejectPurchaseRequest_SaveRejectedBy_Success()
+    {
+        var handler = new ApproveRejectPurchaseRequestCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _currentUserContextMock.Object);
+        var command = new ApproveRejectPurchaseRequestCommand(1, "reject");
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "sent" };
+        var currentUserId = Guid.NewGuid();
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        string.Compare(existingPR.Status, "reject").Should().Be(0);
+        existingPR.RejectedBy.Should().Be(currentUserId);
+        existingPR.ApprovedBy.Should().BeNull();
+        _updateRepoMock.Verify(x => x.Update(existingPR), Times.Once);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

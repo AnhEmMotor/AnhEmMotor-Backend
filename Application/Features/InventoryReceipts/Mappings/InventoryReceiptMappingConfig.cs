@@ -41,6 +41,10 @@ public sealed class InventoryReceiptMappingConfig : IRegister
                                             ? (ii.QuotationProductRow.QuotePrice ?? 0)
                                             : 0))
                     : 0)
+            .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null)
+            .Map(dest => dest.SentByName, src => src.SentByUser != null ? src.SentByUser.FullName : null)
+            .Map(dest => dest.ApprovedByName, src => src.ApprovedByUser != null ? src.ApprovedByUser.FullName : null)
+            .Map(dest => dest.RejectedByName, src => src.RejectedByUser != null ? src.RejectedByUser.FullName : null)
             .Map(dest => dest.Products, src => src.InventoryReceiptInfos);
         config.NewConfig<InventoryReceipt, InventoryReceiptDetailResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
@@ -69,6 +73,10 @@ public sealed class InventoryReceiptMappingConfig : IRegister
                                             ? (ii.QuotationProductRow.QuotePrice ?? 0)
                                             : 0))
                     : 0)
+            .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null)
+            .Map(dest => dest.SentByName, src => src.SentByUser != null ? src.SentByUser.FullName : null)
+            .Map(dest => dest.ApprovedByName, src => src.ApprovedByUser != null ? src.ApprovedByUser.FullName : null)
+            .Map(dest => dest.RejectedByName, src => src.RejectedByUser != null ? src.RejectedByUser.FullName : null)
             .Map(dest => dest.Products, src => src.InventoryReceiptInfos);
         config.NewConfig<InventoryReceiptInfo, InventoryReceiptInfoResponse>()
             .Map(

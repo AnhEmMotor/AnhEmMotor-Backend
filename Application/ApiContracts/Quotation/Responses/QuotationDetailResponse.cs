@@ -14,6 +14,11 @@ public class QuotationDetailResponse
 
     public string? Notes { get; set; }
 
+    public string? CreatedByName { get; set; }
+    public string? SentByName { get; set; }
+    public string? ApprovedByName { get; set; }
+    public string? RejectedByName { get; set; }
+
     public List<QuotationItemResponse>? QuotationItems { get; set; }
 
     public DateTimeOffset? LastUpdatedAt { get; set; }

@@ -12,6 +12,12 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
 
         public string? CreatedByName { get; set; }
 
+        public string? SentByName { get; set; }
+
+        public string? ApprovedByName { get; set; }
+
+        public string? RejectedByName { get; set; }
+
         public DateTimeOffset? CreatedAt { get; set; }
 
         public int TotalItems { get; set; }

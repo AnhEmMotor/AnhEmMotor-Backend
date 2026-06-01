@@ -7,6 +7,7 @@ using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.Quotation;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Mapster;
@@ -29,7 +30,8 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
     IVehicleReadRepository vehicleReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateInventoryReceiptCommand, Result<InventoryReceiptDetailResponse?>>
+    IUnitOfWork unitOfWork,
+    ICurrentUserContext? currentUserContext = null) : IRequestHandler<CreateInventoryReceiptCommand, Result<InventoryReceiptDetailResponse?>>
 {
     [GeneratedRegex("<.*?>")]
     private static partial Regex HtmlTagRegex();
@@ -190,6 +192,7 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
             InventoryReceipt.Notes = HtmlTagRegex().Replace(InventoryReceipt.Notes, string.Empty);
         }
         InventoryReceipt.StatusId = InventoryReceiptStatus.Draft;
+        InventoryReceipt.CreatedBy = currentUserContext?.GetUserId();
         var InventoryReceiptInfos = new List<InventoryReceiptInfoEntity>();
         foreach (var p in request.Products)
         {

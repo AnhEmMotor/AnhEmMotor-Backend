@@ -61,7 +61,11 @@ namespace Infrastructure.Repositories.Quotation
             }
             return query
                 .Include(x => x.Supplier)
-                .Include(x => x.QuotationProductRows);
+                .Include(x => x.QuotationProductRows)
+                .Include(x => x.CreatedByUser)
+                .Include(x => x.SentByUser)
+                .Include(x => x.ApprovedByUser)
+                .Include(x => x.RejectedByUser);
         }
 
         public Task<List<QuotationProductRow>> GetApprovedQuotationRowsByVariantsAsync(

@@ -81,7 +81,11 @@ namespace Infrastructure.Repositories.PurchaseRequest
             {
                 query = query.Where(x => x.DeletedAt != null);
             }
-            return query;
+            return query
+                .Include(x => x.CreatedByUser)
+                .Include(x => x.SentByUser)
+                .Include(x => x.ApprovedByUser)
+                .Include(x => x.RejectedByUser);
         }
 
         public Task<List<PurchaseRequestItem>> GetItemsByIdsAsync(

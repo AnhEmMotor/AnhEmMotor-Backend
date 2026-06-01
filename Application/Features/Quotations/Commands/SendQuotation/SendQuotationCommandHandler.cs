@@ -2,6 +2,7 @@ using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Quotation;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Mapster;
 using MediatR;
@@ -12,7 +13,8 @@ namespace Application.Features.Quotations.Commands.SendQuotation
     public sealed class SendQuotationCommandHandler(
         IQuotationReadRepository readRepository,
         IQuotationUpdateRepository updateRepository,
-        IUnitOfWork unitOfWork) : IRequestHandler<SendQuotationCommand, Result<QuotationDetailResponse?>>
+        IUnitOfWork unitOfWork,
+        ICurrentUserContext? currentUserContext = null) : IRequestHandler<SendQuotationCommand, Result<QuotationDetailResponse?>>
     {
         public async Task<Result<QuotationDetailResponse?>> Handle(
             SendQuotationCommand request,
@@ -32,6 +34,7 @@ namespace Application.Features.Quotations.Commands.SendQuotation
                     "Status");
             }
             quotation.Status = "sent";
+            quotation.SentBy = currentUserContext?.GetUserId();
             updateRepository.Update(quotation);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             var updated = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken)

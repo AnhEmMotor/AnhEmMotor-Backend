@@ -285,8 +285,8 @@ public class ProductReadRepository(
                         v => v.VariantOptionValues
                                 .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
                             v.ProductVariantColors
-                                .Any(c => c.ColorName != null && names.Any(n => c.ColorName.ToLower().Contains(n))) ||
-                            (v.VariantName != null && names.Any(n => v.VariantName.ToLower().Contains(n))));
+                                .Any(c => c.ColorName != null && names.Any(n => c.ColorName.Contains(n, StringComparison.CurrentCultureIgnoreCase))) ||
+                            (v.VariantName != null && names.Any(n => v.VariantName.Contains(n, StringComparison.CurrentCultureIgnoreCase))));
                 }
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));

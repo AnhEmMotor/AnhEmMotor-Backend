@@ -6,6 +6,7 @@ using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptNotes;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
+using Application.Features.InventoryReceipts.Commands.SendInventoryReceipt;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.InventoryLedger;
@@ -632,6 +633,114 @@ public class InventoryReceipts
         string.Compare(result.Value!.Notes, "Original notes").Should().Be(0);
         string.Compare(result.Value.StatusId, "draft").Should().Be(0);
         _insertRepoMock.Verify(x => x.Add(It.IsAny<InventoryReceiptEntity>()), Times.Once);
+    }
+
+    [Fact(DisplayName = "IR_023 - Tạo phiếu nhập kho thành công và lưu người tạo")]
+    public async Task IR_023_CreateInventoryReceipt_SaveCreatedBy_Success()
+    {
+        var currentUserId = Guid.NewGuid();
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
+        var handler = new CreateInventoryReceiptCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _prReadRepoMock.Object,
+            _quotationRepoMock.Object,
+            _supplierRepoMock.Object,
+            _variantRepoMock.Object,
+            _vehicleReadRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _currentUserContextMock.Object);
+        var command = new CreateInventoryReceiptCommand
+        {
+            Notes = "Valid notes",
+            Products = [new CreateInventoryReceiptInfoRequest { PurchaseRequestItemId = 10, Count = 5 }]
+        };
+        var mockPrItems = new List<PurchaseRequestItem> { new() { Id = 10, ProductVariantId = 1 } };
+        var mockVariants = new List<ProductVariant> { new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [] } };
+        _prReadRepoMock.Setup(x => x.GetItemsByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>())).ReturnsAsync(mockPrItems);
+        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(mockVariants);
+        InventoryReceiptEntity? capturedReceipt = null;
+        _insertRepoMock.Setup(x => x.Add(It.IsAny<InventoryReceiptEntity>())).Callback<InventoryReceiptEntity>(r => capturedReceipt = r);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new InventoryReceiptEntity { Id = 10, Notes = "Valid notes", StatusId = "draft", CreatedBy = currentUserId });
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        capturedReceipt.Should().NotBeNull();
+        capturedReceipt!.CreatedBy.Should().Be(currentUserId);
+    }
+
+    [Fact(DisplayName = "IR_024 - Gửi phiếu nhập kho thành công và lưu người gửi")]
+    public async Task IR_024_SendInventoryReceipt_SaveSentBy_Success()
+    {
+        var currentUserId = Guid.NewGuid();
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
+        var handler = new SendInventoryReceiptCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _currentUserContextMock.Object,
+            _unitOfWorkMock.Object);
+        var command = new SendInventoryReceiptCommand { Id = 1 };
+        var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "draft" };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(receipt);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(receipt);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        receipt.StatusId.Should().Be("sent");
+        receipt.SentBy.Should().Be(currentUserId);
+        _updateRepoMock.Verify(x => x.Update(receipt), Times.Once);
+    }
+
+    [Fact(DisplayName = "IR_025 - Phê duyệt phiếu nhập kho thành công và lưu người duyệt")]
+    public async Task IR_025_ApproveInventoryReceipt_SaveApprovedBy_Success()
+    {
+        var currentUserId = Guid.NewGuid();
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
+        var handler = new UpdateInventoryReceiptStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _currentUserContextMock.Object,
+            _ledgerRepoMock.Object,
+            _supplierDebtRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "approve" };
+        var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(receipt);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(receipt);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        receipt.StatusId.Should().Be("approve");
+        receipt.ApprovedBy.Should().Be(currentUserId);
+        receipt.RejectedBy.Should().BeNull();
+        _updateRepoMock.Verify(x => x.Update(receipt), Times.Once);
+    }
+
+    [Fact(DisplayName = "IR_026 - Từ chối phiếu nhập kho thành công và lưu người từ chối")]
+    public async Task IR_026_RejectInventoryReceipt_SaveRejectedBy_Success()
+    {
+        var currentUserId = Guid.NewGuid();
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
+        var handler = new UpdateInventoryReceiptStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _currentUserContextMock.Object,
+            _ledgerRepoMock.Object,
+            _supplierDebtRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "reject" };
+        var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(receipt);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(receipt);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        receipt.StatusId.Should().Be("reject");
+        receipt.RejectedBy.Should().Be(currentUserId);
+        receipt.ApprovedBy.Should().BeNull();
+        receipt.ConfirmedBy.Should().BeNull();
+        _updateRepoMock.Verify(x => x.Update(receipt), Times.Once);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

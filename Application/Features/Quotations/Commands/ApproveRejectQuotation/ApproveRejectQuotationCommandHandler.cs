@@ -2,6 +2,7 @@ using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Quotation;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Mapster;
 using MediatR;
@@ -12,7 +13,8 @@ namespace Application.Features.Quotations.Commands.ApproveRejectQuotation
     public sealed class ApproveRejectQuotationCommandHandler(
         IQuotationReadRepository readRepository,
         IQuotationUpdateRepository updateRepository,
-        IUnitOfWork unitOfWork) : IRequestHandler<ApproveRejectQuotationCommand, Result<QuotationDetailResponse?>>
+        IUnitOfWork unitOfWork,
+        ICurrentUserContext? currentUserContext = null) : IRequestHandler<ApproveRejectQuotationCommand, Result<QuotationDetailResponse?>>
     {
         public async Task<Result<QuotationDetailResponse?>> Handle(
             ApproveRejectQuotationCommand request,
@@ -37,6 +39,17 @@ namespace Application.Features.Quotations.Commands.ApproveRejectQuotation
                     "Status");
             }
             quotation.Status = request.Status.ToLower();
+            var currentUserId = currentUserContext?.GetUserId();
+            if (string.Equals(quotation.Status, QuotationType.Approved, StringComparison.OrdinalIgnoreCase))
+            {
+                quotation.ApprovedBy = currentUserId;
+                quotation.RejectedBy = null;
+            }
+            else if (string.Equals(quotation.Status, QuotationType.Rejected, StringComparison.OrdinalIgnoreCase))
+            {
+                quotation.RejectedBy = currentUserId;
+                quotation.ApprovedBy = null;
+            }
             updateRepository.Update(quotation);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             var updated = await readRepository.GetByIdWithDetailsAsync(quotation.Id, cancellationToken)

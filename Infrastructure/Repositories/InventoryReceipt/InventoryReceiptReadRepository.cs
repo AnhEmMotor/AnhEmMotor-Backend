@@ -102,6 +102,9 @@ public class InventoryReceiptReadRepository(ApplicationDBContext context, ISieve
             .ThenInclude(x => x.PurchaseRequestItem)
             .ThenInclude(x => x!.ProductVariantColor)
             .Include(x => x.CreatedByUser)
+            .Include(x => x.SentByUser)
+            .Include(x => x.ApprovedByUser)
+            .Include(x => x.RejectedByUser)
             .Include(x => x.InventoryReceiptStatus)
             .AsSplitQuery();
     }

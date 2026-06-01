@@ -2,6 +2,7 @@ using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Mapster;
 using MediatR;
@@ -11,6 +12,7 @@ namespace Application.Features.InventoryReceipts.Commands.SendInventoryReceipt;
 public sealed class SendInventoryReceiptCommandHandler(
     IInventoryReceiptReadRepository readRepository,
     IInventoryReceiptUpdateRepository updateRepository,
+    ICurrentUserContext currentUserContext,
     IUnitOfWork unitOfWork) : IRequestHandler<SendInventoryReceiptCommand, Result<InventoryReceiptDetailResponse>>
 {
     public async Task<Result<InventoryReceiptDetailResponse>> Handle(
@@ -34,6 +36,7 @@ public sealed class SendInventoryReceiptCommandHandler(
         }
 
         inventoryReceipt.StatusId = InventoryReceiptStatus.Sent;
+        inventoryReceipt.SentBy = currentUserContext.GetUserId();
         updateRepository.Update(inventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

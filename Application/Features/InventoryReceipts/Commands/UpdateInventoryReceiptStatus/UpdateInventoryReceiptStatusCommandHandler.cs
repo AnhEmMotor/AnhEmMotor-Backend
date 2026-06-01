@@ -53,6 +53,8 @@ public sealed class UpdateInventoryReceiptStatusCommandHandler(
             var currentUserId = currentUserContext.GetUserId();
             InventoryReceipt.InventoryReceiptDate = DateTimeOffset.UtcNow;
             InventoryReceipt.ConfirmedBy = currentUserId;
+            InventoryReceipt.ApprovedBy = currentUserId;
+            InventoryReceipt.RejectedBy = null;
 
             // Group items by Supplier to record SupplierDebt
             var supplierDebtsDict = new Dictionary<int, decimal>();
@@ -125,6 +127,13 @@ public sealed class UpdateInventoryReceiptStatusCommandHandler(
                 };
                 supplierDebtRepository.Add(supplierDebt);
             }
+        }
+        else if (string.Equals(request.StatusId, InventoryReceiptStatus.Reject, StringComparison.OrdinalIgnoreCase))
+        {
+            var currentUserId = currentUserContext.GetUserId();
+            InventoryReceipt.RejectedBy = currentUserId;
+            InventoryReceipt.ApprovedBy = null;
+            InventoryReceipt.ConfirmedBy = null;
         }
         updateRepository.Update(InventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
