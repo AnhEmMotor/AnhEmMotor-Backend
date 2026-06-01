@@ -11,7 +11,7 @@ public sealed record CreateInventoryReceiptCommand : IRequest<Result<InventoryRe
 
     public string? StatusId { get; init; }
 
-    public int? PurchaseRequestId { get; init; }
+    public int? PurchaseOrderId { get; init; }
 
     public List<CreateInventoryReceiptInfoRequest> Products { get; init; } = [];
 }

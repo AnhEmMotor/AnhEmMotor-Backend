@@ -5,7 +5,7 @@ public class InventoryReceiptDetailResponse
 {
     public int? Id { get; set; }
 
-    public int? PurchaseRequestId { get; set; }
+    public int? PurchaseOrderId { get; set; }
 
     public string? Notes { get; set; }
 

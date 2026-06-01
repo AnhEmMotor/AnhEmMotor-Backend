@@ -7,8 +7,7 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
     {
         public UpdateInventoryReceiptInfoCommandValidator()
         {
-            RuleFor(x => x.PurchaseRequestItemId).GreaterThan(0).When(x => x.PurchaseRequestItemId.HasValue);
-            RuleFor(x => x.QuotationProductRowId).GreaterThan(0).When(x => x.QuotationProductRowId.HasValue);
+            RuleFor(x => x.PurchaseOrderItemId).GreaterThan(0).When(x => x.PurchaseOrderItemId.HasValue);
             RuleFor(x => x.Count).NotNull().GreaterThan(0);
         }
     }

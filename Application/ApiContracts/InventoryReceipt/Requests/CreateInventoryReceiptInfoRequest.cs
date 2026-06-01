@@ -2,9 +2,7 @@ namespace Application.ApiContracts.InventoryReceipt.Requests
 {
     public class CreateInventoryReceiptInfoRequest
     {
-        public int? PurchaseRequestItemId { get; set; }
-
-        public int? QuotationProductRowId { get; set; }
+        public int? PurchaseOrderItemId { get; set; }
 
         public int? Count { get; set; }
 
