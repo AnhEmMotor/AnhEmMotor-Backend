@@ -18,9 +18,29 @@ namespace Infrastructure.Repositories.InventoryReceipt
 {
     public class InventoryReceiptReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IInventoryReceiptReadRepository
     {
-        public Task<InventoryReceiptStatsResponse> GetStatsAsync(CancellationToken cancellationToken)
+        public async Task<InventoryReceiptStatsResponse> GetStatsAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var now = DateTimeOffset.UtcNow;
+            var startOfMonth = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
+
+            var totalVehicles = await context.InventoryReceiptInfos
+                .Where(ii => ii.InventoryReceipt != null
+                          && ii.InventoryReceipt.DeletedAt == null
+                          && ii.InventoryReceipt.StatusId == "approve"
+                          && ii.InventoryReceipt.InventoryReceiptDate >= startOfMonth)
+                .SumAsync(ii => ii.Count ?? 0, cancellationToken)
+                .ConfigureAwait(false);
+
+            var processingReceipts = await context.InventoryReceipts
+                .Where(r => r.DeletedAt == null && r.StatusId == "sent")
+                .CountAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return new InventoryReceiptStatsResponse
+            {
+                TotalVehicles = totalVehicles,
+                ProcessingReceipts = processingReceipts
+            };
         }
 
         public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
@@ -90,8 +110,11 @@ namespace Infrastructure.Repositories.InventoryReceipt
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return GetQueryable(mode)
-                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
-                .ContinueWith(t => t.Result, cancellationToken);
+                .Include(x => x.InventoryReceiptInfos)
+                    .ThenInclude(ii => ii.Vehicles)
+                .Include(x => x.PurchaseOrder)
+                    .ThenInclude(po => po!.Supplier)
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
         public Task<List<InventoryReceiptEntity>> GetBySupplierIdAsync(
