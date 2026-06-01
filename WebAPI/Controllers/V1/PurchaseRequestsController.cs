@@ -21,6 +21,7 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using WebAPI.Controllers.Base;
+using Domain.Entities;
 
 namespace WebAPI.Controllers.V1
 {
@@ -150,10 +151,10 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
-        /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu nhập).
+        /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu Purchase Order - phiếu đặt hàng).
         /// </summary>
         [HttpGet("approved")]
-        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [RequiresAnyPermissions(Domain.Constants.Permission.Permissions.PurchaseOrder.Create, Domain.Constants.Permission.Permissions.PurchaseOrder.Edit)]
         [ProducesResponseType(typeof(PagedResult<PurchaseRequestListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetApprovedAsync(
             [FromQuery] SieveModel sieveModel,

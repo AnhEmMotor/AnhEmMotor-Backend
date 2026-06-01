@@ -38,5 +38,6 @@ namespace Application.ApiContracts.PurchaseOrder.Responses
         public DateTimeOffset? CreatedAt { get; set; }
 
         public List<PurchaseOrderItemResponse> Items { get; set; } = [];
+        public decimal TotalAmount { get; set; }
     }
 }

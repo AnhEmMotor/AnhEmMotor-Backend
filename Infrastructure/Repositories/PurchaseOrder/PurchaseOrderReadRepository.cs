@@ -22,7 +22,8 @@ namespace Infrastructure.Repositories.PurchaseOrder
         {
             var query = GetQueryable(mode)
                 .Include(x => x.CreatedByUser)
-                .Include(x => x.PurchaseOrderItems);
+                .Include(x => x.Supplier)
+                .Include(x => x.PurchaseOrderItems.Where(item => item.DeletedAt == null));
             return paginator.ApplyAsync<PurchaseOrderEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 
@@ -47,11 +48,11 @@ namespace Infrastructure.Repositories.PurchaseOrder
                 .Include(x => x.RejectedByUser)
                 .Include(x => x.Supplier)
                 .Include(x => x.PurchaseRequest)
-                .Include(x => x.PurchaseOrderItems)
+                .Include(x => x.PurchaseOrderItems.Where(item => item.DeletedAt == null))
                 .ThenInclude(r => r.ProductVariant)
                 .ThenInclude(pv => pv!.Product)
                 .ThenInclude(p => p!.ProductCategory)
-                .Include(x => x.PurchaseOrderItems)
+                .Include(x => x.PurchaseOrderItems.Where(item => item.DeletedAt == null))
                 .ThenInclude(r => r.ProductVariantColor)
                 .AsSplitQuery();
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);

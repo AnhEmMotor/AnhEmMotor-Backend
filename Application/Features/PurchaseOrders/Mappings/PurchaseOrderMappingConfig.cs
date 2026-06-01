@@ -15,7 +15,8 @@ namespace Application.Features.PurchaseOrders.Mappings
                 .Map(dest => dest.ApprovedByName, src => src.ApprovedByUser != null ? (!string.IsNullOrEmpty(src.ApprovedByUser.FullName) ? src.ApprovedByUser.FullName : src.ApprovedByUser.UserName) : null)
                 .Map(dest => dest.RejectedByName, src => src.RejectedByUser != null ? (!string.IsNullOrEmpty(src.RejectedByUser.FullName) ? src.RejectedByUser.FullName : src.RejectedByUser.UserName) : null)
                 .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
-                .Map(dest => dest.Items, src => src.PurchaseOrderItems);
+                .Map(dest => dest.Items, src => src.PurchaseOrderItems)
+                .Map(dest => dest.TotalAmount, src => src.PurchaseOrderItems != null ? src.PurchaseOrderItems.Where(item => item.DeletedAt == null).Sum(item => item.OrderedQuantity * item.UnitPrice) : 0);
 
             config.NewConfig<PurchaseOrder, PurchaseOrderListResponse>()
                 .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? (!string.IsNullOrEmpty(src.CreatedByUser.FullName) ? src.CreatedByUser.FullName : src.CreatedByUser.UserName) : null)
@@ -25,7 +26,10 @@ namespace Application.Features.PurchaseOrders.Mappings
                 .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
                 .Map(
                     dest => dest.TotalItems,
-                    src => src.PurchaseOrderItems != null ? src.PurchaseOrderItems.Count : 0);
+                    src => src.PurchaseOrderItems != null ? src.PurchaseOrderItems.Where(item => item.DeletedAt == null).Count() : 0)
+                .Map(
+                    dest => dest.TotalAmount,
+                    src => src.PurchaseOrderItems != null ? src.PurchaseOrderItems.Where(item => item.DeletedAt == null).Sum(item => item.OrderedQuantity * item.UnitPrice) : 0);
 
             config.NewConfig<PurchaseOrderItem, PurchaseOrderItemResponse>()
                 .Map(

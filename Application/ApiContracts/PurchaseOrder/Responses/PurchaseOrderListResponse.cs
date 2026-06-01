@@ -29,5 +29,6 @@ namespace Application.ApiContracts.PurchaseOrder.Responses
         public DateTimeOffset? CreatedAt { get; set; }
 
         public int TotalItems { get; set; }
+        public decimal TotalAmount { get; set; }
     }
 }
