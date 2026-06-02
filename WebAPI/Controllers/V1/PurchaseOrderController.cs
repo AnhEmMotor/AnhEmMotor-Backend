@@ -7,6 +7,7 @@ using Application.Features.PurchaseOrders.Commands.DeletePurchaseOrder;
 using Application.Features.PurchaseOrders.Commands.SendPurchaseOrder;
 using Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder;
 using Application.Features.PurchaseOrders.Queries.GetPurchaseOrderById;
+using Application.Features.PurchaseOrders.Queries.GetPurchaseOrderForInputById;
 using Application.Features.PurchaseOrders.Queries.GetPurchaseOrders;
 using Application.Features.PurchaseOrders.Queries.GetPurchaseOrderStatusList;
 using Asp.Versioning;
@@ -164,6 +165,20 @@ namespace WebAPI.Controllers.V1
         public async Task<IActionResult> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             var result = await mediator.Send(new GetPurchaseOrderByIdQuery(id), cancellationToken)
+                .ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy chi tiết đơn chốt mua cho Phiếu Nhập Kho.
+        /// </summary>
+        [HttpGet("{id:int}/for-input")]
+        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [ProducesResponseType(typeof(PurchaseOrderDetailForInputResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetForInputByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetPurchaseOrderForInputByIdQuery(id), cancellationToken)
                 .ConfigureAwait(true);
             return HandleResult(result);
         }

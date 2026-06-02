@@ -42,6 +42,33 @@ namespace Application.Features.PurchaseOrders.Mappings
                 .Map(
                     dest => dest.ProductVariantColorName,
                     src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null);
+
+            config.NewConfig<PurchaseOrder, PurchaseOrderDetailForInputResponse>()
+                .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? (!string.IsNullOrEmpty(src.CreatedByUser.FullName) ? src.CreatedByUser.FullName : src.CreatedByUser.UserName) : null)
+                .Map(dest => dest.SentByName, src => src.SentByUser != null ? (!string.IsNullOrEmpty(src.SentByUser.FullName) ? src.SentByUser.FullName : src.SentByUser.UserName) : null)
+                .Map(dest => dest.ApprovedByName, src => src.ApprovedByUser != null ? (!string.IsNullOrEmpty(src.ApprovedByUser.FullName) ? src.ApprovedByUser.FullName : src.ApprovedByUser.UserName) : null)
+                .Map(dest => dest.RejectedByName, src => src.RejectedByUser != null ? (!string.IsNullOrEmpty(src.RejectedByUser.FullName) ? src.RejectedByUser.FullName : src.RejectedByUser.UserName) : null)
+                .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
+                .Map(dest => dest.Items, src => src.PurchaseOrderItems)
+                .Map(dest => dest.TotalAmount, src => src.PurchaseOrderItems != null ? src.PurchaseOrderItems.Where(item => item.DeletedAt == null).Sum(item => item.OrderedQuantity * item.UnitPrice) : 0);
+
+            config.NewConfig<PurchaseOrderItem, PurchaseOrderItemForInputResponse>()
+                .Map(
+                    dest => dest.ProductName,
+                    src => src.ProductVariant != null
+                        ? (src.ProductVariant.Product != null
+                            ? $"{src.ProductVariant.Product.Name} {src.ProductVariant.VariantName}".Trim()
+                            : src.ProductVariant.VariantName)
+                        : null)
+                .Map(
+                    dest => dest.ProductVariantColorName,
+                    src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
+                .Map(
+                    dest => dest.NeedVin,
+                    src => src.ProductVariant != null &&
+                           src.ProductVariant.Product != null &&
+                           src.ProductVariant.Product.ProductCategory != null &&
+                           string.Compare(src.ProductVariant.Product.ProductCategory.ManagementType, Domain.Constants.Product.ProductManagementType.VinNumber, StringComparison.OrdinalIgnoreCase) == 0);
         }
     }
 }
