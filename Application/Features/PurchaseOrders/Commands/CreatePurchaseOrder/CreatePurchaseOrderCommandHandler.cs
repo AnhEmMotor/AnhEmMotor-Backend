@@ -90,23 +90,27 @@ namespace Application.Features.PurchaseOrders.Commands.CreatePurchaseOrder
                 {
                     return Error.BadRequest("Đơn giá sản phẩm không được nhỏ hơn 0.", "Items");
                 }
-
-                if (!item.SupplierId.HasValue)
+                 if (!item.SupplierId.HasValue)
                 {
                     return Error.BadRequest("SupplierId của từng sản phẩm không được trống.", "Items");
                 }
             }
 
             var currentUserId = currentUserContext.GetUserId();
-            var groupedItems = request.Items.GroupBy(x => x.SupplierId!.Value).ToList();
+            var groupedItems = request.Items.GroupBy(x => new
+            {
+                SupplierId = x.SupplierId!.Value,
+                IsOutsidePR = !request.PurchaseRequestId.HasValue || !x.QuotationProductRowId.HasValue
+            }).ToList();
             var createdPOs = new List<PurchaseOrderEntity>();
 
             foreach (var group in groupedItems)
             {
-                var supplierId = group.Key;
+                var supplierId = group.Key.SupplierId;
+                var isOutside = group.Key.IsOutsidePR;
                 var purchaseOrder = new PurchaseOrderEntity
                 {
-                    PurchaseRequestId = request.PurchaseRequestId,
+                    PurchaseRequestId = isOutside ? null : request.PurchaseRequestId,
                     SupplierId = supplierId,
                     Status = PurchaseOrderStatus.Draft,
                     Note = request.Note,

@@ -22,6 +22,7 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
         IPurchaseOrderReadRepository readRepository,
         IPurchaseOrderUpdateRepository updateRepository,
         IPurchaseOrderDeleteRepository deleteRepository,
+        IPurchaseOrderInsertRepository insertRepository,
         IProductVariantReadRepository variantRepository,
         IPermissionReadRepository permissionReadRepository,
         ICurrentUserContext currentUserContext,
@@ -126,17 +127,24 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
             po.SupplierId = request.SupplierId;
             po.Note = request.Note;
 
-            var existingItemsDict = po.PurchaseOrderItems.ToDictionary(x => x.Id);
-            var requestItemsDict = request.Items.Where(x => x.Id.HasValue && x.Id > 0).ToDictionary(x => x.Id!.Value);
+            var insideItems = request.Items
+                .Where(x => !request.PurchaseRequestId.HasValue || x.QuotationProductRowId.HasValue)
+                .ToList();
+            var outsideItems = request.Items
+                .Where(x => request.PurchaseRequestId.HasValue && !x.QuotationProductRowId.HasValue)
+                .ToList();
 
-            var toDelete = po.PurchaseOrderItems.Where(x => !requestItemsDict.ContainsKey(x.Id)).ToList();
+            var existingItemsDict = po.PurchaseOrderItems.ToDictionary(x => x.Id);
+            var insideItemsDict = insideItems.Where(x => x.Id.HasValue && x.Id > 0).ToDictionary(x => x.Id!.Value);
+
+            var toDelete = po.PurchaseOrderItems.Where(x => !insideItemsDict.ContainsKey(x.Id)).ToList();
             foreach (var item in toDelete)
             {
                 deleteRepository.DeleteItem(item);
                 po.PurchaseOrderItems.Remove(item);
             }
 
-            foreach (var itemRequest in request.Items)
+            foreach (var itemRequest in insideItems)
             {
                 if (itemRequest.Id.HasValue && itemRequest.Id > 0)
                 {
@@ -164,6 +172,29 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
             }
 
             updateRepository.Update(po);
+
+            if (outsideItems.Count > 0)
+            {
+                var outsidePO = new PurchaseOrderEntity
+                {
+                    PurchaseRequestId = null,
+                    SupplierId = request.SupplierId,
+                    Status = PurchaseOrderStatus.Draft,
+                    Note = request.Note,
+                    CreatedBy = userId,
+                    OrderDate = DateTimeOffset.UtcNow,
+                    PurchaseOrderItems = [.. outsideItems.Select(item => new PurchaseOrderItem
+                    {
+                        ProductVariantId = item.ProductVariantId!.Value,
+                        ProductVariantColorId = item.ProductVariantColorId,
+                        OrderedQuantity = item.OrderedQuantity!.Value,
+                        UnitPrice = item.UnitPrice!.Value,
+                        QuotationProductRowId = null
+                    })]
+                };
+                insertRepository.Add(outsidePO);
+            }
+
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             var updated = await readRepository.GetByIdWithDetailsAsync(po.Id, cancellationToken).ConfigureAwait(false);
