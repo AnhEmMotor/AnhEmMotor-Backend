@@ -12,6 +12,8 @@ namespace Application.ApiContracts.PurchaseOrder.Requests
 
         public int? SupplierId { get; set; }
 
+        public int? PurchaseRequestItemId { get; set; }
+
         public int? QuotationProductRowId { get; set; }
     }
 }

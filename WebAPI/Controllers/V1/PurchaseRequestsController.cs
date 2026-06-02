@@ -175,9 +175,12 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(ApprovedPurchaseRequestDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetApprovedByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetApprovedByIdAsync(
+            int id, 
+            [FromQuery] int? excludePurchaseOrderId,
+            CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new GetApprovedPurchaseRequestByIdQuery(id), cancellationToken)
+            var result = await mediator.Send(new GetApprovedPurchaseRequestByIdQuery(id, excludePurchaseOrderId), cancellationToken)
                 .ConfigureAwait(true);
             return HandleResult(result);
         }

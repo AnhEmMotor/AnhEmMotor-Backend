@@ -12,6 +12,14 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
 
         public string? ProductVariantColorName { get; set; }
 
+        public int Quantity { get; set; }
+
+        public int POCreatingQuantity { get; set; }
+
+        public int POApprovedQuantity { get; set; }
+
+        public int PORemainingQuantity { get; set; }
+
         public int UnimportedQuantity { get; set; }
 
         public bool NeedVin { get; set; }

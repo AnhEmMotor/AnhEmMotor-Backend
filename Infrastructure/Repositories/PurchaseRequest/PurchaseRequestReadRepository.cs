@@ -67,6 +67,9 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
                 .ThenInclude(r => r.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
                 .ThenInclude(ii => ii.InventoryReceipt)
+                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.PurchaseOrderItems.Where(poi => poi.DeletedAt == null))
+                .ThenInclude(poi => poi.PurchaseOrder)
                 .AsSplitQuery();
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }

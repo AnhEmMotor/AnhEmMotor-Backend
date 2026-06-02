@@ -344,7 +344,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
         modelBuilder.Entity<PurchaseOrderItem>()
             .HasOne(poi => poi.PurchaseRequestItem)
-            .WithMany()
+            .WithMany(pri => pri.PurchaseOrderItems)
             .HasForeignKey(poi => poi.PurchaseRequestItemId)
             .OnDelete(DeleteBehavior.Restrict);
 

@@ -25,7 +25,30 @@ namespace Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseReque
             {
                 return Error.Validation("Yêu cầu mua hàng chưa được phê duyệt.", "Status");
             }
-            return pr.Adapt<ApprovedPurchaseRequestDetailResponse?>();
+
+            var response = pr.Adapt<ApprovedPurchaseRequestDetailResponse?>();
+
+            // Adjust remaining quantities if a PO is to be excluded (e.g., when editing)
+            if (response != null && request.ExcludePurchaseOrderId.HasValue)
+            {
+                foreach (var responseItem in response.Items)
+                {
+                    var prItem = pr.PurchaseRequestItems.FirstOrDefault(x => x.Id == responseItem.Id);
+                    if (prItem != null)
+                    {
+                        var excludedQty = prItem.PurchaseOrderItems
+                            .Where(poi => poi.PurchaseOrderId == request.ExcludePurchaseOrderId.Value && poi.DeletedAt == null)
+                            .Sum(poi => poi.OrderedQuantity);
+                        
+                        if (excludedQty > 0)
+                        {
+                            responseItem.PORemainingQuantity += excludedQty;
+                        }
+                    }
+                }
+            }
+
+            return response;
         }
     }
 }

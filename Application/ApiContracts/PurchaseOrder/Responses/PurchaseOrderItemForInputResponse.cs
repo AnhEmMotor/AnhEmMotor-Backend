@@ -20,6 +20,8 @@ namespace Application.ApiContracts.PurchaseOrder.Responses
 
         public int? QuotationProductRowId { get; set; }
 
+        public int? PurchaseRequestItemId { get; set; }
+
         public int? QuotationId { get; set; }
 
         public string? QuotationName { get; set; }

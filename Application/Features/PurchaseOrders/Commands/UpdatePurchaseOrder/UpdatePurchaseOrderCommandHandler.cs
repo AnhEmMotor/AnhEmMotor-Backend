@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseOrder;
+using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Permission.Permissions;
@@ -11,10 +12,12 @@ using Domain.Entities;
 using Mapster;
 using MediatR;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using PurchaseOrderEntity = Domain.Entities.PurchaseOrder;
+using Application.ApiContracts.PurchaseOrder.Requests;
 
 namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
 {
@@ -24,6 +27,7 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
         IPurchaseOrderDeleteRepository deleteRepository,
         IPurchaseOrderInsertRepository insertRepository,
         IProductVariantReadRepository variantRepository,
+        IPurchaseRequestReadRepository prReadRepository,
         IPermissionReadRepository permissionReadRepository,
         ICurrentUserContext currentUserContext,
         IUnitOfWork unitOfWork) : IRequestHandler<UpdatePurchaseOrderCommand, Result<PurchaseOrderDetailResponse?>>
@@ -123,19 +127,108 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
                 }
             }
 
+            // Get PR details if it exists to check remaining quantities
+            PurchaseRequest? pr = null;
+            if (request.PurchaseRequestId.HasValue)
+            {
+                pr = await prReadRepository.GetByIdWithDetailsAsync(request.PurchaseRequestId.Value, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            // Logic to split items based on PR remaining quantity
+            var finalItems = new List<UpdatePurchaseOrderItemRequest>();
+            var outsideItemsForNewPO = new List<UpdatePurchaseOrderItemRequest>();
+
+            if (pr != null)
+            {
+                foreach (var item in request.Items)
+                {
+                    if (item.PurchaseRequestItemId.HasValue)
+                    {
+                        var prItem = pr.PurchaseRequestItems.FirstOrDefault(x => x.Id == item.PurchaseRequestItemId.Value);
+                        if (prItem != null)
+                        {
+                            var poQty = prItem.PurchaseOrderItems
+                                .Where(poi => poi.PurchaseOrderId != request.Id && // Exclude CURRENT PO
+                                              poi.PurchaseOrder != null && 
+                                              poi.PurchaseOrder.DeletedAt == null &&
+                                              (string.Compare(poi.PurchaseOrder.Status, PurchaseOrderStatus.Draft, StringComparison.OrdinalIgnoreCase) == 0 ||
+                                               string.Compare(poi.PurchaseOrder.Status, PurchaseOrderStatus.Sent, StringComparison.OrdinalIgnoreCase) == 0 ||
+                                               string.Compare(poi.PurchaseOrder.Status, PurchaseOrderStatus.Approved, StringComparison.OrdinalIgnoreCase) == 0))
+                                .Sum(poi => poi.OrderedQuantity);
+                            
+                            var remaining = prItem.Quantity - poQty;
+                            if (remaining <= 0)
+                            {
+                                // No remaining PR quantity, treat as outside PR
+                                outsideItemsForNewPO.Add(new UpdatePurchaseOrderItemRequest
+                                {
+                                    Id = null,
+                                    ProductVariantId = item.ProductVariantId,
+                                    ProductVariantColorId = item.ProductVariantColorId,
+                                    OrderedQuantity = item.OrderedQuantity,
+                                    UnitPrice = item.UnitPrice,
+                                    PurchaseRequestItemId = null,
+                                    QuotationProductRowId = null
+                                });
+                            }
+                            else if (item.OrderedQuantity > remaining)
+                            {
+                                // Exceeds PR, split
+                                finalItems.Add(new UpdatePurchaseOrderItemRequest
+                                {
+                                    Id = item.Id,
+                                    ProductVariantId = item.ProductVariantId,
+                                    ProductVariantColorId = item.ProductVariantColorId,
+                                    OrderedQuantity = remaining,
+                                    UnitPrice = item.UnitPrice,
+                                    PurchaseRequestItemId = item.PurchaseRequestItemId,
+                                    QuotationProductRowId = item.QuotationProductRowId
+                                });
+                                outsideItemsForNewPO.Add(new UpdatePurchaseOrderItemRequest
+                                {
+                                    Id = null,
+                                    ProductVariantId = item.ProductVariantId,
+                                    ProductVariantColorId = item.ProductVariantColorId,
+                                    OrderedQuantity = item.OrderedQuantity - remaining,
+                                    UnitPrice = item.UnitPrice,
+                                    PurchaseRequestItemId = null,
+                                    QuotationProductRowId = null
+                                });
+                            }
+                            else
+                            {
+                                // Fits in PR
+                                finalItems.Add(item);
+                            }
+                        }
+                        else
+                        {
+                            finalItems.Add(item);
+                        }
+                    }
+                    else if (request.PurchaseRequestId.HasValue)
+                    {
+                        // Explicitly outside PR items in a PO that HAS a PurchaseRequestId
+                        outsideItemsForNewPO.Add(item);
+                    }
+                    else
+                    {
+                        finalItems.Add(item);
+                    }
+                }
+            }
+            else
+            {
+                finalItems.AddRange(request.Items);
+            }
+
             po.PurchaseRequestId = request.PurchaseRequestId;
             po.SupplierId = request.SupplierId;
             po.Note = request.Note;
 
-            var insideItems = request.Items
-                .Where(x => !request.PurchaseRequestId.HasValue || x.QuotationProductRowId.HasValue)
-                .ToList();
-            var outsideItems = request.Items
-                .Where(x => request.PurchaseRequestId.HasValue && !x.QuotationProductRowId.HasValue)
-                .ToList();
-
             var existingItemsDict = po.PurchaseOrderItems.ToDictionary(x => x.Id);
-            var insideItemsDict = insideItems.Where(x => x.Id.HasValue && x.Id > 0).ToDictionary(x => x.Id!.Value);
+            var insideItemsDict = finalItems.Where(x => x.Id.HasValue && x.Id > 0).ToDictionary(x => x.Id!.Value);
 
             var toDelete = po.PurchaseOrderItems.Where(x => !insideItemsDict.ContainsKey(x.Id)).ToList();
             foreach (var item in toDelete)
@@ -144,7 +237,7 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
                 po.PurchaseOrderItems.Remove(item);
             }
 
-            foreach (var itemRequest in insideItems)
+            foreach (var itemRequest in finalItems)
             {
                 if (itemRequest.Id.HasValue && itemRequest.Id > 0)
                 {
@@ -155,6 +248,7 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
                         existingItem.OrderedQuantity = itemRequest.OrderedQuantity!.Value;
                         existingItem.UnitPrice = itemRequest.UnitPrice!.Value;
                         existingItem.QuotationProductRowId = itemRequest.QuotationProductRowId;
+                        existingItem.PurchaseRequestItemId = itemRequest.PurchaseRequestItemId;
                     }
                 }
                 else
@@ -165,7 +259,8 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
                         ProductVariantColorId = itemRequest.ProductVariantColorId,
                         OrderedQuantity = itemRequest.OrderedQuantity!.Value,
                         UnitPrice = itemRequest.UnitPrice!.Value,
-                        QuotationProductRowId = itemRequest.QuotationProductRowId
+                        QuotationProductRowId = itemRequest.QuotationProductRowId,
+                        PurchaseRequestItemId = itemRequest.PurchaseRequestItemId
                     };
                     po.PurchaseOrderItems.Add(newItem);
                 }
@@ -173,7 +268,7 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
 
             updateRepository.Update(po);
 
-            if (outsideItems.Count > 0)
+            if (outsideItemsForNewPO.Count > 0)
             {
                 var outsidePO = new PurchaseOrderEntity
                 {
@@ -183,14 +278,15 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
                     Note = request.Note,
                     CreatedBy = userId,
                     OrderDate = DateTimeOffset.UtcNow,
-                    PurchaseOrderItems = [.. outsideItems.Select(item => new PurchaseOrderItem
+                    PurchaseOrderItems = outsideItemsForNewPO.Select(item => new PurchaseOrderItem
                     {
                         ProductVariantId = item.ProductVariantId!.Value,
                         ProductVariantColorId = item.ProductVariantColorId,
                         OrderedQuantity = item.OrderedQuantity!.Value,
                         UnitPrice = item.UnitPrice!.Value,
-                        QuotationProductRowId = null
-                    })]
+                        QuotationProductRowId = null,
+                        PurchaseRequestItemId = null
+                    }).ToList()
                 };
                 insertRepository.Add(outsidePO);
             }
@@ -198,7 +294,7 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             var updated = await readRepository.GetByIdWithDetailsAsync(po.Id, cancellationToken).ConfigureAwait(false);
-            return updated!.Adapt<PurchaseOrderDetailResponse?>();
+            return updated.Adapt<PurchaseOrderDetailResponse?>();
         }
     }
 }

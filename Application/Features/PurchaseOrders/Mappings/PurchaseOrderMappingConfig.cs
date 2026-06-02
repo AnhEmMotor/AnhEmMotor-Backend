@@ -43,6 +43,7 @@ namespace Application.Features.PurchaseOrders.Mappings
                     dest => dest.ProductVariantColorName,
                     src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
                 .Map(dest => dest.QuotationProductRowId, src => src.QuotationProductRowId)
+                .Map(dest => dest.PurchaseRequestItemId, src => src.PurchaseRequestItemId)
                 .Map(dest => dest.QuotationId, src => src.QuotationProductRow != null ? src.QuotationProductRow.QuotationId : null)
                 .Map(dest => dest.QuotationName, src => src.QuotationProductRow != null ? $"Báo giá #{src.QuotationProductRow.QuotationId}" : null);
 
@@ -67,6 +68,7 @@ namespace Application.Features.PurchaseOrders.Mappings
                     dest => dest.ProductVariantColorName,
                     src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
                 .Map(dest => dest.QuotationProductRowId, src => src.QuotationProductRowId)
+                .Map(dest => dest.PurchaseRequestItemId, src => src.PurchaseRequestItemId)
                 .Map(dest => dest.QuotationId, src => src.QuotationProductRow != null ? src.QuotationProductRow.QuotationId : null)
                 .Map(dest => dest.QuotationName, src => src.QuotationProductRow != null ? $"Báo giá #{src.QuotationProductRow.QuotationId}" : null)
                 .Map(
