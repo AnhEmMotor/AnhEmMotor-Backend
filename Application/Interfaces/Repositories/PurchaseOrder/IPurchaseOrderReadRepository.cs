@@ -24,5 +24,8 @@ namespace Application.Interfaces.Repositories.PurchaseOrder
             int id,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
+        public Task<PagedResult<TResponse>> GetApprovedPagedForInputAsync<TResponse>(
+            SieveModel sieveModel,
+            CancellationToken cancellationToken = default);
     }
 }

@@ -8,6 +8,8 @@ using Application.Features.PurchaseOrders.Commands.SendPurchaseOrder;
 using Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder;
 using Application.Features.PurchaseOrders.Queries.GetPurchaseOrderById;
 using Application.Features.PurchaseOrders.Queries.GetPurchaseOrderForInputById;
+using Application.Features.PurchaseOrders.Queries.GetApprovedPurchaseOrdersForInput;
+using Application.Features.PurchaseOrders.Queries.GetApprovedPurchaseOrderForInputById;
 using Application.Features.PurchaseOrders.Queries.GetPurchaseOrders;
 using Application.Features.PurchaseOrders.Queries.GetPurchaseOrderStatusList;
 using Asp.Versioning;
@@ -179,6 +181,37 @@ namespace WebAPI.Controllers.V1
         public async Task<IActionResult> GetForInputByIdAsync(int id, CancellationToken cancellationToken)
         {
             var result = await mediator.Send(new GetPurchaseOrderForInputByIdQuery(id), cancellationToken)
+                .ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy danh sách đơn chốt mua đã phê duyệt cho Phiếu Nhập Kho.
+        /// </summary>
+        [HttpGet("approved/for-input")]
+        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [ProducesResponseType(typeof(PagedResult<PurchaseOrderListResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetApprovedForInputAsync(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(
+                new GetApprovedPurchaseOrdersForInputQuery { SieveModel = sieveModel },
+                cancellationToken)
+                .ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy chi tiết đơn chốt mua đã phê duyệt cho Phiếu Nhập Kho.
+        /// </summary>
+        [HttpGet("approved/for-input/{id:int}")]
+        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [ProducesResponseType(typeof(PurchaseOrderDetailForInputResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetApprovedForInputByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new GetApprovedPurchaseOrderForInputByIdQuery(id), cancellationToken)
                 .ConfigureAwait(true);
             return HandleResult(result);
         }

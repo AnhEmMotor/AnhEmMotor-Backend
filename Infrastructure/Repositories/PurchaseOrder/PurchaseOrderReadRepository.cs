@@ -60,6 +60,18 @@ namespace Infrastructure.Repositories.PurchaseOrder
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
+        public Task<PagedResult<TResponse>> GetApprovedPagedForInputAsync<TResponse>(
+            SieveModel sieveModel,
+            CancellationToken cancellationToken = default)
+        {
+            var query = GetQueryable(DataFetchMode.ActiveOnly)
+                .Where(x => x.Status == PurchaseOrderStatus.Approved)
+                .Include(x => x.CreatedByUser)
+                .Include(x => x.Supplier)
+                .Include(x => x.PurchaseOrderItems.Where(item => item.DeletedAt == null));
+            return paginator.ApplyAsync<PurchaseOrderEntity, TResponse>(query, sieveModel, DataFetchMode.ActiveOnly, cancellationToken);
+        }
+
         private IQueryable<PurchaseOrderEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             var query = context.PurchaseOrders.IgnoreQueryFilters();
