@@ -17,5 +17,11 @@ namespace Application.ApiContracts.PurchaseOrder.Responses
         public decimal UnitPrice { get; set; }
 
         public bool NeedVin { get; set; }
+
+        public int? QuotationProductRowId { get; set; }
+
+        public int? QuotationId { get; set; }
+
+        public string? QuotationName { get; set; }
     }
 }

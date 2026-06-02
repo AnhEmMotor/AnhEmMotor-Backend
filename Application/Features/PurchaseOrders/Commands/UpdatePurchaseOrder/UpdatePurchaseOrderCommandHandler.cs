@@ -146,6 +146,7 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
                         existingItem.ProductVariantColorId = itemRequest.ProductVariantColorId;
                         existingItem.OrderedQuantity = itemRequest.OrderedQuantity!.Value;
                         existingItem.UnitPrice = itemRequest.UnitPrice!.Value;
+                        existingItem.QuotationProductRowId = itemRequest.QuotationProductRowId;
                     }
                 }
                 else
@@ -155,7 +156,8 @@ namespace Application.Features.PurchaseOrders.Commands.UpdatePurchaseOrder
                         ProductVariantId = itemRequest.ProductVariantId!.Value,
                         ProductVariantColorId = itemRequest.ProductVariantColorId,
                         OrderedQuantity = itemRequest.OrderedQuantity!.Value,
-                        UnitPrice = itemRequest.UnitPrice!.Value
+                        UnitPrice = itemRequest.UnitPrice!.Value,
+                        QuotationProductRowId = itemRequest.QuotationProductRowId
                     };
                     po.PurchaseOrderItems.Add(newItem);
                 }

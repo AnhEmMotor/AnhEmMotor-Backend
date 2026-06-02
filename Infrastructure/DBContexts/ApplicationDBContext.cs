@@ -348,6 +348,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(poi => poi.PurchaseRequestItemId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<PurchaseOrderItem>()
+            .HasOne(poi => poi.QuotationProductRow)
+            .WithMany()
+            .HasForeignKey(poi => poi.QuotationProductRowId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<PurchaseInvoiceItem>()
             .HasOne(pii => pii.PurchaseOrderItem)
             .WithMany()

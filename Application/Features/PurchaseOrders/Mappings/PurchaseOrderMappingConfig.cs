@@ -41,7 +41,10 @@ namespace Application.Features.PurchaseOrders.Mappings
                         : null)
                 .Map(
                     dest => dest.ProductVariantColorName,
-                    src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null);
+                    src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
+                .Map(dest => dest.QuotationProductRowId, src => src.QuotationProductRowId)
+                .Map(dest => dest.QuotationId, src => src.QuotationProductRow != null ? src.QuotationProductRow.QuotationId : null)
+                .Map(dest => dest.QuotationName, src => src.QuotationProductRow != null ? $"Báo giá #{src.QuotationProductRow.QuotationId}" : null);
 
             config.NewConfig<PurchaseOrder, PurchaseOrderDetailForInputResponse>()
                 .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? (!string.IsNullOrEmpty(src.CreatedByUser.FullName) ? src.CreatedByUser.FullName : src.CreatedByUser.UserName) : null)
@@ -63,6 +66,9 @@ namespace Application.Features.PurchaseOrders.Mappings
                 .Map(
                     dest => dest.ProductVariantColorName,
                     src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
+                .Map(dest => dest.QuotationProductRowId, src => src.QuotationProductRowId)
+                .Map(dest => dest.QuotationId, src => src.QuotationProductRow != null ? src.QuotationProductRow.QuotationId : null)
+                .Map(dest => dest.QuotationName, src => src.QuotationProductRow != null ? $"Báo giá #{src.QuotationProductRow.QuotationId}" : null)
                 .Map(
                     dest => dest.NeedVin,
                     src => src.ProductVariant != null &&

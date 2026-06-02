@@ -32,7 +32,8 @@ namespace Application.Features.Quotations.Queries.GetApprovedPricesForVariant
                 SupplierId = quote.QuotationReceipt?.SupplierId ?? 0,
                 SupplierName = quote.QuotationReceipt?.Supplier?.Name ?? string.Empty,
                 QuotePrice = quote.QuotePrice ?? 0,
-                Note = quote.Note
+                Note = quote.Note,
+                QuotationProductRowId = quote.Id
             }).ToList();
 
             return Result<List<PurchaseRequestQuotedPriceResponse>>.Success(result);

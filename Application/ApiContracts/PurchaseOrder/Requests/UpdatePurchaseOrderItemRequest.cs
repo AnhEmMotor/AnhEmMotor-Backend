@@ -11,5 +11,7 @@ namespace Application.ApiContracts.PurchaseOrder.Requests
         public int? OrderedQuantity { get; set; }
 
         public decimal? UnitPrice { get; set; }
+
+        public int? QuotationProductRowId { get; set; }
     }
 }

@@ -13,5 +13,7 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
         public int QuotePrice { get; set; }
 
         public string? Note { get; set; }
+
+        public int QuotationProductRowId { get; set; }
     }
 }

@@ -32,10 +32,15 @@ namespace Domain.Entities
         [Column("UnitPrice", TypeName = "decimal(18, 2)")]
         public decimal UnitPrice { get; set; }
 
+        [Column("QuotationProductRowId")]
+        [ForeignKey("QuotationProductRow")]
+        public int? QuotationProductRowId { get; set; }
+
         // Navigation Properties
         public PurchaseOrder? PurchaseOrder { get; set; }
         public PurchaseRequestItem? PurchaseRequestItem { get; set; }
         public ProductVariant? ProductVariant { get; set; }
         public ProductVariantColor? ProductVariantColor { get; set; }
+        public QuotationProductRow? QuotationProductRow { get; set; }
     }
 }

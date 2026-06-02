@@ -117,7 +117,8 @@ namespace Application.Features.PurchaseOrders.Commands.CreatePurchaseOrder
                         ProductVariantId = item.ProductVariantId!.Value,
                         ProductVariantColorId = item.ProductVariantColorId,
                         OrderedQuantity = item.OrderedQuantity!.Value,
-                        UnitPrice = item.UnitPrice!.Value
+                        UnitPrice = item.UnitPrice!.Value,
+                        QuotationProductRowId = item.QuotationProductRowId
                     })]
                 };
                 insertRepository.Add(purchaseOrder);
