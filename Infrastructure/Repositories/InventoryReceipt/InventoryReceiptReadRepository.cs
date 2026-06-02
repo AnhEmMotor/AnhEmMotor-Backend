@@ -110,8 +110,8 @@ namespace Infrastructure.Repositories.InventoryReceipt
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return GetQueryable(mode)
-                .Include(x => x.InventoryReceiptInfos)
-                    .ThenInclude(ii => ii.Vehicles)
+                .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                    .ThenInclude(ii => ii.Vehicles.Where(v => v.DeletedAt == null))
                 .Include(x => x.PurchaseOrder)
                     .ThenInclude(po => po!.Supplier)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);

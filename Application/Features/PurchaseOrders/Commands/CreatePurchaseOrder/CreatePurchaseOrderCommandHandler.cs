@@ -9,6 +9,7 @@ using Domain.Entities;
 using Mapster;
 using MediatR;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,9 +22,9 @@ namespace Application.Features.PurchaseOrders.Commands.CreatePurchaseOrder
         IPurchaseOrderReadRepository readRepository,
         IProductVariantReadRepository variantRepository,
         ICurrentUserContext currentUserContext,
-        IUnitOfWork unitOfWork) : IRequestHandler<CreatePurchaseOrderCommand, Result<PurchaseOrderDetailResponse?>>
+        IUnitOfWork unitOfWork) : IRequestHandler<CreatePurchaseOrderCommand, Result<List<PurchaseOrderDetailResponse>>>
     {
-        public async Task<Result<PurchaseOrderDetailResponse?>> Handle(
+        public async Task<Result<List<PurchaseOrderDetailResponse>>> Handle(
             CreatePurchaseOrderCommand request,
             CancellationToken cancellationToken)
         {
@@ -89,36 +90,54 @@ namespace Application.Features.PurchaseOrders.Commands.CreatePurchaseOrder
                 {
                     return Error.BadRequest("Đơn giá sản phẩm không được nhỏ hơn 0.", "Items");
                 }
+
+                if (!item.SupplierId.HasValue)
+                {
+                    return Error.BadRequest("SupplierId của từng sản phẩm không được trống.", "Items");
+                }
             }
 
             var currentUserId = currentUserContext.GetUserId();
-            var purchaseOrder = new PurchaseOrderEntity
-            {
-                PurchaseRequestId = request.PurchaseRequestId,
-                SupplierId = request.SupplierId,
-                Status = PurchaseOrderStatus.Draft,
-                Note = request.Note,
-                CreatedBy = currentUserId,
-                OrderDate = DateTimeOffset.UtcNow,
-                PurchaseOrderItems =
-                    [.. request.Items
-                        .Select(
-                            item => new PurchaseOrderItem
-                            {
-                                ProductVariantId = item.ProductVariantId!.Value,
-                                ProductVariantColorId = item.ProductVariantColorId,
-                                OrderedQuantity = item.OrderedQuantity!.Value,
-                                UnitPrice = item.UnitPrice!.Value
-                            })]
-            };
+            var groupedItems = request.Items.GroupBy(x => x.SupplierId!.Value).ToList();
+            var createdPOs = new List<PurchaseOrderEntity>();
 
-            insertRepository.Add(purchaseOrder);
+            foreach (var group in groupedItems)
+            {
+                var supplierId = group.Key;
+                var purchaseOrder = new PurchaseOrderEntity
+                {
+                    PurchaseRequestId = request.PurchaseRequestId,
+                    SupplierId = supplierId,
+                    Status = PurchaseOrderStatus.Draft,
+                    Note = request.Note,
+                    CreatedBy = currentUserId,
+                    OrderDate = DateTimeOffset.UtcNow,
+                    PurchaseOrderItems = [.. group.Select(item => new PurchaseOrderItem
+                    {
+                        ProductVariantId = item.ProductVariantId!.Value,
+                        ProductVariantColorId = item.ProductVariantColorId,
+                        OrderedQuantity = item.OrderedQuantity!.Value,
+                        UnitPrice = item.UnitPrice!.Value
+                    })]
+                };
+                insertRepository.Add(purchaseOrder);
+                createdPOs.Add(purchaseOrder);
+            }
+
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            var created = await readRepository.GetByIdWithDetailsAsync(purchaseOrder.Id, cancellationToken)
-                .ConfigureAwait(false);
+            var responseList = new List<PurchaseOrderDetailResponse>();
+            foreach (var po in createdPOs)
+            {
+                var created = await readRepository.GetByIdWithDetailsAsync(po.Id, cancellationToken)
+                    .ConfigureAwait(false);
+                if (created != null)
+                {
+                    responseList.Add(created.Adapt<PurchaseOrderDetailResponse>());
+                }
+            }
 
-            return created!.Adapt<PurchaseOrderDetailResponse?>();
+            return responseList;
         }
     }
 }

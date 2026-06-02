@@ -40,7 +40,7 @@ namespace WebAPI.Controllers.V1
         /// </summary>
         [HttpPost]
         [HasPermission(InventoryReceipts.Create)]
-        [ProducesResponseType(typeof(PurchaseOrderDetailResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(List<PurchaseOrderDetailResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateAsync(
             [FromBody] CreatePurchaseOrderCommand command,

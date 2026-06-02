@@ -6,11 +6,9 @@ using System.Collections.Generic;
 
 namespace Application.Features.PurchaseOrders.Commands.CreatePurchaseOrder
 {
-    public sealed record CreatePurchaseOrderCommand : IRequest<Result<PurchaseOrderDetailResponse?>>
+    public sealed record CreatePurchaseOrderCommand : IRequest<Result<List<PurchaseOrderDetailResponse>>>
     {
         public int? PurchaseRequestId { get; init; }
-
-        public int SupplierId { get; init; }
 
         public string? Note { get; init; }
 

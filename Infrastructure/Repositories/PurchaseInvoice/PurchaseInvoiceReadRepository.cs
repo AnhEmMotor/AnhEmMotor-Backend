@@ -25,7 +25,7 @@ namespace Infrastructure.Repositories.PurchaseInvoice
                 .Include(x => x.ApprovedByUser)
                 .Include(x => x.PurchaseOrder)
                     .ThenInclude(po => po!.Supplier)
-                .Include(x => x.PurchaseInvoiceItems);
+                .Include(x => x.PurchaseInvoiceItems.Where(pii => pii.DeletedAt == null));
 
             return paginator.ApplyAsync<PurchaseInvoiceEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
@@ -49,10 +49,10 @@ namespace Infrastructure.Repositories.PurchaseInvoice
                 .Include(x => x.ApprovedByUser)
                 .Include(x => x.PurchaseOrder)
                     .ThenInclude(po => po!.Supplier)
-                .Include(x => x.PurchaseInvoiceItems)
+                .Include(x => x.PurchaseInvoiceItems.Where(pii => pii.DeletedAt == null))
                     .ThenInclude(pii => pii.ProductVariant)
                         .ThenInclude(pv => pv!.Product)
-                .Include(x => x.PurchaseInvoiceItems)
+                .Include(x => x.PurchaseInvoiceItems.Where(pii => pii.DeletedAt == null))
                     .ThenInclude(pii => pii.ProductVariantColor)
                 .AsSplitQuery();
 
