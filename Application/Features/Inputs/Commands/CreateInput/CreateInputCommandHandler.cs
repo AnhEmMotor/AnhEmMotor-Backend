@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.SupplierContract;
 using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
 using Domain.Constants.Input;
@@ -25,7 +26,9 @@ public sealed class CreateInputCommandHandler(
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
     IVehicleReadRepository vehicleReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, Result<InputDetailResponse?>>
+    ISupplierContractReadRepository supplierContractRepository,
+    IUnitOfWork unitOfWork)
+    : IRequestHandler<CreateInputCommand, Result<InputDetailResponse?>>
 {
     public async Task<Result<InputDetailResponse?>> Handle(
         CreateInputCommand request,
@@ -36,8 +39,7 @@ public sealed class CreateInputCommandHandler(
             var supplier = await supplierRepository.GetByIdAsync(
                 request.SupplierId.Value,
                 cancellationToken,
-                DataFetchMode.ActiveOnly)
-                .ConfigureAwait(false);
+                DataFetchMode.ActiveOnly).ConfigureAwait(false);
             if (supplier is null)
             {
                 return Error.NotFound($"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa.", "SupplierId");
@@ -47,6 +49,7 @@ public sealed class CreateInputCommandHandler(
                 return Error.BadRequest($"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'.", "SupplierId");
             }
         }
+
         var variantMap = new Dictionary<int, ProductVariant>();
         foreach (var product in request.Products)
         {
@@ -55,8 +58,7 @@ public sealed class CreateInputCommandHandler(
                 var variants = await variantRepository.GetByIdAsync(
                     [product.ProductVarientId.Value],
                     cancellationToken,
-                    DataFetchMode.ActiveOnly)
-                    .ConfigureAwait(false);
+                    DataFetchMode.ActiveOnly).ConfigureAwait(false);
                 var variant = variants.FirstOrDefault();
                 if (variant is null)
                 {
@@ -70,6 +72,7 @@ public sealed class CreateInputCommandHandler(
                     return colorValidation;
                 }
                 variantMap[product.ProductVarientId.Value] = variant;
+
                 var managementType = variant.Product?.ProductCategory?.ManagementType;
                 if (string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase))
                 {
@@ -99,16 +102,13 @@ public sealed class CreateInputCommandHandler(
                         {
                             return Error.BadRequest($"Số máy trùng lặp trong yêu cầu: {engine}", "Products");
                         }
-                        var isVinExists = await vehicleReadRepository.ExistsByVinAsync(vin, cancellationToken)
-                            .ConfigureAwait(false);
+                        var isVinExists = await vehicleReadRepository.ExistsByVinAsync(vin, cancellationToken).ConfigureAwait(false);
                         if (isVinExists)
                         {
                             return Error.BadRequest($"Số khung (VIN) {vin} đã tồn tại trong hệ thống.", "Products");
                         }
                         var isEngineExists = await vehicleReadRepository.ExistsByEngineNumberAsync(
-                            engine,
-                            cancellationToken)
-                            .ConfigureAwait(false);
+                            engine, cancellationToken).ConfigureAwait(false);
                         if (isEngineExists)
                         {
                             return Error.BadRequest($"Số máy {engine} đã tồn tại trong hệ thống.", "Products");
@@ -117,44 +117,81 @@ public sealed class CreateInputCommandHandler(
                 }
             }
         }
+
+        // CreditGuard: Block if order value exceeds active contract credit limit
+        // Auto-fill wholesale prices from contract SKU table
+        if (request.SupplierId.HasValue)
+        {
+            var activeContract = await supplierContractRepository
+                .GetActiveContractBySupplierIdAsync(request.SupplierId.Value, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (activeContract != null && activeContract.CreditLimit.HasValue)
+            {
+                var orderValue = request.Products.Sum(p => (p.Price ?? 0) * (p.Count ?? 0));
+                if (orderValue > activeContract.CreditLimit.Value)
+                {
+                    return Error.BadRequest(
+                        $"Vượt hạn mức công nợ! Giá trị đơn nhập ({FormatCurrency(orderValue)}) vượt quá hạn mức tín dụng ({FormatCurrency(activeContract.CreditLimit.Value)}) của hợp đồng {activeContract.ContractNumber}.",
+                        "CreditLimit");
+                }
+
+                // Auto-fill giá nhập sỉ từ hợp đồng cho các SKU thuộc bảng giá
+                foreach (var product in request.Products)
+                {
+                    if (product.ProductVarientId.HasValue && variantMap.ContainsKey(product.ProductVarientId.Value))
+                    {
+                        var contractItem = activeContract.ContractItems
+                            .FirstOrDefault(ci => ci.ProductVariantId == product.ProductVarientId.Value);
+                        if (contractItem != null && !product.Price.HasValue)
+                        {
+                            product.Price = contractItem.WholesalePrice;
+                        }
+                    }
+                }
+            }
+        }
+
         var input = request.Adapt<InputEntity>();
         if (!string.IsNullOrEmpty(input.Notes))
         {
             input.Notes = Regex.Replace(input.Notes, "<.*?>", string.Empty);
         }
         input.StatusId = InputStatus.Working;
+
         var inputInfos = new List<InputInfoEntity>();
         foreach (var p in request.Products)
         {
             var inputInfo = p.Adapt<InputInfoEntity>();
             inputInfo.RemainingCount = p.Count ?? 0;
             inputInfo.ProductVariantColorId = p.ProductVarientColorId;
+
             if (p.ProductVarientId.HasValue && variantMap.TryGetValue(p.ProductVarientId.Value, out var variant))
             {
                 var managementType = variant.Product?.ProductCategory?.ManagementType;
-                if (string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase) &&
-                    p.Vehicles != null)
+                if (string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase) && p.Vehicles != null)
                 {
                     inputInfo.Vehicles = p.Vehicles
-                        .Select(
-                            v => new Vehicle
-                            {
-                                VinNumber = v.VinNumber.Trim(),
-                                EngineNumber = v.EngineNumber.Trim(),
-                                LicensePlate = v.LicensePlate?.Trim() ?? string.Empty,
-                                ProductId = variant.ProductId,
-                                LeadId = null,
-                                PurchaseDate = DateTimeOffset.UtcNow,
-                                IsActive = true
-                            })
+                        .Select(v => new Vehicle
+                        {
+                            VinNumber = v.VinNumber.Trim(),
+                            EngineNumber = v.EngineNumber.Trim(),
+                            LicensePlate = v.LicensePlate?.Trim() ?? string.Empty,
+                            ProductId = variant.ProductId,
+                            LeadId = null,
+                            PurchaseDate = DateTimeOffset.UtcNow,
+                            IsActive = true
+                        })
                         .ToList();
                 }
             }
             inputInfos.Add(inputInfo);
         }
+
         input.InputInfos = inputInfos;
         insertRepository.Add(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
         var created = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
         return created!.Adapt<InputDetailResponse>();
     }
@@ -177,4 +214,7 @@ public sealed class CreateInputCommandHandler(
             ? null
             : Error.BadRequest("ProductVarientColorId không thuộc biến thể sản phẩm đã chọn.", "ProductVarientColorId");
     }
+
+    private static string FormatCurrency(decimal? value) =>
+        string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:N0} VND", value ?? 0);
 }

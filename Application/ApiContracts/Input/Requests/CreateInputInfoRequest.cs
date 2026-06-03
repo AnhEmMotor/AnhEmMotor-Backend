@@ -2,30 +2,37 @@ using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Input.Requests
 {
-    public class CreateInputInfoRequest
-    {
-        public int? ProductVarientId { get; set; }
+public class CreateInputInfoRequest
+{
+	public int? ProductVarientId { get; set; }
 
-        [JsonIgnore]
-        public int? ProductId
-        {
-            get => ProductVarientId;
-            set => ProductVarientId = value;
-        }
+	[JsonIgnore]
+	public int? ProductId
+	{
+		get => ProductVarientId;
+		set => ProductVarientId = value;
+	}
 
-        public int? ProductVarientColorId { get; set; }
+	public int? ProductVarientColorId { get; set; }
 
-        [JsonIgnore]
-        public int? ProductVariantColorId
-        {
-            get => ProductVarientColorId;
-            set => ProductVarientColorId = value;
-        }
+	[JsonIgnore]
+	public int? ProductVariantColorId
+	{
+		get => ProductVarientColorId;
+		set => ProductVarientColorId = value;
+	}
 
-        public int? Count { get; set; }
+	public int? Count { get; set; }
 
-        public decimal? InputPrice { get; set; }
+	public decimal? Price { get; set; }
 
-        public List<VehicleInputRequest>? Vehicles { get; set; }
-    }
+	[JsonIgnore]
+	public decimal? InputPrice
+	{
+		get => Price;
+		set => Price = value;
+	}
+
+	public List<VehicleInputRequest>? Vehicles { get; set; }
+}
 }

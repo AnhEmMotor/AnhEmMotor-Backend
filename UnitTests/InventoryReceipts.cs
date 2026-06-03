@@ -143,7 +143,9 @@ public class InventoryReceipts
             Mock.Of<ISupplierReadRepository>(),
             Mock.Of<IProductVariantReadRepository>(),
             Mock.Of<IVehicleReadRepository>(),
+            Mock.Of<Application.Interfaces.Repositories.SupplierContract.ISupplierContractReadRepository>(),
             Mock.Of<IUnitOfWork>());
+
         var command = new CreateInputCommand
         {
             Notes = "Test",
@@ -317,6 +319,7 @@ public class InventoryReceipts
             Mock.Of<ISupplierReadRepository>(),
             mockVariantRepo.Object,
             mockVehicleReadRepo.Object,
+            Mock.Of<Application.Interfaces.Repositories.SupplierContract.ISupplierContractReadRepository>(),
             mockUnitOfWork.Object);
 
         var command = new CreateInputCommand
@@ -363,6 +366,7 @@ public class InventoryReceipts
             Mock.Of<ISupplierReadRepository>(),
             mockVariantRepo.Object,
             mockVehicleReadRepo.Object,
+            Mock.Of<Application.Interfaces.Repositories.SupplierContract.ISupplierContractReadRepository>(),
             mockUnitOfWork.Object);
 
         var command = new CreateInputCommand

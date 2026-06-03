@@ -33,42 +33,47 @@ public static class DependencyInjection
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
             services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
-                options =>
-                {
-                    options.UseMySql(connectionString, serverVersion);
-                });
-        } else if (string.Compare(provider, "PostgreSql") == 0)
+            options =>
+            {
+                options.UseMySql(connectionString, serverVersion);
+            });
+            services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
+        }
+        else if (string.Compare(provider, "PostgreSql") == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
-                options =>
-                {
-                    options.UseNpgsql(connectionString);
-                });
-        } else
-        {
-            services.AddDbContextPool<ApplicationDBContext>(
-                options =>
-                {
-                    options.UseSqlServer(
-                        configuration.GetConnectionString("StringConnection"),
-                        b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
-                                .CommandTimeout(30)
-                                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-                });
-        }
-        services.AddIdentity<ApplicationUser, ApplicationRole>(
             options =>
             {
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireDigit = true;
-                options.User.RequireUniqueEmail = true;
-            })
-            .AddEntityFrameworkStores<ApplicationDBContext>()
-            .AddDefaultTokenProviders();
+                options.UseNpgsql(connectionString);
+            });
+            services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
+        }
+        else
+        {
+            services.AddDbContextPool<ApplicationDBContext>(
+            options =>
+            {
+                options.UseSqlServer(
+                configuration.GetConnectionString("StringConnection"),
+                b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
+                .CommandTimeout(30)
+                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+            });
+            services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
+        }
+        services.AddIdentity<ApplicationUser, ApplicationRole>(
+        options =>
+        {
+            options.Password.RequiredLength = 8;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireDigit = true;
+            options.User.RequireUniqueEmail = true;
+        })
+        .AddEntityFrameworkStores<ApplicationDBContext>()
+        .AddDefaultTokenProviders();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IUserStreamService, UserStreamService>();
         services.AddSingleton<INotificationService, NotificationService>();
@@ -95,12 +100,13 @@ public static class DependencyInjection
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient();
         services.Scan(
-            scan => scan
-            .FromAssemblies(Assembly.GetExecutingAssembly())
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
-                .AsImplementedInterfaces()
-                .WithScopedLifetime());
+        scan => scan
+        .FromAssemblies(Assembly.GetExecutingAssembly())
+        .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
+        .AsImplementedInterfaces()
+        .WithScopedLifetime());
         services.AddHostedService<BannerExpiryWorker>();
+        services.AddHostedService<SupplierContractExpiryWorker>();
         return services;
     }
 }

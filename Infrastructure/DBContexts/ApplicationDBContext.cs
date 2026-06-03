@@ -13,7 +13,7 @@ using SupplierStatus = Domain.Entities.SupplierStatus;
 
 namespace Infrastructure.DBContexts;
 
-public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, Application.Common.Interfaces.IApplicationDbContext
 {
     public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options): base(options)
     {
@@ -24,6 +24,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     }
 
     public new DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
+
+    public virtual DbSet<AnhEmMotor.Domain.Entities.Expense> Expenses { get; set; }
 
     public virtual DbSet<Brand> Brands { get; set; }
 
@@ -99,6 +101,18 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<Booking> Bookings { get; set; }
 
+    public virtual DbSet<PlateDossier> PlateDossiers { get; set; }
+
+    public virtual DbSet<RepairOrder> RepairOrders { get; set; }
+
+    public virtual DbSet<RepairOrderDetail> RepairOrderDetails { get; set; }
+
+    public virtual DbSet<ServiceCategory> ServiceCategories { get; set; }
+
+    public virtual DbSet<Service> Services { get; set; }
+
+    public virtual DbSet<ServiceEvaluation> ServiceEvaluations { get; set; }
+
     public virtual DbSet<Lead> Leads { get; set; }
 
     public virtual DbSet<LeadActivity> LeadActivities { get; set; }
@@ -121,9 +135,26 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<CommissionPolicyAuditLog> CommissionPolicyAuditLogs { get; set; }
 
+    // Contracts
+    public virtual DbSet<ContractTemplate> ContractTemplates { get; set; }
+    public virtual DbSet<SalesContract> SalesContracts { get; set; }
+    public virtual DbSet<FinanceContract> FinanceContracts { get; set; }
+    public virtual DbSet<SupplierContract> SupplierContracts { get; set; }
+
+public virtual DbSet<SupplierContractItem> SupplierContractItems { get; set; }
+
+    public virtual DbSet<SupplierContractAuditLog> SupplierContractAuditLogs { get; set; }
+
+    public virtual DbSet<ContractTemplateAuditLog> ContractTemplateAuditLogs { get; set; }
+
+    public virtual DbSet<SupplierFinance> SupplierFinances { get; set; }
+
+    public virtual DbSet<SupplierDebtSettlement> SupplierDebtSettlements { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<AnhEmMotor.Domain.Entities.Expense>().Property(e => e.Amount).HasPrecision(18, 2);
         modelBuilder.Entity<ApplicationUser>().ToTable("Users");
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");
