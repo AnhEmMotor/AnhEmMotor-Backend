@@ -170,8 +170,9 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     purchaseOrderItemId = product.PurchaseOrderItemId;
                 }
 
+                PurchaseOrderItem? poItem = null;
                 var resolvedVariantId = purchaseOrderItemId.HasValue &&
-                        poItemsDict.TryGetValue(purchaseOrderItemId.Value, out var poItem)
+                        poItemsDict.TryGetValue(purchaseOrderItemId.Value, out poItem)
                     ? poItem.ProductVariantId
                     : (int?)null;
 
@@ -184,6 +185,30 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
 
                 if (resolvedVariantId.HasValue)
                 {
+                    if (poItem != null)
+                    {
+                        var occupiedQty = poItem.InventoryReceiptInfos
+                            .Where(ii => ii.DeletedAt == null &&
+                                         ii.InventoryReceiptId != request.Id &&
+                                         ii.InventoryReceipt != null &&
+                                         ii.InventoryReceipt.DeletedAt == null &&
+                                         (string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, StringComparison.OrdinalIgnoreCase) ||
+                                          string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent, StringComparison.OrdinalIgnoreCase) ||
+                                          string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase)))
+                            .Sum(ii => ii.Count ?? 0);
+
+                        var remainingAllowed = poItem.OrderedQuantity - occupiedQty;
+                        var requestedQty = product.Count ?? 0;
+
+                        if (requestedQty > remainingAllowed)
+                        {
+                            var productName = poItem.ProductVariant?.Product?.Name ?? $"Biến thể #{poItem.ProductVariantId}";
+                            return Error.BadRequest(
+                                $"Số lượng nhập ({requestedQty}) cho sản phẩm '{productName}' vượt quá số lượng còn lại được phép nhập từ đơn mua hàng PO ({remainingAllowed}).",
+                                "Products");
+                        }
+                    }
+
                     if (resolvedSupplierId.HasValue)
                     {
                         var supplier = await supplierRepository.GetByIdAsync(

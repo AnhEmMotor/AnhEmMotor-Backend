@@ -56,6 +56,9 @@ namespace Infrastructure.Repositories.PurchaseOrder
                 .ThenInclude(r => r.ProductVariantColor)
                 .Include(x => x.PurchaseOrderItems.Where(item => item.DeletedAt == null))
                 .ThenInclude(r => r.QuotationProductRow)
+                .Include(x => x.PurchaseOrderItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                .ThenInclude(ii => ii.InventoryReceipt)
                 .AsSplitQuery();
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }

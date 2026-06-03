@@ -34,6 +34,18 @@ namespace Application.Features.InventoryReceipts.Mappings
                 .Map(dest => dest.SupplierName, src => src.InventoryReceipt != null && src.InventoryReceipt.PurchaseOrder != null && src.InventoryReceipt.PurchaseOrder.Supplier != null ? src.InventoryReceipt.PurchaseOrder.Supplier.Name : null)
                 .Map(dest => dest.Name, src => src.PurchaseOrderItem != null && src.PurchaseOrderItem.ProductVariant != null && src.PurchaseOrderItem.ProductVariant.Product != null ? src.PurchaseOrderItem.ProductVariant.Product.Name : null)
                 .Map(dest => dest.Quantity, src => src.Count)
+                .Map(dest => dest.OrderedQuantity, src => src.PurchaseOrderItem != null ? src.PurchaseOrderItem.OrderedQuantity : (int?)null)
+                .Map(dest => dest.MaxAllowedQuantity, src => src.PurchaseOrderItem != null
+                    ? src.PurchaseOrderItem.OrderedQuantity - src.PurchaseOrderItem.InventoryReceiptInfos
+                        .Where(ii => ii.DeletedAt == null &&
+                                     ii.Id != src.Id &&
+                                     ii.InventoryReceipt != null &&
+                                     ii.InventoryReceipt.DeletedAt == null &&
+                                     (string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) ||
+                                      string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent, System.StringComparison.OrdinalIgnoreCase) ||
+                                      string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, System.StringComparison.OrdinalIgnoreCase)))
+                        .Sum(ii => ii.Count ?? 0)
+                    : (int?)null)
                 .Map(dest => dest.Vehicles, src => src.Vehicles);
         }
     }

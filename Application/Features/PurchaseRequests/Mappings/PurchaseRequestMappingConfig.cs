@@ -69,44 +69,40 @@ namespace Application.Features.PurchaseRequests.Mappings
                         : 0))
                 .Map(
                     dest => dest.ImportedQuantity,
-                    src => src.InventoryReceiptInfos != null
-                        ? src.InventoryReceiptInfos
-                            .Where(
-                                ii => ii.InventoryReceipt != null &&
-                                            (string.Compare(
-                                                    ii.InventoryReceipt.StatusId,
-                                                    Domain.Constants.InventoryReceiptStatus.Approve) ==
-                                                0))
+                    src => src.PurchaseOrderItems != null
+                        ? src.PurchaseOrderItems
+                            .Where(poi => poi.DeletedAt == null)
+                            .SelectMany(poi => poi.InventoryReceiptInfos)
+                            .Where(ii => ii.DeletedAt == null &&
+                                         ii.InventoryReceipt != null &&
+                                         ii.InventoryReceipt.DeletedAt == null &&
+                                         string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) == 0)
                             .Sum(ii => ii.Count ?? 0)
                         : 0)
                 .Map(
                     dest => dest.PendingQuantity,
-                    src => src.InventoryReceiptInfos != null
-                        ? src.InventoryReceiptInfos
-                            .Where(
-                                ii => ii.InventoryReceipt != null &&
-                                            (string.Compare(
-                                                    ii.InventoryReceipt.StatusId,
-                                                    Domain.Constants.InventoryReceiptStatus.Draft) ==
-                                                0 ||
-                                                string.Compare(
-                                                    ii.InventoryReceipt.StatusId,
-                                                    Domain.Constants.InventoryReceiptStatus.Sent) ==
-                                                0 ||
-                                                string.Compare(ii.InventoryReceipt.StatusId, "working") == 0))
+                    src => src.PurchaseOrderItems != null
+                        ? src.PurchaseOrderItems
+                            .Where(poi => poi.DeletedAt == null)
+                            .SelectMany(poi => poi.InventoryReceiptInfos)
+                            .Where(ii => ii.DeletedAt == null &&
+                                         ii.InventoryReceipt != null &&
+                                         ii.InventoryReceipt.DeletedAt == null &&
+                                         (string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, System.StringComparison.OrdinalIgnoreCase) == 0 ||
+                                          string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent, System.StringComparison.OrdinalIgnoreCase) == 0))
                             .Sum(ii => ii.Count ?? 0)
                         : 0)
                 .Map(
                     dest => dest.UnimportedQuantity,
                     src => src.Quantity -
-                        (src.InventoryReceiptInfos != null
-                            ? src.InventoryReceiptInfos
-                                .Where(
-                                    ii => ii.InventoryReceipt != null &&
-                                                    (string.Compare(
-                                                            ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Approve) ==
-                                                        0))
+                        (src.PurchaseOrderItems != null
+                            ? src.PurchaseOrderItems
+                                .Where(poi => poi.DeletedAt == null)
+                                .SelectMany(poi => poi.InventoryReceiptInfos)
+                                .Where(ii => ii.DeletedAt == null &&
+                                             ii.InventoryReceipt != null &&
+                                             ii.InventoryReceipt.DeletedAt == null &&
+                                             string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) == 0)
                                 .Sum(ii => ii.Count ?? 0)
                             : 0));
 
@@ -160,14 +156,14 @@ namespace Application.Features.PurchaseRequests.Mappings
                 .Map(
                     dest => dest.UnimportedQuantity,
                     src => src.Quantity -
-                        (src.InventoryReceiptInfos != null
-                            ? src.InventoryReceiptInfos
-                                .Where(
-                                    ii => ii.InventoryReceipt != null &&
-                                                    (string.Compare(
-                                                            ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Approve) ==
-                                                        0))
+                        (src.PurchaseOrderItems != null
+                            ? src.PurchaseOrderItems
+                                .Where(poi => poi.DeletedAt == null)
+                                .SelectMany(poi => poi.InventoryReceiptInfos)
+                                .Where(ii => ii.DeletedAt == null &&
+                                             ii.InventoryReceipt != null &&
+                                             ii.InventoryReceipt.DeletedAt == null &&
+                                             string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) == 0)
                                 .Sum(ii => ii.Count ?? 0)
                             : 0))
                 .Map(

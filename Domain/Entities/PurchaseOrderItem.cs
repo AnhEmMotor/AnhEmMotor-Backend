@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -42,5 +43,6 @@ namespace Domain.Entities
         public ProductVariant? ProductVariant { get; set; }
         public ProductVariantColor? ProductVariantColor { get; set; }
         public QuotationProductRow? QuotationProductRow { get; set; }
+        public ICollection<InventoryReceiptInfo> InventoryReceiptInfos { get; set; } = [];
     }
 }

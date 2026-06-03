@@ -71,8 +71,9 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
 
         foreach (var product in request.Products)
         {
+            PurchaseOrderItem? poItem = null;
             var resolvedVariantId = product.PurchaseOrderItemId.HasValue &&
-                    poItemsDict.TryGetValue(product.PurchaseOrderItemId.Value, out var poItem)
+                    poItemsDict.TryGetValue(product.PurchaseOrderItemId.Value, out poItem)
                 ? poItem.ProductVariantId
                 : (int?)null;
 
@@ -85,6 +86,29 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
 
             if (resolvedVariantId.HasValue)
             {
+                if (poItem != null)
+                {
+                    var occupiedQty = poItem.InventoryReceiptInfos
+                        .Where(ii => ii.DeletedAt == null &&
+                                     ii.InventoryReceipt != null &&
+                                     ii.InventoryReceipt.DeletedAt == null &&
+                                     (string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, StringComparison.OrdinalIgnoreCase) ||
+                                      string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent, StringComparison.OrdinalIgnoreCase) ||
+                                      string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase)))
+                        .Sum(ii => ii.Count ?? 0);
+
+                    var remainingAllowed = poItem.OrderedQuantity - occupiedQty;
+                    var requestedQty = product.Count ?? 0;
+
+                    if (requestedQty > remainingAllowed)
+                    {
+                        var productName = poItem.ProductVariant?.Product?.Name ?? $"Biến thể #{poItem.ProductVariantId}";
+                        return Error.BadRequest(
+                            $"Số lượng nhập ({requestedQty}) cho sản phẩm '{productName}' vượt quá số lượng còn lại được phép nhập từ đơn mua hàng PO ({remainingAllowed}).",
+                            "Products");
+                    }
+                }
+
                 var variants = await variantRepository.GetByIdAsync(
                     [resolvedVariantId.Value],
                     cancellationToken,

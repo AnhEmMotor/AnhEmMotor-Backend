@@ -265,7 +265,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<InventoryReceiptInfo>()
             .HasOne(ii => ii.PurchaseOrderItem)
-            .WithMany()
+            .WithMany(poi => poi.InventoryReceiptInfos)
             .HasForeignKey(ii => ii.PurchaseOrderItemId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<OutputInfo>()

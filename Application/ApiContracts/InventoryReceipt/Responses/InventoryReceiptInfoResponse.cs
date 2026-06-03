@@ -21,5 +21,9 @@ public class InventoryReceiptInfoResponse
 
     public int? RemainingCount { get; set; }
 
+    public int? OrderedQuantity { get; set; }
+
+    public int? MaxAllowedQuantity { get; set; }
+
     public List<InventoryReceiptVehicleResponse> Vehicles { get; set; } = [];
 }

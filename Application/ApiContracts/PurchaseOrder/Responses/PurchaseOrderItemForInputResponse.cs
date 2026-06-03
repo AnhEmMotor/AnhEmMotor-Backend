@@ -14,6 +14,14 @@ namespace Application.ApiContracts.PurchaseOrder.Responses
 
         public int OrderedQuantity { get; set; }
 
+        public int ImportedQuantity { get; set; }
+
+        public int SentQuantity { get; set; }
+
+        public int DraftQuantity { get; set; }
+
+        public int RemainingQuantity { get; set; }
+
         public decimal UnitPrice { get; set; }
 
         public bool NeedVin { get; set; }

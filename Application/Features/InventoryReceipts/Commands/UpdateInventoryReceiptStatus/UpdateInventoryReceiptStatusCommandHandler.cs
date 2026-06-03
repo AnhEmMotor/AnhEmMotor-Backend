@@ -41,6 +41,32 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
 
             if (string.Equals(request.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, StringComparison.OrdinalIgnoreCase))
             {
+                foreach (var info in receipt.InventoryReceiptInfos)
+                {
+                    var poItem = info.PurchaseOrderItem;
+                    if (poItem != null)
+                    {
+                        var importedQty = poItem.InventoryReceiptInfos
+                            .Where(ii => ii.DeletedAt == null &&
+                                         ii.InventoryReceiptId != receipt.Id &&
+                                         ii.InventoryReceipt != null &&
+                                         ii.InventoryReceipt.DeletedAt == null &&
+                                         string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, StringComparison.OrdinalIgnoreCase))
+                            .Sum(ii => ii.Count ?? 0);
+
+                        var remainingAllowed = poItem.OrderedQuantity - importedQty;
+                        var currentQty = info.Count ?? 0;
+
+                        if (currentQty > remainingAllowed)
+                        {
+                            var productName = poItem.ProductVariant?.Product?.Name ?? $"Biến thể #{poItem.ProductVariantId}";
+                            return Error.BadRequest(
+                                $"Không thể phê duyệt. Số lượng nhập ({currentQty}) cho sản phẩm '{productName}' vượt quá giới hạn còn lại của PO ({remainingAllowed}).",
+                                "StatusId");
+                        }
+                    }
+                }
+
                 receipt.StatusId = Domain.Constants.InventoryReceiptStatus.Approve;
                 receipt.ApprovedBy = currentUserId;
                 receipt.ConfirmedBy = currentUserId;
