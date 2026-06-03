@@ -1,6 +1,6 @@
 namespace Application.ApiContracts.PurchaseOrder.Responses
 {
-    public class PurchaseOrderItemForInputResponse
+    public class PurchaseOrderItemForInvoiceResponse
     {
         public int Id { get; set; }
 
@@ -14,11 +14,9 @@ namespace Application.ApiContracts.PurchaseOrder.Responses
 
         public int OrderedQuantity { get; set; }
 
-        public int ImportedQuantity { get; set; }
+        public int InvoicedQuantity { get; set; }
 
-        public int SentQuantity { get; set; }
-
-        public int DraftQuantity { get; set; }
+        public int InvoicingQuantity { get; set; }
 
         public int RemainingQuantity { get; set; }
 
@@ -34,6 +32,6 @@ namespace Application.ApiContracts.PurchaseOrder.Responses
 
         public string? QuotationName { get; set; }
 
-        public System.Collections.Generic.List<PurchaseOrderVehicleInputResponse> InvoicedVehicles { get; set; } = [];
+        public System.Collections.Generic.List<PurchaseOrderVehicleInvoiceResponse> ImportedVehicles { get; set; } = [];
     }
 }

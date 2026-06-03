@@ -25,5 +25,11 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
         public int PendingQuantity { get; set; }
 
         public int UnimportedQuantity { get; set; }
+
+        public int InvoicedQuantity { get; set; }
+
+        public int InvoicingQuantity { get; set; }
+
+        public int UninvoicedQuantity { get; set; }
     }
 }

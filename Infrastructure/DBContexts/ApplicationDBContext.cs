@@ -249,6 +249,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(v => v.InventoryReceiptInfoId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Vehicle>()
+            .HasOne(v => v.PurchaseInvoiceItem)
+            .WithMany(pii => pii.Vehicles)
+            .HasForeignKey(v => v.PurchaseInvoiceItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Vehicle>()
             .HasOne(v => v.OutputInfo)
             .WithMany(oi => oi.Vehicles)
             .HasForeignKey(v => v.OutputInfoId)
@@ -356,7 +361,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
         modelBuilder.Entity<PurchaseInvoiceItem>()
             .HasOne(pii => pii.PurchaseOrderItem)
-            .WithMany()
+            .WithMany(poi => poi.PurchaseInvoiceItems)
             .HasForeignKey(pii => pii.PurchaseOrderItemId)
             .OnDelete(DeleteBehavior.Restrict);
 

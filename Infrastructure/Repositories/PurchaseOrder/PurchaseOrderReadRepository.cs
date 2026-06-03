@@ -59,6 +59,15 @@ namespace Infrastructure.Repositories.PurchaseOrder
                 .Include(x => x.PurchaseOrderItems.Where(item => item.DeletedAt == null))
                 .ThenInclude(r => r.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
                 .ThenInclude(ii => ii.InventoryReceipt)
+                .Include(x => x.PurchaseOrderItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                .ThenInclude(ii => ii.Vehicles.Where(v => v.DeletedAt == null))
+                .Include(x => x.PurchaseOrderItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.PurchaseInvoiceItems.Where(pii => pii.DeletedAt == null))
+                .ThenInclude(pii => pii.PurchaseInvoice)
+                .Include(x => x.PurchaseOrderItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.PurchaseInvoiceItems.Where(pii => pii.DeletedAt == null))
+                .ThenInclude(pii => pii.Vehicles.Where(v => v.DeletedAt == null))
                 .AsSplitQuery();
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }

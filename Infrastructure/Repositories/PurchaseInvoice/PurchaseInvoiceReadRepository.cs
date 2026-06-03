@@ -52,8 +52,11 @@ namespace Infrastructure.Repositories.PurchaseInvoice
                 .Include(x => x.PurchaseInvoiceItems.Where(pii => pii.DeletedAt == null))
                     .ThenInclude(pii => pii.ProductVariant)
                         .ThenInclude(pv => pv!.Product)
+                            .ThenInclude(p => p!.ProductCategory)
                 .Include(x => x.PurchaseInvoiceItems.Where(pii => pii.DeletedAt == null))
                     .ThenInclude(pii => pii.ProductVariantColor)
+                .Include(x => x.PurchaseInvoiceItems.Where(pii => pii.DeletedAt == null))
+                    .ThenInclude(pii => pii.Vehicles)
                 .AsSplitQuery();
 
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);

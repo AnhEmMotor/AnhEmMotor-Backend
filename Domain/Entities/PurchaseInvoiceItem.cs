@@ -45,5 +45,6 @@ namespace Domain.Entities
         public InventoryReceiptInfo? InventoryReceiptInfo { get; set; }
         public ProductVariant? ProductVariant { get; set; }
         public ProductVariantColor? ProductVariantColor { get; set; }
+        public ICollection<Vehicle> Vehicles { get; set; } = [];
     }
 }

@@ -18,5 +18,15 @@ namespace Application.ApiContracts.PurchaseInvoice.Requests
         public decimal UnitPrice { get; set; }
 
         public decimal TaxRate { get; set; } = 0;
+
+        public System.Collections.Generic.List<VehicleInvoiceRequest>? Vehicles { get; set; }
+    }
+
+    public class VehicleInvoiceRequest
+    {
+        public int? Id { get; set; }
+        public string VinNumber { get; set; } = string.Empty;
+        public string EngineNumber { get; set; } = string.Empty;
+        public decimal ImportPrice { get; set; }
     }
 }

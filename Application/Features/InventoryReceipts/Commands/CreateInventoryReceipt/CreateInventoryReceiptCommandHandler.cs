@@ -186,7 +186,11 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                             .ConfigureAwait(false);
                         if (isVinExists)
                         {
-                            return Error.BadRequest($"Số khung (VIN) {vin} đã tồn tại trong hệ thống.", "Products");
+                            var existingVehicle = await vehicleReadRepository.GetByVinAsync(vin, cancellationToken).ConfigureAwait(false);
+                            if (existingVehicle == null || existingVehicle.Status != VehicleStatus.PendingImport)
+                            {
+                                return Error.BadRequest($"Số khung (VIN) {vin} đã tồn tại trong hệ thống.", "Products");
+                            }
                         }
 
                         var isEngineExists = await vehicleReadRepository.ExistsByEngineNumberAsync(
@@ -197,7 +201,11 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                             .ConfigureAwait(false);
                         if (isEngineExists)
                         {
-                            return Error.BadRequest($"Số máy {engine} đã tồn tại trong hệ thống.", "Products");
+                            var existingVehicle = await vehicleReadRepository.GetByVinAsync(vin, cancellationToken).ConfigureAwait(false);
+                            if (existingVehicle == null || existingVehicle.Status != VehicleStatus.PendingImport)
+                            {
+                                return Error.BadRequest($"Số máy {engine} đã tồn tại trong hệ thống.", "Products");
+                            }
                         }
                     }
                 }
@@ -234,11 +242,25 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                 if (string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase) &&
                     p.Vehicles != null)
                 {
-                    inventoryReceiptInfo.Vehicles = [.. p.Vehicles
-                        .Select(
-                            v => new Vehicle
+                    var vehiclesList = new List<Vehicle>();
+                    foreach (var v in p.Vehicles)
+                    {
+                        var vin = v.VinNumber.Trim();
+                        var existingVehicle = await vehicleReadRepository.GetByVinAsync(vin, cancellationToken).ConfigureAwait(false);
+                        if (existingVehicle != null && existingVehicle.Status == VehicleStatus.PendingImport)
+                        {
+                            existingVehicle.Status = VehicleStatus.Available;
+                            existingVehicle.ImportPrice = v.ImportPrice;
+                            existingVehicle.EngineNumber = v.EngineNumber.Trim();
+                            existingVehicle.ProductVariantColorId = resolvedColorId;
+                            existingVehicle.InventoryReceiptInfo = inventoryReceiptInfo;
+                            vehiclesList.Add(existingVehicle);
+                        }
+                        else
+                        {
+                            vehiclesList.Add(new Vehicle
                             {
-                                VinNumber = v.VinNumber.Trim(),
+                                VinNumber = vin,
                                 EngineNumber = v.EngineNumber.Trim(),
                                 LicensePlate = string.Empty,
                                 ProductVariantId = variant.Id,
@@ -246,8 +268,12 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                                 LeadId = null,
                                 PurchaseDate = DateTimeOffset.UtcNow,
                                 IsActive = true,
-                                Status = VehicleStatus.Available
-                            })];
+                                Status = VehicleStatus.Available,
+                                ImportPrice = v.ImportPrice
+                            });
+                        }
+                    }
+                    inventoryReceiptInfo.Vehicles = vehiclesList;
                 }
             }
             inventoryReceiptInfos.Add(inventoryReceiptInfo);

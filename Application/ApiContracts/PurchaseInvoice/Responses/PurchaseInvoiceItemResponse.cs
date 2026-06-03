@@ -31,5 +31,19 @@ namespace Application.ApiContracts.PurchaseInvoice.Responses
         public decimal TaxAmount => TotalPrice * (TaxRate / 100);
 
         public decimal TotalAmount => TotalPrice + TaxAmount;
+
+        public bool NeedVin { get; set; }
+
+        public System.Collections.Generic.List<VehicleInvoiceResponse> Vehicles { get; set; } = [];
+    }
+
+    public class VehicleInvoiceResponse
+    {
+        public int Id { get; set; }
+        public string VinNumber { get; set; } = string.Empty;
+        public string EngineNumber { get; set; } = string.Empty;
+        public decimal ImportPrice { get; set; }
+        public int? InventoryReceiptInfoId { get; set; }
+        public bool IsLocked => InventoryReceiptInfoId.HasValue;
     }
 }

@@ -34,7 +34,9 @@ namespace Application.Features.PurchaseInvoices.Mappings
                         : src.ProductVariant.VariantName)
                     : null)
                 .Map(dest => dest.SKU, src => src.ProductVariant != null ? src.ProductVariant.SKU : null)
-                .Map(dest => dest.ColorName, src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null);
+                .Map(dest => dest.ColorName, src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
+                .Map(dest => dest.NeedVin, src => src.ProductVariant != null && src.ProductVariant.Product != null && src.ProductVariant.Product.ProductCategory != null && src.ProductVariant.Product.ProductCategory.ManagementType == "vin_number")
+                .Map(dest => dest.Vehicles, src => src.Vehicles);
         }
     }
 }

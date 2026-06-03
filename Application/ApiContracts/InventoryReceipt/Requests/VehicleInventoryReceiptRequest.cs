@@ -7,5 +7,7 @@ namespace Application.ApiContracts.InventoryReceipt.Requests
         public string VinNumber { get; set; } = string.Empty;
 
         public string EngineNumber { get; set; } = string.Empty;
+
+        public decimal ImportPrice { get; set; } = 0;
     }
 }
