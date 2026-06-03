@@ -49,7 +49,23 @@ namespace Infrastructure.Repositories.InventoryReceipt
             Expression<Func<InventoryReceiptEntity, bool>>? filter = null,
             CancellationToken cancellationToken = default)
         {
-            var query = GetQueryable(mode);
+            IQueryable<InventoryReceiptEntity> query = GetQueryable(mode)
+                .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                    .ThenInclude(ii => ii.Vehicles.Where(v => v.DeletedAt == null))
+                .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                    .ThenInclude(ii => ii.PurchaseOrderItem)
+                        .ThenInclude(poi => poi!.ProductVariant)
+                            .ThenInclude(pv => pv!.Product)
+                .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                    .ThenInclude(ii => ii.PurchaseOrderItem)
+                        .ThenInclude(poi => poi!.ProductVariantColor)
+                .Include(x => x.PurchaseOrder)
+                    .ThenInclude(po => po!.Supplier)
+                .Include(x => x.CreatedByUser)
+                .Include(x => x.SentByUser)
+                .Include(x => x.ApprovedByUser)
+                .Include(x => x.RejectedByUser);
+
             if (filter != null)
             {
                 query = query.Where(filter);
@@ -112,8 +128,19 @@ namespace Infrastructure.Repositories.InventoryReceipt
             return GetQueryable(mode)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
                     .ThenInclude(ii => ii.Vehicles.Where(v => v.DeletedAt == null))
+                .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                    .ThenInclude(ii => ii.PurchaseOrderItem)
+                        .ThenInclude(poi => poi!.ProductVariant)
+                            .ThenInclude(pv => pv!.Product)
+                .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                    .ThenInclude(ii => ii.PurchaseOrderItem)
+                        .ThenInclude(poi => poi!.ProductVariantColor)
                 .Include(x => x.PurchaseOrder)
                     .ThenInclude(po => po!.Supplier)
+                .Include(x => x.CreatedByUser)
+                .Include(x => x.SentByUser)
+                .Include(x => x.ApprovedByUser)
+                .Include(x => x.RejectedByUser)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 

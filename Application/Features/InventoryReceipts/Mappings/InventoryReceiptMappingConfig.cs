@@ -1,4 +1,6 @@
 using Mapster;
+using Domain.Entities;
+using Application.ApiContracts.InventoryReceipt.Responses;
 
 namespace Application.Features.InventoryReceipts.Mappings
 {
@@ -6,7 +8,34 @@ namespace Application.Features.InventoryReceipts.Mappings
     {
         public void Register(TypeAdapterConfig config)
         {
-            // Temporarily empty to allow compilation during module refactoring
+            config.NewConfig<InventoryReceipt, InventoryReceiptListResponse>()
+                .Map(dest => dest.SupplierId, src => src.PurchaseOrder != null ? src.PurchaseOrder.SupplierId : (int?)null)
+                .Map(dest => dest.SupplierName, src => src.PurchaseOrder != null && src.PurchaseOrder.Supplier != null ? src.PurchaseOrder.Supplier.Name : null)
+                .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null)
+                .Map(dest => dest.SentByName, src => src.SentByUser != null ? src.SentByUser.FullName : null)
+                .Map(dest => dest.ApprovedByName, src => src.ApprovedByUser != null ? src.ApprovedByUser.FullName : null)
+                .Map(dest => dest.RejectedByName, src => src.RejectedByUser != null ? src.RejectedByUser.FullName : null)
+                .Map(dest => dest.Products, src => src.InventoryReceiptInfos);
+
+            config.NewConfig<InventoryReceipt, InventoryReceiptDetailResponse>()
+                .Map(dest => dest.SupplierId, src => src.PurchaseOrder != null ? src.PurchaseOrder.SupplierId : (int?)null)
+                .Map(dest => dest.SupplierName, src => src.PurchaseOrder != null && src.PurchaseOrder.Supplier != null ? src.PurchaseOrder.Supplier.Name : null)
+                .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null)
+                .Map(dest => dest.SentByName, src => src.SentByUser != null ? src.SentByUser.FullName : null)
+                .Map(dest => dest.ApprovedByName, src => src.ApprovedByUser != null ? src.ApprovedByUser.FullName : null)
+                .Map(dest => dest.RejectedByName, src => src.RejectedByUser != null ? src.RejectedByUser.FullName : null)
+                .Map(dest => dest.Products, src => src.InventoryReceiptInfos);
+
+            config.NewConfig<InventoryReceiptInfo, InventoryReceiptInfoResponse>()
+                .Map(dest => dest.ProductVariantId, src => src.PurchaseOrderItem != null ? src.PurchaseOrderItem.ProductVariantId : (int?)null)
+                .Map(dest => dest.ProductVariantColorId, src => src.PurchaseOrderItem != null ? src.PurchaseOrderItem.ProductVariantColorId : (int?)null)
+                .Map(dest => dest.ProductVariantColorName, src => src.PurchaseOrderItem != null && src.PurchaseOrderItem.ProductVariantColor != null ? src.PurchaseOrderItem.ProductVariantColor.ColorName : null)
+                .Map(dest => dest.SupplierId, src => src.InventoryReceipt != null && src.InventoryReceipt.PurchaseOrder != null ? src.InventoryReceipt.PurchaseOrder.SupplierId : (int?)null)
+                .Map(dest => dest.SupplierName, src => src.InventoryReceipt != null && src.InventoryReceipt.PurchaseOrder != null && src.InventoryReceipt.PurchaseOrder.Supplier != null ? src.InventoryReceipt.PurchaseOrder.Supplier.Name : null)
+                .Map(dest => dest.Name, src => src.PurchaseOrderItem != null && src.PurchaseOrderItem.ProductVariant != null && src.PurchaseOrderItem.ProductVariant.Product != null ? src.PurchaseOrderItem.ProductVariant.Product.Name : null)
+                .Map(dest => dest.Quantity, src => src.Count)
+                .Map(dest => dest.Vehicles, src => src.Vehicles);
         }
     }
 }
+
