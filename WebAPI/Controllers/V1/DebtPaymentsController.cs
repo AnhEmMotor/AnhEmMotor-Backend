@@ -59,7 +59,7 @@ namespace WebAPI.Controllers.V1
         /// <summary>
         /// Thực hiện thanh toán nợ cho dòng chi tiết phiếu nhập hàng
         /// </summary>
-        [HttpPost("lines/{lineId:int}/pay")]
+        [HttpPost("{lineId:int}/pay")]
         [HasPermission(DebtPayments.Create)]
         [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]

@@ -1,3 +1,5 @@
+using System;
+
 namespace Application.ApiContracts.DebtPayment.Responses
 {
     public class InventoryReceiptDebtLineResponse
@@ -10,5 +12,6 @@ namespace Application.ApiContracts.DebtPayment.Responses
         public string? ColorName { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal PaidAmount { get; set; }
+        public DateTimeOffset? DueDate { get; set; }
     }
 }
