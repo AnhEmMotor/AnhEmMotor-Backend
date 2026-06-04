@@ -246,11 +246,21 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                     foreach (var v in p.Vehicles)
                     {
                         var vin = v.VinNumber.Trim();
-                        var existingVehicle = await vehicleReadRepository.GetByVinAsync(vin, cancellationToken).ConfigureAwait(false);
+                        Vehicle? existingVehicle = null;
+                        if (v.Id.HasValue && v.Id.Value > 0)
+                        {
+                            existingVehicle = await vehicleReadRepository.GetByIdAsync(v.Id.Value, cancellationToken).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            existingVehicle = await vehicleReadRepository.GetByVinAsync(vin, cancellationToken).ConfigureAwait(false);
+                        }
+
                         if (existingVehicle != null && existingVehicle.Status == VehicleStatus.PendingImport)
                         {
                             existingVehicle.Status = VehicleStatus.Available;
                             existingVehicle.ImportPrice = v.ImportPrice;
+                            existingVehicle.VinNumber = vin;
                             existingVehicle.EngineNumber = v.EngineNumber.Trim();
                             existingVehicle.ProductVariantColorId = resolvedColorId;
                             existingVehicle.InventoryReceiptInfo = inventoryReceiptInfo;

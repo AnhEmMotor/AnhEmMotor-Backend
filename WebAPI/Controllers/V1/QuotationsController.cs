@@ -185,9 +185,10 @@ namespace WebAPI.Controllers.V1
         public async Task<IActionResult> GetApprovedPricesAsync(
             [FromQuery] int variantId,
             [FromQuery] int? colorId,
+            [FromQuery] int? supplierId,
             CancellationToken cancellationToken)
         {
-            var query = new GetApprovedPricesForVariantQuery(variantId, colorId);
+            var query = new GetApprovedPricesForVariantQuery(variantId, colorId, supplierId);
             var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }

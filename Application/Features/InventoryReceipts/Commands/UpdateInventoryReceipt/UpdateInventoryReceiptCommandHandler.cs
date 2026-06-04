@@ -32,6 +32,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
     IProductVariantReadRepository variantRepository,
     IPermissionReadRepository permissionRepository,
     IVehicleUpdateRepository vehicleUpdateRepository,
+    IVehicleReadRepository vehicleReadRepository,
     IUnitOfWork unitOfWork,
     ICurrentUserContext currentUserContext) : IRequestHandler<UpdateInventoryReceiptCommand, Result<InventoryReceiptDetailResponse?>>
 {
@@ -314,14 +315,14 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     existingInfo.RemainingCount = productRequest.Count.Value;
                 }
                 var variant = variantsList.FirstOrDefault(v => v.Id == resolvedVariantId);
-                SyncVehicleIdentifiers(existingInfo, productRequest, variant, resolvedColorId, vehicleUpdateRepository);
+                await SyncVehicleIdentifiersAsync(existingInfo, productRequest, variant, resolvedColorId, vehicleUpdateRepository, vehicleReadRepository, cancellationToken).ConfigureAwait(false);
             } 
             else
             {
                 var newInfo = productRequest.Adapt<InventoryReceiptInfo>(config);
                 newInfo.RemainingCount = newInfo.Count ?? 0;
                 var variant = variantsList.FirstOrDefault(v => v.Id == resolvedVariantId);
-                SyncVehicleIdentifiers(newInfo, productRequest, variant, resolvedColorId, vehicleUpdateRepository);
+                await SyncVehicleIdentifiersAsync(newInfo, productRequest, variant, resolvedColorId, vehicleUpdateRepository, vehicleReadRepository, cancellationToken).ConfigureAwait(false);
                 inventoryReceipt.InventoryReceiptInfos.Add(newInfo);
             }
         }
@@ -396,12 +397,14 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         return null;
     }
 
-    private static void SyncVehicleIdentifiers(
+    private static async Task SyncVehicleIdentifiersAsync(
         InventoryReceiptInfo inventoryReceiptInfo,
         UpdateInventoryReceiptInfoRequest productRequest,
         ProductVariant? variant,
         int? resolvedColorId,
-        IVehicleUpdateRepository vehicleUpdateRepository)
+        IVehicleUpdateRepository vehicleUpdateRepository,
+        IVehicleReadRepository vehicleReadRepository,
+        CancellationToken cancellationToken)
     {
         var managementType = variant?.Product?.ProductCategory?.ManagementType;
         if (!string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase))
@@ -429,10 +432,22 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         var updatedVehicles = new List<Vehicle>();
         foreach (var vehicleRequest in requestedVehicles)
         {
-            var vehicle = vehicleRequest.Id.HasValue &&
-                    existingVehicles.TryGetValue(vehicleRequest.Id.Value, out var existingVehicle)
-                ? existingVehicle
-                : new Vehicle
+            Vehicle? vehicle = null;
+            if (vehicleRequest.Id.HasValue)
+            {
+                if (existingVehicles.TryGetValue(vehicleRequest.Id.Value, out var existingVehicle))
+                {
+                    vehicle = existingVehicle;
+                }
+                else
+                {
+                    vehicle = await vehicleReadRepository.GetByIdAsync(vehicleRequest.Id.Value, cancellationToken).ConfigureAwait(false);
+                }
+            }
+
+            if (vehicle == null)
+            {
+                vehicle = new Vehicle
                 {
                     LicensePlate = string.Empty,
                     ProductVariantId = variant?.Id,
@@ -442,6 +457,8 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     IsActive = true,
                     Status = VehicleStatus.Available
                 };
+            }
+
             vehicle.VinNumber = vehicleRequest.VinNumber.Trim();
             vehicle.EngineNumber = vehicleRequest.EngineNumber.Trim();
             vehicle.ProductVariantId = variant?.Id;

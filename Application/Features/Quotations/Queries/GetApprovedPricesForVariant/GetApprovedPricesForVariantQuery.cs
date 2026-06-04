@@ -5,5 +5,5 @@ using System.Collections.Generic;
 
 namespace Application.Features.Quotations.Queries.GetApprovedPricesForVariant
 {
-    public sealed record GetApprovedPricesForVariantQuery(int VariantId, int? ColorId) : IRequest<Result<List<PurchaseRequestQuotedPriceResponse>>>;
+    public sealed record GetApprovedPricesForVariantQuery(int VariantId, int? ColorId, int? SupplierId = null) : IRequest<Result<List<PurchaseRequestQuotedPriceResponse>>>;
 }
