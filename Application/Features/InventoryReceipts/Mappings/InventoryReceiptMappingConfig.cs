@@ -46,6 +46,7 @@ namespace Application.Features.InventoryReceipts.Mappings
                                       string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, System.StringComparison.OrdinalIgnoreCase)))
                         .Sum(ii => ii.Count ?? 0)
                     : (int?)null)
+                .Map(dest => dest.PurchaseOrderItemId, src => src.PurchaseOrderItemId)
                 .Map(dest => dest.Vehicles, src => src.Vehicles);
         }
     }

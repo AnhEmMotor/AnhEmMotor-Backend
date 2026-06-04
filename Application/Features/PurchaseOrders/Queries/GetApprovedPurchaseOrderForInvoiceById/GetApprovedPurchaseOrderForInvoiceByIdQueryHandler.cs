@@ -49,6 +49,26 @@ namespace Application.Features.PurchaseOrders.Queries.GetApprovedPurchaseOrderFo
                         responseItem.InvoicedQuantity -= excludedInvoiced;
                         responseItem.InvoicingQuantity -= excludedInvoicing;
                         responseItem.RemainingQuantity += (excludedInvoiced + excludedInvoicing);
+
+                        var currentInvoiceVins = excludedItems
+                            .SelectMany(pii => pii.Vehicles.Where(v => v.DeletedAt == null))
+                            .Select(v => v.VinNumber.Trim().ToLowerInvariant())
+                            .ToHashSet();
+
+                        var poItemImportVehicles = poItem.InventoryReceiptInfos
+                            .Where(ii => ii.DeletedAt == null && ii.InventoryReceipt != null && ii.InventoryReceipt.DeletedAt == null)
+                            .SelectMany(ii => ii.Vehicles.Where(v => v.DeletedAt == null))
+                            .Where(v => currentInvoiceVins.Contains(v.VinNumber.Trim().ToLowerInvariant()))
+                            .ToList();
+
+                        var mappedImportVehicles = poItemImportVehicles.Adapt<System.Collections.Generic.List<PurchaseOrderVehicleInvoiceResponse>>();
+                        foreach (var mv in mappedImportVehicles)
+                        {
+                            if (!responseItem.ImportedVehicles.Any(v => string.Equals(v.VinNumber.Trim(), mv.VinNumber.Trim(), StringComparison.OrdinalIgnoreCase)))
+                            {
+                                responseItem.ImportedVehicles.Add(mv);
+                            }
+                        }
                     }
                 }
             }

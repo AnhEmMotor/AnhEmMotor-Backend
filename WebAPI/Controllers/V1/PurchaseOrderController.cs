@@ -211,9 +211,12 @@ namespace WebAPI.Controllers.V1
         [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
         [ProducesResponseType(typeof(PurchaseOrderDetailForInputResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetApprovedForInputByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetApprovedForInputByIdAsync(
+            int id,
+            [FromQuery] int? excludeReceiptId,
+            CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new GetApprovedPurchaseOrderForInputByIdQuery(id), cancellationToken)
+            var result = await mediator.Send(new GetApprovedPurchaseOrderForInputByIdQuery(id, excludeReceiptId), cancellationToken)
                 .ConfigureAwait(true);
             return HandleResult(result);
         }

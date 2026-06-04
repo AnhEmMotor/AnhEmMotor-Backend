@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Application.Features.PurchaseOrders.Queries.GetApprovedPurchaseOrderForInputById
 {
-    public sealed record GetApprovedPurchaseOrderForInputByIdQuery(int Id) : IRequest<Result<PurchaseOrderDetailForInputResponse?>>;
+    public sealed record GetApprovedPurchaseOrderForInputByIdQuery(int Id, int? ExcludeReceiptId = null) : IRequest<Result<PurchaseOrderDetailForInputResponse?>>;
 }
