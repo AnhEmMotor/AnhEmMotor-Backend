@@ -87,6 +87,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Where(v => ids.Contains(v.Id))
                 .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
+                .ThenInclude(c => c!.Parent)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)

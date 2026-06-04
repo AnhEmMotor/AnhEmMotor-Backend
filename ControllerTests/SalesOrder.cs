@@ -16,6 +16,7 @@ using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
+using Application.Interfaces.Services;
 using Domain.Constants.Order;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -35,12 +36,15 @@ namespace ControllerTests;
 public class SalesOrder
 {
     private readonly Mock<IMediator> _mediatorMock;
+    private readonly Mock<ICurrentUserContext> _currentUserContextMock;
     private readonly SalesOrdersController _controller;
 
     public SalesOrder()
     {
         _mediatorMock = new Mock<IMediator>();
-        _controller = new SalesOrdersController(_mediatorMock.Object);
+        _currentUserContextMock = new Mock<ICurrentUserContext>();
+        _currentUserContextMock.Setup(c => c.GetUserId()).Returns(Guid.Empty);
+        _controller = new SalesOrdersController(_mediatorMock.Object, _currentUserContextMock.Object);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
@@ -128,6 +132,7 @@ public class SalesOrder
     public async Task CreateOutputForAdmin_WithManagerPermission_CreatesOrder()
     {
         var managerId = Guid.NewGuid();
+        _currentUserContextMock.Setup(c => c.GetUserId()).Returns(managerId);
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, managerId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
@@ -161,6 +166,7 @@ public class SalesOrder
     public async Task UpdateOutput_WithManagerPermission_UpdatesOrder()
     {
         var managerId = Guid.NewGuid();
+        _currentUserContextMock.Setup(c => c.GetUserId()).Returns(managerId);
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, managerId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);

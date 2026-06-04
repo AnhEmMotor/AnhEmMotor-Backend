@@ -68,6 +68,7 @@ public class ProductReadRepository(
         }
         return query
             .Include(p => p.ProductCategory)
+            .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
             .Include(p => p.ProductTechnologies)
             .ThenInclude(pt => pt.Technology)
@@ -174,6 +175,7 @@ public class ProductReadRepository(
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         IQueryable<ProductEntity> dbQuery = query
             .Include(p => p.ProductCategory)
+            .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
@@ -311,6 +313,7 @@ public class ProductReadRepository(
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         IQueryable<ProductEntity> dbQuery = query
             .Include(p => p.ProductCategory)
+            .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductCollectionPhotos)
@@ -388,6 +391,7 @@ public class ProductReadRepository(
         return query
             .Include(v => v.Product)
             .ThenInclude(p => p!.ProductCategory)
+            .ThenInclude(c => c!.Parent)
             .Include(v => v.Product)
             .ThenInclude(p => p!.Brand)
             .Include(v => v.Product)

@@ -77,6 +77,8 @@ namespace Domain.Entities
 
         public ICollection<VariantOptionValue> VariantOptionValues { get; set; } = [];
 
+    public int? MaxPurchaseQuantity { get; set; }
+
         public ICollection<InventoryTransaction> InventoryTransactions { get; set; } = [];
 
         public ICollection<BookingAppointment> BookingAppointments { get; set; } = [];

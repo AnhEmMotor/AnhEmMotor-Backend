@@ -274,7 +274,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(n => n.PublishedByUser)
             .WithMany(u => u.PublishedNewsArticles)
             .HasForeignKey(n => n.PublishedBy)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<NewsArticle>()
             .HasIndex(n => n.Slug)
@@ -293,7 +293,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(b => b.UpdatedByUser)
             .WithMany(u => u.UpdatedBanners)
             .HasForeignKey(b => b.UpdatedBy)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<PromotionBanner>()
             .HasIndex(b => new { b.IsEnabled, b.StartDate, b.EndDate });
@@ -303,7 +303,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             entity.HasOne(v => v.User)
                 .WithMany()
                 .HasForeignKey(v => v.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(v => v.Product)
                 .WithMany()
@@ -329,7 +329,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             entity.HasOne(t => t.Customer)
                 .WithMany()
                 .HasForeignKey(t => t.CustomerId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(t => t.AssignedAdmin)
                 .WithMany()

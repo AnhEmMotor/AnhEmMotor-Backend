@@ -11,5 +11,7 @@ namespace Application.ApiContracts.Product.Responses
         public string? ColorCode { get; set; }
 
         public string? CoverImageUrl { get; set; }
+
+        public int? MaxPurchaseQuantity { get; set; }
     }
 }

@@ -1,12 +1,18 @@
 using AnhEmMotor.Domain.Constants;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Entities;
 
 namespace AnhEmMotor.Domain.Entities
 {
+    [Table("SupportTicket")]
     public class SupportTicket : BaseEntity
     {
+        [Key]
+        [Column("Id")]
+        public int Id { get; set; }
         public Guid? CustomerId { get; set; }
         public virtual ApplicationUser? Customer { get; set; }
 
