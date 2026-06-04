@@ -35,6 +35,7 @@ public static class DependencyInjection
                 options =>
                 {
                     options.UseMySql(connectionString, serverVersion);
+                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
                 });
         } else if (string.Compare(provider, "PostgreSql") == 0)
         {
@@ -43,6 +44,7 @@ public static class DependencyInjection
                 options =>
                 {
                     options.UseNpgsql(connectionString);
+                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
                 });
         } else
         {
@@ -54,6 +56,7 @@ public static class DependencyInjection
                         b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
                                 .CommandTimeout(30)
                                 .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+                    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
                 });
         }
         services.AddIdentity<ApplicationUser, ApplicationRole>(

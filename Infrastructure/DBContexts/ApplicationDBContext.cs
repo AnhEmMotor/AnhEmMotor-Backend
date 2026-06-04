@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
+using Application.Interfaces.Repositories.InventoryOnHand;
+using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using System.Linq.Expressions;
 using InventoryReceiptStatus = Domain.Entities.InventoryReceiptStatus;
@@ -15,12 +17,16 @@ namespace Infrastructure.DBContexts;
 
 public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
-    public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options): base(options)
+    private readonly IServiceProvider? _serviceProvider;
+
+    public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options, IServiceProvider? serviceProvider = null): base(options)
     {
+        _serviceProvider = serviceProvider;
     }
 
-    protected ApplicationDBContext(DbContextOptions options): base(options)
+    protected ApplicationDBContext(DbContextOptions options, IServiceProvider? serviceProvider = null): base(options)
     {
+        _serviceProvider = serviceProvider;
     }
 
     public new DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
@@ -132,6 +138,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<InventoryLedger> InventoryLedgers { get; set; }
 
     public virtual DbSet<SupplierDebt> SupplierDebts { get; set; }
+
+    public virtual DbSet<InventoryOnHand> InventoryOnHands { get; set; }
 
     public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
 
@@ -386,6 +394,16 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(il => il.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryOnHand>()
+            .HasOne(i => i.ProductVariant)
+            .WithMany()
+            .HasForeignKey(i => i.ProductVariantId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<InventoryOnHand>()
+            .HasOne(i => i.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(i => i.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Cascade);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
         if (isNotSqlServer)
@@ -444,8 +462,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         }
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        // 1. Audit columns update
         var entries = ChangeTracker.Entries<BaseEntity>();
         foreach (var entry in entries)
         {
@@ -466,7 +485,119 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     break;
             }
         }
-        return base.SaveChangesAsync(cancellationToken);
+
+        // 2. Identify affected items for inventory recalculation
+        var receiptIds = new List<int>();
+        var outputIds = new List<int>();
+        var bookingIds = new List<int>();
+
+        var allEntries = ChangeTracker.Entries();
+        foreach (var entry in allEntries)
+        {
+            if (entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
+            {
+                if (entry.Entity is InventoryReceiptInfo receiptInfo)
+                {
+                    receiptIds.Add(receiptInfo.InventoryReceiptId);
+                }
+                else if (entry.Entity is InventoryReceipt receipt)
+                {
+                    receiptIds.Add(receipt.Id);
+                }
+                else if (entry.Entity is OutputInfo outputInfo)
+                {
+                    outputIds.Add(outputInfo.OutputId);
+                }
+                else if (entry.Entity is Output outputOrder)
+                {
+                    outputIds.Add(outputOrder.Id);
+                }
+                else if (entry.Entity is Booking booking)
+                {
+                    bookingIds.Add(booking.Id);
+                }
+            }
+        }
+
+        // 3. Save changes
+        var result = await base.SaveChangesAsync(cancellationToken);
+
+        // 4. Recalculate inventory
+        if (receiptIds.Any() || outputIds.Any() || bookingIds.Any())
+        {
+            var combos = new HashSet<(int VariantId, int? ColorId)>();
+
+            if (receiptIds.Any())
+            {
+                var receiptCombos = await InventoryReceiptInfos
+                    .IgnoreQueryFilters()
+                    .Where(x => receiptIds.Contains(x.InventoryReceiptId))
+                    .Select(x => new { 
+                        PurchaseVariantId = x.PurchaseOrderItem != null ? (int?)x.PurchaseOrderItem.ProductVariantId : null,
+                        PurchaseColorId = x.PurchaseOrderItem != null ? x.PurchaseOrderItem.ProductVariantColorId : null,
+                        ReturnVariantId = x.ParentOutputInfo != null ? (int?)x.ParentOutputInfo.ProductVariantId : null,
+                        ReturnColorId = x.ParentOutputInfo != null ? x.ParentOutputInfo.ProductVariantColorId : null
+                    })
+                    .ToListAsync(cancellationToken);
+
+                foreach (var rc in receiptCombos)
+                {
+                    if (rc.PurchaseVariantId.HasValue)
+                        combos.Add((rc.PurchaseVariantId.Value, rc.PurchaseColorId));
+                    if (rc.ReturnVariantId.HasValue)
+                        combos.Add((rc.ReturnVariantId.Value, rc.ReturnColorId));
+                }
+            }
+
+            if (outputIds.Any())
+            {
+                var outputCombos = await OutputInfos
+                    .IgnoreQueryFilters()
+                    .Where(x => outputIds.Contains(x.OutputId))
+                    .Select(x => new { x.ProductVariantId, x.ProductVariantColorId })
+                    .ToListAsync(cancellationToken);
+
+                foreach (var oc in outputCombos)
+                {
+                    if (oc.ProductVariantId.HasValue)
+                        combos.Add((oc.ProductVariantId.Value, oc.ProductVariantColorId));
+                }
+            }
+
+            if (bookingIds.Any())
+            {
+                var bookingCombos = await Bookings
+                    .IgnoreQueryFilters()
+                    .Where(x => bookingIds.Contains(x.Id) && x.ProductVariantId.HasValue)
+                    .Select(x => x.ProductVariantId.Value)
+                    .ToListAsync(cancellationToken);
+
+                foreach (var variantId in bookingCombos)
+                {
+                    combos.Add((variantId, null));
+                }
+            }
+
+            if (combos.Any() && _serviceProvider != null)
+            {
+                var inventoryRepo = _serviceProvider.GetService<IInventoryOnHandUpdateRepository>();
+                if (inventoryRepo != null)
+                {
+                    foreach (var combo in combos)
+                    {
+                        try
+                        {
+                            await inventoryRepo.RecalculateAsync(combo.VariantId, combo.ColorId, cancellationToken);
+                        }
+                        catch
+                        {
+                            // Avoid failing SaveChangesAsync if recalculation fails
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     public IQueryable<T> All<T>() where T : class => Set<T>().IgnoreQueryFilters();
