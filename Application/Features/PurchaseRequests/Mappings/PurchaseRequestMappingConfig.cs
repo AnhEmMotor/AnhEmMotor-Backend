@@ -34,40 +34,12 @@ namespace Application.Features.PurchaseRequests.Mappings
                 .Map(
                     dest => dest.ProductVariantColorName,
                     src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
-                .Map(
-                    dest => dest.POCreatingQuantity,
-                    src => 0)
-                .Map(
-                    dest => dest.POApprovedQuantity,
-                    src => 0)
-                .Map(
-                    dest => dest.PORemainingQuantity,
-                    src => src.Quantity)
+
                 .Map(
                     dest => dest.ImportedQuantity,
-                    src => src.InventoryReceiptInfos != null
-                        ? src.InventoryReceiptInfos
-                            .Where(ii => ii.DeletedAt == null &&
-                                         ii.InventoryReceipt != null &&
-                                         ii.InventoryReceipt.DeletedAt == null &&
-                                         string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) == 0)
-                            .Sum(ii => ii.Count ?? 0)
-                        : 0)
-                .Map(
-                    dest => dest.PendingQuantity,
-                    src => src.InventoryReceiptInfos != null
-                        ? src.InventoryReceiptInfos
-                            .Where(ii => ii.DeletedAt == null &&
-                                         ii.InventoryReceipt != null &&
-                                         ii.InventoryReceipt.DeletedAt == null &&
-                                         (string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, System.StringComparison.OrdinalIgnoreCase) == 0 ||
-                                          string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent, System.StringComparison.OrdinalIgnoreCase) == 0))
-                            .Sum(ii => ii.Count ?? 0)
-                        : 0)
-                .Map(
-                    dest => dest.UnimportedQuantity,
-                    src => src.Quantity -
-                        (src.InventoryReceiptInfos != null
+                    src => (src.PurchaseRequest == null || string.Compare(src.PurchaseRequest.Status, Domain.Constants.PurchaseRequestStatus.Approve, System.StringComparison.OrdinalIgnoreCase) != 0) 
+                        ? (int?)null 
+                        : (src.InventoryReceiptInfos != null
                             ? src.InventoryReceiptInfos
                                 .Where(ii => ii.DeletedAt == null &&
                                              ii.InventoryReceipt != null &&
@@ -75,6 +47,32 @@ namespace Application.Features.PurchaseRequests.Mappings
                                              string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) == 0)
                                 .Sum(ii => ii.Count ?? 0)
                             : 0))
+                .Map(
+                    dest => dest.PendingQuantity,
+                    src => (src.PurchaseRequest == null || string.Compare(src.PurchaseRequest.Status, Domain.Constants.PurchaseRequestStatus.Approve, System.StringComparison.OrdinalIgnoreCase) != 0) 
+                        ? (int?)null 
+                        : (src.InventoryReceiptInfos != null
+                            ? src.InventoryReceiptInfos
+                                .Where(ii => ii.DeletedAt == null &&
+                                             ii.InventoryReceipt != null &&
+                                             ii.InventoryReceipt.DeletedAt == null &&
+                                             (string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, System.StringComparison.OrdinalIgnoreCase) == 0 ||
+                                              string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent, System.StringComparison.OrdinalIgnoreCase) == 0))
+                                .Sum(ii => ii.Count ?? 0)
+                            : 0))
+                .Map(
+                    dest => dest.UnimportedQuantity,
+                    src => (src.PurchaseRequest == null || string.Compare(src.PurchaseRequest.Status, Domain.Constants.PurchaseRequestStatus.Approve, System.StringComparison.OrdinalIgnoreCase) != 0) 
+                        ? (int?)null 
+                        : (src.Quantity -
+                            (src.InventoryReceiptInfos != null
+                                ? src.InventoryReceiptInfos
+                                    .Where(ii => ii.DeletedAt == null &&
+                                                 ii.InventoryReceipt != null &&
+                                                 ii.InventoryReceipt.DeletedAt == null &&
+                                                 string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) == 0)
+                                    .Sum(ii => ii.Count ?? 0)
+                                : 0)))
                 .Map(
                     dest => dest.InvoicedQuantity,
                     src => 0)
@@ -99,15 +97,7 @@ namespace Application.Features.PurchaseRequests.Mappings
                 .Map(
                     dest => dest.ProductVariantColorName,
                     src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
-                .Map(
-                    dest => dest.POCreatingQuantity,
-                    src => 0)
-                .Map(
-                    dest => dest.POApprovedQuantity,
-                    src => 0)
-                .Map(
-                    dest => dest.PORemainingQuantity,
-                    src => src.Quantity)
+
                 .Map(
                     dest => dest.UnimportedQuantity,
                     src => src.Quantity -

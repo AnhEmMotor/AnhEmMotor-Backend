@@ -43,7 +43,7 @@ namespace Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseReque
                         
                         if (excludedQty > 0)
                         {
-                            responseItem.PORemainingQuantity += excludedQty;
+                            responseItem.UnimportedQuantity += excludedQty;
                         }
                     }
                 }
