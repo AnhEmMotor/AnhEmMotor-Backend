@@ -141,13 +141,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<InventoryOnHand> InventoryOnHands { get; set; }
 
-    public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
 
-    public virtual DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
-
-    public virtual DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
-
-    public virtual DbSet<PurchaseInvoiceItem> PurchaseInvoiceItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -256,11 +250,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(ii => ii.Vehicles)
             .HasForeignKey(v => v.InventoryReceiptInfoId)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<Vehicle>()
-            .HasOne(v => v.PurchaseInvoiceItem)
-            .WithMany(pii => pii.Vehicles)
-            .HasForeignKey(v => v.PurchaseInvoiceItemId)
-            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Vehicle>()
             .HasOne(v => v.OutputInfo)
             .WithMany(oi => oi.Vehicles)
@@ -277,9 +267,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(v => v.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<InventoryReceiptInfo>()
-            .HasOne(ii => ii.PurchaseOrderItem)
-            .WithMany(poi => poi.InventoryReceiptInfos)
-            .HasForeignKey(ii => ii.PurchaseOrderItemId)
+            .HasOne(ii => ii.PurchaseRequestItem)
+            .WithMany(pri => pri.InventoryReceiptInfos)
+            .HasForeignKey(ii => ii.PurchaseRequestItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryReceiptInfo>()
+            .HasOne(ii => ii.Supplier)
+            .WithMany()
+            .HasForeignKey(ii => ii.SupplierId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<OutputInfo>()
             .HasOne(oi => oi.ProductVariantColor)
@@ -324,14 +319,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(oi => oi.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<InventoryReceipt>()
-            .HasOne(oi => oi.PurchaseOrder)
-            .WithMany(po => po.InventoryReceipts)
-            .HasForeignKey(oi => oi.PurchaseOrderId)
+            .HasOne(oi => oi.PurchaseRequest)
+            .WithMany()
+            .HasForeignKey(oi => oi.PurchaseRequestId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<SupplierDebt>()
-            .HasOne(sd => sd.PurchaseInvoice)
-            .WithMany(r => r.SupplierDebts)
-            .HasForeignKey(sd => sd.PurchaseInvoiceId)
+            .HasOne(sd => sd.InventoryReceipt)
+            .WithMany(ir => ir.SupplierDebts)
+            .HasForeignKey(sd => sd.InventoryReceiptId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<SupplierDebt>()
             .HasOne(sd => sd.Supplier)
@@ -339,45 +334,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(sd => sd.SupplierId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<PurchaseOrderItem>()
-            .HasOne(poi => poi.PurchaseOrder)
-            .WithMany(po => po.PurchaseOrderItems)
-            .HasForeignKey(poi => poi.PurchaseOrderId)
-            .OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<PurchaseInvoiceItem>()
-            .HasOne(pii => pii.PurchaseInvoice)
-            .WithMany(pi => pi.PurchaseInvoiceItems)
-            .HasForeignKey(pii => pii.PurchaseInvoiceId)
-            .OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<PurchaseInvoice>()
-            .HasOne(pi => pi.PurchaseOrder)
-            .WithMany(po => po.PurchaseInvoices)
-            .HasForeignKey(pi => pi.PurchaseOrderId)
-            .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<PurchaseOrderItem>()
-            .HasOne(poi => poi.PurchaseRequestItem)
-            .WithMany(pri => pri.PurchaseOrderItems)
-            .HasForeignKey(poi => poi.PurchaseRequestItemId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<PurchaseOrderItem>()
-            .HasOne(poi => poi.QuotationProductRow)
-            .WithMany()
-            .HasForeignKey(poi => poi.QuotationProductRowId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<PurchaseInvoiceItem>()
-            .HasOne(pii => pii.PurchaseOrderItem)
-            .WithMany(poi => poi.PurchaseInvoiceItems)
-            .HasForeignKey(pii => pii.PurchaseOrderItemId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<PurchaseInvoiceItem>()
-            .HasOne(pii => pii.InventoryReceiptInfo)
-            .WithMany()
-            .HasForeignKey(pii => pii.InventoryReceiptItemId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<InventoryReceiptInfo>()
             .HasOne(ii => ii.InventoryReceipt)
@@ -398,12 +355,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(i => i.ProductVariant)
             .WithMany()
             .HasForeignKey(i => i.ProductVariantId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<InventoryOnHand>()
             .HasOne(i => i.ProductVariantColor)
             .WithMany()
             .HasForeignKey(i => i.ProductVariantColorId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
         if (isNotSqlServer)
@@ -533,8 +490,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     .IgnoreQueryFilters()
                     .Where(x => receiptIds.Contains(x.InventoryReceiptId))
                     .Select(x => new { 
-                        PurchaseVariantId = x.PurchaseOrderItem != null ? (int?)x.PurchaseOrderItem.ProductVariantId : null,
-                        PurchaseColorId = x.PurchaseOrderItem != null ? x.PurchaseOrderItem.ProductVariantColorId : null,
+                        PurchaseVariantId = x.PurchaseRequestItem != null ? (int?)x.PurchaseRequestItem.ProductVariantId : null,
+                        PurchaseColorId = x.PurchaseRequestItem != null ? x.PurchaseRequestItem.ProductVariantColorId : null,
                         ReturnVariantId = x.ParentOutputInfo != null ? (int?)x.ParentOutputInfo.ProductVariantId : null,
                         ReturnColorId = x.ParentOutputInfo != null ? x.ParentOutputInfo.ProductVariantColorId : null
                     })

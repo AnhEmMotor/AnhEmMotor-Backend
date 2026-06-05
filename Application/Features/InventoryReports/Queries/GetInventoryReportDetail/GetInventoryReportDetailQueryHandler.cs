@@ -1,19 +1,73 @@
 using Application.ApiContracts.InventoryReport.Responses;
 using Application.Common.Models;
+using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.InventoryReceipt;
+using Domain.Constants;
+using Domain.Constants.Order;
 using MediatR;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Features.InventoryReports.Queries.GetInventoryReportDetail
 {
-    public sealed class GetInventoryReportDetailQueryHandler : IRequestHandler<GetInventoryReportDetailQuery, Result<InventoryReportDetailResponse>>
+    public sealed class GetInventoryReportDetailQueryHandler(
+        IProductReadRepository productRepository,
+        IInventoryReceiptReadRepository receiptRepository)
+        : IRequestHandler<GetInventoryReportDetailQuery, Result<InventoryReportDetailResponse>>
     {
-        public Task<Result<InventoryReportDetailResponse>> Handle(
+        public async Task<Result<InventoryReportDetailResponse>> Handle(
             GetInventoryReportDetailQuery request,
             CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var variant = await productRepository.GetVariantByIdWithDetailsAsync(request.VariantId, cancellationToken).ConfigureAwait(false);
+            if (variant == null)
+            {
+                return Error.NotFound($"Không tìm thấy biến thể sản phẩm có ID {request.VariantId}");
+            }
+
+            var hasColors = variant.ProductVariantColors != null && variant.ProductVariantColors.Any();
+            if (hasColors && request.ColorId == null)
+            {
+                return Error.BadRequest("Mã màu sắc (colorId) là bắt buộc đối với biến thể có nhiều màu sắc");
+            }
+
+            var receiptInfos = await receiptRepository.GetInfosByVariantAsync(request.VariantId, request.ColorId, cancellationToken).ConfigureAwait(false);
+
+            var imports = receiptInfos
+                .Where(ii => ii.InventoryReceipt != null &&
+                             InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId))
+                .Select(ii => new InventoryTransactionResponse
+                {
+                    PartnerName = ii.Supplier?.Name ?? "Nhà cung cấp",
+                    Qty = ii.Count ?? 0,
+                    Price = (int)(ii.UnitPrice ?? 0),
+                    Date = ii.InventoryReceipt!.InventoryReceiptDate ?? ii.InventoryReceipt.CreatedAt ?? DateTimeOffset.MinValue
+                })
+                .OrderByDescending(x => x.Date)
+                .ToList();
+
+            var exports = variant.OutputInfos
+                .Where(oi => oi.OutputOrder != null &&
+                             string.Equals(oi.OutputOrder.StatusId, OrderStatus.Completed, StringComparison.OrdinalIgnoreCase))
+                .Where(oi => !hasColors || oi.ProductVariantColorId == request.ColorId)
+                .Select(oi => new InventoryTransactionResponse
+                {
+                    PartnerName = oi.OutputOrder!.CustomerName ?? "Khách hàng",
+                    Qty = oi.Count ?? 0,
+                    Price = oi.Price ?? 0,
+                    Date = oi.OutputOrder.LastStatusChangedAt ?? oi.OutputOrder.CreatedAt ?? DateTimeOffset.MinValue
+                })
+                .OrderByDescending(x => x.Date)
+                .ToList();
+
+            return new InventoryReportDetailResponse
+            {
+                Imports = imports,
+                Exports = exports
+            };
         }
     }
 }

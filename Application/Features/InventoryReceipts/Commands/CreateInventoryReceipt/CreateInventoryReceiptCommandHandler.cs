@@ -3,7 +3,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
-using Application.Interfaces.Repositories.PurchaseOrder;
+using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
@@ -28,7 +28,7 @@ namespace Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt
 public sealed partial class CreateInventoryReceiptCommandHandler(
     IInventoryReceiptInsertRepository insertRepository,
     IInventoryReceiptReadRepository readRepository,
-    IPurchaseOrderReadRepository poReadRepository,
+    IPurchaseRequestReadRepository prReadRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
     IVehicleReadRepository vehicleReadRepository,
@@ -42,28 +42,35 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
         CreateInventoryReceiptCommand request,
         CancellationToken cancellationToken)
     {
-        PurchaseOrder? po = null;
-        if (request.PurchaseOrderId.HasValue)
+        PurchaseRequest? pr = null;
+        if (request.PurchaseRequestId.HasValue)
         {
-            po = await poReadRepository.GetByIdWithDetailsAsync(request.PurchaseOrderId.Value, cancellationToken)
+            pr = await prReadRepository.GetByIdWithDetailsAsync(request.PurchaseRequestId.Value, cancellationToken)
                 .ConfigureAwait(false);
-            if (po is null)
+            if (pr is null)
             {
                 return Error.NotFound(
-                    $"Đơn mua hàng {request.PurchaseOrderId} không tồn tại hoặc đã bị xóa.",
-                    "PurchaseOrderId");
+                    $"Yêu cầu mua hàng {request.PurchaseRequestId} không tồn tại hoặc đã bị xóa.",
+                    "PurchaseRequestId");
             }
-            if (!string.Equals(po.Status, PurchaseOrderStatus.Approved, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(pr.Status, PurchaseRequestStatus.Approve, StringComparison.OrdinalIgnoreCase))
             {
                 return Error.BadRequest(
-                    $"Đơn mua hàng {request.PurchaseOrderId} chưa được phê duyệt.",
-                    "PurchaseOrderId");
+                    $"Yêu cầu mua hàng {request.PurchaseRequestId} chưa được phê duyệt.",
+                    "PurchaseRequestId");
             }
         }
 
-        var poItemsDict = po != null
-            ? po.PurchaseOrderItems.ToDictionary(x => x.Id)
+        var prItemsDict = pr != null
+            ? pr.PurchaseRequestItems.ToDictionary(x => x.Id)
             : [];
+
+        if (prItemsDict.Count == 0 && request.Products.Any(p => p.PurchaseRequestItemId.HasValue))
+        {
+            var prItemIds = request.Products.Where(p => p.PurchaseRequestItemId.HasValue).Select(p => p.PurchaseRequestItemId!.Value).Distinct();
+            var prItems = await prReadRepository.GetItemsByIdsAsync(prItemIds, cancellationToken).ConfigureAwait(false);
+            prItemsDict = prItems.ToDictionary(x => x.Id);
+        }
 
         var variantMap = new Dictionary<int, ProductVariant>();
         var uniqueVins = new HashSet<(string Vin, int ProductVariantId, int? ProductVariantColorId)>();
@@ -71,24 +78,24 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
 
         foreach (var product in request.Products)
         {
-            PurchaseOrderItem? poItem = null;
-            var resolvedVariantId = product.PurchaseOrderItemId.HasValue &&
-                    poItemsDict.TryGetValue(product.PurchaseOrderItemId.Value, out poItem)
-                ? poItem.ProductVariantId
+            PurchaseRequestItem? prItem = null;
+            var resolvedVariantId = product.PurchaseRequestItemId.HasValue &&
+                    prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out prItem)
+                ? prItem.ProductVariantId
                 : (int?)null;
 
-            var resolvedColorId = product.PurchaseOrderItemId.HasValue &&
-                    poItemsDict.TryGetValue(product.PurchaseOrderItemId.Value, out var poItem2)
-                ? poItem2.ProductVariantColorId
+            var resolvedColorId = product.PurchaseRequestItemId.HasValue &&
+                    prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItem2)
+                ? prItem2.ProductVariantColorId
                 : (int?)null;
 
-            var resolvedSupplierId = po?.SupplierId;
+            var resolvedSupplierId = product.SupplierId;
 
             if (resolvedVariantId.HasValue)
             {
-                if (poItem != null)
+                if (prItem != null)
                 {
-                    var occupiedQty = poItem.InventoryReceiptInfos
+                    var occupiedQty = prItem.InventoryReceiptInfos
                         .Where(ii => ii.DeletedAt == null &&
                                      ii.InventoryReceipt != null &&
                                      ii.InventoryReceipt.DeletedAt == null &&
@@ -97,14 +104,14 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                                       string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase)))
                         .Sum(ii => ii.Count ?? 0);
 
-                    var remainingAllowed = poItem.OrderedQuantity - occupiedQty;
+                    var remainingAllowed = prItem.Quantity - occupiedQty;
                     var requestedQty = product.Count ?? 0;
 
                     if (requestedQty > remainingAllowed)
                     {
-                        var productName = poItem.ProductVariant?.Product?.Name ?? $"Biến thể #{poItem.ProductVariantId}";
+                        var productName = prItem.ProductVariant?.Product?.Name ?? $"Biến thể #{prItem.ProductVariantId}";
                         return Error.BadRequest(
-                            $"Số lượng nhập ({requestedQty}) cho sản phẩm '{productName}' vượt quá số lượng còn lại được phép nhập từ đơn mua hàng PO ({remainingAllowed}).",
+                            $"Số lượng nhập ({requestedQty}) cho sản phẩm '{productName}' vượt quá số lượng còn lại được phép nhập từ yêu cầu mua hàng ({remainingAllowed}).",
                             "Products");
                     }
                 }
@@ -223,14 +230,14 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
         var inventoryReceiptInfos = new List<InventoryReceiptInfoEntity>();
         foreach (var p in request.Products)
         {
-            var resolvedVariantId = p.PurchaseOrderItemId.HasValue &&
-                    poItemsDict.TryGetValue(p.PurchaseOrderItemId.Value, out var poItem)
-                ? poItem.ProductVariantId
+            var resolvedVariantId = p.PurchaseRequestItemId.HasValue &&
+                    prItemsDict.TryGetValue(p.PurchaseRequestItemId.Value, out var prItem)
+                ? prItem.ProductVariantId
                 : (int?)null;
 
-            var resolvedColorId = p.PurchaseOrderItemId.HasValue &&
-                    poItemsDict.TryGetValue(p.PurchaseOrderItemId.Value, out var poItem2)
-                ? poItem2.ProductVariantColorId
+            var resolvedColorId = p.PurchaseRequestItemId.HasValue &&
+                    prItemsDict.TryGetValue(p.PurchaseRequestItemId.Value, out var prItem2)
+                ? prItem2.ProductVariantColorId
                 : (int?)null;
 
             var inventoryReceiptInfo = p.Adapt<InventoryReceiptInfoEntity>();

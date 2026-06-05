@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories.PurchaseRequest;
 using Domain.Constants;
 using Mapster;
 using MediatR;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,17 +29,17 @@ namespace Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseReque
 
             var response = pr.Adapt<ApprovedPurchaseRequestDetailResponse?>();
 
-            // Adjust remaining quantities if a PO is to be excluded (e.g., when editing)
-            if (response != null && request.ExcludePurchaseOrderId.HasValue)
+            // Adjust remaining quantities if an InventoryReceipt is to be excluded (e.g., when editing)
+            if (response != null && request.ExcludeInventoryReceiptId.HasValue)
             {
                 foreach (var responseItem in response.Items)
                 {
                     var prItem = pr.PurchaseRequestItems.FirstOrDefault(x => x.Id == responseItem.Id);
                     if (prItem != null)
                     {
-                        var excludedQty = prItem.PurchaseOrderItems
-                            .Where(poi => poi.PurchaseOrderId == request.ExcludePurchaseOrderId.Value && poi.DeletedAt == null)
-                            .Sum(poi => poi.OrderedQuantity);
+                        var excludedQty = prItem.InventoryReceiptInfos
+                            .Where(ii => ii.InventoryReceiptId == request.ExcludeInventoryReceiptId.Value && ii.DeletedAt == null)
+                            .Sum(ii => ii.Count ?? 0);
                         
                         if (excludedQty > 0)
                         {

@@ -11,18 +11,18 @@ public sealed class UpdateInventoryReceiptCommandValidator : AbstractValidator<U
             .Must(
                 products =>
                 {
-                    var poItemIds = products
-                        .Where(p => p.PurchaseOrderItemId.HasValue)
-                        .Select(p => p.PurchaseOrderItemId!.Value)
+                    var priItemIds = products
+                        .Where(p => p.PurchaseRequestItemId.HasValue)
+                        .Select(p => p.PurchaseRequestItemId!.Value)
                         .ToList();
-                    if (poItemIds.Count != poItemIds.Distinct().Count())
+                    if (priItemIds.Count != priItemIds.Distinct().Count())
                     {
                         return false;
                     }
                     return true;
                 })
             .WithMessage(
-                "Purchase Order Items cannot be duplicated in a single InventoryReceipt.");
+                "Purchase Request Items cannot be duplicated in a single InventoryReceipt.");
         RuleForEach(x => x.Products).SetValidator(new UpdateInventoryReceiptInfoCommandValidator());
     }
 }

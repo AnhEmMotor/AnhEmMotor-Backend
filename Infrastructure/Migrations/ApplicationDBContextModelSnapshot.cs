@@ -223,7 +223,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Banner");
+                    b.ToTable("Banner", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.BannerAuditLog", b =>
@@ -266,7 +266,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("BannerId");
 
-                    b.ToTable("BannerAuditLog");
+                    b.ToTable("BannerAuditLog", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Booking", b =>
@@ -334,7 +334,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("Booking");
+                    b.ToTable("Booking", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Brand", b =>
@@ -379,7 +379,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brand");
+                    b.ToTable("Brand", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.CommissionPolicy", b =>
@@ -440,7 +440,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("CommissionPolicy");
+                    b.ToTable("CommissionPolicy", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.CommissionPolicyAuditLog", b =>
@@ -490,7 +490,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("PolicyId");
 
-                    b.ToTable("CommissionPolicyAuditLog");
+                    b.ToTable("CommissionPolicyAuditLog", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.CommissionRecord", b =>
@@ -540,7 +540,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("OutputId");
 
-                    b.ToTable("CommissionRecord");
+                    b.ToTable("CommissionRecord", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Contact", b =>
@@ -601,7 +601,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Contact");
+                    b.ToTable("Contact", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ContactReply", b =>
@@ -641,7 +641,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("RepliedById");
 
-                    b.ToTable("ContactReply");
+                    b.ToTable("ContactReply", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.EmployeeProfile", b =>
@@ -694,7 +694,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("EmployeeProfile");
+                    b.ToTable("EmployeeProfile", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
@@ -760,7 +760,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("InventoryReceipt");
+                    b.ToTable("InventoryReceipt", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
@@ -820,7 +820,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("QuotationProductRowId");
 
-                    b.ToTable("InventoryReceiptInfo");
+                    b.ToTable("InventoryReceiptInfo", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
@@ -840,7 +840,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("InventoryReceiptStatus");
+                    b.ToTable("InventoryReceiptStatus", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.KPI", b =>
@@ -886,7 +886,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("EmployeeProfileId");
 
-                    b.ToTable("KPI");
+                    b.ToTable("KPI", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Lead", b =>
@@ -997,7 +997,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("AssignedToId");
 
-                    b.ToTable("Lead");
+                    b.ToTable("Lead", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.LeadActivity", b =>
@@ -1036,7 +1036,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("LeadId");
 
-                    b.ToTable("LeadActivity");
+                    b.ToTable("LeadActivity", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.MaintenanceHistory", b =>
@@ -1078,7 +1078,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("MaintenanceHistory");
+                    b.ToTable("MaintenanceHistory", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.MediaFile", b =>
@@ -1124,7 +1124,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MediaFiles");
+                    b.ToTable("MediaFiles", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.News", b =>
@@ -1201,7 +1201,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("News");
+                    b.ToTable("News", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.NewsCategory", b =>
@@ -1238,7 +1238,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("NewsCategory");
+                    b.ToTable("NewsCategory", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Option", b =>
@@ -1267,7 +1267,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Option");
+                    b.ToTable("Option", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.OptionValue", b =>
@@ -1324,7 +1324,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("OptionId");
 
-                    b.ToTable("OptionValue");
+                    b.ToTable("OptionValue", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Output", b =>
@@ -1427,7 +1427,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Output");
+                    b.ToTable("Output", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.OutputInfo", b =>
@@ -1480,7 +1480,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("OutputInfo");
+                    b.ToTable("OutputInfo", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.OutputStatus", b =>
@@ -1500,7 +1500,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("OutputStatus");
+                    b.ToTable("OutputStatus", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.PartnerType", b =>
@@ -1520,7 +1520,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("PartnerType");
+                    b.ToTable("PartnerType", (string)null);
 
                     b.HasData(
                         new
@@ -1591,7 +1591,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("EmployeeProfileId");
 
-                    b.ToTable("Payroll");
+                    b.ToTable("Payroll", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission", b =>
@@ -1644,7 +1644,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Key")
                         .IsUnique();
 
-                    b.ToTable("PredefinedOption");
+                    b.ToTable("PredefinedOption", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
@@ -1853,7 +1853,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Product");
+                    b.ToTable("Product", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCategory", b =>
@@ -1911,7 +1911,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("ProductCategory");
+                    b.ToTable("ProductCategory", (string)null);
 
                     b.HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
                 });
@@ -1946,7 +1946,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("ProductCollectionPhoto");
+                    b.ToTable("ProductCollectionPhoto", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCompatibility", b =>
@@ -1985,7 +1985,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CompatibleVehicleModelId");
 
-                    b.ToTable("ProductCompatibility");
+                    b.ToTable("ProductCompatibility", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductStatus", b =>
@@ -2005,7 +2005,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("ProductStatus");
+                    b.ToTable("ProductStatus", (string)null);
 
                     b.HasData(
                         new
@@ -2066,7 +2066,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TechnologyId");
 
-                    b.ToTable("ProductTechnology");
+                    b.ToTable("ProductTechnology", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
@@ -2163,7 +2163,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductVariant");
+                    b.ToTable("ProductVariant", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductVariantColor", b =>
@@ -2204,7 +2204,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("ProductVariantColor");
+                    b.ToTable("ProductVariantColor", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
@@ -2248,7 +2248,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CreatedBy");
 
-                    b.ToTable("PurchaseRequest");
+                    b.ToTable("PurchaseRequest", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.PurchaseRequestItem", b =>
@@ -2284,7 +2284,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("PurchaseRequestId");
 
-                    b.ToTable("PurchaseRequestItem");
+                    b.ToTable("PurchaseRequestItem", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Quotation", b =>
@@ -2321,7 +2321,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Quotations");
+                    b.ToTable("Quotations", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.QuotationProductRow", b =>
@@ -2361,7 +2361,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("QuotationId");
 
-                    b.ToTable("QuotationProductRows");
+                    b.ToTable("QuotationProductRows", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
@@ -2400,7 +2400,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("Setting");
+                    b.ToTable("Setting", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Supplier", b =>
@@ -2459,7 +2459,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Supplier");
+                    b.ToTable("Supplier", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.SupplierContact", b =>
@@ -2504,7 +2504,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("SupplierContact");
+                    b.ToTable("SupplierContact", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.SupplierStatus", b =>
@@ -2524,7 +2524,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("SupplierStatus");
+                    b.ToTable("SupplierStatus", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Technology", b =>
@@ -2573,7 +2573,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Technologies");
+                    b.ToTable("Technologies", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TechnologyCategory", b =>
@@ -2600,7 +2600,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TechnologyCategories");
+                    b.ToTable("TechnologyCategories", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TechnologyImage", b =>
@@ -2637,7 +2637,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TechnologyId");
 
-                    b.ToTable("TechnologyImages");
+                    b.ToTable("TechnologyImages", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.VariantOptionValue", b =>
@@ -2672,7 +2672,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VariantId");
 
-                    b.ToTable("VariantOptionValue");
+                    b.ToTable("VariantOptionValue", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Vehicle", b =>
@@ -2758,7 +2758,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("Vehicle");
+                    b.ToTable("Vehicle", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.VehicleDocument", b =>
@@ -2802,7 +2802,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("VehicleDocument");
+                    b.ToTable("VehicleDocument", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

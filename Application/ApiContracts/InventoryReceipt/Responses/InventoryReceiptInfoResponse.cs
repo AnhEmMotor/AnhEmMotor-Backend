@@ -25,7 +25,9 @@ public class InventoryReceiptInfoResponse
 
     public int? MaxAllowedQuantity { get; set; }
 
-    public int? PurchaseOrderItemId { get; set; }
+    public int? PurchaseRequestItemId { get; set; }
+
+    public decimal? UnitPrice { get; set; }
 
     public List<InventoryReceiptVehicleResponse> Vehicles { get; set; } = [];
 }

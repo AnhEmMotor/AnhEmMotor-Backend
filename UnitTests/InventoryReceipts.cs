@@ -51,6 +51,8 @@ public class InventoryReceipts
     private readonly Mock<IPermissionReadRepository> _permissionRepoMock;
     private readonly Mock<IInventoryLedgerRepository> _ledgerRepoMock;
     private readonly Mock<ISupplierDebtRepository> _supplierDebtRepoMock;
+    private readonly Mock<IVehicleUpdateRepository> _vehicleUpdateRepoMock;
+    private readonly Mock<IQuotationProductRowRepository> _quotationProductRowRepoMock;
 
     public InventoryReceipts()
     {
@@ -68,6 +70,8 @@ public class InventoryReceipts
         _permissionRepoMock = new Mock<IPermissionReadRepository>();
         _ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
         _supplierDebtRepoMock = new Mock<ISupplierDebtRepository>();
+        _vehicleUpdateRepoMock = new Mock<IVehicleUpdateRepository>();
+        _quotationProductRowRepoMock = new Mock<IQuotationProductRowRepository>();
     }
 
     #pragma warning disable IDE0079 
@@ -80,7 +84,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _prReadRepoMock.Object,
-            _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
@@ -94,7 +97,7 @@ public class InventoryReceipts
 
         var mockPrItems = new List<PurchaseRequestItem>
         {
-            new() { Id = 10, ProductVariantId = 1 }
+            new() { Id = 10, ProductVariantId = 1, Quantity = 100 }
         };
 
         var mockVariants = new List<ProductVariant>
@@ -133,7 +136,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _prReadRepoMock.Object,
-            _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
@@ -145,7 +147,7 @@ public class InventoryReceipts
             Products = []
         };
 
-        _prReadRepoMock.Setup(x => x.GetByIdAsync(99, It.IsAny<CancellationToken>()))
+        _prReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(99, It.IsAny<CancellationToken>()))
             .ReturnsAsync((PurchaseRequest?)null);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -161,7 +163,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _prReadRepoMock.Object,
-            _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
@@ -175,7 +176,7 @@ public class InventoryReceipts
 
         var pr = new PurchaseRequest { Id = 1, Status = "draft" };
 
-        _prReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+        _prReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(pr);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -191,7 +192,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _prReadRepoMock.Object,
-            _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
@@ -204,7 +204,7 @@ public class InventoryReceipts
 
         var mockPrItems = new List<PurchaseRequestItem>
         {
-            new() { Id = 10, ProductVariantId = 99 }
+            new() { Id = 10, ProductVariantId = 99, Quantity = 100 }
         };
 
         _prReadRepoMock.Setup(x => x.GetItemsByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
@@ -226,7 +226,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _prReadRepoMock.Object,
-            _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
@@ -239,7 +238,7 @@ public class InventoryReceipts
 
         var mockPrItems = new List<PurchaseRequestItem>
         {
-            new() { Id = 10, ProductVariantId = 1, ProductVariantColorId = 99 }
+            new() { Id = 10, ProductVariantId = 1, ProductVariantColorId = 99, Quantity = 100 }
         };
 
         var mockVariants = new List<ProductVariant>
@@ -269,7 +268,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _prReadRepoMock.Object,
-            _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
@@ -292,7 +290,7 @@ public class InventoryReceipts
 
         var mockPrItems = new List<PurchaseRequestItem>
         {
-            new() { Id = 10, ProductVariantId = 1 }
+            new() { Id = 10, ProductVariantId = 1, Quantity = 100 }
         };
 
         var mockVariants = new List<ProductVariant>
@@ -330,7 +328,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _prReadRepoMock.Object,
-            _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
@@ -352,7 +349,7 @@ public class InventoryReceipts
 
         var mockPrItems = new List<PurchaseRequestItem>
         {
-            new() { Id = 10, ProductVariantId = 1 }
+            new() { Id = 10, ProductVariantId = 1, Quantity = 100 }
         };
 
         var mockVariants = new List<ProductVariant>
@@ -395,10 +392,11 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _deleteRepoMock.Object,
             _prReadRepoMock.Object,
-            _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
+            _vehicleUpdateRepoMock.Object,
+            _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
 
@@ -439,10 +437,11 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _deleteRepoMock.Object,
             _prReadRepoMock.Object,
-            _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
+            _vehicleUpdateRepoMock.Object,
+            _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
 
@@ -478,6 +477,7 @@ public class InventoryReceipts
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
+            _quotationProductRowRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateInventoryReceiptStatusCommand
@@ -518,6 +518,7 @@ public class InventoryReceipts
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
+            _quotationProductRowRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateInventoryReceiptStatusCommand
@@ -644,7 +645,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _prReadRepoMock.Object,
-            _quotationRepoMock.Object,
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
@@ -655,7 +655,7 @@ public class InventoryReceipts
             Notes = "Valid notes",
             Products = [new CreateInventoryReceiptInfoRequest { PurchaseRequestItemId = 10, Count = 5 }]
         };
-        var mockPrItems = new List<PurchaseRequestItem> { new() { Id = 10, ProductVariantId = 1 } };
+        var mockPrItems = new List<PurchaseRequestItem> { new() { Id = 10, ProductVariantId = 1, Quantity = 100 } };
         var mockVariants = new List<ProductVariant> { new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [] } };
         _prReadRepoMock.Setup(x => x.GetItemsByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>())).ReturnsAsync(mockPrItems);
         _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(mockVariants);
@@ -703,6 +703,7 @@ public class InventoryReceipts
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
+            _quotationProductRowRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "approve" };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
@@ -728,6 +729,7 @@ public class InventoryReceipts
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
+            _quotationProductRowRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "reject" };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };

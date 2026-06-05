@@ -180,7 +180,7 @@ namespace WebAPI.Controllers.V1
         /// <param name="cancellationToken">Token hủy bỏ.</param>
         /// <returns>Danh sách báo giá đã được phê duyệt.</returns>
         [HttpGet("approved-prices")]
-        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit, Products.View, Products.Edit)]
         [ProducesResponseType(typeof(List<PurchaseRequestQuotedPriceResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetApprovedPricesAsync(
             [FromQuery] int variantId,
@@ -190,6 +190,37 @@ namespace WebAPI.Controllers.V1
         {
             var query = new GetApprovedPricesForVariantQuery(variantId, colorId, supplierId);
             var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lưu hoặc cập nhật giá nhà cung cấp cho biến thể (không cần Quotation ID).
+        /// </summary>
+        [HttpPost("approved-prices")]
+        [RequiresAnyPermissions(Products.Edit, Quotations.Edit)]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> SaveApprovedPriceAsync(
+            [FromBody] Application.Features.Quotations.Commands.SaveSupplierPrice.SaveSupplierPriceCommand command,
+            CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Xóa giá nhà cung cấp của biến thể.
+        /// </summary>
+        [HttpDelete("approved-prices")]
+        [RequiresAnyPermissions(Products.Edit, Quotations.Edit)]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteApprovedPriceAsync(
+            [FromQuery] int variantId,
+            [FromQuery] int? colorId,
+            [FromQuery] int supplierId,
+            CancellationToken cancellationToken)
+        {
+            var command = new Application.Features.Quotations.Commands.DeleteSupplierPrice.DeleteSupplierPriceCommand(variantId, colorId, supplierId);
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
     }

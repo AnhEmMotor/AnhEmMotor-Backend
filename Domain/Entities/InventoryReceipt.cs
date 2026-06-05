@@ -22,9 +22,9 @@ namespace Domain.Entities
         [ForeignKey("InventoryReceiptStatus")]
         public string? StatusId { get; set; }
 
-        [Column("PurchaseOrderId")]
-        [ForeignKey("PurchaseOrder")]
-        public int? PurchaseOrderId { get; set; }
+        [Column("PurchaseRequestId")]
+        [ForeignKey("PurchaseRequest")]
+        public int? PurchaseRequestId { get; set; }
 
         [Column("CreatedBy")]
         [ForeignKey("CreatedByUser")]
@@ -54,9 +54,11 @@ namespace Domain.Entities
 
         public Output? Output { get; set; }
 
-        public PurchaseOrder? PurchaseOrder { get; set; }
+        public PurchaseRequest? PurchaseRequest { get; set; }
 
         public ICollection<InventoryReceiptInfo> InventoryReceiptInfos { get; set; } = [];
+
+        public ICollection<SupplierDebt> SupplierDebts { get; set; } = [];
 
         public ApplicationUser? CreatedByUser { get; set; }
 

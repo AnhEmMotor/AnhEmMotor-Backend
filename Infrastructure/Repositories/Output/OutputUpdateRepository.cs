@@ -82,7 +82,7 @@ namespace Infrastructure.Repositories.Output
                         if (remainingToDeduct <= 0)
                             break;
                         var batchRemaining = batch.RemainingCount ?? 0;
-                        var batchPrice = batch.PurchaseOrderItem != null ? batch.PurchaseOrderItem.UnitPrice : 0;
+                        var batchPrice = batch.UnitPrice ?? 0;
                         if (batchRemaining >= remainingToDeduct)
                         {
                             totalCost += remainingToDeduct * batchPrice;
@@ -110,11 +110,11 @@ namespace Infrastructure.Repositories.Output
             var finishedStatuses = Domain.Constants.InventoryReceiptStatus.FinishInventoryReceiptValues;
             return context.InventoryReceiptInfos
                 .Include(ii => ii.InventoryReceipt)
-                .Include(ii => ii.PurchaseOrderItem)
+                .Include(ii => ii.PurchaseRequestItem)
                 .Where(
-                    ii => ii.PurchaseOrderItem != null &&
-                        ii.PurchaseOrderItem.ProductVariantId == productId &&
-                        ii.PurchaseOrderItem.ProductVariantColorId == colorId &&
+                    ii => ii.PurchaseRequestItem != null &&
+                        ii.PurchaseRequestItem.ProductVariantId == productId &&
+                        ii.PurchaseRequestItem.ProductVariantColorId == colorId &&
                         ii.RemainingCount > 0 &&
                         ii.DeletedAt == null &&
                         ii.InventoryReceipt != null &&

@@ -1511,7 +1511,7 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 10,
-                                InventoryReceiptReceipt =
+                                InventoryReceipt =
                                     new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
@@ -1521,7 +1521,7 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 3,
-                                InventoryReceiptReceipt =
+                                InventoryReceipt =
                                     new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
@@ -1531,7 +1531,7 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 0,
-                                InventoryReceiptReceipt =
+                                InventoryReceipt =
                                     new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
@@ -1696,12 +1696,12 @@ public class Product
                 [new InventoryReceiptInfo
                 {
                     RemainingCount = 5,
-                    InventoryReceiptReceipt =
+                    InventoryReceipt =
                         new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                 }, new InventoryReceiptInfo
                 {
                     RemainingCount = 10,
-                    InventoryReceiptReceipt =
+                    InventoryReceipt =
                         new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                 }]
         };

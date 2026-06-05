@@ -25,7 +25,7 @@ public class InventoryOnHandUpdateRepository(ApplicationDBContext context) : IIn
         var importedQty = await context.InventoryReceiptInfos
             .Where(x => x.InventoryReceipt != null && x.InventoryReceipt.StatusId == Domain.Constants.InventoryReceiptStatus.Approve)
             .Where(x => 
-                (x.PurchaseOrderItem != null && x.PurchaseOrderItem.ProductVariantId == productVariantId && x.PurchaseOrderItem.ProductVariantColorId == productVariantColorId) ||
+                (x.PurchaseRequestItem != null && x.PurchaseRequestItem.ProductVariantId == productVariantId && x.PurchaseRequestItem.ProductVariantColorId == productVariantColorId) ||
                 (x.ParentOutputInfo != null && x.ParentOutputInfo.ProductVariantId == productVariantId && x.ParentOutputInfo.ProductVariantColorId == productVariantColorId)
             )
             .SumAsync(x => x.Count ?? 0, cancellationToken);

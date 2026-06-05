@@ -14,6 +14,12 @@ namespace Domain.Entities
         [ForeignKey("QuotationReceipt")]
         public int? QuotationId { get; set; }
 
+        [Column("SupplierId")]
+        [ForeignKey("Supplier")]
+        public int? SupplierId { get; set; }
+
+        public Supplier? Supplier { get; set; }
+
         [Column("ProductVariantId")]
         [ForeignKey("ProductVariant")]
         public int? ProductVariantId { get; set; }

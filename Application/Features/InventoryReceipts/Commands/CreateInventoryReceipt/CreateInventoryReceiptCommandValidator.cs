@@ -6,28 +6,28 @@ public sealed class CreateInventoryReceiptCommandValidator : AbstractValidator<C
 {
     public CreateInventoryReceiptCommandValidator()
     {
-        RuleFor(x => x.PurchaseOrderId)
+        RuleFor(x => x.PurchaseRequestId)
             .GreaterThan(0)
-            .When(x => x.PurchaseOrderId.HasValue)
-            .WithMessage("PurchaseOrderId must be greater than 0.");
+            .When(x => x.PurchaseRequestId.HasValue)
+            .WithMessage("PurchaseRequestId must be greater than 0.");
         RuleFor(x => x.Notes).MaximumLength(1000).WithMessage("Notes cannot exceed 1000 characters.");
         RuleFor(x => x.Products).NotEmpty().WithMessage("InventoryReceipt must contain at least one product.");
         RuleFor(x => x.Products)
             .Must(
                 products =>
                 {
-                    var poItemIds = products
-                        .Where(p => p.PurchaseOrderItemId.HasValue)
-                        .Select(p => p.PurchaseOrderItemId!.Value)
+                    var priItemIds = products
+                        .Where(p => p.PurchaseRequestItemId.HasValue)
+                        .Select(p => p.PurchaseRequestItemId!.Value)
                         .ToList();
-                    if (poItemIds.Count != poItemIds.Distinct().Count())
+                    if (priItemIds.Count != priItemIds.Distinct().Count())
                     {
                         return false;
                     }
                     return true;
                 })
             .WithMessage(
-                "Purchase Order Items cannot be duplicated in a single InventoryReceipt.");
+                "Purchase Request Items cannot be duplicated in a single InventoryReceipt.");
         RuleForEach(x => x.Products).SetValidator(new CreateInventoryReceiptInfoCommandValidator());
     }
 }

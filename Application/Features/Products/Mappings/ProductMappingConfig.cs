@@ -542,7 +542,7 @@ public class ProductMappingConfig : IRegister
                     ? variant.InventoryReceiptInfos
                         .Where(ii => ii.InventoryReceipt != null &&
                                      InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId) &&
-                                     (ii.PurchaseOrderItem != null && ii.PurchaseOrderItem.ProductVariantColorId == c.Id))
+                                     (ii.PurchaseRequestItem != null && ii.PurchaseRequestItem.ProductVariantColorId == c.Id))
                         .Sum(ii => ii.RemainingCount) ?? 0
                     : 0);
         }

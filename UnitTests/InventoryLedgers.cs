@@ -4,6 +4,7 @@ using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStat
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.InventoryReceipt;
+using Application.Interfaces.Repositories.Quotation;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -27,6 +28,7 @@ namespace UnitTests
         private readonly Mock<ICurrentUserContext> _currentUserContextMock;
         private readonly Mock<IInventoryLedgerRepository> _ledgerRepoMock;
         private readonly Mock<ISupplierDebtRepository> _supplierDebtRepoMock;
+        private readonly Mock<IQuotationProductRowRepository> _quotationProductRowRepoMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
         public InventoryLedgers()
@@ -36,6 +38,7 @@ namespace UnitTests
             _currentUserContextMock = new Mock<ICurrentUserContext>();
             _ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
             _supplierDebtRepoMock = new Mock<ISupplierDebtRepository>();
+            _quotationProductRowRepoMock = new Mock<IQuotationProductRowRepository>();
             _unitOfWorkMock = new Mock<IUnitOfWork>();
         }
 
@@ -48,6 +51,7 @@ namespace UnitTests
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
                 _supplierDebtRepoMock.Object,
+                _quotationProductRowRepoMock.Object,
                 _unitOfWorkMock.Object);
 
             var command = new UpdateInventoryReceiptStatusCommand
@@ -65,7 +69,8 @@ namespace UnitTests
                     new()
                     {
                         Count = 5,
-                        QuotationProductRow = new QuotationProductRow { ProductVariantId = 10, QuotePrice = 100000 }
+                        UnitPrice = 100000,
+                        PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100 }
                     }
                 }
             };
@@ -101,6 +106,7 @@ namespace UnitTests
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
                 _supplierDebtRepoMock.Object,
+                _quotationProductRowRepoMock.Object,
                 _unitOfWorkMock.Object);
 
             var command = new UpdateInventoryReceiptStatusCommand
@@ -118,7 +124,8 @@ namespace UnitTests
                     new()
                     {
                         Count = 5,
-                        QuotationProductRow = new QuotationProductRow { ProductVariantId = 10, QuotePrice = 100000 }
+                        UnitPrice = 100000,
+                        PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100 }
                     }
                 }
             };
@@ -155,6 +162,7 @@ namespace UnitTests
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
                 _supplierDebtRepoMock.Object,
+                _quotationProductRowRepoMock.Object,
                 _unitOfWorkMock.Object);
 
             var command = new UpdateInventoryReceiptStatusCommand
@@ -172,12 +180,9 @@ namespace UnitTests
                     new()
                     {
                         Count = 3,
-                        QuotationProductRow = new QuotationProductRow 
-                        { 
-                            ProductVariantId = 10, 
-                            QuotePrice = 150000,
-                            QuotationReceipt = new Domain.Entities.Quotation { Supplier = new Domain.Entities.Supplier { Name = "Supplier Auto" } }
-                        }
+                        UnitPrice = 150000,
+                        PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100 },
+                        Supplier = new Domain.Entities.Supplier { Name = "Supplier Auto" }
                     }
                 }
             };

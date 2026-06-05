@@ -29,6 +29,13 @@ namespace Application.Features.DebtPayments.Commands.RecordDebtPayment
                 return Error.NotFound($"Không tìm thấy công nợ nhà cung cấp với ID {request.LineId}.", "LineId");
             }
 
+            var receipt = await inventoryReceiptReadRepository.GetByIdWithDetailsAsync(debt.InventoryReceiptId, cancellationToken)
+                .ConfigureAwait(false);
+            if (receipt != null && receipt.StatusId != Domain.Constants.InventoryReceiptStatus.Approve)
+            {
+                return Error.BadRequest("Phiếu nhập chưa được phê duyệt.", "StatusId");
+            }
+
             decimal remainingDebt = debt.TotalAmount - debt.PaidAmount;
             decimal amountToPay = request.Amount ?? remainingDebt;
 
@@ -46,23 +53,7 @@ namespace Application.Features.DebtPayments.Commands.RecordDebtPayment
             supplierDebtRepository.Update(debt);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            var firstReceiptItem = debt.PurchaseInvoice?.PurchaseInvoiceItems?
-                .FirstOrDefault(i => i.InventoryReceiptInfo != null);
-
-            int inventoryReceiptId = 0;
-            if (firstReceiptItem != null && firstReceiptItem.InventoryReceiptInfo != null)
-            {
-                inventoryReceiptId = firstReceiptItem.InventoryReceiptInfo.InventoryReceiptId;
-            }
-            else if (debt.PurchaseInvoice?.PurchaseOrderId.HasValue == true)
-            {
-                var receipts = await inventoryReceiptReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-                var matchingReceipt = receipts.FirstOrDefault(r => r.PurchaseOrderId == debt.PurchaseInvoice.PurchaseOrderId);
-                if (matchingReceipt != null)
-                {
-                    inventoryReceiptId = matchingReceipt.Id;
-                }
-            }
+            int inventoryReceiptId = debt.InventoryReceiptId;
 
             if (inventoryReceiptId == 0)
             {

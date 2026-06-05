@@ -285,8 +285,8 @@ public class ProductReadRepository(
                         v => v.VariantOptionValues
                                 .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
                             v.ProductVariantColors
-                                .Any(c => c.ColorName != null && names.Any(n => c.ColorName.Contains(n, StringComparison.CurrentCultureIgnoreCase))) ||
-                            (v.VariantName != null && names.Any(n => v.VariantName.Contains(n, StringComparison.CurrentCultureIgnoreCase))));
+                                .Any(c => c.ColorName != null && names.Contains(c.ColorName.ToLower())) ||
+                            (v.VariantName != null && names.Contains(v.VariantName.ToLower())));
                 }
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));
@@ -426,7 +426,7 @@ public class ProductReadRepository(
             .ThenInclude(ii => ii.InventoryReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InventoryReceiptInfos)
-            .ThenInclude(ii => ii.PurchaseOrderItem)
+            .ThenInclude(ii => ii.PurchaseRequestItem)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
@@ -444,9 +444,10 @@ public class ProductReadRepository(
             .Include(v => v.InventoryReceiptInfos)
             .ThenInclude(ii => ii.InventoryReceipt)
             .Include(v => v.InventoryReceiptInfos)
-            .ThenInclude(ii => ii.PurchaseOrderItem)
-            .ThenInclude(poi => poi!.PurchaseOrder)
-            .ThenInclude(po => po!.Supplier)
+            .ThenInclude(ii => ii.PurchaseRequestItem)
+            .ThenInclude(pri => pri!.PurchaseRequest)
+            .Include(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.Supplier)
             .Include(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()

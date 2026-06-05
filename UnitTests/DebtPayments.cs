@@ -12,7 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
-using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
 using SupplierDebtEntity = Domain.Entities.SupplierDebt;
 
 namespace UnitTests
@@ -34,8 +33,8 @@ namespace UnitTests
         public async Task DP_005_PayDebt_PartialPayment_Success()
         {
             var handler = new RecordDebtPaymentCommandHandler(
-                _readRepoMock.Object,
                 _supplierDebtRepoMock.Object,
+                _readRepoMock.Object,
                 _unitOfWorkMock.Object);
 
             var command = new RecordDebtPaymentCommand
@@ -53,6 +52,7 @@ namespace UnitTests
 
             var supplierDebt = new SupplierDebtEntity
             {
+                Id = 1,
                 InventoryReceiptId = 1,
                 SupplierId = 1,
                 TotalAmount = 2000000,
@@ -60,25 +60,8 @@ namespace UnitTests
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
 
-            var line = new InventoryReceiptInfoEntity
-            {
-                Id = 1,
-                InventoryReceiptId = 1,
-                Count = 1,
-                PaidAmount = 500000,
-                InventoryReceiptReceipt = existingReceipt,
-                QuotationProductRow = new Domain.Entities.QuotationProductRow
-                {
-                    QuotePrice = 2000000,
-                    QuotationReceipt = new Domain.Entities.Quotation
-                    {
-                        SupplierId = 1
-                    }
-                }
-            };
-
-            _readRepoMock.Setup(x => x.GetInfoByIdAsync(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(line);
+            _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(supplierDebt);
 
             _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
                 .ReturnsAsync(existingReceipt);
@@ -89,7 +72,6 @@ namespace UnitTests
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
             result.IsSuccess.Should().BeTrue();
-            line.PaidAmount.Should().Be(1500000);
             supplierDebt.PaidAmount.Should().Be(1500000);
             _supplierDebtRepoMock.Verify(x => x.Update(supplierDebt), Times.Once);
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -99,8 +81,8 @@ namespace UnitTests
         public async Task DP_006_PayDebt_FullPayment_Success()
         {
             var handler = new RecordDebtPaymentCommandHandler(
-                _readRepoMock.Object,
                 _supplierDebtRepoMock.Object,
+                _readRepoMock.Object,
                 _unitOfWorkMock.Object);
 
             var command = new RecordDebtPaymentCommand
@@ -118,6 +100,7 @@ namespace UnitTests
 
             var supplierDebt = new SupplierDebtEntity
             {
+                Id = 1,
                 InventoryReceiptId = 1,
                 SupplierId = 1,
                 TotalAmount = 2000000,
@@ -125,25 +108,8 @@ namespace UnitTests
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
 
-            var line = new InventoryReceiptInfoEntity
-            {
-                Id = 1,
-                InventoryReceiptId = 1,
-                Count = 1,
-                PaidAmount = 500000,
-                InventoryReceiptReceipt = existingReceipt,
-                QuotationProductRow = new Domain.Entities.QuotationProductRow
-                {
-                    QuotePrice = 2000000,
-                    QuotationReceipt = new Domain.Entities.Quotation
-                    {
-                        SupplierId = 1
-                    }
-                }
-            };
-
-            _readRepoMock.Setup(x => x.GetInfoByIdAsync(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(line);
+            _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(supplierDebt);
 
             _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
                 .ReturnsAsync(existingReceipt);
@@ -154,7 +120,6 @@ namespace UnitTests
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
             result.IsSuccess.Should().BeTrue();
-            line.PaidAmount.Should().Be(2000000);
             supplierDebt.PaidAmount.Should().Be(2000000);
             _supplierDebtRepoMock.Verify(x => x.Update(supplierDebt), Times.Once);
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -164,8 +129,8 @@ namespace UnitTests
         public async Task DP_007_PayDebt_InvalidAmount()
         {
             var handler = new RecordDebtPaymentCommandHandler(
-                _readRepoMock.Object,
                 _supplierDebtRepoMock.Object,
+                _readRepoMock.Object,
                 _unitOfWorkMock.Object);
 
             var command = new RecordDebtPaymentCommand
@@ -183,6 +148,7 @@ namespace UnitTests
 
             var supplierDebt = new SupplierDebtEntity
             {
+                Id = 1,
                 InventoryReceiptId = 1,
                 SupplierId = 1,
                 TotalAmount = 2000000,
@@ -190,25 +156,11 @@ namespace UnitTests
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
 
-            var line = new InventoryReceiptInfoEntity
-            {
-                Id = 1,
-                InventoryReceiptId = 1,
-                Count = 1,
-                PaidAmount = 500000,
-                InventoryReceiptReceipt = existingReceipt,
-                QuotationProductRow = new Domain.Entities.QuotationProductRow
-                {
-                    QuotePrice = 2000000,
-                    QuotationReceipt = new Domain.Entities.Quotation
-                    {
-                        SupplierId = 1
-                    }
-                }
-            };
+            _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(supplierDebt);
 
-            _readRepoMock.Setup(x => x.GetInfoByIdAsync(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(line);
+            _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+                .ReturnsAsync(existingReceipt);
 
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -220,8 +172,8 @@ namespace UnitTests
         public async Task DP_008_PayDebt_AmountExceedsDebt()
         {
             var handler = new RecordDebtPaymentCommandHandler(
-                _readRepoMock.Object,
                 _supplierDebtRepoMock.Object,
+                _readRepoMock.Object,
                 _unitOfWorkMock.Object);
 
             var command = new RecordDebtPaymentCommand
@@ -239,6 +191,7 @@ namespace UnitTests
 
             var supplierDebt = new SupplierDebtEntity
             {
+                Id = 1,
                 InventoryReceiptId = 1,
                 SupplierId = 1,
                 TotalAmount = 2000000,
@@ -246,25 +199,11 @@ namespace UnitTests
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
 
-            var line = new InventoryReceiptInfoEntity
-            {
-                Id = 1,
-                InventoryReceiptId = 1,
-                Count = 1,
-                PaidAmount = 500000,
-                InventoryReceiptReceipt = existingReceipt,
-                QuotationProductRow = new Domain.Entities.QuotationProductRow
-                {
-                    QuotePrice = 2000000,
-                    QuotationReceipt = new Domain.Entities.Quotation
-                    {
-                        SupplierId = 1
-                    }
-                }
-            };
+            _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(supplierDebt);
 
-            _readRepoMock.Setup(x => x.GetInfoByIdAsync(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(line);
+            _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+                .ReturnsAsync(existingReceipt);
 
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -276,8 +215,8 @@ namespace UnitTests
         public async Task DP_009_PayDebt_ReceiptNotApproved()
         {
             var handler = new RecordDebtPaymentCommandHandler(
-                _readRepoMock.Object,
                 _supplierDebtRepoMock.Object,
+                _readRepoMock.Object,
                 _unitOfWorkMock.Object);
 
             var command = new RecordDebtPaymentCommand
@@ -295,6 +234,7 @@ namespace UnitTests
 
             var supplierDebt = new SupplierDebtEntity
             {
+                Id = 1,
                 InventoryReceiptId = 1,
                 SupplierId = 1,
                 TotalAmount = 2000000,
@@ -302,25 +242,11 @@ namespace UnitTests
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
 
-            var line = new InventoryReceiptInfoEntity
-            {
-                Id = 1,
-                InventoryReceiptId = 1,
-                Count = 1,
-                PaidAmount = 500000,
-                InventoryReceiptReceipt = existingReceipt,
-                QuotationProductRow = new Domain.Entities.QuotationProductRow
-                {
-                    QuotePrice = 2000000,
-                    QuotationReceipt = new Domain.Entities.Quotation
-                    {
-                        SupplierId = 1
-                    }
-                }
-            };
+            _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(supplierDebt);
 
-            _readRepoMock.Setup(x => x.GetInfoByIdAsync(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(line);
+            _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+                .ReturnsAsync(existingReceipt);
 
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 

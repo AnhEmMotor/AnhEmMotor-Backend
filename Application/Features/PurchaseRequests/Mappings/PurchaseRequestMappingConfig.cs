@@ -36,43 +36,17 @@ namespace Application.Features.PurchaseRequests.Mappings
                     src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
                 .Map(
                     dest => dest.POCreatingQuantity,
-                    src => src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null && 
-                                          poi.PurchaseOrder != null && 
-                                          poi.PurchaseOrder.DeletedAt == null &&
-                                          (string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Draft, StringComparison.OrdinalIgnoreCase) == 0 ||
-                                           string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Sent, StringComparison.OrdinalIgnoreCase) == 0))
-                            .Sum(poi => poi.OrderedQuantity)
-                        : 0)
+                    src => 0)
                 .Map(
                     dest => dest.POApprovedQuantity,
-                    src => src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null && 
-                                          poi.PurchaseOrder != null && 
-                                          poi.PurchaseOrder.DeletedAt == null &&
-                                          string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Approved, StringComparison.OrdinalIgnoreCase) == 0)
-                            .Sum(poi => poi.OrderedQuantity)
-                        : 0)
+                    src => 0)
                 .Map(
                     dest => dest.PORemainingQuantity,
-                    src => src.Quantity - (src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null && 
-                                          poi.PurchaseOrder != null && 
-                                          poi.PurchaseOrder.DeletedAt == null &&
-                                          (string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Draft, StringComparison.OrdinalIgnoreCase) == 0 ||
-                                           string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Sent, StringComparison.OrdinalIgnoreCase) == 0 ||
-                                           string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Approved, StringComparison.OrdinalIgnoreCase) == 0))
-                            .Sum(poi => poi.OrderedQuantity)
-                        : 0))
+                    src => src.Quantity)
                 .Map(
                     dest => dest.ImportedQuantity,
-                    src => src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null)
-                            .SelectMany(poi => poi.InventoryReceiptInfos)
+                    src => src.InventoryReceiptInfos != null
+                        ? src.InventoryReceiptInfos
                             .Where(ii => ii.DeletedAt == null &&
                                          ii.InventoryReceipt != null &&
                                          ii.InventoryReceipt.DeletedAt == null &&
@@ -81,10 +55,8 @@ namespace Application.Features.PurchaseRequests.Mappings
                         : 0)
                 .Map(
                     dest => dest.PendingQuantity,
-                    src => src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null)
-                            .SelectMany(poi => poi.InventoryReceiptInfos)
+                    src => src.InventoryReceiptInfos != null
+                        ? src.InventoryReceiptInfos
                             .Where(ii => ii.DeletedAt == null &&
                                          ii.InventoryReceipt != null &&
                                          ii.InventoryReceipt.DeletedAt == null &&
@@ -95,10 +67,8 @@ namespace Application.Features.PurchaseRequests.Mappings
                 .Map(
                     dest => dest.UnimportedQuantity,
                     src => src.Quantity -
-                        (src.PurchaseOrderItems != null
-                            ? src.PurchaseOrderItems
-                                .Where(poi => poi.DeletedAt == null)
-                                .SelectMany(poi => poi.InventoryReceiptInfos)
+                        (src.InventoryReceiptInfos != null
+                            ? src.InventoryReceiptInfos
                                 .Where(ii => ii.DeletedAt == null &&
                                              ii.InventoryReceipt != null &&
                                              ii.InventoryReceipt.DeletedAt == null &&
@@ -107,40 +77,13 @@ namespace Application.Features.PurchaseRequests.Mappings
                             : 0))
                 .Map(
                     dest => dest.InvoicedQuantity,
-                    src => src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null)
-                            .SelectMany(poi => poi.PurchaseInvoiceItems)
-                            .Where(pii => pii.DeletedAt == null &&
-                                          pii.PurchaseInvoice != null &&
-                                          pii.PurchaseInvoice.DeletedAt == null &&
-                                          string.Compare(pii.PurchaseInvoice.Status, "approved", StringComparison.OrdinalIgnoreCase) == 0)
-                            .Sum(pii => pii.InvoicedQuantity)
-                        : 0)
+                    src => 0)
                 .Map(
                     dest => dest.InvoicingQuantity,
-                    src => src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null)
-                            .SelectMany(poi => poi.PurchaseInvoiceItems)
-                            .Where(pii => pii.DeletedAt == null &&
-                                          pii.PurchaseInvoice != null &&
-                                          pii.PurchaseInvoice.DeletedAt == null &&
-                                          string.Compare(pii.PurchaseInvoice.Status, "draft", StringComparison.OrdinalIgnoreCase) == 0)
-                            .Sum(pii => pii.InvoicedQuantity)
-                        : 0)
+                    src => 0)
                 .Map(
                     dest => dest.UninvoicedQuantity,
-                    src => src.Quantity - (src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null)
-                            .SelectMany(poi => poi.PurchaseInvoiceItems)
-                            .Where(pii => pii.DeletedAt == null &&
-                                          pii.PurchaseInvoice != null &&
-                                          pii.PurchaseInvoice.DeletedAt == null &&
-                                          string.Compare(pii.PurchaseInvoice.Status, "approved", StringComparison.OrdinalIgnoreCase) == 0)
-                            .Sum(pii => pii.InvoicedQuantity)
-                        : 0));
+                    src => src.Quantity);
 
             config.NewConfig<PurchaseRequest, ApprovedPurchaseRequestDetailResponse>()
                 .Map(dest => dest.Items, src => src.PurchaseRequestItems);
@@ -158,44 +101,18 @@ namespace Application.Features.PurchaseRequests.Mappings
                     src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
                 .Map(
                     dest => dest.POCreatingQuantity,
-                    src => src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null && 
-                                          poi.PurchaseOrder != null && 
-                                          poi.PurchaseOrder.DeletedAt == null &&
-                                          (string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Draft, StringComparison.OrdinalIgnoreCase) == 0 ||
-                                           string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Sent, StringComparison.OrdinalIgnoreCase) == 0))
-                            .Sum(poi => poi.OrderedQuantity)
-                        : 0)
+                    src => 0)
                 .Map(
                     dest => dest.POApprovedQuantity,
-                    src => src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null && 
-                                          poi.PurchaseOrder != null && 
-                                          poi.PurchaseOrder.DeletedAt == null &&
-                                          string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Approved, StringComparison.OrdinalIgnoreCase) == 0)
-                            .Sum(poi => poi.OrderedQuantity)
-                        : 0)
+                    src => 0)
                 .Map(
                     dest => dest.PORemainingQuantity,
-                    src => src.Quantity - (src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null && 
-                                          poi.PurchaseOrder != null && 
-                                          poi.PurchaseOrder.DeletedAt == null &&
-                                          (string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Draft, StringComparison.OrdinalIgnoreCase) == 0 ||
-                                           string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Sent, StringComparison.OrdinalIgnoreCase) == 0 ||
-                                           string.Compare(poi.PurchaseOrder.Status, Domain.Constants.PurchaseOrderStatus.Approved, StringComparison.OrdinalIgnoreCase) == 0))
-                            .Sum(poi => poi.OrderedQuantity)
-                        : 0))
+                    src => src.Quantity)
                 .Map(
                     dest => dest.UnimportedQuantity,
                     src => src.Quantity -
-                        (src.PurchaseOrderItems != null
-                            ? src.PurchaseOrderItems
-                                .Where(poi => poi.DeletedAt == null)
-                                .SelectMany(poi => poi.InventoryReceiptInfos)
+                        (src.InventoryReceiptInfos != null
+                            ? src.InventoryReceiptInfos
                                 .Where(ii => ii.DeletedAt == null &&
                                              ii.InventoryReceipt != null &&
                                              ii.InventoryReceipt.DeletedAt == null &&
@@ -204,40 +121,13 @@ namespace Application.Features.PurchaseRequests.Mappings
                             : 0))
                 .Map(
                     dest => dest.InvoicedQuantity,
-                    src => src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null)
-                            .SelectMany(poi => poi.PurchaseInvoiceItems)
-                            .Where(pii => pii.DeletedAt == null &&
-                                          pii.PurchaseInvoice != null &&
-                                          pii.PurchaseInvoice.DeletedAt == null &&
-                                          string.Compare(pii.PurchaseInvoice.Status, "approved", StringComparison.OrdinalIgnoreCase) == 0)
-                            .Sum(pii => pii.InvoicedQuantity)
-                        : 0)
+                    src => 0)
                 .Map(
                     dest => dest.InvoicingQuantity,
-                    src => src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null)
-                            .SelectMany(poi => poi.PurchaseInvoiceItems)
-                            .Where(pii => pii.DeletedAt == null &&
-                                          pii.PurchaseInvoice != null &&
-                                          pii.PurchaseInvoice.DeletedAt == null &&
-                                          string.Compare(pii.PurchaseInvoice.Status, "draft", StringComparison.OrdinalIgnoreCase) == 0)
-                            .Sum(pii => pii.InvoicedQuantity)
-                        : 0)
+                    src => 0)
                 .Map(
                     dest => dest.UninvoicedQuantity,
-                    src => src.Quantity - (src.PurchaseOrderItems != null
-                        ? src.PurchaseOrderItems
-                            .Where(poi => poi.DeletedAt == null)
-                            .SelectMany(poi => poi.PurchaseInvoiceItems)
-                            .Where(pii => pii.DeletedAt == null &&
-                                          pii.PurchaseInvoice != null &&
-                                          pii.PurchaseInvoice.DeletedAt == null &&
-                                          string.Compare(pii.PurchaseInvoice.Status, "approved", StringComparison.OrdinalIgnoreCase) == 0)
-                            .Sum(pii => pii.InvoicedQuantity)
-                        : 0))
+                    src => src.Quantity)
                 .Map(
                     dest => dest.NeedVin,
                     src => src.ProductVariant != null &&
@@ -247,4 +137,3 @@ namespace Application.Features.PurchaseRequests.Mappings
         }
     }
 }
-

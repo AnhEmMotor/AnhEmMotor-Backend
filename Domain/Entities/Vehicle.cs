@@ -64,12 +64,6 @@ public class Vehicle : BaseEntity
     [Column("ImportPrice", TypeName = "decimal(18, 2)")]
     public decimal ImportPrice { get; set; } = 0;
 
-    [Column("PurchaseInvoiceItemId")]
-    [ForeignKey("PurchaseInvoiceItem")]
-    public int? PurchaseInvoiceItemId { get; set; }
-
-    public PurchaseInvoiceItem? PurchaseInvoiceItem { get; set; }
-
     public ICollection<VehicleDocument> Documents { get; set; } = new List<VehicleDocument>();
 
     public ICollection<MaintenanceHistory> MaintenanceHistories { get; set; } = new List<MaintenanceHistory>();

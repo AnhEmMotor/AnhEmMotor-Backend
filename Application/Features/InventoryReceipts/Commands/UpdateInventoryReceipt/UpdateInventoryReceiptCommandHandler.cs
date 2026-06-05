@@ -4,7 +4,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
-using Application.Interfaces.Repositories.PurchaseOrder;
+using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -27,7 +27,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
     IInventoryReceiptReadRepository readRepository,
     IInventoryReceiptUpdateRepository updateRepository,
     IInventoryReceiptDeleteRepository deleteRepository,
-    IPurchaseOrderReadRepository poReadRepository,
+    IPurchaseRequestReadRepository prReadRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
     IPermissionReadRepository permissionRepository,
@@ -85,49 +85,56 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
 
         var existingInfoDict = inventoryReceipt.InventoryReceiptInfos.ToDictionary(ii => ii.Id);
 
-        var purchaseOrderId = request.PurchaseOrderId ?? inventoryReceipt.PurchaseOrderId;
-        PurchaseOrder? po = null;
-        if (purchaseOrderId.HasValue)
+        var purchaseRequestId = request.PurchaseRequestId ?? inventoryReceipt.PurchaseRequestId;
+        PurchaseRequest? pr = null;
+        if (purchaseRequestId.HasValue)
         {
-            po = await poReadRepository.GetByIdWithDetailsAsync(purchaseOrderId.Value, cancellationToken)
+            pr = await prReadRepository.GetByIdWithDetailsAsync(purchaseRequestId.Value, cancellationToken)
                 .ConfigureAwait(false);
-            if (po is null)
+            if (pr is null)
             {
                 return Error.NotFound(
-                    $"Đơn mua hàng {purchaseOrderId} không tồn tại hoặc đã bị xóa.",
-                    "PurchaseOrderId");
+                    $"Yêu cầu mua hàng {purchaseRequestId} không tồn tại hoặc đã bị xóa.",
+                    "PurchaseRequestId");
             }
-            if (!string.Equals(po.Status, PurchaseOrderStatus.Approved, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(pr.Status, PurchaseRequestStatus.Approve, StringComparison.OrdinalIgnoreCase))
             {
                 return Error.BadRequest(
-                    $"Đơn mua hàng {purchaseOrderId} chưa được phê duyệt.",
-                    "PurchaseOrderId");
+                    $"Yêu cầu mua hàng {purchaseRequestId} chưa được phê duyệt.",
+                    "PurchaseRequestId");
             }
         }
 
-        var poItemsDict = po != null
-            ? po.PurchaseOrderItems.ToDictionary(x => x.Id)
+        var prItemsDict = pr != null
+            ? pr.PurchaseRequestItems.ToDictionary(x => x.Id)
             : [];
+
+        if (prItemsDict.Count == 0 && request.Products.Any(p => p.PurchaseRequestItemId.HasValue))
+        {
+            var prItemIds = request.Products.Where(p => p.PurchaseRequestItemId.HasValue).Select(p => p.PurchaseRequestItemId!.Value).Distinct();
+            var prItems = await prReadRepository.GetItemsByIdsAsync(prItemIds, cancellationToken).ConfigureAwait(false);
+            prItemsDict = prItems.ToDictionary(x => x.Id);
+        }
 
         var variantIds = new List<int>();
         foreach (var productRequest in request.Products)
         {
-            int? purchaseOrderItemId = null;
+            int? purchaseRequestItemId = null;
             if (productRequest.Id.HasValue && productRequest.Id > 0)
             {
                 if (existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
                 {
-                    purchaseOrderItemId = productRequest.PurchaseOrderItemId ?? existingInfo.PurchaseOrderItemId;
+                    purchaseRequestItemId = productRequest.PurchaseRequestItemId ?? existingInfo.PurchaseRequestItemId;
                 }
             }
             else
             {
-                purchaseOrderItemId = productRequest.PurchaseOrderItemId;
+                purchaseRequestItemId = productRequest.PurchaseRequestItemId;
             }
 
-            if (purchaseOrderItemId.HasValue && poItemsDict.TryGetValue(purchaseOrderItemId.Value, out var poItem))
+            if (purchaseRequestItemId.HasValue && prItemsDict.TryGetValue(purchaseRequestItemId.Value, out var prItem))
             {
-                variantIds.Add(poItem.ProductVariantId);
+                variantIds.Add(prItem.ProductVariantId);
             }
         }
         variantIds = variantIds.Distinct().ToList();
@@ -161,34 +168,34 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             var uniqueEngines = new HashSet<(string Engine, int ProductVariantId, int? ProductVariantColorId)>();
             foreach (var product in request.Products)
             {
-                int? purchaseOrderItemId = null;
+                int? purchaseRequestItemId = null;
                 if (product.Id.HasValue && product.Id > 0 && existingInfoDict.TryGetValue(product.Id.Value, out var existingInfo))
                 {
-                    purchaseOrderItemId = product.PurchaseOrderItemId ?? existingInfo.PurchaseOrderItemId;
+                    purchaseRequestItemId = product.PurchaseRequestItemId ?? existingInfo.PurchaseRequestItemId;
                 }
                 else
                 {
-                    purchaseOrderItemId = product.PurchaseOrderItemId;
+                    purchaseRequestItemId = product.PurchaseRequestItemId;
                 }
 
-                PurchaseOrderItem? poItem = null;
-                var resolvedVariantId = purchaseOrderItemId.HasValue &&
-                        poItemsDict.TryGetValue(purchaseOrderItemId.Value, out poItem)
-                    ? poItem.ProductVariantId
+                PurchaseRequestItem? prItem = null;
+                var resolvedVariantId = purchaseRequestItemId.HasValue &&
+                        prItemsDict.TryGetValue(purchaseRequestItemId.Value, out prItem)
+                    ? prItem.ProductVariantId
                     : (int?)null;
 
-                var resolvedColorId = purchaseOrderItemId.HasValue &&
-                        poItemsDict.TryGetValue(purchaseOrderItemId.Value, out var poItem2)
-                    ? poItem2.ProductVariantColorId
+                var resolvedColorId = purchaseRequestItemId.HasValue &&
+                        prItemsDict.TryGetValue(purchaseRequestItemId.Value, out var prItem2)
+                    ? prItem2.ProductVariantColorId
                     : (int?)null;
 
-                var resolvedSupplierId = po?.SupplierId;
+                var resolvedSupplierId = product.SupplierId;
 
                 if (resolvedVariantId.HasValue)
                 {
-                    if (poItem != null)
+                    if (prItem != null)
                     {
-                        var occupiedQty = poItem.InventoryReceiptInfos
+                        var occupiedQty = prItem.InventoryReceiptInfos
                             .Where(ii => ii.DeletedAt == null &&
                                          ii.InventoryReceiptId != request.Id &&
                                          ii.InventoryReceipt != null &&
@@ -198,15 +205,15 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                                           string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase)))
                             .Sum(ii => ii.Count ?? 0);
 
-                        var remainingAllowed = poItem.OrderedQuantity - occupiedQty;
+                        var remainingAllowed = prItem.Quantity - occupiedQty;
                         var requestedQty = product.Count ?? 0;
 
                         if (requestedQty > remainingAllowed)
                         {
-                            var productName = poItem.ProductVariant?.Product?.Name ?? $"Biến thể #{poItem.ProductVariantId}";
+                            var productName = prItem.ProductVariant?.Product?.Name ?? $"Biến thể #{prItem.ProductVariantId}";
                             return Error.BadRequest(
-                                $"Số lượng nhập ({requestedQty}) cho sản phẩm '{productName}' vượt quá số lượng còn lại được phép nhập từ đơn mua hàng PO ({remainingAllowed}).",
-                                "Products");
+                                $"Số lượng nhập ({requestedQty}) cho sản phẩm '{productName}' vượt quá số lượng còn lại được phép nhập từ yêu cầu mua hàng ({remainingAllowed}).",
+                               "Products");
                         }
                     }
 
@@ -248,14 +255,14 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             }
         }
 
-        var oldPurchaseOrderId = inventoryReceipt.PurchaseOrderId;
+        var oldPurchaseRequestId = inventoryReceipt.PurchaseRequestId;
         var oldNotes = inventoryReceipt.Notes;
 
         request.Adapt(inventoryReceipt);
 
-        if (!request.PurchaseOrderId.HasValue)
+        if (!request.PurchaseRequestId.HasValue)
         {
-            inventoryReceipt.PurchaseOrderId = oldPurchaseOrderId;
+            inventoryReceipt.PurchaseRequestId = oldPurchaseRequestId;
         }
         if (request.Notes == null)
         {
@@ -288,27 +295,27 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                 existingInfoDict.TryGetValue(productRequest.Id.Value, out existingInfo);
             }
 
-            int? purchaseOrderItemId = existingInfo != null
-                ? (productRequest.PurchaseOrderItemId ?? existingInfo.PurchaseOrderItemId)
-                : productRequest.PurchaseOrderItemId;
+            int? purchaseRequestItemId = existingInfo != null
+                ? (productRequest.PurchaseRequestItemId ?? existingInfo.PurchaseRequestItemId)
+                : productRequest.PurchaseRequestItemId;
 
-            var resolvedColorId = purchaseOrderItemId.HasValue &&
-                    poItemsDict.TryGetValue(purchaseOrderItemId.Value, out var poItem)
-                ? poItem.ProductVariantColorId
+            var resolvedColorId = purchaseRequestItemId.HasValue &&
+                    prItemsDict.TryGetValue(purchaseRequestItemId.Value, out var prItem)
+                ? prItem.ProductVariantColorId
                 : (int?)null;
 
-            var resolvedVariantId = purchaseOrderItemId.HasValue &&
-                    poItemsDict.TryGetValue(purchaseOrderItemId.Value, out var poItemV)
-                ? poItemV.ProductVariantId
+            var resolvedVariantId = purchaseRequestItemId.HasValue &&
+                    prItemsDict.TryGetValue(purchaseRequestItemId.Value, out var prItemV)
+                ? prItemV.ProductVariantId
                 : (int?)null;
 
             if (existingInfo != null)
             {
-                var oldPurchaseOrderItemId = existingInfo.PurchaseOrderItemId;
+                var oldPurchaseRequestItemId = existingInfo.PurchaseRequestItemId;
                 productRequest.Adapt(existingInfo, config);
-                if (!productRequest.PurchaseOrderItemId.HasValue)
+                if (!productRequest.PurchaseRequestItemId.HasValue)
                 {
-                    existingInfo.PurchaseOrderItemId = oldPurchaseOrderItemId;
+                    existingInfo.PurchaseRequestItemId = oldPurchaseRequestItemId;
                 }
                 if (productRequest.Count.HasValue)
                 {

@@ -3,12 +3,14 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.InventoryReceipt;
+using Application.Interfaces.Repositories.Quotation;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Mapster;
 using MediatR;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,6 +22,7 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
         ICurrentUserContext currentUserContext,
         IInventoryLedgerRepository ledgerRepository,
         ISupplierDebtRepository supplierDebtRepository,
+        IQuotationProductRowRepository quotationRowRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>
     {
         public async Task<Result<InventoryReceiptDetailResponse>> Handle(
@@ -43,10 +46,10 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
             {
                 foreach (var info in receipt.InventoryReceiptInfos)
                 {
-                    var poItem = info.PurchaseOrderItem;
-                    if (poItem != null)
+                    var prItem = info.PurchaseRequestItem;
+                    if (prItem != null)
                     {
-                        var importedQty = poItem.InventoryReceiptInfos
+                        var importedQty = prItem.InventoryReceiptInfos
                             .Where(ii => ii.DeletedAt == null &&
                                          ii.InventoryReceiptId != receipt.Id &&
                                          ii.InventoryReceipt != null &&
@@ -54,14 +57,14 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                                          string.Equals(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, StringComparison.OrdinalIgnoreCase))
                             .Sum(ii => ii.Count ?? 0);
 
-                        var remainingAllowed = poItem.OrderedQuantity - importedQty;
+                        var remainingAllowed = prItem.Quantity - importedQty;
                         var currentQty = info.Count ?? 0;
 
                         if (currentQty > remainingAllowed)
                         {
-                            var productName = poItem.ProductVariant?.Product?.Name ?? $"Biến thể #{poItem.ProductVariantId}";
+                            var productName = prItem.ProductVariant?.Product?.Name ?? $"Biến thể #{prItem.ProductVariantId}";
                             return Error.BadRequest(
-                                $"Không thể phê duyệt. Số lượng nhập ({currentQty}) cho sản phẩm '{productName}' vượt quá giới hạn còn lại của PO ({remainingAllowed}).",
+                                $"Không thể phê duyệt. Số lượng nhập ({currentQty}) cho sản phẩm '{productName}' vượt quá giới hạn còn lại ({remainingAllowed}).",
                                 "StatusId");
                         }
                     }
@@ -73,9 +76,9 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                 receipt.RejectedBy = null;
 
                 foreach (var info in receipt.InventoryReceiptInfos)
-                 {
-                     var variantId = info.PurchaseOrderItem?.ProductVariantId ?? 0;
-                     var colorId = info.PurchaseOrderItem?.ProductVariantColorId;
+                {
+                     var variantId = info.PurchaseRequestItem?.ProductVariantId ?? 0;
+                     var colorId = info.PurchaseRequestItem?.ProductVariantColorId;
                      var lastEntry = await ledgerRepository.GetLastEntryAsync(variantId, colorId, cancellationToken).ConfigureAwait(false);
                      var currentStock = lastEntry?.StockAfter ?? 0;
                      var importQty = info.Count ?? 0;
@@ -88,16 +91,44 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                          TransactionType = "Nhập kho",
                          ProductVariantId = variantId,
                          ProductVariantColorId = colorId,
-                         PartnerName = receipt.PurchaseOrder?.Supplier?.Name,
+                         PartnerName = info.Supplier?.Name,
                          ImportQty = importQty,
                          ExportQty = 0,
-                         UnitPrice = info.PurchaseOrderItem?.UnitPrice ?? 0,
-                         TotalAmount = importQty * (info.PurchaseOrderItem?.UnitPrice ?? 0),
+                         UnitPrice = info.UnitPrice ?? 0,
+                         TotalAmount = importQty * (info.UnitPrice ?? 0),
                          StockAfter = newStock
                      };
 
                      await ledgerRepository.AddAsync(ledger, cancellationToken).ConfigureAwait(false);
-                 }
+
+                     // Add/update supplier quotation prices in product section
+                     if (info.SupplierId.HasValue && info.UnitPrice.HasValue && variantId > 0)
+                     {
+                         var existingQuote = await quotationRowRepository
+                             .GetBySupplierAndVariantAsync(variantId, colorId, info.SupplierId.Value, cancellationToken)
+                             .ConfigureAwait(false);
+
+                         if (existingQuote != null)
+                         {
+                             if (existingQuote.QuotePrice != (int)info.UnitPrice.Value)
+                             {
+                                 existingQuote.QuotePrice = (int)info.UnitPrice.Value;
+                                 quotationRowRepository.Update(existingQuote);
+                             }
+                         }
+                         else
+                         {
+                             var newQuote = new QuotationProductRow
+                             {
+                                 ProductVariantId = variantId,
+                                 ProductVariantColorId = colorId,
+                                 SupplierId = info.SupplierId.Value,
+                                 QuotePrice = (int)info.UnitPrice.Value
+                             };
+                             await quotationRowRepository.AddAsync(newQuote, cancellationToken).ConfigureAwait(false);
+                         }
+                     }
+                }
             }
             else if (string.Equals(request.StatusId, Domain.Constants.InventoryReceiptStatus.Reject, StringComparison.OrdinalIgnoreCase))
             {
@@ -119,4 +150,3 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
         }
     }
 }
-
