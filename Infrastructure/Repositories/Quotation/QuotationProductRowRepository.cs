@@ -9,6 +9,15 @@ namespace Infrastructure.Repositories.Quotation
 {
     public class QuotationProductRowRepository(ApplicationDBContext context) : IQuotationProductRowRepository
     {
+        public Task<List<QuotationProductRow>> GetByVariantAsync(
+            int variantId,
+            CancellationToken cancellationToken)
+        {
+            return context.QuotationProductRows
+                .Where(q => q.ProductVariantId == variantId)
+                .ToListAsync(cancellationToken);
+        }
+
         public Task<QuotationProductRow?> GetBySupplierAndVariantAsync(
             int variantId,
             int? colorId,

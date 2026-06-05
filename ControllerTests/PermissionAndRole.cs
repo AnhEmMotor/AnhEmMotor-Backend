@@ -424,14 +424,6 @@ public class PermissionAndRole
         result.Should().BeOfType<OkObjectResult>();
     }
 
-    [Fact(DisplayName = "PERM_034 - Controller - Xóa khách hàng tiềm năng không có quyền")]
-    public async Task DeleteLead_NoPermission_ReturnsForbidden()
-    {
-        _mediatorMock.Setup(m => m.Send(It.IsAny<IBaseRequest>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedAccessException());
-        Assert.True(true);
-    }
-
     [Fact(DisplayName = "PERM_039 - Controller - Gán quyền mới cho vai trò (Role)")]
     public async Task UpdateRole_NewPermission_ReturnsOk()
     {

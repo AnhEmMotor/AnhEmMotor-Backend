@@ -6,6 +6,10 @@ namespace Application.Interfaces.Repositories.Quotation
 {
     public interface IQuotationProductRowRepository
     {
+        Task<List<QuotationProductRow>> GetByVariantAsync(
+            int variantId,
+            CancellationToken cancellationToken);
+
         Task<QuotationProductRow?> GetBySupplierAndVariantAsync(
             int variantId,
             int? colorId,

@@ -1,3 +1,4 @@
+using Application.ApiContracts.Product.Requests;
 using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Responses;
@@ -25,6 +26,9 @@ public class ProductVariantDetailForManagerResponse
 
     [JsonPropertyName("colors")]
     public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
+
+    [JsonPropertyName("supplier_prices")]
+    public List<VariantSupplierPriceRequest> SupplierPrices { get; set; } = [];
 
     [JsonPropertyName("sku")]
     public string? SKU { get; set; }

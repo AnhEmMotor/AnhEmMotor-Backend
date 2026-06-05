@@ -12,4 +12,7 @@ public class CreateProductVariantColorRequest
 
     [JsonPropertyName("cover_image_url")]
     public string? CoverImageUrl { get; set; }
+
+    [JsonPropertyName("supplier_prices")]
+    public List<VariantSupplierPriceRequest> SupplierPrices { get; set; } = [];
 }

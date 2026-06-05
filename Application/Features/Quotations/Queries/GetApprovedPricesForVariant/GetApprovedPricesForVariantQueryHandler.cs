@@ -25,11 +25,6 @@ namespace Application.Features.Quotations.Queries.GetApprovedPricesForVariant
                 q => q.ProductVariantId == request.VariantId &&
                     q.ProductVariantColorId == request.ColorId);
 
-            if (request.SupplierId.HasValue)
-            {
-                matchedQuotes = matchedQuotes.Where(q => q.QuotationReceipt?.SupplierId == request.SupplierId.Value);
-            }
-
             var result = matchedQuotes.Select(quote => new PurchaseRequestQuotedPriceResponse
             {
                 ProductVariantId = quote.ProductVariantId ?? 0,
