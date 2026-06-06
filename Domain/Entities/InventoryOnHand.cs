@@ -30,15 +30,6 @@ namespace Domain.Entities
         [Column("OrderedQty")]
         public int OrderedQty { get; set; }
 
-        [Column("PickingQty")]
-        public int PickingQty { get; set; }
-
-        [Column("TestDriveQty")]
-        public int TestDriveQty { get; set; }
-
-        [NotMapped]
-        public int RemainingQty => StockQty - OrderedQty;
-
         public ProductVariant? ProductVariant { get; set; }
         public ProductVariantColor? ProductVariantColor { get; set; }
     }

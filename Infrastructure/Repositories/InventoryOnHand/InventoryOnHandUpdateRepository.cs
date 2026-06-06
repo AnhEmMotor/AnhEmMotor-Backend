@@ -52,26 +52,6 @@ public class InventoryOnHandUpdateRepository(ApplicationDBContext context) : IIn
             .Where(x => x.OutputOrder != null && orderedStatuses.Contains(x.OutputOrder.StatusId))
             .SumAsync(x => x.Count ?? 0, cancellationToken);
 
-        // Calculate PickingQty
-        var pickingStatuses = new[]
-        {
-            OrderStatus.Delivering,
-            OrderStatus.WaitingPickup
-        };
-        var pickingQty = await context.OutputInfos
-            .Where(x => x.ProductVariantId == productVariantId && x.ProductVariantColorId == productVariantColorId)
-            .Where(x => x.OutputOrder != null && pickingStatuses.Contains(x.OutputOrder.StatusId))
-            .SumAsync(x => x.Count ?? 0, cancellationToken);
-
-        // Calculate TestDriveQty
-        var testDriveQty = 0;
-        if (productVariantColorId == null)
-        {
-            testDriveQty = await context.Bookings
-                .Where(x => x.ProductVariantId == productVariantId)
-                .Where(x => x.BookingType == BookingType.TestDrive && x.Status == BookingStatus.Confirmed)
-                .CountAsync(cancellationToken);
-        }
 
         var inventoryOnHand = await context.InventoryOnHands
             .IgnoreQueryFilters()
@@ -91,8 +71,7 @@ public class InventoryOnHandUpdateRepository(ApplicationDBContext context) : IIn
         inventoryOnHand.ExportedQty = exportedQty;
         inventoryOnHand.StockQty = importedQty - exportedQty;
         inventoryOnHand.OrderedQty = orderedQty;
-        inventoryOnHand.PickingQty = pickingQty;
-        inventoryOnHand.TestDriveQty = testDriveQty;
+
         inventoryOnHand.DeletedAt = null;
 
         await context.SaveChangesAsync(cancellationToken);
