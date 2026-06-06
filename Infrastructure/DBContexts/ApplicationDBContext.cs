@@ -127,9 +127,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<CommissionPolicyAuditLog> CommissionPolicyAuditLogs { get; set; }
 
-    public virtual DbSet<Quotation> Quotations { get; set; }
 
-    public virtual DbSet<QuotationProductRow> QuotationProductRows { get; set; }
+
+    public virtual DbSet<ProductQuotation> ProductQuotations { get; set; }
 
     public virtual DbSet<PurchaseRequest> PurchaseRequests { get; set; }
 
@@ -281,22 +281,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<QuotationProductRow>()
-            .HasOne(oi => oi.QuotationReceipt)
-            .WithMany(q => q.QuotationProductRows)
-            .HasForeignKey(oi => oi.QuotationId)
-            .OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<Quotation>()
-            .HasOne(oi => oi.Supplier)
-            .WithMany()
-            .HasForeignKey(oi => oi.SupplierId)
-            .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<QuotationProductRow>()
+        modelBuilder.Entity<ProductQuotation>()
             .HasOne(oi => oi.ProductVariant)
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantId)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<QuotationProductRow>()
+        modelBuilder.Entity<ProductQuotation>()
             .HasOne(oi => oi.ProductVariantColor)
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantColorId)

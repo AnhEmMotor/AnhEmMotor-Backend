@@ -2,7 +2,7 @@ using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Product;
-using Application.Interfaces.Repositories.Quotation;
+using Application.Interfaces.Repositories.ProductQuotations;
 using Mapster;
 using MediatR;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace Application.Features.Products.Queries.GetProductById;
 
 public sealed class GetProductByIdQueryHandler(
     IProductReadRepository readRepository,
-    IQuotationProductRowRepository? quotationProductRowRepository = null) : IRequestHandler<GetProductByIdQuery, Result<ProductDetailForManagerResponse?>>
+    IProductQuotationReadRepository? ProductQuotationReadRepository = null) : IRequestHandler<GetProductByIdQuery, Result<ProductDetailForManagerResponse?>>
 {
     public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         GetProductByIdQuery request,
@@ -37,7 +37,7 @@ public sealed class GetProductByIdQueryHandler(
         Domain.Entities.Product product,
         CancellationToken cancellationToken)
     {
-        if (quotationProductRowRepository is null)
+        if (ProductQuotationReadRepository is null)
         {
             return;
         }
@@ -55,7 +55,7 @@ public sealed class GetProductByIdQueryHandler(
                 continue;
             }
 
-            var rows = await quotationProductRowRepository
+            var rows = await ProductQuotationReadRepository
                 .GetByVariantAsync(variantEntity.Id, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -91,3 +91,6 @@ public sealed class GetProductByIdQueryHandler(
         }
     }
 }
+
+
+

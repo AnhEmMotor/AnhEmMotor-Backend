@@ -3,7 +3,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.InventoryReceipt;
-using Application.Interfaces.Repositories.Quotation;
+using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services;
 using Domain.Entities;
@@ -22,7 +22,7 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
         ICurrentUserContext currentUserContext,
         IInventoryLedgerRepository ledgerRepository,
         ISupplierDebtRepository supplierDebtRepository,
-        IQuotationProductRowRepository quotationRowRepository,
+        IProductQuotationReadRepository quotationReadRepository, IProductQuotationUpdateRepository quotationUpdateRepository, IProductQuotationInsertRepository quotationInsertRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>
     {
         public async Task<Result<InventoryReceiptDetailResponse>> Handle(
@@ -104,8 +104,7 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                      // Add/update supplier quotation prices in product section
                      if (info.SupplierId.HasValue && info.UnitPrice.HasValue && variantId > 0)
                      {
-                         var existingQuote = await quotationRowRepository
-                             .GetBySupplierAndVariantAsync(variantId, colorId, info.SupplierId.Value, cancellationToken)
+                         var existingQuote = await quotationReadRepository.GetBySupplierAndVariantAsync(variantId, colorId, info.SupplierId.Value, cancellationToken)
                              .ConfigureAwait(false);
 
                          if (existingQuote != null)
@@ -113,19 +112,19 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                              if (existingQuote.QuotePrice != (int)info.UnitPrice.Value)
                              {
                                  existingQuote.QuotePrice = (int)info.UnitPrice.Value;
-                                 quotationRowRepository.Update(existingQuote);
+                                 quotationUpdateRepository.Update(existingQuote);
                              }
                          }
                          else
                          {
-                             var newQuote = new QuotationProductRow
+                             var newQuote = new ProductQuotation
                              {
                                  ProductVariantId = variantId,
                                  ProductVariantColorId = colorId,
                                  SupplierId = info.SupplierId.Value,
                                  QuotePrice = (int)info.UnitPrice.Value
                              };
-                             await quotationRowRepository.AddAsync(newQuote, cancellationToken).ConfigureAwait(false);
+                             await quotationInsertRepository.AddAsync(newQuote, cancellationToken).ConfigureAwait(false);
                          }
                      }
                 }
@@ -150,3 +149,5 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
         }
     }
 }
+
+

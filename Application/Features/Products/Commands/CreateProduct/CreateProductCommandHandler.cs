@@ -10,7 +10,7 @@ using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
-using Application.Interfaces.Repositories.Quotation;
+using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.Technology.Technology;
 using Domain.Constants;
 using Domain.Entities;
@@ -34,7 +34,7 @@ public sealed class CreateProductCommandHandler(
     IOptionValueInsertRepository optionValueInsertRepository,
     ITechnologyReadRepository technologyReadRepository,
     IUnitOfWork unitOfWork,
-    IQuotationProductRowRepository? quotationProductRowRepository = null) : IRequestHandler<CreateProductCommand, Result<ProductDetailForManagerResponse?>>
+    IProductQuotationReadRepository? ProductQuotationReadRepository = null, IProductQuotationInsertRepository? ProductQuotationInsertRepository = null, IProductQuotationUpdateRepository? ProductQuotationUpdateRepository = null, IProductQuotationDeleteRepository? ProductQuotationDeleteRepository = null) : IRequestHandler<CreateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
     public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         CreateProductCommand request,
@@ -482,7 +482,7 @@ public sealed class CreateProductCommandHandler(
         List<(ProductVariant Variant, ProductVariantColor Color, List<VariantSupplierPriceRequest> SupplierPrices)> colorSupplierPriceTargets,
         CancellationToken cancellationToken)
     {
-        if (quotationProductRowRepository is null)
+        if (ProductQuotationReadRepository is null || ProductQuotationInsertRepository is null || ProductQuotationUpdateRepository is null || ProductQuotationDeleteRepository is null)
         {
             return;
         }
@@ -494,8 +494,7 @@ public sealed class CreateProductCommandHandler(
                 continue;
             }
 
-            var existingRows = await quotationProductRowRepository
-                .GetByVariantAsync(variant.Id, cancellationToken)
+            var existingRows = await ProductQuotationReadRepository.GetByVariantAsync(variant.Id, cancellationToken)
                 .ConfigureAwait(false);
             existingRows = existingRows.Where(x => x.ProductVariantColorId == null).ToList();
 
@@ -515,12 +514,12 @@ public sealed class CreateProductCommandHandler(
                         ? Convert.ToInt32(supplierPrice.QuotePrice.Value)
                         : null;
                     existingRow.Note = supplierPrice.Note?.Trim();
-                    quotationProductRowRepository.Update(existingRow);
+                    ProductQuotationUpdateRepository.Update(existingRow);
                 }
                 else
                 {
-                    await quotationProductRowRepository.AddAsync(
-                        new QuotationProductRow
+                    await ProductQuotationInsertRepository.AddAsync(
+                        new ProductQuotation
                         {
                             ProductVariantId = variant.Id,
                             ProductVariantColorId = supplierPrice.ProductVariantColorId,
@@ -539,7 +538,7 @@ public sealed class CreateProductCommandHandler(
                 var key = (existingRow.SupplierId ?? 0, existingRow.ProductVariantColorId);
                 if (!desiredKeys.Contains(key))
                 {
-                    quotationProductRowRepository.Delete(existingRow);
+                    ProductQuotationDeleteRepository.Delete(existingRow);
                 }
             }
         }
@@ -551,8 +550,7 @@ public sealed class CreateProductCommandHandler(
                 continue;
             }
 
-            var existingRows = await quotationProductRowRepository
-                .GetByVariantAsync(variant.Id, cancellationToken)
+            var existingRows = await ProductQuotationReadRepository.GetByVariantAsync(variant.Id, cancellationToken)
                 .ConfigureAwait(false);
             existingRows = existingRows.Where(x => x.ProductVariantColorId == color.Id).ToList();
 
@@ -568,12 +566,12 @@ public sealed class CreateProductCommandHandler(
                         ? Convert.ToInt32(supplierPrice.QuotePrice.Value)
                         : null;
                     existingRow.Note = supplierPrice.Note?.Trim();
-                    quotationProductRowRepository.Update(existingRow);
+                    ProductQuotationUpdateRepository.Update(existingRow);
                 }
                 else
                 {
-                    await quotationProductRowRepository.AddAsync(
-                        new QuotationProductRow
+                    await ProductQuotationInsertRepository.AddAsync(
+                        new ProductQuotation
                         {
                             ProductVariantId = variant.Id,
                             ProductVariantColorId = color.Id,
@@ -592,7 +590,7 @@ public sealed class CreateProductCommandHandler(
                 var key = (existingRow.SupplierId ?? 0, existingRow.ProductVariantColorId ?? color.Id);
                 if (!desiredKeys.Contains(key))
                 {
-                    quotationProductRowRepository.Delete(existingRow);
+                    ProductQuotationDeleteRepository.Delete(existingRow);
                 }
             }
         }
@@ -605,7 +603,7 @@ public sealed class CreateProductCommandHandler(
         ProductEntity product,
         CancellationToken cancellationToken)
     {
-        if (quotationProductRowRepository is null)
+        if (ProductQuotationReadRepository is null || ProductQuotationInsertRepository is null || ProductQuotationUpdateRepository is null || ProductQuotationDeleteRepository is null)
         {
             return;
         }
@@ -623,8 +621,7 @@ public sealed class CreateProductCommandHandler(
                 continue;
             }
 
-            var rows = await quotationProductRowRepository
-                .GetByVariantAsync(variantEntity.Id, cancellationToken)
+            var rows = await ProductQuotationReadRepository.GetByVariantAsync(variantEntity.Id, cancellationToken)
                 .ConfigureAwait(false);
 
             responseVariant.SupplierPrices = rows
@@ -687,3 +684,5 @@ public sealed class CreateProductCommandHandler(
         return null;
     }
 }
+
+

@@ -1,5 +1,6 @@
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Common.Models;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
@@ -392,6 +393,23 @@ public class ProductController(ISender sender) : ApiController
     {
         var result = await sender.Send(
             new UpdateManyProductPricesCommand() { Ids = request.Ids, Price = request.Price },
+            cancellationToken)
+            .ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách giá nhà cung cấp cho 1 biến thể sản phẩm.
+    /// </summary>
+    [HttpGet("variant/{variantId:int}/supplier-prices")]
+    [ProducesResponseType(typeof(List<PurchaseRequestQuotedPriceResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetSupplierPricesForVariantAsync(
+        int variantId,
+        [FromQuery] int? colorId,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new Application.Features.ProductQuotations.Queries.GetSupplierPricesForVariant.GetSupplierPricesForVariantQuery(variantId, colorId),
             cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);

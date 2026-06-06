@@ -14,6 +14,6 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
 
         public string? Note { get; set; }
 
-        public int QuotationProductRowId { get; set; }
+        public int ProductQuotationId { get; set; }
     }
 }

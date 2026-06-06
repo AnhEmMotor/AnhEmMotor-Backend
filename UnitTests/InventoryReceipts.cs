@@ -13,7 +13,7 @@ using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
-using Application.Interfaces.Repositories.Quotation;
+using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
@@ -42,7 +42,7 @@ public class InventoryReceipts
     private readonly Mock<IInventoryReceiptUpdateRepository> _updateRepoMock;
     private readonly Mock<IInventoryReceiptDeleteRepository> _deleteRepoMock;
     private readonly Mock<IPurchaseRequestReadRepository> _prReadRepoMock;
-    private readonly Mock<IQuotationReadRepository> _quotationRepoMock;
+    private readonly Mock<IProductQuotationReadRepository> _quotationRepoMock;
     private readonly Mock<ISupplierReadRepository> _supplierRepoMock;
     private readonly Mock<IProductVariantReadRepository> _variantRepoMock;
     private readonly Mock<IVehicleReadRepository> _vehicleReadRepoMock;
@@ -52,7 +52,7 @@ public class InventoryReceipts
     private readonly Mock<IInventoryLedgerRepository> _ledgerRepoMock;
     private readonly Mock<ISupplierDebtRepository> _supplierDebtRepoMock;
     private readonly Mock<IVehicleUpdateRepository> _vehicleUpdateRepoMock;
-    private readonly Mock<IQuotationProductRowRepository> _quotationProductRowRepoMock;
+    private readonly Mock<IProductQuotationReadRepository> _ProductQuotationRepoMock;
 
     public InventoryReceipts()
     {
@@ -61,7 +61,7 @@ public class InventoryReceipts
         _updateRepoMock = new Mock<IInventoryReceiptUpdateRepository>();
         _deleteRepoMock = new Mock<IInventoryReceiptDeleteRepository>();
         _prReadRepoMock = new Mock<IPurchaseRequestReadRepository>();
-        _quotationRepoMock = new Mock<IQuotationReadRepository>();
+        _quotationRepoMock = new Mock<IProductQuotationReadRepository>();
         _supplierRepoMock = new Mock<ISupplierReadRepository>();
         _variantRepoMock = new Mock<IProductVariantReadRepository>();
         _vehicleReadRepoMock = new Mock<IVehicleReadRepository>();
@@ -71,7 +71,7 @@ public class InventoryReceipts
         _ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
         _supplierDebtRepoMock = new Mock<ISupplierDebtRepository>();
         _vehicleUpdateRepoMock = new Mock<IVehicleUpdateRepository>();
-        _quotationProductRowRepoMock = new Mock<IQuotationProductRowRepository>();
+        _ProductQuotationRepoMock = new Mock<IProductQuotationReadRepository>();
     }
 
     #pragma warning disable IDE0079 
@@ -477,7 +477,7 @@ public class InventoryReceipts
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
-            _quotationProductRowRepoMock.Object,
+            _ProductQuotationRepoMock.Object, null, null,
             _unitOfWorkMock.Object);
 
         var command = new UpdateInventoryReceiptStatusCommand
@@ -518,7 +518,7 @@ public class InventoryReceipts
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
-            _quotationProductRowRepoMock.Object,
+            _ProductQuotationRepoMock.Object, null, null,
             _unitOfWorkMock.Object);
 
         var command = new UpdateInventoryReceiptStatusCommand
@@ -703,7 +703,7 @@ public class InventoryReceipts
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
-            _quotationProductRowRepoMock.Object,
+            _ProductQuotationRepoMock.Object, null, null,
             _unitOfWorkMock.Object);
         var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "approve" };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
@@ -729,7 +729,7 @@ public class InventoryReceipts
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
-            _quotationProductRowRepoMock.Object,
+            _ProductQuotationRepoMock.Object, null, null,
             _unitOfWorkMock.Object);
         var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "reject" };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
@@ -747,3 +747,4 @@ public class InventoryReceipts
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
+
