@@ -23,7 +23,7 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
         IInventoryLedgerRepository ledgerRepository,
         ISupplierDebtRepository supplierDebtRepository,
         IProductQuotationReadRepository quotationReadRepository, IProductQuotationUpdateRepository quotationUpdateRepository, IProductQuotationInsertRepository quotationInsertRepository,
-        IUnitOfWork unitOfWork) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>
+        IUnitOfWork unitOfWork, IPublisher publisher) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>
     {
         public async Task<Result<InventoryReceiptDetailResponse>> Handle(
             UpdateInventoryReceiptStatusCommand request,
@@ -143,6 +143,20 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
 
             updateRepository.Update(receipt);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            // Cập nhật tồn kho thủ công (Explicit Call)
+            var combos = new System.Collections.Generic.HashSet<(int VariantId, int? ColorId)>();
+            foreach (var info in receipt.InventoryReceiptInfos)
+            {
+                if (info.PurchaseRequestItem != null)
+                {
+                    combos.Add((info.PurchaseRequestItem.ProductVariantId, info.PurchaseRequestItem.ProductVariantColorId));
+                }
+            }
+            if (combos.Count > 0)
+            {
+                await publisher.Publish(new Application.Features.InventoryOnHand.Notifications.InventoryChangedNotification(combos), cancellationToken).ConfigureAwait(false);
+            }
 
             var updated = await readRepository.GetByIdWithDetailsAsync(receipt.Id, cancellationToken).ConfigureAwait(false);
             return updated!.Adapt<InventoryReceiptDetailResponse>();

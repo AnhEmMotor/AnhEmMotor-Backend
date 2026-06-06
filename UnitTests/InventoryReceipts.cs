@@ -478,7 +478,7 @@ public class InventoryReceipts
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
             _ProductQuotationRepoMock.Object, null, null,
-            _unitOfWorkMock.Object);
+            _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
 
         var command = new UpdateInventoryReceiptStatusCommand
         {
@@ -519,7 +519,7 @@ public class InventoryReceipts
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
             _ProductQuotationRepoMock.Object, null, null,
-            _unitOfWorkMock.Object);
+            _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
 
         var command = new UpdateInventoryReceiptStatusCommand
         {
@@ -704,7 +704,7 @@ public class InventoryReceipts
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
             _ProductQuotationRepoMock.Object, null, null,
-            _unitOfWorkMock.Object);
+            _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
         var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "approve" };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(receipt);
@@ -730,7 +730,7 @@ public class InventoryReceipts
             _ledgerRepoMock.Object,
             _supplierDebtRepoMock.Object,
             _ProductQuotationRepoMock.Object, null, null,
-            _unitOfWorkMock.Object);
+            _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
         var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "reject" };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(receipt);
@@ -743,6 +743,25 @@ public class InventoryReceipts
         receipt.ApprovedBy.Should().BeNull();
         receipt.ConfirmedBy.Should().BeNull();
         _updateRepoMock.Verify(x => x.Update(receipt), Times.Once);
+    }
+
+    [Fact(DisplayName = "IR_029 - Handler gọi đúng hàm tính tồn kho")]
+    public async Task IR_029_Handler_CallsRecalculateAsync()
+    {
+        var repoMock = new Mock<Application.Interfaces.Repositories.InventoryOnHand.IInventoryOnHandUpdateRepository>();
+        var handler = new Application.Features.InventoryOnHand.Notifications.InventoryChangedNotificationHandler(repoMock.Object);
+        
+        var combos = new HashSet<(int VariantId, int? ColorId)>
+        {
+            (1, null),
+            (2, 5)
+        };
+        var notification = new Application.Features.InventoryOnHand.Notifications.InventoryChangedNotification(combos);
+        
+        await handler.Handle(notification, CancellationToken.None).ConfigureAwait(true);
+        
+        repoMock.Verify(r => r.RecalculateAsync(1, null, It.IsAny<CancellationToken>()), Times.Once);
+        repoMock.Verify(r => r.RecalculateAsync(2, 5, It.IsAny<CancellationToken>()), Times.Once);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
