@@ -177,12 +177,24 @@ namespace Infrastructure.Repositories.InventoryReceipt
             throw new NotImplementedException();
         }
 
-        public Task<List<Domain.Entities.InventoryReceiptInfo>> GetInfosByVariantAsync(
+        public async Task<List<Domain.Entities.InventoryReceiptInfo>> GetInfosByVariantAsync(
             int variantId,
             int? colorId,
             CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var query = context.InventoryReceiptInfos
+                .Where(x => x.DeletedAt == null && x.InventoryReceipt != null && x.InventoryReceipt.DeletedAt == null)
+                .Include(x => x.InventoryReceipt)
+                .Include(x => x.Supplier)
+                .Include(x => x.PurchaseRequestItem)
+                .Where(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.ProductVariantId == variantId);
+
+            if (colorId.HasValue)
+            {
+                query = query.Where(x => x.PurchaseRequestItem!.ProductVariantColorId == colorId.Value);
+            }
+
+            return await query.ToListAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

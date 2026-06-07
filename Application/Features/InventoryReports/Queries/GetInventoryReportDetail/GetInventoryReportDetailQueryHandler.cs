@@ -41,6 +41,7 @@ namespace Application.Features.InventoryReports.Queries.GetInventoryReportDetail
                              InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId))
                 .Select(ii => new InventoryTransactionResponse
                 {
+                    Id = ii.InventoryReceipt!.Id,
                     PartnerName = ii.Supplier?.Name ?? "Nhà cung cấp",
                     Qty = ii.Count ?? 0,
                     Price = (int)(ii.UnitPrice ?? 0),
@@ -55,6 +56,7 @@ namespace Application.Features.InventoryReports.Queries.GetInventoryReportDetail
                 .Where(oi => !hasColors || oi.ProductVariantColorId == request.ColorId)
                 .Select(oi => new InventoryTransactionResponse
                 {
+                    Id = oi.OutputOrder!.Id,
                     PartnerName = oi.OutputOrder!.CustomerName ?? "Khách hàng",
                     Qty = oi.Count ?? 0,
                     Price = oi.Price ?? 0,
