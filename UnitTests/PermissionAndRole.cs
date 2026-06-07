@@ -642,7 +642,7 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_041 - Unit - Quyền tối thượng của tài khoản Admin (Bypass check)")]
     public async Task PermissionHandler_AdminRole_BypassesPermissionCheck()
     {
-        var dbContextMock = new Mock<ApplicationDBContext>(new DbContextOptions<ApplicationDBContext>(), null);
+        var dbContextMock = new Mock<ApplicationDBContext>(new DbContextOptions<ApplicationDBContext>(), null!);
         var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
         var userManagerMock = new Mock<UserManager<ApplicationUser>>(
             userStoreMock.Object,
@@ -661,7 +661,7 @@ public class PermissionAndRole
         var requirement = new PermissionRequirement("Some.Permission");
         var claims = new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) };
         var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
-        var authContext = new AuthorizationHandlerContext([requirement], userPrincipal, null);
+        var authContext = new AuthorizationHandlerContext([requirement], userPrincipal, null!);
         userManagerMock.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(user);
         userManagerMock.Setup(x => x.GetRolesAsync(user)).ReturnsAsync(["Admin"]);
         var configuration = new ConfigurationBuilder()

@@ -70,7 +70,9 @@ namespace Application.Features.PurchaseRequests.Mappings
                                     .Where(ii => ii.DeletedAt == null &&
                                                  ii.InventoryReceipt != null &&
                                                  ii.InventoryReceipt.DeletedAt == null &&
-                                                 string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) == 0)
+                                                 (string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) == 0 ||
+                                                  string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent, System.StringComparison.OrdinalIgnoreCase) == 0 ||
+                                                  string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, System.StringComparison.OrdinalIgnoreCase) == 0))
                                     .Sum(ii => ii.Count ?? 0)
                                 : 0)))
                 .Map(
@@ -106,7 +108,9 @@ namespace Application.Features.PurchaseRequests.Mappings
                                 .Where(ii => ii.DeletedAt == null &&
                                              ii.InventoryReceipt != null &&
                                              ii.InventoryReceipt.DeletedAt == null &&
-                                             string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) == 0)
+                                             (string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Approve, System.StringComparison.OrdinalIgnoreCase) == 0 ||
+                                              string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent, System.StringComparison.OrdinalIgnoreCase) == 0 ||
+                                              string.Compare(ii.InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, System.StringComparison.OrdinalIgnoreCase) == 0))
                                 .Sum(ii => ii.Count ?? 0)
                             : 0))
                 .Map(

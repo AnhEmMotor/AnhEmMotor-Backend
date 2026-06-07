@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.ProductQuotations
 {
     public interface IProductQuotationUpdateRepository
     {
-        void Update(ProductQuotation row);
+        public void Update(ProductQuotation row);
     }
 }

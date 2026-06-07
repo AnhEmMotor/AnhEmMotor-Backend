@@ -12,8 +12,7 @@ using System.Threading.Tasks;
 namespace Application.Features.DebtPayments.Queries.GetReceiptsWithDebtBySupplierId
 {
     public sealed class GetReceiptsWithDebtBySupplierIdQueryHandler(
-        ISupplierDebtRepository supplierDebtRepository,
-        IInventoryReceiptReadRepository inventoryReceiptReadRepository) 
+        ISupplierDebtRepository supplierDebtRepository) 
         : IRequestHandler<GetReceiptsWithDebtBySupplierIdQuery, Result<List<InventoryReceiptDebtLineResponse>>>
     {
         public async Task<Result<List<InventoryReceiptDebtLineResponse>>> Handle(

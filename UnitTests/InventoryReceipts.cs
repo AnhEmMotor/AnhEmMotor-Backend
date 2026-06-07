@@ -476,8 +476,8 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
+            _ProductQuotationRepoMock.Object, null!, null!,
             _supplierDebtRepoMock.Object,
-            _ProductQuotationRepoMock.Object, null, null,
             _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
 
         var command = new UpdateInventoryReceiptStatusCommand
@@ -517,8 +517,8 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
+            _ProductQuotationRepoMock.Object, null!, null!,
             _supplierDebtRepoMock.Object,
-            _ProductQuotationRepoMock.Object, null, null,
             _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
 
         var command = new UpdateInventoryReceiptStatusCommand
@@ -702,8 +702,8 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
+            _ProductQuotationRepoMock.Object, null!, null!,
             _supplierDebtRepoMock.Object,
-            _ProductQuotationRepoMock.Object, null, null,
             _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
         var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "approve" };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
@@ -728,8 +728,8 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
+            _ProductQuotationRepoMock.Object, null!, null!,
             _supplierDebtRepoMock.Object,
-            _ProductQuotationRepoMock.Object, null, null,
             _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
         var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "reject" };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };

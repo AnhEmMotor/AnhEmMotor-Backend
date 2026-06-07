@@ -50,8 +50,8 @@ namespace UnitTests
                 _updateRepoMock.Object,
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
+                _ProductQuotationRepoMock.Object, null!, null!,
                 _supplierDebtRepoMock.Object,
-                _ProductQuotationRepoMock.Object, null, null,
                 _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
 
             var command = new UpdateInventoryReceiptStatusCommand
@@ -105,8 +105,8 @@ namespace UnitTests
                 _updateRepoMock.Object,
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
+                _ProductQuotationRepoMock.Object, null!, null!,
                 _supplierDebtRepoMock.Object,
-                _ProductQuotationRepoMock.Object, null, null,
                 _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
 
             var command = new UpdateInventoryReceiptStatusCommand
@@ -161,8 +161,8 @@ namespace UnitTests
                 _updateRepoMock.Object,
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
+                _ProductQuotationRepoMock.Object, null!, null!,
                 _supplierDebtRepoMock.Object,
-                _ProductQuotationRepoMock.Object, null, null,
                 _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
 
             var command = new UpdateInventoryReceiptStatusCommand

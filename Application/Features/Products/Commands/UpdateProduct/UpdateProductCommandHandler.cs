@@ -117,7 +117,7 @@ public sealed class UpdateProductCommandHandler(
         {
             return errors;
         }
-        foreach (var variantReq in command.Variants)
+        foreach (var variantReq in command.Variants!)
         {
             var variantDuplicateError = ValidateSupplierPriceUniqueness(
                 variantReq.SupplierPrices ?? [],

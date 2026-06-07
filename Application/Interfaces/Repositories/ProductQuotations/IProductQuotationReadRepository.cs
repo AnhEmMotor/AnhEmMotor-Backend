@@ -7,11 +7,11 @@ namespace Application.Interfaces.Repositories.ProductQuotations
 {
     public interface IProductQuotationReadRepository
     {
-        Task<List<ProductQuotation>> GetByVariantAsync(
+        public Task<List<ProductQuotation>> GetByVariantAsync(
             int variantId,
             CancellationToken cancellationToken);
 
-        Task<ProductQuotation?> GetBySupplierAndVariantAsync(
+        public Task<ProductQuotation?> GetBySupplierAndVariantAsync(
             int variantId,
             int? colorId,
             int supplierId,

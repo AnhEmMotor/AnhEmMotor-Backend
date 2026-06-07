@@ -21,8 +21,8 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
         IInventoryReceiptUpdateRepository updateRepository,
         ICurrentUserContext currentUserContext,
         IInventoryLedgerRepository ledgerRepository,
-        ISupplierDebtRepository supplierDebtRepository,
         IProductQuotationReadRepository quotationReadRepository, IProductQuotationUpdateRepository quotationUpdateRepository, IProductQuotationInsertRepository quotationInsertRepository,
+        ISupplierDebtRepository supplierDebtRepository,
         IUnitOfWork unitOfWork, IPublisher publisher) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>
     {
         public async Task<Result<InventoryReceiptDetailResponse>> Handle(
@@ -127,6 +127,29 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                              await quotationInsertRepository.AddAsync(newQuote, cancellationToken).ConfigureAwait(false);
                          }
                      }
+                }
+
+                var debtsToCreate = receipt.InventoryReceiptInfos
+                    .Where(info => info.SupplierId.HasValue && info.Count.HasValue && info.Count.Value > 0)
+                    .GroupBy(info => info.SupplierId!.Value)
+                    .Select(g => new
+                    {
+                        SupplierId = g.Key,
+                        TotalAmount = g.Sum(i => (i.Count ?? 0) * (i.UnitPrice ?? 0))
+                    })
+                    .Where(x => x.TotalAmount > 0)
+                    .ToList();
+
+                foreach (var debtInfo in debtsToCreate)
+                {
+                    var debt = new SupplierDebt
+                    {
+                        InventoryReceiptId = receipt.Id,
+                        SupplierId = debtInfo.SupplierId,
+                        TotalAmount = debtInfo.TotalAmount,
+                        PaidAmount = 0
+                    };
+                    supplierDebtRepository.Add(debt);
                 }
             }
             else if (string.Equals(request.StatusId, Domain.Constants.InventoryReceiptStatus.Reject, StringComparison.OrdinalIgnoreCase))
