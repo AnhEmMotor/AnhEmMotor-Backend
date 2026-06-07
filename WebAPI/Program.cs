@@ -15,7 +15,17 @@ var environment = builder.Environment;
 var customUploadPath = configuration["LocalFileStorage:UploadPath"];
 if (!string.IsNullOrWhiteSpace(customUploadPath))
 {
-    environment.WebRootPath = customUploadPath;
+    var absolutePath = Path.IsPathRooted(customUploadPath) 
+        ? customUploadPath 
+        : Path.Combine(environment.ContentRootPath, customUploadPath);
+        
+    if (!Directory.Exists(absolutePath))
+    {
+        Directory.CreateDirectory(absolutePath);
+    }
+        
+    environment.WebRootPath = absolutePath;
+    environment.WebRootFileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(absolutePath);
 }
 builder.Services.AddApplicationServices();
 if (!environment.IsEnvironment("Test"))
@@ -95,6 +105,7 @@ if (app.Environment.IsDevelopment())
     Console.WriteLine("=======================================================\n");
     Console.ForegroundColor = originalColor;
 }
+app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("CorsPolicy");
 if (!app.Environment.IsEnvironment("Test"))

@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace Application.Features.News.Commands.CreateNews;
+namespace Application.Features.News.Commands.UpdateNews;
 
-public sealed class CreateNewsCommandValidator : AbstractValidator<CreateNewsCommand>
+public sealed class UpdateNewsCommandValidator : AbstractValidator<UpdateNewsCommand>
 {
-    public CreateNewsCommandValidator()
+    public UpdateNewsCommandValidator()
     {
         RuleFor(x => x.Title)
             .NotEmpty()

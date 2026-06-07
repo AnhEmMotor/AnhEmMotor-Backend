@@ -63,6 +63,17 @@ public class NewsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
+    /// Lấy danh sách sản phẩm để chọn gắn vào bài viết.
+    /// </summary>
+    [HttpGet("products-for-selection")]
+    [SwaggerOperation(Summary = "Lấy danh sách sản phẩm (biến thể & màu) để chọn gắn vào bài viết")]
+    public async Task<IActionResult> GetProductsForSelection(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new Application.Features.News.Queries.GetProductsForNews.GetProductsForNewsQuery(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Cập nhật bài viết
     /// </summary>
     /// <param name="id">Mã bài viết</param>
