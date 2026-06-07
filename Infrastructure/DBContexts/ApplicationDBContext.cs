@@ -95,6 +95,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<NewsCategory> NewsCategories { get; set; }
 
+    public virtual DbSet<NewsComment> NewsComments { get; set; }
+
     public virtual DbSet<Banner> Banners { get; set; }
 
     public virtual DbSet<BannerAuditLog> BannerAuditLogs { get; set; }
@@ -235,6 +237,16 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(n => n.AuthorId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<NewsComment>()
+            .HasOne(nc => nc.News)
+            .WithMany(n => n.Comments)
+            .HasForeignKey(nc => nc.NewsId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NewsComment>()
+            .HasOne(nc => nc.User)
+            .WithMany()
+            .HasForeignKey(nc => nc.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<MaintenanceHistory>()
             .HasOne(mh => mh.Vehicle)
             .WithMany(v => v.MaintenanceHistories)

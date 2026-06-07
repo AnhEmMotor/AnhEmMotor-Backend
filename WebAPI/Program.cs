@@ -55,6 +55,7 @@ if (!builder.Environment.IsEnvironment("Test"))
     builder.Services.AddRateLimitingServices();
 }
 builder.Services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 var app = builder.Build();

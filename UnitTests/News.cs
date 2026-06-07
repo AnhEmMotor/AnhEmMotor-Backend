@@ -5,6 +5,7 @@ using Application.Features.News.Queries.GetNewsBySlug;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.News;
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 
 namespace UnitTests;
@@ -14,12 +15,14 @@ public class News
     private readonly Mock<INewsReadRepository> _newsReadRepoMock;
     private readonly Mock<INewsInsertRepository> _newsInsertRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IMemoryCache> _memoryCacheMock;
 
     public News()
     {
         _newsReadRepoMock = new Mock<INewsReadRepository>();
         _newsInsertRepoMock = new Mock<INewsInsertRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _memoryCacheMock = new Mock<IMemoryCache>();
     }
 
     #pragma warning disable IDE0079 
@@ -100,11 +103,11 @@ public class News
     }
 
     [Fact(DisplayName = "NEWS_008 - Xử lý lỗi khi truy vấn Slug không tồn tại")]
-    public async Task GetBySlug_NotExists_ReturnsNotFound()
+    public async Task GetNewsBySlug_ReturnsNewsResponse_WhenNewsExists()
     {
         _newsReadRepoMock.Setup(x => x.GetBySlugAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.Entities.News?)null);
-        var handler = new GetNewsBySlugQueryHandler(_newsReadRepoMock.Object);
+        var handler = new GetNewsBySlugQueryHandler(_newsReadRepoMock.Object, _memoryCacheMock.Object);
         var result = await handler.Handle(new GetNewsBySlugQuery { Slug = "non-existent" }, CancellationToken.None)
             .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();

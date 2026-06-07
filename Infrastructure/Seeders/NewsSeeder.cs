@@ -8,6 +8,29 @@ public static class NewsSeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
+        var categories = new List<NewsCategory>
+        {
+            new() { Name = "Sự kiện showroom", Slug = "su-kien-showroom", IsActive = true },
+            new() { Name = "Cẩm nang công nghệ", Slug = "cam-nang-cong-nghe", IsActive = true },
+            new() { Name = "Đánh giá xe", Slug = "danh-gia-xe", IsActive = true }
+        };
+
+        foreach (var category in categories)
+        {
+            var existingCategory = await context.NewsCategories
+                .FirstOrDefaultAsync(c => c.Slug == category.Slug, cancellationToken)
+                .ConfigureAwait(false);
+            if (existingCategory == null)
+            {
+                await context.NewsCategories.AddAsync(category, cancellationToken).ConfigureAwait(false);
+            }
+        }
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        var suKien = await context.NewsCategories.FirstOrDefaultAsync(c => c.Slug == "su-kien-showroom", cancellationToken);
+        var camNang = await context.NewsCategories.FirstOrDefaultAsync(c => c.Slug == "cam-nang-cong-nghe", cancellationToken);
+        var danhGia = await context.NewsCategories.FirstOrDefaultAsync(c => c.Slug == "danh-gia-xe", cancellationToken);
+
         var newsList = new List<News>
         {
             new()
@@ -18,7 +41,8 @@ public static class NewsSeeder
                 AuthorName = "Admin",
                 IsPublished = true,
                 PublishedDate = DateTimeOffset.UtcNow,
-                CoverImageUrl = "/assets/image/news/news-1.webp"
+                CoverImageUrl = "/assets/image/news/news-1.webp",
+                CategoryId = suKien?.Id
             },
             new()
             {
@@ -28,7 +52,8 @@ public static class NewsSeeder
                 AuthorName = "Marketing",
                 IsPublished = true,
                 PublishedDate = DateTimeOffset.UtcNow,
-                CoverImageUrl = "/assets/image/news/news-2.webp"
+                CoverImageUrl = "/assets/image/news/news-2.webp",
+                CategoryId = suKien?.Id
             },
             new()
             {
@@ -38,7 +63,8 @@ public static class NewsSeeder
                 AuthorName = "Kỹ thuật",
                 IsPublished = true,
                 PublishedDate = DateTimeOffset.UtcNow,
-                CoverImageUrl = "/assets/image/news/news-3.webp"
+                CoverImageUrl = "/assets/image/news/news-3.webp",
+                CategoryId = camNang?.Id
             }
         };
         foreach (var news in newsList)
