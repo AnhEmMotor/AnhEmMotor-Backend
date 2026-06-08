@@ -99,6 +99,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ContactReply> ContactReplies { get; set; }
 
+
+public virtual DbSet<Domain.Entities.SupportRequest> SupportRequests { get; set; }
+
+public virtual DbSet<Domain.Entities.CustomerFeedback> CustomerFeedbacks { get; set; }
+
+public virtual DbSet<Domain.Entities.JobApplication> JobApplications { get; set; }
     public virtual DbSet<Booking> Bookings { get; set; }
 
     public virtual DbSet<PlateDossier> PlateDossiers { get; set; }
@@ -155,6 +161,10 @@ public virtual DbSet<SupplierContractItem> SupplierContractItems { get; set; }
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<AnhEmMotor.Domain.Entities.Expense>().Property(e => e.Amount).HasPrecision(18, 2);
+modelBuilder.Entity<ContractTemplate>().Property(e => e.Version).HasPrecision(18, 2);
+modelBuilder.Entity<SupplierFinance>().Property(e => e.CurrentDebt).HasPrecision(18, 2);
+modelBuilder.Entity<ContractTemplate>().Property(ct => ct.Version).HasPrecision(18, 2);
+modelBuilder.Entity<SupplierFinance>().Property(sf => sf.CurrentDebt).HasPrecision(18, 2);
         modelBuilder.Entity<ApplicationUser>().ToTable("Users");
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");

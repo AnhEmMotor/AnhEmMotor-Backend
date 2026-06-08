@@ -8,7 +8,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Services;
 
-namespace WebAPI.Controllers.V1;
+namespace Application.Features.Services.Queries;
 
 /// <summary>
 /// Handler xử lý yêu cầu lấy danh sách dịch vụ có phân trang.
