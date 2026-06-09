@@ -35,4 +35,7 @@ public sealed record CreateNewsCommand : IRequest<Result<int>>
 
     [JsonPropertyName("author_id")]
     public Guid? AuthorId { get; init; }
+
+    [JsonPropertyName("linked_products")]
+    public List<NewsProductRequest>? LinkedProducts { get; init; }
 }

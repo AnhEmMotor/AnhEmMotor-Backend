@@ -36,6 +36,28 @@ public sealed class CreateNewsCommandHandler(
             CategoryId = request.CategoryId,
             AuthorId = request.AuthorId
         };
+
+        if (request.LinkedProducts != null && request.LinkedProducts.Any())
+        {
+            foreach (var lp in request.LinkedProducts)
+            {
+                var parts = lp.Id.Split('_');
+                if (parts.Length == 2 && int.TryParse(parts[0], out var variantId))
+                {
+                    int? colorId = null;
+                    if (int.TryParse(parts[1], out var parsedColorId))
+                    {
+                        colorId = parsedColorId;
+                    }
+                    news.LinkedProducts.Add(new Domain.Entities.NewsProduct
+                    {
+                        ProductVariantId = variantId,
+                        ProductVariantColorId = colorId
+                    });
+                }
+            }
+        }
+
         newsInsertRepository.Add(news);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(news.Id);

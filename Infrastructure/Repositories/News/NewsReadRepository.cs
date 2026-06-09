@@ -27,7 +27,7 @@ namespace Infrastructure.Repositories.News
 
         internal IQueryable<Domain.Entities.News> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
-            var query = context.News.AsQueryable();
+            var query = context.News.Include(n => n.Category).AsQueryable();
             if (mode == DataFetchMode.ActiveOnly)
             {
                 query = query.Where(n => n.IsPublished);
@@ -37,12 +37,25 @@ namespace Infrastructure.Repositories.News
 
         public Task<Domain.Entities.News?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return context.News.FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
+            return context.News
+                .Include(n => n.LinkedProducts)
+                    .ThenInclude(lp => lp.ProductVariant)
+                        .ThenInclude(pv => pv.Product)
+                .Include(n => n.LinkedProducts)
+                    .ThenInclude(lp => lp.ProductVariantColor)
+                .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
         }
 
         public Task<Domain.Entities.News?> GetBySlugAsync(string slug, CancellationToken cancellationToken)
         {
-            return context.News.FirstOrDefaultAsync(n => string.Compare(n.Slug, slug) == 0, cancellationToken);
+            return context.News
+                .Include(n => n.Category)
+                .Include(n => n.LinkedProducts)
+                    .ThenInclude(lp => lp.ProductVariant)
+                        .ThenInclude(pv => pv.Product)
+                .Include(n => n.LinkedProducts)
+                    .ThenInclude(lp => lp.ProductVariantColor)
+                .FirstOrDefaultAsync(n => string.Compare(n.Slug, slug) == 0, cancellationToken);
         }
     }
 }

@@ -9,5 +9,10 @@ namespace Infrastructure.Repositories.News
         {
             context.News.Update(news);
         }
+
+        public void RemoveLinkedProducts(IEnumerable<Domain.Entities.NewsProduct> linkedProducts)
+        {
+            context.NewsProducts.RemoveRange(linkedProducts);
+        }
     }
 }

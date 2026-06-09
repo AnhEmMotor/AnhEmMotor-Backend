@@ -41,6 +41,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<News>(p => p.Id).CanSort().CanFilter();
         mapper.Property<News>(p => p.Title).CanSort().CanFilter();
         mapper.Property<News>(p => p.CategoryId).CanFilter();
+        mapper.Property<News>(p => p.Category!.Slug).CanFilter().HasName("Category.Slug");
         mapper.Property<Banner>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Banner>(p => p.Title).CanSort().CanFilter();
         mapper.Property<ProductVariant>(p => p.Id).CanSort().CanFilter();

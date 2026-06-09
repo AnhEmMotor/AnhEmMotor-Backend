@@ -93,6 +93,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<News> News { get; set; }
 
+    public virtual DbSet<NewsProduct> NewsProducts { get; set; }
+
     public virtual DbSet<NewsCategory> NewsCategories { get; set; }
 
     public virtual DbSet<NewsComment> NewsComments { get; set; }

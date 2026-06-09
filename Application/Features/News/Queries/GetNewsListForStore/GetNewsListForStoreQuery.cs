@@ -4,9 +4,9 @@ using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
 
-namespace Application.Features.News.Queries.GetNewsList;
+namespace Application.Features.News.Queries.GetNewsListForStore;
 
-public sealed record GetNewsListQuery : IRequest<Result<PagedResult<NewsSummaryResponse>>>
+public sealed record GetNewsListForStoreQuery : IRequest<Result<PagedResult<NewsSummaryResponse>>>
 {
     public SieveModel? SieveModel { get; init; }
 }

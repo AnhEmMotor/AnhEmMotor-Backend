@@ -23,9 +23,9 @@ namespace Application.Features.InventoryReports.Queries.GetInventoryReportSummar
             {
                 var term = request.SearchTerm.Trim().ToLower();
                 query = query.Where(x => 
-                    x.ProductVariant!.Product!.Name.ToLower().Contains(term) ||
-                    x.ProductVariant.VariantName!.ToLower().Contains(term) ||
-                    (x.ProductVariantColor != null && x.ProductVariantColor.ColorName.ToLower().Contains(term)));
+                    (x.ProductVariant!.Product!.Name != null && x.ProductVariant.Product.Name.ToLower().Contains(term)) ||
+                    (x.ProductVariant.VariantName != null && x.ProductVariant.VariantName.ToLower().Contains(term)) ||
+                    (x.ProductVariantColor != null && x.ProductVariantColor.ColorName != null && x.ProductVariantColor.ColorName.ToLower().Contains(term)));
             }
 
             var allData = query.Select(x => new 
