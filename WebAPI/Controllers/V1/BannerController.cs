@@ -98,9 +98,11 @@ public class BannerController(ISender sender) : ApiController
     [HttpGet]
     [HasPermission(Banners.View)]
     [SwaggerOperation(Summary = "Lấy toàn bộ danh sách banner")]
-    public async Task<IActionResult> GetListAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetListAsync(
+        [FromQuery] GetBannersListQuery query,
+        CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetBannersListQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

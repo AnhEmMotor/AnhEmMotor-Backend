@@ -32,7 +32,5 @@ namespace Domain.Entities
 
         [Column("Placement", TypeName = "nvarchar(50)")]
         public string? Placement { get; set; }
-
-
     }
 }
