@@ -23,6 +23,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     {
     }
 
+
+
     public new DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
 
     public virtual DbSet<AnhEmMotor.Domain.Entities.Expense> Expenses { get; set; }
@@ -149,7 +151,7 @@ public virtual DbSet<Domain.Entities.JobApplication> JobApplications { get; set;
 
 public virtual DbSet<SupplierContractItem> SupplierContractItems { get; set; }
 
-    public virtual DbSet<SupplierContractAuditLog> SupplierContractAuditLogs { get; set; }
+public virtual DbSet<SupplierContractAuditLog> SupplierContractAuditLogs { get; set; }
 
     public virtual DbSet<ContractTemplateAuditLog> ContractTemplateAuditLogs { get; set; }
 
@@ -157,14 +159,31 @@ public virtual DbSet<SupplierContractItem> SupplierContractItems { get; set; }
 
     public virtual DbSet<SupplierDebtSettlement> SupplierDebtSettlements { get; set; }
 
+    // Logistics
+    public virtual DbSet<Domain.Entities.Logistics.ParcelDeliveryOrder> ParcelDeliveryOrders { get; set; }
+    public virtual DbSet<Domain.Entities.Logistics.ParcelDeliveryOrderItem> ParcelDeliveryOrderItems { get; set; }
+    public virtual DbSet<Domain.Entities.Logistics.CurrentUnreconciledCod> CurrentUnreconciledCods { get; set; }
+
+    public virtual DbSet<Domain.Entities.Logistics.CarrierPartner> CarrierPartners { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<AnhEmMotor.Domain.Entities.Expense>().Property(e => e.Amount).HasPrecision(18, 2);
-modelBuilder.Entity<ContractTemplate>().Property(e => e.Version).HasPrecision(18, 2);
-modelBuilder.Entity<SupplierFinance>().Property(e => e.CurrentDebt).HasPrecision(18, 2);
-modelBuilder.Entity<ContractTemplate>().Property(ct => ct.Version).HasPrecision(18, 2);
-modelBuilder.Entity<SupplierFinance>().Property(sf => sf.CurrentDebt).HasPrecision(18, 2);
+        modelBuilder.Entity<ContractTemplate>().Property(e => e.Version).HasPrecision(18, 2);
+        modelBuilder.Entity<SupplierFinance>().Property(e => e.CurrentDebt).HasPrecision(18, 2);
+        modelBuilder.Entity<ContractTemplate>().Property(ct => ct.Version).HasPrecision(18, 2);
+        modelBuilder.Entity<SupplierFinance>().Property(sf => sf.CurrentDebt).HasPrecision(18, 2);
+        modelBuilder.Entity<Domain.Entities.Logistics.CurrentUnreconciledCod>().Property(e => e.Value).HasPrecision(18, 2);
+        modelBuilder.Entity<Domain.Entities.Logistics.ParcelDeliveryOrder>().Property(e => e.CodAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<Domain.Entities.Logistics.ParcelDeliveryOrder>().Property(e => e.ShippingCost).HasPrecision(18, 2);
+        modelBuilder.Entity<Domain.Entities.Logistics.CarrierPartner>().Property(e => e.MaxParcelWeightKg).HasPrecision(18, 2);
+
+        modelBuilder.Entity<Domain.Entities.Logistics.ParcelDeliveryOrder>()
+            .HasMany(p => p.Items)
+            .WithOne(i => i.ParcelDeliveryOrder)
+            .HasForeignKey(i => i.ParcelDeliveryOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ApplicationUser>().ToTable("Users");
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");

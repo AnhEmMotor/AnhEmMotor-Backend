@@ -65,7 +65,7 @@ public class FinanceContractsController(ISender sender) : ApiController
     [HttpPost("{financeContractId:guid}/disbursement/evidence/upload")]
     public async Task<IActionResult> UploadDisbursementEvidence(
         [FromRoute] Guid financeContractId,
-        [FromForm] IFormFile file,
+        IFormFile file,
         CancellationToken cancellationToken)
     {
         if (file == null) return BadRequest(new { success = false, message = "File is required" });

@@ -14,8 +14,7 @@ namespace Infrastructure.Repositories.SalesContract;
 
 public class SalesContractReadRepository(
     ApplicationDBContext context,
-    ISievePaginator paginator,
-    ISieveProcessor sieveProcessor) : ISalesContractReadRepository
+    ISievePaginator paginator) : ISalesContractReadRepository
 {
     internal IQueryable<global::Domain.Entities.SalesContract> GetQueryable()
     {

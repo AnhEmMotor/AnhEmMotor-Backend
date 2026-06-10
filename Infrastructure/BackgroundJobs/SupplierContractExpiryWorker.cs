@@ -87,7 +87,7 @@ public class SupplierContractExpiryWorker(IServiceProvider serviceProvider) : Ba
                 {
                     SupplierContractId = contract.Id,
                     Action = "ExpiryWarning",
-                    Details = $"Hợp đồng {contract.ContractNumber} sắp hết hạn trong {(contract.ExpirationDate.Value - now.DateTime).Days} ngày.",
+                    Details = $"Hợp đồng {contract.ContractNumber} sắp hết hạn trong {(contract.ExpirationDate!.Value - now).Days} ngày.",
                     ChangedBy = "System (Background Worker)"
                 });
             }

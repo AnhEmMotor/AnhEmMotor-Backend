@@ -12,11 +12,11 @@ namespace Infrastructure.Repositories.Contract;
 
 public class SupplierContractReadRepository(
 	ApplicationDBContext context,
-	ISievePaginator paginator,
-	ISieveProcessor sieveProcessor) : ISupplierContractReadRepository
+	ISievePaginator paginator) : ISupplierContractReadRepository
 {
 	internal IQueryable<SupplierContract> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
 	{
+#pragma warning disable CS8602 // EF Core translates this correctly
 		return context.GetQuery<SupplierContract>(mode)
 			.Include(sc => sc.Supplier)
 			.Include(sc => sc.ContractItems)
@@ -24,6 +24,7 @@ public class SupplierContractReadRepository(
 			.ThenInclude(pv => pv.Product)
 			.ThenInclude(p => p.ProductCategory)
 			.Include(sc => sc.AuditLogs);
+#pragma warning restore CS8602
 	}
 
 	public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(

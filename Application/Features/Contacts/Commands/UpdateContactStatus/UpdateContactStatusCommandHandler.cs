@@ -12,7 +12,6 @@ public class UpdateContactStatusCommandHandler(
     ISupportRequestRepository supportRequestRepository,
     ICustomerFeedbackRepository feedbackRepository,
     IJobApplicationRepository jobApplicationRepository,
-    IContactUpdateRepository contactUpdateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateContactStatusCommand, Result<bool>>
 {

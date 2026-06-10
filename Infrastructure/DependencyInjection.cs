@@ -36,6 +36,7 @@ public static class DependencyInjection
             options =>
             {
                 options.UseMySql(connectionString, serverVersion);
+                options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             });
             services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
         }
@@ -46,6 +47,7 @@ public static class DependencyInjection
             options =>
             {
                 options.UseNpgsql(connectionString);
+                options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             });
             services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
         }
@@ -59,6 +61,7 @@ public static class DependencyInjection
                 b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
                 .CommandTimeout(30)
                 .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+                options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             });
             services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
         }

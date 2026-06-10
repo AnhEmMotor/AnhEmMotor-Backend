@@ -9,7 +9,6 @@ using MediatR;
 namespace Application.Features.Contacts.Queries.GetPaginatedContacts;
 
 public class GetPaginatedContactsQueryHandler(
-    IContactReadRepository contactReadRepository,
     ISupportRequestRepository supportRequestRepository,
     ICustomerFeedbackRepository feedbackRepository,
     IJobApplicationRepository jobApplicationRepository)

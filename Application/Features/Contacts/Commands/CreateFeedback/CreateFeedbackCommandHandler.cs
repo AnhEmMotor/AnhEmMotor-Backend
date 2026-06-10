@@ -40,7 +40,7 @@ public class CreateFeedbackCommandHandler(
             Status = FeedbackStatus.Pending
         };
 
-        feedbackRepository.AddAsync(feedback, cancellationToken).ConfigureAwait(false);
+        await feedbackRepository.AddAsync(feedback, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result<int>.Success(feedback.Id);

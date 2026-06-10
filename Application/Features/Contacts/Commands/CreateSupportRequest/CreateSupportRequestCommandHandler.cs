@@ -40,7 +40,7 @@ public class CreateSupportRequestCommandHandler(
             Status = SupportRequestStatus.New
         };
 
-        supportRequestRepository.AddAsync(supportRequest, cancellationToken).ConfigureAwait(false);
+        await supportRequestRepository.AddAsync(supportRequest, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result<int>.Success(supportRequest.Id);
