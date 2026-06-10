@@ -220,14 +220,46 @@ public class ProductReadRepository(
     {
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Max(pageSize, 1);
-        var searchPattern = string.IsNullOrWhiteSpace(search) ? null : $"%{search.Trim()}%";
+        var normalizedSearch = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+        var searchPattern = normalizedSearch == null ? null : $"%{normalizedSearch}%";
+        var isExactVariantSearch = normalizedSearch != null &&
+            await context.ProductVariants
+                .AnyAsync(
+                    v => v.DeletedAt == null &&
+                        ((v.VariantName != null && v.VariantName == normalizedSearch) ||
+                            v.VariantOptionValues.Any(
+                                vov => vov.OptionValue != null &&
+                                    vov.OptionValue.Name == normalizedSearch)),
+                    cancellationToken)
+                .ConfigureAwait(false);
         var query = context.Products.AsNoTracking();
         if (searchPattern != null)
         {
-            query = query.Where(
-                p => EF.Functions.Like(p.Name, searchPattern) ||
-                    (p.ProductCategory != null && EF.Functions.Like(p.ProductCategory.Name, searchPattern)) ||
-                    (p.Brand != null && EF.Functions.Like(p.Brand.Name, searchPattern)));
+            query = isExactVariantSearch
+                ? query.Where(
+                    p => p.ProductVariants.Any(
+                        v => v.DeletedAt == null &&
+                            ((v.VariantName != null && v.VariantName == normalizedSearch) ||
+                                v.VariantOptionValues.Any(
+                                    vov => vov.OptionValue != null &&
+                                        vov.OptionValue.Name == normalizedSearch))))
+                : query.Where(
+                    p => EF.Functions.Like(p.Name, searchPattern) ||
+                        (p.ProductCategory != null && EF.Functions.Like(p.ProductCategory.Name, searchPattern)) ||
+                        (p.Brand != null && EF.Functions.Like(p.Brand.Name, searchPattern)) ||
+                        p.ProductVariants.Any(
+                            v => v.DeletedAt == null &&
+                                ((v.VariantName != null && EF.Functions.Like(v.VariantName, searchPattern)) ||
+                                    (v.SKU != null && EF.Functions.Like(v.SKU, searchPattern)) ||
+                                    (v.UrlSlug != null && EF.Functions.Like(v.UrlSlug, searchPattern)) ||
+                                    v.ProductVariantColors.Any(
+                                        c => c.DeletedAt == null &&
+                                            c.ColorName != null &&
+                                            EF.Functions.Like(c.ColorName, searchPattern)) ||
+                                    v.VariantOptionValues.Any(
+                                        vov => vov.OptionValue != null &&
+                                            vov.OptionValue.Name != null &&
+                                            EF.Functions.Like(vov.OptionValue.Name, searchPattern)))));
         }
         if (statusIds != null && statusIds.Count > 0)
         {
