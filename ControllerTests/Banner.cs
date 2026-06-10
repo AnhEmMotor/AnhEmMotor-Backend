@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Features.Banners.Commands.CreateBanner;
 using Application.Features.Banners.Commands.UpdateBanner;
 using Application.Features.Banners.Queries.GetBannersList;
+using Domain.Primitives;
 using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -80,8 +81,8 @@ public class Banner
     public async Task BANN_026_Bulk_Priority_Update_Returns_Success()
     {
         _senderMock.Setup(m => m.Send(It.IsAny<GetBannersListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<BannerResponse>>.Success([]));
-        var result = await _bannerController.GetListAsync(CancellationToken.None).ConfigureAwait(true);
+            .ReturnsAsync(Result<PagedResult<BannerResponse>>.Success(new PagedResult<BannerResponse>([], 0, 1, 10)));
+        var result = await _bannerController.GetListAsync(new GetBannersListQuery(), CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
     }
 }

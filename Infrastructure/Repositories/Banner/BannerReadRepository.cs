@@ -12,10 +12,14 @@ namespace Infrastructure.Repositories.Banner
             return context.Banners.FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         }
 
-        public Task<List<Domain.Entities.Banner>> GetActiveBannersAsync(CancellationToken cancellationToken)
+        public Task<List<Domain.Entities.Banner>> GetBannersByPlacementAsync(CancellationToken cancellationToken, string? placement = null)
         {
-            return context.Banners
-                .ToListAsync(cancellationToken);
+            var query = context.Banners.AsQueryable();
+            if (!string.IsNullOrEmpty(placement))
+            {
+                query = query.Where(b => b.Placement == placement);
+            }
+            return query.ToListAsync(cancellationToken);
         }
 
         public Task<List<Domain.Entities.Banner>> GetAllAsync(CancellationToken cancellationToken = default)

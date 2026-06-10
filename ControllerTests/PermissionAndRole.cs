@@ -1,7 +1,7 @@
 using Application.ApiContracts.News.Responses;
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
-using Application.Features.Banners.Queries.GetActiveBanners;
+using Application.Features.Banners.Queries.GetStoreBanners;
 using Application.Features.Bookings.Commands.ConfirmBooking;
 using Application.Features.Contacts.Commands.CreateContactReply;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
@@ -393,10 +393,10 @@ public class PermissionAndRole
     public async Task GetBanners_NoPermission_ReturnsForbidden()
     {
         var bannerController = new BannerController(_mediatorMock.Object);
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetActiveBannersQuery>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetStoreBannersQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => bannerController.GetActiveAsync(CancellationToken.None))
+            () => bannerController.GetStoreAsync(null, CancellationToken.None))
             .ConfigureAwait(true);
     }
 

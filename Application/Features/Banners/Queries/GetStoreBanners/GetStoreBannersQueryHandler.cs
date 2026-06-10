@@ -4,15 +4,16 @@ using Application.Interfaces.Repositories.Banner;
 using Mapster;
 using MediatR;
 
-namespace Application.Features.Banners.Queries.GetActiveBanners;
+namespace Application.Features.Banners.Queries.GetStoreBanners;
 
-public sealed class GetActiveBannersQueryHandler(IBannerReadRepository bannerReadRepository) : IRequestHandler<GetActiveBannersQuery, Result<List<BannerResponse>>>
+internal sealed class GetStoreBannersQueryHandler(IBannerReadRepository bannerReadRepository)
+    : IRequestHandler<GetStoreBannersQuery, Result<List<BannerResponse>>>
 {
     public async Task<Result<List<BannerResponse>>> Handle(
-        GetActiveBannersQuery request,
+        GetStoreBannersQuery request,
         CancellationToken cancellationToken)
     {
-        var banners = await bannerReadRepository.GetActiveBannersAsync(cancellationToken).ConfigureAwait(false);
+        var banners = await bannerReadRepository.GetBannersByPlacementAsync(cancellationToken, request.Placement).ConfigureAwait(false);
         var response = banners.Adapt<List<BannerResponse>>();
         return Result<List<BannerResponse>>.Success(response);
     }

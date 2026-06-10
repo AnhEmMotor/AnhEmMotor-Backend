@@ -1,7 +1,7 @@
 using Application.Features.Banners.Commands.CreateBanner;
 using Application.Features.Banners.Commands.DeleteBanner;
 using Application.Features.Banners.Commands.UpdateBanner;
-using Application.Features.Banners.Queries.GetActiveBanners;
+using Application.Features.Banners.Queries.GetStoreBanners;
 using Application.Features.Banners.Queries.GetBannerAuditLogs;
 using Application.Features.Banners.Queries.GetBannersList;
 using Asp.Versioning;
@@ -82,12 +82,20 @@ public class BannerController(ISender sender) : ApiController
     /// </summary>
     /// <returns>Danh sách banner</returns>
     /// <param name="cancellationToken">The cancellation token.</param>
-    [HttpGet("active")]
-    [SwaggerOperation(Summary = "Lấy danh sách banner đang hoạt động")]
-    public async Task<IActionResult> GetActiveAsync(CancellationToken cancellationToken)
+    [HttpGet("store")]
+    [SwaggerOperation(Summary = "Lấy danh sách banner cho cửa hàng (lọc theo vị trí)")]
+    public async Task<IActionResult> GetStoreAsync([FromQuery] string? placement, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetActiveBannersQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetStoreBannersQuery { Placement = placement }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
+    }
+
+    [HttpGet("placements")]
+    [SwaggerOperation(Summary = "Lấy danh sách vị trí banner hợp lệ")]
+    public IActionResult GetPlacements()
+    {
+        var placements = Domain.Constants.BannerPlacements.PlacementLabels.Select(kvp => new { Value = kvp.Key, Label = kvp.Value });
+        return Ok(new { Data = placements, Success = true });
     }
 
     /// <summary>
