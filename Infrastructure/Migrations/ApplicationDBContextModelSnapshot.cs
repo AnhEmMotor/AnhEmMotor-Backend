@@ -158,56 +158,36 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ClickCount")
-                        .HasColumnType("int")
-                        .HasColumnName("ClickCount");
-
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("CtaText")
+                    b.Property<string>("CtaLabel")
                         .HasColumnType("nvarchar(100)")
-                        .HasColumnName("CtaText");
+                        .HasColumnName("CtaLabel");
+
+                    b.Property<string>("CtaLink")
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("CtaLink");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int")
-                        .HasColumnName("DisplayOrder");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("Description");
 
-                    b.Property<DateTimeOffset?>("EndDate")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("EndDate");
-
-                    b.Property<string>("ImageUrl")
+                    b.Property<string>("DesktopImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(500)")
-                        .HasColumnName("ImageUrl");
+                        .HasColumnName("DesktopImageUrl");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("IsActive");
-
-                    b.Property<string>("LinkUrl")
+                    b.Property<string>("MobileImageUrl")
                         .HasColumnType("nvarchar(500)")
-                        .HasColumnName("LinkUrl");
+                        .HasColumnName("MobileImageUrl");
 
                     b.Property<string>("Placement")
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Placement");
-
-                    b.Property<string>("Position")
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("Position");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int")
-                        .HasColumnName("Priority");
-
-                    b.Property<DateTimeOffset?>("StartDate")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("StartDate");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -217,13 +197,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<int>("ViewCount")
-                        .HasColumnType("int")
-                        .HasColumnName("ViewCount");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Banner", (string)null);
+                    b.ToTable("Banner");
                 });
 
             modelBuilder.Entity("Domain.Entities.BannerAuditLog", b =>
@@ -266,7 +242,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("BannerId");
 
-                    b.ToTable("BannerAuditLog", (string)null);
+                    b.ToTable("BannerAuditLog");
                 });
 
             modelBuilder.Entity("Domain.Entities.Booking", b =>
@@ -334,7 +310,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("Booking", (string)null);
+                    b.ToTable("Booking");
                 });
 
             modelBuilder.Entity("Domain.Entities.Brand", b =>
@@ -379,7 +355,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brand", (string)null);
+                    b.ToTable("Brand");
                 });
 
             modelBuilder.Entity("Domain.Entities.CommissionPolicy", b =>
@@ -440,7 +416,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("CommissionPolicy", (string)null);
+                    b.ToTable("CommissionPolicy");
                 });
 
             modelBuilder.Entity("Domain.Entities.CommissionPolicyAuditLog", b =>
@@ -490,7 +466,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("PolicyId");
 
-                    b.ToTable("CommissionPolicyAuditLog", (string)null);
+                    b.ToTable("CommissionPolicyAuditLog");
                 });
 
             modelBuilder.Entity("Domain.Entities.CommissionRecord", b =>
@@ -540,7 +516,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("OutputId");
 
-                    b.ToTable("CommissionRecord", (string)null);
+                    b.ToTable("CommissionRecord");
                 });
 
             modelBuilder.Entity("Domain.Entities.Contact", b =>
@@ -601,7 +577,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Contact", (string)null);
+                    b.ToTable("Contact");
                 });
 
             modelBuilder.Entity("Domain.Entities.ContactReply", b =>
@@ -641,7 +617,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("RepliedById");
 
-                    b.ToTable("ContactReply", (string)null);
+                    b.ToTable("ContactReply");
                 });
 
             modelBuilder.Entity("Domain.Entities.EmployeeProfile", b =>
@@ -694,7 +670,131 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("EmployeeProfile", (string)null);
+                    b.ToTable("EmployeeProfile");
+                });
+
+            modelBuilder.Entity("Domain.Entities.InventoryLedger", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DocumentCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("DocumentCode");
+
+                    b.Property<int>("ExportQty")
+                        .HasColumnType("int")
+                        .HasColumnName("ExportQty");
+
+                    b.Property<int>("ImportQty")
+                        .HasColumnType("int")
+                        .HasColumnName("ImportQty");
+
+                    b.Property<string>("PartnerName")
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("PartnerName");
+
+                    b.Property<int?>("ProductVariantColorId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantColorId");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantId");
+
+                    b.Property<int>("StockAfter")
+                        .HasColumnType("int")
+                        .HasColumnName("StockAfter");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("TotalAmount");
+
+                    b.Property<DateTimeOffset>("TransactionDate")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("TransactionDate");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("TransactionType");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("UnitPrice");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantColorId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("InventoryLedger");
+                });
+
+            modelBuilder.Entity("Domain.Entities.InventoryOnHand", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("ExportedQty")
+                        .HasColumnType("int")
+                        .HasColumnName("ExportedQty");
+
+                    b.Property<int>("ImportedQty")
+                        .HasColumnType("int")
+                        .HasColumnName("ImportedQty");
+
+                    b.Property<int>("OrderedQty")
+                        .HasColumnType("int")
+                        .HasColumnName("OrderedQty");
+
+                    b.Property<int?>("ProductVariantColorId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantColorId");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantId");
+
+                    b.Property<int>("StockQty")
+                        .HasColumnType("int")
+                        .HasColumnName("StockQty");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantColorId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("InventoryOnHand");
                 });
 
             modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
@@ -705,6 +805,10 @@ namespace Infrastructure.Migrations
                         .HasColumnName("Id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ApprovedBy");
 
                     b.Property<Guid?>("ConfirmedBy")
                         .HasColumnType("uniqueidentifier")
@@ -732,6 +836,14 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("PurchaseRequestId");
 
+                    b.Property<Guid?>("RejectedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("RejectedBy");
+
+                    b.Property<Guid?>("SentBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("SentBy");
+
                     b.Property<int?>("SourceOrderId")
                         .HasColumnType("int")
                         .HasColumnName("SourceOrderId");
@@ -740,13 +852,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("StatusId");
 
-                    b.Property<int?>("SupplierId")
-                        .HasColumnType("int");
-
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApprovedBy");
 
                     b.HasIndex("ConfirmedBy");
 
@@ -754,13 +865,15 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("PurchaseRequestId");
 
+                    b.HasIndex("RejectedBy");
+
+                    b.HasIndex("SentBy");
+
                     b.HasIndex("SourceOrderId");
 
                     b.HasIndex("StatusId");
 
-                    b.HasIndex("SupplierId");
-
-                    b.ToTable("InventoryReceipt", (string)null);
+                    b.ToTable("InventoryReceipt");
                 });
 
             modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
@@ -797,13 +910,17 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("PurchaseRequestItemId");
 
-                    b.Property<int?>("QuotationProductRowId")
-                        .HasColumnType("int")
-                        .HasColumnName("QuotationProductRowId");
-
                     b.Property<int?>("RemainingCount")
                         .HasColumnType("int")
                         .HasColumnName("RemainingCount");
+
+                    b.Property<int?>("SupplierId")
+                        .HasColumnType("int")
+                        .HasColumnName("SupplierId");
+
+                    b.Property<decimal?>("UnitPrice")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("UnitPrice");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
@@ -818,9 +935,9 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("PurchaseRequestItemId");
 
-                    b.HasIndex("QuotationProductRowId");
+                    b.HasIndex("SupplierId");
 
-                    b.ToTable("InventoryReceiptInfo", (string)null);
+                    b.ToTable("InventoryReceiptInfo");
                 });
 
             modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
@@ -840,7 +957,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("InventoryReceiptStatus", (string)null);
+                    b.ToTable("InventoryReceiptStatus");
                 });
 
             modelBuilder.Entity("Domain.Entities.KPI", b =>
@@ -886,7 +1003,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("EmployeeProfileId");
 
-                    b.ToTable("KPI", (string)null);
+                    b.ToTable("KPI");
                 });
 
             modelBuilder.Entity("Domain.Entities.Lead", b =>
@@ -997,7 +1114,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("AssignedToId");
 
-                    b.ToTable("Lead", (string)null);
+                    b.ToTable("Lead");
                 });
 
             modelBuilder.Entity("Domain.Entities.LeadActivity", b =>
@@ -1036,7 +1153,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("LeadId");
 
-                    b.ToTable("LeadActivity", (string)null);
+                    b.ToTable("LeadActivity");
                 });
 
             modelBuilder.Entity("Domain.Entities.MaintenanceHistory", b =>
@@ -1078,7 +1195,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("MaintenanceHistory", (string)null);
+                    b.ToTable("MaintenanceHistory");
                 });
 
             modelBuilder.Entity("Domain.Entities.MediaFile", b =>
@@ -1124,7 +1241,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MediaFiles", (string)null);
+                    b.ToTable("MediaFiles");
                 });
 
             modelBuilder.Entity("Domain.Entities.News", b =>
@@ -1201,7 +1318,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("News", (string)null);
+                    b.ToTable("News");
                 });
 
             modelBuilder.Entity("Domain.Entities.NewsCategory", b =>
@@ -1238,7 +1355,100 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("NewsCategory", (string)null);
+                    b.ToTable("NewsCategory");
+                });
+
+            modelBuilder.Entity("Domain.Entities.NewsComment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthorEmail")
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("AuthorEmail");
+
+                    b.Property<string>("AuthorName")
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("AuthorName");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Content");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsApproved");
+
+                    b.Property<int>("NewsId")
+                        .HasColumnType("int")
+                        .HasColumnName("NewsId");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NewsId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("NewsComments");
+                });
+
+            modelBuilder.Entity("Domain.Entities.NewsProduct", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("NewsId")
+                        .HasColumnType("int")
+                        .HasColumnName("NewsId");
+
+                    b.Property<int?>("ProductVariantColorId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantColorId");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantId");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NewsId");
+
+                    b.HasIndex("ProductVariantColorId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("NewsProduct");
                 });
 
             modelBuilder.Entity("Domain.Entities.Option", b =>
@@ -1267,7 +1477,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Option", (string)null);
+                    b.ToTable("Option");
                 });
 
             modelBuilder.Entity("Domain.Entities.OptionValue", b =>
@@ -1324,7 +1534,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("OptionId");
 
-                    b.ToTable("OptionValue", (string)null);
+                    b.ToTable("OptionValue");
                 });
 
             modelBuilder.Entity("Domain.Entities.Output", b =>
@@ -1427,7 +1637,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Output", (string)null);
+                    b.ToTable("Output");
                 });
 
             modelBuilder.Entity("Domain.Entities.OutputInfo", b =>
@@ -1480,7 +1690,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("OutputInfo", (string)null);
+                    b.ToTable("OutputInfo");
                 });
 
             modelBuilder.Entity("Domain.Entities.OutputStatus", b =>
@@ -1500,7 +1710,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("OutputStatus", (string)null);
+                    b.ToTable("OutputStatus");
                 });
 
             modelBuilder.Entity("Domain.Entities.PartnerType", b =>
@@ -1520,7 +1730,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("PartnerType", (string)null);
+                    b.ToTable("PartnerType");
 
                     b.HasData(
                         new
@@ -1591,7 +1801,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("EmployeeProfileId");
 
-                    b.ToTable("Payroll", (string)null);
+                    b.ToTable("Payroll");
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission", b =>
@@ -1644,7 +1854,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Key")
                         .IsUnique();
 
-                    b.ToTable("PredefinedOption", (string)null);
+                    b.ToTable("PredefinedOption");
                 });
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
@@ -1853,7 +2063,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Product", (string)null);
+                    b.ToTable("Product");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCategory", b =>
@@ -1911,7 +2121,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("ProductCategory", (string)null);
+                    b.ToTable("ProductCategory");
 
                     b.HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
                 });
@@ -1946,7 +2156,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("ProductCollectionPhoto", (string)null);
+                    b.ToTable("ProductCollectionPhoto");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCompatibility", b =>
@@ -1985,7 +2195,47 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CompatibleVehicleModelId");
 
-                    b.ToTable("ProductCompatibility", (string)null);
+                    b.ToTable("ProductCompatibility");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ProductQuotation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnName("Note");
+
+                    b.Property<int?>("ProductVariantColorId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantColorId");
+
+                    b.Property<int?>("ProductVariantId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantId");
+
+                    b.Property<int?>("QuotePrice")
+                        .HasColumnType("int")
+                        .HasColumnName("QuotePrice");
+
+                    b.Property<int?>("SupplierId")
+                        .HasColumnType("int")
+                        .HasColumnName("SupplierId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantColorId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("ProductQuotations");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductStatus", b =>
@@ -2005,7 +2255,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("ProductStatus", (string)null);
+                    b.ToTable("ProductStatus");
 
                     b.HasData(
                         new
@@ -2066,7 +2316,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TechnologyId");
 
-                    b.ToTable("ProductTechnology", (string)null);
+                    b.ToTable("ProductTechnology");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
@@ -2163,7 +2413,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductVariant", (string)null);
+                    b.ToTable("ProductVariant");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductVariantColor", b =>
@@ -2204,7 +2454,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("ProductVariantColor", (string)null);
+                    b.ToTable("ProductVariantColor");
                 });
 
             modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
@@ -2234,6 +2484,14 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(MAX)")
                         .HasColumnName("Note");
 
+                    b.Property<Guid?>("RejectedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("RejectedBy");
+
+                    b.Property<Guid?>("SentBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("SentBy");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("varchar(30)")
@@ -2248,7 +2506,11 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CreatedBy");
 
-                    b.ToTable("PurchaseRequest", (string)null);
+                    b.HasIndex("RejectedBy");
+
+                    b.HasIndex("SentBy");
+
+                    b.ToTable("PurchaseRequest");
                 });
 
             modelBuilder.Entity("Domain.Entities.PurchaseRequestItem", b =>
@@ -2259,6 +2521,12 @@ namespace Infrastructure.Migrations
                         .HasColumnName("Id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("int")
@@ -2276,6 +2544,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Quantity");
 
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductVariantColorId");
@@ -2284,84 +2555,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("PurchaseRequestId");
 
-                    b.ToTable("PurchaseRequestItem", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.Quotation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(MAX)")
-                        .HasColumnName("Note");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("varchar(30)")
-                        .HasColumnName("Status");
-
-                    b.Property<int?>("SupplierId")
-                        .HasColumnType("int")
-                        .HasColumnName("SupplierId");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SupplierId");
-
-                    b.ToTable("Quotations", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.QuotationProductRow", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(MAX)")
-                        .HasColumnName("Note");
-
-                    b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("int")
-                        .HasColumnName("ProductVariantColorId");
-
-                    b.Property<int?>("ProductVariantId")
-                        .HasColumnType("int")
-                        .HasColumnName("ProductVariantId");
-
-                    b.Property<int?>("QuotationId")
-                        .HasColumnType("int")
-                        .HasColumnName("QuotationId");
-
-                    b.Property<int?>("QuotePrice")
-                        .HasColumnType("int")
-                        .HasColumnName("QuotePrice");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductVariantColorId");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("QuotationId");
-
-                    b.ToTable("QuotationProductRows", (string)null);
+                    b.ToTable("PurchaseRequestItem");
                 });
 
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
@@ -2400,7 +2594,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("Setting", (string)null);
+                    b.ToTable("Setting");
                 });
 
             modelBuilder.Entity("Domain.Entities.Supplier", b =>
@@ -2459,7 +2653,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Supplier", (string)null);
+                    b.ToTable("Supplier");
                 });
 
             modelBuilder.Entity("Domain.Entities.SupplierContact", b =>
@@ -2504,7 +2698,50 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("SupplierContact", (string)null);
+                    b.ToTable("SupplierContact");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SupplierDebt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("InventoryReceiptId")
+                        .HasColumnType("int")
+                        .HasColumnName("InventoryReceiptId");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("PaidAmount");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int")
+                        .HasColumnName("SupplierId");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("TotalAmount");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InventoryReceiptId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("SupplierDebt");
                 });
 
             modelBuilder.Entity("Domain.Entities.SupplierStatus", b =>
@@ -2524,7 +2761,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("SupplierStatus", (string)null);
+                    b.ToTable("SupplierStatus");
                 });
 
             modelBuilder.Entity("Domain.Entities.Technology", b =>
@@ -2573,7 +2810,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Technologies", (string)null);
+                    b.ToTable("Technologies");
                 });
 
             modelBuilder.Entity("Domain.Entities.TechnologyCategory", b =>
@@ -2600,7 +2837,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TechnologyCategories", (string)null);
+                    b.ToTable("TechnologyCategories");
                 });
 
             modelBuilder.Entity("Domain.Entities.TechnologyImage", b =>
@@ -2637,7 +2874,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("TechnologyId");
 
-                    b.ToTable("TechnologyImages", (string)null);
+                    b.ToTable("TechnologyImages");
                 });
 
             modelBuilder.Entity("Domain.Entities.VariantOptionValue", b =>
@@ -2672,7 +2909,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VariantId");
 
-                    b.ToTable("VariantOptionValue", (string)null);
+                    b.ToTable("VariantOptionValue");
                 });
 
             modelBuilder.Entity("Domain.Entities.Vehicle", b =>
@@ -2694,6 +2931,10 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("EngineNumber");
+
+                    b.Property<decimal>("ImportPrice")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("ImportPrice");
 
                     b.Property<int?>("InventoryReceiptInfoId")
                         .HasColumnType("int")
@@ -2758,7 +2999,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("Vehicle", (string)null);
+                    b.ToTable("Vehicle");
                 });
 
             modelBuilder.Entity("Domain.Entities.VehicleDocument", b =>
@@ -2802,7 +3043,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("VehicleDocument", (string)null);
+                    b.ToTable("VehicleDocument");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -3008,8 +3249,48 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Domain.Entities.InventoryLedger", b =>
+                {
+                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantColorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("ProductVariantColor");
+                });
+
+            modelBuilder.Entity("Domain.Entities.InventoryOnHand", b =>
+                {
+                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantColorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("ProductVariantColor");
+                });
+
             modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
                 {
+                    b.HasOne("Domain.Entities.ApplicationUser", "ApprovedByUser")
+                        .WithMany()
+                        .HasForeignKey("ApprovedBy");
+
                     b.HasOne("Domain.Entities.ApplicationUser", "ConfirmedByUser")
                         .WithMany()
                         .HasForeignKey("ConfirmedBy");
@@ -3023,17 +3304,23 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("PurchaseRequestId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Domain.Entities.ApplicationUser", "RejectedByUser")
+                        .WithMany()
+                        .HasForeignKey("RejectedBy");
+
+                    b.HasOne("Domain.Entities.ApplicationUser", "SentByUser")
+                        .WithMany()
+                        .HasForeignKey("SentBy");
+
                     b.HasOne("Domain.Entities.Output", "Output")
                         .WithMany("Returns")
                         .HasForeignKey("SourceOrderId");
 
                     b.HasOne("Domain.Entities.InventoryReceiptStatus", "InventoryReceiptStatus")
-                        .WithMany("InventoryReceiptReceipts")
+                        .WithMany("InventoryReceipts")
                         .HasForeignKey("StatusId");
 
-                    b.HasOne("Domain.Entities.Supplier", null)
-                        .WithMany("InventoryReceiptReceipts")
-                        .HasForeignKey("SupplierId");
+                    b.Navigation("ApprovedByUser");
 
                     b.Navigation("ConfirmedByUser");
 
@@ -3044,11 +3331,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("Output");
 
                     b.Navigation("PurchaseRequest");
+
+                    b.Navigation("RejectedByUser");
+
+                    b.Navigation("SentByUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
                 {
-                    b.HasOne("Domain.Entities.InventoryReceipt", "InventoryReceiptReceipt")
+                    b.HasOne("Domain.Entities.InventoryReceipt", "InventoryReceipt")
                         .WithMany("InventoryReceiptInfos")
                         .HasForeignKey("InventoryReceiptId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3067,18 +3358,18 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("PurchaseRequestItemId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Domain.Entities.QuotationProductRow", "QuotationProductRow")
+                    b.HasOne("Domain.Entities.Supplier", "Supplier")
                         .WithMany()
-                        .HasForeignKey("QuotationProductRowId")
+                        .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("InventoryReceiptReceipt");
+                    b.Navigation("InventoryReceipt");
 
                     b.Navigation("ParentOutputInfo");
 
                     b.Navigation("PurchaseRequestItem");
 
-                    b.Navigation("QuotationProductRow");
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("Domain.Entities.KPI", b =>
@@ -3138,6 +3429,49 @@ namespace Infrastructure.Migrations
                     b.Navigation("Author");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Domain.Entities.NewsComment", b =>
+                {
+                    b.HasOne("Domain.Entities.News", "News")
+                        .WithMany("Comments")
+                        .HasForeignKey("NewsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("News");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.NewsProduct", b =>
+                {
+                    b.HasOne("Domain.Entities.News", "News")
+                        .WithMany("LinkedProducts")
+                        .HasForeignKey("NewsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantColorId");
+
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("News");
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("ProductVariantColor");
                 });
 
             modelBuilder.Entity("Domain.Entities.Option", b =>
@@ -3280,6 +3614,29 @@ namespace Infrastructure.Migrations
                     b.Navigation("CompatibleVehicleModel");
                 });
 
+            modelBuilder.Entity("Domain.Entities.ProductQuotation", b =>
+                {
+                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantColorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId");
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("ProductVariantColor");
+
+                    b.Navigation("Supplier");
+                });
+
             modelBuilder.Entity("Domain.Entities.ProductTechnology", b =>
                 {
                     b.HasOne("Domain.Entities.Product", "Product")
@@ -3331,9 +3688,21 @@ namespace Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("CreatedBy");
 
+                    b.HasOne("Domain.Entities.ApplicationUser", "RejectedByUser")
+                        .WithMany()
+                        .HasForeignKey("RejectedBy");
+
+                    b.HasOne("Domain.Entities.ApplicationUser", "SentByUser")
+                        .WithMany()
+                        .HasForeignKey("SentBy");
+
                     b.Navigation("ApprovedByUser");
 
                     b.Navigation("CreatedByUser");
+
+                    b.Navigation("RejectedByUser");
+
+                    b.Navigation("SentByUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.PurchaseRequestItem", b =>
@@ -3358,40 +3727,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("ProductVariantColor");
 
                     b.Navigation("PurchaseRequest");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Quotation", b =>
-                {
-                    b.HasOne("Domain.Entities.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Supplier");
-                });
-
-            modelBuilder.Entity("Domain.Entities.QuotationProductRow", b =>
-                {
-                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantColorId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Domain.Entities.Quotation", "QuotationReceipt")
-                        .WithMany("QuotationProductRows")
-                        .HasForeignKey("QuotationId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("ProductVariant");
-
-                    b.Navigation("ProductVariantColor");
-
-                    b.Navigation("QuotationReceipt");
                 });
 
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
@@ -3433,6 +3768,25 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Supplier", "Supplier")
                         .WithMany("SupplierContacts")
                         .HasForeignKey("SupplierId");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SupplierDebt", b =>
+                {
+                    b.HasOne("Domain.Entities.InventoryReceipt", "InventoryReceipt")
+                        .WithMany("SupplierDebts")
+                        .HasForeignKey("InventoryReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Supplier", "Supplier")
+                        .WithMany("SupplierDebts")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("InventoryReceipt");
 
                     b.Navigation("Supplier");
                 });
@@ -3619,6 +3973,8 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
                 {
                     b.Navigation("InventoryReceiptInfos");
+
+                    b.Navigation("SupplierDebts");
                 });
 
             modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
@@ -3628,12 +3984,19 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
                 {
-                    b.Navigation("InventoryReceiptReceipts");
+                    b.Navigation("InventoryReceipts");
                 });
 
             modelBuilder.Entity("Domain.Entities.Lead", b =>
                 {
                     b.Navigation("Activities");
+                });
+
+            modelBuilder.Entity("Domain.Entities.News", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("LinkedProducts");
                 });
 
             modelBuilder.Entity("Domain.Entities.NewsCategory", b =>
@@ -3726,16 +4089,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("InventoryReceiptInfos");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Quotation", b =>
-                {
-                    b.Navigation("QuotationProductRows");
-                });
-
             modelBuilder.Entity("Domain.Entities.Supplier", b =>
                 {
-                    b.Navigation("InventoryReceiptReceipts");
-
                     b.Navigation("SupplierContacts");
+
+                    b.Navigation("SupplierDebts");
                 });
 
             modelBuilder.Entity("Domain.Entities.SupplierStatus", b =>
