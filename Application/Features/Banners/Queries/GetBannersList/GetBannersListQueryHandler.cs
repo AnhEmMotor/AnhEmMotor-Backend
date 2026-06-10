@@ -6,7 +6,6 @@ using MediatR;
 using System;
 
 using Domain.Primitives;
-using Mapster;
 using System.Linq;
 
 namespace Application.Features.Banners.Queries.GetBannersList

@@ -189,16 +189,8 @@ public static class PermissionsList
         { "Nhân sự", [Permissions.HR.View, Permissions.HR.Create, Permissions.HR.Edit, Permissions.HR.Delete] },
         { "Lương & Hoa hồng", [Payroll.View, Payroll.Configure, Payroll.Approve] },
         {
-            "Báo giá",
-            [Quotations.View, Quotations.Create, Quotations.Edit, Quotations.Delete, Quotations.Send, Quotations.Approve]
-        },
-        {
             "Yêu cầu mua hàng (PR)",
             [PurchaseRequests.View, PurchaseRequests.Create, PurchaseRequests.Edit, PurchaseRequests.Delete, PurchaseRequests.Send, PurchaseRequests.ApproveReject]
-        },
-        {
-            "Đơn chốt mua (PO)",
-            [PurchaseOrder.View, PurchaseOrder.Create, PurchaseOrder.Edit, PurchaseOrder.Delete, PurchaseOrder.Send, PurchaseOrder.ApproveReject]
         },
         {
             "Quản lý công nợ",

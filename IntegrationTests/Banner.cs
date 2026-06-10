@@ -38,7 +38,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
     [Fact(DisplayName = "BANN_012 - Kiểm tra tính toàn vẹn của dữ liệu ảnh (DesktopImageUrl)")]
     public async Task CreateBanner_ValidDesktopImageUrl_SavesCorrectly()
     {
-        var payload = new { title = "Integrity Test", desktop_image_url = "http://anh-em-motor.com/banner.jpg" };
+        var payload = new { title = "Integrity Test", placement = "home_top", description = "Test", cta_label = "Click", cta_link = "/link", desktop_image_url = "http://anh-em-motor.com/banner.jpg" };
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,

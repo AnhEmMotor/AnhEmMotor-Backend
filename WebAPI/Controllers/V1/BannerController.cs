@@ -81,6 +81,7 @@ public class BannerController(ISender sender) : ApiController
     /// Lấy danh sách banner đang hoạt động
     /// </summary>
     /// <returns>Danh sách banner</returns>
+    /// <param name="placement">Vị trí cần lấy</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet("store")]
     [SwaggerOperation(Summary = "Lấy danh sách banner cho cửa hàng (lọc theo vị trí)")]
@@ -90,6 +91,10 @@ public class BannerController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Lấy danh sách vị trí banner hợp lệ
+    /// </summary>
+    /// <returns>Danh sách các vị trí</returns>
     [HttpGet("placements")]
     [SwaggerOperation(Summary = "Lấy danh sách vị trí banner hợp lệ")]
     public IActionResult GetPlacements()
@@ -102,6 +107,7 @@ public class BannerController(ISender sender) : ApiController
     /// Lấy toàn bộ danh sách banner (Dành cho quản lý)
     /// </summary>
     /// <returns>Danh sách banner</returns>
+    /// <param name="query">Lọc danh sách</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet]
     [HasPermission(Banners.View)]

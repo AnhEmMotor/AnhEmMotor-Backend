@@ -131,9 +131,20 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     [Fact(DisplayName = "NEWS_012 - Đảm bảo tính toàn vẹn của thông tin Metadata SEO")]
     public async Task CreateNews_WithSEO_SavesMetadataCorrectly()
     {
+        int categoryId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var cat = new NewsCategory { Name = "Tech", Slug = "tech-" + Guid.NewGuid() };
+            db.NewsCategories.Add(cat);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            categoryId = cat.Id;
+        }
         var payload = new
         {
             title = "SEO News",
+            slug = "seo-news",
+            category_id = categoryId,
             content = "C",
             cover_image_url = "http://img.com",
             meta_title = "Meta T",
@@ -292,7 +303,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             newsId = news.Id;
         }
-        var payload = new { id = newsId, title = "Updated Title", author_id = authorId, content = "New content", cover_image_url = "http://img.com" };
+        var payload = new { id = newsId, title = "Updated Title", slug = "updated-title", category_id = 1, author_id = authorId, content = "New content", cover_image_url = "http://img.com" };
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             $"admin_{uniqueId}",

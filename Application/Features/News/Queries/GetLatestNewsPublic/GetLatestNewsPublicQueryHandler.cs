@@ -30,6 +30,6 @@ public sealed class GetLatestNewsPublicQueryHandler(INewsReadRepository reposito
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
             
-        return result.Items.ToList();
+        return result.Items?.ToList() ?? new List<NewsSummaryResponse>();
     }
 }
