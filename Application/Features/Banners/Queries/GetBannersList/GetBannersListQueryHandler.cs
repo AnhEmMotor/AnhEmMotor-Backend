@@ -14,7 +14,7 @@ namespace Application.Features.Banners.Queries.GetBannersList
             CancellationToken cancellationToken)
         {
             var banners = await bannerRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-            var response = banners.Adapt<List<BannerResponse>>().OrderBy(b => b.DisplayOrder).ToList();
+            var response = banners.Adapt<List<BannerResponse>>();
             return Result<List<BannerResponse>>.Success(response);
         }
     }

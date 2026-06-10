@@ -32,10 +32,8 @@ public class Banner
         var command = new CreateBannerCommand
         {
             Title = "Banner KM",
-            ImageUrl = "http://anh-em.com/km.jpg",
-            LinkUrl = "http://anh-em.com/km",
-            Position = "Home",
-            DisplayOrder = 1
+            DesktopImageUrl = "http://anh-em.com/km.jpg",
+            CtaLink = "http://anh-em.com/km"
         };
         _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(Result<int>.Success(50));
         var result = await _bannerController.CreateAsync(command, CancellationToken.None).ConfigureAwait(true);
@@ -47,7 +45,7 @@ public class Banner
     [Fact(DisplayName = "BANN_015 - Ngăn chặn tải lên ảnh banner quá 10MB")]
     public async Task BANN_015_Large_Image_Upload_Returns_BadRequest()
     {
-        var command = new CreateBannerCommand { Title = "Large", ImageUrl = "TooBig" };
+        var command = new CreateBannerCommand { Title = "Large", DesktopImageUrl = "TooBig" };
         _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<int>.Failure("File size exceeds 10MB"));
         var result = await _bannerController.CreateAsync(command, CancellationToken.None).ConfigureAwait(true);
@@ -57,7 +55,7 @@ public class Banner
     [Fact(DisplayName = "BANN_018 - Cập nhật nội dung kêu gọi hành động (CTA)")]
     public async Task BANN_018_Update_CTA_Returns_Success()
     {
-        var command = new UpdateBannerCommand { Id = 1, CtaText = "Mua ngay" };
+        var command = new UpdateBannerCommand { Id = 1, CtaLabel = "Mua ngay" };
         _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Unit>.Success(Unit.Value));
         var result = await _bannerController.UpdateAsync(1, command, TestContext.Current.CancellationToken)

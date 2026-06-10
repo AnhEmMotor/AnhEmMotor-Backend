@@ -1,6 +1,5 @@
 using Application.Features.Banners.Commands.CreateBanner;
 using Application.Features.Banners.Commands.DeleteBanner;
-using Application.Features.Banners.Commands.TrackBannerClick;
 using Application.Features.Banners.Commands.UpdateBanner;
 using Application.Features.Banners.Queries.GetActiveBanners;
 using Application.Features.Banners.Queries.GetBannerAuditLogs;
@@ -76,19 +75,7 @@ public class BannerController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
-    /// <summary>
-    /// Ghi nhận lượt click vào banner
-    /// </summary>
-    /// <param name="id">Mã banner</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>Kết quả</returns>
-    [HttpPost("{id}/click")]
-    [SwaggerOperation(Summary = "Ghi nhận lượt click banner")]
-    public async Task<IActionResult> TrackClickAsync(int id, CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new TrackBannerClickCommand(id), cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
+
 
     /// <summary>
     /// Lấy danh sách banner đang hoạt động

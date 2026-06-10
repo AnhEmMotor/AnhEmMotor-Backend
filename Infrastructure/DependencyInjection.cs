@@ -4,7 +4,7 @@ using Application.Interfaces.Services;
 using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
-using Infrastructure.BackgroundJobs;
+
 using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
@@ -101,7 +101,7 @@ public static class DependencyInjection
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
-        services.AddHostedService<BannerExpiryWorker>();
+
         return services;
     }
 }

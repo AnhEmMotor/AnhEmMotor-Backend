@@ -14,19 +14,13 @@ namespace Infrastructure.Repositories.Banner
 
         public Task<List<Domain.Entities.Banner>> GetActiveBannersAsync(CancellationToken cancellationToken)
         {
-            var now = DateTimeOffset.UtcNow;
             return context.Banners
-                .Where(
-                    b => b.IsActive &&
-                        (!b.StartDate.HasValue || b.StartDate <= now) &&
-                        (!b.EndDate.HasValue || b.EndDate >= now))
-                .OrderByDescending(b => b.Priority)
                 .ToListAsync(cancellationToken);
         }
 
         public Task<List<Domain.Entities.Banner>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return context.Banners.OrderByDescending(b => b.Priority).ToListAsync(cancellationToken);
+            return context.Banners.ToListAsync(cancellationToken);
         }
 
         public Task<List<BannerAuditLog>> GetLogsByBannerIdAsync(int bannerId, CancellationToken cancellationToken)
