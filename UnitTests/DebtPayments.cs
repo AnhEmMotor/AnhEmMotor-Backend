@@ -1,5 +1,3 @@
-using Application.ApiContracts.InventoryReceipt.Responses;
-using Application.Common.Models;
 using Application.Features.DebtPayments.Commands.RecordDebtPayment;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
@@ -7,10 +5,6 @@ using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
 using FluentAssertions;
 using Moq;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
 using SupplierDebtEntity = Domain.Entities.SupplierDebt;
 
@@ -36,20 +30,13 @@ namespace UnitTests
                 _supplierDebtRepoMock.Object,
                 _readRepoMock.Object,
                 _unitOfWorkMock.Object);
-
-            var command = new RecordDebtPaymentCommand
-            {
-                LineId = 1,
-                Amount = 1000000
-            };
-
+            var command = new RecordDebtPaymentCommand { LineId = 1, Amount = 1000000 };
             var existingReceipt = new InventoryReceiptEntity
             {
                 Id = 1,
                 StatusId = "approve",
                 SupplierDebts = new List<SupplierDebtEntity>()
             };
-
             var supplierDebt = new SupplierDebtEntity
             {
                 Id = 1,
@@ -59,18 +46,14 @@ namespace UnitTests
                 PaidAmount = 500000
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
-
             _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(supplierDebt);
-
-            _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            _readRepoMock.Setup(
+                x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
                 .ReturnsAsync(existingReceipt);
-
             _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(existingReceipt);
-
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
             result.IsSuccess.Should().BeTrue();
             supplierDebt.PaidAmount.Should().Be(1500000);
             _supplierDebtRepoMock.Verify(x => x.Update(supplierDebt), Times.Once);
@@ -84,20 +67,13 @@ namespace UnitTests
                 _supplierDebtRepoMock.Object,
                 _readRepoMock.Object,
                 _unitOfWorkMock.Object);
-
-            var command = new RecordDebtPaymentCommand
-            {
-                LineId = 1,
-                Amount = 1500000
-            };
-
+            var command = new RecordDebtPaymentCommand { LineId = 1, Amount = 1500000 };
             var existingReceipt = new InventoryReceiptEntity
             {
                 Id = 1,
                 StatusId = "approve",
                 SupplierDebts = new List<SupplierDebtEntity>()
             };
-
             var supplierDebt = new SupplierDebtEntity
             {
                 Id = 1,
@@ -107,18 +83,14 @@ namespace UnitTests
                 PaidAmount = 500000
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
-
             _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(supplierDebt);
-
-            _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            _readRepoMock.Setup(
+                x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
                 .ReturnsAsync(existingReceipt);
-
             _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(existingReceipt);
-
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
             result.IsSuccess.Should().BeTrue();
             supplierDebt.PaidAmount.Should().Be(2000000);
             _supplierDebtRepoMock.Verify(x => x.Update(supplierDebt), Times.Once);
@@ -132,20 +104,13 @@ namespace UnitTests
                 _supplierDebtRepoMock.Object,
                 _readRepoMock.Object,
                 _unitOfWorkMock.Object);
-
-            var command = new RecordDebtPaymentCommand
-            {
-                LineId = 1,
-                Amount = 0
-            };
-
+            var command = new RecordDebtPaymentCommand { LineId = 1, Amount = 0 };
             var existingReceipt = new InventoryReceiptEntity
             {
                 Id = 1,
                 StatusId = "approve",
                 SupplierDebts = new List<SupplierDebtEntity>()
             };
-
             var supplierDebt = new SupplierDebtEntity
             {
                 Id = 1,
@@ -155,15 +120,12 @@ namespace UnitTests
                 PaidAmount = 500000
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
-
             _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(supplierDebt);
-
-            _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            _readRepoMock.Setup(
+                x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
                 .ReturnsAsync(existingReceipt);
-
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
             result.IsFailure.Should().BeTrue();
             result.Error?.Code.Should().Be("BadRequest");
         }
@@ -175,20 +137,13 @@ namespace UnitTests
                 _supplierDebtRepoMock.Object,
                 _readRepoMock.Object,
                 _unitOfWorkMock.Object);
-
-            var command = new RecordDebtPaymentCommand
-            {
-                LineId = 1,
-                Amount = 2000000
-            };
-
+            var command = new RecordDebtPaymentCommand { LineId = 1, Amount = 2000000 };
             var existingReceipt = new InventoryReceiptEntity
             {
                 Id = 1,
                 StatusId = "approve",
                 SupplierDebts = new List<SupplierDebtEntity>()
             };
-
             var supplierDebt = new SupplierDebtEntity
             {
                 Id = 1,
@@ -198,15 +153,12 @@ namespace UnitTests
                 PaidAmount = 500000
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
-
             _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(supplierDebt);
-
-            _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            _readRepoMock.Setup(
+                x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
                 .ReturnsAsync(existingReceipt);
-
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
             result.IsFailure.Should().BeTrue();
             result.Error?.Code.Should().Be("BadRequest");
         }
@@ -218,20 +170,13 @@ namespace UnitTests
                 _supplierDebtRepoMock.Object,
                 _readRepoMock.Object,
                 _unitOfWorkMock.Object);
-
-            var command = new RecordDebtPaymentCommand
-            {
-                LineId = 1,
-                Amount = 1000000
-            };
-
+            var command = new RecordDebtPaymentCommand { LineId = 1, Amount = 1000000 };
             var existingReceipt = new InventoryReceiptEntity
             {
                 Id = 1,
                 StatusId = "draft",
                 SupplierDebts = new List<SupplierDebtEntity>()
             };
-
             var supplierDebt = new SupplierDebtEntity
             {
                 Id = 1,
@@ -241,15 +186,12 @@ namespace UnitTests
                 PaidAmount = 500000
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
-
             _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(supplierDebt);
-
-            _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            _readRepoMock.Setup(
+                x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
                 .ReturnsAsync(existingReceipt);
-
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
             result.IsFailure.Should().BeTrue();
             result.Error?.Code.Should().Be("BadRequest");
         }

@@ -2,6 +2,7 @@ using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Common.Models;
+using Application.Features.ProductQuotations.Queries.GetSupplierPricesForVariant;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -408,9 +409,7 @@ public class ProductController(ISender sender) : ApiController
         [FromQuery] int? colorId,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(
-            new Application.Features.ProductQuotations.Queries.GetSupplierPricesForVariant.GetSupplierPricesForVariantQuery(variantId, colorId),
-            cancellationToken)
+        var result = await sender.Send(new GetSupplierPricesForVariantQuery(variantId, colorId), cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }

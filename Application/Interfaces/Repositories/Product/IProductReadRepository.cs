@@ -76,5 +76,7 @@ public interface IProductReadRepository
 
     public Task<List<ProductEntity>> GetAllProductsWithInventoryDetailsAsync(CancellationToken cancellationToken);
 
-    public Task<Domain.Entities.ProductVariant?> GetVariantByIdWithDetailsAsync(int variantId, CancellationToken cancellationToken);
+    public Task<Domain.Entities.ProductVariant?> GetVariantByIdWithDetailsAsync(
+        int variantId,
+        CancellationToken cancellationToken);
 }

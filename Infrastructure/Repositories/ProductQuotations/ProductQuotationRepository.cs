@@ -2,22 +2,13 @@ using Application.Interfaces.Repositories.ProductQuotations;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.ProductQuotations
 {
-    public class ProductQuotationRepository(ApplicationDBContext context) :
-        IProductQuotationReadRepository,
-        IProductQuotationInsertRepository,
-        IProductQuotationUpdateRepository,
-        IProductQuotationDeleteRepository
+    public class ProductQuotationRepository(ApplicationDBContext context) : IProductQuotationReadRepository, IProductQuotationInsertRepository, IProductQuotationUpdateRepository, IProductQuotationDeleteRepository
     {
-        public Task<List<ProductQuotation>> GetByVariantAsync(
-            int variantId,
-            CancellationToken cancellationToken)
+        public Task<List<ProductQuotation>> GetByVariantAsync(int variantId, CancellationToken cancellationToken)
         {
             return context.ProductQuotations
                 .Include(q => q.Supplier)
@@ -32,9 +23,11 @@ namespace Infrastructure.Repositories.ProductQuotations
             CancellationToken cancellationToken)
         {
             return context.ProductQuotations
-                .FirstOrDefaultAsync(q => q.ProductVariantId == variantId &&
-                                         q.ProductVariantColorId == colorId &&
-                                         q.SupplierId == supplierId, cancellationToken);
+                .FirstOrDefaultAsync(
+                    q => q.ProductVariantId == variantId &&
+                        q.ProductVariantColorId == colorId &&
+                        q.SupplierId == supplierId,
+                    cancellationToken);
         }
 
         public void Update(ProductQuotation row)
@@ -49,7 +42,7 @@ namespace Infrastructure.Repositories.ProductQuotations
 
         public async Task AddAsync(ProductQuotation row, CancellationToken cancellationToken)
         {
-            await context.ProductQuotations.AddAsync(row, cancellationToken);
+            await context.ProductQuotations.AddAsync(row, cancellationToken).ConfigureAwait(false);
         }
     }
 }

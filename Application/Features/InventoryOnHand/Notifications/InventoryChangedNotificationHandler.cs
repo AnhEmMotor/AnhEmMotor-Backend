@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Application.Interfaces.Repositories.InventoryOnHand;
 using MediatR;
 
@@ -11,7 +9,8 @@ public class InventoryChangedNotificationHandler(IInventoryOnHandUpdateRepositor
     {
         foreach (var combo in notification.Combos)
         {
-           await inventoryRepo.RecalculateAsync(combo.VariantId, combo.ColorId, cancellationToken).ConfigureAwait(false);
+            await inventoryRepo.RecalculateAsync(combo.VariantId, combo.ColorId, cancellationToken)
+                .ConfigureAwait(false);
         }
     }
 }

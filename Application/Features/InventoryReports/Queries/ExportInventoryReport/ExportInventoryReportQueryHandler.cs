@@ -1,9 +1,6 @@
-using Application.ApiContracts.InventoryReport.Responses;
 using Application.Common.Models;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.InventoryReports.Queries.ExportInventoryReport
 {

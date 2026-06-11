@@ -6,14 +6,14 @@ using MediatR;
 
 namespace Application.Features.Banners.Queries.GetStoreBanners;
 
-internal sealed class GetStoreBannersQueryHandler(IBannerReadRepository bannerReadRepository)
-    : IRequestHandler<GetStoreBannersQuery, Result<List<BannerResponse>>>
+public class GetStoreBannersQueryHandler(IBannerReadRepository bannerReadRepository) : IRequestHandler<GetStoreBannersQuery, Result<List<BannerResponse>>>
 {
     public async Task<Result<List<BannerResponse>>> Handle(
         GetStoreBannersQuery request,
         CancellationToken cancellationToken)
     {
-        var banners = await bannerReadRepository.GetBannersByPlacementAsync(cancellationToken, request.Placement).ConfigureAwait(false);
+        var banners = await bannerReadRepository.GetBannersByPlacementAsync(cancellationToken, request.Placement)
+            .ConfigureAwait(false);
         var response = banners.Adapt<List<BannerResponse>>();
         return Result<List<BannerResponse>>.Success(response);
     }

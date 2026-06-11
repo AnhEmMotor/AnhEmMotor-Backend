@@ -118,16 +118,11 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
         int receiptInfoId,
         CancellationToken cancellationToken = default)
     {
-        return context.Vehicles
-            .Where(v => v.InventoryReceiptInfoId == receiptInfoId)
-            .ToListAsync(cancellationToken);
+        return context.Vehicles.Where(v => v.InventoryReceiptInfoId == receiptInfoId).ToListAsync(cancellationToken);
     }
 
-    public Task<Domain.Entities.Vehicle?> GetByVinAsync(
-        string vin,
-        CancellationToken cancellationToken = default)
+    public Task<Domain.Entities.Vehicle?> GetByVinAsync(string vin, CancellationToken cancellationToken = default)
     {
-        return context.Vehicles
-            .FirstOrDefaultAsync(v => string.Compare(v.VinNumber, vin) == 0, cancellationToken);
+        return context.Vehicles.FirstOrDefaultAsync(v => string.Compare(v.VinNumber, vin) == 0, cancellationToken);
     }
 }

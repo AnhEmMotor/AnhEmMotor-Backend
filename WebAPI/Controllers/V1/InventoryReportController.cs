@@ -1,19 +1,15 @@
 using Application.ApiContracts.InventoryReport.Responses;
 using Application.Common.Models;
+using Application.Features.InventoryReports.Queries.ExportInventoryReport;
 using Application.Features.InventoryReports.Queries.GetInventoryReportDetail;
 using Application.Features.InventoryReports.Queries.GetInventoryReportSummary;
-using Application.Features.InventoryReports.Queries.ExportInventoryReport;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1

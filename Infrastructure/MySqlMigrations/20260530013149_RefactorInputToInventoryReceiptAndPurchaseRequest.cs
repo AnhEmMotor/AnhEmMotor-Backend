@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -12,33 +12,16 @@ namespace Infrastructure.MySqlMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Vehicle_InputInfo_InputInfoId",
-                table: "Vehicle");
-
-            migrationBuilder.DropTable(
-                name: "InputInfo");
-
-            migrationBuilder.DropTable(
-                name: "Input");
-
-            migrationBuilder.DropTable(
-                name: "InputStatus");
-
-            migrationBuilder.DropColumn(
-                name: "Highlights",
-                table: "Product");
-
-            migrationBuilder.RenameColumn(
-                name: "InputInfoId",
-                table: "Vehicle",
-                newName: "InventoryReceiptInfoId");
-
+            migrationBuilder.DropForeignKey(name: "FK_Vehicle_InputInfo_InputInfoId", table: "Vehicle");
+            migrationBuilder.DropTable(name: "InputInfo");
+            migrationBuilder.DropTable(name: "Input");
+            migrationBuilder.DropTable(name: "InputStatus");
+            migrationBuilder.DropColumn(name: "Highlights", table: "Product");
+            migrationBuilder.RenameColumn(name: "InputInfoId", table: "Vehicle", newName: "InventoryReceiptInfoId");
             migrationBuilder.RenameIndex(
                 name: "IX_Vehicle_InputInfoId",
                 table: "Vehicle",
                 newName: "IX_Vehicle_InventoryReceiptInfoId");
-
             migrationBuilder.CreateTable(
                 name: "InventoryReceiptStatus",
                 columns: table => new
@@ -54,7 +37,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_InventoryReceiptStatus", x => x.Key);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "PurchaseRequest",
                 columns: table => new
@@ -63,8 +45,7 @@ namespace Infrastructure.MySqlMigrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Status = table.Column<string>(type: "varchar(30)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Note = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Note = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedBy = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
                     ApprovedBy = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
@@ -86,7 +67,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "InventoryReceipt",
                 columns: table => new
@@ -143,7 +123,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "PurchaseRequestItem",
                 columns: table => new
@@ -178,7 +157,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "InventoryReceiptInfo",
                 columns: table => new
@@ -229,87 +207,70 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_ConfirmedBy",
                 table: "InventoryReceipt",
                 column: "ConfirmedBy");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_CreatedBy",
                 table: "InventoryReceipt",
                 column: "CreatedBy");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_PurchaseRequestId",
                 table: "InventoryReceipt",
                 column: "PurchaseRequestId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_SourceOrderId",
                 table: "InventoryReceipt",
                 column: "SourceOrderId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_StatusId",
                 table: "InventoryReceipt",
                 column: "StatusId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_SupplierId",
                 table: "InventoryReceipt",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceiptInfo_InventoryReceiptId",
                 table: "InventoryReceiptInfo",
                 column: "InventoryReceiptId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceiptInfo_ParentOutputInfoId",
                 table: "InventoryReceiptInfo",
                 column: "ParentOutputInfoId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceiptInfo_ProductVariantId",
                 table: "InventoryReceiptInfo",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceiptInfo_PurchaseRequestItemId",
                 table: "InventoryReceiptInfo",
                 column: "PurchaseRequestItemId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceiptInfo_QuotationProductRowId",
                 table: "InventoryReceiptInfo",
                 column: "QuotationProductRowId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequest_ApprovedBy",
                 table: "PurchaseRequest",
                 column: "ApprovedBy");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequest_CreatedBy",
                 table: "PurchaseRequest",
                 column: "CreatedBy");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequestItem_ProductVariantColorId",
                 table: "PurchaseRequestItem",
                 column: "ProductVariantColorId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequestItem_ProductVariantId",
                 table: "PurchaseRequestItem",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequestItem_PurchaseRequestId",
                 table: "PurchaseRequestItem",
                 column: "PurchaseRequestId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_Vehicle_InventoryReceiptInfo_InventoryReceiptInfoId",
                 table: "Vehicle",
@@ -325,39 +286,18 @@ namespace Infrastructure.MySqlMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_Vehicle_InventoryReceiptInfo_InventoryReceiptInfoId",
                 table: "Vehicle");
-
-            migrationBuilder.DropTable(
-                name: "InventoryReceiptInfo");
-
-            migrationBuilder.DropTable(
-                name: "InventoryReceipt");
-
-            migrationBuilder.DropTable(
-                name: "PurchaseRequestItem");
-
-            migrationBuilder.DropTable(
-                name: "InventoryReceiptStatus");
-
-            migrationBuilder.DropTable(
-                name: "PurchaseRequest");
-
-            migrationBuilder.RenameColumn(
-                name: "InventoryReceiptInfoId",
-                table: "Vehicle",
-                newName: "InputInfoId");
-
+            migrationBuilder.DropTable(name: "InventoryReceiptInfo");
+            migrationBuilder.DropTable(name: "InventoryReceipt");
+            migrationBuilder.DropTable(name: "PurchaseRequestItem");
+            migrationBuilder.DropTable(name: "InventoryReceiptStatus");
+            migrationBuilder.DropTable(name: "PurchaseRequest");
+            migrationBuilder.RenameColumn(name: "InventoryReceiptInfoId", table: "Vehicle", newName: "InputInfoId");
             migrationBuilder.RenameIndex(
                 name: "IX_Vehicle_InventoryReceiptInfoId",
                 table: "Vehicle",
                 newName: "IX_Vehicle_InputInfoId");
-
-            migrationBuilder.AddColumn<string>(
-                name: "Highlights",
-                table: "Product",
-                type: "longtext",
-                nullable: true)
+            migrationBuilder.AddColumn<string>(name: "Highlights", table: "Product", type: "longtext", nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "InputStatus",
                 columns: table => new
@@ -373,7 +313,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_InputStatus", x => x.Key);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Input",
                 columns: table => new
@@ -423,7 +362,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "InputInfo",
                 columns: table => new
@@ -468,52 +406,24 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_ConfirmedBy",
-                table: "Input",
-                column: "ConfirmedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_CreatedBy",
-                table: "Input",
-                column: "CreatedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_SourceOrderId",
-                table: "Input",
-                column: "SourceOrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_StatusId",
-                table: "Input",
-                column: "StatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_SupplierId",
-                table: "Input",
-                column: "SupplierId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_InputInfo_InputId",
-                table: "InputInfo",
-                column: "InputId");
-
+            migrationBuilder.CreateIndex(name: "IX_Input_ConfirmedBy", table: "Input", column: "ConfirmedBy");
+            migrationBuilder.CreateIndex(name: "IX_Input_CreatedBy", table: "Input", column: "CreatedBy");
+            migrationBuilder.CreateIndex(name: "IX_Input_SourceOrderId", table: "Input", column: "SourceOrderId");
+            migrationBuilder.CreateIndex(name: "IX_Input_StatusId", table: "Input", column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Input_SupplierId", table: "Input", column: "SupplierId");
+            migrationBuilder.CreateIndex(name: "IX_InputInfo_InputId", table: "InputInfo", column: "InputId");
             migrationBuilder.CreateIndex(
                 name: "IX_InputInfo_ParentOutputInfoId",
                 table: "InputInfo",
                 column: "ParentOutputInfoId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InputInfo_ProductVariantColorId",
                 table: "InputInfo",
                 column: "ProductVariantColorId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InputInfo_ProductVariantId",
                 table: "InputInfo",
                 column: "ProductVariantId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_Vehicle_InputInfo_InputInfoId",
                 table: "Vehicle",

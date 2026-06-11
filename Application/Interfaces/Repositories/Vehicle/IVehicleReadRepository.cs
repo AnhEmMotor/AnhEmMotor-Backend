@@ -47,7 +47,5 @@ public interface IVehicleReadRepository
         int receiptInfoId,
         CancellationToken cancellationToken = default);
 
-    public Task<Domain.Entities.Vehicle?> GetByVinAsync(
-        string vin,
-        CancellationToken cancellationToken = default);
+    public Task<Domain.Entities.Vehicle?> GetByVinAsync(string vin, CancellationToken cancellationToken = default);
 }

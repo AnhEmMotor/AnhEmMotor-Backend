@@ -921,7 +921,8 @@ public class SalesOrder
         var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _settingRepoMock.Object);
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Page = 1, PageSize = 10 } };
         var statusIdsProperty = typeof(GetOutputsListQuery).GetProperty("StatusIds");
-        statusIdsProperty.Should().NotBeNull("GetOutputsListQuery cần nhận nhóm trạng thái để tách phiếu tạm và phiếu bán hàng");
+        statusIdsProperty.Should()
+            .NotBeNull("GetOutputsListQuery cần nhận nhóm trạng thái để tách phiếu tạm và phiếu bán hàng");
         statusIdsProperty!.SetValue(query, new[] { OrderStatus.Pending, OrderStatus.WaitingDeposit });
         Expression<Func<Output, bool>>? capturedFilter = null;
         _readRepoMock.Setup(

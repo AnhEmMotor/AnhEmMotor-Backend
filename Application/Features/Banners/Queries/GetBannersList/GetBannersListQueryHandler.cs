@@ -1,11 +1,11 @@
 using Application.ApiContracts.Banner.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Banner;
+using Domain.Primitives;
 using Mapster;
 using MediatR;
-using System;
 
-using Domain.Primitives;
+using System;
 using System.Linq;
 
 namespace Application.Features.Banners.Queries.GetBannersList
@@ -17,18 +17,14 @@ namespace Application.Features.Banners.Queries.GetBannersList
             CancellationToken cancellationToken)
         {
             var banners = await bannerRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-            
             var totalCount = banners.Count;
             var page = request.Page > 0 ? request.Page : 1;
             var pageSize = request.PageSize > 0 ? request.PageSize : 10;
-            
             var pagedBanners = banners
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
-
             var response = pagedBanners.Adapt<List<BannerResponse>>();
-            
             var pagedResult = new PagedResult<BannerResponse>(response, totalCount, page, pageSize);
             return Result<PagedResult<BannerResponse>>.Success(pagedResult);
         }

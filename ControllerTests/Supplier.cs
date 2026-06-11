@@ -118,7 +118,8 @@ public class Supplier
         var result = await _controller.GetSuppliersForInventoryReceiptAsync(sieveModel, CancellationToken.None)
             .ConfigureAwait(true);
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = okResult.Value.Should().BeOfType<PagedResult<SupplierForInventoryReceiptManagerResponse>>().Subject;
+        var response = okResult.Value.Should().BeOfType<PagedResult<SupplierForInventoryReceiptManagerResponse>>()
+            .Subject;
         response.Items.Should().HaveCount(2);
     }
 

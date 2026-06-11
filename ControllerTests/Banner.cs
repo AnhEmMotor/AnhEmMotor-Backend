@@ -82,7 +82,8 @@ public class Banner
     {
         _senderMock.Setup(m => m.Send(It.IsAny<GetBannersListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<BannerResponse>>.Success(new PagedResult<BannerResponse>([], 0, 1, 10)));
-        var result = await _bannerController.GetListAsync(new GetBannersListQuery(), CancellationToken.None).ConfigureAwait(true);
+        var result = await _bannerController.GetListAsync(new GetBannersListQuery(), CancellationToken.None)
+            .ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
     }
 }

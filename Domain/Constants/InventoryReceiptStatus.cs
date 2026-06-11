@@ -47,7 +47,7 @@ namespace Domain.Constants
             if (string.IsNullOrWhiteSpace(value))
                 return true;
             return string.Equals(value, Approve, StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(value, Reject, StringComparison.OrdinalIgnoreCase);
+                string.Equals(value, Reject, StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsDraft(string? value)

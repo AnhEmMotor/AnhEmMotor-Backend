@@ -11,9 +11,8 @@ namespace Application.ApiContracts.Product.Responses
 
         public string? ColorCode { get; set; }
 
-    public string? CoverImageUrl { get; set; }
+        public string? CoverImageUrl { get; set; }
 
-    public List<VariantSupplierPriceRequest> SupplierPrices { get; set; } = [];
-
-}
+        public List<VariantSupplierPriceRequest> SupplierPrices { get; set; } = [];
+    }
 }

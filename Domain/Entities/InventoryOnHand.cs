@@ -31,6 +31,7 @@ namespace Domain.Entities
         public int OrderedQty { get; set; }
 
         public ProductVariant? ProductVariant { get; set; }
+
         public ProductVariantColor? ProductVariantColor { get; set; }
     }
 }

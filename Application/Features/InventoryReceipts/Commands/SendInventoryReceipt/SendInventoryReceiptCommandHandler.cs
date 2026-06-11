@@ -24,26 +24,21 @@ public sealed class SendInventoryReceiptCommandHandler(
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
         if (inventoryReceipt is null)
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
-
         if (!string.Equals(inventoryReceipt.StatusId, InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase))
         {
             return Error.BadRequest("Chỉ có thể gửi phiếu nhập ở trạng thái nháp (draft).", "StatusId");
         }
-
         inventoryReceipt.StatusId = InventoryReceiptStatus.Sent;
         inventoryReceipt.SentBy = currentUserContext.GetUserId();
         updateRepository.Update(inventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var updated = await readRepository.GetByIdWithDetailsAsync(inventoryReceipt.Id, cancellationToken)
             .ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
-
         return updated.Adapt<InventoryReceiptDetailResponse>();
     }
 }

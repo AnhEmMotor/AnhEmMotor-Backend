@@ -1,16 +1,9 @@
-using Application.Interfaces.Repositories.InventoryReceipt;
-using Application.ApiContracts.InventoryReport.Responses;
-using Application.Common.Models;
 using Application.Features.InventoryReports.Queries.GetInventoryReportDetail;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Product;
-using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using ProductVariant = Domain.Entities.ProductVariant;
 
 namespace UnitTests
@@ -24,7 +17,8 @@ namespace UnitTests
         {
             _productRepoMock = new Mock<IProductReadRepository>();
             _receiptRepoMock = new Mock<IInventoryReceiptReadRepository>();
-            _receiptRepoMock.Setup(x => x.GetInfosByVariantAsync(It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            _receiptRepoMock.Setup(
+                x => x.GetInfosByVariantAsync(It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync([]);
         }
 
@@ -32,27 +26,15 @@ namespace UnitTests
         public async Task IRP_004_GetReportDetail_MissingColorId_BadRequest()
         {
             var handler = new GetInventoryReportDetailQueryHandler(_productRepoMock.Object, _receiptRepoMock.Object);
-
-            var query = new GetInventoryReportDetailQuery
-            {
-                VariantId = 1,
-                ColorId = null
-            };
-
+            var query = new GetInventoryReportDetailQuery { VariantId = 1, ColorId = null };
             var mockVariant = new ProductVariant
             {
                 Id = 1,
-                ProductVariantColors = new List<ProductVariantColor>
-                {
-                    new() { Id = 10, ColorName = "Red" }
-                }
+                ProductVariantColors = new List<ProductVariantColor> { new() { Id = 10, ColorName = "Red" } }
             };
-
             _productRepoMock.Setup(x => x.GetVariantByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(mockVariant);
-
             var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
             result.IsFailure.Should().BeTrue();
             result.Error?.Code.Should().Be("BadRequest");
         }
@@ -61,26 +43,17 @@ namespace UnitTests
         public async Task IRP_005_GetReportDetail_NoColors_Success()
         {
             var handler = new GetInventoryReportDetailQueryHandler(_productRepoMock.Object, _receiptRepoMock.Object);
-
-            var query = new GetInventoryReportDetailQuery
-            {
-                VariantId = 1,
-                ColorId = null
-            };
-
+            var query = new GetInventoryReportDetailQuery { VariantId = 1, ColorId = null };
             var mockVariant = new ProductVariant
             {
                 Id = 1,
-                ProductVariantColors = new List<ProductVariantColor>(), // No colors
+                ProductVariantColors = new List<ProductVariantColor>(),
                 InventoryReceiptInfos = [],
                 OutputInfos = []
             };
-
             _productRepoMock.Setup(x => x.GetVariantByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(mockVariant);
-
             var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().NotBeNull();
         }
@@ -89,18 +62,10 @@ namespace UnitTests
         public async Task IRP_006_GetReportDetail_VariantNotFound_NotFound()
         {
             var handler = new GetInventoryReportDetailQueryHandler(_productRepoMock.Object, _receiptRepoMock.Object);
-
-            var query = new GetInventoryReportDetailQuery
-            {
-                VariantId = 999,
-                ColorId = null
-            };
-
+            var query = new GetInventoryReportDetailQuery { VariantId = 999, ColorId = null };
             _productRepoMock.Setup(x => x.GetVariantByIdWithDetailsAsync(999, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((ProductVariant?)null);
-
             var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
             result.IsFailure.Should().BeTrue();
             result.Error?.Code.Should().Be("NotFound");
         }

@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
-using Application.Interfaces.Repositories.InventoryOnHand;
-using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using System.Linq.Expressions;
 using InventoryReceiptStatus = Domain.Entities.InventoryReceiptStatus;
@@ -19,7 +17,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 {
     private readonly IServiceProvider? _serviceProvider;
 
-    public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options, IServiceProvider? serviceProvider = null): base(options)
+    public ApplicationDBContext(
+        DbContextOptions<ApplicationDBContext> options,
+        IServiceProvider? serviceProvider = null): base(options)
     {
         _serviceProvider = serviceProvider;
     }
@@ -131,8 +131,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<CommissionPolicyAuditLog> CommissionPolicyAuditLogs { get; set; }
 
-
-
     public virtual DbSet<ProductQuotation> ProductQuotations { get; set; }
 
     public virtual DbSet<PurchaseRequest> PurchaseRequests { get; set; }
@@ -144,8 +142,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<SupplierDebt> SupplierDebts { get; set; }
 
     public virtual DbSet<InventoryOnHand> InventoryOnHands { get; set; }
-
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -264,7 +260,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(ii => ii.Vehicles)
             .HasForeignKey(v => v.InventoryReceiptInfoId)
             .OnDelete(DeleteBehavior.Restrict);
-
         modelBuilder.Entity<Vehicle>()
             .HasOne(v => v.OutputInfo)
             .WithMany(oi => oi.Vehicles)
@@ -310,7 +305,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(q => q.PurchaseRequestItems)
             .HasForeignKey(oi => oi.PurchaseRequestId)
             .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired(false);;
+            .IsRequired(false);
+        ;
         modelBuilder.Entity<PurchaseRequestItem>()
             .HasOne(oi => oi.ProductVariant)
             .WithMany()
@@ -337,9 +333,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(s => s.SupplierDebts)
             .HasForeignKey(sd => sd.SupplierId)
             .OnDelete(DeleteBehavior.Restrict);
-
-
-
         modelBuilder.Entity<InventoryReceiptInfo>()
             .HasOne(ii => ii.InventoryReceipt)
             .WithMany(ir => ir.InventoryReceiptInfos)
@@ -425,7 +418,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        // 1. Audit columns update
         var entries = ChangeTracker.Entries<BaseEntity>();
         foreach (var entry in entries)
         {
@@ -446,10 +438,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     break;
             }
         }
-
-        // 3. Save changes
-        var result = await base.SaveChangesAsync(cancellationToken);
-
+        var result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return result;
     }
 

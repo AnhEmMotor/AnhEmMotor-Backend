@@ -22,7 +22,11 @@ namespace Infrastructure.Repositories.NewsCategory
             {
                 query = query.Where(filter);
             }
-            return paginator.ApplyAsync<Domain.Entities.NewsCategory, TResponse>(query, sieveModel, mode, cancellationToken);
+            return paginator.ApplyAsync<Domain.Entities.NewsCategory, TResponse>(
+                query,
+                sieveModel,
+                mode,
+                cancellationToken);
         }
 
         internal IQueryable<Domain.Entities.NewsCategory> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
@@ -37,14 +41,12 @@ namespace Infrastructure.Repositories.NewsCategory
 
         public Task<Domain.Entities.NewsCategory?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return context.NewsCategories
-                .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
+            return context.NewsCategories.FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
         }
 
         public Task<Domain.Entities.NewsCategory?> GetBySlugAsync(string slug, CancellationToken cancellationToken)
         {
-            return context.NewsCategories
-                .FirstOrDefaultAsync(n => string.Compare(n.Slug, slug) == 0, cancellationToken);
+            return context.NewsCategories.FirstOrDefaultAsync(n => string.Compare(n.Slug, slug) == 0, cancellationToken);
         }
     }
 }

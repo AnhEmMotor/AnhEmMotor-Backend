@@ -340,7 +340,8 @@ public class PermissionAndRole
     {
         var newsController = new NewsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetNewsListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PagedResult<NewsSummaryResponse>>.Success(new PagedResult<NewsSummaryResponse>([], 0, 1, 10)));
+            .ReturnsAsync(
+                Result<PagedResult<NewsSummaryResponse>>.Success(new PagedResult<NewsSummaryResponse>([], 0, 1, 10)));
         var result = await newsController.GetListAsync(new SieveModel(), CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
     }

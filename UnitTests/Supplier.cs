@@ -7,6 +7,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
+using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Moq;
@@ -574,17 +575,11 @@ public class Supplier
             _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
-        var existingSupplier = new SupplierEntity
-        {
-            Id = 1,
-            Name = "Supplier",
-            StatusId = "active"
-        };
+        var existingSupplier = new SupplierEntity { Id = 1, Name = "Supplier", StatusId = "active" };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
         _supplierDebtRepoMock.Setup(x => x.GetBySupplierIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Domain.Entities.SupplierDebt>());
-
+            .ReturnsAsync(new List<SupplierDebt>());
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -599,20 +594,11 @@ public class Supplier
             _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
-        var existingSupplier = new SupplierEntity
-        {
-            Id = 1,
-            Name = "Supplier",
-            StatusId = "active"
-        };
+        var existingSupplier = new SupplierEntity { Id = 1, Name = "Supplier", StatusId = "active" };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
         _supplierDebtRepoMock.Setup(x => x.GetBySupplierIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Domain.Entities.SupplierDebt>
-            {
-                new() { InventoryReceipt = new() { StatusId = "completed" } }
-            });
-
+            .ReturnsAsync(new List<SupplierDebt> { new() { InventoryReceipt = new() { StatusId = "completed" } } });
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }

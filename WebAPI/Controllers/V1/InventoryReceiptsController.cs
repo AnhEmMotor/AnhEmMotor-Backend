@@ -70,10 +70,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Lấy danh sách trạng thái phiếu nhập.
     /// </summary>
     [HttpGet("status")]
-    [RequiresAnyPermissions(
-        InventoryReceipts.View,
-        InventoryReceipts.Create,
-        InventoryReceipts.Edit)]
+    [RequiresAnyPermissions(InventoryReceipts.View, InventoryReceipts.Create, InventoryReceipts.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInventoryReceiptStatusesAsync(CancellationToken cancellationToken)
     {
@@ -168,9 +165,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Cập nhật phiếu nhập.
     /// </summary>
     [HttpPut("{id:int}")]
-    [RequiresAnyPermissions(
-        InventoryReceipts.Edit,
-        InventoryReceipts.ApproveReject)]
+    [RequiresAnyPermissions(InventoryReceipts.Edit, InventoryReceipts.ApproveReject)]
     [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -238,9 +233,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Xóa phiếu nhập.
     /// </summary>
     [HttpDelete("{id:int}")]
-    [RequiresAnyPermissions(
-        InventoryReceipts.Delete,
-        InventoryReceipts.ApproveReject)]
+    [RequiresAnyPermissions(InventoryReceipts.Delete, InventoryReceipts.ApproveReject)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteInventoryReceiptAsync(int id, CancellationToken cancellationToken)
@@ -254,9 +247,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// Xóa nhiều phiếu nhập cùng lúc.
     /// </summary>
     [HttpDelete]
-    [RequiresAnyPermissions(
-        InventoryReceipts.Delete,
-        InventoryReceipts.ApproveReject)]
+    [RequiresAnyPermissions(InventoryReceipts.Delete, InventoryReceipts.ApproveReject)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteManyInventoryReceiptsAsync(

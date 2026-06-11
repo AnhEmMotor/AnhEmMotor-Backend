@@ -12,7 +12,9 @@ namespace Infrastructure.Repositories.Banner
             return context.Banners.FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         }
 
-        public Task<List<Domain.Entities.Banner>> GetBannersByPlacementAsync(CancellationToken cancellationToken, string? placement = null)
+        public Task<List<Domain.Entities.Banner>> GetBannersByPlacementAsync(
+            CancellationToken cancellationToken,
+            string? placement = null)
         {
             var query = context.Banners.AsQueryable();
             if (!string.IsNullOrEmpty(placement))

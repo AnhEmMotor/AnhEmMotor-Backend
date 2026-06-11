@@ -10,8 +10,11 @@ public class InventoryReceiptListResponse
     public string? StatusId { get; set; }
 
     public string? CreatedByName { get; set; }
+
     public string? SentByName { get; set; }
+
     public string? ApprovedByName { get; set; }
+
     public string? RejectedByName { get; set; }
 
     public int? SupplierId { get; set; }

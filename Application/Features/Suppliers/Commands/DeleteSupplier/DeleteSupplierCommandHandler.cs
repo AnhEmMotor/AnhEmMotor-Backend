@@ -5,8 +5,6 @@ using Domain.Constants;
 using MediatR;
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Suppliers.Commands.DeleteSupplier
 {
@@ -23,8 +21,10 @@ namespace Application.Features.Suppliers.Commands.DeleteSupplier
             {
                 return Result.Failure(Error.NotFound($"Supplier with Id {request.Id} not found."));
             }
-            var supplierDebts = await supplierDebtRepository.GetBySupplierIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-            if (supplierDebts.Any(sd => sd.InventoryReceipt != null && InventoryReceiptStatus.IsCanEdit(sd.InventoryReceipt.StatusId)))
+            var supplierDebts = await supplierDebtRepository.GetBySupplierIdAsync(request.Id, cancellationToken)
+                .ConfigureAwait(false);
+            if (supplierDebts.Any(
+                sd => sd.InventoryReceipt != null && InventoryReceiptStatus.IsCanEdit(sd.InventoryReceipt.StatusId)))
             {
                 return Result.Failure(Error.Conflict("Cannot delete supplier with working InventoryReceipt receipts."));
             }

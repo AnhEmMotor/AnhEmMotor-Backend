@@ -1,15 +1,10 @@
 using Domain.Entities;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Interfaces.Repositories.ProductQuotations
 {
     public interface IProductQuotationReadRepository
     {
-        public Task<List<ProductQuotation>> GetByVariantAsync(
-            int variantId,
-            CancellationToken cancellationToken);
+        public Task<List<ProductQuotation>> GetByVariantAsync(int variantId, CancellationToken cancellationToken);
 
         public Task<ProductQuotation?> GetBySupplierAndVariantAsync(
             int variantId,

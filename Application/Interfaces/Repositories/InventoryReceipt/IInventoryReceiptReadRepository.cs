@@ -1,5 +1,6 @@
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Domain.Constants;
+using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
 using System.Linq.Expressions;
@@ -46,11 +47,9 @@ public interface IInventoryReceiptReadRepository
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    public Task<Domain.Entities.InventoryReceiptInfo?> GetInfoByIdAsync(
-        int id,
-        CancellationToken cancellationToken);
+    public Task<InventoryReceiptInfo?> GetInfoByIdAsync(int id, CancellationToken cancellationToken);
 
-    public Task<List<Domain.Entities.InventoryReceiptInfo>> GetInfosByVariantAsync(
+    public Task<List<InventoryReceiptInfo>> GetInfosByVariantAsync(
         int variantId,
         int? colorId,
         CancellationToken cancellationToken);

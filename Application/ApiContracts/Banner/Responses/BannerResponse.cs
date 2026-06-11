@@ -18,5 +18,4 @@ public class BannerResponse
     public string? CtaLabel { get; init; }
 
     public string? Placement { get; init; }
-
 }

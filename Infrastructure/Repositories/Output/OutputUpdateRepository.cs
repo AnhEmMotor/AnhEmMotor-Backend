@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Output;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 using OutputEntity = Domain.Entities.Output;
 
 namespace Infrastructure.Repositories.Output
@@ -61,8 +58,7 @@ namespace Infrastructure.Repositories.Output
                         Error.BadRequest(
                             $"Sản phẩm '{productName}' không đủ tồn kho. Hiện có: {totalAvailable}, cần: {outputInfo.Count.Value}",
                             "StatusId"));
-                }
-                else if (commitDeduction)
+                } else if (commitDeduction)
                 {
                     transactions.Add((outputInfo, batches, outputInfo.Count.Value));
                 }
@@ -88,8 +84,7 @@ namespace Infrastructure.Repositories.Output
                             totalCost += remainingToDeduct * batchPrice;
                             batch.RemainingCount = batchRemaining - remainingToDeduct;
                             remainingToDeduct = 0;
-                        }
-                        else
+                        } else
                         {
                             totalCost += batchRemaining * batchPrice;
                             remainingToDeduct -= batchRemaining;

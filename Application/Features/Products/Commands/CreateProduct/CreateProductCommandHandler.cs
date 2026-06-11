@@ -9,8 +9,8 @@ using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
-using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.ProductQuotations;
+using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Technology.Technology;
 using Domain.Constants;
 using Domain.Entities;
@@ -34,7 +34,10 @@ public sealed class CreateProductCommandHandler(
     IOptionValueInsertRepository optionValueInsertRepository,
     ITechnologyReadRepository technologyReadRepository,
     IUnitOfWork unitOfWork,
-    IProductQuotationReadRepository? ProductQuotationReadRepository = null, IProductQuotationInsertRepository? ProductQuotationInsertRepository = null, IProductQuotationUpdateRepository? ProductQuotationUpdateRepository = null, IProductQuotationDeleteRepository? ProductQuotationDeleteRepository = null) : IRequestHandler<CreateProductCommand, Result<ProductDetailForManagerResponse?>>
+    IProductQuotationReadRepository? ProductQuotationReadRepository = null,
+    IProductQuotationInsertRepository? ProductQuotationInsertRepository = null,
+    IProductQuotationUpdateRepository? ProductQuotationUpdateRepository = null,
+    IProductQuotationDeleteRepository? ProductQuotationDeleteRepository = null) : IRequestHandler<CreateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
     public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         CreateProductCommand request,
@@ -299,8 +302,10 @@ public sealed class CreateProductCommandHandler(
             ProductVariants = [],
             ProductTechnologies = []
         };
-        var variantSupplierPriceTargets = new List<(ProductVariant Variant, List<VariantSupplierPriceRequest> SupplierPrices)>();
-        var colorSupplierPriceTargets = new List<(ProductVariant Variant, ProductVariantColor Color, List<VariantSupplierPriceRequest> SupplierPrices)>();
+        var variantSupplierPriceTargets = new List<(ProductVariant Variant, List<VariantSupplierPriceRequest> SupplierPrices)>(
+            );
+        var colorSupplierPriceTargets = new List<(ProductVariant Variant, ProductVariantColor Color, List<VariantSupplierPriceRequest> SupplierPrices)>(
+            );
         if (request.Variants?.Count > 0)
         {
             foreach (var variantReq in request.Variants)
@@ -312,13 +317,12 @@ public sealed class CreateProductCommandHandler(
                 {
                     return Result<ProductDetailForManagerResponse?>.Failure(variantDuplicateError);
                 }
-
                 foreach (var color in variantReq.Colors ?? [])
                 {
+                    if (color is null)
+                        continue;
                     var colorLabel = $"{variantReq.VariantName ?? variantReq.UrlSlug ?? "biến thể"} / {color.ColorName ?? "màu"}";
-                    var colorDuplicateError = ValidateSupplierPriceUniqueness(
-                        color.SupplierPrices ?? [],
-                        colorLabel);
+                    var colorDuplicateError = ValidateSupplierPriceUniqueness(color.SupplierPrices ?? [], colorLabel);
                     if (colorDuplicateError is not null)
                     {
                         return Result<ProductDetailForManagerResponse?>.Failure(colorDuplicateError);
@@ -358,8 +362,7 @@ public sealed class CreateProductCommandHandler(
                         ColorCode = color.ColorCode?.Trim(),
                         CoverImageUrl = color.CoverImageUrl?.Trim()
                     };
-                    variant.ProductVariantColors
-                        .Add(colorEntity);
+                    variant.ProductVariantColors.Add(colorEntity);
                     colorSupplierPriceTargets.Add((variant, colorEntity, color.SupplierPrices ?? []));
                 }
                 if (variantReq.PhotoCollection?.Count > 0)
@@ -482,29 +485,26 @@ public sealed class CreateProductCommandHandler(
         List<(ProductVariant Variant, ProductVariantColor Color, List<VariantSupplierPriceRequest> SupplierPrices)> colorSupplierPriceTargets,
         CancellationToken cancellationToken)
     {
-        if (ProductQuotationReadRepository is null || ProductQuotationInsertRepository is null || ProductQuotationUpdateRepository is null || ProductQuotationDeleteRepository is null)
+        if (ProductQuotationReadRepository is null ||
+            ProductQuotationInsertRepository is null ||
+            ProductQuotationUpdateRepository is null ||
+            ProductQuotationDeleteRepository is null)
         {
             return;
         }
-
         foreach (var (variant, supplierPrices) in variantSupplierPriceTargets)
         {
             if (variant.Id <= 0)
             {
                 continue;
             }
-
             var existingRows = await ProductQuotationReadRepository.GetByVariantAsync(variant.Id, cancellationToken)
                 .ConfigureAwait(false);
-            existingRows = existingRows.Where(x => x.ProductVariantColorId == null).ToList();
-
+            existingRows = [.. existingRows.Where(x => x.ProductVariantColorId == null)];
             var desiredKeys = supplierPrices
                 .Select(x => (x.SupplierId, x.ProductVariantColorId))
                 .ToHashSet();
-
-            var existingRowsByKey = existingRows.ToDictionary(
-                x => (x.SupplierId ?? 0, x.ProductVariantColorId));
-
+            var existingRowsByKey = existingRows.ToDictionary(x => (x.SupplierId ?? 0, x.ProductVariantColorId));
             foreach (var supplierPrice in supplierPrices)
             {
                 var key = (supplierPrice.SupplierId, supplierPrice.ProductVariantColorId);
@@ -515,8 +515,7 @@ public sealed class CreateProductCommandHandler(
                         : null;
                     existingRow.Note = supplierPrice.Note?.Trim();
                     ProductQuotationUpdateRepository.Update(existingRow);
-                }
-                else
+                } else
                 {
                     await ProductQuotationInsertRepository.AddAsync(
                         new ProductQuotation
@@ -524,15 +523,16 @@ public sealed class CreateProductCommandHandler(
                             ProductVariantId = variant.Id,
                             ProductVariantColorId = supplierPrice.ProductVariantColorId,
                             SupplierId = supplierPrice.SupplierId,
-                            QuotePrice = supplierPrice.QuotePrice.HasValue
-                                ? Convert.ToInt32(supplierPrice.QuotePrice.Value)
-                                : null,
+                            QuotePrice =
+                                supplierPrice.QuotePrice.HasValue
+                                        ? Convert.ToInt32(supplierPrice.QuotePrice.Value)
+                                        : null,
                             Note = supplierPrice.Note?.Trim()
                         },
-                        cancellationToken).ConfigureAwait(false);
+                        cancellationToken)
+                        .ConfigureAwait(false);
                 }
             }
-
             foreach (var existingRow in existingRows)
             {
                 var key = (existingRow.SupplierId ?? 0, existingRow.ProductVariantColorId);
@@ -542,21 +542,18 @@ public sealed class CreateProductCommandHandler(
                 }
             }
         }
-
         foreach (var (variant, color, supplierPrices) in colorSupplierPriceTargets)
         {
-            if (variant.Id <= 0 || color.Id <= 0)
+            if (color == null || variant.Id <= 0 || color.Id <= 0)
             {
                 continue;
             }
-
             var existingRows = await ProductQuotationReadRepository.GetByVariantAsync(variant.Id, cancellationToken)
                 .ConfigureAwait(false);
-            existingRows = existingRows.Where(x => x.ProductVariantColorId == color.Id).ToList();
-
-            var desiredKeys = supplierPrices.Select(x => (x.SupplierId, x.ProductVariantColorId ?? color.Id)).ToHashSet();
+            existingRows = [.. existingRows.Where(x => x.ProductVariantColorId == color.Id)];
+            var desiredKeys = supplierPrices.Select(x => (x.SupplierId, x.ProductVariantColorId ?? color.Id))
+                .ToHashSet();
             var existingRowsByKey = existingRows.ToDictionary(x => (x.SupplierId ?? 0, x.ProductVariantColorId));
-
             foreach (var supplierPrice in supplierPrices)
             {
                 var key = (supplierPrice.SupplierId, supplierPrice.ProductVariantColorId ?? color.Id);
@@ -567,8 +564,7 @@ public sealed class CreateProductCommandHandler(
                         : null;
                     existingRow.Note = supplierPrice.Note?.Trim();
                     ProductQuotationUpdateRepository.Update(existingRow);
-                }
-                else
+                } else
                 {
                     await ProductQuotationInsertRepository.AddAsync(
                         new ProductQuotation
@@ -576,15 +572,16 @@ public sealed class CreateProductCommandHandler(
                             ProductVariantId = variant.Id,
                             ProductVariantColorId = color.Id,
                             SupplierId = supplierPrice.SupplierId,
-                            QuotePrice = supplierPrice.QuotePrice.HasValue
-                                ? Convert.ToInt32(supplierPrice.QuotePrice.Value)
-                                : null,
+                            QuotePrice =
+                                supplierPrice.QuotePrice.HasValue
+                                        ? Convert.ToInt32(supplierPrice.QuotePrice.Value)
+                                        : null,
                             Note = supplierPrice.Note?.Trim()
                         },
-                        cancellationToken).ConfigureAwait(false);
+                        cancellationToken)
+                        .ConfigureAwait(false);
                 }
             }
-
             foreach (var existingRow in existingRows)
             {
                 var key = (existingRow.SupplierId ?? 0, existingRow.ProductVariantColorId ?? color.Id);
@@ -594,7 +591,6 @@ public sealed class CreateProductCommandHandler(
                 }
             }
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -603,16 +599,17 @@ public sealed class CreateProductCommandHandler(
         ProductEntity product,
         CancellationToken cancellationToken)
     {
-        if (ProductQuotationReadRepository is null || ProductQuotationInsertRepository is null || ProductQuotationUpdateRepository is null || ProductQuotationDeleteRepository is null)
+        if (ProductQuotationReadRepository is null ||
+            ProductQuotationInsertRepository is null ||
+            ProductQuotationUpdateRepository is null ||
+            ProductQuotationDeleteRepository is null)
         {
             return;
         }
-
         if (response?.Variants is null || response.Variants.Count == 0)
         {
             return;
         }
-
         foreach (var responseVariant in response.Variants)
         {
             var variantEntity = product.ProductVariants.FirstOrDefault(v => v.Id == responseVariant.Id);
@@ -620,20 +617,18 @@ public sealed class CreateProductCommandHandler(
             {
                 continue;
             }
-
             var rows = await ProductQuotationReadRepository.GetByVariantAsync(variantEntity.Id, cancellationToken)
                 .ConfigureAwait(false);
-
-            responseVariant.SupplierPrices = rows
+            responseVariant.SupplierPrices = [.. rows
                 .Where(row => row.ProductVariantColorId == null)
-                .Select(row => new VariantSupplierPriceRequest
-            {
-                SupplierId = row.SupplierId ?? 0,
-                ProductVariantColorId = row.ProductVariantColorId,
-                QuotePrice = row.QuotePrice,
-                Note = row.Note
-            }).ToList();
-
+                .Select(
+                    row => new VariantSupplierPriceRequest
+                    {
+                        SupplierId = row.SupplierId ?? 0,
+                        ProductVariantColorId = row.ProductVariantColorId,
+                        QuotePrice = row.QuotePrice,
+                        Note = row.Note
+                    })];
             var responseColors = responseVariant.Colors ?? [];
             foreach (var responseColor in responseColors)
             {
@@ -642,16 +637,16 @@ public sealed class CreateProductCommandHandler(
                 {
                     continue;
                 }
-                responseColor.SupplierPrices = rows
+                responseColor.SupplierPrices = [.. rows
                     .Where(row => row.ProductVariantColorId == colorId)
-                    .Select(row => new VariantSupplierPriceRequest
-                    {
-                        SupplierId = row.SupplierId ?? 0,
-                        ProductVariantColorId = row.ProductVariantColorId,
-                        QuotePrice = row.QuotePrice,
-                        Note = row.Note
-                    })
-                    .ToList();
+                    .Select(
+                        row => new VariantSupplierPriceRequest
+                        {
+                            SupplierId = row.SupplierId ?? 0,
+                            ProductVariantColorId = row.ProductVariantColorId,
+                            QuotePrice = row.QuotePrice,
+                            Note = row.Note
+                        })];
             }
         }
     }
@@ -672,7 +667,6 @@ public sealed class CreateProductCommandHandler(
             {
                 continue;
             }
-
             if (!seen.Add(supplierPrice.SupplierId))
             {
                 return Error.BadRequest(
@@ -680,9 +674,6 @@ public sealed class CreateProductCommandHandler(
                     nameof(VariantSupplierPriceRequest.SupplierId));
             }
         }
-
         return null;
     }
 }
-
-

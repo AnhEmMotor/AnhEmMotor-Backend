@@ -33,11 +33,21 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
                 .Where(x => x.Status == PurchaseRequestStatus.Approve)
-                .Where(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null).Any(item =>
-                    item.Quantity > item.InventoryReceiptInfos
-                        .Where(ii => ii.DeletedAt == null && ii.InventoryReceipt != null && ii.InventoryReceipt.DeletedAt == null && ii.InventoryReceipt.StatusId == Domain.Constants.InventoryReceiptStatus.Approve)
-                        .Sum(ii => ii.Count ?? 0)
-                ));
+                .Where(
+                    x => x.PurchaseRequestItems
+                        .Where(item => item.DeletedAt == null)
+                        .Any(
+                            item => item.Quantity >
+                                    item.InventoryReceiptInfos
+                                        .Where(
+                                            ii => ii.DeletedAt == null &&
+                                                            ii.InventoryReceipt != null &&
+                                                            ii.InventoryReceipt.DeletedAt == null &&
+                                                            string.Compare(
+                                                                ii.InventoryReceipt.StatusId,
+                                                                Domain.Constants.InventoryReceiptStatus.Approve) ==
+                                                            0)
+                                        .Sum(ii => ii.Count ?? 0)));
             return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 

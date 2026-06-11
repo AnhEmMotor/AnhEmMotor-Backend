@@ -25,6 +25,7 @@ namespace Domain.Entities
         public decimal PaidAmount { get; set; }
 
         public InventoryReceipt? InventoryReceipt { get; set; }
+
         public Supplier? Supplier { get; set; }
     }
 }

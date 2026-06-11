@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.News;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.News
@@ -10,7 +11,7 @@ namespace Infrastructure.Repositories.News
             context.News.Update(news);
         }
 
-        public void RemoveLinkedProducts(IEnumerable<Domain.Entities.NewsProduct> linkedProducts)
+        public void RemoveLinkedProducts(IEnumerable<NewsProduct> linkedProducts)
         {
             context.NewsProducts.RemoveRange(linkedProducts);
         }

@@ -41,8 +41,7 @@ namespace Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRe
             {
                 pr.ApprovedBy = currentUserId;
                 pr.RejectedBy = null;
-            }
-            else if (string.Equals(request.Status, PurchaseRequestStatus.Reject, StringComparison.OrdinalIgnoreCase))
+            } else if (string.Equals(request.Status, PurchaseRequestStatus.Reject, StringComparison.OrdinalIgnoreCase))
             {
                 pr.RejectedBy = currentUserId;
                 pr.ApprovedBy = null;

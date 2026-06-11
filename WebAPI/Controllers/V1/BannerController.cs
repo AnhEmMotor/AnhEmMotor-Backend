@@ -1,10 +1,11 @@
 using Application.Features.Banners.Commands.CreateBanner;
 using Application.Features.Banners.Commands.DeleteBanner;
 using Application.Features.Banners.Commands.UpdateBanner;
-using Application.Features.Banners.Queries.GetStoreBanners;
 using Application.Features.Banners.Queries.GetBannerAuditLogs;
 using Application.Features.Banners.Queries.GetBannersList;
+using Application.Features.Banners.Queries.GetStoreBanners;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -30,7 +31,7 @@ public class BannerController(ISender sender) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
     [HttpPost]
-    [HasPermission("Domain.Constants.Permission.Permissions.Banners.Create")]
+    [HasPermission(Banners.Create)]
     [SwaggerOperation(Summary = "Thêm banner mới")]
     public async Task<IActionResult> CreateAsync(
         [FromBody] CreateBannerCommand command,
@@ -75,8 +76,6 @@ public class BannerController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
-
-
     /// <summary>
     /// Lấy danh sách banner đang hoạt động
     /// </summary>
@@ -87,7 +86,8 @@ public class BannerController(ISender sender) : ApiController
     [SwaggerOperation(Summary = "Lấy danh sách banner cho cửa hàng (lọc theo vị trí)")]
     public async Task<IActionResult> GetStoreAsync([FromQuery] string? placement, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetStoreBannersQuery { Placement = placement }, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetStoreBannersQuery { Placement = placement }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -99,7 +99,7 @@ public class BannerController(ISender sender) : ApiController
     [SwaggerOperation(Summary = "Lấy danh sách vị trí banner hợp lệ")]
     public IActionResult GetPlacements()
     {
-        var placements = Domain.Constants.BannerPlacements.PlacementLabels.Select(kvp => new { Value = kvp.Key, Label = kvp.Value });
+        var placements = BannerPlacements.PlacementLabels.Select(kvp => new { Value = kvp.Key, Label = kvp.Value });
         return Ok(new { Data = placements, Success = true });
     }
 

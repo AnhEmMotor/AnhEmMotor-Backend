@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.News;
+using Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -19,9 +20,7 @@ public sealed class UpdateNewsCommandHandler(
         {
             return Result<Unit>.Failure("Bài viết không tồn tại.");
         }
-        
         var oldSlug = news.Slug;
-        
         news.Title = request.Title;
         news.Slug = request.Slug ?? news.Slug;
         news.Content = request.Content;
@@ -37,7 +36,6 @@ public sealed class UpdateNewsCommandHandler(
         {
             news.PublishedDate = DateTimeOffset.UtcNow;
         }
-
         if (request.LinkedProducts != null)
         {
             news.LinkedProducts.Clear();
@@ -51,28 +49,22 @@ public sealed class UpdateNewsCommandHandler(
                     {
                         colorId = parsedColorId;
                     }
-                    news.LinkedProducts.Add(new Domain.Entities.NewsProduct
-                    {
-                        ProductVariantId = variantId,
-                        ProductVariantColorId = colorId
-                    });
+                    news.LinkedProducts
+                        .Add(new NewsProduct { ProductVariantId = variantId, ProductVariantColorId = colorId });
                 }
             }
         }
-
         newsUpdateRepository.Update(news);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
         cache.Remove($"News_{news.Id}");
         if (!string.IsNullOrWhiteSpace(oldSlug))
         {
             cache.Remove($"News_Slug_{oldSlug}_Store");
         }
-        if (!string.IsNullOrWhiteSpace(news.Slug) && news.Slug != oldSlug)
+        if (!string.IsNullOrWhiteSpace(news.Slug) && string.Compare(news.Slug, oldSlug) != 0)
         {
             cache.Remove($"News_Slug_{news.Slug}_Store");
         }
-
         return Result<Unit>.Success(Unit.Value);
     }
 }

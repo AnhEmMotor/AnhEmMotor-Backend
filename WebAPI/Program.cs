@@ -1,6 +1,7 @@
 using Application;
 using Asp.Versioning.ApiExplorer;
 using Infrastructure;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -15,17 +16,15 @@ var environment = builder.Environment;
 var customUploadPath = configuration["LocalFileStorage:UploadPath"];
 if (!string.IsNullOrWhiteSpace(customUploadPath))
 {
-    var absolutePath = Path.IsPathRooted(customUploadPath) 
-        ? customUploadPath 
+    var absolutePath = Path.IsPathRooted(customUploadPath)
+        ? customUploadPath
         : Path.Combine(environment.ContentRootPath, customUploadPath);
-        
     if (!Directory.Exists(absolutePath))
     {
         Directory.CreateDirectory(absolutePath);
     }
-        
     environment.WebRootPath = absolutePath;
-    environment.WebRootFileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(absolutePath);
+    environment.WebRootFileProvider = new PhysicalFileProvider(absolutePath);
 }
 builder.Services.AddApplicationServices();
 if (!environment.IsEnvironment("Test"))

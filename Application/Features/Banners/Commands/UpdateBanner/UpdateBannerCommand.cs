@@ -22,5 +22,4 @@ public sealed record UpdateBannerCommand : IRequest<Result<Unit>>
     public string? CtaLabel { get; init; }
 
     public string? Placement { get; init; }
-
 }

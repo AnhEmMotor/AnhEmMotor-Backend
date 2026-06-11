@@ -68,6 +68,5 @@ public class ProductVariantDetailForManagerResponse
 
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
-
 }
 

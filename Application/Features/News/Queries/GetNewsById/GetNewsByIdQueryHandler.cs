@@ -16,34 +16,45 @@ public sealed class GetNewsByIdQueryHandler(INewsReadRepository repository, IMem
         {
             return Result<NewsResponse>.Success(cachedResponse!);
         }
-
         var news = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (news == null)
         {
             return Result<NewsResponse>.Failure(new Error("News.NotFound", "The requested news was not found."));
         }
-
         var response = news.Adapt<NewsResponse>();
-        if (news.LinkedProducts != null && news.LinkedProducts.Any())
+        if (news.LinkedProducts != null && news.LinkedProducts.Count != 0)
         {
             response = response with
             {
-                LinkedProducts = news.LinkedProducts.Select(lp => new NewsProductResponse
-                {
-                    Id = lp.Id.ToString(),
-                    Name = (lp.ProductVariant?.Product?.Name != null ? lp.ProductVariant.Product.Name + " - " : "") + 
-                           lp.ProductVariant?.VariantName + 
-                           (lp.ProductVariantColor != null ? $" ({lp.ProductVariantColor.ColorName})" : ""),
-                    Price = "Liên hệ",
-                    Img = lp.ProductVariantColor?.CoverImageUrl ?? lp.ProductVariant?.CoverImageUrl ?? "",
-                    ProductVariantId = lp.ProductVariantId,
-                    ProductVariantColorId = lp.ProductVariantColorId,
-                    VariantName = (lp.ProductVariant?.Product?.Name != null ? lp.ProductVariant.Product.Name + " - " : "") + lp.ProductVariant?.VariantName,
-                    ColorName = lp.ProductVariantColor?.ColorName
-                }).ToList()
-            };
+                LinkedProducts =
+                    [.. news.LinkedProducts
+                        .Select(
+                            lp =>
+                            {
+                                var productName = lp.ProductVariant?.Product?.Name;
+                                var variantName = lp.ProductVariant?.VariantName;
+                                var colorName = lp.ProductVariantColor?.ColorName;
+                                var productPrefix = productName != null ? $"{productName} - " : string.Empty;
+                                var variantFullName = $"{productPrefix}{variantName}";
+                                var displayName = lp.ProductVariantColor != null
+                                    ? $"{variantFullName} ({colorName})"
+                                    : variantFullName;
+                                return new NewsProductResponse
+                        {
+                            Id = lp.Id.ToString(),
+                            Name = displayName,
+                            Price = "Liên hệ",
+                            Img =
+                                lp.ProductVariantColor?.CoverImageUrl ??
+                                            lp.ProductVariant?.CoverImageUrl ??
+                                            string.Empty,
+                            ProductVariantId = lp.ProductVariantId,
+                            ProductVariantColorId = lp.ProductVariantColorId,
+                            VariantName = variantFullName,
+                            ColorName = colorName
+                        };
+                            })]};
         }
-
         cache.Set(cacheKey, response, TimeSpan.FromMinutes(30));
         return Result<NewsResponse>.Success(response);
     }

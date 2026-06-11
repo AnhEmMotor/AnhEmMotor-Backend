@@ -351,40 +351,39 @@ public class SalesOrder
         var viewUnconfirmedPermission = typeof(Outputs).GetField("ViewUnconfirmed")?.GetRawConstantValue() as string;
         viewConfirmedPermission.Should().Be("Permissions.Outputs.ViewConfirmed");
         viewUnconfirmedPermission.Should().Be("Permissions.Outputs.ViewUnconfirmed");
-
-        var confirmedMethod = typeof(SalesOrdersController).GetMethod(nameof(SalesOrdersController.GetConfirmedOutputsAsync));
-        var unconfirmedMethod = typeof(SalesOrdersController).GetMethod(nameof(SalesOrdersController.GetUnconfirmedOutputsAsync));
+        var confirmedMethod = typeof(SalesOrdersController).GetMethod(
+            nameof(SalesOrdersController.GetConfirmedOutputsAsync));
+        var unconfirmedMethod = typeof(SalesOrdersController).GetMethod(
+            nameof(SalesOrdersController.GetUnconfirmedOutputsAsync));
         confirmedMethod.Should().NotBeNull();
         unconfirmedMethod.Should().NotBeNull();
-
         confirmedMethod!.GetCustomAttribute<HttpGetAttribute>()?.Template.Should().Be("confirmed");
         unconfirmedMethod!.GetCustomAttribute<HttpGetAttribute>()?.Template.Should().Be("unconfirmed");
         confirmedMethod.GetCustomAttribute<HasPermissionAttribute>()?.Policy
-            .Should().Be($"HasPermission{viewConfirmedPermission}");
+            .Should()
+        .Be($"HasPermission{viewConfirmedPermission}");
         unconfirmedMethod.GetCustomAttribute<HasPermissionAttribute>()?.Policy
-            .Should().Be($"HasPermission{viewUnconfirmedPermission}");
+            .Should()
+        .Be($"HasPermission{viewUnconfirmedPermission}");
     }
 
     [Fact(DisplayName = "SO_118 - GetConfirmedOutputs returns confirmed sales orders")]
     public async Task GetConfirmedOutputs_WithSieveModel_ReturnsConfirmedOutputs()
     {
-        var sieveModel = new SieveModel
-        {
-            Page = 1,
-            PageSize = 10
-        };
+        var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
         var expectedResponse = new PagedResult<OutputItemResponse>([], 0, 1, 10);
-        _mediatorMock.Setup(m => m.Send(
-            It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
-            It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.Is<GetOutputsListQuery>(
+                    q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Success(expectedResponse));
-
         var result = await _controller.GetConfirmedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(
-                It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
+                It.Is<GetOutputsListQuery>(
+                    q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -392,23 +391,21 @@ public class SalesOrder
     [Fact(DisplayName = "SO_119 - GetUnconfirmedOutputs returns unconfirmed sales orders")]
     public async Task GetUnconfirmedOutputs_WithSieveModel_ReturnsUnconfirmedOutputs()
     {
-        var sieveModel = new SieveModel
-        {
-            Page = 1,
-            PageSize = 10
-        };
+        var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
         var expectedResponse = new PagedResult<OutputItemResponse>([], 0, 1, 10);
-        _mediatorMock.Setup(m => m.Send(
-            It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
-            It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.Is<GetOutputsListQuery>(
+                    q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Success(expectedResponse));
-
-        var result = await _controller.GetUnconfirmedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
+        var result = await _controller.GetUnconfirmedOutputsAsync(sieveModel, CancellationToken.None)
+            .ConfigureAwait(true);
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(
-                It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
+                It.Is<GetOutputsListQuery>(
+                    q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -418,33 +415,30 @@ public class SalesOrder
     {
         var rootGetMethods = typeof(SalesOrdersController)
             .GetMethods(BindingFlags.Instance | BindingFlags.Public)
-            .Where(method => method.GetCustomAttributes<HttpGetAttribute>()
-                .Any(attribute => string.IsNullOrEmpty(attribute.Template)))
+            .Where(
+                method => method.GetCustomAttributes<HttpGetAttribute>()
+                    .Any(attribute => string.IsNullOrEmpty(attribute.Template)))
             .Select(method => method.Name);
-
         rootGetMethods.Should().BeEmpty();
     }
 
     [Fact(DisplayName = "SO_121 - GetConfirmedOutputs returns failure when mediator fails")]
     public async Task GetConfirmedOutputs_WhenMediatorFails_ReturnsFailureResult()
     {
-        var sieveModel = new SieveModel
-        {
-            Page = 1,
-            PageSize = 10
-        };
+        var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
         var expectedError = Error.Failure("Test failure");
-        _mediatorMock.Setup(m => m.Send(
-            It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
-            It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.Is<GetOutputsListQuery>(
+                    q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Failure(expectedError));
-
         var result = await _controller.GetConfirmedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(
-                It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
+                It.Is<GetOutputsListQuery>(
+                    q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.ConfirmedOrderStatuses),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -452,23 +446,21 @@ public class SalesOrder
     [Fact(DisplayName = "SO_122 - GetUnconfirmedOutputs returns failure when mediator fails")]
     public async Task GetUnconfirmedOutputs_WhenMediatorFails_ReturnsFailureResult()
     {
-        var sieveModel = new SieveModel
-        {
-            Page = 1,
-            PageSize = 10
-        };
+        var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
         var expectedError = Error.Failure("Test failure");
-        _mediatorMock.Setup(m => m.Send(
-            It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
-            It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.Is<GetOutputsListQuery>(
+                    q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Failure(expectedError));
-
-        var result = await _controller.GetUnconfirmedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
+        var result = await _controller.GetUnconfirmedOutputsAsync(sieveModel, CancellationToken.None)
+            .ConfigureAwait(true);
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(
-                It.Is<GetOutputsListQuery>(q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
+                It.Is<GetOutputsListQuery>(
+                    q => q.SieveModel == sieveModel && q.StatusIds == OrderStatus.UnconfirmedOrderStatuses),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

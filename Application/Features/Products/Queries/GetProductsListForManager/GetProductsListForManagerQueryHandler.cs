@@ -2,21 +2,17 @@ using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Features.Products.Mappings;
 using Application.Interfaces.Repositories.Product;
-using Application.Interfaces.Repositories.Setting;
-using Domain.Constants;
 using Domain.Primitives;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductsListForManager;
 
-public sealed class GetProductsListForManagerQueryHandler(
-    IProductReadRepository readRepository) : IRequestHandler<GetProductsListForManagerQuery, Result<PagedResult<ProductDetailForManagerResponse>>>
+public sealed class GetProductsListForManagerQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductsListForManagerQuery, Result<PagedResult<ProductDetailForManagerResponse>>>
 {
     public async Task<Result<PagedResult<ProductDetailForManagerResponse>>> Handle(
         GetProductsListForManagerQuery request,
         CancellationToken cancellationToken)
     {
-        long alertLevel = 0;
         var normalizedStatusIds = request.StatusIds
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Select(s => s.Trim())
@@ -37,7 +33,7 @@ public sealed class GetProductsListForManagerQueryHandler(
             cancellationToken)
             .ConfigureAwait(false);
         var allItems = entities
-            .Select(e => ProductMappingConfig.MapProductToDetailForManagerResponseWithAlertLevel(e, alertLevel))
+            .Select(ProductMappingConfig.MapProductToDetailForManagerResponseWithAlertLevel)
             .ToList();
         var sortedItems = allItems;
         return new PagedResult<ProductDetailForManagerResponse>(sortedItems, totalCount, request.Page, request.PageSize);

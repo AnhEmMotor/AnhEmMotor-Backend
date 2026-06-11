@@ -1,19 +1,13 @@
 using Application.ApiContracts.DebtPayment.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Supplier;
-using Application.Interfaces.Repositories.InventoryReceipt;
 using MediatR;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.DebtPayments.Queries.GetReceiptsWithDebtBySupplierId
 {
-    public sealed class GetReceiptsWithDebtBySupplierIdQueryHandler(
-        ISupplierDebtRepository supplierDebtRepository) 
-        : IRequestHandler<GetReceiptsWithDebtBySupplierIdQuery, Result<List<InventoryReceiptDebtLineResponse>>>
+    public sealed class GetReceiptsWithDebtBySupplierIdQueryHandler(ISupplierDebtRepository supplierDebtRepository) : IRequestHandler<GetReceiptsWithDebtBySupplierIdQuery, Result<List<InventoryReceiptDebtLineResponse>>>
     {
         public async Task<Result<List<InventoryReceiptDebtLineResponse>>> Handle(
             GetReceiptsWithDebtBySupplierIdQuery request,
@@ -21,14 +15,11 @@ namespace Application.Features.DebtPayments.Queries.GetReceiptsWithDebtBySupplie
         {
             var debts = await supplierDebtRepository.GetBySupplierIdAsync(request.SupplierId, cancellationToken)
                 .ConfigureAwait(false);
-
             var responseList = new List<InventoryReceiptDebtLineResponse>();
-
             foreach (var debt in debts)
             {
                 var receipt = debt.InventoryReceipt;
                 var firstInfo = receipt?.InventoryReceiptInfos?.FirstOrDefault();
-
                 var response = new InventoryReceiptDebtLineResponse
                 {
                     Id = debt.Id,
@@ -41,10 +32,8 @@ namespace Application.Features.DebtPayments.Queries.GetReceiptsWithDebtBySupplie
                     PaidAmount = debt.PaidAmount,
                     DueDate = receipt?.InventoryReceiptDate
                 };
-
                 responseList.Add(response);
             }
-
             return responseList;
         }
     }

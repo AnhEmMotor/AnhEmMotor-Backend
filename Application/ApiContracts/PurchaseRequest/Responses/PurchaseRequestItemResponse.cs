@@ -14,8 +14,6 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
 
         public int Quantity { get; set; }
 
-
-
         public int? ImportedQuantity { get; set; }
 
         public int? PendingQuantity { get; set; }

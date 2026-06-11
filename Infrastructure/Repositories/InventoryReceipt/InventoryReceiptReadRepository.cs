@@ -1,17 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Constants;
+using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
+using System;
+using System.Linq;
+using System.Linq.Expressions;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
 
 namespace Infrastructure.Repositories.InventoryReceipt
@@ -22,20 +20,18 @@ namespace Infrastructure.Repositories.InventoryReceipt
         {
             var now = DateTimeOffset.UtcNow;
             var startOfMonth = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
-
             var totalVehicles = await context.InventoryReceiptInfos
-                .Where(ii => ii.InventoryReceipt != null
-                          && ii.InventoryReceipt.DeletedAt == null
-                          && ii.InventoryReceipt.StatusId == "approve"
-                          && ii.InventoryReceipt.InventoryReceiptDate >= startOfMonth)
+                .Where(
+                    ii => ii.InventoryReceipt != null &&
+                        ii.InventoryReceipt.DeletedAt == null &&
+                        ii.InventoryReceipt.StatusId == "approve" &&
+                        ii.InventoryReceipt.InventoryReceiptDate >= startOfMonth)
                 .SumAsync(ii => ii.Count ?? 0, cancellationToken)
                 .ConfigureAwait(false);
-
             var processingReceipts = await context.InventoryReceipts
                 .Where(r => r.DeletedAt == null && r.StatusId == "sent")
                 .CountAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             return new InventoryReceiptStatsResponse
             {
                 TotalVehicles = totalVehicles,
@@ -51,26 +47,25 @@ namespace Infrastructure.Repositories.InventoryReceipt
         {
             IQueryable<InventoryReceiptEntity> query = GetQueryable(mode)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                    .ThenInclude(ii => ii.Vehicles.Where(v => v.DeletedAt == null))
+                .ThenInclude(ii => ii.Vehicles.Where(v => v.DeletedAt == null))
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                    .ThenInclude(ii => ii.PurchaseRequestItem)
-                        .ThenInclude(pri => pri!.ProductVariant)
-                            .ThenInclude(pv => pv!.Product)
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                    .ThenInclude(ii => ii.PurchaseRequestItem)
-                        .ThenInclude(pri => pri!.ProductVariantColor)
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.ProductVariantColor)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                    .ThenInclude(ii => ii.PurchaseRequestItem)
-                        .ThenInclude(pri => pri!.InventoryReceiptInfos.Where(rii => rii.DeletedAt == null))
-                            .ThenInclude(rii => rii.InventoryReceipt)
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.InventoryReceiptInfos.Where(rii => rii.DeletedAt == null))
+                .ThenInclude(rii => rii.InventoryReceipt)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                    .ThenInclude(ii => ii.Supplier)
+                .ThenInclude(ii => ii.Supplier)
                 .Include(x => x.PurchaseRequest)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.SentByUser)
                 .Include(x => x.ApprovedByUser)
                 .Include(x => x.RejectedByUser);
-
             if (filter != null)
             {
                 query = query.Where(filter);
@@ -84,8 +79,7 @@ namespace Infrastructure.Repositories.InventoryReceipt
             if (mode == DataFetchMode.ActiveOnly)
             {
                 query = query.Where(x => x.DeletedAt == null);
-            }
-            else if (mode == DataFetchMode.DeletedOnly)
+            } else if (mode == DataFetchMode.DeletedOnly)
             {
                 query = query.Where(x => x.DeletedAt != null);
             }
@@ -132,20 +126,20 @@ namespace Infrastructure.Repositories.InventoryReceipt
         {
             return GetQueryable(mode)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                    .ThenInclude(ii => ii.Vehicles.Where(v => v.DeletedAt == null))
+                .ThenInclude(ii => ii.Vehicles.Where(v => v.DeletedAt == null))
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                    .ThenInclude(ii => ii.PurchaseRequestItem)
-                        .ThenInclude(pri => pri!.ProductVariant)
-                            .ThenInclude(pv => pv!.Product)
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                    .ThenInclude(ii => ii.PurchaseRequestItem)
-                        .ThenInclude(pri => pri!.ProductVariantColor)
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.ProductVariantColor)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                    .ThenInclude(ii => ii.PurchaseRequestItem)
-                        .ThenInclude(pri => pri!.InventoryReceiptInfos.Where(rii => rii.DeletedAt == null))
-                            .ThenInclude(rii => rii.InventoryReceipt)
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.InventoryReceiptInfos.Where(rii => rii.DeletedAt == null))
+                .ThenInclude(rii => rii.InventoryReceipt)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                    .ThenInclude(ii => ii.Supplier)
+                .ThenInclude(ii => ii.Supplier)
                 .Include(x => x.PurchaseRequest)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.SentByUser)
@@ -170,14 +164,12 @@ namespace Infrastructure.Repositories.InventoryReceipt
             throw new NotImplementedException();
         }
 
-        public Task<Domain.Entities.InventoryReceiptInfo?> GetInfoByIdAsync(
-            int id,
-            CancellationToken cancellationToken)
+        public Task<InventoryReceiptInfo?> GetInfoByIdAsync(int id, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<List<Domain.Entities.InventoryReceiptInfo>> GetInfosByVariantAsync(
+        public Task<List<InventoryReceiptInfo>> GetInfosByVariantAsync(
             int variantId,
             int? colorId,
             CancellationToken cancellationToken)
@@ -188,13 +180,11 @@ namespace Infrastructure.Repositories.InventoryReceipt
                 .Include(x => x.Supplier)
                 .Include(x => x.PurchaseRequestItem)
                 .Where(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.ProductVariantId == variantId);
-
             if (colorId.HasValue)
             {
                 query = query.Where(x => x.PurchaseRequestItem!.ProductVariantColorId == colorId.Value);
             }
-
-            return await query.ToListAsync(cancellationToken).ConfigureAwait(false);
+            return query.ToListAsync(cancellationToken);
         }
     }
 }

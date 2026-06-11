@@ -6,10 +6,10 @@ using Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.SendPurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
+using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequestById;
+using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequests;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequests;
-using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequests;
-using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequestById;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
@@ -21,7 +21,6 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using WebAPI.Controllers.Base;
-using Domain.Entities;
 
 namespace WebAPI.Controllers.V1
 {
@@ -129,7 +128,8 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPurchaseRequestStatusesAsync(CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new GetPurchaseRequestStatusListQuery(), cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(new GetPurchaseRequestStatusListQuery(), cancellationToken)
+                .ConfigureAwait(true);
             return HandleResult(result);
         }
 
@@ -151,10 +151,11 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
-        /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu Purchase Order - phiếu đặt hàng).
+        /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu Purchase Order - phiếu đặt
+        /// hàng).
         /// </summary>
         [HttpGet("approved")]
-        [RequiresAnyPermissions(Domain.Constants.Permission.Permissions.PurchaseOrder.Create, Domain.Constants.Permission.Permissions.PurchaseOrder.Edit)]
+        [RequiresAnyPermissions(PurchaseOrder.Create, PurchaseOrder.Edit)]
         [ProducesResponseType(typeof(PagedResult<PurchaseRequestListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetApprovedAsync(
             [FromQuery] SieveModel sieveModel,
@@ -176,11 +177,13 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetApprovedByIdAsync(
-            int id, 
+            int id,
             [FromQuery] int? excludePurchaseOrderId,
             CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new GetApprovedPurchaseRequestByIdQuery(id, excludePurchaseOrderId), cancellationToken)
+            var result = await mediator.Send(
+                new GetApprovedPurchaseRequestByIdQuery(id, excludePurchaseOrderId),
+                cancellationToken)
                 .ConfigureAwait(true);
             return HandleResult(result);
         }

@@ -1,6 +1,5 @@
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
-using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -20,7 +19,6 @@ using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
-using Application.Features.Technologies.Commands.CreateTechnology;
 using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -210,13 +208,17 @@ public class Product
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PRODUCT_097 - API variants-lite/for-InventoryReceipt trả về 403 khi user không có quyền InventoryReceipt")]
+    [Fact(
+        DisplayName = "PRODUCT_097 - API variants-lite/for-InventoryReceipt trả về 403 khi user không có quyền InventoryReceipt")]
     public async Task GetActiveVariantLiteProductsForInventoryReceipt_UserNoPermission_ReturnsForbidden()
     {
-        _senderMock.Setup(m => m.Send(It.IsAny<GetActiveVariantLiteListForInventoryReceiptQuery>(), It.IsAny<CancellationToken>()))
+        _senderMock.Setup(
+            m => m.Send(It.IsAny<GetActiveVariantLiteListForInventoryReceiptQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetActiveVariantLiteProductsForInventoryReceiptAsync(new SieveModel(), CancellationToken.None))
+            () => _controller.GetActiveVariantLiteProductsForInventoryReceiptAsync(
+                new SieveModel(),
+                CancellationToken.None))
             .ConfigureAwait(true);
     }
 

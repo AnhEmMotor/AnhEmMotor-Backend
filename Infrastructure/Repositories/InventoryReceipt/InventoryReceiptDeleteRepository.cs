@@ -1,9 +1,8 @@
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Infrastructure.DBContexts;
+using System.Linq;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
 using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace Infrastructure.Repositories.InventoryReceipt;
 
@@ -12,7 +11,6 @@ public class InventoryReceiptDeleteRepository(ApplicationDBContext context) : II
     public void Delete(InventoryReceiptEntity inventoryReceipt)
     {
         context.SoftDeleteUsingSetColumn(inventoryReceipt);
-        
         var infos = context.InventoryReceiptInfos.Where(ii => ii.InventoryReceiptId == inventoryReceipt.Id).ToList();
         foreach (var info in infos)
         {
@@ -26,7 +24,6 @@ public class InventoryReceiptDeleteRepository(ApplicationDBContext context) : II
     {
         var ids = inventoryReceipts.Select(x => x.Id).ToList();
         context.SoftDeleteUsingSetColumnRange(inventoryReceipts);
-
         var infos = context.InventoryReceiptInfos.Where(ii => ids.Contains(ii.InventoryReceiptId)).ToList();
         foreach (var info in infos)
         {

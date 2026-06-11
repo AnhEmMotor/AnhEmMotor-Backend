@@ -28,7 +28,6 @@ using Application.Interfaces.Repositories.Technology;
 using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
-using Domain.Constants.Order;
 using Domain.Entities;
 using FluentAssertions;
 using Mapster;
@@ -1330,7 +1329,6 @@ public class Product
         result.Should().NotBeNull();
         result.IsValid.Should().BeFalse();
     }
-
 
     [Fact(DisplayName = "PRODUCT_112 - Tạo sản phẩm hợp lệ với 1 biến thể rỗng OptionValues")]
     public void CreateProduct_SingleEmptyVariant_ValidationSuccess()

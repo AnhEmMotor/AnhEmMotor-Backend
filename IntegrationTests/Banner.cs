@@ -1,4 +1,4 @@
-using Application.ApiContracts.Banner.Responses;
+using Application.Features.Banners.Commands.CreateBanner;
 using Application.Features.Banners.Commands.UpdateBanner;
 using Domain.Constants.Permission.Permissions;
 using FluentAssertions;
@@ -38,13 +38,21 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
     [Fact(DisplayName = "BANN_012 - Kiểm tra tính toàn vẹn của dữ liệu ảnh (DesktopImageUrl)")]
     public async Task CreateBanner_ValidDesktopImageUrl_SavesCorrectly()
     {
-        var payload = new { title = "Integrity Test", placement = "home_top", description = "Test", cta_label = "Click", cta_link = "/link", desktop_image_url = "http://anh-em-motor.com/banner.jpg" };
+        var payload = new CreateBannerCommand
+        {
+            Title = "Integrity Test",
+            Placement = "home_top",
+            Description = "Test",
+            CtaLabel = "Click",
+            CtaLink = "/link",
+            DesktopImageUrl = "http://anh-em-motor.com/banner.jpg"
+        };
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Domain.Constants.Permission.Permissions.Banners.Create"],
+            [Banners.Create],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -90,12 +98,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var payload = new UpdateBannerCommand
-        {
-            Id = banner.Id,
-            Title = "Audit Test",
-            DesktopImageUrl = "NewUrl"
-        };
+        var payload = new UpdateBannerCommand { Id = banner.Id, Title = "Audit Test", DesktopImageUrl = "NewUrl" };
         await _client.PutAsJsonAsync($"/api/v1/banners/{banner.Id}", payload).ConfigureAwait(true);
         var auditResponse = await _client.GetAsync($"/api/v1/banners/{banner.Id}/audit", CancellationToken.None)
             .ConfigureAwait(true);

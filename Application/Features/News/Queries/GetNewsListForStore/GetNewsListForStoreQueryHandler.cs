@@ -1,7 +1,7 @@
 using Application.ApiContracts.News.Responses;
 using Application.Common.Models;
-using Domain.Primitives;
 using Application.Interfaces.Repositories.News;
+using Domain.Primitives;
 using MediatR;
 using System.Linq.Expressions;
 
@@ -13,15 +13,12 @@ public sealed class GetNewsListForStoreQueryHandler(INewsReadRepository reposito
         GetNewsListForStoreQuery request,
         CancellationToken cancellationToken)
     {
-        // Enforce IsPublished == true strictly for store
         Expression<Func<Domain.Entities.News, bool>> filter = x => x.IsPublished;
-
         var result = await repository.GetPagedAsync<NewsSummaryResponse>(
             request.SieveModel!,
             filter: filter,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-            
         return result;
     }
 }

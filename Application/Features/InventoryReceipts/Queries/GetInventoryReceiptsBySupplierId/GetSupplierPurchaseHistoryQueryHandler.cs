@@ -3,8 +3,6 @@ using Application.Common.Models;
 using Domain.Primitives;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId
 {

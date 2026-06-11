@@ -135,7 +135,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var cat = new NewsCategory { Name = "Tech", Slug = "tech-" + Guid.NewGuid() };
+            var cat = new NewsCategory { Name = "Tech", Slug = $"tech-{Guid.NewGuid()}" };
             db.NewsCategories.Add(cat);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             categoryId = cat.Id;
@@ -173,15 +173,19 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.PostAsJsonAsync("/api/v1/news", payload).ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var news = await db.News
-            .FirstOrDefaultAsync(n => string.Compare(n.Title, "SEO News") == 0, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        news.Should().NotBeNull();
-        news!.MetaTitle.Should().Be("Meta T");
-        news.MetaDescription.Should().Be("Meta D");
-        news.MetaKeywords.Should().Be("K1, K2");
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var news = await db.News
+                .FirstOrDefaultAsync(
+                    n => string.Compare(n.Title, "SEO News") == 0,
+                    TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
+            news.Should().NotBeNull();
+            news!.MetaTitle.Should().Be("Meta T");
+            news.MetaDescription.Should().Be("Meta D");
+            news.MetaKeywords.Should().Be("K1, K2");
+        }
     }
 
     [Fact(DisplayName = "NEWS_013 - Tạo bài viết với đầy đủ thông tin SEO và Danh mục")]
@@ -286,24 +290,44 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         int newsId;
         Guid authorId;
+        int categoryId;
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var news = new Domain.Entities.News { Title = "News", Slug = "news-auth", Content = "C" };
+            var cat = new NewsCategory { Name = "Cat 17", Slug = $"cat-17-{uniqueId}" };
+            db.NewsCategories.Add(cat);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            categoryId = cat.Id;
+            var news = new Domain.Entities.News
+            {
+                Title = "News",
+                Slug = $"news-auth-{uniqueId}",
+                Content = "C",
+                CategoryId = categoryId
+            };
             db.News.Add(news);
             var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
                 _factory.Services,
                 $"author_{uniqueId}",
                 "Password123!",
-                ["Domain.Constants.Permission.Permissions.News.Create"],
+                [Domain.Constants.Permission.Permissions.News.Create],
                 TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             authorId = user.Id;
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             newsId = news.Id;
         }
-        var payload = new { id = newsId, title = "Updated Title", slug = "updated-title", category_id = 1, author_id = authorId, content = "New content", cover_image_url = "http://img.com" };
+        var payload = new
+        {
+            id = newsId,
+            title = "Updated Title",
+            slug = $"updated-title-{uniqueId}",
+            category_id = categoryId,
+            author_id = authorId,
+            content = "New content",
+            cover_image_url = "http://img.com"
+        };
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             $"admin_{uniqueId}",

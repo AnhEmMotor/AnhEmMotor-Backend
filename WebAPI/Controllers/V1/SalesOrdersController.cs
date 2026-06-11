@@ -100,15 +100,11 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [HttpGet("confirmed")]
     [HasPermission(Outputs.ViewConfirmed)]
     [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetConfirmedOutputsAsync(
+    public Task<IActionResult> GetConfirmedOutputsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        return await GetOutputsByStatusesAsync(
-            sieveModel,
-            OrderStatus.ConfirmedOrderStatuses,
-            cancellationToken)
-            .ConfigureAwait(true);
+        return GetOutputsByStatusesAsync(sieveModel, OrderStatus.ConfirmedOrderStatuses, cancellationToken);
     }
 
     /// <summary>
@@ -117,15 +113,11 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [HttpGet("unconfirmed")]
     [HasPermission(Outputs.ViewUnconfirmed)]
     [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetUnconfirmedOutputsAsync(
+    public Task<IActionResult> GetUnconfirmedOutputsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        return await GetOutputsByStatusesAsync(
-            sieveModel,
-            OrderStatus.UnconfirmedOrderStatuses,
-            cancellationToken)
-            .ConfigureAwait(true);
+        return GetOutputsByStatusesAsync(sieveModel, OrderStatus.UnconfirmedOrderStatuses, cancellationToken);
     }
 
     /// <summary>

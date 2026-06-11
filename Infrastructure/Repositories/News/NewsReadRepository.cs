@@ -39,10 +39,10 @@ namespace Infrastructure.Repositories.News
         {
             return context.News
                 .Include(n => n.LinkedProducts)
-                    .ThenInclude(lp => lp.ProductVariant)
-                        .ThenInclude(pv => pv!.Product)
+                .ThenInclude(lp => lp.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
                 .Include(n => n.LinkedProducts)
-                    .ThenInclude(lp => lp.ProductVariantColor)
+                .ThenInclude(lp => lp.ProductVariantColor)
                 .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
         }
 
@@ -51,10 +51,10 @@ namespace Infrastructure.Repositories.News
             return context.News
                 .Include(n => n.Category)
                 .Include(n => n.LinkedProducts)
-                    .ThenInclude(lp => lp.ProductVariant)
-                        .ThenInclude(pv => pv!.Product)
+                .ThenInclude(lp => lp.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
                 .Include(n => n.LinkedProducts)
-                    .ThenInclude(lp => lp.ProductVariantColor)
+                .ThenInclude(lp => lp.ProductVariantColor)
                 .FirstOrDefaultAsync(n => string.Compare(n.Slug, slug) == 0, cancellationToken);
         }
     }

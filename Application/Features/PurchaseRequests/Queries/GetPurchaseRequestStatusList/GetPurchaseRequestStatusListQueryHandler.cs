@@ -1,9 +1,6 @@
 using Application.Common.Models;
 using Domain.Constants;
 using MediatR;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;
 

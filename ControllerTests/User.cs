@@ -6,7 +6,6 @@ using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
-using Application.Interfaces.Services;
 using Domain.Constants;
 using FluentAssertions;
 using MediatR;

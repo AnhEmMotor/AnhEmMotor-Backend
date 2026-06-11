@@ -7,11 +7,12 @@ using Application.Features.News.Commands.UpdateNews;
 using Application.Features.News.Commands.UpdateNewsStatus;
 using Application.Features.News.Commands.UploadNewsContentImage;
 using Application.Features.News.Commands.UploadNewsCoverImage;
+using Application.Features.News.Queries.GetLatestNewsPublic;
 using Application.Features.News.Queries.GetNewsById;
 using Application.Features.News.Queries.GetNewsBySlug;
 using Application.Features.News.Queries.GetNewsList;
 using Application.Features.News.Queries.GetNewsListForStore;
-using Application.Features.News.Queries.GetLatestNewsPublic;
+using Application.Features.News.Queries.GetProductsForNews;
 using Application.Features.NewsCategories.Queries.GetNewsCategoryList;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
@@ -123,16 +124,18 @@ public class NewsController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 
-
     /// <summary>
     /// Lấy danh sách sản phẩm (biến thể &amp; màu) để chọn gắn vào bài viết
     /// </summary>
     /// <returns></returns>
     [HttpGet("products-for-selection")]
     [SwaggerOperation(Summary = "Lấy danh sách sản phẩm (biến thể & màu) để chọn gắn vào bài viết")]
-    public async Task<IActionResult> GetProductsForSelection([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetProductsForSelectionAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new Application.Features.News.Queries.GetProductsForNews.GetProductsForNewsQuery { SieveModel = sieveModel }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetProductsForNewsQuery { SieveModel = sieveModel }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -229,20 +232,18 @@ public class NewsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("images/cover")]
     [SwaggerOperation(Summary = "Upload ảnh bìa bài viết")]
-    public async Task<IActionResult> UploadCoverImage(IFormFile file, CancellationToken cancellationToken)
+    public async Task<IActionResult> UploadCoverImageAsync(IFormFile file, CancellationToken cancellationToken)
     {
         if (file == null || file.Length == 0)
         {
             return BadRequest("File không hợp lệ.");
         }
-
         var command = new UploadNewsCoverImageCommand
         {
             FileStream = file.OpenReadStream(),
             FileName = file.FileName,
             BaseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{HttpContext.Request.PathBase}"
         };
-
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -252,20 +253,18 @@ public class NewsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("images/content")]
     [SwaggerOperation(Summary = "Upload ảnh nội dung bài viết (WangEditor)")]
-    public async Task<IActionResult> UploadContentImage(IFormFile file, CancellationToken cancellationToken)
+    public async Task<IActionResult> UploadContentImageAsync(IFormFile file, CancellationToken cancellationToken)
     {
         if (file == null || file.Length == 0)
         {
             return Ok(new UploadNewsContentImageResponse { Errno = 1, Message = "File không hợp lệ." });
         }
-
         var command = new UploadNewsContentImageCommand
         {
             FileStream = file.OpenReadStream(),
             FileName = file.FileName,
             BaseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{HttpContext.Request.PathBase}"
         };
-
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }

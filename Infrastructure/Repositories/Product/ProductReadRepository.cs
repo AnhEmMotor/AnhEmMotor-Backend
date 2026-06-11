@@ -415,9 +415,9 @@ public class ProductReadRepository(
         return context.Products.AnyAsync(p => p.Id == id, cancellationToken);
     }
 
-    public async Task<List<ProductEntity>> GetAllProductsWithInventoryDetailsAsync(CancellationToken cancellationToken)
+    public Task<List<ProductEntity>> GetAllProductsWithInventoryDetailsAsync(CancellationToken cancellationToken)
     {
-        return await context.Products
+        return context.Products
             .Where(p => p.DeletedAt == null)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductVariantColors)
@@ -431,13 +431,14 @@ public class ProductReadRepository(
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<Domain.Entities.ProductVariant?> GetVariantByIdWithDetailsAsync(int variantId, CancellationToken cancellationToken)
+    public Task<Domain.Entities.ProductVariant?> GetVariantByIdWithDetailsAsync(
+        int variantId,
+        CancellationToken cancellationToken)
     {
-        return await context.ProductVariants
+        return context.ProductVariants
             .Where(v => v.Id == variantId && v.DeletedAt == null)
             .Include(v => v.Product)
             .Include(v => v.ProductVariantColors)
@@ -451,7 +452,6 @@ public class ProductReadRepository(
             .Include(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false);
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

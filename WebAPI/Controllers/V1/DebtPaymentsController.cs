@@ -9,12 +9,8 @@ using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1
@@ -68,11 +64,7 @@ namespace WebAPI.Controllers.V1
             [FromBody] PayDebtRequest request,
             CancellationToken cancellationToken)
         {
-            var command = new RecordDebtPaymentCommand 
-            { 
-                LineId = lineId, 
-                Amount = request.Amount
-            };
+            var command = new RecordDebtPaymentCommand { LineId = lineId, Amount = request.Amount };
             var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }

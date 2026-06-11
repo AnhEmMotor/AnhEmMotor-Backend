@@ -8,10 +8,7 @@ using Domain.Constants.Product;
 using Mapster;
 using MediatR;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
 using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
 
@@ -41,8 +38,7 @@ namespace Application.Features.InventoryReceipts.Commands.CloneInventoryReceipt
                 return Error.NotFound($"Phiếu nhập với Id = {command.Id.Value} không tồn tại", "Id");
             }
             var productVariantIds = originalInventoryReceipt.InventoryReceiptInfos
-                .Select(
-                    p => p.PurchaseRequestItem != null ? p.PurchaseRequestItem.ProductVariantId : (int?)null)
+                .Select(p => p.PurchaseRequestItem != null ? p.PurchaseRequestItem.ProductVariantId : (int?)null)
                 .Where(id => id.HasValue)
                 .Select(id => id!.Value)
                 .Distinct()

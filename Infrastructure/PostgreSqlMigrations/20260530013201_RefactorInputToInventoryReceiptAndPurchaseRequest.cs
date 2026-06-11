@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using System;
 
 #nullable disable
 
@@ -12,33 +12,16 @@ namespace Infrastructure.PostgreSqlMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Vehicle_InputInfo_InputInfoId",
-                table: "Vehicle");
-
-            migrationBuilder.DropTable(
-                name: "InputInfo");
-
-            migrationBuilder.DropTable(
-                name: "Input");
-
-            migrationBuilder.DropTable(
-                name: "InputStatus");
-
-            migrationBuilder.DropColumn(
-                name: "Highlights",
-                table: "Product");
-
-            migrationBuilder.RenameColumn(
-                name: "InputInfoId",
-                table: "Vehicle",
-                newName: "InventoryReceiptInfoId");
-
+            migrationBuilder.DropForeignKey(name: "FK_Vehicle_InputInfo_InputInfoId", table: "Vehicle");
+            migrationBuilder.DropTable(name: "InputInfo");
+            migrationBuilder.DropTable(name: "Input");
+            migrationBuilder.DropTable(name: "InputStatus");
+            migrationBuilder.DropColumn(name: "Highlights", table: "Product");
+            migrationBuilder.RenameColumn(name: "InputInfoId", table: "Vehicle", newName: "InventoryReceiptInfoId");
             migrationBuilder.RenameIndex(
                 name: "IX_Vehicle_InputInfoId",
                 table: "Vehicle",
                 newName: "IX_Vehicle_InventoryReceiptInfoId");
-
             migrationBuilder.CreateTable(
                 name: "InventoryReceiptStatus",
                 columns: table => new
@@ -52,13 +35,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_InventoryReceiptStatus", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "PurchaseRequest",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Status = table.Column<string>(type: "varchar(30)", nullable: false),
                     Note = table.Column<string>(type: "text", nullable: true),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
@@ -81,14 +65,17 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "InventoryReceipt",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    InventoryReceiptDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    InventoryReceiptDate = table.Column<DateTimeOffset>(
+                        type: "timestamp with time zone",
+                        nullable: true),
                     Notes = table.Column<string>(type: "text", nullable: true),
                     StatusId = table.Column<string>(type: "text", nullable: true),
                     PurchaseRequestId = table.Column<int>(type: "integer", nullable: true),
@@ -135,13 +122,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "PurchaseRequestItem",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     PurchaseRequestId = table.Column<int>(type: "integer", nullable: false),
                     ProductVariantId = table.Column<int>(type: "integer", nullable: false),
                     ProductVariantColorId = table.Column<int>(type: "integer", nullable: true),
@@ -169,13 +157,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "InventoryReceiptInfo",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     InventoryReceiptId = table.Column<int>(type: "integer", nullable: false),
                     Count = table.Column<int>(type: "integer", nullable: true),
                     RemainingCount = table.Column<int>(type: "integer", nullable: true),
@@ -219,87 +208,70 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_ConfirmedBy",
                 table: "InventoryReceipt",
                 column: "ConfirmedBy");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_CreatedBy",
                 table: "InventoryReceipt",
                 column: "CreatedBy");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_PurchaseRequestId",
                 table: "InventoryReceipt",
                 column: "PurchaseRequestId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_SourceOrderId",
                 table: "InventoryReceipt",
                 column: "SourceOrderId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_StatusId",
                 table: "InventoryReceipt",
                 column: "StatusId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceipt_SupplierId",
                 table: "InventoryReceipt",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceiptInfo_InventoryReceiptId",
                 table: "InventoryReceiptInfo",
                 column: "InventoryReceiptId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceiptInfo_ParentOutputInfoId",
                 table: "InventoryReceiptInfo",
                 column: "ParentOutputInfoId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceiptInfo_ProductVariantId",
                 table: "InventoryReceiptInfo",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceiptInfo_PurchaseRequestItemId",
                 table: "InventoryReceiptInfo",
                 column: "PurchaseRequestItemId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReceiptInfo_QuotationProductRowId",
                 table: "InventoryReceiptInfo",
                 column: "QuotationProductRowId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequest_ApprovedBy",
                 table: "PurchaseRequest",
                 column: "ApprovedBy");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequest_CreatedBy",
                 table: "PurchaseRequest",
                 column: "CreatedBy");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequestItem_ProductVariantColorId",
                 table: "PurchaseRequestItem",
                 column: "ProductVariantColorId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequestItem_ProductVariantId",
                 table: "PurchaseRequestItem",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequestItem_PurchaseRequestId",
                 table: "PurchaseRequestItem",
                 column: "PurchaseRequestId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_Vehicle_InventoryReceiptInfo_InventoryReceiptInfoId",
                 table: "Vehicle",
@@ -315,38 +287,17 @@ namespace Infrastructure.PostgreSqlMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_Vehicle_InventoryReceiptInfo_InventoryReceiptInfoId",
                 table: "Vehicle");
-
-            migrationBuilder.DropTable(
-                name: "InventoryReceiptInfo");
-
-            migrationBuilder.DropTable(
-                name: "InventoryReceipt");
-
-            migrationBuilder.DropTable(
-                name: "PurchaseRequestItem");
-
-            migrationBuilder.DropTable(
-                name: "InventoryReceiptStatus");
-
-            migrationBuilder.DropTable(
-                name: "PurchaseRequest");
-
-            migrationBuilder.RenameColumn(
-                name: "InventoryReceiptInfoId",
-                table: "Vehicle",
-                newName: "InputInfoId");
-
+            migrationBuilder.DropTable(name: "InventoryReceiptInfo");
+            migrationBuilder.DropTable(name: "InventoryReceipt");
+            migrationBuilder.DropTable(name: "PurchaseRequestItem");
+            migrationBuilder.DropTable(name: "InventoryReceiptStatus");
+            migrationBuilder.DropTable(name: "PurchaseRequest");
+            migrationBuilder.RenameColumn(name: "InventoryReceiptInfoId", table: "Vehicle", newName: "InputInfoId");
             migrationBuilder.RenameIndex(
                 name: "IX_Vehicle_InventoryReceiptInfoId",
                 table: "Vehicle",
                 newName: "IX_Vehicle_InputInfoId");
-
-            migrationBuilder.AddColumn<string>(
-                name: "Highlights",
-                table: "Product",
-                type: "text",
-                nullable: true);
-
+            migrationBuilder.AddColumn<string>(name: "Highlights", table: "Product", type: "text", nullable: true);
             migrationBuilder.CreateTable(
                 name: "InputStatus",
                 columns: table => new
@@ -360,13 +311,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_InputStatus", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Input",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ConfirmedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
                     SourceOrderId = table.Column<int>(type: "integer", nullable: true),
@@ -407,13 +359,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "InputInfo",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     InputId = table.Column<int>(type: "integer", nullable: false),
                     ParentOutputInfoId = table.Column<int>(type: "integer", nullable: true),
                     ProductVariantColorId = table.Column<int>(type: "integer", nullable: true),
@@ -451,52 +404,24 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "ProductVariant",
                         principalColumn: "Id");
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_ConfirmedBy",
-                table: "Input",
-                column: "ConfirmedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_CreatedBy",
-                table: "Input",
-                column: "CreatedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_SourceOrderId",
-                table: "Input",
-                column: "SourceOrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_StatusId",
-                table: "Input",
-                column: "StatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_SupplierId",
-                table: "Input",
-                column: "SupplierId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_InputInfo_InputId",
-                table: "InputInfo",
-                column: "InputId");
-
+            migrationBuilder.CreateIndex(name: "IX_Input_ConfirmedBy", table: "Input", column: "ConfirmedBy");
+            migrationBuilder.CreateIndex(name: "IX_Input_CreatedBy", table: "Input", column: "CreatedBy");
+            migrationBuilder.CreateIndex(name: "IX_Input_SourceOrderId", table: "Input", column: "SourceOrderId");
+            migrationBuilder.CreateIndex(name: "IX_Input_StatusId", table: "Input", column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Input_SupplierId", table: "Input", column: "SupplierId");
+            migrationBuilder.CreateIndex(name: "IX_InputInfo_InputId", table: "InputInfo", column: "InputId");
             migrationBuilder.CreateIndex(
                 name: "IX_InputInfo_ParentOutputInfoId",
                 table: "InputInfo",
                 column: "ParentOutputInfoId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InputInfo_ProductVariantColorId",
                 table: "InputInfo",
                 column: "ProductVariantColorId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InputInfo_ProductVariantId",
                 table: "InputInfo",
                 column: "ProductVariantId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_Vehicle_InputInfo_InputInfoId",
                 table: "Vehicle",

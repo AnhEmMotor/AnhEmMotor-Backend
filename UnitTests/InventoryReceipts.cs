@@ -1,37 +1,32 @@
 using Application.ApiContracts.InventoryReceipt.Requests;
-using Application.ApiContracts.InventoryReceipt.Responses;
-using Application.Common.Models;
+using Application.Features.InventoryOnHand.Notifications;
 using Application.Features.InventoryReceipts.Commands.CloneInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
+using Application.Features.InventoryReceipts.Commands.SendInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptNotes;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
-using Application.Features.InventoryReceipts.Commands.SendInventoryReceipt;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.InventoryLedger;
+using Application.Interfaces.Repositories.InventoryOnHand;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Permission;
+using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
-using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
+using MediatR;
 using Moq;
-using Mapster;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
 using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
 using ProductVariant = Domain.Entities.ProductVariant;
-using Vehicle = Domain.Entities.Vehicle;
 
 namespace UnitTests;
 
@@ -88,41 +83,25 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateInventoryReceiptCommand
         {
             Notes = "Valid notes",
             Products = [new CreateInventoryReceiptInfoRequest { PurchaseRequestItemId = 10, Count = 5 }]
         };
-
-        var mockPrItems = new List<PurchaseRequestItem>
-        {
-            new() { Id = 10, ProductVariantId = 1, Quantity = 100 }
-        };
-
+        var mockPrItems = new List<PurchaseRequestItem> { new() { Id = 10, ProductVariantId = 1, Quantity = 100 } };
         var mockVariants = new List<ProductVariant>
         {
             new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [] }
         };
-
         _prReadRepoMock.Setup(x => x.GetItemsByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockPrItems);
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
-        var createdReceipt = new InventoryReceiptEntity
-        {
-            Id = 10,
-            Notes = "Valid notes",
-            StatusId = "draft"
-        };
-
+        var createdReceipt = new InventoryReceiptEntity { Id = 10, Notes = "Valid notes", StatusId = "draft" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdReceipt);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue(result.Error?.Message);
         result.Value.Should().NotBeNull();
         string.Compare(result.Value!.Notes, "Valid notes").Should().Be(0);
@@ -140,18 +119,10 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object);
-
-        var command = new CreateInventoryReceiptCommand
-        {
-            PurchaseRequestId = 99,
-            Products = []
-        };
-
+        var command = new CreateInventoryReceiptCommand { PurchaseRequestId = 99, Products = [] };
         _prReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(99, It.IsAny<CancellationToken>()))
             .ReturnsAsync((PurchaseRequest?)null);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "NotFound").Should().Be(0);
     }
@@ -167,20 +138,10 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object);
-
-        var command = new CreateInventoryReceiptCommand
-        {
-            PurchaseRequestId = 1,
-            Products = []
-        };
-
+        var command = new CreateInventoryReceiptCommand { PurchaseRequestId = 1, Products = [] };
         var pr = new PurchaseRequest { Id = 1, Status = "draft" };
-
-        _prReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(pr);
-
+        _prReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(pr);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -196,25 +157,17 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateInventoryReceiptCommand
         {
             Products = [new CreateInventoryReceiptInfoRequest { PurchaseRequestItemId = 10, Count = 1 }]
         };
-
-        var mockPrItems = new List<PurchaseRequestItem>
-        {
-            new() { Id = 10, ProductVariantId = 99, Quantity = 100 }
-        };
-
+        var mockPrItems = new List<PurchaseRequestItem> { new() { Id = 10, ProductVariantId = 99, Quantity = 100 } };
         _prReadRepoMock.Setup(x => x.GetItemsByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockPrItems);
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -230,40 +183,38 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateInventoryReceiptCommand
         {
             Products = [new CreateInventoryReceiptInfoRequest { PurchaseRequestItemId = 10, Count = 1 }]
         };
-
         var mockPrItems = new List<PurchaseRequestItem>
         {
             new() { Id = 10, ProductVariantId = 1, ProductVariantColorId = 99, Quantity = 100 }
         };
-
         var mockVariants = new List<ProductVariant>
         {
             new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [new ProductVariantColor { Id = 2 }] }
         };
-
         _prReadRepoMock.Setup(x => x.GetItemsByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockPrItems);
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
 
-    [Theory(DisplayName = "IR_006 - Ngăn chặn tạo phiếu nhập kho khi danh sách xe máy có số khung hoặc số máy bị trùng lặp ngay trong yêu cầu gửi lên.")]
-    [InlineData("VIN123", "ENG123", "VIN123", "ENG456", "số khung")]
-    [InlineData("VIN123", "ENG123", "VIN456", "ENG123", "số máy")]
-    public async Task IR_006_CreateInventoryReceipt_DuplicateVehiclesInRequest(string vin1, string eng1, string vin2, string eng2, string type)
+    [Theory(
+        DisplayName = "IR_006 - Ngăn chặn tạo phiếu nhập kho khi danh sách xe máy có số khung hoặc số máy bị trùng lặp ngay trong yêu cầu gửi lên.")]
+    [InlineData("VIN123", "ENG123", "VIN123", "ENG456")]
+    [InlineData("VIN123", "ENG123", "VIN456", "ENG123")]
+    public async Task IR_006_CreateInventoryReceipt_DuplicateVehiclesInRequestAsync(
+        string vin1,
+        string eng1,
+        string vin2,
+        string eng2)
     {
-        _ = type;
         var handler = new CreateInventoryReceiptCommandHandler(
             _insertRepoMock.Object,
             _readRepoMock.Object,
@@ -272,54 +223,48 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateInventoryReceiptCommand
         {
-            Products = [
-                new CreateInventoryReceiptInfoRequest 
-                { 
-                    PurchaseRequestItemId = 10, 
+            Products =
+                [new CreateInventoryReceiptInfoRequest
+                {
+                    PurchaseRequestItemId = 10,
                     Count = 2,
-                    Vehicles = [
-                        new VehicleInventoryReceiptRequest { VinNumber = vin1, EngineNumber = eng1 },
-                        new VehicleInventoryReceiptRequest { VinNumber = vin2, EngineNumber = eng2 }
-                    ]
-                }
-            ]
+                    Vehicles =
+                        [new VehicleInventoryReceiptRequest { VinNumber = vin1, EngineNumber = eng1 }, new VehicleInventoryReceiptRequest
+                            {
+                                VinNumber = vin2,
+                                EngineNumber = eng2
+                            }]
+                }]
         };
-
-        var mockPrItems = new List<PurchaseRequestItem>
-        {
-            new() { Id = 10, ProductVariantId = 1, Quantity = 100 }
-        };
-
+        var mockPrItems = new List<PurchaseRequestItem> { new() { Id = 10, ProductVariantId = 1, Quantity = 100 } };
         var mockVariants = new List<ProductVariant>
         {
-            new() 
-            { 
-                Id = 1, 
-                VariantName = "Variant 1", 
-                ProductVariantColors = [], 
-                Product = new Domain.Entities.Product 
-                { 
-                    ProductCategory = new Domain.Entities.ProductCategory { ManagementType = "vin_number" } 
-                } 
+            new()
+            {
+                Id = 1,
+                VariantName = "Variant 1",
+                ProductVariantColors = [],
+                Product =
+                    new Domain.Entities.Product
+                    {
+                        ProductCategory = new Domain.Entities.ProductCategory { ManagementType = "vin_number" }
+                    }
             }
         };
-
         _prReadRepoMock.Setup(x => x.GetItemsByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockPrItems);
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
 
-    [Theory(DisplayName = "IR_007 - Ngăn chặn tạo phiếu nhập kho khi số khung hoặc số máy của xe máy đã tồn tại trong cơ sở dữ liệu.")]
+    [Theory(
+        DisplayName = "IR_007 - Ngăn chặn tạo phiếu nhập kho khi số khung hoặc số máy của xe máy đã tồn tại trong cơ sở dữ liệu.")]
     [InlineData(true, false)]
     [InlineData(false, true)]
     public async Task IR_007_CreateInventoryReceipt_ExistingVehiclesInDatabase(bool vinExists, bool engineExists)
@@ -332,59 +277,47 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateInventoryReceiptCommand
         {
-            Products = [
-                new CreateInventoryReceiptInfoRequest 
-                { 
-                    PurchaseRequestItemId = 10, 
+            Products =
+                [new CreateInventoryReceiptInfoRequest
+                {
+                    PurchaseRequestItemId = 10,
                     Count = 1,
-                    Vehicles = [
-                        new VehicleInventoryReceiptRequest { VinNumber = "VIN123", EngineNumber = "ENG123" }
-                    ]
-                }
-            ]
+                    Vehicles = [new VehicleInventoryReceiptRequest { VinNumber = "VIN123", EngineNumber = "ENG123" }]
+                }]
         };
-
-        var mockPrItems = new List<PurchaseRequestItem>
-        {
-            new() { Id = 10, ProductVariantId = 1, Quantity = 100 }
-        };
-
+        var mockPrItems = new List<PurchaseRequestItem> { new() { Id = 10, ProductVariantId = 1, Quantity = 100 } };
         var mockVariants = new List<ProductVariant>
         {
-            new() 
-            { 
-                Id = 1, 
-                VariantName = "Variant 1", 
-                ProductVariantColors = [], 
-                Product = new Domain.Entities.Product 
-                { 
-                    ProductCategory = new Domain.Entities.ProductCategory { ManagementType = "vin_number" } 
-                } 
+            new()
+            {
+                Id = 1,
+                VariantName = "Variant 1",
+                ProductVariantColors = [],
+                Product =
+                    new Domain.Entities.Product
+                    {
+                        ProductCategory = new Domain.Entities.ProductCategory { ManagementType = "vin_number" }
+                    }
             }
         };
-
         _prReadRepoMock.Setup(x => x.GetItemsByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockPrItems);
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         _vehicleReadRepoMock.Setup(x => x.ExistsByVinAsync("VIN123", 1, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(vinExists);
-
         _vehicleReadRepoMock.Setup(x => x.ExistsByEngineNumberAsync("ENG123", 1, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(engineExists);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
 
-    [Fact(DisplayName = "IR_008 - Cập nhật thông tin phiếu nhập kho thành công khi phiếu đang ở trạng thái nháp hoặc chờ duyệt.")]
+    [Fact(
+        DisplayName = "IR_008 - Cập nhật thông tin phiếu nhập kho thành công khi phiếu đang ở trạng thái nháp hoặc chờ duyệt.")]
     public async Task IR_008_UpdateInventoryReceipt_Success()
     {
         var handler = new UpdateInventoryReceiptCommandHandler(
@@ -399,14 +332,7 @@ public class InventoryReceipts
             _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
-
-        var command = new UpdateInventoryReceiptCommand
-        {
-            Id = 1,
-            Notes = "Updated notes",
-            Products = []
-        };
-
+        var command = new UpdateInventoryReceiptCommand { Id = 1, Notes = "Updated notes", Products = [] };
         var existingReceipt = new InventoryReceiptEntity
         {
             Id = 1,
@@ -414,20 +340,17 @@ public class InventoryReceipts
             Notes = "Old notes",
             InventoryReceiptInfos = []
         };
-
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingReceipt);
-
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingReceipt);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         _updateRepoMock.Verify(x => x.Update(It.IsAny<InventoryReceiptEntity>()), Times.Once);
     }
 
-    [Theory(DisplayName = "IR_009 - Ngăn chặn cập nhật phiếu nhập kho khi phiếu đã ở trạng thái phê duyệt hoặc bị từ chối.")]
+    [Theory(
+        DisplayName = "IR_009 - Ngăn chặn cập nhật phiếu nhập kho khi phiếu đã ở trạng thái phê duyệt hoặc bị từ chối.")]
     [InlineData("approve")]
     [InlineData("reject")]
     public async Task IR_009_UpdateInventoryReceipt_Failed_WhenCannotEdit(string status)
@@ -444,31 +367,22 @@ public class InventoryReceipts
             _vehicleReadRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
-
         var command = new UpdateInventoryReceiptCommand
         {
             Id = 1,
             Notes = "Updated notes",
             Products = [new UpdateInventoryReceiptInfoRequest { Count = 5 }]
         };
-
-        var existingReceipt = new InventoryReceiptEntity
-        {
-            Id = 1,
-            StatusId = status,
-            Notes = "Old notes"
-        };
-
+        var existingReceipt = new InventoryReceiptEntity { Id = 1, StatusId = status, Notes = "Old notes" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingReceipt);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
 
-    [Fact(DisplayName = "IR_010 - Phê duyệt phiếu nhập kho thành công, chuyển trạng thái sang Approve và tự động tăng số lượng tồn kho sản phẩm.")]
+    [Fact(
+        DisplayName = "IR_010 - Phê duyệt phiếu nhập kho thành công, chuyển trạng thái sang Approve và tự động tăng số lượng tồn kho sản phẩm.")]
     public async Task IR_010_ApproveInventoryReceipt_Success()
     {
         var handler = new UpdateInventoryReceiptStatusCommandHandler(
@@ -476,40 +390,29 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object, null!, null!,
+            _ProductQuotationRepoMock.Object,
+            null!,
+            null!,
             _supplierDebtRepoMock.Object,
-            _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
-
-        var command = new UpdateInventoryReceiptStatusCommand
-        {
-            Id = 1,
-            StatusId = "approve"
-        };
-
-        var existingReceipt = new InventoryReceiptEntity
-        {
-            Id = 1,
-            StatusId = "sent"
-        };
-
+            _unitOfWorkMock.Object,
+            new Mock<IPublisher>().Object);
+        var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "approve" };
+        var existingReceipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
         var currentUserId = Guid.NewGuid();
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
-
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingReceipt);
-
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingReceipt);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         string.Compare(existingReceipt.StatusId, "approve").Should().Be(0);
         existingReceipt.ConfirmedBy.Should().Be(currentUserId);
         _updateRepoMock.Verify(x => x.Update(existingReceipt), Times.Once);
     }
 
-    [Fact(DisplayName = "IR_011 - Từ chối phê duyệt phiếu nhập kho thành công, chuyển trạng thái sang Reject mà không thay đổi tồn kho.")]
+    [Fact(
+        DisplayName = "IR_011 - Từ chối phê duyệt phiếu nhập kho thành công, chuyển trạng thái sang Reject mà không thay đổi tồn kho.")]
     public async Task IR_011_RejectInventoryReceipt_Success()
     {
         var handler = new UpdateInventoryReceiptStatusCommandHandler(
@@ -517,69 +420,46 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object, null!, null!,
+            _ProductQuotationRepoMock.Object,
+            null!,
+            null!,
             _supplierDebtRepoMock.Object,
-            _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
-
-        var command = new UpdateInventoryReceiptStatusCommand
-        {
-            Id = 1,
-            StatusId = "reject"
-        };
-
-        var existingReceipt = new InventoryReceiptEntity
-        {
-            Id = 1,
-            StatusId = "sent"
-        };
-
+            _unitOfWorkMock.Object,
+            new Mock<IPublisher>().Object);
+        var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "reject" };
+        var existingReceipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingReceipt);
-
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingReceipt);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         string.Compare(existingReceipt.StatusId, "reject").Should().Be(0);
         _updateRepoMock.Verify(x => x.Update(existingReceipt), Times.Once);
     }
 
-    [Fact(DisplayName = "IR_012 - Cập nhật nhanh ghi chú của phiếu nhập kho thành công và tự động loại bỏ các thẻ HTML nguy hại.")]
+    [Fact(
+        DisplayName = "IR_012 - Cập nhật nhanh ghi chú của phiếu nhập kho thành công và tự động loại bỏ các thẻ HTML nguy hại.")]
     public async Task IR_012_UpdateInventoryReceiptNotes_Success()
     {
         var handler = new UpdateInventoryReceiptNotesCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
-        var command = new UpdateInventoryReceiptNotesCommand
-        {
-            Id = 1,
-            Notes = "New Notes"
-        };
-
-        var existingReceipt = new InventoryReceiptEntity
-        {
-            Id = 1,
-            Notes = "Old Notes"
-        };
-
+        var command = new UpdateInventoryReceiptNotesCommand { Id = 1, Notes = "New Notes" };
+        var existingReceipt = new InventoryReceiptEntity { Id = 1, Notes = "Old Notes" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingReceipt);
-
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingReceipt);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         string.Compare(existingReceipt.Notes, "New Notes").Should().Be(0);
         _updateRepoMock.Verify(x => x.Update(existingReceipt), Times.Once);
     }
 
-    [Fact(DisplayName = "IR_013 - Nhân bản phiếu nhập kho thành công từ phiếu nhập kho gốc và chỉ giữ lại những sản phẩm còn hoạt động.")]
+    [Fact(
+        DisplayName = "IR_013 - Nhân bản phiếu nhập kho thành công từ phiếu nhập kho gốc và chỉ giữ lại những sản phẩm còn hoạt động.")]
     public async Task IR_013_CloneInventoryReceipt_Success()
     {
         var handler = new CloneInventoryReceiptCommandHandler(
@@ -587,48 +467,37 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _unitOfWorkMock.Object);
-
-        var command = new CloneInventoryReceiptCommand
-        {
-            Id = 1
-        };
-
+        var command = new CloneInventoryReceiptCommand { Id = 1 };
         var originalReceipt = new InventoryReceiptEntity
         {
             Id = 1,
             Notes = "Original notes",
             PurchaseRequestId = 10,
-            InventoryReceiptInfos = [
-                new InventoryReceiptInfoEntity 
-                { 
-                    Id = 20, 
+            InventoryReceiptInfos =
+                [new InventoryReceiptInfoEntity
+                {
+                    Id = 20,
                     Count = 2,
                     PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 5 }
-                }
-            ]
+                }]
         };
-
         var mockVariants = new List<ProductVariant>
         {
-            new() 
-            { 
-                Id = 5, 
-                VariantName = "Variant 5", 
-                Product = new Domain.Entities.Product { StatusId = Domain.Constants.Product.ProductStatus.ForSale } 
+            new()
+            {
+                Id = 5,
+                VariantName = "Variant 5",
+                Product = new Domain.Entities.Product { StatusId = Domain.Constants.Product.ProductStatus.ForSale }
             }
         };
-
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(originalReceipt);
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new InventoryReceiptEntity { Id = 2, Notes = "Original notes", StatusId = "draft" });
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         string.Compare(result.Value!.Notes, "Original notes").Should().Be(0);
@@ -656,14 +525,28 @@ public class InventoryReceipts
             Products = [new CreateInventoryReceiptInfoRequest { PurchaseRequestItemId = 10, Count = 5 }]
         };
         var mockPrItems = new List<PurchaseRequestItem> { new() { Id = 10, ProductVariantId = 1, Quantity = 100 } };
-        var mockVariants = new List<ProductVariant> { new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [] } };
-        _prReadRepoMock.Setup(x => x.GetItemsByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>())).ReturnsAsync(mockPrItems);
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(mockVariants);
+        var mockVariants = new List<ProductVariant>
+        {
+            new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [] }
+        };
+        _prReadRepoMock.Setup(x => x.GetItemsByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(mockPrItems);
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(mockVariants);
         InventoryReceiptEntity? capturedReceipt = null;
-        _insertRepoMock.Setup(x => x.Add(It.IsAny<InventoryReceiptEntity>())).Callback<InventoryReceiptEntity>(r => capturedReceipt = r);
+        _insertRepoMock.Setup(x => x.Add(It.IsAny<InventoryReceiptEntity>()))
+            .Callback<InventoryReceiptEntity>(r => capturedReceipt = r);
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new InventoryReceiptEntity { Id = 10, Notes = "Valid notes", StatusId = "draft", CreatedBy = currentUserId });
+            .ReturnsAsync(
+                new InventoryReceiptEntity
+                {
+                    Id = 10,
+                    Notes = "Valid notes",
+                    StatusId = "draft",
+                    CreatedBy = currentUserId
+                });
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         capturedReceipt.Should().NotBeNull();
@@ -682,7 +565,8 @@ public class InventoryReceipts
             _unitOfWorkMock.Object);
         var command = new SendInventoryReceiptCommand { Id = 1 };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "draft" };
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(receipt);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(receipt);
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(receipt);
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -702,12 +586,16 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object, null!, null!,
+            _ProductQuotationRepoMock.Object,
+            null!,
+            null!,
             _supplierDebtRepoMock.Object,
-            _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
+            _unitOfWorkMock.Object,
+            new Mock<IPublisher>().Object);
         var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "approve" };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(receipt);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(receipt);
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(receipt);
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -728,12 +616,16 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object, null!, null!,
+            _ProductQuotationRepoMock.Object,
+            null!,
+            null!,
             _supplierDebtRepoMock.Object,
-            _unitOfWorkMock.Object, new Moq.Mock<MediatR.IPublisher>().Object);
+            _unitOfWorkMock.Object,
+            new Mock<IPublisher>().Object);
         var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "reject" };
         var receipt = new InventoryReceiptEntity { Id = 1, StatusId = "sent" };
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync(receipt);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(receipt);
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(receipt);
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -748,18 +640,11 @@ public class InventoryReceipts
     [Fact(DisplayName = "IR_029 - Handler gọi đúng hàm tính tồn kho")]
     public async Task IR_029_Handler_CallsRecalculateAsync()
     {
-        var repoMock = new Mock<Application.Interfaces.Repositories.InventoryOnHand.IInventoryOnHandUpdateRepository>();
-        var handler = new Application.Features.InventoryOnHand.Notifications.InventoryChangedNotificationHandler(repoMock.Object);
-        
-        var combos = new HashSet<(int VariantId, int? ColorId)>
-        {
-            (1, null),
-            (2, 5)
-        };
-        var notification = new Application.Features.InventoryOnHand.Notifications.InventoryChangedNotification(combos);
-        
+        var repoMock = new Mock<IInventoryOnHandUpdateRepository>();
+        var handler = new InventoryChangedNotificationHandler(repoMock.Object);
+        var combos = new HashSet<(int VariantId, int? ColorId)> { (1, null), (2, 5) };
+        var notification = new InventoryChangedNotification(combos);
         await handler.Handle(notification, CancellationToken.None).ConfigureAwait(true);
-        
         repoMock.Verify(r => r.RecalculateAsync(1, null, It.IsAny<CancellationToken>()), Times.Once);
         repoMock.Verify(r => r.RecalculateAsync(2, 5, It.IsAny<CancellationToken>()), Times.Once);
     }

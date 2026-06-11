@@ -5,10 +5,7 @@ using Domain.Constants.Order;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.Statistical
 {
@@ -50,7 +47,12 @@ namespace Infrastructure.Repositories.Statistical
                 .ConfigureAwait(false);
             var grouped = rawData.GroupBy(x => x.ProductVariantId)
                 .Select(
-                    g => new { VariantId = g.Key, Revenue = g.Sum(x => x.Price * x.Count), SoldCount = g.Sum(x => x.Count) })
+                    g => new
+                    {
+                        VariantId = g.Key,
+                        Revenue = g.Sum(x => x.Price * x.Count),
+                        SoldCount = g.Sum(x => x.Count)
+                    })
                 .OrderByDescending(x => x.Revenue)
                 .Take(limit)
                 .ToList();
@@ -107,7 +109,7 @@ namespace Infrastructure.Repositories.Statistical
                     BrandName = variants.FirstOrDefault(v => v.Id == r.ProductVariantId)?.Product?.Brand?.Name ?? "Khác",
                     Revenue = r.Price * r.Count
                 });
-            return [.. revenueData.GroupBy(r => r.BrandName)
+            return[.. revenueData.GroupBy(r => r.BrandName)
                 .Select(g => new BrandRevenueResponse { BrandName = g.Key, Revenue = g.Sum(x => x.Revenue) })
                 .OrderByDescending(b => b.Revenue)];
         }
@@ -217,7 +219,11 @@ namespace Infrastructure.Repositories.Statistical
             {
                 var stats = await context.OutputInfos
                     .IgnoreQueryFilters()
-                    .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+                    .Join(
+                        context.OutputOrders.IgnoreQueryFilters(),
+                        oi => oi.OutputId,
+                        o => o.Id,
+                        (oi, o) => new { oi, o })
                     .Where(
                         x => x.o.CreatedAt >= start &&
                             x.o.CreatedAt <= end &&
@@ -268,7 +274,11 @@ namespace Infrastructure.Repositories.Statistical
             {
                 var data = await context.OutputInfos
                     .IgnoreQueryFilters()
-                    .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+                    .Join(
+                        context.OutputOrders.IgnoreQueryFilters(),
+                        oi => oi.OutputId,
+                        o => o.Id,
+                        (oi, o) => new { oi, o })
                     .Join(
                         context.ProductVariants.IgnoreQueryFilters(),
                         x => x.oi.ProductVariantId,
@@ -341,7 +351,8 @@ namespace Infrastructure.Repositories.Statistical
                     {
                         BrandName = x.Name,
                         StockCount =
-                            (int)((confirmedInventoryReceipts.FirstOrDefault(i => i.VariantId == x.VariantId)?.TotalIn ?? 0) -
+                            (int)((confirmedInventoryReceipts.FirstOrDefault(i => i.VariantId == x.VariantId)?.TotalIn ??
+                                        0) -
                                     (soldOutputs.FirstOrDefault(o => o.VariantId == x.VariantId)?.TotalOut ?? 0))
                     })
                 .GroupBy(x => x.BrandName)
@@ -366,7 +377,8 @@ namespace Infrastructure.Repositories.Statistical
                     i => i.Id,
                     (ii, i) => new { ii, i })
                 .Where(
-                    x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
+                    x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
+                        x.i.CreatedAt <= sixtyDaysAgo)
                 .Select(
                     x => x.ii.PurchaseRequestItem != null ? (int?)x.ii.PurchaseRequestItem.ProductVariantId : (int?)null)
                 .Distinct()
@@ -402,7 +414,10 @@ namespace Infrastructure.Repositories.Statistical
             decimal total7dRev = last7DaysData.Sum(x => x.Revenue);
             decimal total7dProf = last7DaysData.Sum(x => x.Profit);
             var bestDay = last7DaysData.OrderByDescending(x => x.Revenue).FirstOrDefault();
-            var totalSKU = await context.Products.IgnoreQueryFilters().CountAsync(cancellationToken).ConfigureAwait(false);
+            var totalSKU = await context.Products
+                .IgnoreQueryFilters()
+                .CountAsync(cancellationToken)
+                .ConfigureAwait(false);
             var activeInstallments = await context.OutputOrders
                 .IgnoreQueryFilters()
                 .CountAsync(
@@ -418,7 +433,11 @@ namespace Infrastructure.Repositories.Statistical
                         (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                             string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
                             string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
-                .Join(context.ProductVariants, x => x.oi.ProductVariantId, pv => pv.Id, (x, pv) => new { x.oi, x.o, pv })
+                .Join(
+                    context.ProductVariants,
+                    x => x.oi.ProductVariantId,
+                    pv => pv.Id,
+                    (x, pv) => new { x.oi, x.o, pv })
                 .Join(context.Products, x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
                 .GroupBy(x => x.p.Name)
                 .Select(
@@ -445,7 +464,11 @@ namespace Infrastructure.Repositories.Statistical
                     x => x.oi.ProductVariantId,
                     pv => pv.Id,
                     (x, pv) => new { x.oi, x.o, pv })
-                .Join(context.Products.IgnoreQueryFilters(), x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
+                .Join(
+                    context.Products.IgnoreQueryFilters(),
+                    x => x.pv.ProductId,
+                    p => p.Id,
+                    (x, p) => new { x.oi, x.o, p })
                 .Join(context.Brands.IgnoreQueryFilters(), x => x.p.BrandId, b => b.Id, (x, b) => new { x.oi, x.o, b })
                 .GroupBy(x => x.b.Name)
                 .Select(
@@ -557,7 +580,8 @@ namespace Infrastructure.Repositories.Statistical
                 });
         }
 
-        public Task<IEnumerable<OrderStatusCountResponse>> GetOrderStatusCountsAsync(CancellationToken cancellationToken)
+        public Task<IEnumerable<OrderStatusCountResponse>> GetOrderStatusCountsAsync(
+            CancellationToken cancellationToken)
         {
             return context.OutputStatuses
                 .IgnoreQueryFilters()
@@ -570,7 +594,8 @@ namespace Infrastructure.Repositories.Statistical
                 .ContinueWith<IEnumerable<OrderStatusCountResponse>>(t => t.Result, cancellationToken);
         }
 
-        public async Task<IEnumerable<ProductReportResponse>> GetProductReportLastMonthAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<ProductReportResponse>> GetProductReportLastMonthAsync(
+            CancellationToken cancellationToken)
         {
             var lastMonthStart = new DateTimeOffset(
                 DateTimeOffset.UtcNow.AddMonths(-1).Year,
@@ -635,7 +660,7 @@ namespace Infrastructure.Repositories.Statistical
                 pv => new ProductReportResponse
                 {
                     ProductName =
-                        $"{pv.Product?.Name} - {pv.VariantName} ({(pv.ProductVariantColors != null ? pv.ProductVariantColors.FirstOrDefault()?.ColorName?.Split(',').FirstOrDefault() : "")})".Trim(
+                        $"{pv.Product?.Name} - {pv.VariantName} ({(pv.ProductVariantColors != null ? pv.ProductVariantColors.FirstOrDefault()?.ColorName?.Split(',').FirstOrDefault() : string.Empty)})".Trim(
                                 ' ',
                                 '-',
                                 '(',
@@ -648,12 +673,17 @@ namespace Infrastructure.Repositories.Statistical
                 });
         }
 
-        public async Task<IEnumerable<ProductPerformanceTableResponse>> GetProductPerformanceTableAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<ProductPerformanceTableResponse>> GetProductPerformanceTableAsync(
+            CancellationToken cancellationToken)
         {
             var last30Days = new DateTimeOffset(DateTime.UtcNow.AddDays(-30), TimeSpan.Zero);
             var confirmedInventoryReceipts = await context.InventoryReceiptInfos
                 .IgnoreQueryFilters()
-                .Join(context.InventoryReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
+                .Join(
+                    context.InventoryReceipts.IgnoreQueryFilters(),
+                    ii => ii.InventoryReceiptId,
+                    i => i.Id,
+                    (ii, i) => new { ii, i })
                 .Where(
                     x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                         x.ii.DeletedAt == null &&
@@ -699,7 +729,8 @@ namespace Infrastructure.Repositories.Statistical
             return[.. variants.Select(
                 pv =>
                 {
-                    var stock = (int)((confirmedInventoryReceipts.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -
+                    var stock = (int)((confirmedInventoryReceipts.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ??
+                                0) -
                         (soldOutputsAll.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalOut ?? 0));
                     var sold30 = (int)(soldLast30Days.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalSold ?? 0);
                     var variantOutputs = outputsData.Where(x => x.ProductVariantId == pv.Id).ToList();
@@ -710,7 +741,7 @@ namespace Infrastructure.Repositories.Statistical
                     return new ProductPerformanceTableResponse
                     {
                         ProductName =
-                            $"{pv.Product?.Name} - {pv.VariantName} ({(pv.ProductVariantColors != null ? pv.ProductVariantColors.FirstOrDefault()?.ColorName?.Split(',').FirstOrDefault() : "")})".Trim(
+                            $"{pv.Product?.Name} - {pv.VariantName} ({(pv.ProductVariantColors != null ? pv.ProductVariantColors.FirstOrDefault()?.ColorName?.Split(',').FirstOrDefault() : string.Empty)})".Trim(
                                     ' ',
                                     '-',
                                     '(',
@@ -726,7 +757,8 @@ namespace Infrastructure.Repositories.Statistical
                 })];
         }
 
-        public async Task<IEnumerable<WarehouseTableDataResponse>> GetWarehouseTableDataAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<WarehouseTableDataResponse>> GetWarehouseTableDataAsync(
+            CancellationToken cancellationToken)
         {
             var variants = await context.ProductVariants
                 .IgnoreQueryFilters()
@@ -736,7 +768,11 @@ namespace Infrastructure.Repositories.Statistical
                 .ConfigureAwait(false);
             var confirmedInventoryReceipts = await context.InventoryReceiptInfos
                 .IgnoreQueryFilters()
-                .Join(context.InventoryReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
+                .Join(
+                    context.InventoryReceipts.IgnoreQueryFilters(),
+                    ii => ii.InventoryReceiptId,
+                    i => i.Id,
+                    (ii, i) => new { ii, i })
                 .Where(
                     x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                         x.ii.DeletedAt == null &&
@@ -749,7 +785,9 @@ namespace Infrastructure.Repositories.Statistical
                         VariantId = g.Key,
                         TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)),
                         AvgInventoryReceiptPrice = g.Sum(x => (x.ii.UnitPrice ?? 0) * (x.ii.Count ?? 0)) /
-                            (g.Sum(x => (long)(x.ii.Count ?? 0)) == 0 ? 1M : (decimal)(g.Sum(x => (long)(x.ii.Count ?? 0))))
+                            (g.Sum(x => (long)(x.ii.Count ?? 0)) == 0
+                                    ? 1M
+                                    : (decimal)(g.Sum(x => (long)(x.ii.Count ?? 0))))
                     })
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -798,7 +836,9 @@ namespace Infrastructure.Repositories.Statistical
             return grouped;
         }
 
-        public async Task<ProductStockPriceResponse?> GetProductStockAndPriceAsync(int variantId, CancellationToken cancellationToken)
+        public async Task<ProductStockPriceResponse?> GetProductStockAndPriceAsync(
+            int variantId,
+            CancellationToken cancellationToken)
         {
             var variant = await context.ProductVariants
                 .FirstOrDefaultAsync(pv => pv.Id == variantId, cancellationToken)
@@ -815,7 +855,9 @@ namespace Infrastructure.Repositories.Statistical
                         i => i.Id,
                         (ii, i) => new { ii, i })
                     .Where(
-                        x => (x.ii.PurchaseRequestItem != null ? (int?)x.ii.PurchaseRequestItem.ProductVariantId : (int?)null) ==
+                        x => (x.ii.PurchaseRequestItem != null
+                                    ? (int?)x.ii.PurchaseRequestItem.ProductVariantId
+                                    : (int?)null) ==
                                 variantId &&
                                 string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
                     .SumAsync(x => (long?)(x.ii.Count ?? 0), cancellationToken)
@@ -823,7 +865,11 @@ namespace Infrastructure.Repositories.Statistical
                 0;
             var totalOutput = await context.OutputInfos
                     .IgnoreQueryFilters()
-                    .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+                    .Join(
+                        context.OutputOrders.IgnoreQueryFilters(),
+                        oi => oi.OutputId,
+                        o => o.Id,
+                        (oi, o) => new { oi, o })
                     .Where(
                         x => x.oi.ProductVariantId == variantId &&
                                 (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||

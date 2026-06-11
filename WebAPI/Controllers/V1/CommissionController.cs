@@ -3,6 +3,7 @@ using Application.Features.HR.Commands.ApprovePayroll;
 using Application.Features.HR.Queries.GetCommissionRecords;
 using Application.Features.HR.Queries.GetPayrollSummary;
 using Asp.Versioning;
+using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +41,7 @@ public class CommissionController(ISender mediator) : ApiController
     /// <param name="year">Năm.</param>
     /// <param name="ct">Token hủy bỏ.</param>
     [HttpGet("payroll-summary")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Payroll.View)]
+    [HasPermission(Payroll.View)]
     [ProducesResponseType(typeof(List<PayrollResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPayrollSummaryAsync(
         [FromQuery] int month,
@@ -57,7 +58,7 @@ public class CommissionController(ISender mediator) : ApiController
     /// <param name="command">Lệnh phê duyệt payroll.</param>
     /// <param name="ct">Token hủy bỏ.</param>
     [HttpPost("approve-payroll")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Payroll.Approve)]
+    [HasPermission(Payroll.Approve)]
     public async Task<IActionResult> ApprovePayrollAsync([FromBody] ApprovePayrollCommand command, CancellationToken ct)
     {
         var result = await mediator.Send(command, ct).ConfigureAwait(true);

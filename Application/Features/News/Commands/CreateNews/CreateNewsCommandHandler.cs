@@ -2,6 +2,7 @@ using Application.Common.Helper;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.News;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.News.Commands.CreateNews;
@@ -36,7 +37,6 @@ public sealed class CreateNewsCommandHandler(
             CategoryId = request.CategoryId,
             AuthorId = request.AuthorId
         };
-
         if (request.LinkedProducts != null && request.LinkedProducts.Any())
         {
             foreach (var lp in request.LinkedProducts)
@@ -49,15 +49,11 @@ public sealed class CreateNewsCommandHandler(
                     {
                         colorId = parsedColorId;
                     }
-                    news.LinkedProducts.Add(new Domain.Entities.NewsProduct
-                    {
-                        ProductVariantId = variantId,
-                        ProductVariantColorId = colorId
-                    });
+                    news.LinkedProducts
+                        .Add(new NewsProduct { ProductVariantId = variantId, ProductVariantColorId = colorId });
                 }
             }
         }
-
         newsInsertRepository.Add(news);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(news.Id);
