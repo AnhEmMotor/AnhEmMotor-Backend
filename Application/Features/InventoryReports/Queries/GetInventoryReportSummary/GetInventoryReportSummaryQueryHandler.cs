@@ -13,13 +13,12 @@ namespace Application.Features.InventoryReports.Queries.GetInventoryReportSummar
             GetInventoryReportSummaryQuery request,
             CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             var page = await readRepository.GetInventoryReportSummaryAsync(
                 request.PageNumber,
                 request.PageSize,
                 request.SearchTerm,
-                cancellationToken);
-
+                cancellationToken)
+                .ConfigureAwait(false);
             return new PagedResult<InventoryReportSummaryResponse>(
                 page.Items,
                 page.TotalCount,

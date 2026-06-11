@@ -1,5 +1,5 @@
-using Application.Interfaces.Repositories.InventoryOnHand;
 using Application.ApiContracts.InventoryReport.Responses;
+using Application.Interfaces.Repositories.InventoryOnHand;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -27,7 +27,6 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
         var query = context.InventoryOnHands
             .AsNoTracking()
             .Where(x => x.ProductVariant != null && x.ProductVariant.Product != null);
-
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             var term = searchTerm.Trim().ToLower();
@@ -35,17 +34,15 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                 x => (x.ProductVariant!.Product!.Name != null &&
                         x.ProductVariant.Product.Name.Contains(term, StringComparison.CurrentCultureIgnoreCase)) ||
                     (x.ProductVariant.VariantName != null &&
-                        x.ProductVariant.VariantName
-                            .ToLower()
-                            .Contains(term, StringComparison.CurrentCultureIgnoreCase)) ||
+                        x.ProductVariant.VariantName.ToLower().Contains(term, StringComparison.CurrentCultureIgnoreCase)) ||
                     (x.ProductVariantColor != null &&
                         x.ProductVariantColor.ColorName != null &&
                         x.ProductVariantColor.ColorName
                             .ToLower()
                             .Contains(term, StringComparison.CurrentCultureIgnoreCase)));
         }
-
-        return query.Select(x => new InventoryReportSummaryRowResponse
+        return query.Select(
+            x => new InventoryReportSummaryRowResponse
             {
                 ProductId = x.ProductVariant!.ProductId,
                 ProductName = x.ProductVariant.Product!.Name,
@@ -67,8 +64,7 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
         string? searchTerm,
         CancellationToken cancellationToken)
     {
-        var allData = await GetInventoryReportSummaryRowsAsync(searchTerm, cancellationToken);
-
+        var allData = await GetInventoryReportSummaryRowsAsync(searchTerm, cancellationToken).ConfigureAwait(false);
         var totalCount = allData.Select(x => x.ProductId).Distinct().Count();
         var paginatedProductIds = allData.Select(x => x.ProductId)
             .Distinct()
@@ -76,7 +72,6 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToList();
-
         var groupedByProduct = allData
             .Where(x => paginatedProductIds.Contains(x.ProductId))
             .GroupBy(x => new { x.ProductId, x.ProductName })
@@ -94,18 +89,18 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                         [.. gp.GroupBy(x => new { x.VariantId, x.VariantName })
                                 .Select(
                                     gv => new InventoryReportVariantResponse
-                                    {
-                                        VariantId = gv.Key.VariantId,
-                                        VariantName = gv.Key.VariantName,
-                                        ImportedQty = gv.Sum(x => x.ImportedQty),
-                                        ExportedQty = gv.Sum(x => x.ExportedQty),
-                                        InventoryQty = gv.Sum(x => x.StockQty),
-                                        OrderedQty = gv.Sum(x => x.OrderedQty),
-                                        RemainingQty = gv.Sum(x => x.StockQty) - gv.Sum(x => x.OrderedQty),
-                                        VariantColors =
-                                            [.. gv.Where(x => x.ColorId != null)
-                                                    .Select(
-                                                        gc => new InventoryReportColorResponse
+                                {
+                                    VariantId = gv.Key.VariantId,
+                                    VariantName = gv.Key.VariantName,
+                                    ImportedQty = gv.Sum(x => x.ImportedQty),
+                                    ExportedQty = gv.Sum(x => x.ExportedQty),
+                                    InventoryQty = gv.Sum(x => x.StockQty),
+                                    OrderedQty = gv.Sum(x => x.OrderedQty),
+                                    RemainingQty = gv.Sum(x => x.StockQty) - gv.Sum(x => x.OrderedQty),
+                                    VariantColors =
+                                        [.. gv.Where(x => x.ColorId != null)
+                                                        .Select(
+                                                            gc => new InventoryReportColorResponse
                                                         {
                                                             ColorId = gc.ColorId!.Value,
                                                             ColorName = gc.ColorName,
@@ -115,14 +110,9 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                                                             OrderedQty = gc.OrderedQty,
                                                             RemainingQty = gc.StockQty - gc.OrderedQty
                                                         })]
-                                    })]
+                                })]
                 })
             .ToList();
-
-        return new InventoryReportSummaryPageResponse(
-            groupedByProduct,
-            totalCount,
-            pageNumber,
-            pageSize);
+        return new InventoryReportSummaryPageResponse(groupedByProduct, totalCount, pageNumber, pageSize);
     }
 }

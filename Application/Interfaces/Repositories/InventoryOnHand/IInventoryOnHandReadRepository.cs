@@ -1,5 +1,5 @@
-using System.Linq;
 using Application.ApiContracts.InventoryReport.Responses;
+using System.Linq;
 using InventoryOnHandEntity = Domain.Entities.InventoryOnHand;
 
 namespace Application.Interfaces.Repositories.InventoryOnHand;

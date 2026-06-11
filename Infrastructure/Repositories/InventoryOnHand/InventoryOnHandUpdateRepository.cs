@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.InventoryOnHand;
+using Domain.Constants;
 using Domain.Constants.Order;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -20,9 +21,7 @@ public class InventoryOnHandUpdateRepository(ApplicationDBContext context) : IIn
         CancellationToken cancellationToken)
     {
         var importedQty = await context.InventoryReceiptInfos
-            .Where(
-                x => x.InventoryReceipt != null &&
-                    x.InventoryReceipt.StatusId == Domain.Constants.InventoryReceiptStatus.Approve)
+            .Where(x => x.InventoryReceipt != null && x.InventoryReceipt.StatusId == InventoryReceiptStatus.Approve)
             .Where(
                 x => (x.PurchaseRequestItem != null &&
                         x.PurchaseRequestItem.ProductVariantId == productVariantId &&

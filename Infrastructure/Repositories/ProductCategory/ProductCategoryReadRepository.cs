@@ -3,11 +3,13 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Constants;
 using Domain.Primitives;
-using Mapster;
 using Infrastructure.DBContexts;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
+using System.Globalization;
+using System.Text;
 using CategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Infrastructure.Repositories.ProductCategory;
@@ -54,8 +56,8 @@ public class ProductCategoryReadRepository(
         {
             var allCategories = await GetAllAsync(cancellationToken).ConfigureAwait(false);
             var matchedCategories = allCategories.Where(
-                    c => RemoveDiacritics(c.Name ?? string.Empty)
-                        .Contains(RemoveDiacritics(searchKeyword), StringComparison.OrdinalIgnoreCase))
+                c => RemoveDiacritics(c.Name ?? string.Empty)
+                    .Contains(RemoveDiacritics(searchKeyword), StringComparison.OrdinalIgnoreCase))
                 .ToList();
             var resultIds = new HashSet<int>();
             foreach (var cat in matchedCategories)
@@ -89,10 +91,8 @@ public class ProductCategoryReadRepository(
                 sieveModel.Page ?? 1,
                 sieveModel.PageSize ?? 10);
         }
-
-        return await GetPagedAsync<ProductCategoryResponse>(
-            sieveModel,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+        return await GetPagedAsync<ProductCategoryResponse>(sieveModel, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public Task<bool> ExistsByNameAsync(
@@ -205,21 +205,16 @@ public class ProductCategoryReadRepository(
     {
         if (string.IsNullOrWhiteSpace(text))
             return text;
-
-        var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);
-        var stringBuilder = new System.Text.StringBuilder();
+        var normalizedString = text.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder();
         foreach (var c in normalizedString)
         {
-            var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
-            if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
             {
                 stringBuilder.Append(c);
             }
         }
-
-        return stringBuilder.ToString()
-            .Normalize(System.Text.NormalizationForm.FormC)
-            .Replace('đ', 'd')
-            .Replace('Đ', 'D');
+        return stringBuilder.ToString().Normalize(NormalizationForm.FormC).Replace('đ', 'd').Replace('Đ', 'D');
     }
 }

@@ -59,7 +59,7 @@ public sealed class ExportProductsQueryHandler(IProductReadRepository repository
         subtitleRange.Style.Font.FontSize = 10;
         subtitleRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
         subtitleRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
-        string[] headers =["STT", "Hình Ảnh", "San Pham", "The Loai", "Thuong Hieu", "Dong Xe", "Kich Thuoc DxDxS", "Van Do Cuc Dai", "Mo Men Cuc Dai", "Dung Tich Dong Co", "Trong Luong", "Chieu Cao Phu Toc", "Khoang Sa Dua", "Dung Tich Thang Xang", "He Thong Phanh Trruc Toc", "He Thong Tre Nhon", "Lo Xe", "Kieu Dang Truyen Dong", "He Thong Khoi Dong", "SKU", "Bien The", "Gia Ban", "Ton Kho", "Trang Thai Ton Kho", "Hinh Anh Bien The", "Trong Luong BL", "Kich Thuoc BL", "Chieu Cao Phu Toc BL", "Lo Xe BL", "Phanh Truoc BL", "Phanh Sau BL", "Tre Truoc BL", "Tre Sau BL", "Kieu Dong Co BL", "Cong Suat", "Mo Men"];
+        string[] headers = ["STT", "Hình Ảnh", "San Pham", "The Loai", "Thuong Hieu", "Dong Xe", "Kich Thuoc DxDxS", "Van Do Cuc Dai", "Mo Men Cuc Dai", "Dung Tich Dong Co", "Trong Luong", "Chieu Cao Phu Toc", "Khoang Sa Dua", "Dung Tich Thang Xang", "He Thong Phanh Trruc Toc", "He Thong Tre Nhon", "Lo Xe", "Kieu Dang Truyen Dong", "He Thong Khoi Dong", "SKU", "Bien The", "Gia Ban", "Ton Kho", "Trang Thai Ton Kho", "Hinh Anh Bien The", "Trong Luong BL", "Kich Thuoc BL", "Chieu Cao Phu Toc BL", "Lo Xe BL", "Phanh Truoc BL", "Phanh Sau BL", "Tre Truoc BL", "Tre Sau BL", "Kieu Dong Co BL", "Cong Suat", "Mo Men"];
         for (int i = 0; i < headers.Length; i++)
         {
             var cell = worksheet.Cell(4, i + 1);
