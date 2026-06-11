@@ -1,4 +1,5 @@
 using System.Linq;
+using Application.ApiContracts.InventoryReport.Responses;
 using InventoryOnHandEntity = Domain.Entities.InventoryOnHand;
 
 namespace Application.Interfaces.Repositories.InventoryOnHand;
@@ -10,5 +11,13 @@ public interface IInventoryOnHandReadRepository
         int? productVariantColorId,
         CancellationToken cancellationToken);
 
-    public IQueryable<InventoryOnHandEntity> GetQuery();
+    public Task<List<InventoryReportSummaryRowResponse>> GetInventoryReportSummaryRowsAsync(
+        string? searchTerm,
+        CancellationToken cancellationToken);
+
+    public Task<InventoryReportSummaryPageResponse> GetInventoryReportSummaryAsync(
+        int pageNumber,
+        int pageSize,
+        string? searchTerm,
+        CancellationToken cancellationToken);
 }

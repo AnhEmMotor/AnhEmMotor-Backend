@@ -15,6 +15,11 @@ public interface IProductCategoryReadRepository
         DataFetchMode mode = DataFetchMode.ActiveOnly,
         CancellationToken cancellationToken = default);
 
+    public Task<PagedResult<ProductCategoryResponse>> GetPagedListAsync(
+        SieveModel sieveModel,
+        string? searchKeyword,
+        CancellationToken cancellationToken);
+
     public Task<bool> ExistsByNameAsync(
         string name,
         CancellationToken cancellationToken,
