@@ -45,9 +45,23 @@ namespace Infrastructure.Repositories
             return new DashboardSummaryDto
             {
                 TotalRevenue = totalRevenue,
+                RevenueVsYesterdayPercentage = 12.5m, // Mock
+                DailyTarget = 100000000m, // 100tr
+
                 NetProfit = totalRevenue - cogs - totalExpenses,
+                ProfitMargin = 21.0m, // Mock
+                ProfitVsYesterdayPercentage = -3.0m, // Mock
+
                 PendingAmount = pendingAmount,
-                AlertsCount = 0, // Sẽ tính toán dựa trên logic rào chắn
+                DepositAmount = pendingAmount * 0.3m, // Mock 30%
+                LoanWaitAmount = pendingAmount * 0.7m, // Mock 70%
+
+                AlertsCount = 6, // Mock sum
+                NewComplaintsCount = 2,
+                DelayedLoansCount = 1,
+                LowStockVehiclesCount = 3,
+                MissedAppointmentsCount = 0,
+
                 MonthAchieved = totalRevenue,
                 MonthTarget = 1000000000m, // Ví dụ 1 tỷ
                 MonthRemaining = 1000000000m - totalRevenue,
@@ -103,13 +117,15 @@ namespace Infrastructure.Repositories
                 })
                 .ToListAsync();
 
-            return staffSales.Select(s => new StaffPerformanceDto
+            return staffSales.Select((s, index) => new StaffPerformanceDto
             {
                 EmployeeName = s.FullName ?? string.Empty,
                 Role = s.Role ?? string.Empty,
                 TotalSales = s.Sales,
+                TargetSales = 120000000m, // Mock 120tr
                 CommissionPaid = s.Sales * 0.02m, // Giả định 2% hoa hồng
-                KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện")
+                KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện"),
+                IsTopSeller = index == 0 // Mock top 1
             }).ToList();
         }
 
@@ -126,6 +142,7 @@ namespace Infrastructure.Repositories
                     ProductName = o.OutputInfos.Select(oi => oi.ProductVariant != null && oi.ProductVariant.Product != null ? oi.ProductVariant.Product.Name : "N/A").FirstOrDefault() ?? "N/A",
                     Amount = o.OutputInfos.Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
                     IsRevenue = true,
+                    Status = o.StatusId == "Completed" ? "Completed" : "Pending", // Tạm dùng StatusId
                     StaffName = "N/A"
                 }).ToListAsync();
 
@@ -139,6 +156,7 @@ namespace Infrastructure.Repositories
                     ProductName = e.Name,
                     Amount = e.Amount,
                     IsRevenue = false,
+                    Status = "Refund", // Tạm gọi khoản chi là Refund cho demo UI
                     StaffName = "Admin"
                 }).ToListAsync();
 
