@@ -13,7 +13,7 @@ using SupplierStatus = Domain.Entities.SupplierStatus;
 
 namespace Infrastructure.DBContexts;
 
-public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, Application.Common.Interfaces.IApplicationDbContext
 {
     private readonly IServiceProvider? _serviceProvider;
 
@@ -29,7 +29,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         _serviceProvider = serviceProvider;
     }
 
+
+
     public new DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
+
+    public virtual DbSet<AnhEmMotor.Domain.Entities.Expense> Expenses { get; set; }
 
     public virtual DbSet<Brand> Brands { get; set; }
 
@@ -107,7 +111,25 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ContactReply> ContactReplies { get; set; }
 
+
+public virtual DbSet<Domain.Entities.SupportRequest> SupportRequests { get; set; }
+
+public virtual DbSet<Domain.Entities.CustomerFeedback> CustomerFeedbacks { get; set; }
+
+public virtual DbSet<Domain.Entities.JobApplication> JobApplications { get; set; }
     public virtual DbSet<Booking> Bookings { get; set; }
+
+    public virtual DbSet<PlateDossier> PlateDossiers { get; set; }
+
+    public virtual DbSet<RepairOrder> RepairOrders { get; set; }
+
+    public virtual DbSet<RepairOrderDetail> RepairOrderDetails { get; set; }
+
+    public virtual DbSet<ServiceCategory> ServiceCategories { get; set; }
+
+    public virtual DbSet<Service> Services { get; set; }
+
+    public virtual DbSet<ServiceEvaluation> ServiceEvaluations { get; set; }
 
     public virtual DbSet<Lead> Leads { get; set; }
 
@@ -142,10 +164,47 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<SupplierDebt> SupplierDebts { get; set; }
 
     public virtual DbSet<InventoryOnHand> InventoryOnHands { get; set; }
+    // Contracts
+    public virtual DbSet<ContractTemplate> ContractTemplates { get; set; }
+    public virtual DbSet<SalesContract> SalesContracts { get; set; }
+    public virtual DbSet<FinanceContract> FinanceContracts { get; set; }
+    public virtual DbSet<SupplierContract> SupplierContracts { get; set; }
+
+public virtual DbSet<SupplierContractItem> SupplierContractItems { get; set; }
+
+public virtual DbSet<SupplierContractAuditLog> SupplierContractAuditLogs { get; set; }
+
+    public virtual DbSet<ContractTemplateAuditLog> ContractTemplateAuditLogs { get; set; }
+
+    public virtual DbSet<SupplierFinance> SupplierFinances { get; set; }
+
+    public virtual DbSet<SupplierDebtSettlement> SupplierDebtSettlements { get; set; }
+
+    // Logistics
+    public virtual DbSet<Domain.Entities.Logistics.ParcelDeliveryOrder> ParcelDeliveryOrders { get; set; }
+    public virtual DbSet<Domain.Entities.Logistics.ParcelDeliveryOrderItem> ParcelDeliveryOrderItems { get; set; }
+    public virtual DbSet<Domain.Entities.Logistics.CurrentUnreconciledCod> CurrentUnreconciledCods { get; set; }
+
+    public virtual DbSet<Domain.Entities.Logistics.CarrierPartner> CarrierPartners { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<AnhEmMotor.Domain.Entities.Expense>().Property(e => e.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<ContractTemplate>().Property(e => e.Version).HasPrecision(18, 2);
+        modelBuilder.Entity<SupplierFinance>().Property(e => e.CurrentDebt).HasPrecision(18, 2);
+        modelBuilder.Entity<ContractTemplate>().Property(ct => ct.Version).HasPrecision(18, 2);
+        modelBuilder.Entity<SupplierFinance>().Property(sf => sf.CurrentDebt).HasPrecision(18, 2);
+        modelBuilder.Entity<Domain.Entities.Logistics.CurrentUnreconciledCod>().Property(e => e.Value).HasPrecision(18, 2);
+        modelBuilder.Entity<Domain.Entities.Logistics.ParcelDeliveryOrder>().Property(e => e.CodAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<Domain.Entities.Logistics.ParcelDeliveryOrder>().Property(e => e.ShippingCost).HasPrecision(18, 2);
+        modelBuilder.Entity<Domain.Entities.Logistics.CarrierPartner>().Property(e => e.MaxParcelWeightKg).HasPrecision(18, 2);
+
+        modelBuilder.Entity<Domain.Entities.Logistics.ParcelDeliveryOrder>()
+            .HasMany(p => p.Items)
+            .WithOne(i => i.ParcelDeliveryOrder)
+            .HasForeignKey(i => i.ParcelDeliveryOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ApplicationUser>().ToTable("Users");
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");

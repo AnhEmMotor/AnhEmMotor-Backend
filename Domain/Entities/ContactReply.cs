@@ -21,7 +21,10 @@ public class ContactReply : BaseEntity
 
     [Column("RepliedById")]
     [ForeignKey("RepliedBy")]
-    public Guid RepliedById { get; set; }
+    public Guid? RepliedById { get; set; }
 
-    public ApplicationUser RepliedBy { get; set; } = null!;
+    public ApplicationUser? RepliedBy { get; set; }
+
+    [Column("IsInternal")]
+    public bool IsInternal { get; set; } = false;
 }

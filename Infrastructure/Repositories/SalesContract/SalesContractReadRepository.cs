@@ -1,0 +1,79 @@
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.SalesContract;
+using Application.ApiContracts.SalesContracts.Responses;
+using Domain.Constants;
+using Domain.Entities;
+using Domain.Primitives;
+using Infrastructure.DBContexts;
+using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using Sieve.Services;
+using System.Linq;
+
+namespace Infrastructure.Repositories.SalesContract;
+
+public class SalesContractReadRepository(
+    ApplicationDBContext context,
+    ISievePaginator paginator) : ISalesContractReadRepository
+{
+    internal IQueryable<global::Domain.Entities.SalesContract> GetQueryable()
+    {
+        return context.SalesContracts.AsQueryable();
+    }
+
+    public Task<PagedResult<SalesContractResponse>> GetPagedAsync(
+        SieveModel sieveModel,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable();
+        return paginator.ApplyAsync<global::Domain.Entities.SalesContract, SalesContractResponse>(query, sieveModel, null, cancellationToken);
+    }
+
+    public Task<global::Domain.Entities.SalesContract?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return GetQueryable().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
+
+    public Task<List<global::Domain.Entities.SalesContract>> GetAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return GetQueryable().ToListAsync(cancellationToken);
+    }
+
+    public Task<global::Domain.Entities.SalesContract?> GetByOrderIdAsync(
+        int? orderId,
+        CancellationToken cancellationToken = default)
+    {
+        return GetQueryable()
+            .FirstOrDefaultAsync(x => x.OutputId == orderId, cancellationToken);
+    }
+
+    public Task<bool> IsContractNumberExistsAsync(
+        string contractNumber,
+        Guid? excludeId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable().Where(x => x.ContractNumber == contractNumber);
+        if (excludeId.HasValue)
+            query = query.Where(x => x.Id != excludeId.Value);
+        return query.AnyAsync(cancellationToken);
+    }
+
+    public Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return GetQueryable().CountAsync(cancellationToken);
+    }
+
+    public Task<int> CountByStatusAsync(string status, CancellationToken cancellationToken = default)
+    {
+        return GetQueryable().CountAsync(x => x.Status == status, cancellationToken);
+    }
+
+    public Task<int> CountOverdueAsync(CancellationToken cancellationToken = default)
+    {
+        return GetQueryable()
+            .CountAsync(x => x.Status == "Signed" && x.FinalPaymentDeadline.HasValue && x.FinalPaymentDeadline.Value < DateTimeOffset.UtcNow, cancellationToken);
+    }
+}

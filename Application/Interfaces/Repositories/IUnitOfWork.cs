@@ -4,4 +4,5 @@ namespace Application.Interfaces.Repositories
     {
         public Task SaveChangesAsync(CancellationToken cancellationToken = default);
     }
+
 }
