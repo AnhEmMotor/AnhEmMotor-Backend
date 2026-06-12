@@ -102,7 +102,9 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
                 {
                     Id = e.Id,
                     Name = e.Name,
+                    CategoryId = e.CategoryId,
                     Category = e.ProductCategory?.Name,
+                    BrandId = e.BrandId,
                     Brand = e.Brand?.Name,
                     Displacement = e.Displacement,
                     HasBeenBooked = e.Id % 20,

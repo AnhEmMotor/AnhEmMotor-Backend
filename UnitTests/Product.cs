@@ -981,6 +981,93 @@ public class Product
         result.Should().NotBeNull();
     }
 
+    [Fact(DisplayName = "PRODUCT_029a - Đổi thể loại giữ nguyên entity màu đang được theo dõi")]
+    public async Task UpdateProduct_ChangeCategoryWithExistingColor_UpdatesTrackedColor()
+    {
+        var existingColor = new ProductVariantColor
+        {
+            Id = 10,
+            ProductVariantId = 1,
+            ColorName = "Đỏ",
+            ColorCode = "#FF0000",
+            CoverImageUrl = "red-old.jpg",
+            MaxPurchaseQuantity = 2
+        };
+        var existingVariant = new ProductVariant
+        {
+            Id = 1,
+            ProductId = 1,
+            UrlSlug = "variant-1",
+            ProductVariantColors = [existingColor]
+        };
+        var product = new ProductEntity
+        {
+            Id = 1,
+            CategoryId = 1,
+            ProductVariants = [existingVariant]
+        };
+        var command = new UpdateProductCommand
+        {
+            Id = 1,
+            Name = "Sản phẩm thử nghiệm",
+            CategoryId = 2,
+            Variants =
+            [
+                new UpdateProductVariantRequest
+                {
+                    Id = 1,
+                    Price = 100000,
+                    Colors =
+                    [
+                        new UpdateProductVariantColorRequest
+                        {
+                            Id = 10,
+                            ColorName = "Đỏ đậm",
+                            ColorCode = "#CC0000",
+                            CoverImageUrl = "red-new.jpg"
+                        }
+                    ]
+                }
+            ]
+        };
+        _productReadRepoMock.Setup(
+            x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(product);
+        _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(2, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 2 });
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var handler = new UpdateProductCommandHandler(
+            _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
+            _variantReadRepoMock.Object,
+            _productCategoryReadRepoMock.Object,
+            _brandReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
+            _optionReadRepoMock.Object,
+            _optionValueReadRepoMock.Object,
+            _variantInsertRepoMock.Object,
+            _optionValueInsertRepoMock.Object,
+            _technologyReadRepoMock.Object,
+            _variantOptionValueDeleteRepoMock.Object,
+            _variantDeleteRepoMock.Object,
+            _productUpdateRepoMock.Object,
+            _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        product.CategoryId.Should().Be(2);
+        existingVariant.ProductVariantColors.Should().ContainSingle()
+            .Which.Should().BeSameAs(existingColor);
+        existingColor.ColorName.Should().Be("Đỏ đậm");
+        existingColor.ColorCode.Should().Be("#CC0000");
+        existingColor.CoverImageUrl.Should().Be("red-new.jpg");
+        existingColor.MaxPurchaseQuantity.Should().Be(2);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     [Fact(DisplayName = "PRODUCT_030 - Sửa giá một biến thể thành công")]
     public async Task UpdateVariantPrice_ValidData_Success()
     {
