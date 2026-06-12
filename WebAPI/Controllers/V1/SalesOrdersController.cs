@@ -17,6 +17,7 @@ using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
 using Application.Features.Outputs.Queries.GetOrderStatusMap;
 using Application.Features.Outputs.Queries.GetOrderStatusTransitionMap;
 using Application.Features.Outputs.Queries.GetOutputById;
+using Application.Features.Outputs.Queries.GetOutputForCurrentUserById;
 using Application.Features.Outputs.Queries.GetOutputsByUserIdForManager;
 using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
 using Application.Features.Outputs.Queries.GetOutputsList;
@@ -65,6 +66,21 @@ public class SalesOrdersController(
     {
         var query = new GetOutputsForCurrentUserQuery(sieveModel);
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy chi tiết một đơn hàng thuộc về người dùng hiện tại.
+    /// </summary>
+    [HttpGet("my-purchases/{id:int}")]
+    [Authorize]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetMyPurchaseByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetOutputForCurrentUserByIdQuery(id), cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 

@@ -30,6 +30,7 @@ public class Payment
         var orderId = 123;
         var fullOrderCode = (long)orderId * 100000;
         var totalAmount = 100000m;
+        var paymentAmount = 300000m;
         var order = new Output
         {
             Id = orderId,
@@ -41,7 +42,7 @@ public class Payment
         var webhookData = new PayOSWebhookData
         {
             OrderCode = fullOrderCode.ToString(),
-            Amount = totalAmount,
+            Amount = paymentAmount,
             TransactionId = "TX_PAYOS_1"
         };
         _payosServiceMock.Setup(x => x.VerifyWebhook(webhookData)).Returns(true);
@@ -68,7 +69,7 @@ public class Payment
         var orderId = 124;
         var fullOrderCode = (long)orderId * 100000;
         var totalAmount = 100000m;
-        var depositAmount = 50000m;
+        var depositAmount = 150000m;
         var order = new Output
         {
             Id = orderId,
@@ -178,6 +179,7 @@ public class Payment
     {
         var orderId = 200;
         var totalAmount = 200000m;
+        var paymentAmount = 400000m;
         var order = new Output
         {
             Id = orderId,
@@ -191,7 +193,7 @@ public class Payment
             Success = true,
             VnPayResponseCode = "00",
             OrderId = orderId.ToString(),
-            Amount = totalAmount,
+            Amount = paymentAmount,
             TransactionId = "TX_VNPAY_1"
         };
         _vnpayServiceMock.Setup(x => x.PaymentExecute(It.IsAny<IQueryCollection>())).Returns(vnpayResponse);
@@ -214,7 +216,14 @@ public class Payment
     public async Task PAY_007_VNPayIPN_InsufficientBalance()
     {
         var orderId = 201;
-        var order = new Output { Id = orderId, PaymentStatus = OrderPaymentStatus.Pending };
+        var order = new Output
+        {
+            Id = orderId,
+            PaymentStatus = OrderPaymentStatus.Pending,
+            PaymentUrl = "https://sandbox.vnpayment.vn/old-payment",
+            PaymentCode = orderId.ToString(),
+            PaymentExpiredAt = DateTimeOffset.UtcNow.AddMinutes(10)
+        };
         var query = new Mock<IQueryCollection>();
         var vnpayResponse = new VNPayPaymentResponse
         {
@@ -234,6 +243,9 @@ public class Payment
         result.Value.Should().NotBeNull();
         result.Value?.VnPayResponseCode.Should().Be("09");
         order.PaymentStatus.Should().Be(OrderPaymentStatus.Failed);
+        order.PaymentUrl.Should().BeNull();
+        order.PaymentCode.Should().BeNull();
+        order.PaymentExpiredAt.Should().BeNull();
         _updateRepositoryMock.Verify(x => x.Update(order), Times.Once);
     }
 
@@ -310,5 +322,44 @@ public class Payment
             .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         _updateRepositoryMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Never);
+    }
+
+    [Fact(DisplayName = "PAY_011 - PayOS Callback - Hủy thanh toán nhưng giữ đơn hàng")]
+    public async Task PAY_011_PayOSCallback_Cancelled_KeepsOrderPending()
+    {
+        var orderId = 204;
+        var fullOrderCode = (long)orderId * 100000;
+        var order = new Output
+        {
+            Id = orderId,
+            StatusId = OrderStatus.Pending,
+            PaymentMethod = PaymentMethod.PayOS,
+            PaymentStatus = OrderPaymentStatus.Pending,
+            PaymentUrl = "https://pay.payos.vn/old-payment",
+            PaymentCode = fullOrderCode.ToString(),
+            PaymentExpiredAt = DateTimeOffset.UtcNow.AddHours(1)
+        };
+        var payosData = new PayOSData { Status = PayOSStatus.Cancelled };
+        _payosServiceMock.Setup(x => x.GetPaymentDetailsAsync(fullOrderCode, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(payosData);
+        _readRepositoryMock.Setup(x => x.GetByIdWithDetailsAsync(orderId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(order);
+        var handler = new ProcessPayOSCallbackCommandHandler(
+            _readRepositoryMock.Object,
+            _updateRepositoryMock.Object,
+            _unitOfWorkMock.Object,
+            _payosServiceMock.Object);
+
+        var result = await handler.Handle(new ProcessPayOSCallbackCommand(fullOrderCode), CancellationToken.None)
+            .ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeFalse();
+        order.StatusId.Should().Be(OrderStatus.Pending);
+        order.PaymentStatus.Should().Be(OrderPaymentStatus.Failed);
+        order.PaymentUrl.Should().BeNull();
+        order.PaymentCode.Should().BeNull();
+        order.PaymentExpiredAt.Should().BeNull();
+        _updateRepositoryMock.Verify(x => x.Update(order), Times.Once);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

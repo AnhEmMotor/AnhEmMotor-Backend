@@ -1,4 +1,5 @@
 using Application.Common.Models;
+using Application.Common.Payments;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Services;
@@ -35,11 +36,13 @@ namespace Application.Features.Payments.Commands.ProcessPayOSCallback
             if (string.Compare(payosData.Status, PayOSStatus.Paid) == 0 &&
                 string.Compare(order.PaymentStatus, OrderPaymentStatus.Paid) != 0)
             {
-                if (payosData.Amount >= order.Total)
+                var total = OrderPaymentAmountCalculator.GetTotal(order);
+                var depositAmount = OrderPaymentAmountCalculator.GetDepositAmount(order);
+                if (payosData.Amount >= total)
                 {
                     order.StatusId = OrderStatus.PaidProcessing;
                     order.PaymentStatus = OrderPaymentStatus.Paid;
-                } else if (payosData.Amount >= order.DepositAmount)
+                } else if (payosData.Amount >= depositAmount)
                 {
                     order.StatusId = OrderStatus.DepositPaid;
                     order.PaymentStatus = OrderPaymentStatus.Partial;
@@ -52,8 +55,10 @@ namespace Application.Features.Payments.Commands.ProcessPayOSCallback
             }
             if (string.Compare(payosData.Status, PayOSStatus.Cancelled) == 0)
             {
-                order.StatusId = OrderStatus.Cancelled;
                 order.PaymentStatus = OrderPaymentStatus.Failed;
+                order.PaymentUrl = null;
+                order.PaymentCode = null;
+                order.PaymentExpiredAt = null;
                 updateRepository.Update(order);
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return Result<int>.Failure(Error.BadRequest("Giao dịch đã bị hủy", "Payment"));

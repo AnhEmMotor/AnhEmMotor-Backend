@@ -1,6 +1,7 @@
 using Application.ApiContracts.Payment.Requests;
 using Application.ApiContracts.Payment.Responses;
 using Application.Common.Models;
+using Application.Common.Payments;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Role;
@@ -72,7 +73,7 @@ public sealed class GetPaymentLinkQueryHandler(
         {
             return Result<PaymentLinkResponse>.Success(new PaymentLinkResponse(order.PaymentUrl!));
         }
-        var amountToPay = string.Compare(order.StatusId, OrderStatus.WaitingDeposit) == 0 ? order.DepositAmount : order.Total;
+        var amountToPay = OrderPaymentAmountCalculator.GetAmountToPay(order);
         if (string.Compare(paymentMethod, PaymentMethod.VNPay) == 0)
         {
             var vnpayRequest = new VNPayPaymentRequest
@@ -83,7 +84,14 @@ public sealed class GetPaymentLinkQueryHandler(
                 Description = $"Thanh toan don hang {order.Id}",
                 CreatedDate = DateTime.UtcNow
             };
-            var paymentUrl = vnpayService.CreatePaymentUrl(context, vnpayRequest);
+            string paymentUrl;
+            try
+            {
+                paymentUrl = vnpayService.CreatePaymentUrl(context, vnpayRequest);
+            } catch (InvalidOperationException exception)
+            {
+                return Error.Failure(exception.Message, "VNPayConfiguration");
+            }
             order.PaymentUrl = paymentUrl;
             order.PaymentCode = order.Id.ToString();
             order.PaymentExpiredAt = DateTimeOffset.UtcNow.AddMinutes(15);
@@ -101,7 +109,15 @@ public sealed class GetPaymentLinkQueryHandler(
                 Amount = amountToPay,
                 Description = $"ANHEMMOTOR {order.Id}"
             };
-            var response = await payosService.CreatePaymentAsync(payosRequest, cancellationToken).ConfigureAwait(false);
+            PayOSPaymentResponse response;
+            try
+            {
+                response = await payosService.CreatePaymentAsync(payosRequest, cancellationToken)
+                    .ConfigureAwait(false);
+            } catch (InvalidOperationException exception)
+            {
+                return Error.Failure(exception.Message, "PayOSConfiguration");
+            }
             if (response.ErrorCode == 0)
             {
                 order.PaymentUrl = response.CheckoutUrl;
