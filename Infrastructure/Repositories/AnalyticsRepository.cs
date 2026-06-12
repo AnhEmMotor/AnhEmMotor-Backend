@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Application.Common.Interfaces;
+using Infrastructure.DBContexts;
 using AnhEmMotor.Application.DTOs.Analytics;
 using Domain.Entities;
 using AnhEmMotor.Domain.Enums;
@@ -12,9 +12,9 @@ namespace Infrastructure.Repositories
 {
     public class AnalyticsRepository : IAnalyticsRepository
     {
-        private readonly IApplicationDbContext _context;
+        private readonly ApplicationDBContext _context;
 
-        public AnalyticsRepository(IApplicationDbContext context)
+        public AnalyticsRepository(ApplicationDBContext context)
         {
             _context = context;
         }

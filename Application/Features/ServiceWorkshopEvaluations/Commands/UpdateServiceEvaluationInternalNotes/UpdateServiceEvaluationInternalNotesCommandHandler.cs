@@ -12,7 +12,7 @@ public class UpdateServiceEvaluationInternalNotesCommandHandler(
     IServiceEvaluationReadRepository serviceEvaluationReadRepository,
     IServiceEvaluationUpdateRepository serviceEvaluationUpdateRepository,
     IContactInsertRepository contactInsertRepository,
-    IHttpTokenAccessorService tokenAccessor,
+    ICurrentUserContext currentUserContext,
     IUnitOfWork unitOfWork
 ) : IRequestHandler<UpdateServiceEvaluationInternalNotesCommand, Result<bool>>
 {
@@ -27,8 +27,8 @@ public class UpdateServiceEvaluationInternalNotesCommandHandler(
             return Result<bool>.Failure(Error.NotFound("Đánh giá không tồn tại."));
         }
 
-        var userIdString = tokenAccessor.GetUserId();
-        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+        var userId = currentUserContext.GetUserId();
+        if (userId == Guid.Empty)
         {
             return Result<bool>.Failure(Error.Unauthorized("Không thể xác định người dùng thực hiện ghi chú."));
         }

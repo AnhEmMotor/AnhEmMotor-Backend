@@ -3,7 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.RepairOrder;
 using Application.Interfaces.Repositories.Service;
 using Application.Interfaces.Repositories.ProductVariant;
-using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Entities;
 using MediatR;
 using System;
@@ -19,7 +19,7 @@ namespace Application.Features.RepairOrders.Commands.IssueParts
         IRepairOrderUpdateRepository repairOrderUpdateRepository,
         IServiceReadRepository serviceReadRepository,
         IProductVariantReadRepository productVariantReadRepository,
-        IInputInfoReadRepository inputInfoReadRepository,
+        IInventoryReceiptInfoReadRepository inventoryReceiptInfoReadRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<IssuePartsCommand, Result<bool>>
     {
         public async Task<Result<bool>> Handle(IssuePartsCommand request, CancellationToken cancellationToken)
@@ -38,7 +38,7 @@ namespace Application.Features.RepairOrders.Commands.IssueParts
             {
                 if (detail.ProductVariantId == null) continue;
 
-                var inputInfos = await inputInfoReadRepository.GetFinishedInputInfosByVariantIdAsync(detail.ProductVariantId.Value, cancellationToken)
+                var inputInfos = await inventoryReceiptInfoReadRepository.GetFinishedInventoryReceiptInfosByVariantIdAsync(detail.ProductVariantId.Value, cancellationToken)
                     .ConfigureAwait(false);
                 inputInfos = inputInfos.OrderBy(ii => ii.Id).ToList();
 
@@ -107,12 +107,12 @@ namespace Application.Features.RepairOrders.Commands.IssueParts
                 }
 
                 // Query available finished input receipt items for this variant
-                var allInputInfos = await inputInfoReadRepository.GetFinishedInputInfosByVariantIdAsync(partItem.ProductVariantId, cancellationToken)
+                var allInputInfos = await inventoryReceiptInfoReadRepository.GetFinishedInventoryReceiptInfosByVariantIdAsync(partItem.ProductVariantId, cancellationToken)
                     .ConfigureAwait(false);
                 
                 var inputInfos = allInputInfos
                     .Where(ii => (ii.RemainingCount ?? 0) > 0)
-                    .OrderBy(ii => ii.InputReceipt != null ? ii.InputReceipt.InputDate : DateTimeOffset.MinValue)
+                    .OrderBy(ii => ii.InventoryReceipt != null ? ii.InventoryReceipt.InventoryReceiptDate : DateTimeOffset.MinValue)
                     .ToList();
 
                 var availableStock = inputInfos.Sum(ii => ii.RemainingCount ?? 0);

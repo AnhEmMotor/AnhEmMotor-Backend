@@ -2,21 +2,19 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.ApiContracts.Logistics.CarrierSettings.Responses;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories.CarrierPartner;
 using Domain.Entities.Logistics;
 using MediatR;
 
 namespace Application.Features.Logistics.Queries.GetCarriers;
 
-public class GetCarriersQueryHandler(IApplicationDbContext db)
+public class GetCarriersQueryHandler(ICarrierPartnerReadRepository carrierPartnerReadRepository)
     : IRequestHandler<GetCarriersQuery, GetCarriersResponse>
 {
     public async Task<GetCarriersResponse> Handle(GetCarriersQuery request, CancellationToken cancellationToken)
     {
         // Note: async EF is available; using ToList + Task.FromResult for consistency.
-        var items = db.CarrierPartners
-            .OrderBy(x => x.Id)
-            .AsEnumerable()
+        var items = (await carrierPartnerReadRepository.GetAllAsync(cancellationToken))
             .Select(x => new CarrierPartnerDto
             {
                 Id = x.Id,

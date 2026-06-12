@@ -5,7 +5,6 @@ using Domain.Entities;
 using Domain.Primitives;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Sieve.Services;
 
 namespace Application.Features.Services.Queries;
@@ -31,18 +30,17 @@ public sealed class GetServicesListQueryHandler (
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var query = serviceRepository.GetQueryable().AsNoTracking();
+        var query = serviceRepository.GetQueryable();
 
         var filteredQuery = sieveProcessor.Apply(request.SieveModel, query);
 
-        var totalCount = await filteredQuery.CountAsync(cancellationToken).ConfigureAwait(false);
+        var totalCount = filteredQuery.Count();
 
-        var services = await filteredQuery
+        var services = filteredQuery
             .Skip((request.SieveModel.Page!.Value - 1) * request.SieveModel.PageSize!.Value)
             .Take(request.SieveModel.PageSize.Value)
             .ProjectToType<ServiceResponse>()
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+            .ToList();
 
         return new PagedResult<ServiceResponse>(services, totalCount, request.SieveModel.Page.Value, request.SieveModel.PageSize.Value);
     }

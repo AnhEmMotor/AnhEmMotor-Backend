@@ -18,6 +18,15 @@ namespace Infrastructure.Repositories.RepairOrder
         ApplicationDBContext context,
         ISievePaginator paginator) : IRepairOrderReadRepository
     {
+        public Task<List<Domain.Entities.RepairOrder>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return GetQueryable()
+                .Include(r => r.Details)
+                    .ThenInclude(d => d.ProductVariant)
+                        .ThenInclude(pv => pv!.Product)
+                .ToListAsync(cancellationToken);
+        }
+
         public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
             SieveModel sieveModel,
             DataFetchMode mode = DataFetchMode.ActiveOnly,

@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Entities.Logistics;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Logistics.Returns.Queries.GetReturns;
 
@@ -26,34 +25,20 @@ public class ReturnOrderDto
     public DateTime CreatedAt { get; set; }
 }
 
-public class GetReturnsQueryHandler(IApplicationDbContext db)
+public class GetReturnsQueryHandler(IParcelDeliveryOrderReadRepository parcelDeliveryOrderReadRepository)
     : IRequestHandler<GetReturnsQuery, List<ReturnOrderDto>>
 {
     public async Task<List<ReturnOrderDto>> Handle(GetReturnsQuery request, CancellationToken cancellationToken)
     {
-        var query = db.ParcelDeliveryOrders
-            .Where(x => x.Status == ParcelDeliveryStatus.Returned)
-            .AsQueryable();
-
+        var returns = await parcelDeliveryOrderReadRepository.GetReturnedAsync(cancellationToken);
+        var query = returns.AsQueryable();
         if (!string.IsNullOrEmpty(request.Status))
         {
-            if (request.Status == "pending")
-            {
-                query = query.Where(x => x.InspectedAt == null);
-            }
-            else if (request.Status == "completed")
-            {
-                query = query.Where(x => x.ReturnAction != null);
-            }
-            else if (request.Status == "inspecting")
-            {
-                query = query.Where(x => x.InspectedAt != null && x.ReturnAction == null);
-            }
+            if (request.Status == "pending") query = query.Where(x => x.InspectedAt == null);
+            else if (request.Status == "completed") query = query.Where(x => x.ReturnAction != null);
+            else if (request.Status == "inspecting") query = query.Where(x => x.InspectedAt != null && x.ReturnAction == null);
         }
-
-        var returns = await query
-            .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync(cancellationToken);
+        returns = query.OrderByDescending(x => x.CreatedAt).ToList();
 
         var result = returns.Select(x => new ReturnOrderDto
         {

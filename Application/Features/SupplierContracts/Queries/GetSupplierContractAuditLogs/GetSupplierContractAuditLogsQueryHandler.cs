@@ -6,7 +6,6 @@ using Domain.Constants;
 using Domain.Entities;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.SupplierContracts.Queries.GetSupplierContractAuditLogs;
 

@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Entities.Logistics;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Logistics.Returns.Queries.GetReturnDetail;
 
@@ -44,16 +43,14 @@ public class ReturnDetailItemDto
     public int Quantity { get; set; }
 }
 
-public class GetReturnDetailQueryHandler(IApplicationDbContext db)
+public class GetReturnDetailQueryHandler(IParcelDeliveryOrderReadRepository parcelDeliveryOrderReadRepository)
     : IRequestHandler<GetReturnDetailQuery, ReturnDetailDto?>
 {
     public async Task<ReturnDetailDto?> Handle(GetReturnDetailQuery request, CancellationToken cancellationToken)
     {
-        var order = await db.ParcelDeliveryOrders
-            .Include(x => x.Items)
-            .FirstOrDefaultAsync(x => x.Id == request.Id && x.Status == ParcelDeliveryStatus.Returned, cancellationToken);
+        var order = await parcelDeliveryOrderReadRepository.GetByIdAsync(request.Id, cancellationToken);
 
-        if (order == null) return null;
+        if (order == null || order.Status != ParcelDeliveryStatus.Returned) return null;
 
         return new ReturnDetailDto
         {

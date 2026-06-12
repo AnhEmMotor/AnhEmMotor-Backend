@@ -5,7 +5,6 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Primitives;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Contacts.Queries.GetPaginatedContacts;
 

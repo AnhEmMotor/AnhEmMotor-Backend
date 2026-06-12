@@ -4,12 +4,12 @@ using Application.Interfaces.Services;
 using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
-
 using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Services;
+using Infrastructure.BackgroundJobs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,63 +27,41 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.Configure<LocalFileStorageOptions>(configuration.GetSection(LocalFileStorageOptions.SectionName));
+
         var provider = configuration.GetValue("Provider", "SqlServer");
-        if (string.Compare(provider, "MySql") == 0)
+        if (string.Compare(provider, "MySql", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
-            services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
-                options =>
-                {
-                    options.UseMySql(connectionString, serverVersion);
-                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-                });
-        } else if (string.Compare(provider, "PostgreSql") == 0)
+            services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(options =>
+            {
+                options.UseMySql(connectionString, serverVersion);
+                options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+            });
+        }
+        else if (string.Compare(provider, "PostgreSql", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
-            services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
-                options =>
-                {
-                    options.UseNpgsql(connectionString);
-                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-                });
-        } else
-        {
-            services.AddDbContextPool<ApplicationDBContext>(
-                options =>
-                {
-                    options.UseSqlServer(
-                        configuration.GetConnectionString("StringConnection"),
-                        b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
-                                .CommandTimeout(30)
-                                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-                });
-        }
-        services.AddIdentity<ApplicationUser, ApplicationRole>(
-            options =>
+            services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(options =>
             {
                 options.UseNpgsql(connectionString);
-                options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
             });
-            services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
         }
         else
         {
-            services.AddDbContextPool<ApplicationDBContext>(
-            options =>
+            services.AddDbContextPool<ApplicationDBContext>(options =>
             {
                 options.UseSqlServer(
-                configuration.GetConnectionString("StringConnection"),
-                b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
-                .CommandTimeout(30)
-                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-                options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+                    configuration.GetConnectionString("StringConnection"),
+                    b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
+                        .CommandTimeout(30)
+                        .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+                options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
             });
-            services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
         }
-        services.AddIdentity<ApplicationUser, ApplicationRole>(
-        options =>
+
+        services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
         {
             options.Password.RequiredLength = 8;
             options.Password.RequireNonAlphanumeric = true;
@@ -94,6 +72,7 @@ public static class DependencyInjection
         })
         .AddEntityFrameworkStores<ApplicationDBContext>()
         .AddDefaultTokenProviders();
+
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IUserStreamService, UserStreamService>();
         services.AddSingleton<INotificationService, NotificationService>();
@@ -118,13 +97,11 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient();
-        services.Scan(
-            scan => scan
+        services.Scan(scan => scan
             .FromAssemblies(Assembly.GetExecutingAssembly())
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
-                .AsImplementedInterfaces()
-                .WithScopedLifetime());
-        services.AddHostedService<BannerExpiryWorker>();
+            .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
         services.AddHostedService<SupplierContractExpiryWorker>();
         return services;
     }

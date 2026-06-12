@@ -1,8 +1,9 @@
 using Application.Api.Contracts.Statistical.Responses;
-using Application.Common.Interfaces;
-using Domain.Entities;
+using Application.Interfaces.Repositories.InventoryReceipt;
+using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.RepairOrder;
+using Application.Interfaces.Repositories.HR.Employee;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,21 @@ namespace Application.Features.Statistical.Queries.GetWorkshopDashboard;
 
 public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashboardQuery, WorkshopDashboardResponse>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IRepairOrderReadRepository _repairOrderReadRepository;
+    private readonly IOutputReadRepository _outputReadRepository;
+    private readonly IEmployeeReadRepository _employeeReadRepository;
+    private readonly IInventoryReceiptInfoReadRepository _inventoryReceiptInfoReadRepository;
 
-    public GetWorkshopDashboardQueryHandler(IApplicationDbContext context)
+    public GetWorkshopDashboardQueryHandler(
+        IRepairOrderReadRepository repairOrderReadRepository,
+        IOutputReadRepository outputReadRepository,
+        IEmployeeReadRepository employeeReadRepository,
+        IInventoryReceiptInfoReadRepository inventoryReceiptInfoReadRepository)
     {
-        _context = context;
+        _repairOrderReadRepository = repairOrderReadRepository;
+        _outputReadRepository = outputReadRepository;
+        _employeeReadRepository = employeeReadRepository;
+        _inventoryReceiptInfoReadRepository = inventoryReceiptInfoReadRepository;
     }
 
     public async Task<WorkshopDashboardResponse> Handle(GetWorkshopDashboardQuery request, CancellationToken cancellationToken)
@@ -26,17 +37,10 @@ public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashb
         var response = new WorkshopDashboardResponse();
 
         // 1. KPI Cards
-        var inProgressOrders = await _context.RepairOrders
-            .Where(ro => ro.Status == "InProgress")
-            .ToListAsync(cancellationToken);
-
-        var completedOrders = await _context.RepairOrders
-            .Where(ro => ro.Status == "Completed" && ro.StartTime != null && ro.CompletedDate != null)
-            .ToListAsync(cancellationToken);
-
-        var revenueOrders = await _context.RepairOrders
-            .Where(ro => ro.CreatedAt >= request.FromDate && ro.CreatedAt <= request.ToDate)
-            .ToListAsync(cancellationToken);
+        var allOrders = await _repairOrderReadRepository.GetAllAsync(cancellationToken);
+        var inProgressOrders = allOrders.Where(ro => ro.Status == "InProgress").ToList();
+        var completedOrders = allOrders.Where(ro => ro.Status == "Completed" && ro.StartTime != null && ro.CompletedDate != null).ToList();
+        var revenueOrders = allOrders.Where(ro => ro.CreatedAt >= request.FromDate && ro.CreatedAt <= request.ToDate).ToList();
 
         response.KpiCards.InProgressCount = inProgressOrders.Count;
         response.KpiCards.CumulativeRevenue = revenueOrders.Sum(ro => ro.TotalAmount);
@@ -48,7 +52,7 @@ public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashb
         }
 
         // 2. Urgent Alerts
-        response.Alerts.OverdueTickets = await _context.RepairOrders
+        response.Alerts.OverdueTickets = allOrders
             .Where(ro => ro.Status != "Completed" && ro.ExpectedCompletionTime < now)
             .Select(ro => new OverdueTicketDto
             {
@@ -56,27 +60,27 @@ public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashb
                 CustomerName = ro.CustomerName,
                 ExpectedCompletionTime = ro.ExpectedCompletionTime ?? now,
                 Status = ro.Status
-            }).ToListAsync(cancellationToken);
+            }).ToList();
 
         // Part Shortage: Check RepairOrderDetails of InProgress tickets
-        var activeItems = await _context.RepairOrderDetails
+        var activeItems = allOrders
+            .SelectMany(ro => ro.Details)
             .Where(rod => rod.RepairOrder.Status == "InProgress" && rod.Type == "Part" && rod.ProductVariantId != null)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         foreach (var item in activeItems)
         {
-            // Mock logic: In real world, you'd check a real Inventory/Stock table.
-            // Here we simulate check against InputInfos (assuming InputInfo represents stock)
-            var stock = await _context.InputInfos
-                .Where(ii => ii.ProductVariantColorId != null && ii.Count > 0)
-                .SumAsync(ii => ii.Count ?? 0, cancellationToken);
+            // Mock logic: count finished receipt stock for the variant.
+            var stock = (await _inventoryReceiptInfoReadRepository.GetFinishedInventoryReceiptInfosByVariantIdAsync(item.ProductVariantId!.Value, cancellationToken))
+                .Where(ii => ii.Count > 0)
+                .Sum(ii => ii.Count ?? 0);
 
             if (stock < item.Count)
             {
                 response.Alerts.PartShortages.Add(new PartShortageDto
                 {
                     TicketId = item.RepairOrderId,
-                    PartName = item.ProductVariant?.ProductVariantColor?.ColorName ?? "Unknown Part",
+                PartName = item.ProductVariant?.Product?.Name ?? "Unknown Part",
                     RequiredQuantity = item.Count,
                     AvailableQuantity = stock
                 });
@@ -85,9 +89,9 @@ public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashb
 
         // 3. Analytics
         var workshopRev = revenueOrders.Sum(ro => ro.TotalAmount);
-        var retailRev = await _context.OutputOrders
+        var retailRev = (await _outputReadRepository.GetAllAsync(cancellationToken))
             .Where(o => o.CreatedAt >= request.FromDate && o.CreatedAt <= request.ToDate)
-            .SumAsync(o => o.Total, cancellationToken);
+            .Sum(o => o.Total);
 
         response.Analytics.RevenueComparison = new RevenueComparison
         {
@@ -107,7 +111,7 @@ public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashb
         });
 
         // 4. Productivity
-        var employees = await _context.EmployeeProfiles.ToListAsync(cancellationToken);
+        var employees = await _employeeReadRepository.GetAllWithUsersAsync(cancellationToken);
         foreach (var emp in employees)
         {
             var currentOrder = inProgressOrders.FirstOrDefault(ro => ro.TechnicianId == emp.Id);

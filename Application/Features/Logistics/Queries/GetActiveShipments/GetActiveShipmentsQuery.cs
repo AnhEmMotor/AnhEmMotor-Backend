@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Entities.Logistics;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Logistics.Queries.GetActiveShipments;
 
@@ -31,17 +30,17 @@ public class ActiveShipmentDto
     public bool IsStuck { get; set; }
 }
 
-public class GetActiveShipmentsQueryHandler(IApplicationDbContext db)
+public class GetActiveShipmentsQueryHandler(IParcelDeliveryOrderReadRepository parcelDeliveryOrderReadRepository)
     : IRequestHandler<GetActiveShipmentsQuery, List<ActiveShipmentDto>>
 {
     public async Task<List<ActiveShipmentDto>> Handle(GetActiveShipmentsQuery request, CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
 
-        var shipments = await db.ParcelDeliveryOrders
+        var shipments = (await parcelDeliveryOrderReadRepository.GetAllAsync(cancellationToken))
             .Where(x => x.Status == ParcelDeliveryStatus.Shipping)
             .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         var result = shipments.Select(x => new ActiveShipmentDto
         {

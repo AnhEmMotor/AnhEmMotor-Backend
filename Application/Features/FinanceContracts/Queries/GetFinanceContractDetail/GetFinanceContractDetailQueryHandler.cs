@@ -5,7 +5,6 @@ using Application.Interfaces.Services;
 using Domain.Entities;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.FinanceContracts.Queries.GetFinanceContractDetail;
 

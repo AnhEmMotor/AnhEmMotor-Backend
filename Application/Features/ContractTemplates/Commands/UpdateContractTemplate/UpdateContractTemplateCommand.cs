@@ -1,6 +1,5 @@
 using Application.Common.Models;
 using Application.ApiContracts.ContractTemplate.Requests;
-using Application.Common.Interfaces;
 using Domain.Entities;
 using MediatR;
 

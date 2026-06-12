@@ -13,7 +13,7 @@ using SupplierStatus = Domain.Entities.SupplierStatus;
 
 namespace Infrastructure.DBContexts;
 
-public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, Application.Common.Interfaces.IApplicationDbContext
+public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     private readonly IServiceProvider? _serviceProvider;
 

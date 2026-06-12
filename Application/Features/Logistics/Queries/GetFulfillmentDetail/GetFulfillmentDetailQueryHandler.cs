@@ -2,25 +2,22 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Application.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 
 namespace Application.Features.Logistics.Queries.GetFulfillmentDetail;
 
 public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDetailQuery, FulfillmentDetailResponse>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IParcelDeliveryOrderReadRepository _context;
 
-    public GetFulfillmentDetailQueryHandler(IApplicationDbContext context)
+    public GetFulfillmentDetailQueryHandler(IParcelDeliveryOrderReadRepository context)
     {
         _context = context;
     }
 
     public async Task<FulfillmentDetailResponse> Handle(GetFulfillmentDetailQuery request, CancellationToken cancellationToken)
     {
-        var order = await _context.ParcelDeliveryOrders
-            .Include(x => x.Items)
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var order = await _context.GetByIdAsync(request.Id, cancellationToken);
 
         if (order == null)
             return null; // Normally we throw NotFoundException

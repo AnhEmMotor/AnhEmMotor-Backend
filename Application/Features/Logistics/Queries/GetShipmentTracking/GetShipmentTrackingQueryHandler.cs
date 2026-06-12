@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Entities.Logistics;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Logistics.Queries.GetShipmentTracking
 {
     public class GetShipmentTrackingQueryHandler : IRequestHandler<GetShipmentTrackingQuery, ShipmentTrackingDto>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly IParcelDeliveryOrderReadRepository _context;
 
-        public GetShipmentTrackingQueryHandler(IApplicationDbContext context)
+        public GetShipmentTrackingQueryHandler(IParcelDeliveryOrderReadRepository context)
         {
             _context = context;
         }
@@ -24,13 +23,11 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
             var search = request.TrackingNumberOrPhone?.Trim();
             
             // Try to find the order in the database
-            var order = await _context.ParcelDeliveryOrders
-                .Include(o => o.Items)
-                .FirstOrDefaultAsync(o => 
+            var order = (await _context.GetAllAsync(cancellationToken))
+                .FirstOrDefault(o => 
                     o.TrackingNumber == search || 
                     o.CustomerPhone == search || 
-                    o.OriginalOrderCode == search, 
-                    cancellationToken);
+                    o.OriginalOrderCode == search);
 
             // If not found in DB but the user passed something, we'll generate a mock 
             // for demonstration so the map always renders something for the reviewer.

@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Entities.Logistics;
 using MediatR;
 
 namespace Application.Features.Logistics.Queries.GetLogisticsDashboard;
 
 
-public class GetLogisticsDashboardQueryHandler(IApplicationDbContext db)
+public class GetLogisticsDashboardQueryHandler(IParcelDeliveryOrderReadRepository parcelDeliveryOrderReadRepository)
     : IRequestHandler<GetLogisticsDashboardQuery, LogisticsDashboardResponse>
 {
     public async Task<LogisticsDashboardResponse> Handle(GetLogisticsDashboardQuery request, CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ public class GetLogisticsDashboardQueryHandler(IApplicationDbContext db)
             _ => now.AddDays(-1),
         };
 
-        var parcels = db.ParcelDeliveryOrders
+        var parcels = (await parcelDeliveryOrderReadRepository.GetAllAsync(cancellationToken))
             .Where(x => x.CreatedAt >= from)
             .ToList();
 

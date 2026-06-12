@@ -1,26 +1,28 @@
 using Application.ApiContracts.ContractTemplate.Requests;
 using Application.Common.Models;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories.ContractTemplate;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Primitives;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Commands.UpdateContractTemplate;
 
-internal sealed class UpdateContractTemplateCommandHandler(IApplicationDbContext context)
+internal sealed class UpdateContractTemplateCommandHandler(
+    IContractTemplateReadRepository contractTemplateReadRepository,
+    IContractTemplateUpdateRepository contractTemplateUpdateRepository,
+    IContractTemplateInsertRepository contractTemplateInsertRepository,
+    Application.Interfaces.Repositories.IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateContractTemplateCommand, Result<Unit>>
 {
     public async Task<Result<Unit>> Handle(
         UpdateContractTemplateCommand request,
         CancellationToken cancellationToken)
     {
-        var entity = await context.ContractTemplates
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var entity = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (entity is null)
         {
@@ -50,7 +52,8 @@ internal sealed class UpdateContractTemplateCommandHandler(IApplicationDbContext
         entity.Content = request.Request.Content;
         entity.DynamicFields = request.Request.DynamicFields;
 
-        await context.SaveChangesAsync(cancellationToken);
+        contractTemplateUpdateRepository.Update(entity);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var auditLog = new ContractTemplateAuditLog
         {
@@ -60,8 +63,8 @@ internal sealed class UpdateContractTemplateCommandHandler(IApplicationDbContext
             ChangedBy = "System",
             Details = $"Cập nhật mẫu '{entity.Name}' v{entity.Version}"
         };
-        await context.ContractTemplateAuditLogs.AddAsync(auditLog, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+        contractTemplateInsertRepository.AddAuditLog(auditLog);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<Unit>.Success(Unit.Value);
     }

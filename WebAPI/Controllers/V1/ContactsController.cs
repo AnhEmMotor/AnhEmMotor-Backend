@@ -2,6 +2,7 @@ using Application.ApiContracts.Contacts.Requests;
 using Application.Features.Contacts.Commands.CreateSupportRequest;
 using Application.Features.Contacts.Commands.CreateFeedback;
 using Application.Features.Contacts.Commands.CreateJobApplication;
+using Application.Features.Contacts.Queries.GetContacts;
 using Application.Features.Contacts.Commands.UpdateContactStatus;
 using Application.Features.Contacts.Queries.GetPaginatedContacts;
 using Asp.Versioning;
@@ -28,6 +29,17 @@ public class ContactsController(ISender sender) : ApiController
     public async Task<IActionResult> CreateAsync(Application.Features.Contacts.Commands.CreateContact.CreateContactCommand command, CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy toàn bộ danh sách liên hệ.
+    /// </summary>
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetContactsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

@@ -14,7 +14,7 @@ public class CreateServiceEvaluationReplyCommandHandler(
     IContactReadRepository contactReadRepository,
     IContactInsertRepository contactInsertRepository,
     IUnitOfWork unitOfWork,
-    IHttpTokenAccessorService tokenAccessor
+    ICurrentUserContext currentUserContext
 ) : IRequestHandler<CreateServiceEvaluationReplyCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(
@@ -35,8 +35,8 @@ public class CreateServiceEvaluationReplyCommandHandler(
             return Result<int>.Failure(Error.NotFound("Liên hệ không tồn tại."));
         }
 
-        var userIdString = tokenAccessor.GetUserId();
-        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+        var userId = currentUserContext.GetUserId();
+        if (userId == Guid.Empty)
         {
             return Result<int>.Failure(Error.Unauthorized("Không thể xác định người dùng thực hiện phản hồi."));
         }

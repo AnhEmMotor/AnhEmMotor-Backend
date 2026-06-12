@@ -11,6 +11,8 @@ namespace Application.Interfaces.Repositories.RepairOrder
 {
     public interface IRepairOrderReadRepository
     {
+public Task<List<Domain.Entities.RepairOrder>> GetAllAsync(CancellationToken cancellationToken = default);
+
 public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
             SieveModel sieveModel,
             DataFetchMode mode = DataFetchMode.ActiveOnly,

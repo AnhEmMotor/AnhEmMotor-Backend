@@ -18,6 +18,7 @@ public class ContactReadRepository(ApplicationDBContext context) : IContactReadR
     {
         return context.Contacts
             .Include(c => c.Replies)
+            .ThenInclude(r => r.RepliedBy)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync(cancellationToken);
     }

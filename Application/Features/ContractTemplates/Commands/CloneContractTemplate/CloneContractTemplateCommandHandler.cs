@@ -1,23 +1,25 @@
 using Application.Common.Models;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories.ContractTemplate;
 using Domain.Entities;
 using Domain.Primitives;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Commands.CloneContractTemplate;
 
-internal sealed class CloneContractTemplateCommandHandler(IApplicationDbContext context)
+internal sealed class CloneContractTemplateCommandHandler(
+    IContractTemplateReadRepository contractTemplateReadRepository,
+    IContractTemplateInsertRepository contractTemplateInsertRepository,
+    IContractTemplateUpdateRepository contractTemplateUpdateRepository,
+    Application.Interfaces.Repositories.IUnitOfWork unitOfWork)
     : IRequestHandler<CloneContractTemplateCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(
         CloneContractTemplateCommand request,
         CancellationToken cancellationToken)
     {
-        var original = await context.ContractTemplates
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var original = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken);
 
         if (original is null)
         {
@@ -38,8 +40,9 @@ internal sealed class CloneContractTemplateCommandHandler(IApplicationDbContext 
             IsActive = true
         };
 
-        await context.ContractTemplates.AddAsync(clone, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+        contractTemplateUpdateRepository.Update(original);
+        contractTemplateInsertRepository.Add(clone);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<Guid>.Success(clone.Id);
     }

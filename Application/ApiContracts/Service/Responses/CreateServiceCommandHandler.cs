@@ -7,7 +7,6 @@ using Domain.Entities;
 using Domain.Primitives;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Services.Commands.CreateService;
 

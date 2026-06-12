@@ -1,10 +1,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Entities.Logistics;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Logistics.Returns.Commands.InspectReturn;
 
@@ -18,15 +17,17 @@ public class InspectReturnCommand : IRequest<bool>
     public string Action { get; set; } = string.Empty; // "restock", "defect", "refund"
 }
 
-public class InspectReturnCommandHandler(IApplicationDbContext db)
+public class InspectReturnCommandHandler(
+    IParcelDeliveryOrderReadRepository parcelDeliveryOrderReadRepository,
+    IParcelDeliveryOrderUpdateRepository parcelDeliveryOrderUpdateRepository,
+    Application.Interfaces.Repositories.IUnitOfWork unitOfWork)
     : IRequestHandler<InspectReturnCommand, bool>
 {
     public async Task<bool> Handle(InspectReturnCommand request, CancellationToken cancellationToken)
     {
-        var order = await db.ParcelDeliveryOrders
-            .FirstOrDefaultAsync(x => x.Id == request.Id && x.Status == ParcelDeliveryStatus.Returned, cancellationToken);
+        var order = await parcelDeliveryOrderReadRepository.GetByIdAsync(request.Id, cancellationToken);
 
-        if (order == null) return false;
+        if (order == null || order.Status != ParcelDeliveryStatus.Returned) return false;
 
         order.InspectedAt = DateTime.UtcNow;
         order.BoxCondition = request.BoxCondition;
@@ -39,7 +40,8 @@ public class InspectReturnCommandHandler(IApplicationDbContext db)
         // - Update inventory (add back stock for "restock", move to defect storage for "defect")
         // - Trigger refund logic to finance module for "refund"
         
-        await db.SaveChangesAsync(cancellationToken);
+        parcelDeliveryOrderUpdateRepository.Update(order);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return true;
     }

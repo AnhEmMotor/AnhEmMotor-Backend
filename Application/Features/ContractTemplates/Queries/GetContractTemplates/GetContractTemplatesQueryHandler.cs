@@ -1,23 +1,23 @@
 using Application.ApiContracts.ContractTemplate.Responses;
 using Application.Common.Models;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories.ContractTemplate;
 using Domain.Primitives;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Queries.GetContractTemplates;
 
-internal sealed class GetContractTemplatesQueryHandler(IApplicationDbContext context)
+internal sealed class GetContractTemplatesQueryHandler(IContractTemplateReadRepository contractTemplateReadRepository)
 : IRequestHandler<GetContractTemplatesQuery, Result<PagedResult<ContractTemplateResponse>>>
 {
     public async Task<Result<PagedResult<ContractTemplateResponse>>> Handle(
         GetContractTemplatesQuery request,
         CancellationToken cancellationToken)
     {
-        var query = context.ContractTemplates.AsNoTracking();
+        var items = await contractTemplateReadRepository.GetAllAsync(cancellationToken);
+        var query = items.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
@@ -25,9 +25,9 @@ internal sealed class GetContractTemplatesQueryHandler(IApplicationDbContext con
             query = query.Where(x => x.Name.ToLower().Contains(search) || x.Code.ToLower().Contains(search));
         }
 
-        var totalCount = await query.CountAsync(cancellationToken);
+        var totalCount = query.Count();
 
-        var items = await query
+        var pageItems = query
             .OrderByDescending(x => x.CreatedAt)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
@@ -45,9 +45,9 @@ internal sealed class GetContractTemplatesQueryHandler(IApplicationDbContext con
                 ParentId = x.ParentId,
                 IsUsed = x.IsUsed
             })
-            .ToListAsync(cancellationToken);
+            .ToList();
 
-        var result = new PagedResult<ContractTemplateResponse>(items, totalCount, request.Page, request.PageSize);
+        var result = new PagedResult<ContractTemplateResponse>(pageItems, totalCount, request.Page, request.PageSize);
 
         return Result<PagedResult<ContractTemplateResponse>>.Success(result);
     }

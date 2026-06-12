@@ -1,9 +1,8 @@
+using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using System.Threading;
 using System.Threading.Tasks;
 using Domain.Entities.Logistics;
-using Application.Common.Interfaces;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Logistics.Commands.ProcessFulfillment;
 
@@ -30,44 +29,45 @@ public class FulfillmentCommandsHandler :
     IRequestHandler<UpdateTrackingNumberCommand, bool>,
     IRequestHandler<ToggleItemPickCommand, bool>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IParcelDeliveryOrderReadRepository _readRepository;
+    private readonly IParcelDeliveryOrderUpdateRepository _updateRepository;
 
-    public FulfillmentCommandsHandler(IApplicationDbContext context)
+    public FulfillmentCommandsHandler(
+        IParcelDeliveryOrderReadRepository readRepository,
+        IParcelDeliveryOrderUpdateRepository updateRepository)
     {
-        _context = context;
+        _readRepository = readRepository;
+        _updateRepository = updateRepository;
     }
 
     public async Task<bool> Handle(UpdateParcelStatusCommand request, CancellationToken cancellationToken)
     {
-        var order = await _context.ParcelDeliveryOrders.FindAsync(new object[] { request.Id }, cancellationToken);
+        var order = await _readRepository.GetByIdAsync(request.Id, cancellationToken);
         if (order == null) return false;
 
         order.Status = request.NewStatus;
-        
-        // If status is shipping, maybe logic for COD can go here via MediatR events or Domain events.
-        // For now just save changes.
-        
-        await _context.SaveChangesAsync(cancellationToken);
+        _updateRepository.Update(order);
         return true;
     }
 
     public async Task<bool> Handle(UpdateTrackingNumberCommand request, CancellationToken cancellationToken)
     {
-        var order = await _context.ParcelDeliveryOrders.FindAsync(new object[] { request.Id }, cancellationToken);
+        var order = await _readRepository.GetByIdAsync(request.Id, cancellationToken);
         if (order == null) return false;
 
         order.TrackingNumber = request.TrackingNumber;
-        await _context.SaveChangesAsync(cancellationToken);
+        _updateRepository.Update(order);
         return true;
     }
 
     public async Task<bool> Handle(ToggleItemPickCommand request, CancellationToken cancellationToken)
     {
-        var item = await _context.ParcelDeliveryOrderItems.FindAsync(new object[] { request.ItemId }, cancellationToken);
+        var order = await _readRepository.GetByIdAsync(request.ItemId, cancellationToken);
+        var item = order?.Items?.FirstOrDefault(x => x.Id == request.ItemId);
         if (item == null) return false;
 
         item.IsPicked = request.IsPicked;
-        await _context.SaveChangesAsync(cancellationToken);
+        _updateRepository.UpdateItem(item);
         return true;
     }
 }
