@@ -1,10 +1,11 @@
 using Application.Common.Helper;
 
 using Application.Features.News.Commands.CreateNews;
-using Application.Features.News.Queries.GetNewsBySlug;
+using Application.Features.News.Queries.GetNewsById;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.News;
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 
 namespace UnitTests;
@@ -14,12 +15,14 @@ public class News
     private readonly Mock<INewsReadRepository> _newsReadRepoMock;
     private readonly Mock<INewsInsertRepository> _newsInsertRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IMemoryCache> _memoryCacheMock;
 
     public News()
     {
         _newsReadRepoMock = new Mock<INewsReadRepository>();
         _newsInsertRepoMock = new Mock<INewsInsertRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _memoryCacheMock = new Mock<IMemoryCache>();
     }
 
     #pragma warning disable IDE0079 
@@ -99,13 +102,13 @@ public class News
         _newsInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.News>(n => n.PublishedDate == null)), Times.Once);
     }
 
-    [Fact(DisplayName = "NEWS_008 - Xử lý lỗi khi truy vấn Slug không tồn tại")]
-    public async Task GetBySlug_NotExists_ReturnsNotFound()
+    [Fact(DisplayName = "NEWS_008 - Xử lý lỗi khi truy vấn Id không tồn tại")]
+    public async Task GetNewsById_ReturnsNewsResponse_WhenNewsExists()
     {
-        _newsReadRepoMock.Setup(x => x.GetBySlugAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _newsReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.Entities.News?)null);
-        var handler = new GetNewsBySlugQueryHandler(_newsReadRepoMock.Object);
-        var result = await handler.Handle(new GetNewsBySlugQuery { Slug = "non-existent" }, CancellationToken.None)
+        var handler = new GetNewsByIdQueryHandler(_newsReadRepoMock.Object, _memoryCacheMock.Object);
+        var result = await handler.Handle(new GetNewsByIdQuery { Id = 999 }, CancellationToken.None)
             .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().Contain(e => string.Compare(e.Code, "News.NotFound") == 0);

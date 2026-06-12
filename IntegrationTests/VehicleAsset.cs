@@ -213,7 +213,10 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var payload = new { new_lead_id = lead2.Id };
         var response = await _client.PostAsJsonAsync($"/api/v1/vehicle/{vehicle.Id}/transfer", payload)
             .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var errContent = await response.Content
+            .ReadAsStringAsync(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK, $"Error 500 content: {errContent}");
         var updatedAsset = await response!.Content
             .ReadFromJsonAsync<VehicleResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);

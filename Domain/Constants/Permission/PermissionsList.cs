@@ -1,4 +1,5 @@
 using Domain.Constants.Permission.Permissions;
+using PurchaseOrder = Domain.Constants.Permission.Permissions.PurchaseOrder;
 
 namespace Domain.Constants.Permission;
 
@@ -32,8 +33,14 @@ public static class PermissionsList
         { Suppliers.Delete, new PermissionMetadata("Delete Supplier", "Xóa nhà cung cấp") },
 
         { Outputs.View, new PermissionMetadata("View Outputs", "Xem danh sách đơn xuất hàng") },
-        { Outputs.ViewConfirmed, new PermissionMetadata("View Confirmed Outputs", "Xem danh sách phiếu bán hàng đã xác nhận") },
-        { Outputs.ViewUnconfirmed, new PermissionMetadata("View Unconfirmed Outputs", "Xem danh sách phiếu tạm chưa xác nhận") },
+        {
+            Outputs.ViewConfirmed,
+            new PermissionMetadata("View Confirmed Outputs", "Xem danh sách phiếu bán hàng đã xác nhận")
+        },
+        {
+            Outputs.ViewUnconfirmed,
+            new PermissionMetadata("View Unconfirmed Outputs", "Xem danh sách phiếu tạm chưa xác nhận")
+        },
         { Outputs.Create, new PermissionMetadata("Create Output", "Tạo đơn xuất hàng mới") },
         { Outputs.Edit, new PermissionMetadata("Edit Output", "Chỉnh sửa đơn xuất hàng") },
         { Outputs.Delete, new PermissionMetadata("Delete Output", "Xóa đơn xuất hàng") },
@@ -131,6 +138,19 @@ public static class PermissionsList
             InventoryReceipts.ApproveReject,
             new PermissionMetadata("Approve/Reject Purchase Order", "Phê duyệt/Từ chối đơn chốt mua và nhập hàng")
         },
+        { DebtPayments.View, new PermissionMetadata("View Debt Payments", "Xem quản lý công nợ và danh sách nợ") },
+        { DebtPayments.Create, new PermissionMetadata("Create Debt Payment", "Tạo phiếu trả nợ nhà cung cấp") },
+        { PurchaseOrder.View, new PermissionMetadata("View Purchase Order", "Xem danh sách phiếu mua hàng") },
+        { PurchaseOrder.Create, new PermissionMetadata("Create Purchase Order", "Tạo đơn phiếu mua hàng") },
+        { PurchaseOrder.Edit, new PermissionMetadata("Edit Purchase Order", "Chỉnh sửa phiếu mua hàng") },
+        { PurchaseOrder.Delete, new PermissionMetadata("Delete Purchase Order", "Xóa phiếu mua hàng") },
+        { PurchaseOrder.Send, new PermissionMetadata("Send Purchase Order", "Gửi phiếu mua hàng") },
+        {
+            PurchaseOrder.ApproveReject,
+            new PermissionMetadata(
+            "Approve Order",
+            "Duyệt/Từ chối phiếu mua hàng; và bắt buộc đi kèm quyền Sửa/Xóa đối với phiếu mua hàng đã gửi (Sent)")
+        }
     };
 
     public static PermissionMetadata? GetMetadata(string permissionName)
@@ -160,7 +180,10 @@ public static class PermissionsList
             [ProductCategories.View, ProductCategories.Create, ProductCategories.Edit, ProductCategories.Delete]
         },
         { "Nhà cung cấp", [Suppliers.View, Suppliers.Create, Suppliers.Edit, Suppliers.Delete] },
-        { "Xuất hàng", [Outputs.View, Outputs.ViewConfirmed, Outputs.ViewUnconfirmed, Outputs.Create, Outputs.Edit, Outputs.Delete, Outputs.ChangeStatus] },
+        {
+            "Xuất hàng",
+            [Outputs.View, Outputs.ViewConfirmed, Outputs.ViewUnconfirmed, Outputs.Create, Outputs.Edit, Outputs.Delete, Outputs.ChangeStatus]
+        },
         { "Tệp tin", [Files.View, Files.Upload, Files.Delete] },
         { "Cài đặt", [Settings.View, Settings.Edit] },
         { "Thống kê", [Statistical.View, Statistical.Export] },
@@ -175,17 +198,10 @@ public static class PermissionsList
         { "Nhân sự", [Permissions.HR.View, Permissions.HR.Create, Permissions.HR.Edit, Permissions.HR.Delete] },
         { "Lương & Hoa hồng", [Payroll.View, Payroll.Configure, Payroll.Approve] },
         {
-            "Báo giá",
-            [Quotations.View, Quotations.Create, Quotations.Edit, Quotations.Delete, Quotations.Send, Quotations.Approve]
-        },
-        {
             "Yêu cầu mua hàng (PR)",
             [PurchaseRequests.View, PurchaseRequests.Create, PurchaseRequests.Edit, PurchaseRequests.Delete, PurchaseRequests.Send, PurchaseRequests.ApproveReject]
         },
-        {
-            "Đơn chốt mua (PO)",
-            [InventoryReceipts.View, InventoryReceipts.Create, InventoryReceipts.Edit, InventoryReceipts.Delete, InventoryReceipts.Send, InventoryReceipts.ApproveReject]
-        },
+        { "Quản lý công nợ", [DebtPayments.View, DebtPayments.Create] },
     };
 
     public static readonly Dictionary<string, List<string>> Conflicts = [];
@@ -275,6 +291,7 @@ public static class PermissionsList
         { InventoryReceipts.Delete, [InventoryReceipts.View] },
         { InventoryReceipts.Send, [InventoryReceipts.View] },
         { InventoryReceipts.ApproveReject, [InventoryReceipts.View] },
+        { DebtPayments.Create, [DebtPayments.View] },
     };
 
     public static (bool IsValid, string? ErrorMessage) ValidateRules(IEnumerable<string> permissions)

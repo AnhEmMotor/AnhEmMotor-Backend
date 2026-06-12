@@ -1,7 +1,7 @@
 using Application.ApiContracts.News.Responses;
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
-using Application.Features.Banners.Queries.GetActiveBanners;
+using Application.Features.Banners.Queries.GetStoreBanners;
 using Application.Features.Bookings.Commands.ConfirmBooking;
 using Application.Features.Contacts.Commands.CreateContactReply;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
@@ -340,7 +340,8 @@ public class PermissionAndRole
     {
         var newsController = new NewsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetNewsListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PagedResult<NewsResponse>>.Success(new PagedResult<NewsResponse>([], 0, 1, 10)));
+            .ReturnsAsync(
+                Result<PagedResult<NewsSummaryResponse>>.Success(new PagedResult<NewsSummaryResponse>([], 0, 1, 10)));
         var result = await newsController.GetListAsync(new SieveModel(), CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
     }
@@ -393,10 +394,10 @@ public class PermissionAndRole
     public async Task GetBanners_NoPermission_ReturnsForbidden()
     {
         var bannerController = new BannerController(_mediatorMock.Object);
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetActiveBannersQuery>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetStoreBannersQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => bannerController.GetActiveAsync(CancellationToken.None))
+            () => bannerController.GetStoreAsync(null, CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -422,14 +423,6 @@ public class PermissionAndRole
             CancellationToken.None)
             .ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
-    }
-
-    [Fact(DisplayName = "PERM_034 - Controller - Xóa khách hàng tiềm năng không có quyền")]
-    public async Task DeleteLead_NoPermission_ReturnsForbidden()
-    {
-        _mediatorMock.Setup(m => m.Send(It.IsAny<IBaseRequest>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedAccessException());
-        Assert.True(true);
     }
 
     [Fact(DisplayName = "PERM_039 - Controller - Gán quyền mới cho vai trò (Role)")]

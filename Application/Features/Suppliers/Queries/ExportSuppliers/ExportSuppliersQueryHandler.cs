@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Supplier;
 using ClosedXML.Excel;
+using Domain.Constants;
 using MediatR;
 using Sieve.Models;
 
@@ -63,7 +64,7 @@ public sealed class ExportSuppliersQueryHandler(ISupplierReadRepository reposito
             worksheet.Row(rowIndex).Height = 24;
             worksheet.Cell(rowIndex, 1).Value = stt++;
             worksheet.Cell(rowIndex, 2).Value = supplier.Name ?? string.Empty;
-            worksheet.Cell(rowIndex, 3).Value = supplier.PartnerTypeId ?? string.Empty;
+            worksheet.Cell(rowIndex, 3).Value = PartnerType.GetName(supplier.PartnerTypeId);
             worksheet.Cell(rowIndex, 4).Value = supplier.Phone ?? string.Empty;
             worksheet.Cell(rowIndex, 5).Value = supplier.Email ?? string.Empty;
             worksheet.Cell(rowIndex, 6).Value = supplier.TaxIdentificationNumber ?? string.Empty;

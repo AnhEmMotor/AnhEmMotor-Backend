@@ -42,4 +42,10 @@ public interface IVehicleReadRepository
         int productVariantId,
         int? productVariantColorId,
         CancellationToken cancellationToken = default);
+
+    public Task<List<Domain.Entities.Vehicle>> GetVehiclesByReceiptInfoIdAsync(
+        int receiptInfoId,
+        CancellationToken cancellationToken = default);
+
+    public Task<Domain.Entities.Vehicle?> GetByVinAsync(string vin, CancellationToken cancellationToken = default);
 }

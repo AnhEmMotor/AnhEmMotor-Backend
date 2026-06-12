@@ -8,7 +8,7 @@ public class InventoryReceiptUpdateRepository(ApplicationDBContext context) : II
 {
     public void Update(InventoryReceiptEntity InventoryReceipt)
     {
-        context.InventoryReceiptReceipts.Update(InventoryReceipt);
+        context.InventoryReceipts.Update(InventoryReceipt);
     }
 
     public void Restore(InventoryReceiptEntity InventoryReceipt)

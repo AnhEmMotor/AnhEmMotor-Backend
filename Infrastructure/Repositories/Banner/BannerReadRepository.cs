@@ -12,21 +12,21 @@ namespace Infrastructure.Repositories.Banner
             return context.Banners.FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         }
 
-        public Task<List<Domain.Entities.Banner>> GetActiveBannersAsync(CancellationToken cancellationToken)
+        public Task<List<Domain.Entities.Banner>> GetBannersByPlacementAsync(
+            CancellationToken cancellationToken,
+            string? placement = null)
         {
-            var now = DateTimeOffset.UtcNow;
-            return context.Banners
-                .Where(
-                    b => b.IsActive &&
-                        (!b.StartDate.HasValue || b.StartDate <= now) &&
-                        (!b.EndDate.HasValue || b.EndDate >= now))
-                .OrderByDescending(b => b.Priority)
-                .ToListAsync(cancellationToken);
+            var query = context.Banners.AsQueryable();
+            if (!string.IsNullOrEmpty(placement))
+            {
+                query = query.Where(b => b.Placement == placement);
+            }
+            return query.ToListAsync(cancellationToken);
         }
 
         public Task<List<Domain.Entities.Banner>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return context.Banners.OrderByDescending(b => b.Priority).ToListAsync(cancellationToken);
+            return context.Banners.ToListAsync(cancellationToken);
         }
 
         public Task<List<BannerAuditLog>> GetLogsByBannerIdAsync(int bannerId, CancellationToken cancellationToken)

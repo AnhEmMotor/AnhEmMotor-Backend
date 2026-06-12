@@ -82,7 +82,7 @@ public class ProductReadRepository(
             .ThenInclude(v => v.ProductVariantColors)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InventoryReceiptInfos)
-            .ThenInclude(ii => ii.InventoryReceiptReceipt)
+            .ThenInclude(ii => ii.InventoryReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
@@ -133,7 +133,7 @@ public class ProductReadRepository(
             .ThenInclude(v => v.ProductVariantColors)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InventoryReceiptInfos)
-            .ThenInclude(ii => ii.InventoryReceiptReceipt)
+            .ThenInclude(ii => ii.InventoryReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
@@ -185,7 +185,7 @@ public class ProductReadRepository(
             .ThenInclude(v => v.ProductVariantColors)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InventoryReceiptInfos)
-            .ThenInclude(ii => ii.InventoryReceiptReceipt)
+            .ThenInclude(ii => ii.InventoryReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder);
@@ -285,8 +285,8 @@ public class ProductReadRepository(
                         v => v.VariantOptionValues
                                 .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
                             v.ProductVariantColors
-                                .Any(c => c.ColorName != null && names.Any(n => c.ColorName.ToLower().Contains(n))) ||
-                            (v.VariantName != null && names.Any(n => v.VariantName.ToLower().Contains(n))));
+                                .Any(c => c.ColorName != null && names.Contains(c.ColorName.ToLower())) ||
+                            (v.VariantName != null && names.Contains(v.VariantName.ToLower())));
                 }
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));
@@ -322,7 +322,7 @@ public class ProductReadRepository(
             .ThenInclude(ov => ov!.Option)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InventoryReceiptInfos)
-            .ThenInclude(ii => ii.InventoryReceiptReceipt)
+            .ThenInclude(ii => ii.InventoryReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder);
@@ -403,7 +403,7 @@ public class ProductReadRepository(
             .ThenInclude(ov => ov!.Option)
             .Include(v => v.ProductCollectionPhotos)
             .Include(v => v.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-            .ThenInclude(ii => ii.InventoryReceiptReceipt)
+            .ThenInclude(ii => ii.InventoryReceipt)
             .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null))
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
@@ -413,5 +413,45 @@ public class ProductReadRepository(
     public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
     {
         return context.Products.AnyAsync(p => p.Id == id, cancellationToken);
+    }
+
+    public Task<List<ProductEntity>> GetAllProductsWithInventoryDetailsAsync(CancellationToken cancellationToken)
+    {
+        return context.Products
+            .Where(p => p.DeletedAt == null)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.ProductVariantColors)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.InventoryReceipt)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.PurchaseRequestItem)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<Domain.Entities.ProductVariant?> GetVariantByIdWithDetailsAsync(
+        int variantId,
+        CancellationToken cancellationToken)
+    {
+        return context.ProductVariants
+            .Where(v => v.Id == variantId && v.DeletedAt == null)
+            .Include(v => v.Product)
+            .Include(v => v.ProductVariantColors)
+            .Include(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.InventoryReceipt)
+            .Include(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.PurchaseRequestItem)
+            .ThenInclude(pri => pri!.PurchaseRequest)
+            .Include(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.Supplier)
+            .Include(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

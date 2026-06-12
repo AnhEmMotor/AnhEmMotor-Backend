@@ -19,20 +19,15 @@ public sealed class UpdateBannerCommandHandler(
         var banner = await bannerReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (banner == null)
             return Result<Unit>.Failure("Banner not found");
-        var oldStatus = banner.IsActive;
         banner.Title = request.Title.Trim();
-        banner.ImageUrl = request.ImageUrl.Trim();
-        banner.LinkUrl = request.LinkUrl?.Trim();
-        banner.CtaText = request.CtaText?.Trim();
-        banner.Position = request.Position?.Trim();
+        banner.DesktopImageUrl = request.DesktopImageUrl.Trim();
+        banner.MobileImageUrl = request.MobileImageUrl?.Trim();
+        banner.Description = request.Description?.Trim();
+        banner.CtaLink = request.CtaLink?.Trim();
+        banner.CtaLabel = request.CtaLabel?.Trim();
         banner.Placement = request.Placement?.Trim();
-        banner.StartDate = request.StartDate;
-        banner.EndDate = request.EndDate;
-        banner.IsActive = request.IsActive;
-        banner.Priority = request.Priority;
-        banner.DisplayOrder = request.DisplayOrder;
         bannerUpdateRepository.Update(banner);
-        var action = oldStatus != banner.IsActive ? (banner.IsActive ? "Resume" : "Pause") : "Update";
+        var action = "Update";
         bannerInsertRepository.AddLog(
             new BannerAuditLog
             {

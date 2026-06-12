@@ -41,6 +41,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<News>(p => p.Id).CanSort().CanFilter();
         mapper.Property<News>(p => p.Title).CanSort().CanFilter();
         mapper.Property<News>(p => p.CategoryId).CanFilter();
+        mapper.Property<News>(p => p.Category!.Slug).CanFilter().HasName("Category.Slug");
         mapper.Property<Banner>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Banner>(p => p.Title).CanSort().CanFilter();
         mapper.Property<ProductVariant>(p => p.Id).CanSort().CanFilter();
@@ -93,10 +94,6 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Vehicle>(v => v.PurchaseDate).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.Lead!.FullName).CanSort().CanFilter().HasName("FullName");
         mapper.Property<Vehicle>(v => v.Lead!.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
-        mapper.Property<Quotation>(p => p.Id).CanSort().CanFilter();
-        mapper.Property<Quotation>(p => p.Status).CanSort().CanFilter();
-        mapper.Property<Quotation>(p => p.SupplierId).CanSort().CanFilter();
-        mapper.Property<Quotation>(p => p.Supplier!.Name).CanFilter().HasName("SupplierName");
         mapper.Property<Lead>(l => l.Id).CanSort().CanFilter();
         mapper.Property<Lead>(l => l.FullName).CanSort().CanFilter();
         mapper.Property<Lead>(l => l.PhoneNumber).CanSort().CanFilter();

@@ -1,54 +1,189 @@
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
+using Application.Features.InventoryOnHand.Notifications;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.InventoryReceipt;
+using Application.Interfaces.Repositories.ProductQuotations;
+using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services;
-using Domain.Constants;
+using Domain.Entities;
 using Mapster;
 using MediatR;
+using System;
+using System.Linq;
 
-namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
-
-public sealed class UpdateInventoryReceiptStatusCommandHandler(
-    IInventoryReceiptReadRepository readRepository,
-    IInventoryReceiptUpdateRepository updateRepository,
-    ICurrentUserContext currentUserContext,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>
+namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus
 {
-    public async Task<Result<InventoryReceiptDetailResponse>> Handle(
-        UpdateInventoryReceiptStatusCommand request,
-        CancellationToken cancellationToken)
+    public sealed class UpdateInventoryReceiptStatusCommandHandler(
+        IInventoryReceiptReadRepository readRepository,
+        IInventoryReceiptUpdateRepository updateRepository,
+        ICurrentUserContext currentUserContext,
+        IInventoryLedgerRepository ledgerRepository,
+        IProductQuotationReadRepository quotationReadRepository,
+        IProductQuotationUpdateRepository quotationUpdateRepository,
+        IProductQuotationInsertRepository quotationInsertRepository,
+        ISupplierDebtRepository supplierDebtRepository,
+        IUnitOfWork unitOfWork,
+        IPublisher publisher) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>
     {
-        var InventoryReceipt = await readRepository.GetByIdWithDetailsAsync(
-            request.Id,
-            cancellationToken,
-            DataFetchMode.ActiveOnly)
-            .ConfigureAwait(false);
-        if (InventoryReceipt is null)
+        public async Task<Result<InventoryReceiptDetailResponse>> Handle(
+            UpdateInventoryReceiptStatusCommand request,
+            CancellationToken cancellationToken)
         {
-            return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
-        }
-        if (!string.Equals(InventoryReceipt.StatusId, InventoryReceiptStatus.Sent, StringComparison.OrdinalIgnoreCase))
-        {
-            return Error.BadRequest("Chỉ có thể duyệt hoặc từ chối phiếu nhập đang ở trạng thái đã gửi (sent).", "StatusId");
-        }
-        if (!string.Equals(request.StatusId, InventoryReceiptStatus.Approve, StringComparison.OrdinalIgnoreCase) &&
-            !string.Equals(request.StatusId, InventoryReceiptStatus.Reject, StringComparison.OrdinalIgnoreCase))
-        {
-            return Error.BadRequest("Trạng thái mới phải là phê duyệt (approve) hoặc từ chối (reject).", "StatusId");
-        }
-        InventoryReceipt.StatusId = request.StatusId;
-        if (string.Equals(request.StatusId, InventoryReceiptStatus.Approve, StringComparison.OrdinalIgnoreCase))
-        {
+            var receipt = await readRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken)
+                .ConfigureAwait(false);
+            if (receipt is null)
+            {
+                return Error.NotFound($"Không tìm thấy phiếu nhập kho với ID {request.Id}.", "Id");
+            }
+            if (string.Compare(receipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent) != 0)
+            {
+                return Error.BadRequest(
+                    "Phiếu nhập kho phải ở trạng thái đã gửi (sent) mới có thể phê duyệt hoặc từ chối.",
+                    "StatusId");
+            }
             var currentUserId = currentUserContext.GetUserId();
-            InventoryReceipt.InventoryReceiptDate = DateTimeOffset.UtcNow;
-            InventoryReceipt.ConfirmedBy = currentUserId;
+            if (string.Equals(
+                request.StatusId,
+                Domain.Constants.InventoryReceiptStatus.Approve,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var info in receipt.InventoryReceiptInfos)
+                {
+                    var prItem = info.PurchaseRequestItem;
+                    if (prItem != null)
+                    {
+                        var importedQty = prItem.InventoryReceiptInfos
+                            .Where(
+                                ii => ii.DeletedAt == null &&
+                                    ii.InventoryReceiptId != receipt.Id &&
+                                    ii.InventoryReceipt != null &&
+                                    ii.InventoryReceipt.DeletedAt == null &&
+                                    string.Equals(
+                                        ii.InventoryReceipt.StatusId,
+                                        Domain.Constants.InventoryReceiptStatus.Approve,
+                                        StringComparison.OrdinalIgnoreCase))
+                            .Sum(ii => ii.Count ?? 0);
+                        var remainingAllowed = prItem.Quantity - importedQty;
+                        var currentQty = info.Count ?? 0;
+                        if (currentQty > remainingAllowed)
+                        {
+                            var productName = prItem.ProductVariant?.Product?.Name ??
+                                $"Biến thể #{prItem.ProductVariantId}";
+                            return Error.BadRequest(
+                                $"Không thể phê duyệt. Số lượng nhập ({currentQty}) cho sản phẩm '{productName}' vượt quá giới hạn còn lại ({remainingAllowed}).",
+                                "StatusId");
+                        }
+                    }
+                }
+                receipt.StatusId = Domain.Constants.InventoryReceiptStatus.Approve;
+                receipt.ApprovedBy = currentUserId;
+                receipt.ConfirmedBy = currentUserId;
+                receipt.RejectedBy = null;
+                foreach (var info in receipt.InventoryReceiptInfos)
+                {
+                    var variantId = info.PurchaseRequestItem?.ProductVariantId ?? 0;
+                    var colorId = info.PurchaseRequestItem?.ProductVariantColorId;
+                    var lastEntry = await ledgerRepository.GetLastEntryAsync(variantId, colorId, cancellationToken)
+                        .ConfigureAwait(false);
+                    var currentStock = lastEntry?.StockAfter ?? 0;
+                    var importQty = info.Count ?? 0;
+                    var newStock = currentStock + importQty;
+                    var ledger = new InventoryLedger
+                    {
+                        TransactionDate = DateTimeOffset.UtcNow,
+                        DocumentCode = $"IR-{receipt.Id}",
+                        TransactionType = "Nhập kho",
+                        ProductVariantId = variantId,
+                        ProductVariantColorId = colorId,
+                        PartnerName = info.Supplier?.Name,
+                        ImportQty = importQty,
+                        ExportQty = 0,
+                        UnitPrice = info.UnitPrice ?? 0,
+                        TotalAmount = importQty * (info.UnitPrice ?? 0),
+                        StockAfter = newStock
+                    };
+                    await ledgerRepository.AddAsync(ledger, cancellationToken).ConfigureAwait(false);
+                    if (info.SupplierId.HasValue && info.UnitPrice.HasValue && variantId > 0)
+                    {
+                        var existingQuote = await quotationReadRepository.GetBySupplierAndVariantAsync(
+                            variantId,
+                            colorId,
+                            info.SupplierId.Value,
+                            cancellationToken)
+                            .ConfigureAwait(false);
+                        if (existingQuote != null)
+                        {
+                            if (existingQuote.QuotePrice != (int)info.UnitPrice.Value)
+                            {
+                                existingQuote.QuotePrice = (int)info.UnitPrice.Value;
+                                quotationUpdateRepository.Update(existingQuote);
+                            }
+                        } else
+                        {
+                            var newQuote = new ProductQuotation
+                            {
+                                ProductVariantId = variantId,
+                                ProductVariantColorId = colorId,
+                                SupplierId = info.SupplierId.Value,
+                                QuotePrice = (int)info.UnitPrice.Value
+                            };
+                            await quotationInsertRepository.AddAsync(newQuote, cancellationToken).ConfigureAwait(false);
+                        }
+                    }
+                }
+                var debtsToCreate = receipt.InventoryReceiptInfos
+                    .Where(info => info.SupplierId.HasValue && info.Count.HasValue && info.Count.Value > 0)
+                    .GroupBy(info => info.SupplierId!.Value)
+                    .Select(
+                        g => new { SupplierId = g.Key, TotalAmount = g.Sum(i => (i.Count ?? 0) * (i.UnitPrice ?? 0)) })
+                    .Where(x => x.TotalAmount > 0)
+                    .ToList();
+                foreach (var debtInfo in debtsToCreate)
+                {
+                    var debt = new SupplierDebt
+                    {
+                        InventoryReceiptId = receipt.Id,
+                        SupplierId = debtInfo.SupplierId,
+                        TotalAmount = debtInfo.TotalAmount,
+                        PaidAmount = 0
+                    };
+                    supplierDebtRepository.Add(debt);
+                }
+            } else if (string.Equals(
+                       request.StatusId,
+                       Domain.Constants.InventoryReceiptStatus.Reject,
+                       StringComparison.OrdinalIgnoreCase))
+            {
+                receipt.StatusId = Domain.Constants.InventoryReceiptStatus.Reject;
+                receipt.RejectedBy = currentUserId;
+                receipt.ApprovedBy = null;
+                receipt.ConfirmedBy = null;
+            } else
+            {
+                return Error.BadRequest("Trạng thái phê duyệt không hợp lệ.", "StatusId");
+            }
+            updateRepository.Update(receipt);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            var combos = new HashSet<(int VariantId, int? ColorId)>();
+            foreach (var info in receipt.InventoryReceiptInfos)
+            {
+                if (info.PurchaseRequestItem != null)
+                {
+                    combos.Add(
+                        (info.PurchaseRequestItem.ProductVariantId, info.PurchaseRequestItem.ProductVariantColorId));
+                }
+            }
+            if (combos.Count > 0)
+            {
+                await publisher.Publish(new InventoryChangedNotification(combos), cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            var updated = await readRepository.GetByIdWithDetailsAsync(receipt.Id, cancellationToken)
+                .ConfigureAwait(false);
+            return updated!.Adapt<InventoryReceiptDetailResponse>();
         }
-        updateRepository.Update(InventoryReceipt);
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken)
-            .ConfigureAwait(false);
-        ArgumentNullException.ThrowIfNull(updated);
-        return updated.Adapt<InventoryReceiptDetailResponse>();
     }
 }
+

@@ -21,13 +21,25 @@ namespace Domain.Entities
         [ForeignKey("CreatedByUser")]
         public Guid? CreatedBy { get; set; }
 
+        [Column("SentBy")]
+        [ForeignKey("SentByUser")]
+        public Guid? SentBy { get; set; }
+
         [Column("ApprovedBy")]
         [ForeignKey("ApprovedByUser")]
         public Guid? ApprovedBy { get; set; }
 
+        [Column("RejectedBy")]
+        [ForeignKey("RejectedByUser")]
+        public Guid? RejectedBy { get; set; }
+
         public ApplicationUser? CreatedByUser { get; set; }
 
         public ApplicationUser? ApprovedByUser { get; set; }
+
+        public ApplicationUser? SentByUser { get; set; }
+
+        public ApplicationUser? RejectedByUser { get; set; }
 
         public ICollection<PurchaseRequestItem> PurchaseRequestItems { get; set; } = [];
     }

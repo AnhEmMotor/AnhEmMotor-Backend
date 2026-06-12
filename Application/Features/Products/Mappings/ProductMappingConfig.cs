@@ -47,24 +47,8 @@ public class ProductMappingConfig : IRegister
                                 OptionValue = vov.OptionValue != null ? vov.OptionValue.Name : null
                             })
                     .ToList())
-            .Map(
-                dest => dest.Stock,
-                src => src.InventoryReceiptInfos != null
-                    ? src.InventoryReceiptInfos
-                            .Where(
-                                ii => ii.InventoryReceiptReceipt != null &&
-                                                InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
-                            .Sum(ii => ii.RemainingCount) ??
-                        0
-                    : 0)
-            .Map(
-                dest => dest.HasBeenBooked,
-                src => src.OutputInfos != null
-                    ? src.OutputInfos
-                            .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
-                            .Sum(oi => (long?)oi.Count) ??
-                        0
-                    : 0);
+            .Map(dest => dest.Stock, src => CalculateVariantStock(src))
+            .Map(dest => dest.HasBeenBooked, src => CalculateVariantBooked(src));
         config.NewConfig<VariantRow, ProductVariantDetailForManagerResponse>()
             .Map(
                 dest => dest.OptionValues,
@@ -74,9 +58,7 @@ public class ProductMappingConfig : IRegister
                                 !string.IsNullOrWhiteSpace(pair.OptionValue))
                     .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase))
-            .Map(dest => dest.PhotoCollection, src => src.Photos)
-            .Map(dest => dest.StatusStockId, src => GetStockStatus(src.Stock - src.HasBeenBooked))
-            .Map(dest => dest.InventoryStatus, src => InventoryStatus.OutOfStock);
+            .Map(dest => dest.PhotoCollection, src => src.Photos);
         config.NewConfig<VariantRow, ProductVariantDetailResponse>()
             .Map(
                 dest => dest.OptionValues,
@@ -145,20 +127,17 @@ public class ProductMappingConfig : IRegister
 
     private static ProductDetailForManagerResponse MapProductToDetailForManagerResponse(ProductEntity product)
     {
-        return MapProductToDetailForManagerResponseWithAlertLevel(product, 0);
+        return MapProductToDetailForManagerResponseWithAlertLevel(product);
     }
 
     public static ProductDetailForManagerResponse MapProductToDetailForManagerResponseWithAlertLevel(
-        ProductEntity product,
-        long alertLevel)
+        ProductEntity product)
     {
         var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
         var variantResponses = variantRows
             .Select(
                 row =>
                 {
-                    var available = row.Stock - row.HasBeenBooked;
-                    var inventoryStatus = CalculateInventoryStatus(available, alertLevel);
                     var coverImage = string.IsNullOrWhiteSpace(row.CoverImageUrl)
                         ? row.Photos.FirstOrDefault()
                         : row.CoverImageUrl;
@@ -180,8 +159,6 @@ public class ProductMappingConfig : IRegister
                                         g => g.First().OptionValue!,
                                         StringComparer.OrdinalIgnoreCase),
                         PhotoCollection = row.Photos,
-                        Stock = row.Stock,
-                        HasBeenBooked = row.HasBeenBooked,
                         VariantName = row.VariantName,
                         Colors = row.Colors,
                         SKU = row.SKU,
@@ -196,20 +173,11 @@ public class ProductMappingConfig : IRegister
                         RearBrake = row.RearBrake,
                         FrontSuspension = row.FrontSuspension,
                         RearSuspension = row.RearSuspension,
-                        EngineType = row.EngineType,
-                        StatusStockId = GetStockStatus(available),
-                        InventoryStatus = inventoryStatus
+                        EngineType = row.EngineType
                     };
                 })
-            .OrderBy(v => InventoryStatus.GetSeverity(v.InventoryStatus))
-            .ThenBy(v => v.UrlSlug)
+            .OrderBy(v => v.UrlSlug)
             .ToList();
-        var totalStock = variantRows.Sum(v => (long)v.Stock);
-        var totalBooked = variantRows.Sum(v => (long)v.HasBeenBooked);
-        var productAvailable = totalStock - totalBooked;
-        var productInventoryStatus = variantResponses.Count == 0
-            ? InventoryStatus.OutOfStock
-            : variantResponses.MinBy(v => InventoryStatus.GetSeverity(v.InventoryStatus))!.InventoryStatus;
         return new ProductDetailForManagerResponse
         {
             Id = product.Id,
@@ -263,10 +231,6 @@ public class ProductMappingConfig : IRegister
             StatusId = product.StatusId,
             ProductTechnologies = MapProductTechnologiesList(product),
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
-            Stock = (int)totalStock,
-            HasBeenBooked = totalBooked,
-            StatusStockId = GetStockStatus(productAvailable),
-            InventoryStatus = productInventoryStatus,
             Variants = variantResponses
         };
     }
@@ -371,12 +335,7 @@ public class ProductMappingConfig : IRegister
         var displayName = string.IsNullOrWhiteSpace(variantName)
             ? productName ?? string.Empty
             : $"{productName} ({variantName})";
-        var stock = variant.InventoryReceiptInfos
-                .Where(
-                    ii => ii.InventoryReceiptReceipt != null &&
-                            InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
-                .Sum(ii => ii.RemainingCount) ??
-            0;
+        var stock = (int)CalculateVariantStock(variant);
         var photos = variant.ProductCollectionPhotos
             .Select(p => p.ImageUrl ?? string.Empty)
             .Where(url => !string.IsNullOrWhiteSpace(url))
@@ -499,19 +458,12 @@ public class ProductMappingConfig : IRegister
         return InventoryStatus.InStock;
     }
 
-    private static string GetStockStatus(long availableStock)
-    {
-        return availableStock > 0 ? "in_stock" : "out_of_stock";
-    }
-
     private static long CalculateTotalStock(ProductEntity product)
     {
         return product.ProductVariants
             .Where(v => v.InventoryReceiptInfos != null)
             .SelectMany(variant => variant.InventoryReceiptInfos!)
-            .Where(
-                ii => ii.InventoryReceiptReceipt != null &&
-                    InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
+            .Where(ii => ii.InventoryReceipt != null && InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId))
             .Sum(info => info.RemainingCount ?? 0);
     }
 
@@ -560,24 +512,77 @@ public class ProductMappingConfig : IRegister
             .Select(
                 variant =>
                 {
-                    var stock = variant.InventoryReceiptInfos
-                        .Where(
-                            ii => ii.InventoryReceiptReceipt != null &&
-                                    InventoryReceiptStatus.IsFinished(ii.InventoryReceiptReceipt.StatusId))
-                        .Sum(ii => ii.RemainingCount ?? 0);
-                    var booked = variant.OutputInfos
-                        .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
-                        .Sum(oi => (long)(oi.Count ?? 0));
+                    var stock = CalculateVariantStock(variant);
+                    var booked = CalculateVariantBooked(variant);
                     return CalculateInventoryStatus(stock - booked, alertLevel);
                 })
             .ToList();
         return statuses.Count == 0 ? InventoryStatus.OutOfStock : statuses.MinBy(InventoryStatus.GetSeverity)!;
     }
 
+    public static long CalculateVariantStock(ProductVariantEntity variant)
+    {
+        if (variant.ProductVariantColors != null && variant.ProductVariantColors.Count != 0)
+        {
+            long total = 0;
+            foreach (var c in variant.ProductVariantColors)
+            {
+                if (variant.InventoryReceiptInfos != null)
+                {
+                    total += variant.InventoryReceiptInfos
+                            .Where(
+                                ii => ii.InventoryReceipt != null &&
+                                        InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId) &&
+                                        (ii.PurchaseRequestItem != null &&
+                                            ii.PurchaseRequestItem.ProductVariantColorId == c.Id))
+                            .Sum(ii => ii.RemainingCount) ??
+                        0;
+                }
+            }
+            return total;
+        }
+        return variant.InventoryReceiptInfos != null
+            ? variant.InventoryReceiptInfos
+                    .Where(
+                        ii => ii.InventoryReceipt != null &&
+                                    InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId))
+                    .Sum(ii => ii.RemainingCount) ??
+                0
+            : 0;
+    }
+
+    public static long CalculateVariantBooked(ProductVariantEntity variant)
+    {
+        if (variant.ProductVariantColors != null && variant.ProductVariantColors.Count != 0)
+        {
+            long total = 0;
+            foreach (var c in variant.ProductVariantColors)
+            {
+                if (variant.OutputInfos != null)
+                {
+                    total += variant.OutputInfos
+                            .Where(
+                                oi => oi.OutputOrder != null &&
+                                        OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId) &&
+                                        oi.ProductVariantColorId == c.Id)
+                            .Sum(oi => (long?)oi.Count) ??
+                        0;
+                }
+            }
+            return total;
+        }
+        return variant.OutputInfos != null
+            ? variant.OutputInfos
+                    .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
+                    .Sum(oi => (long?)oi.Count) ??
+                0
+            : 0;
+    }
+
     private static List<ProductTechnologyResponse> MapProductTechnologiesList(ProductEntity product)
     {
         return product.ProductTechnologies != null
-            ? product.ProductTechnologies
+            ? [.. product.ProductTechnologies
                 .OrderBy(t => t.DisplayOrder)
                 .Select(
                     t => new ProductTechnologyResponse
@@ -594,16 +599,13 @@ public class ProductMappingConfig : IRegister
                             DefaultDescription = t.Technology?.DefaultDescription,
                             DefaultImageUrl = t.Technology?.DefaultImageUrl,
                             CategoryName = t.Technology?.Category?.Name ?? "TECHNOLOGY"
-                        })
-                .ToList()
+                        })]
             : [];
     }
 
     private static string BuildStoreVariantDisplayName(ProductVariantEntity variant, bool isOtherVariant = false)
     {
-        var colorName = variant.ProductVariantColors != null
-            ? variant.ProductVariantColors.FirstOrDefault()?.ColorName
-            : null;
+        var colorName = variant.ProductVariantColors?.FirstOrDefault()?.ColorName;
         if (!string.IsNullOrWhiteSpace(variant.VariantName) && !string.IsNullOrWhiteSpace(colorName))
         {
             return $"{variant.VariantName} - {colorName}";

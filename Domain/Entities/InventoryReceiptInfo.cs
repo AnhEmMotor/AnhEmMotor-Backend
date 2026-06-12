@@ -11,7 +11,7 @@ namespace Domain.Entities
         public int Id { get; set; }
 
         [Column("InventoryReceiptId")]
-        [ForeignKey("InventoryReceiptReceipt")]
+        [ForeignKey("InventoryReceipt")]
         public int InventoryReceiptId { get; set; }
 
         [Column("Count")]
@@ -28,15 +28,18 @@ namespace Domain.Entities
         [ForeignKey("PurchaseRequestItem")]
         public int? PurchaseRequestItemId { get; set; }
 
-        [Column("QuotationProductRowId")]
-        [ForeignKey("QuotationProductRow")]
-        public int? QuotationProductRowId { get; set; }
+        [Column("SupplierId")]
+        [ForeignKey("Supplier")]
+        public int? SupplierId { get; set; }
 
-        public InventoryReceipt? InventoryReceiptReceipt { get; set; }
+        [Column("UnitPrice", TypeName = "decimal(18, 2)")]
+        public decimal? UnitPrice { get; set; }
+
+        public InventoryReceipt? InventoryReceipt { get; set; }
 
         public PurchaseRequestItem? PurchaseRequestItem { get; set; }
 
-        public QuotationProductRow? QuotationProductRow { get; set; }
+        public Supplier? Supplier { get; set; }
 
         public OutputInfo? ParentOutputInfo { get; set; }
 

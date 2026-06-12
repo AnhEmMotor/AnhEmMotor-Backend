@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Infrastructure.DBContexts;
+using System.Linq;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
 using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
 
@@ -7,18 +8,33 @@ namespace Infrastructure.Repositories.InventoryReceipt;
 
 public class InventoryReceiptDeleteRepository(ApplicationDBContext context) : IInventoryReceiptDeleteRepository
 {
-    public void Delete(InventoryReceiptEntity InventoryReceipt)
+    public void Delete(InventoryReceiptEntity inventoryReceipt)
     {
-        context.SoftDeleteUsingSetColumn(InventoryReceipt);
+        context.SoftDeleteUsingSetColumn(inventoryReceipt);
+        var infos = context.InventoryReceiptInfos.Where(ii => ii.InventoryReceiptId == inventoryReceipt.Id).ToList();
+        foreach (var info in infos)
+        {
+            context.SoftDeleteUsingSetColumn(info);
+            var vehicles = context.Vehicles.Where(v => v.InventoryReceiptInfoId == info.Id).ToList();
+            context.SoftDeleteUsingSetColumnRange(vehicles);
+        }
     }
 
-    public void Delete(IEnumerable<InventoryReceiptEntity> InventoryReceipts)
+    public void Delete(IEnumerable<InventoryReceiptEntity> inventoryReceipts)
     {
-        context.SoftDeleteUsingSetColumnRange(InventoryReceipts);
+        var ids = inventoryReceipts.Select(x => x.Id).ToList();
+        context.SoftDeleteUsingSetColumnRange(inventoryReceipts);
+        var infos = context.InventoryReceiptInfos.Where(ii => ids.Contains(ii.InventoryReceiptId)).ToList();
+        foreach (var info in infos)
+        {
+            context.SoftDeleteUsingSetColumn(info);
+            var vehicles = context.Vehicles.Where(v => v.InventoryReceiptInfoId == info.Id).ToList();
+            context.SoftDeleteUsingSetColumnRange(vehicles);
+        }
     }
 
-    public void DeleteInventoryReceiptInfo(InventoryReceiptInfoEntity InventoryReceiptInfo)
+    public void DeleteInventoryReceiptInfo(InventoryReceiptInfoEntity inventoryReceiptInfo)
     {
-        context.InventoryReceiptInfos.Remove(InventoryReceiptInfo);
+        context.InventoryReceiptInfos.Remove(inventoryReceiptInfo);
     }
 }

@@ -1,6 +1,4 @@
 using Application.ApiContracts.PurchaseRequest.Requests;
-using Application.ApiContracts.PurchaseRequest.Responses;
-using Application.Common.Models;
 using Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest;
@@ -53,24 +51,20 @@ public class PurchaseRequests
             _variantRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreatePurchaseRequestCommand
         {
             Note = "Test Note",
             Items = [new CreatePurchaseRequestItemRequest { ProductVariantId = 1, Quantity = 10 }]
         };
-
         var mockVariants = new List<ProductVariant>
         {
             new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [] }
         };
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         var currentUserId = Guid.NewGuid();
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
-
         var createdPR = new PurchaseRequestEntity
         {
             Id = 10,
@@ -78,12 +72,9 @@ public class PurchaseRequests
             Status = "draft",
             CreatedBy = currentUserId
         };
-
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdPR);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         string.Compare(result.Value!.Note, "Test Note").Should().Be(0);
@@ -99,29 +90,21 @@ public class PurchaseRequests
             _variantRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreatePurchaseRequestCommand
         {
             Note = "Test Note With Color",
-            Items = [new CreatePurchaseRequestItemRequest { ProductVariantId = 1, ProductVariantColorId = 2, Quantity = 5 }]
+            Items =
+                [new CreatePurchaseRequestItemRequest { ProductVariantId = 1, ProductVariantColorId = 2, Quantity = 5 }]
         };
-
         var mockVariants = new List<ProductVariant>
         {
-            new()
-            {
-                Id = 1,
-                VariantName = "Variant 1",
-                ProductVariantColors = [new ProductVariantColor { Id = 2 }]
-            }
+            new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [new ProductVariantColor { Id = 2 }] }
         };
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         var currentUserId = Guid.NewGuid();
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
-
         var createdPR = new PurchaseRequestEntity
         {
             Id = 11,
@@ -129,12 +112,9 @@ public class PurchaseRequests
             Status = "draft",
             CreatedBy = currentUserId
         };
-
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdPR);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         string.Compare(result.Value!.Note, "Test Note With Color").Should().Be(0);
@@ -149,15 +129,8 @@ public class PurchaseRequests
             _variantRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
-        var command = new CreatePurchaseRequestCommand
-        {
-            Note = "Test Empty Items",
-            Items = []
-        };
-
+        var command = new CreatePurchaseRequestCommand { Note = "Test Empty Items", Items = [] };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -171,15 +144,12 @@ public class PurchaseRequests
             _variantRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreatePurchaseRequestCommand
         {
             Note = "Test Null Variant Id",
             Items = [new CreatePurchaseRequestItemRequest { ProductVariantId = null, Quantity = 10 }]
         };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -193,18 +163,15 @@ public class PurchaseRequests
             _variantRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreatePurchaseRequestCommand
         {
             Note = "Test Variant Not Found",
             Items = [new CreatePurchaseRequestItemRequest { ProductVariantId = 99, Quantity = 10 }]
         };
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "NotFound").Should().Be(0);
     }
@@ -218,28 +185,25 @@ public class PurchaseRequests
             _variantRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreatePurchaseRequestCommand
         {
             Note = "Test Missing Color",
-            Items = [new CreatePurchaseRequestItemRequest { ProductVariantId = 1, ProductVariantColorId = null, Quantity = 10 }]
+            Items =
+                [new CreatePurchaseRequestItemRequest
+                {
+                    ProductVariantId = 1,
+                    ProductVariantColorId = null,
+                    Quantity = 10
+                }]
         };
-
         var mockVariants = new List<ProductVariant>
         {
-            new()
-            {
-                Id = 1,
-                VariantName = "Variant 1",
-                ProductVariantColors = [new ProductVariantColor { Id = 2 }]
-            }
+            new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [new ProductVariantColor { Id = 2 }] }
         };
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -253,28 +217,25 @@ public class PurchaseRequests
             _variantRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreatePurchaseRequestCommand
         {
             Note = "Test Wrong Color",
-            Items = [new CreatePurchaseRequestItemRequest { ProductVariantId = 1, ProductVariantColorId = 99, Quantity = 10 }]
+            Items =
+                [new CreatePurchaseRequestItemRequest
+                {
+                    ProductVariantId = 1,
+                    ProductVariantColorId = 99,
+                    Quantity = 10
+                }]
         };
-
         var mockVariants = new List<ProductVariant>
         {
-            new()
-            {
-                Id = 1,
-                VariantName = "Variant 1",
-                ProductVariantColors = [new ProductVariantColor { Id = 2 }]
-            }
+            new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [new ProductVariantColor { Id = 2 }] }
         };
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -288,23 +249,20 @@ public class PurchaseRequests
             _variantRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreatePurchaseRequestCommand
         {
             Note = "Test Color Not Supported",
-            Items = [new CreatePurchaseRequestItemRequest { ProductVariantId = 1, ProductVariantColorId = 2, Quantity = 10 }]
+            Items =
+                [new CreatePurchaseRequestItemRequest { ProductVariantId = 1, ProductVariantColorId = 2, Quantity = 10 }]
         };
-
         var mockVariants = new List<ProductVariant>
         {
             new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [] }
         };
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -320,23 +278,19 @@ public class PurchaseRequests
             _variantRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreatePurchaseRequestCommand
         {
             Note = "Test Invalid Quantity",
             Items = [new CreatePurchaseRequestItemRequest { ProductVariantId = 1, Quantity = quantity }]
         };
-
         var mockVariants = new List<ProductVariant>
         {
             new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [] }
         };
-
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -352,14 +306,12 @@ public class PurchaseRequests
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new UpdatePurchaseRequestCommand
         {
             Id = 1,
             Note = "Updated Note",
             Items = [new UpdatePurchaseRequestItemRequest { ProductVariantId = 1, Quantity = 20 }]
         };
-
         var existingPR = new PurchaseRequestEntity
         {
             Id = 1,
@@ -367,19 +319,15 @@ public class PurchaseRequests
             Note = "Old Note",
             PurchaseRequestItems = []
         };
-
         var mockVariants = new List<ProductVariant>
         {
             new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [] }
         };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         _updateRepoMock.Verify(x => x.Update(It.IsAny<PurchaseRequestEntity>()), Times.Once);
     }
@@ -395,19 +343,10 @@ public class PurchaseRequests
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
-        var command = new UpdatePurchaseRequestCommand
-        {
-            Id = 99,
-            Note = "Note",
-            Items = []
-        };
-
+        var command = new UpdatePurchaseRequestCommand { Id = 99, Note = "Note", Items = [] };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(99, It.IsAny<CancellationToken>()))
             .ReturnsAsync((PurchaseRequestEntity?)null);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "NotFound").Should().Be(0);
     }
@@ -423,14 +362,12 @@ public class PurchaseRequests
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new UpdatePurchaseRequestCommand
         {
             Id = 1,
             Note = "Updated Note Sent",
             Items = [new UpdatePurchaseRequestItemRequest { ProductVariantId = 1, Quantity = 20 }]
         };
-
         var existingPR = new PurchaseRequestEntity
         {
             Id = 1,
@@ -438,23 +375,23 @@ public class PurchaseRequests
             Note = "Old Note",
             PurchaseRequestItems = []
         };
-
         var mockVariants = new List<ProductVariant>
         {
             new() { Id = 1, VariantName = "Variant 1", ProductVariantColors = [] }
         };
-
         var currentUserId = Guid.NewGuid();
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-        _permissionRepoMock.Setup(x => x.CheckUserPermissionsAsync(currentUserId, It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _permissionRepoMock.Setup(
+            x => x.CheckUserPermissionsAsync(
+                currentUserId,
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(mockVariants);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
     }
 
@@ -469,30 +406,18 @@ public class PurchaseRequests
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
-        var command = new UpdatePurchaseRequestCommand
-        {
-            Id = 1,
-            Note = "Updated Note Sent Fail",
-            Items = []
-        };
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = "sent",
-            Note = "Old Note"
-        };
-
+        var command = new UpdatePurchaseRequestCommand { Id = 1, Note = "Updated Note Sent Fail", Items = [] };
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "sent", Note = "Old Note" };
         var currentUserId = Guid.NewGuid();
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-        _permissionRepoMock.Setup(x => x.CheckUserPermissionsAsync(currentUserId, It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _permissionRepoMock.Setup(
+            x => x.CheckUserPermissionsAsync(
+                currentUserId,
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -510,26 +435,10 @@ public class PurchaseRequests
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
-        var command = new UpdatePurchaseRequestCommand
-        {
-            Id = 1,
-            Note = "Updated Note Finalized",
-            Items = []
-        };
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = status,
-            Note = "Old Note"
-        };
-
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-
+        var command = new UpdatePurchaseRequestCommand { Id = 1, Note = "Updated Note Finalized", Items = [] };
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = status, Note = "Old Note" };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -543,20 +452,10 @@ public class PurchaseRequests
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new DeletePurchaseRequestCommand(1);
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = "draft"
-        };
-
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "draft" };
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         _deleteRepoMock.Verify(x => x.Delete(existingPR), Times.Once);
     }
@@ -570,14 +469,10 @@ public class PurchaseRequests
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new DeletePurchaseRequestCommand(99);
-
         _readRepoMock.Setup(x => x.GetByIdAsync(99, It.IsAny<CancellationToken>()))
             .ReturnsAsync((PurchaseRequestEntity?)null);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "NotFound").Should().Be(0);
     }
@@ -591,24 +486,18 @@ public class PurchaseRequests
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new DeletePurchaseRequestCommand(1);
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = "sent"
-        };
-
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "sent" };
         var currentUserId = Guid.NewGuid();
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-        _permissionRepoMock.Setup(x => x.CheckUserPermissionsAsync(currentUserId, It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _permissionRepoMock.Setup(
+            x => x.CheckUserPermissionsAsync(
+                currentUserId,
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         _deleteRepoMock.Verify(x => x.Delete(existingPR), Times.Once);
     }
@@ -622,24 +511,18 @@ public class PurchaseRequests
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new DeletePurchaseRequestCommand(1);
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = "sent"
-        };
-
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "sent" };
         var currentUserId = Guid.NewGuid();
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-        _permissionRepoMock.Setup(x => x.CheckUserPermissionsAsync(currentUserId, It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _permissionRepoMock.Setup(
+            x => x.CheckUserPermissionsAsync(
+                currentUserId,
+                It.IsAny<IEnumerable<string>>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -651,20 +534,10 @@ public class PurchaseRequests
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new SendPurchaseRequestCommand(1);
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = "draft"
-        };
-
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "draft" };
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         string.Compare(existingPR.Status, "sent").Should().Be(0);
         _updateRepoMock.Verify(x => x.Update(existingPR), Times.Once);
@@ -677,20 +550,10 @@ public class PurchaseRequests
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new SendPurchaseRequestCommand(1);
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = "approve"
-        };
-
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "approve" };
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -703,22 +566,12 @@ public class PurchaseRequests
             _updateRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
-
         var command = new ApproveRejectPurchaseRequestCommand(1, "approve");
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = "sent"
-        };
-
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "sent" };
         var currentUserId = Guid.NewGuid();
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         string.Compare(existingPR.Status, "approve").Should().Be(0);
         existingPR.ApprovedBy.Should().Be(currentUserId);
@@ -733,25 +586,15 @@ public class PurchaseRequests
             _updateRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
-
         var command = new ApproveRejectPurchaseRequestCommand(1, "reject");
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = "sent"
-        };
-
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "sent" };
         var currentUserId = Guid.NewGuid();
         _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         string.Compare(existingPR.Status, "reject").Should().Be(0);
-        existingPR.ApprovedBy.Should().Be(currentUserId);
+        existingPR.RejectedBy.Should().Be(currentUserId);
         _updateRepoMock.Verify(x => x.Update(existingPR), Times.Once);
     }
 
@@ -763,20 +606,10 @@ public class PurchaseRequests
             _updateRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
-
         var command = new ApproveRejectPurchaseRequestCommand(1, "draft");
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = "sent"
-        };
-
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "sent" };
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
     }
@@ -791,22 +624,77 @@ public class PurchaseRequests
             _updateRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
-
         var command = new ApproveRejectPurchaseRequestCommand(1, "approve");
-
-        var existingPR = new PurchaseRequestEntity
-        {
-            Id = 1,
-            Status = currentStatus
-        };
-
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingPR);
-
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = currentStatus };
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
+    }
+
+    [Fact(DisplayName = "PR_043 - Gửi PR thành công và lưu người gửi")]
+    public async Task PR_043_SendPurchaseRequest_SaveSentBy_Success()
+    {
+        var handler = new SendPurchaseRequestCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _currentUserContextMock.Object);
+        var command = new SendPurchaseRequestCommand(1);
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "draft" };
+        var currentUserId = Guid.NewGuid();
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        string.Compare(existingPR.Status, "sent").Should().Be(0);
+        existingPR.SentBy.Should().Be(currentUserId);
+        _updateRepoMock.Verify(x => x.Update(existingPR), Times.Once);
+    }
+
+    [Fact(DisplayName = "PR_044 - Phê duyệt PR thành công và lưu người duyệt")]
+    public async Task PR_044_ApprovePurchaseRequest_SaveApprovedBy_Success()
+    {
+        var handler = new ApproveRejectPurchaseRequestCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _currentUserContextMock.Object);
+        var command = new ApproveRejectPurchaseRequestCommand(1, "approve");
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "sent" };
+        var currentUserId = Guid.NewGuid();
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        string.Compare(existingPR.Status, "approve").Should().Be(0);
+        existingPR.ApprovedBy.Should().Be(currentUserId);
+        existingPR.RejectedBy.Should().BeNull();
+        _updateRepoMock.Verify(x => x.Update(existingPR), Times.Once);
+    }
+
+    [Fact(DisplayName = "PR_045 - Từ chối PR thành công và lưu người từ chối")]
+    public async Task PR_045_RejectPurchaseRequest_SaveRejectedBy_Success()
+    {
+        var handler = new ApproveRejectPurchaseRequestCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _currentUserContextMock.Object);
+        var command = new ApproveRejectPurchaseRequestCommand(1, "reject");
+        var existingPR = new PurchaseRequestEntity { Id = 1, Status = "sent" };
+        var currentUserId = Guid.NewGuid();
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(currentUserId);
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(existingPR);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        string.Compare(existingPR.Status, "reject").Should().Be(0);
+        existingPR.RejectedBy.Should().Be(currentUserId);
+        existingPR.ApprovedBy.Should().BeNull();
+        _updateRepoMock.Verify(x => x.Update(existingPR), Times.Once);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

@@ -9,6 +9,7 @@ using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
+using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Technology;
 using Application.Interfaces.Repositories.Technology.Technology;
@@ -37,7 +38,11 @@ public sealed class UpdateProductCommandHandler(
     IVariantOptionValueDeleteRepository variantOptionValueDeleteRepository,
     IProductVariantDeleteRepository productVariantDeleteRepository,
     IProductUpdateRepository productUpdateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, Result<ProductDetailForManagerResponse?>>
+    IUnitOfWork unitOfWork,
+    IProductQuotationReadRepository? ProductQuotationReadRepository = null,
+    IProductQuotationInsertRepository? ProductQuotationInsertRepository = null,
+    IProductQuotationUpdateRepository? ProductQuotationUpdateRepository = null,
+    IProductQuotationDeleteRepository? ProductQuotationDeleteRepository = null) : IRequestHandler<UpdateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
     public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         UpdateProductCommand command,
@@ -79,6 +84,10 @@ public sealed class UpdateProductCommandHandler(
                         nameof(command.BrandId)));
             }
         }
+        var variantSupplierPriceTargets = new List<(ProductVariant Variant, List<VariantSupplierPriceRequest> SupplierPrices)>(
+            );
+        var colorSupplierPriceTargets = new List<(ProductVariant Variant, ProductVariantColor Color, List<VariantSupplierPriceRequest> SupplierPrices)>(
+            );
         if (command.Variants?.Count > 0)
         {
             var slugs = command.Variants
@@ -112,6 +121,27 @@ public sealed class UpdateProductCommandHandler(
         if (errors.Count > 0)
         {
             return errors;
+        }
+        foreach (var variantReq in command.Variants!)
+        {
+            var variantDuplicateError = ValidateSupplierPriceUniqueness(
+                variantReq.SupplierPrices ?? [],
+                variantReq.VariantName ?? variantReq.UrlSlug ?? "biến thể");
+            if (variantDuplicateError is not null)
+            {
+                return Result<ProductDetailForManagerResponse?>.Failure(variantDuplicateError);
+            }
+            foreach (var color in variantReq.Colors ?? [])
+            {
+                if (color is null)
+                    continue;
+                var colorLabel = $"{variantReq.VariantName ?? variantReq.UrlSlug ?? "biến thể"} / {color.ColorName ?? "màu"}";
+                var colorDuplicateError = ValidateSupplierPriceUniqueness(color.SupplierPrices ?? [], colorLabel);
+                if (colorDuplicateError is not null)
+                {
+                    return Result<ProductDetailForManagerResponse?>.Failure(colorDuplicateError);
+                }
+            }
         }
         command.Adapt(product);
         var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>();
@@ -306,19 +336,57 @@ public sealed class UpdateProductCommandHandler(
             variantReq.Adapt(variantEntity);
             if (HasColorRequests(variantReq))
             {
-                variantEntity.ProductVariantColors.Clear();
-                foreach (var color in GetColorRequests(variantReq))
+                var incomingColors = GetColorRequests(variantReq);
+                var existingColors = variantEntity.ProductVariantColors.ToList();
+                var incomingColorIds = incomingColors
+                    .Where(c => c.Id.HasValue && c.Id > 0)
+                    .Select(c => c.Id!.Value)
+                    .ToHashSet();
+                foreach (var existingColor in existingColors)
                 {
-                    variantEntity.ProductVariantColors
-                        .Add(
-                            new ProductVariantColor
+                    if (existingColor.Id > 0 && !incomingColorIds.Contains(existingColor.Id))
+                    {
+                        variantEntity.ProductVariantColors.Remove(existingColor);
+                    }
+                }
+                foreach (var color in incomingColors)
+                {
+                    if (color is null)
+                        continue;
+                    ProductVariantColor colorEntity;
+                    if (color.Id.HasValue && color.Id > 0)
+                    {
+                        var existingColor = existingColors.FirstOrDefault(c => c.Id == color.Id.Value);
+                        if (existingColor != null)
+                        {
+                            existingColor.ColorName = color.ColorName?.Trim();
+                            existingColor.ColorCode = color.ColorCode?.Trim();
+                            existingColor.CoverImageUrl = color.CoverImageUrl?.Trim();
+                            colorEntity = existingColor;
+                        } else
+                        {
+                            colorEntity = new ProductVariantColor
                             {
-                                Id = color.Id ?? 0,
+                                Id = color.Id.Value,
                                 ProductVariantId = variantEntity.Id,
                                 ColorName = color.ColorName?.Trim(),
                                 ColorCode = color.ColorCode?.Trim(),
                                 CoverImageUrl = color.CoverImageUrl?.Trim()
-                            });
+                            };
+                            variantEntity.ProductVariantColors.Add(colorEntity);
+                        }
+                    } else
+                    {
+                        colorEntity = new ProductVariantColor
+                        {
+                            ProductVariantId = variantEntity.Id,
+                            ColorName = color.ColorName?.Trim(),
+                            ColorCode = color.ColorCode?.Trim(),
+                            CoverImageUrl = color.CoverImageUrl?.Trim()
+                        };
+                        variantEntity.ProductVariantColors.Add(colorEntity);
+                    }
+                    colorSupplierPriceTargets.Add((variantEntity, colorEntity, color.SupplierPrices ?? []));
                 }
                 variantEntity.CoverImageUrl = null;
             } else
@@ -387,12 +455,13 @@ public sealed class UpdateProductCommandHandler(
                     }
                 }
             }
+            variantSupplierPriceTargets.Add((variantEntity, variantReq.SupplierPrices ?? []));
         }
         var existingTechs = product.ProductTechnologies.ToList();
         var newTechList = command.ProductTechnologies ?? [];
         if (newTechList.Count > 0)
         {
-            newTechList = newTechList.GroupBy(x => x.TechnologyId).Select(g => g.First()).ToList();
+            newTechList = [.. newTechList.GroupBy(x => x.TechnologyId).Select(g => g.First())];
             var techIds = newTechList.Select(x => x.TechnologyId).ToList();
             var validTechs = await technologyReadRepository.GetByIdsAsync(techIds, cancellationToken)
                 .ConfigureAwait(false);
@@ -448,26 +517,217 @@ public sealed class UpdateProductCommandHandler(
         }
         productUpdateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await SyncVariantSupplierPricesAsync(variantSupplierPriceTargets, colorSupplierPriceTargets, cancellationToken)
+            .ConfigureAwait(false);
         var response = product.Adapt<ProductDetailForManagerResponse>();
         if (response != null)
         {
-            response.CompatibleVehicleModelIds = product.CompatibleWith.Select(c => c.CompatibleVehicleModelId).ToList();
+            response.CompatibleVehicleModelIds = [.. product.CompatibleWith.Select(c => c.CompatibleVehicleModelId)];
+            await PopulateSupplierPricesAsync(response, product, cancellationToken).ConfigureAwait(false);
         }
         return Result<ProductDetailForManagerResponse?>.Success(response);
     }
 
+    private async Task SyncVariantSupplierPricesAsync(
+        List<(ProductVariant Variant, List<VariantSupplierPriceRequest> SupplierPrices)> variantSupplierPriceTargets,
+        List<(ProductVariant Variant, ProductVariantColor Color, List<VariantSupplierPriceRequest> SupplierPrices)> colorSupplierPriceTargets,
+        CancellationToken cancellationToken)
+    {
+        if (ProductQuotationReadRepository is null ||
+            ProductQuotationInsertRepository is null ||
+            ProductQuotationUpdateRepository is null ||
+            ProductQuotationDeleteRepository is null)
+        {
+            return;
+        }
+        foreach (var (variant, supplierPrices) in variantSupplierPriceTargets)
+        {
+            if (variant.Id <= 0)
+            {
+                continue;
+            }
+            var existingRows = await ProductQuotationReadRepository.GetByVariantAsync(variant.Id, cancellationToken)
+                .ConfigureAwait(false);
+            existingRows = [.. existingRows.Where(x => x.ProductVariantColorId == null)];
+            var desiredKeys = supplierPrices
+                .Select(x => (x.SupplierId, x.ProductVariantColorId))
+                .ToHashSet();
+            var existingRowsByKey = existingRows.ToDictionary(x => (x.SupplierId ?? 0, x.ProductVariantColorId));
+            foreach (var supplierPrice in supplierPrices)
+            {
+                var key = (supplierPrice.SupplierId, supplierPrice.ProductVariantColorId);
+                if (existingRowsByKey.TryGetValue(key, out var existingRow))
+                {
+                    existingRow.QuotePrice = supplierPrice.QuotePrice.HasValue
+                        ? Convert.ToInt32(supplierPrice.QuotePrice.Value)
+                        : null;
+                    existingRow.Note = supplierPrice.Note?.Trim();
+                    ProductQuotationUpdateRepository.Update(existingRow);
+                } else
+                {
+                    await ProductQuotationInsertRepository.AddAsync(
+                        new ProductQuotation
+                        {
+                            ProductVariantId = variant.Id,
+                            ProductVariantColorId = supplierPrice.ProductVariantColorId,
+                            SupplierId = supplierPrice.SupplierId,
+                            QuotePrice =
+                                supplierPrice.QuotePrice.HasValue
+                                        ? Convert.ToInt32(supplierPrice.QuotePrice.Value)
+                                        : null,
+                            Note = supplierPrice.Note?.Trim()
+                        },
+                        cancellationToken)
+                        .ConfigureAwait(false);
+                }
+            }
+            foreach (var existingRow in existingRows)
+            {
+                var key = (existingRow.SupplierId ?? 0, existingRow.ProductVariantColorId);
+                if (!desiredKeys.Contains(key))
+                {
+                    ProductQuotationDeleteRepository.Delete(existingRow);
+                }
+            }
+        }
+        foreach (var (variant, color, supplierPrices) in colorSupplierPriceTargets)
+        {
+            if (variant.Id <= 0 || color.Id <= 0)
+            {
+                continue;
+            }
+            var existingRows = await ProductQuotationReadRepository.GetByVariantAsync(variant.Id, cancellationToken)
+                .ConfigureAwait(false);
+            existingRows = [.. existingRows.Where(x => x.ProductVariantColorId == color.Id)];
+            var desiredKeys = supplierPrices.Select(x => (x.SupplierId, x.ProductVariantColorId ?? color.Id))
+                .ToHashSet();
+            var existingRowsByKey = existingRows.ToDictionary(x => (x.SupplierId ?? 0, x.ProductVariantColorId));
+            foreach (var supplierPrice in supplierPrices)
+            {
+                var key = (supplierPrice.SupplierId, supplierPrice.ProductVariantColorId ?? color.Id);
+                if (existingRowsByKey.TryGetValue(key, out var existingRow))
+                {
+                    existingRow.QuotePrice = supplierPrice.QuotePrice.HasValue
+                        ? Convert.ToInt32(supplierPrice.QuotePrice.Value)
+                        : null;
+                    existingRow.Note = supplierPrice.Note?.Trim();
+                    ProductQuotationUpdateRepository.Update(existingRow);
+                } else
+                {
+                    await ProductQuotationInsertRepository.AddAsync(
+                        new ProductQuotation
+                        {
+                            ProductVariantId = variant.Id,
+                            ProductVariantColorId = color.Id,
+                            SupplierId = supplierPrice.SupplierId,
+                            QuotePrice =
+                                supplierPrice.QuotePrice.HasValue
+                                        ? Convert.ToInt32(supplierPrice.QuotePrice.Value)
+                                        : null,
+                            Note = supplierPrice.Note?.Trim()
+                        },
+                        cancellationToken)
+                        .ConfigureAwait(false);
+                }
+            }
+            foreach (var existingRow in existingRows)
+            {
+                var key = (existingRow.SupplierId ?? 0, existingRow.ProductVariantColorId ?? color.Id);
+                if (!desiredKeys.Contains(key))
+                {
+                    ProductQuotationDeleteRepository.Delete(existingRow);
+                }
+            }
+        }
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task PopulateSupplierPricesAsync(
+        ProductDetailForManagerResponse response,
+        Product product,
+        CancellationToken cancellationToken)
+    {
+        if (ProductQuotationReadRepository is null ||
+            ProductQuotationInsertRepository is null ||
+            ProductQuotationUpdateRepository is null ||
+            ProductQuotationDeleteRepository is null)
+        {
+            return;
+        }
+        if (response.Variants is null || response.Variants.Count == 0)
+        {
+            return;
+        }
+        foreach (var responseVariant in response.Variants)
+        {
+            var variantEntity = product.ProductVariants.FirstOrDefault(v => v.Id == responseVariant.Id);
+            if (variantEntity is null || variantEntity.Id <= 0)
+            {
+                continue;
+            }
+            var rows = await ProductQuotationReadRepository.GetByVariantAsync(variantEntity.Id, cancellationToken)
+                .ConfigureAwait(false);
+            responseVariant.SupplierPrices = [.. rows
+                .Where(row => row.ProductVariantColorId == null)
+                .Select(
+                    row => new VariantSupplierPriceRequest
+                    {
+                        SupplierId = row.SupplierId ?? 0,
+                        ProductVariantColorId = row.ProductVariantColorId,
+                        QuotePrice = row.QuotePrice,
+                        Note = row.Note
+                    })];
+            var responseColors = responseVariant.Colors ?? [];
+            foreach (var responseColor in responseColors)
+            {
+                var colorId = responseColor.Id;
+                if (colorId <= 0)
+                {
+                    continue;
+                }
+                responseColor.SupplierPrices = [.. rows
+                    .Where(row => row.ProductVariantColorId == colorId)
+                    .Select(
+                        row => new VariantSupplierPriceRequest
+                        {
+                            SupplierId = row.SupplierId ?? 0,
+                            ProductVariantColorId = row.ProductVariantColorId,
+                            QuotePrice = row.QuotePrice,
+                            Note = row.Note
+                        })];
+            }
+        }
+    }
+
     private static bool HasColorRequests(UpdateProductVariantRequest variant)
     {
-        return GetColorRequests(variant).Count > 0;
+        return variant.Colors?.Count > 0;
     }
 
     private static List<UpdateProductVariantColorRequest> GetColorRequests(UpdateProductVariantRequest variant)
     {
-        if (variant.Colors.Count > 0)
+        return variant.Colors ?? [];
+    }
+
+    private static Error? ValidateSupplierPriceUniqueness(
+        IEnumerable<VariantSupplierPriceRequest> supplierPrices,
+        string scopeLabel)
+    {
+        var seen = new HashSet<int>();
+        foreach (var supplierPrice in supplierPrices)
         {
-            return variant.Colors;
+            if (supplierPrice.SupplierId <= 0)
+            {
+                continue;
+            }
+            if (!seen.Add(supplierPrice.SupplierId))
+            {
+                return Error.BadRequest(
+                    $"Mỗi nhà cung cấp chỉ được xuất hiện một lần trong {scopeLabel}.",
+                    nameof(VariantSupplierPriceRequest.SupplierId));
+            }
         }
-        return [];
+        return null;
     }
 
     private static void UpdateVariantPhotos(ProductVariant variant, List<string>? newUrls)
@@ -497,3 +757,4 @@ public sealed class UpdateProductCommandHandler(
         }
     }
 }
+

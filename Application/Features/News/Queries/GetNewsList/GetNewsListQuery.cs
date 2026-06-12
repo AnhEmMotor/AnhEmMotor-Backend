@@ -6,7 +6,7 @@ using Sieve.Models;
 
 namespace Application.Features.News.Queries.GetNewsList;
 
-public sealed record GetNewsListQuery : IRequest<Result<PagedResult<NewsResponse>>>
+public sealed record GetNewsListQuery : IRequest<Result<PagedResult<NewsSummaryResponse>>>
 {
     public SieveModel? SieveModel { get; init; }
 }

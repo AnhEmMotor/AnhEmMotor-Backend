@@ -19,15 +19,15 @@ public class InventoryReceiptInfoResponse
 
     public int? Quantity { get; set; }
 
-    public decimal? UnitPrice { get; set; }
-
-    public decimal? ImportPrice { get; set; }
-
-    public decimal? Discount { get; set; }
-
-    public decimal? Total { get; set; }
-
     public int? RemainingCount { get; set; }
+
+    public int? OrderedQuantity { get; set; }
+
+    public int? MaxAllowedQuantity { get; set; }
+
+    public int? PurchaseRequestItemId { get; set; }
+
+    public decimal? UnitPrice { get; set; }
 
     public List<InventoryReceiptVehicleResponse> Vehicles { get; set; } = [];
 }

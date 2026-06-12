@@ -7,8 +7,7 @@ using MediatR;
 
 namespace Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequests
 {
-    public sealed class GetApprovedPurchaseRequestsQueryHandler(IPurchaseRequestReadRepository repository) 
-        : IRequestHandler<GetApprovedPurchaseRequestsQuery, Result<PagedResult<PurchaseRequestListResponse>>>
+    public sealed class GetApprovedPurchaseRequestsQueryHandler(IPurchaseRequestReadRepository repository) : IRequestHandler<GetApprovedPurchaseRequestsQuery, Result<PagedResult<PurchaseRequestListResponse>>>
     {
         public async Task<Result<PagedResult<PurchaseRequestListResponse>>> Handle(
             GetApprovedPurchaseRequestsQuery request,

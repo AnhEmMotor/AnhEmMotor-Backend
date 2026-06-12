@@ -36,7 +36,6 @@ public class PurchaseRequests
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreatePurchaseRequestCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CreateAsync(new CreatePurchaseRequestCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -47,7 +46,6 @@ public class PurchaseRequests
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdatePurchaseRequestCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateAsync(1, new UpdatePurchaseRequestCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -58,9 +56,7 @@ public class PurchaseRequests
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeletePurchaseRequestCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.DeleteAsync(1, CancellationToken.None))
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.DeleteAsync(1, CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -69,9 +65,7 @@ public class PurchaseRequests
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<SendPurchaseRequestCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.SendAsync(1, CancellationToken.None))
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.SendAsync(1, CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -80,9 +74,11 @@ public class PurchaseRequests
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<ApproveRejectPurchaseRequestCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.ApproveRejectAsync(1, new ApproveRejectPurchaseRequestRequest { Status = "approve" }, CancellationToken.None))
+            () => _controller.ApproveRejectAsync(
+                1,
+                new ApproveRejectPurchaseRequestRequest { Status = "approve" },
+                CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -95,16 +91,13 @@ public class PurchaseRequests
         {
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetPurchaseRequestsQuery>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new UnauthorizedAccessException());
-
             await Assert.ThrowsAsync<UnauthorizedAccessException>(
                 () => _controller.GetAllAsync(new SieveModel(), CancellationToken.None))
                 .ConfigureAwait(true);
-        }
-        else
+        } else
         {
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetPurchaseRequestByIdQuery>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new UnauthorizedAccessException());
-
             await Assert.ThrowsAsync<UnauthorizedAccessException>(
                 () => _controller.GetByIdAsync(1, CancellationToken.None))
                 .ConfigureAwait(true);

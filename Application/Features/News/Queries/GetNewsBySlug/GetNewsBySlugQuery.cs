@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.News.Queries.GetNewsBySlug;
 
-public sealed record GetNewsBySlugQuery : IRequest<Result<NewsResponse>>
+public sealed record GetNewsBySlugQuery : IRequest<Result<NewsForStoreResponse>>
 {
-    public string Slug { get; init; } = string.Empty;
+    public string Slug { get; init; } = default!;
 }

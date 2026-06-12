@@ -15,43 +15,22 @@ namespace Domain.Entities
         public string Title { get; set; } = string.Empty;
 
         [Required]
-        [Column("ImageUrl", TypeName = "nvarchar(500)")]
-        public string ImageUrl { get; set; } = string.Empty;
+        [Column("DesktopImageUrl", TypeName = "nvarchar(500)")]
+        public string DesktopImageUrl { get; set; } = string.Empty;
 
-        [Column("LinkUrl", TypeName = "nvarchar(500)")]
-        public string? LinkUrl { get; set; }
+        [Column("MobileImageUrl", TypeName = "nvarchar(500)")]
+        public string? MobileImageUrl { get; set; }
 
-        [Column("CtaText", TypeName = "nvarchar(100)")]
-        public string? CtaText { get; set; }
+        [Column("Description", TypeName = "nvarchar(1000)")]
+        public string? Description { get; set; }
+
+        [Column("CtaLink", TypeName = "nvarchar(500)")]
+        public string? CtaLink { get; set; }
+
+        [Column("CtaLabel", TypeName = "nvarchar(100)")]
+        public string? CtaLabel { get; set; }
 
         [Column("Placement", TypeName = "nvarchar(50)")]
         public string? Placement { get; set; }
-
-        [Column("Position", TypeName = "nvarchar(50)")]
-        public string? Position { get; set; }
-
-        [Column("StartDate")]
-        public DateTimeOffset? StartDate { get; set; }
-
-        [Column("EndDate")]
-        public DateTimeOffset? EndDate { get; set; }
-
-        [Column("IsActive")]
-        public bool IsActive { get; set; } = true;
-
-        [Column("Priority")]
-        public int Priority { get; set; }
-
-        [Column("ClickCount")]
-        public int ClickCount { get; set; } = 0;
-
-        [Column("ViewCount")]
-        public int ViewCount { get; set; } = 0;
-
-        [NotMapped]
-        public double CTR => ViewCount > 0 ? Math.Round((double)ClickCount / ViewCount * 100, 2) : 0;
-
-        [Column("DisplayOrder")]
-        public int DisplayOrder { get; set; }
     }
 }

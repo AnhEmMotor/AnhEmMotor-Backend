@@ -36,7 +36,16 @@ namespace Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRe
                         "Status"));
             }
             pr.Status = request.Status;
-            pr.ApprovedBy = currentUserContext.GetUserId();
+            var currentUserId = currentUserContext.GetUserId();
+            if (string.Equals(request.Status, PurchaseRequestStatus.Approve, StringComparison.OrdinalIgnoreCase))
+            {
+                pr.ApprovedBy = currentUserId;
+                pr.RejectedBy = null;
+            } else if (string.Equals(request.Status, PurchaseRequestStatus.Reject, StringComparison.OrdinalIgnoreCase))
+            {
+                pr.RejectedBy = currentUserId;
+                pr.ApprovedBy = null;
+            }
             updateRepository.Update(pr);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();

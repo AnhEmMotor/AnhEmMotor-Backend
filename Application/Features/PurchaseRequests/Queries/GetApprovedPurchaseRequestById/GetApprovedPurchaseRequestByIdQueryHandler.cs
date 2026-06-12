@@ -4,13 +4,11 @@ using Application.Interfaces.Repositories.PurchaseRequest;
 using Domain.Constants;
 using Mapster;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Linq;
 
 namespace Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequestById
 {
-    public sealed class GetApprovedPurchaseRequestByIdQueryHandler(IPurchaseRequestReadRepository repository)
-        : IRequestHandler<GetApprovedPurchaseRequestByIdQuery, Result<ApprovedPurchaseRequestDetailResponse?>>
+    public sealed class GetApprovedPurchaseRequestByIdQueryHandler(IPurchaseRequestReadRepository repository) : IRequestHandler<GetApprovedPurchaseRequestByIdQuery, Result<ApprovedPurchaseRequestDetailResponse?>>
     {
         public async Task<Result<ApprovedPurchaseRequestDetailResponse?>> Handle(
             GetApprovedPurchaseRequestByIdQuery request,
@@ -21,11 +19,31 @@ namespace Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseReque
             {
                 return Error.NotFound($"Không tìm thấy yêu cầu mua hàng có ID {request.Id}.", "Id");
             }
-            if (pr.Status != PurchaseRequestStatus.Approve)
+            if (string.Compare(pr.Status, PurchaseRequestStatus.Approve) != 0)
             {
                 return Error.Validation("Yêu cầu mua hàng chưa được phê duyệt.", "Status");
             }
-            return pr.Adapt<ApprovedPurchaseRequestDetailResponse?>();
+            var response = pr.Adapt<ApprovedPurchaseRequestDetailResponse?>();
+            if (response != null && request.ExcludeInventoryReceiptId.HasValue)
+            {
+                foreach (var responseItem in response.Items)
+                {
+                    var prItem = pr.PurchaseRequestItems.FirstOrDefault(x => x.Id == responseItem.Id);
+                    if (prItem != null)
+                    {
+                        var excludedQty = prItem.InventoryReceiptInfos
+                            .Where(
+                                ii => ii.InventoryReceiptId == request.ExcludeInventoryReceiptId.Value &&
+                                    ii.DeletedAt == null)
+                            .Sum(ii => ii.Count ?? 0);
+                        if (excludedQty > 0)
+                        {
+                            responseItem.UnimportedQuantity += excludedQty;
+                        }
+                    }
+                }
+            }
+            return response;
         }
     }
 }

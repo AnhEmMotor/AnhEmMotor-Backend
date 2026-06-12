@@ -4,7 +4,7 @@ using Application.Interfaces.Services;
 using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
-using Infrastructure.BackgroundJobs;
+
 using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
@@ -13,6 +13,7 @@ using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -35,6 +36,7 @@ public static class DependencyInjection
                 options =>
                 {
                     options.UseMySql(connectionString, serverVersion);
+                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 });
         } else if (string.Compare(provider, "PostgreSql") == 0)
         {
@@ -43,6 +45,7 @@ public static class DependencyInjection
                 options =>
                 {
                     options.UseNpgsql(connectionString);
+                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 });
         } else
         {
@@ -54,6 +57,7 @@ public static class DependencyInjection
                         b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
                                 .CommandTimeout(30)
                                 .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 });
         }
         services.AddIdentity<ApplicationUser, ApplicationRole>(
@@ -98,7 +102,6 @@ public static class DependencyInjection
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
-        services.AddHostedService<BannerExpiryWorker>();
         return services;
     }
 }

@@ -51,7 +51,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputInfos.RemoveRange(db.OutputInfos);
         db.OutputOrders.RemoveRange(db.OutputOrders);
         db.InventoryReceiptInfos.RemoveRange(db.InventoryReceiptInfos);
-        db.InventoryReceiptReceipts.RemoveRange(db.InventoryReceiptReceipts);
+        db.InventoryReceipts.RemoveRange(db.InventoryReceipts);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 

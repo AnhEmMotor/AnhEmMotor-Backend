@@ -4,7 +4,9 @@ namespace Application.ApiContracts.InventoryReceipt.Requests
     {
         public int? PurchaseRequestItemId { get; set; }
 
-        public int? QuotationProductRowId { get; set; }
+        public int? SupplierId { get; set; }
+
+        public decimal? UnitPrice { get; set; }
 
         public int? Count { get; set; }
 

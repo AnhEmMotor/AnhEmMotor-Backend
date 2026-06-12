@@ -4,5 +4,5 @@ using MediatR;
 
 namespace Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequestById
 {
-    public sealed record GetApprovedPurchaseRequestByIdQuery(int Id) : IRequest<Result<ApprovedPurchaseRequestDetailResponse?>>;
+    public sealed record GetApprovedPurchaseRequestByIdQuery(int Id, int? ExcludeInventoryReceiptId = null) : IRequest<Result<ApprovedPurchaseRequestDetailResponse?>>;
 }

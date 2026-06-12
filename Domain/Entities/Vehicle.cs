@@ -61,6 +61,9 @@ public class Vehicle : BaseEntity
     [Column("PurchaseDate")]
     public DateTimeOffset PurchaseDate { get; set; }
 
+    [Column("ImportPrice", TypeName = "decimal(18, 2)")]
+    public decimal ImportPrice { get; set; } = 0;
+
     public ICollection<VehicleDocument> Documents { get; set; } = new List<VehicleDocument>();
 
     public ICollection<MaintenanceHistory> MaintenanceHistories { get; set; } = new List<MaintenanceHistory>();

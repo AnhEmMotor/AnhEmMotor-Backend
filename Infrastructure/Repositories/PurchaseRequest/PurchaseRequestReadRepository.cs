@@ -20,7 +20,7 @@ namespace Infrastructure.Repositories.PurchaseRequest
         {
             var query = GetQueryable(mode)
                 .Include(x => x.CreatedByUser)
-                .Include(x => x.PurchaseRequestItems);
+                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null));
             return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 
@@ -31,8 +31,23 @@ namespace Infrastructure.Repositories.PurchaseRequest
         {
             var query = GetQueryable(mode)
                 .Include(x => x.CreatedByUser)
-                .Include(x => x.PurchaseRequestItems)
-                .Where(x => x.Status == PurchaseRequestStatus.Approve);
+                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
+                .Where(x => x.Status == PurchaseRequestStatus.Approve)
+                .Where(
+                    x => x.PurchaseRequestItems
+                        .Where(item => item.DeletedAt == null)
+                        .Any(
+                            item => item.Quantity >
+                                    item.InventoryReceiptInfos
+                                        .Where(
+                                            ii => ii.DeletedAt == null &&
+                                                            ii.InventoryReceipt != null &&
+                                                            ii.InventoryReceipt.DeletedAt == null &&
+                                                            string.Compare(
+                                                                ii.InventoryReceipt.StatusId,
+                                                                Domain.Constants.InventoryReceiptStatus.Approve) ==
+                                                            0)
+                                        .Sum(ii => ii.Count ?? 0)));
             return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 
@@ -53,15 +68,15 @@ namespace Infrastructure.Repositories.PurchaseRequest
             var query = GetQueryable(mode)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.ApprovedByUser)
-                .Include(x => x.PurchaseRequestItems)
+                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
                 .ThenInclude(r => r.ProductVariant)
                 .ThenInclude(pv => pv!.Product)
                 .ThenInclude(p => p!.ProductCategory)
-                .Include(x => x.PurchaseRequestItems)
+                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
                 .ThenInclude(r => r.ProductVariantColor)
-                .Include(x => x.PurchaseRequestItems)
-                .ThenInclude(r => r.InventoryReceiptInfos)
-                .ThenInclude(ii => ii.InventoryReceiptReceipt)
+                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                .ThenInclude(ii => ii.InventoryReceipt)
                 .AsSplitQuery();
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
@@ -76,7 +91,11 @@ namespace Infrastructure.Repositories.PurchaseRequest
             {
                 query = query.Where(x => x.DeletedAt != null);
             }
-            return query;
+            return query
+                .Include(x => x.CreatedByUser)
+                .Include(x => x.SentByUser)
+                .Include(x => x.ApprovedByUser)
+                .Include(x => x.RejectedByUser);
         }
 
         public Task<List<PurchaseRequestItem>> GetItemsByIdsAsync(

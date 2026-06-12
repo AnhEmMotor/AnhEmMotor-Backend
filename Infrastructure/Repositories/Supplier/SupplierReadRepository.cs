@@ -25,39 +25,22 @@ public class SupplierReadRepository(
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<SupplierEntity>(mode)
-            .GroupJoin(
-                context.GetQuery<Domain.Entities.InventoryReceiptInfo>(DataFetchMode.ActiveOnly)
-                    .Where(
-                        ii => ii.InventoryReceiptReceipt != null &&
-                                ii.InventoryReceiptReceipt.StatusId == InventoryReceiptStatus.Approve),
-                supplier => (int?)supplier.Id,
-                InventoryReceiptInfo => InventoryReceiptInfo.QuotationProductRow != null &&
-                        InventoryReceiptInfo.QuotationProductRow.QuotationReceipt != null
-                    ? InventoryReceiptInfo.QuotationProductRow.QuotationReceipt.SupplierId
-                    : null,
-                (supplier, InventoryReceiptInfos) => new { supplier, InventoryReceiptInfos })
             .Select(
                 x => new SupplierWithTotalInventoryReceiptResponse
                 {
-                    Id = x.supplier.Id,
-                    Name = x.supplier.Name!,
-                    Phone = x.supplier.Phone,
-                    Email = x.supplier.Email,
-                    Address = x.supplier.Address,
-                    StatusId = x.supplier.StatusId!,
-                    CreatedAt = x.supplier.CreatedAt,
-                    UpdatedAt = x.supplier.UpdatedAt,
-                    DeletedAt = x.supplier.DeletedAt,
-                    Notes = x.supplier.Notes,
-                    TaxIdentificationNumber = x.supplier.TaxIdentificationNumber,
-                    PartnerTypeId = x.supplier.PartnerTypeId ?? "supplier",
-                    TotalInventoryReceipt =
-                        x.InventoryReceiptInfos
-                                .Sum(
-                                    ii => (long)(ii.Count ?? 0) *
-                                                (long)(ii.QuotationProductRow != null
-                                                    ? (ii.QuotationProductRow.QuotePrice ?? 0)
-                                                    : 0))
+                    Id = x.Id,
+                    Name = x.Name!,
+                    Phone = x.Phone,
+                    Email = x.Email,
+                    Address = x.Address,
+                    StatusId = x.StatusId!,
+                    CreatedAt = x.CreatedAt,
+                    UpdatedAt = x.UpdatedAt,
+                    DeletedAt = x.DeletedAt,
+                    Notes = x.Notes,
+                    TaxIdentificationNumber = x.TaxIdentificationNumber,
+                    PartnerTypeId = x.PartnerTypeId ?? "supplier",
+                    TotalInventoryReceipt = 0
                 });
     }
 

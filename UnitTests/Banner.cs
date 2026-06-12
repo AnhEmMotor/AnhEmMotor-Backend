@@ -27,9 +27,8 @@ public class Banner
         var command = new CreateBannerCommand
         {
             Title = "  Title  ",
-            ImageUrl = "  http://img.com  ",
-            LinkUrl = "  http://link.com  ",
-            Position = "  Home  "
+            DesktopImageUrl = "  http://img.com  ",
+            CtaLink = "  http://link.com  "
         };
         var handler = new CreateBannerCommandHandler(
             _bannerInsertRepoMock.Object,
@@ -40,21 +39,20 @@ public class Banner
             x => x.Add(
                 It.Is<Domain.Entities.Banner>(
                     b => string.Compare(b.Title, "Title") == 0 &&
-                        string.Compare(b.ImageUrl, "http://img.com") == 0 &&
-                        string.Compare(b.LinkUrl, "http://link.com") == 0 &&
-                        string.Compare(b.Position, "Home") == 0)),
+                        string.Compare(b.DesktopImageUrl, "http://img.com") == 0 &&
+                        string.Compare(b.CtaLink, "http://link.com") == 0)),
             Times.Once);
     }
 
     [Fact(DisplayName = "BANN_011 - Kiểm tra lưu trữ Banner khi không có liên kết (LinkUrl)")]
     public async Task CreateBanner_NullLinkUrl_ShouldSaveSuccessfully()
     {
-        var command = new CreateBannerCommand { Title = "Title", ImageUrl = "http://img.com", LinkUrl = null };
+        var command = new CreateBannerCommand { Title = "Title", DesktopImageUrl = "http://img.com", CtaLink = null };
         var handler = new CreateBannerCommandHandler(
             _bannerInsertRepoMock.Object,
             _tokenAccessorMock.Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        _bannerInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Banner>(b => b.LinkUrl == null)), Times.Once);
+        _bannerInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Banner>(b => b.CtaLink == null)), Times.Once);
     }
 }

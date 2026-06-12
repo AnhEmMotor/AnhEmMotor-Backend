@@ -1,14 +1,17 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.News;
+using Domain.Entities;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Application.Features.News.Commands.UpdateNews;
 
 public sealed class UpdateNewsCommandHandler(
     INewsReadRepository newsReadRepository,
     INewsUpdateRepository newsUpdateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateNewsCommand, Result<Unit>>
+    IUnitOfWork unitOfWork,
+    IMemoryCache cache) : IRequestHandler<UpdateNewsCommand, Result<Unit>>
 {
     public async Task<Result<Unit>> Handle(UpdateNewsCommand request, CancellationToken cancellationToken)
     {
@@ -17,6 +20,7 @@ public sealed class UpdateNewsCommandHandler(
         {
             return Result<Unit>.Failure("Bài viết không tồn tại.");
         }
+        var oldSlug = news.Slug;
         news.Title = request.Title;
         news.Slug = request.Slug ?? news.Slug;
         news.Content = request.Content;
@@ -32,8 +36,36 @@ public sealed class UpdateNewsCommandHandler(
         {
             news.PublishedDate = DateTimeOffset.UtcNow;
         }
+        if (request.LinkedProducts != null)
+        {
+            news.LinkedProducts.Clear();
+            foreach (var lp in request.LinkedProducts)
+            {
+                var parts = lp.Id.Split('_');
+                if (parts.Length == 2 && int.TryParse(parts[0], out var variantId))
+                {
+                    int? colorId = null;
+                    if (int.TryParse(parts[1], out var parsedColorId))
+                    {
+                        colorId = parsedColorId;
+                    }
+                    news.LinkedProducts
+                        .Add(new NewsProduct { ProductVariantId = variantId, ProductVariantColorId = colorId });
+                }
+            }
+        }
         newsUpdateRepository.Update(news);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        cache.Remove($"News_{news.Id}");
+        if (!string.IsNullOrWhiteSpace(oldSlug))
+        {
+            cache.Remove($"News_Slug_{oldSlug}_Store");
+        }
+        if (!string.IsNullOrWhiteSpace(news.Slug) && string.Compare(news.Slug, oldSlug) != 0)
+        {
+            cache.Remove($"News_Slug_{news.Slug}_Store");
+        }
         return Result<Unit>.Success(Unit.Value);
     }
 }
+

@@ -28,15 +28,12 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInven
             {
                 search = displayName;
             }
-
             var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(
                     ',',
                     StringSplitOptions.RemoveEmptyEntries)
                     .ToList() ??
                 [];
-
             var cleanFilters = RemoveFilter(request.Filters, "DisplayName");
-
             return new GetActiveVariantLiteListForInventoryReceiptQuery
             {
                 Page = request.Page ?? 1,

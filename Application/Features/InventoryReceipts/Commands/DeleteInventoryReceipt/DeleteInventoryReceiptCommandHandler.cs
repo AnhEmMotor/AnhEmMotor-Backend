@@ -25,7 +25,8 @@ public sealed class DeleteInventoryReceiptCommandHandler(
         }
         if (InventoryReceiptStatus.IsCannotDelete(InventoryReceipt.StatusId))
         {
-            return Result.Failure(Error.BadRequest("Khi đã phê duyệt hoặc từ chối thì không được xoá phiếu.", "StatusId"));
+            return Result.Failure(
+                Error.BadRequest("Khi đã phê duyệt hoặc từ chối thì không được xoá phiếu.", "StatusId"));
         }
         if (!string.Equals(InventoryReceipt.StatusId, InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase))
         {

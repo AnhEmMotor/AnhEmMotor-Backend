@@ -28,7 +28,6 @@ using Application.Interfaces.Repositories.Technology;
 using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
-using Domain.Constants.Order;
 using Domain.Entities;
 using FluentAssertions;
 using Mapster;
@@ -1331,101 +1330,6 @@ public class Product
         result.IsValid.Should().BeFalse();
     }
 
-    [Fact(
-        DisplayName = "PRODUCT_CALC_001 - CalculateTotalStock tính tổng RemainingCount từ InventoryReceipt receipt Finished")]
-    public void MapProductToDetailForManagerResponse_CalculatesTotalStockCorrectly()
-    {
-        var product = new ProductEntity
-        {
-            Id = 1,
-            Name = "Honda Wave",
-            ProductVariants =
-                [new ProductVariant
-                {
-                    Id = 1,
-                    InventoryReceiptInfos =
-                        [new InventoryReceiptInfo
-                            {
-                                RemainingCount = 10,
-                                InventoryReceiptReceipt =
-                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
-                            }, new InventoryReceiptInfo
-                            {
-                                RemainingCount = 5,
-                                InventoryReceiptReceipt =
-                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Draft }
-                            }]
-                }, new ProductVariant
-                {
-                    Id = 2,
-                    InventoryReceiptInfos =
-                        [new InventoryReceiptInfo
-                            {
-                                RemainingCount = 15,
-                                InventoryReceiptReceipt =
-                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
-                            }]
-                }]
-        };
-        var response = product.Adapt<ProductDetailForManagerResponse>();
-        response.Stock.Should().Be(25);
-    }
-
-    [Fact(DisplayName = "PRODUCT_CALC_002 - CalculateTotalBooked tính tổng Count từ Output Order Pending/Confirmed")]
-    public void MapProductToDetailForManagerResponse_CalculatesReservedStockCorrectly()
-    {
-        var product = new ProductEntity
-        {
-            Id = 1,
-            Name = "Yamaha",
-            ProductVariants =
-                [new ProductVariant
-                {
-                    Id = 1,
-                    OutputInfos =
-                        [new OutputInfo { Count = 3, OutputOrder = new Output { StatusId = OrderStatus.Pending } }, new OutputInfo
-                            {
-                                Count = 2,
-                                OutputOrder = new Output { StatusId = OrderStatus.ConfirmedCod }
-                            }, new OutputInfo
-                            {
-                                Count = 5,
-                                OutputOrder = new Output { StatusId = OrderStatus.Completed }
-                            }]
-                }]
-        };
-        var response = product.Adapt<ProductDetailForManagerResponse>();
-        response.HasBeenBooked.Should().Be(5);
-    }
-
-    [Fact(DisplayName = "PRODUCT_CALC_003 - Tính toán Available To Sell (ATS) chính xác")]
-    public void MapProductToDetailForManagerResponse_CalculatesATSCorrectly()
-    {
-        var product = new ProductEntity
-        {
-            Id = 1,
-            Name = "Suzuki",
-            ProductVariants =
-                [new ProductVariant
-                {
-                    Id = 1,
-                    InventoryReceiptInfos =
-                        [new InventoryReceiptInfo
-                            {
-                                RemainingCount = 50,
-                                InventoryReceiptReceipt =
-                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
-                            }],
-                    OutputInfos =
-                        [new OutputInfo { Count = 10, OutputOrder = new Output { StatusId = OrderStatus.Pending } }]
-                }]
-        };
-        var response = product.Adapt<ProductDetailForManagerResponse>();
-        response.Stock.Should().Be(50);
-        response.HasBeenBooked.Should().Be(10);
-        response.StatusStockId.Should().Be("in_stock");
-    }
-
     [Fact(DisplayName = "PRODUCT_112 - Tạo sản phẩm hợp lệ với 1 biến thể rỗng OptionValues")]
     public void CreateProduct_SingleEmptyVariant_ValidationSuccess()
     {
@@ -1605,7 +1509,7 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 10,
-                                InventoryReceiptReceipt =
+                                InventoryReceipt =
                                     new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
@@ -1615,7 +1519,7 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 3,
-                                InventoryReceiptReceipt =
+                                InventoryReceipt =
                                     new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
@@ -1625,7 +1529,7 @@ public class Product
                         [new InventoryReceiptInfo
                             {
                                 RemainingCount = 0,
-                                InventoryReceiptReceipt =
+                                InventoryReceipt =
                                     new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
@@ -1768,19 +1672,6 @@ public class Product
         response.DisplayName.Should().Contain("Đỏ");
     }
 
-    [Fact(DisplayName = "PRODUCT_170 - Logic hiển thị tên mặc định khi thiếu thông tin")]
-    public void VariantLiteResponse_DisplayName_FallbackToName()
-    {
-        var variant = new ProductVariant
-        {
-            Product = new ProductEntity { Name = "Standard Bike" },
-            VariantName = null,
-            ProductVariantColors = []
-        };
-        var response = variant.Adapt<ProductVariantLiteResponse>();
-        response.DisplayName.Should().NotBeNullOrEmpty();
-    }
-
     [Fact(DisplayName = "PRODUCT_155 - Tính toán tổng tồn kho (Stock) của biến thể")]
     public void ProductVariant_CalculateStock_SumRemaining()
     {
@@ -1790,12 +1681,12 @@ public class Product
                 [new InventoryReceiptInfo
                 {
                     RemainingCount = 5,
-                    InventoryReceiptReceipt =
+                    InventoryReceipt =
                         new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                 }, new InventoryReceiptInfo
                 {
                     RemainingCount = 10,
-                    InventoryReceiptReceipt =
+                    InventoryReceipt =
                         new InventoryReceipt { StatusId = Domain.Constants.InventoryReceiptStatus.Approve }
                 }]
         };

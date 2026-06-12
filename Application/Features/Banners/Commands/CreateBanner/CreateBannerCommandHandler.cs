@@ -17,16 +17,12 @@ public sealed class CreateBannerCommandHandler(
         var banner = new Banner
         {
             Title = request.Title.Trim(),
-            ImageUrl = request.ImageUrl.Trim(),
-            LinkUrl = request.LinkUrl?.Trim(),
-            CtaText = request.CtaText?.Trim(),
-            Position = request.Position?.Trim(),
-            Placement = request.Placement?.Trim(),
-            StartDate = request.StartDate,
-            EndDate = request.EndDate,
-            IsActive = request.IsActive,
-            Priority = request.Priority,
-            DisplayOrder = request.DisplayOrder
+            DesktopImageUrl = request.DesktopImageUrl.Trim(),
+            MobileImageUrl = request.MobileImageUrl?.Trim(),
+            Description = request.Description?.Trim(),
+            CtaLink = request.CtaLink?.Trim(),
+            CtaLabel = request.CtaLabel?.Trim(),
+            Placement = request.Placement?.Trim()
         };
         bannerInsertRepository.Add(banner);
         bannerInsertRepository.AddLog(

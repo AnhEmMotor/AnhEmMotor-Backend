@@ -73,4 +73,10 @@ public interface IProductReadRepository
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
     public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
+    public Task<List<ProductEntity>> GetAllProductsWithInventoryDetailsAsync(CancellationToken cancellationToken);
+
+    public Task<Domain.Entities.ProductVariant?> GetVariantByIdWithDetailsAsync(
+        int variantId,
+        CancellationToken cancellationToken);
 }

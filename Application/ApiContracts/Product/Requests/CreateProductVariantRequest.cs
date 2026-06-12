@@ -27,6 +27,9 @@ public class CreateProductVariantRequest
     [JsonPropertyName("colors")]
     public List<CreateProductVariantColorRequest> Colors { get; set; } = [];
 
+    [JsonPropertyName("supplier_prices")]
+    public List<VariantSupplierPriceRequest> SupplierPrices { get; set; } = [];
+
     [JsonPropertyName("sku")]
     public string? SKU { get; set; }
 

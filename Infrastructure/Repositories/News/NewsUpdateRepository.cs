@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.News;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.News
@@ -8,6 +9,11 @@ namespace Infrastructure.Repositories.News
         public void Update(Domain.Entities.News news)
         {
             context.News.Update(news);
+        }
+
+        public void RemoveLinkedProducts(IEnumerable<NewsProduct> linkedProducts)
+        {
+            context.NewsProducts.RemoveRange(linkedProducts);
         }
     }
 }

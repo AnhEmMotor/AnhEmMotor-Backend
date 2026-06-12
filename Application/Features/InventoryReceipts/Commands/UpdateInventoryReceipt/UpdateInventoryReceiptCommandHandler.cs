@@ -3,17 +3,19 @@ using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
+using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
-using Application.Interfaces.Repositories.Quotation;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
 using Mapster;
 using MediatR;
-using Application.Interfaces.Repositories.Permission;
+using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
@@ -23,10 +25,11 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
     IInventoryReceiptUpdateRepository updateRepository,
     IInventoryReceiptDeleteRepository deleteRepository,
     IPurchaseRequestReadRepository prReadRepository,
-    IQuotationReadRepository quotationRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
     IPermissionReadRepository permissionRepository,
+    IVehicleUpdateRepository vehicleUpdateRepository,
+    IVehicleReadRepository vehicleReadRepository,
     IUnitOfWork unitOfWork,
     ICurrentUserContext currentUserContext) : IRequestHandler<UpdateInventoryReceiptCommand, Result<InventoryReceiptDetailResponse?>>
 {
@@ -37,22 +40,24 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         UpdateInventoryReceiptCommand request,
         CancellationToken cancellationToken)
     {
-        var InventoryReceipt = await readRepository.GetByIdWithDetailsAsync(
+        var inventoryReceipt = await readRepository.GetByIdWithDetailsAsync(
             request.Id,
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-        if (InventoryReceipt is null)
+        if (inventoryReceipt is null)
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
-        if (Domain.Constants.InventoryReceiptStatus.IsCannotEdit(InventoryReceipt.StatusId))
+        if (Domain.Constants.InventoryReceiptStatus.IsCannotEdit(inventoryReceipt.StatusId))
         {
             return Error.BadRequest("Khi đã phê duyệt hoặc từ chối thì không được sửa phiếu.", "StatusId");
         }
-
         Guid userId = currentUserContext.GetUserId();
-        if (string.Equals(InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(
+            inventoryReceipt.StatusId,
+            Domain.Constants.InventoryReceiptStatus.Sent,
+            StringComparison.OrdinalIgnoreCase))
         {
             var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                 userId,
@@ -61,10 +66,14 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                 .ConfigureAwait(false);
             if (!hasApprovePermission)
             {
-                return Error.BadRequest("Chỉ người có quyền phê duyệt/từ chối mới được sửa phiếu nhập ở trạng thái đã gửi.", "StatusId");
+                return Error.BadRequest(
+                    "Chỉ người có quyền phê duyệt/từ chối mới được sửa phiếu nhập ở trạng thái đã gửi.",
+                    "StatusId");
             }
-        }
-        else if (!string.Equals(InventoryReceipt.StatusId, Domain.Constants.InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase))
+        } else if (!string.Equals(
+            inventoryReceipt.StatusId,
+            Domain.Constants.InventoryReceiptStatus.Draft,
+            StringComparison.OrdinalIgnoreCase))
         {
             var hasEditOrApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                 userId,
@@ -76,37 +85,56 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                 return Error.BadRequest("Bạn không có quyền chỉnh sửa phiếu nhập này.", "StatusId");
             }
         }
-        var prItemIds = request.Products
-            .Where(p => p.PurchaseRequestItemId.HasValue)
-            .Select(p => p.PurchaseRequestItemId!.Value)
-            .Distinct()
-            .ToList();
-        var prItems = prItemIds.Count > 0
-            ? await prReadRepository.GetItemsByIdsAsync(prItemIds, cancellationToken).ConfigureAwait(false)
-            : [];
-        var prItemsDict = prItems.ToDictionary(x => x.Id);
-        var quoteRowIds = request.Products
-            .Where(p => p.QuotationProductRowId.HasValue)
-            .Select(p => p.QuotationProductRowId!.Value)
-            .Distinct()
-            .ToList();
-        var quoteRows = quoteRowIds.Count > 0
-            ? await quotationRepository.GetRowsByIdsAsync(quoteRowIds, cancellationToken).ConfigureAwait(false)
-            : [];
-        var quoteRowsDict = quoteRows.ToDictionary(x => x.Id);
-        var variantIds = request.Products
-            .Select(
-                p => p.QuotationProductRowId.HasValue &&
-                        quoteRowsDict.TryGetValue(p.QuotationProductRowId.Value, out var qr)
-                    ? qr.ProductVariantId
-                    : (p.PurchaseRequestItemId.HasValue &&
-                            prItemsDict.TryGetValue(p.PurchaseRequestItemId.Value, out var prItem)
-                        ? prItem.ProductVariantId
-                        : (int?)null))
-            .Where(id => id.HasValue)
-            .Select(id => id!.Value)
-            .Distinct()
-            .ToList();
+        var existingInfoDict = inventoryReceipt.InventoryReceiptInfos.ToDictionary(ii => ii.Id);
+        var purchaseRequestId = request.PurchaseRequestId ?? inventoryReceipt.PurchaseRequestId;
+        PurchaseRequest? pr = null;
+        if (purchaseRequestId.HasValue)
+        {
+            pr = await prReadRepository.GetByIdWithDetailsAsync(purchaseRequestId.Value, cancellationToken)
+                .ConfigureAwait(false);
+            if (pr is null)
+            {
+                return Error.NotFound(
+                    $"Yêu cầu mua hàng {purchaseRequestId} không tồn tại hoặc đã bị xóa.",
+                    "PurchaseRequestId");
+            }
+            if (!string.Equals(pr.Status, PurchaseRequestStatus.Approve, StringComparison.OrdinalIgnoreCase))
+            {
+                return Error.BadRequest(
+                    $"Yêu cầu mua hàng {purchaseRequestId} chưa được phê duyệt.",
+                    "PurchaseRequestId");
+            }
+        }
+        var prItemsDict = pr != null ? pr.PurchaseRequestItems.ToDictionary(x => x.Id) : [];
+        if (prItemsDict.Count == 0 && request.Products.Any(p => p.PurchaseRequestItemId.HasValue))
+        {
+            var prItemIds = request.Products
+                .Where(p => p.PurchaseRequestItemId.HasValue)
+                .Select(p => p.PurchaseRequestItemId!.Value)
+                .Distinct();
+            var prItems = await prReadRepository.GetItemsByIdsAsync(prItemIds, cancellationToken).ConfigureAwait(false);
+            prItemsDict = prItems.ToDictionary(x => x.Id);
+        }
+        var variantIds = new List<int>();
+        foreach (var productRequest in request.Products)
+        {
+            int? purchaseRequestItemId = null;
+            if (productRequest.Id.HasValue && productRequest.Id > 0)
+            {
+                if (existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
+                {
+                    purchaseRequestItemId = productRequest.PurchaseRequestItemId ?? existingInfo.PurchaseRequestItemId;
+                }
+            } else
+            {
+                purchaseRequestItemId = productRequest.PurchaseRequestItemId;
+            }
+            if (purchaseRequestItemId.HasValue && prItemsDict.TryGetValue(purchaseRequestItemId.Value, out var prItem))
+            {
+                variantIds.Add(prItem.ProductVariantId);
+            }
+        }
+        variantIds = variantIds.Distinct().ToList();
         var variantsList = new List<ProductVariant>();
         if (variantIds.Count > 0)
         {
@@ -134,27 +162,60 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             var uniqueEngines = new HashSet<(string Engine, int ProductVariantId, int? ProductVariantColorId)>();
             foreach (var product in request.Products)
             {
-                var resolvedVariantId = product.QuotationProductRowId.HasValue &&
-                        quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr)
-                    ? qr.ProductVariantId
-                    : (product.PurchaseRequestItemId.HasValue &&
-                            prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItem)
-                        ? prItem.ProductVariantId
-                        : (int?)null);
-                var resolvedColorId = product.QuotationProductRowId.HasValue &&
-                        quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr2)
-                    ? qr2.ProductVariantColorId
-                    : (product.PurchaseRequestItemId.HasValue &&
-                            prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItem2)
-                        ? prItem2.ProductVariantColorId
-                        : (int?)null);
-                var resolvedSupplierId = product.QuotationProductRowId.HasValue &&
-                        quoteRowsDict.TryGetValue(product.QuotationProductRowId.Value, out var qr3) &&
-                        qr3.QuotationReceipt != null
-                    ? qr3.QuotationReceipt.SupplierId
+                int? purchaseRequestItemId = null;
+                if (product.Id.HasValue &&
+                    product.Id > 0 &&
+                    existingInfoDict.TryGetValue(product.Id.Value, out var existingInfo))
+                {
+                    purchaseRequestItemId = product.PurchaseRequestItemId ?? existingInfo.PurchaseRequestItemId;
+                } else
+                {
+                    purchaseRequestItemId = product.PurchaseRequestItemId;
+                }
+                PurchaseRequestItem? prItem = null;
+                var resolvedVariantId = purchaseRequestItemId.HasValue &&
+                        prItemsDict.TryGetValue(purchaseRequestItemId.Value, out prItem)
+                    ? prItem.ProductVariantId
                     : (int?)null;
+                var resolvedColorId = purchaseRequestItemId.HasValue &&
+                        prItemsDict.TryGetValue(purchaseRequestItemId.Value, out var prItem2)
+                    ? prItem2.ProductVariantColorId
+                    : (int?)null;
+                var resolvedSupplierId = product.SupplierId;
                 if (resolvedVariantId.HasValue)
                 {
+                    if (prItem != null)
+                    {
+                        var occupiedQty = prItem.InventoryReceiptInfos
+                            .Where(
+                                ii => ii.DeletedAt == null &&
+                                    ii.InventoryReceiptId != request.Id &&
+                                    ii.InventoryReceipt != null &&
+                                    ii.InventoryReceipt.DeletedAt == null &&
+                                    (string.Equals(
+                                            ii.InventoryReceipt.StatusId,
+                                            Domain.Constants.InventoryReceiptStatus.Approve,
+                                            StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(
+                                            ii.InventoryReceipt.StatusId,
+                                            Domain.Constants.InventoryReceiptStatus.Sent,
+                                            StringComparison.OrdinalIgnoreCase) ||
+                                        string.Equals(
+                                            ii.InventoryReceipt.StatusId,
+                                            Domain.Constants.InventoryReceiptStatus.Draft,
+                                            StringComparison.OrdinalIgnoreCase)))
+                            .Sum(ii => ii.Count ?? 0);
+                        var remainingAllowed = prItem.Quantity - occupiedQty;
+                        var requestedQty = product.Count ?? 0;
+                        if (requestedQty > remainingAllowed)
+                        {
+                            var productName = prItem.ProductVariant?.Product?.Name ??
+                                $"Biến thể #{prItem.ProductVariantId}";
+                            return Error.BadRequest(
+                                $"Số lượng nhập ({requestedQty}) cho sản phẩm '{productName}' vượt quá số lượng còn lại được phép nhập từ yêu cầu mua hàng ({remainingAllowed}).",
+                                "Products");
+                        }
+                    }
                     if (resolvedSupplierId.HasValue)
                     {
                         var supplier = await supplierRepository.GetByIdAsync(
@@ -190,59 +251,90 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                 }
             }
         }
-        request.Adapt(InventoryReceipt);
-        if (!string.IsNullOrEmpty(InventoryReceipt.Notes))
+        var oldPurchaseRequestId = inventoryReceipt.PurchaseRequestId;
+        var oldNotes = inventoryReceipt.Notes;
+        request.Adapt(inventoryReceipt);
+        if (!request.PurchaseRequestId.HasValue)
         {
-            InventoryReceipt.Notes = HtmlTagRegex().Replace(InventoryReceipt.Notes, string.Empty);
+            inventoryReceipt.PurchaseRequestId = oldPurchaseRequestId;
         }
-        var existingInfoDict = InventoryReceipt.InventoryReceiptInfos.ToDictionary(ii => ii.Id);
+        if (request.Notes == null)
+        {
+            inventoryReceipt.Notes = oldNotes;
+        }
+        if (!string.IsNullOrEmpty(inventoryReceipt.Notes))
+        {
+            inventoryReceipt.Notes = HtmlTagRegex().Replace(inventoryReceipt.Notes, string.Empty);
+        }
         var requestInfoDict = request.Products.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
-        var toDelete = InventoryReceipt.InventoryReceiptInfos.Where(ii => !requestInfoDict.ContainsKey(ii.Id)).ToList();
+        var toDelete = inventoryReceipt.InventoryReceiptInfos.Where(ii => !requestInfoDict.ContainsKey(ii.Id)).ToList();
         foreach (var info in toDelete)
         {
             deleteRepository.DeleteInventoryReceiptInfo(info);
-            InventoryReceipt.InventoryReceiptInfos.Remove(info);
+            inventoryReceipt.InventoryReceiptInfos.Remove(info);
         }
+        var config = new TypeAdapterConfig();
+        config.NewConfig<UpdateInventoryReceiptInfoRequest, InventoryReceiptInfo>().Ignore(dest => dest.Vehicles);
         foreach (var productRequest in request.Products)
         {
-            var resolvedColorId = productRequest.QuotationProductRowId.HasValue &&
-                    quoteRowsDict.TryGetValue(productRequest.QuotationProductRowId.Value, out var qr)
-                ? qr.ProductVariantColorId
-                : (productRequest.PurchaseRequestItemId.HasValue &&
-                        prItemsDict.TryGetValue(productRequest.PurchaseRequestItemId.Value, out var prItem)
-                    ? prItem.ProductVariantColorId
-                    : (int?)null);
-            var resolvedVariantId = productRequest.QuotationProductRowId.HasValue &&
-                    quoteRowsDict.TryGetValue(productRequest.QuotationProductRowId.Value, out var qrV)
-                ? qrV.ProductVariantId
-                : (productRequest.PurchaseRequestItemId.HasValue &&
-                        prItemsDict.TryGetValue(productRequest.PurchaseRequestItemId.Value, out var prItemV)
-                    ? prItemV.ProductVariantId
-                    : (int?)null);
+            InventoryReceiptInfo? existingInfo = null;
             if (productRequest.Id.HasValue && productRequest.Id > 0)
             {
-                if (existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
+                existingInfoDict.TryGetValue(productRequest.Id.Value, out existingInfo);
+            }
+            int? purchaseRequestItemId = existingInfo != null
+                ? (productRequest.PurchaseRequestItemId ?? existingInfo.PurchaseRequestItemId)
+                : productRequest.PurchaseRequestItemId;
+            var resolvedColorId = purchaseRequestItemId.HasValue &&
+                    prItemsDict.TryGetValue(purchaseRequestItemId.Value, out var prItem)
+                ? prItem.ProductVariantColorId
+                : (int?)null;
+            var resolvedVariantId = purchaseRequestItemId.HasValue &&
+                    prItemsDict.TryGetValue(purchaseRequestItemId.Value, out var prItemV)
+                ? prItemV.ProductVariantId
+                : (int?)null;
+            if (existingInfo != null)
+            {
+                var oldPurchaseRequestItemId = existingInfo.PurchaseRequestItemId;
+                productRequest.Adapt(existingInfo, config);
+                if (!productRequest.PurchaseRequestItemId.HasValue)
                 {
-                    productRequest.Adapt(existingInfo);
-                    if (productRequest.Count.HasValue)
-                    {
-                        existingInfo.RemainingCount = productRequest.Count.Value;
-                    }
-                    var variant = variantsList.FirstOrDefault(v => v.Id == resolvedVariantId);
-                    SyncVehicleIdentifiers(existingInfo, productRequest, variant, resolvedColorId);
+                    existingInfo.PurchaseRequestItemId = oldPurchaseRequestItemId;
                 }
+                if (productRequest.Count.HasValue)
+                {
+                    existingInfo.RemainingCount = productRequest.Count.Value;
+                }
+                var variant = variantsList.FirstOrDefault(v => v.Id == resolvedVariantId);
+                await SyncVehicleIdentifiersAsync(
+                    existingInfo,
+                    productRequest,
+                    variant,
+                    resolvedColorId,
+                    vehicleUpdateRepository,
+                    vehicleReadRepository,
+                    cancellationToken)
+                    .ConfigureAwait(false);
             } else
             {
-                var newInfo = productRequest.Adapt<InventoryReceiptInfo>();
+                var newInfo = productRequest.Adapt<InventoryReceiptInfo>(config);
                 newInfo.RemainingCount = newInfo.Count ?? 0;
                 var variant = variantsList.FirstOrDefault(v => v.Id == resolvedVariantId);
-                SyncVehicleIdentifiers(newInfo, productRequest, variant, resolvedColorId);
-                InventoryReceipt.InventoryReceiptInfos.Add(newInfo);
+                await SyncVehicleIdentifiersAsync(
+                    newInfo,
+                    productRequest,
+                    variant,
+                    resolvedColorId,
+                    vehicleUpdateRepository,
+                    vehicleReadRepository,
+                    cancellationToken)
+                    .ConfigureAwait(false);
+                inventoryReceipt.InventoryReceiptInfos.Add(newInfo);
             }
         }
-        updateRepository.Update(InventoryReceipt);
+        updateRepository.Update(inventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var updated = await readRepository.GetByIdWithDetailsAsync(InventoryReceipt.Id, cancellationToken)
+        var updated = await readRepository.GetByIdWithDetailsAsync(inventoryReceipt.Id, cancellationToken)
             .ConfigureAwait(false);
         return updated!.Adapt<InventoryReceiptDetailResponse>();
     }
@@ -309,27 +401,54 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         return null;
     }
 
-    private static void SyncVehicleIdentifiers(
-        InventoryReceiptInfo InventoryReceiptInfo,
+    private static async Task SyncVehicleIdentifiersAsync(
+        InventoryReceiptInfo inventoryReceiptInfo,
         UpdateInventoryReceiptInfoRequest productRequest,
         ProductVariant? variant,
-        int? resolvedColorId)
+        int? resolvedColorId,
+        IVehicleUpdateRepository vehicleUpdateRepository,
+        IVehicleReadRepository vehicleReadRepository,
+        CancellationToken cancellationToken)
     {
         var managementType = variant?.Product?.ProductCategory?.ManagementType;
         if (!string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase))
         {
-            InventoryReceiptInfo.Vehicles.Clear();
+            foreach (var vehicle in inventoryReceiptInfo.Vehicles.ToList())
+            {
+                vehicleUpdateRepository.Remove(vehicle);
+                inventoryReceiptInfo.Vehicles.Remove(vehicle);
+            }
             return;
         }
         var requestedVehicles = productRequest.Vehicles ?? [];
-        var existingVehicles = InventoryReceiptInfo.Vehicles.ToDictionary(v => v.Id);
+        var existingVehicles = inventoryReceiptInfo.Vehicles.ToDictionary(v => v.Id);
+        var requestedIds = requestedVehicles.Where(v => v.Id.HasValue).Select(v => v.Id!.Value).ToHashSet();
+        foreach (var existingVehicle in inventoryReceiptInfo.Vehicles.ToList())
+        {
+            if (!requestedIds.Contains(existingVehicle.Id))
+            {
+                vehicleUpdateRepository.Remove(existingVehicle);
+                inventoryReceiptInfo.Vehicles.Remove(existingVehicle);
+            }
+        }
         var updatedVehicles = new List<Vehicle>();
         foreach (var vehicleRequest in requestedVehicles)
         {
-            var vehicle = vehicleRequest.Id.HasValue &&
-                    existingVehicles.TryGetValue(vehicleRequest.Id.Value, out var existingVehicle)
-                ? existingVehicle
-                : new Vehicle
+            Vehicle? vehicle = null;
+            if (vehicleRequest.Id.HasValue)
+            {
+                if (existingVehicles.TryGetValue(vehicleRequest.Id.Value, out var existingVehicle))
+                {
+                    vehicle = existingVehicle;
+                } else
+                {
+                    vehicle = await vehicleReadRepository.GetByIdAsync(vehicleRequest.Id.Value, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+            }
+            if (vehicle == null)
+            {
+                vehicle = new Vehicle
                 {
                     LicensePlate = string.Empty,
                     ProductVariantId = variant?.Id,
@@ -339,6 +458,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     IsActive = true,
                     Status = VehicleStatus.Available
                 };
+            }
             vehicle.VinNumber = vehicleRequest.VinNumber.Trim();
             vehicle.EngineNumber = vehicleRequest.EngineNumber.Trim();
             vehicle.ProductVariantId = variant?.Id;
@@ -349,10 +469,10 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             }
             updatedVehicles.Add(vehicle);
         }
-        InventoryReceiptInfo.Vehicles.Clear();
+        inventoryReceiptInfo.Vehicles.Clear();
         foreach (var vehicle in updatedVehicles)
         {
-            InventoryReceiptInfo.Vehicles.Add(vehicle);
+            inventoryReceiptInfo.Vehicles.Add(vehicle);
         }
     }
 }

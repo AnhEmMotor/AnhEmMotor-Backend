@@ -15,19 +15,25 @@ namespace Infrastructure.DBContexts;
 
 public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
-    public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options): base(options)
+    private readonly IServiceProvider? _serviceProvider;
+
+    public ApplicationDBContext(
+        DbContextOptions<ApplicationDBContext> options,
+        IServiceProvider? serviceProvider = null): base(options)
     {
+        _serviceProvider = serviceProvider;
     }
 
-    protected ApplicationDBContext(DbContextOptions options): base(options)
+    protected ApplicationDBContext(DbContextOptions options, IServiceProvider? serviceProvider = null): base(options)
     {
+        _serviceProvider = serviceProvider;
     }
 
     public new DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
 
     public virtual DbSet<Brand> Brands { get; set; }
 
-    public virtual DbSet<InventoryReceipt> InventoryReceiptReceipts { get; set; }
+    public virtual DbSet<InventoryReceipt> InventoryReceipts { get; set; }
 
     public virtual DbSet<InventoryReceiptInfo> InventoryReceiptInfos { get; set; }
 
@@ -87,7 +93,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<News> News { get; set; }
 
+    public virtual DbSet<NewsProduct> NewsProducts { get; set; }
+
     public virtual DbSet<NewsCategory> NewsCategories { get; set; }
+
+    public virtual DbSet<NewsComment> NewsComments { get; set; }
 
     public virtual DbSet<Banner> Banners { get; set; }
 
@@ -121,13 +131,17 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<CommissionPolicyAuditLog> CommissionPolicyAuditLogs { get; set; }
 
-    public virtual DbSet<Quotation> Quotations { get; set; }
-
-    public virtual DbSet<QuotationProductRow> QuotationProductRows { get; set; }
+    public virtual DbSet<ProductQuotation> ProductQuotations { get; set; }
 
     public virtual DbSet<PurchaseRequest> PurchaseRequests { get; set; }
 
     public virtual DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
+
+    public virtual DbSet<InventoryLedger> InventoryLedgers { get; set; }
+
+    public virtual DbSet<SupplierDebt> SupplierDebts { get; set; }
+
+    public virtual DbSet<InventoryOnHand> InventoryOnHands { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -221,6 +235,16 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(n => n.AuthorId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<NewsComment>()
+            .HasOne(nc => nc.News)
+            .WithMany(n => n.Comments)
+            .HasForeignKey(nc => nc.NewsId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NewsComment>()
+            .HasOne(nc => nc.User)
+            .WithMany()
+            .HasForeignKey(nc => nc.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<MaintenanceHistory>()
             .HasOne(mh => mh.Vehicle)
             .WithMany(v => v.MaintenanceHistories)
@@ -257,31 +281,21 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(ii => ii.PurchaseRequestItemId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<InventoryReceiptInfo>()
-            .HasOne(ii => ii.QuotationProductRow)
+            .HasOne(ii => ii.Supplier)
             .WithMany()
-            .HasForeignKey(ii => ii.QuotationProductRowId)
+            .HasForeignKey(ii => ii.SupplierId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<OutputInfo>()
             .HasOne(oi => oi.ProductVariantColor)
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<QuotationProductRow>()
-            .HasOne(oi => oi.QuotationReceipt)
-            .WithMany(q => q.QuotationProductRows)
-            .HasForeignKey(oi => oi.QuotationId)
-            .OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<Quotation>()
-            .HasOne(oi => oi.Supplier)
-            .WithMany()
-            .HasForeignKey(oi => oi.SupplierId)
-            .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<QuotationProductRow>()
+        modelBuilder.Entity<ProductQuotation>()
             .HasOne(oi => oi.ProductVariant)
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantId)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<QuotationProductRow>()
+        modelBuilder.Entity<ProductQuotation>()
             .HasOne(oi => oi.ProductVariantColor)
             .WithMany()
             .HasForeignKey(oi => oi.ProductVariantColorId)
@@ -291,7 +305,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(q => q.PurchaseRequestItems)
             .HasForeignKey(oi => oi.PurchaseRequestId)
             .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired(false);;
+            .IsRequired(false);
+        ;
         modelBuilder.Entity<PurchaseRequestItem>()
             .HasOne(oi => oi.ProductVariant)
             .WithMany()
@@ -307,6 +322,41 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(oi => oi.PurchaseRequest)
             .WithMany()
             .HasForeignKey(oi => oi.PurchaseRequestId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<SupplierDebt>()
+            .HasOne(sd => sd.InventoryReceipt)
+            .WithMany(ir => ir.SupplierDebts)
+            .HasForeignKey(sd => sd.InventoryReceiptId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<SupplierDebt>()
+            .HasOne(sd => sd.Supplier)
+            .WithMany(s => s.SupplierDebts)
+            .HasForeignKey(sd => sd.SupplierId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryReceiptInfo>()
+            .HasOne(ii => ii.InventoryReceipt)
+            .WithMany(ir => ir.InventoryReceiptInfos)
+            .HasForeignKey(ii => ii.InventoryReceiptId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<InventoryLedger>()
+            .HasOne(il => il.ProductVariant)
+            .WithMany()
+            .HasForeignKey(il => il.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryLedger>()
+            .HasOne(il => il.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(il => il.ProductVariantColorId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryOnHand>()
+            .HasOne(i => i.ProductVariant)
+            .WithMany()
+            .HasForeignKey(i => i.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<InventoryOnHand>()
+            .HasOne(i => i.ProductVariantColor)
+            .WithMany()
+            .HasForeignKey(i => i.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
@@ -366,7 +416,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         }
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker.Entries<BaseEntity>();
         foreach (var entry in entries)
@@ -388,7 +438,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     break;
             }
         }
-        return base.SaveChangesAsync(cancellationToken);
+        var result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return result;
     }
 
     public IQueryable<T> All<T>() where T : class => Set<T>().IgnoreQueryFilters();

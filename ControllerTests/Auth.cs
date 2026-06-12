@@ -5,7 +5,6 @@ using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.LoginForManager;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.Register;
-using Application.Interfaces.Services;
 using FluentAssertions;
 using FluentValidation;
 using MediatR;

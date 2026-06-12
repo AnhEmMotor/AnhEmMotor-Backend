@@ -4,13 +4,20 @@ using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
+using Sieve.Services;
+using System.Globalization;
+using System.Text;
 using CategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Infrastructure.Repositories.ProductCategory;
 
-public class ProductCategoryReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IProductCategoryReadRepository
+public class ProductCategoryReadRepository(
+    ApplicationDBContext context,
+    ISievePaginator paginator,
+    ISieveProcessor sieveProcessor) : IProductCategoryReadRepository
 {
     public async Task<ProductCategoryStatsResponse> GetStatisticsAsync(CancellationToken cancellationToken)
     {
@@ -38,6 +45,54 @@ public class ProductCategoryReadRepository(ApplicationDBContext context, ISieveP
     {
         var query = GetQueryable(mode);
         return paginator.ApplyAsync<CategoryEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
+
+    public async Task<PagedResult<ProductCategoryResponse>> GetPagedListAsync(
+        SieveModel sieveModel,
+        string? searchKeyword,
+        CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrWhiteSpace(searchKeyword))
+        {
+            var allCategories = await GetAllAsync(cancellationToken).ConfigureAwait(false);
+            var matchedCategories = allCategories.Where(
+                c => RemoveDiacritics(c.Name ?? string.Empty)
+                    .Contains(RemoveDiacritics(searchKeyword), StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            var resultIds = new HashSet<int>();
+            foreach (var cat in matchedCategories)
+            {
+                resultIds.Add(cat.Id);
+                var parent = cat;
+                while (parent.ParentId.HasValue)
+                {
+                    var parentId = parent.ParentId.Value;
+                    if (!resultIds.Add(parentId))
+                        break;
+                    parent = allCategories.FirstOrDefault(c => c.Id == parentId);
+                    if (parent == null)
+                        break;
+                }
+                var children = allCategories.Where(c => c.ParentId == cat.Id);
+                foreach (var child in children)
+                {
+                    resultIds.Add(child.Id);
+                }
+            }
+            var finalCategories = allCategories.Where(c => resultIds.Contains(c.Id)).ToList();
+            var query = finalCategories.AsQueryable();
+            var totalCount = query.Count();
+            var pagedQuery = sieveProcessor.Apply(sieveModel, query, applyFiltering: false);
+            var paginatedCategories = pagedQuery.ToList();
+            var responseItems = paginatedCategories.Select(c => c.Adapt<ProductCategoryResponse>()).ToList();
+            return new PagedResult<ProductCategoryResponse>(
+                responseItems,
+                totalCount,
+                sieveModel.Page ?? 1,
+                sieveModel.PageSize ?? 10);
+        }
+        return await GetPagedAsync<ProductCategoryResponse>(sieveModel, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public Task<bool> ExistsByNameAsync(
@@ -144,5 +199,22 @@ public class ProductCategoryReadRepository(ApplicationDBContext context, ISieveP
     internal IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<CategoryEntity>(mode);
+    }
+
+    private static string RemoveDiacritics(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return text;
+        var normalizedString = text.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder();
+        foreach (var c in normalizedString)
+        {
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+            {
+                stringBuilder.Append(c);
+            }
+        }
+        return stringBuilder.ToString().Normalize(NormalizationForm.FormC).Replace('đ', 'd').Replace('Đ', 'D');
     }
 }

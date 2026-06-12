@@ -30,14 +30,18 @@ public sealed class DeleteManyInventoryReceiptsCommandHandler(
         bool hasApprovePermissionChecked = false;
         bool hasApprovePermission = false;
         Guid userId = currentUserContext.GetUserId();
-
         foreach (var receipt in InventoryReceiptsList)
         {
             if (InventoryReceiptStatus.IsCannotDelete(receipt.StatusId))
             {
-                errors.Add(Error.BadRequest($"Khi đã phê duyệt hoặc từ chối thì không được xoá phiếu (Phiếu ID {receipt.Id}).", "Ids"));
-            }
-            else if (!string.Equals(receipt.StatusId, InventoryReceiptStatus.Draft, StringComparison.OrdinalIgnoreCase))
+                errors.Add(
+                    Error.BadRequest(
+                        $"Khi đã phê duyệt hoặc từ chối thì không được xoá phiếu (Phiếu ID {receipt.Id}).",
+                        "Ids"));
+            } else if (!string.Equals(
+                receipt.StatusId,
+                InventoryReceiptStatus.Draft,
+                StringComparison.OrdinalIgnoreCase))
             {
                 if (!hasApprovePermissionChecked)
                 {
@@ -50,7 +54,10 @@ public sealed class DeleteManyInventoryReceiptsCommandHandler(
                 }
                 if (!hasApprovePermission)
                 {
-                    errors.Add(Error.BadRequest($"Để xóa phiếu nhập ở trạng thái '{receipt.StatusId}', bạn cần có quyền phê duyệt/từ chối (Phiếu ID {receipt.Id}).", "Ids"));
+                    errors.Add(
+                        Error.BadRequest(
+                            $"Để xóa phiếu nhập ở trạng thái '{receipt.StatusId}', bạn cần có quyền phê duyệt/từ chối (Phiếu ID {receipt.Id}).",
+                            "Ids"));
                 }
             }
         }

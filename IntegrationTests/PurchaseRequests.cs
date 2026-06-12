@@ -1,20 +1,16 @@
 using Application.ApiContracts.PurchaseRequest.Requests;
 using Application.ApiContracts.PurchaseRequest.Responses;
-using Application.Common.Models;
 using Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest;
-using Domain.Constants.Permission.Permissions;
+using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Xunit;
 using ProductEntities = Domain.Entities.Product;
 using ProductVariantEntities = Domain.Entities.ProductVariant;
 using PurchaseRequestEntities = Domain.Entities.PurchaseRequest;
@@ -40,19 +36,16 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
         GC.SuppressFinalize(this);
     }
 
-    private async Task<int> SeedProductVariantAsync()
+    private async Task<int> SeedProductVariantAsync(CancellationToken cancellationToken = default)
     {
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        
         var product = new ProductEntities { Name = "Integration Test Product" };
         db.Products.Add(product);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(false);
-
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var variant = new ProductVariantEntities { ProductId = product.Id, VariantName = "Integration Test Variant" };
         db.ProductVariants.Add(variant);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(false);
-
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return variant.Id;
     }
 
@@ -66,7 +59,6 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
@@ -75,39 +67,34 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
-        var variantId = await SeedProductVariantAsync().ConfigureAwait(true);
-
+        var variantId = await SeedProductVariantAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var command = new CreatePurchaseRequestCommand
         {
             Note = "Integration Test PR Note",
             Items = [new CreatePurchaseRequestItemRequest { ProductVariantId = variantId, Quantity = 15 }]
         };
-
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/purchase-requests");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(command);
-
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var responseData = await response.Content
             .ReadFromJsonAsync<PurchaseRequestDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         responseData.Should().NotBeNull();
         string.Compare(responseData!.Note, "Integration Test PR Note").Should().Be(0);
-
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var prInDb = await verifyDb.Set<PurchaseRequestEntities>().FindAsync(new object[] { responseData.Id }, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var prInDb = await verifyDb.Set<PurchaseRequestEntities>()
+            .FindAsync([responseData.Id], TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         prInDb.Should().NotBeNull();
         string.Compare(prInDb!.Note, "Integration Test PR Note").Should().Be(0);
     }
@@ -119,7 +106,6 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
@@ -128,39 +114,35 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Set<PurchaseRequestEntities>().RemoveRange(db.Set<PurchaseRequestEntities>());
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
             var list = new List<PurchaseRequestEntities>();
             for (int i = 1; i <= 15; i++)
             {
                 list.Add(new PurchaseRequestEntities { Note = $"PR Note {i}", Status = "draft" });
             }
-            await db.Set<PurchaseRequestEntities>().AddRangeAsync(list, TestContext.Current.CancellationToken).ConfigureAwait(true);
+            await db.Set<PurchaseRequestEntities>()
+                .AddRangeAsync(list, TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/purchase-requests?Page=1&PageSize=10");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var result = await response.Content
             .ReadFromJsonAsync<PagedResult<PurchaseRequestListResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         result.Should().NotBeNull();
         result!.Items.Should().HaveCount(10);
         result.TotalCount.Should().Be(15);
@@ -173,7 +155,6 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
@@ -182,14 +163,12 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         int prId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -199,17 +178,14 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             prId = pr.Id;
         }
-
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/purchase-requests/{prId}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var responseData = await response.Content
             .ReadFromJsonAsync<PurchaseRequestDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         responseData.Should().NotBeNull();
         responseData!.Id.Should().Be(prId);
         string.Compare(responseData.Note, "Specific GetById Note").Should().Be(0);
@@ -222,7 +198,6 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
@@ -231,14 +206,12 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         int prId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -248,16 +221,16 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             prId = pr.Id;
         }
-
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/purchase-requests/{prId}/send");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var prInDb = await verifyDb.Set<PurchaseRequestEntities>().FindAsync(new object[] { prId }, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var prInDb = await verifyDb.Set<PurchaseRequestEntities>()
+            .FindAsync([prId], TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         prInDb.Should().NotBeNull();
         string.Compare(prInDb!.Status, "sent").Should().Be(0);
     }
@@ -269,7 +242,6 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-
         var adminUser = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
@@ -278,14 +250,12 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         int prId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -295,18 +265,18 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             prId = pr.Id;
         }
-
         var request = new ApproveRejectPurchaseRequestRequest { Status = "approve" };
         var requestMessage = new HttpRequestMessage(HttpMethod.Patch, $"/api/v1/purchase-requests/{prId}/status");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var prInDb = await verifyDb.Set<PurchaseRequestEntities>().FindAsync(new object[] { prId }, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var prInDb = await verifyDb.Set<PurchaseRequestEntities>()
+            .FindAsync([prId], TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         prInDb.Should().NotBeNull();
         string.Compare(prInDb!.Status, "approve").Should().Be(0);
         prInDb.ApprovedBy.Should().Be(adminUser.Id);
@@ -319,7 +289,6 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
@@ -328,14 +297,12 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         int prId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -345,20 +312,21 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             prId = pr.Id;
         }
-
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/purchase-requests/{prId}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var prInDb = await verifyDb.Set<PurchaseRequestEntities>().FindAsync(new object[] { prId }, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var prInDb = await verifyDb.Set<PurchaseRequestEntities>()
+            .FindAsync([prId], TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         prInDb.Should().BeNull();
     }
 
-    [Fact(DisplayName = "PR_037 - Integration: Lấy danh sách yêu cầu mua hàng hiển thị đúng số mặt hàng và tên người tạo")]
+    [Fact(
+        DisplayName = "PR_037 - Integration: Lấy danh sách yêu cầu mua hàng hiển thị đúng số mặt hàng và tên người tạo")]
     public async Task PR_037_GetPurchaseRequests_List_CorrectTotalItemsAndCreatedByName()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -379,7 +347,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var variantId = await SeedProductVariantAsync().ConfigureAwait(true);
+        var variantId = await SeedProductVariantAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -388,21 +356,15 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
                 Status = "draft",
                 Note = "List Test PR Note",
                 CreatedBy = user.Id,
-                PurchaseRequestItems =
-                [
-                    new Domain.Entities.PurchaseRequestItem
-                    {
-                        ProductVariantId = variantId,
-                        Quantity = 5
-                    }
-                ]
+                PurchaseRequestItems = [new PurchaseRequestItem { ProductVariantId = variantId, Quantity = 5 }]
             };
             db.Set<PurchaseRequestEntities>().Add(purchaseRequest);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/purchase-requests?Page=1&PageSize=10");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content
             .ReadFromJsonAsync<PagedResult<PurchaseRequestListResponse>>(TestContext.Current.CancellationToken)
@@ -414,7 +376,8 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
         string.Compare(item.CreatedByName, user.FullName).Should().Be(0);
     }
 
-    [Fact(DisplayName = "PR_038 - Integration: Lấy chi tiết yêu cầu mua hàng hiển thị đúng tên người tạo và người duyệt")]
+    [Fact(
+        DisplayName = "PR_038 - Integration: Lấy chi tiết yêu cầu mua hàng hiển thị đúng tên người tạo và người duyệt")]
     public async Task PR_038_GetPurchaseRequestById_Details_CorrectCreatedByNameAndApprovedByName()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -447,7 +410,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var variantId = await SeedProductVariantAsync().ConfigureAwait(true);
+        var variantId = await SeedProductVariantAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         int purchaseRequestId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -458,14 +421,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
                 Note = "Details Test PR Note",
                 CreatedBy = user.Id,
                 ApprovedBy = adminUser.Id,
-                PurchaseRequestItems =
-                [
-                    new Domain.Entities.PurchaseRequestItem
-                    {
-                        ProductVariantId = variantId,
-                        Quantity = 10
-                    }
-                ]
+                PurchaseRequestItems = [new PurchaseRequestItem { ProductVariantId = variantId, Quantity = 10 }]
             };
             db.Set<PurchaseRequestEntities>().Add(purchaseRequest);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -473,7 +429,8 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
         }
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/purchase-requests/{purchaseRequestId}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var responseData = await response.Content
             .ReadFromJsonAsync<PurchaseRequestDetailResponse>(TestContext.Current.CancellationToken)
@@ -498,15 +455,13 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
-        var variantId = await SeedProductVariantAsync().ConfigureAwait(true);
+        var variantId = await SeedProductVariantAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         int purchaseRequestId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -517,25 +472,19 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
                 Note = "Approved Details Test PR Note",
                 CreatedBy = user.Id,
                 ApprovedBy = user.Id,
-                PurchaseRequestItems =
-                [
-                    new Domain.Entities.PurchaseRequestItem
-                    {
-                        ProductVariantId = variantId,
-                        Quantity = 10
-                    }
-                ]
+                PurchaseRequestItems = [new PurchaseRequestItem { ProductVariantId = variantId, Quantity = 10 }]
             };
             db.Set<PurchaseRequestEntities>().Add(purchaseRequest);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             purchaseRequestId = purchaseRequest.Id;
         }
-
-        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/purchase-requests/approved/{purchaseRequestId}");
+        var requestMessage = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"/api/v1/purchase-requests/approved/{purchaseRequestId}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var responseData = await response.Content
             .ReadFromJsonAsync<ApprovedPurchaseRequestDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
@@ -561,14 +510,12 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         int purchaseRequestId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -583,10 +530,12 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             purchaseRequestId = purchaseRequest.Id;
         }
-
-        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/purchase-requests/approved/{purchaseRequestId}");
+        var requestMessage = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"/api/v1/purchase-requests/approved/{purchaseRequestId}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -605,17 +554,16 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/purchase-requests/approved/-1");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 

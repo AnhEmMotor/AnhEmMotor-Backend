@@ -5,6 +5,8 @@ public sealed record NewsResponse
 {
     public int Id { get; init; }
 
+    public int? CategoryId { get; init; }
+
     public string Title { get; init; } = string.Empty;
 
     public string Slug { get; init; } = string.Empty;
@@ -26,4 +28,6 @@ public sealed record NewsResponse
     public string? MetaKeywords { get; init; }
 
     public DateTimeOffset CreatedAt { get; init; }
+
+    public List<NewsProductResponse>? LinkedProducts { get; init; }
 }
