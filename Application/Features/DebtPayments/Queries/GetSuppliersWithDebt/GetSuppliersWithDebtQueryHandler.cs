@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Application.Features.DebtPayments.Queries.GetSuppliersWithDebt
 {
-    public sealed class GetSuppliersWithDebtQueryHandler(ISupplierDebtRepository supplierDebtRepository) : IRequestHandler<GetSuppliersWithDebtQuery, Result<List<SupplierDebtResponse>>>
+    public class GetSuppliersWithDebtQueryHandler(ISupplierDebtRepository supplierDebtRepository) : IRequestHandler<GetSuppliersWithDebtQuery, Result<List<SupplierDebtResponse>>>
     {
         public async Task<Result<List<SupplierDebtResponse>>> Handle(
             GetSuppliersWithDebtQuery request,

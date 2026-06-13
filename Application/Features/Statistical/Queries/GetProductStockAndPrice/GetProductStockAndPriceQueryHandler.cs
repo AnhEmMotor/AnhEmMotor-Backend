@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetProductStockAndPrice;
 
-public sealed class GetProductStockAndPriceQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetProductStockAndPriceQuery, Result<ProductStockPriceResponse?>>
+public class GetProductStockAndPriceQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetProductStockAndPriceQuery, Result<ProductStockPriceResponse?>>
 {
     public async Task<Result<ProductStockPriceResponse?>> Handle(
         GetProductStockAndPriceQuery request,

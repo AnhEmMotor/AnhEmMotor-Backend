@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.Service
 {
     public interface IServiceInsertRepository
     {
-        void Add(ServiceEntity service);
+        public void Add(ServiceEntity service);
     }
 }

@@ -4,8 +4,9 @@ namespace Application.Interfaces.Repositories.ParcelDeliveryOrder;
 
 public interface IParcelDeliveryOrderReadRepository
 {
-    Task<List<ParcelDeliveryOrderEntity>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<List<ParcelDeliveryOrderEntity>> GetReturnedAsync(CancellationToken cancellationToken = default);
-    Task<ParcelDeliveryOrderEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
-    Task<ParcelDeliveryOrderEntity?> FindByTrackingOrPhoneAsync(string? search, CancellationToken cancellationToken = default);
+    public Task<List<ParcelDeliveryOrderEntity>> GetAllAsync(CancellationToken cancellationToken = default);
+    public Task<List<ParcelDeliveryOrderEntity>> GetReturnedAsync(CancellationToken cancellationToken = default);
+    public Task<ParcelDeliveryOrderEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    public Task<ParcelDeliveryOrderEntity?> FindByTrackingOrPhoneAsync(string? search, CancellationToken cancellationToken = default);
 }
+

@@ -9,7 +9,7 @@ using Mapster;
 
 namespace Application.Features.SupplierContracts.Commands.UpdateSupplierContract;
 
-public sealed class UpdateSupplierContractCommandHandler(
+public class UpdateSupplierContractCommandHandler(
     ISupplierContractReadRepository readRepo,
     ISupplierContractUpdateRepository updateRepo,
     IUnitOfWork unitOfWork
@@ -23,14 +23,14 @@ public sealed class UpdateSupplierContractCommandHandler(
             return Result<SupplierContractResponse>.Failure("Supplier contract not found.");
         }
 
-        bool isCurrentlyActive = entity.Status == SupplierContractStatus.Active;
-        bool statusBeingChanged = !string.IsNullOrWhiteSpace(request.Request.Status) && request.Request.Status != entity.Status;
+        bool isCurrentlyActive = string.Compare(entity.Status, SupplierContractStatus.Active) == 0;
+        bool statusBeingChanged = !string.IsNullOrWhiteSpace(request.Request.Status) && string.Compare(request.Request.Status, entity.Status) != 0;
 
         if (isCurrentlyActive && !statusBeingChanged)
         {
             if ((request.Request.CreditLimit.HasValue && request.Request.CreditLimit != entity.CreditLimit) ||
                 (request.Request.DiscountRate.HasValue && request.Request.DiscountRate != entity.DiscountRate) ||
-                (request.Request.ContractItems != null && request.Request.ContractItems.Any()))
+                (request.Request.ContractItems != null && request.Request.ContractItems.Count != 0))
             {
                 return Result<SupplierContractResponse>.Failure("Cannot modify financial terms of an active contract. Please create an addendum.");
             }
@@ -38,7 +38,7 @@ public sealed class UpdateSupplierContractCommandHandler(
 
         var auditLogs = new List<SupplierContractAuditLog>();
 
-        if (!string.IsNullOrWhiteSpace(request.Request.ContractNumber) && request.Request.ContractNumber != entity.ContractNumber)
+        if (!string.IsNullOrWhiteSpace(request.Request.ContractNumber) && string.Compare(request.Request.ContractNumber, entity.ContractNumber) != 0)
         {
             var isDuplicate = await readRepo.IsContractNumberExistsAsync(request.Request.ContractNumber, request.Id, cancellationToken)
             .ConfigureAwait(false);
@@ -65,7 +65,7 @@ public sealed class UpdateSupplierContractCommandHandler(
 
         if (!string.IsNullOrWhiteSpace(request.Request.Status) && SupplierContractStatus.IsValid(request.Request.Status))
         {
-            if (request.Request.Status != entity.Status)
+            if (string.Compare(request.Request.Status, entity.Status) != 0)
             {
                 auditLogs.Add(new SupplierContractAuditLog
                 {

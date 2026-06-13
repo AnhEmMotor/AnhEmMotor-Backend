@@ -20,3 +20,4 @@ namespace Application.Interfaces.Repositories.Supplier
         public Task<List<SupplierDebt>> GetAllAsync(CancellationToken cancellationToken);
     }
 }
+

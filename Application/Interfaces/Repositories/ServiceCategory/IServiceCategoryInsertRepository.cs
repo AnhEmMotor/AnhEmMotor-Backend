@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.ServiceCategory
 {
     public interface IServiceCategoryInsertRepository
     {
-        void Add(ServiceCategoryEntity serviceCategory);
+        public void Add(ServiceCategoryEntity serviceCategory);
     }
 }

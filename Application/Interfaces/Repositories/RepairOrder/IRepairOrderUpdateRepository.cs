@@ -4,12 +4,12 @@ namespace Application.Interfaces.Repositories.RepairOrder
 {
     public interface IRepairOrderUpdateRepository
     {
-        void Add(Domain.Entities.RepairOrder repairOrder);
-        void Update(Domain.Entities.RepairOrder repairOrder);
-        void Remove(Domain.Entities.RepairOrder repairOrder);
+        public void Add(Domain.Entities.RepairOrder repairOrder);
+        public void Update(Domain.Entities.RepairOrder repairOrder);
+        public void Remove(Domain.Entities.RepairOrder repairOrder);
         
-        void AddDetail(Domain.Entities.RepairOrderDetail detail);
-        void RemoveDetail(Domain.Entities.RepairOrderDetail detail);
-        void RemoveDetailsRange(IEnumerable<Domain.Entities.RepairOrderDetail> details);
+        public void AddDetail(Domain.Entities.RepairOrderDetail detail);
+        public void RemoveDetail(Domain.Entities.RepairOrderDetail detail);
+        public void RemoveDetailsRange(IEnumerable<Domain.Entities.RepairOrderDetail> details);
     }
 }

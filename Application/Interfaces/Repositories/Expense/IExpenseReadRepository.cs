@@ -4,6 +4,7 @@ namespace Application.Interfaces.Repositories.Expense;
 
 public interface IExpenseReadRepository
 {
-    Task<List<ExpenseEntity>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<ExpenseEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    public Task<List<ExpenseEntity>> GetAllAsync(CancellationToken cancellationToken = default);
+    public Task<ExpenseEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 }
+

@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.SupplierContracts.Commands.DeleteSupplierContract;
 
-public sealed class DeleteSupplierContractCommandHandler(
+public class DeleteSupplierContractCommandHandler(
     ISupplierContractReadRepository readRepo,
     ISupplierContractDeleteRepository deleteRepo,
     IUnitOfWork unitOfWork

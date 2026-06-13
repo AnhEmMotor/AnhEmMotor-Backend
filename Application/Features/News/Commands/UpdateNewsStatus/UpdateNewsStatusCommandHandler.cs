@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Application.Features.News.Commands.UpdateNewsStatus;
 
-public sealed class UpdateNewsStatusCommandHandler(
+public class UpdateNewsStatusCommandHandler(
     INewsReadRepository newsReadRepository,
     INewsUpdateRepository newsUpdateRepository,
     IUnitOfWork unitOfWork,

@@ -7,6 +7,7 @@ namespace Application.Features.SalesContracts.Mappings;
 
 public class SalesContractMapsterRegister : IRegister
 {
+#pragma warning disable CS8603
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<Domain.Entities.SalesContract, SalesContractResponse>()
@@ -23,4 +24,5 @@ public class SalesContractMapsterRegister : IRegister
             .Ignore(dest => dest.SignedDate)
             .Ignore(dest => dest.ScannedFileUrl);
     }
+#pragma warning restore CS8603
 }

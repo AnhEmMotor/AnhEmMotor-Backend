@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Application.Features.PurchaseRequests.Mappings
 {
-    public sealed class PurchaseRequestMappingConfig : IRegister
+    public class PurchaseRequestMappingConfig : IRegister
     {
         public void Register(TypeAdapterConfig config)
         {

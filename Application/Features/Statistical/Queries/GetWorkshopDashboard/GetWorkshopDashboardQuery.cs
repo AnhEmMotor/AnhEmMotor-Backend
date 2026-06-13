@@ -1,4 +1,4 @@
-using Application.Api.Contracts.Statistical.Responses;
+using Application.ApiContracts.Statistical.Responses;
 using MediatR;
 using System;
 

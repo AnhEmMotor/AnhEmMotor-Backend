@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductsList;
 
-public sealed class GetProductsListQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductsListQuery, Result<PagedResult<ProductListStoreResponse>>>
+public class GetProductsListQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductsListQuery, Result<PagedResult<ProductListStoreResponse>>>
 {
     public async Task<Result<PagedResult<ProductListStoreResponse>>> Handle(
         GetProductsListQuery request,

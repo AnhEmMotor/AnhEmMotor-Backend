@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.Service
 {
     public interface IServiceUpdateRepository
     {
-        void Update(ServiceEntity service);
+        public void Update(ServiceEntity service);
     }
 }

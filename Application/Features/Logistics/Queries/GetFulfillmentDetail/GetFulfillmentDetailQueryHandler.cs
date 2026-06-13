@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.ApiContracts.Logistics.Responses;
 using MediatR;
 using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 
@@ -17,10 +18,10 @@ public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDe
 
     public async Task<FulfillmentDetailResponse> Handle(GetFulfillmentDetailQuery request, CancellationToken cancellationToken)
     {
-        var order = await _context.GetByIdAsync(request.Id, cancellationToken);
+        var order = await _context.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (order == null)
-            return null; // Normally we throw NotFoundException
+            return null!; // Normally we throw NotFoundException
 
         return new FulfillmentDetailResponse
         {
@@ -37,7 +38,7 @@ public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDe
             CreatedAt = order.CreatedAt,
             ExpectedAt = order.ExpectedAt,
             DeliveredAt = order.DeliveredAt,
-            Items = order.Items.Select(i => new FulfillmentItemDto
+            Items = order.Items.Select(i => new FulfillmentDetailItemResponse
             {
                 Id = i.Id,
                 ProductId = i.ProductId,

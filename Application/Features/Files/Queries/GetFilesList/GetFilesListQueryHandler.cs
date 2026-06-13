@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Files.Queries.GetFilesList;
 
-public sealed class GetFilesListQueryHandler(IMediaFileReadRepository repository, IFileReadService fileReadService) : IRequestHandler<GetFilesListQuery, Result<PagedResult<MediaFileResponse>>>
+public class GetFilesListQueryHandler(IMediaFileReadRepository repository, IFileReadService fileReadService) : IRequestHandler<GetFilesListQuery, Result<PagedResult<MediaFileResponse>>>
 {
     public async Task<Result<PagedResult<MediaFileResponse>>> Handle(
         GetFilesListQuery request,

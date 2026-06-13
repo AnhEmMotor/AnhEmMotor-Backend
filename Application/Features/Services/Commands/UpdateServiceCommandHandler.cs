@@ -12,7 +12,7 @@ namespace Application.Features.Services.Commands.UpdateService;
 /// <summary>
 /// Xử lý yêu cầu cập nhật thông tin dịch vụ.
 /// </summary>
-public sealed class UpdateServiceCommandHandler (
+public class UpdateServiceCommandHandler (
     IUnitOfWork unitOfWork,
     IServiceReadRepository serviceReadRepository,
     IServiceUpdateRepository serviceUpdateRepository,

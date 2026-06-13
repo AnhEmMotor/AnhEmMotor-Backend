@@ -6,7 +6,7 @@ using System.Net;
 namespace Infrastructure.Authorization.Attribute;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-public sealed class LocalhostOnlyAttribute : System.Attribute, IAsyncAuthorizationFilter
+public class LocalhostOnlyAttribute : System.Attribute, IAsyncAuthorizationFilter
 {
     public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {

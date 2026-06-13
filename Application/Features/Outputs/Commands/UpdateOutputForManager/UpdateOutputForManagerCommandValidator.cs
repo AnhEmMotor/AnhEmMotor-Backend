@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.UpdateOutputForManager;
 
-public sealed class UpdateOutputForManagerCommandValidator : AbstractValidator<UpdateOutputForManagerCommand>
+public class UpdateOutputForManagerCommandValidator : AbstractValidator<UpdateOutputForManagerCommand>
 {
     public UpdateOutputForManagerCommandValidator()
     {

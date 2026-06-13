@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 
 namespace Application.Features.Vehicles.Queries.GetVehicles
 {
-    public sealed class GetVehiclesQueryHandler(IVehicleReadRepository vehicleRepository) : IRequestHandler<GetVehiclesQuery, Result<PagedResult<VehicleResponse>>>
+    public class GetVehiclesQueryHandler(IVehicleReadRepository vehicleRepository) : IRequestHandler<GetVehiclesQuery, Result<PagedResult<VehicleResponse>>>
     {
         public async Task<Result<PagedResult<VehicleResponse>>> Handle(
             GetVehiclesQuery request,

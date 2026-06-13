@@ -47,3 +47,4 @@ public Task<IEnumerable<ServiceCategoryEntity>> GetSubCategoriesAsync(
             DataFetchMode mode = DataFetchMode.ActiveOnly);
     }
 }
+

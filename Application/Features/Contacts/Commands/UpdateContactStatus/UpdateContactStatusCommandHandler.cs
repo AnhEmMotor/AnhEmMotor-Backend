@@ -20,9 +20,9 @@ public class UpdateContactStatusCommandHandler(
     {
         bool updated = request.ContactType.ToLower() switch
         {
-            "support" => await UpdateSupportRequestStatusAsync(request.Id, request.Request.Status, cancellationToken),
-            "feedback" => await UpdateFeedbackStatusAsync(request.Id, request.Request.Status, cancellationToken),
-            "candidate" => await UpdateJobApplicationStatusAsync(request.Id, request.Request.Status, cancellationToken),
+            "support" => await UpdateSupportRequestStatusAsync(request.Id, request.Request.Status, cancellationToken).ConfigureAwait(false),
+            "feedback" => await UpdateFeedbackStatusAsync(request.Id, request.Request.Status, cancellationToken).ConfigureAwait(false),
+            "candidate" => await UpdateJobApplicationStatusAsync(request.Id, request.Request.Status, cancellationToken).ConfigureAwait(false),
             _ => false
         };
 

@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Files.Queries.GetDeletedFilesList;
 
-public sealed class GetDeletedFilesListQueryHandler(
+public class GetDeletedFilesListQueryHandler(
     IMediaFileReadRepository repository,
     IFileReadService fileReadService) : IRequestHandler<GetDeletedFilesListQuery, Result<PagedResult<MediaFileResponse>>>
 {

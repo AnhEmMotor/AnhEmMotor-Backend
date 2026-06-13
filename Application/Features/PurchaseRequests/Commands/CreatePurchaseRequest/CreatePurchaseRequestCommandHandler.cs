@@ -14,7 +14,7 @@ using PurchaseRequestEntity = Domain.Entities.PurchaseRequest;
 
 namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
 {
-    public sealed class CreatePurchaseRequestCommandHandler(
+    public class CreatePurchaseRequestCommandHandler(
         IPurchaseRequestInsertRepository insertRepository,
         IPurchaseRequestReadRepository readRepository,
         IProductVariantReadRepository variantRepository,

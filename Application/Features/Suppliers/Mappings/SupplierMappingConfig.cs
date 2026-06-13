@@ -7,7 +7,7 @@ using Mapster;
 
 namespace Application.Features.Suppliers.Mappings;
 
-public sealed class SupplierMappingConfig : IRegister
+public class SupplierMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {

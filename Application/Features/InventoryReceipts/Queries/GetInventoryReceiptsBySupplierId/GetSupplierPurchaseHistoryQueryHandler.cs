@@ -6,7 +6,7 @@ using System;
 
 namespace Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId
 {
-    public sealed class GetSupplierPurchaseHistoryQueryHandler : IRequestHandler<GetSupplierPurchaseHistoryQuery, Result<PagedResult<SupplierPurchaseHistoryResponse>>>
+    public class GetSupplierPurchaseHistoryQueryHandler : IRequestHandler<GetSupplierPurchaseHistoryQuery, Result<PagedResult<SupplierPurchaseHistoryResponse>>>
     {
         public Task<Result<PagedResult<SupplierPurchaseHistoryResponse>>> Handle(
             GetSupplierPurchaseHistoryQuery request,

@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.SalesContracts.Queries.GetSalesContractById;
 
-public sealed class GetSalesContractByIdQueryHandler(
+public class GetSalesContractByIdQueryHandler(
     ISalesContractReadRepository readRepo) : IRequestHandler<GetSalesContractByIdQuery, Result<SalesContractResponse>>
 {
     public async Task<Result<SalesContractResponse>> Handle(

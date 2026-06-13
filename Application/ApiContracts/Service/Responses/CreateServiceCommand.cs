@@ -10,7 +10,7 @@ namespace Application.Features.Services.Commands.CreateService;
 /// <summary>
 /// Lệnh yêu cầu tạo mới một dịch vụ.
 /// </summary>
-public sealed class CreateServiceCommand : IRequest<Result<ServiceResponse>>
+public class CreateServiceCommand : IRequest<Result<ServiceResponse>>
 {
     /// <summary>
     /// Tên của dịch vụ.

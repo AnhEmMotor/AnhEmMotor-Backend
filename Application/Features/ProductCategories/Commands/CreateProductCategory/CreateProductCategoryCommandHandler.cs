@@ -9,7 +9,7 @@ using ProductCategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Application.Features.ProductCategories.Commands.CreateProductCategory;
 
-public sealed class CreateProductCategoryCommandHandler(
+public class CreateProductCategoryCommandHandler(
     IProductCategoryInsertRepository repository,
     IProductCategoryReadRepository readRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCategoryCommand, Result<ProductCategoryResponse>>

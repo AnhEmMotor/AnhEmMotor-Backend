@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace Application.Features.HR.Commands.UpdateCommissionPolicy
 {
-    public sealed class UpdateCommissionPolicyCommandHandler(
+    public class UpdateCommissionPolicyCommandHandler(
         ICommissionPolicyReadRepository readRepository,
         ICommissionPolicyUpdateRepository updateRepository,
         ICommissionPolicyInsertRepository insertRepository,

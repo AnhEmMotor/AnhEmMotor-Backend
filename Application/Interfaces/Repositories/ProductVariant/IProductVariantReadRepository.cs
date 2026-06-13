@@ -46,3 +46,4 @@ namespace Application.Interfaces.Repositories.ProductVariant
         public Task<List<string>> GetUrlSlugsAsync(CancellationToken cancellationToken);
     }
 }
+

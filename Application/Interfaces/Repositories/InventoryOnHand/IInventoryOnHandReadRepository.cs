@@ -21,3 +21,4 @@ public interface IInventoryOnHandReadRepository
         string? searchTerm,
         CancellationToken cancellationToken);
 }
+

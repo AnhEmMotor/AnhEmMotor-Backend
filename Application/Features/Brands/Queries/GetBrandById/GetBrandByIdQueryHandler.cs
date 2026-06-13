@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.Brands.Queries.GetBrandById;
 
-public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandByIdQuery, Result<BrandResponse>>
+public class GetBrandByIdQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandByIdQuery, Result<BrandResponse>>
 {
     public async Task<Result<BrandResponse>> Handle(GetBrandByIdQuery request, CancellationToken cancellationToken)
     {

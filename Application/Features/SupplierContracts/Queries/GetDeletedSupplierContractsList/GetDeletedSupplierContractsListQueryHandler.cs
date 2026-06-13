@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.SupplierContracts.Queries.GetDeletedSupplierContractsList;
 
-public sealed class GetDeletedSupplierContractsListQueryHandler(
+public class GetDeletedSupplierContractsListQueryHandler(
 ISupplierContractReadRepository repository) : IRequestHandler<GetDeletedSupplierContractsListQuery, Result<SupplierContractListResponse>>
 {
 public async Task<Result<SupplierContractListResponse>> Handle(GetDeletedSupplierContractsListQuery request, CancellationToken cancellationToken)

@@ -7,24 +7,23 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
+using SupplierContractEntity = Domain.Entities.SupplierContract;
 
-namespace Infrastructure.Repositories.Contract;
+namespace Infrastructure.Repositories.SupplierContract;
 
 public class SupplierContractReadRepository(
 	ApplicationDBContext context,
 	ISievePaginator paginator) : ISupplierContractReadRepository
 {
-	internal IQueryable<SupplierContract> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+	internal IQueryable<SupplierContractEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
 	{
-#pragma warning disable CS8602 // EF Core translates this correctly
-		return context.GetQuery<SupplierContract>(mode)
+		return context.GetQuery<SupplierContractEntity>(mode)
 			.Include(sc => sc.Supplier)
 			.Include(sc => sc.ContractItems)
 			.ThenInclude(ci => ci.ProductVariant)
-			.ThenInclude(pv => pv.Product)
-			.ThenInclude(p => p.ProductCategory)
+			.ThenInclude(pv => pv!.Product)
+			.ThenInclude(p => p!.ProductCategory)
 			.Include(sc => sc.AuditLogs);
-#pragma warning restore CS8602
 	}
 
 	public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
@@ -33,10 +32,10 @@ public class SupplierContractReadRepository(
 		CancellationToken cancellationToken = default)
 	{
 		var query = GetQueryable(mode);
-		return paginator.ApplyAsync<SupplierContract, TResponse>(query, sieveModel, mode, cancellationToken);
+		return paginator.ApplyAsync<SupplierContractEntity, TResponse>(query, sieveModel, mode, cancellationToken);
 	}
 
-	public Task<SupplierContract?> GetByIdAsync(
+	public Task<SupplierContractEntity?> GetByIdAsync(
 		Guid id,
 		CancellationToken cancellationToken = default,
 		DataFetchMode mode = DataFetchMode.ActiveOnly)
@@ -44,20 +43,20 @@ public class SupplierContractReadRepository(
 		return GetQueryable(mode).FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 	}
 
-	public Task<List<SupplierContract>> GetAllAsync(
+	public Task<List<SupplierContractEntity>> GetAllAsync(
 		CancellationToken cancellationToken = default,
 		DataFetchMode mode = DataFetchMode.ActiveOnly)
 	{
 		return GetQueryable(mode).ToListAsync(cancellationToken);
 	}
 
-	public Task<SupplierContract?> GetActiveContractBySupplierIdAsync(
+	public Task<SupplierContractEntity?> GetActiveContractBySupplierIdAsync(
 		int supplierId,
 		CancellationToken cancellationToken = default)
 	{
 		return GetQueryable(DataFetchMode.ActiveOnly)
 			.FirstOrDefaultAsync(x => x.SupplierId == supplierId
-				&& x.Status == SupplierContractStatus.Active
+				&& string.Compare(x.Status, SupplierContractStatus.Active) == 0
 				&& (!x.ExpirationDate.HasValue || x.ExpirationDate.Value > DateTime.Now),
 				cancellationToken);
 	}
@@ -79,7 +78,7 @@ public class SupplierContractReadRepository(
 		CancellationToken cancellationToken = default)
 	{
 		return GetQueryable(DataFetchMode.All)
-			.AnyAsync(x => x.ContractNumber == contractNumber
+			.AnyAsync(x => string.Compare(x.ContractNumber, contractNumber) == 0
 				&& (!excludeId.HasValue || x.Id != excludeId.Value), cancellationToken);
 	}
 
@@ -91,14 +90,14 @@ public class SupplierContractReadRepository(
 	public Task<int> CountByStatusAsync(string status, CancellationToken cancellationToken = default)
 	{
 		return GetQueryable(DataFetchMode.ActiveOnly)
-			.CountAsync(x => x.Status == status, cancellationToken);
+			.CountAsync(x => string.Compare(x.Status, status) == 0, cancellationToken);
 	}
 
 	public Task<int> CountExpiringAsync(int daysThreshold, CancellationToken cancellationToken = default)
 	{
 		var thresholdDate = DateTime.Now.AddDays(daysThreshold);
 		return GetQueryable(DataFetchMode.ActiveOnly)
-			.CountAsync(x => x.Status == SupplierContractStatus.Active
+			.CountAsync(x => string.Compare(x.Status, SupplierContractStatus.Active) == 0
 				&& x.ExpirationDate.HasValue
 				&& x.ExpirationDate.Value <= thresholdDate
 				&& x.ExpirationDate.Value >= DateTime.Now, cancellationToken);

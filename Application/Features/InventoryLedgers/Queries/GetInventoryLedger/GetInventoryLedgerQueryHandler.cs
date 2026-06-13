@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Application.Features.InventoryLedgers.Queries.GetInventoryLedger
 {
-    public sealed class GetInventoryLedgerQueryHandler(IInventoryLedgerRepository ledgerRepository) : IRequestHandler<GetInventoryLedgerQuery, Result<List<InventoryLedgerResponse>>>
+    public class GetInventoryLedgerQueryHandler(IInventoryLedgerRepository ledgerRepository) : IRequestHandler<GetInventoryLedgerQuery, Result<List<InventoryLedgerResponse>>>
     {
         public async Task<Result<List<InventoryLedgerResponse>>> Handle(
             GetInventoryLedgerQuery request,

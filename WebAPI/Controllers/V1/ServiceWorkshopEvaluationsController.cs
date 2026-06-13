@@ -6,6 +6,8 @@ using Application.Features.ServiceWorkshopEvaluations.Commands.MarkServiceEvalua
 using Application.Features.ServiceWorkshopEvaluations.Commands.UpdateServiceEvaluationInternalNotes;
 using Application.Features.ServiceWorkshopEvaluations.Queries.GetServiceWorkshopEvaluations;
 using Application.Features.ServiceWorkshopEvaluations.Queries.GetServiceWorkshopEvaluationDetail;
+using Domain.Primitives;
+using Sieve.Models;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -16,53 +18,32 @@ namespace WebAPI.Controllers.V1;
 /// <summary>
 /// Controller for managing service workshop evaluations.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="ServiceWorkshopEvaluationsController"/> class.
+/// </remarks>
+/// <param name="mediator">The mediator service.</param>
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
-public class ServiceWorkshopEvaluationsController : ControllerBase
+public class ServiceWorkshopEvaluationsController(IMediator mediator) : ControllerBase
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ServiceWorkshopEvaluationsController"/> class.
-    /// </summary>
-    /// <param name="mediator">The mediator service.</param>
-    public ServiceWorkshopEvaluationsController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
-    private readonly IMediator _mediator;
 
     /// <summary>
     /// Retrieves a paged list of service workshop evaluations.
     /// </summary>
-    /// <param name="status">The status to filter by.</param>
-    /// <param name="criteria">The criteria to filter by.</param>
-    /// <param name="search">The search term.</param>
-    /// <param name="page">The page number.</param>
-    /// <param name="pageSize">The page size.</param>
+    /// <param name="sieveModel">The Sieve query model.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A paged list of evaluations.</returns>
     [HttpGet]
     [Authorize]
     [ProducesResponseType(typeof(ServiceEvaluationListResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<Result<ServiceEvaluationListResponse>>> GetPagedAsync(
-        [FromQuery] string? status,
-        [FromQuery] string? criteria,
-        [FromQuery] string? search,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20,
+    public async Task<ActionResult<Result<PagedResult<ServiceEvaluationListRowResponse>>>> GetPagedAsync(
+        [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetServiceWorkshopEvaluationsQuery
-        {
-            Status = status,
-            Criteria = criteria,
-            Search = search,
-            Page = page,
-            PageSize = pageSize,
-        };
+        var query = new GetServiceWorkshopEvaluationsQuery { SieveModel = sieveModel };
 
-        var result = await _mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
 
@@ -80,7 +61,7 @@ public class ServiceWorkshopEvaluationsController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var query = new GetServiceWorkshopEvaluationDetailQuery { EvaluationId = evaluationId };
-        var result = await _mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
 
@@ -103,7 +84,7 @@ public class ServiceWorkshopEvaluationsController : ControllerBase
             Message = request.Message,
             MarkAsProcessed = request.MarkAsProcessed,
         };
-        var result = await _mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
 
@@ -120,7 +101,7 @@ public class ServiceWorkshopEvaluationsController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var cmd = new MarkServiceEvaluationProcessedCommand { EvaluationId = request.EvaluationId };
-        var result = await _mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
 
@@ -142,7 +123,7 @@ public class ServiceWorkshopEvaluationsController : ControllerBase
             InternalNotes = request.InternalNotes,
         };
 
-        var result = await _mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
 }

@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.SupplierContract;
 
 public interface ISupplierContractDeleteRepository
 {
-    void Delete(SupplierContractEntity entity);
-    void Delete(IEnumerable<SupplierContractEntity> entities);
+    public void Delete(SupplierContractEntity entity);
+    public void Delete(IEnumerable<SupplierContractEntity> entities);
 }

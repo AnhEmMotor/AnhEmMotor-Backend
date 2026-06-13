@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.SalesContracts.Commands.UpdateSalesContract;
 
-public sealed class UpdateSalesContractCommand(
+public class UpdateSalesContractCommand(
     Guid id,
     UpdateSalesContractRequest request) : IRequest<Result<SalesContractResponse>>
 {

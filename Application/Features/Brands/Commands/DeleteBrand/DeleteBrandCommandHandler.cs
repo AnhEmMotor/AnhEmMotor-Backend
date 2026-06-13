@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Brands.Commands.DeleteBrand;
 
-public sealed class DeleteBrandCommandHandler(
+public class DeleteBrandCommandHandler(
     IBrandReadRepository readRepository,
     IBrandDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteBrandCommand, Result>

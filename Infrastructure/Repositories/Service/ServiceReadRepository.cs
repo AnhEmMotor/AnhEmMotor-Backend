@@ -12,23 +12,22 @@ public class ServiceReadRepository(ApplicationDBContext context) : IServiceReadR
         return context.Services.AsNoTracking();
     }
 
-    public async Task<IEnumerable<ServiceEntity>> GetAllAsync(
+    public Task<IEnumerable<ServiceEntity>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        return await context.Services
+        return context.Services
             .AsNoTracking()
             .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+            .ContinueWith(t => (IEnumerable<ServiceEntity>)t.Result, cancellationToken);
     }
 
-    public async Task<ServiceEntity?> GetByIdAsync(
+    public Task<ServiceEntity?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken = default)
     {
-        return await context.Services
+        return context.Services
             .AsNoTracking()
-            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken)
-            .ConfigureAwait(false);
+            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
     public Task<bool> ExistsAsync(
@@ -44,7 +43,7 @@ public class ServiceReadRepository(ApplicationDBContext context) : IServiceReadR
         CancellationToken cancellationToken = default)
     {
         return context.Services
-            .AnyAsync(s => s.Name.ToLower() == name.ToLower(), cancellationToken);
+            .AnyAsync(s => string.Compare(s.Name.ToLower(), name.ToLower()) == 0, cancellationToken);
     }
 
     public Task<bool> NameExistsExcludingAsync(
@@ -53,6 +52,6 @@ public class ServiceReadRepository(ApplicationDBContext context) : IServiceReadR
         CancellationToken cancellationToken = default)
     {
         return context.Services
-            .AnyAsync(s => s.Id != excludeId && s.Name.ToLower() == name.ToLower(), cancellationToken);
+            .AnyAsync(s => s.Id != excludeId && string.Compare(s.Name.ToLower(), name.ToLower()) == 0, cancellationToken);
     }
 }

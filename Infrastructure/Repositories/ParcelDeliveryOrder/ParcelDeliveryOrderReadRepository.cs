@@ -1,8 +1,8 @@
 using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using ParcelDeliveryOrderEntity = Domain.Entities.Logistics.ParcelDeliveryOrder;
-using ParcelDeliveryStatus = Domain.Entities.Logistics.ParcelDeliveryStatus;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Domain.Enums;
 
 namespace Infrastructure.Repositories.ParcelDeliveryOrder;
 
@@ -28,8 +28,8 @@ public class ParcelDeliveryOrderReadRepository(ApplicationDBContext context) : I
         return context.Set<ParcelDeliveryOrderEntity>()
             .Include(x => x.Items)
             .FirstOrDefaultAsync(x =>
-                x.TrackingNumber == normalized ||
-                x.CustomerPhone == normalized ||
-                x.OriginalOrderCode == normalized, cancellationToken);
+                string.Compare(x.TrackingNumber, normalized) == 0 ||
+                string.Compare(x.CustomerPhone, normalized) ==0 ||
+                string.Compare(x.OriginalOrderCode, normalized) == 0, cancellationToken);
     }
 }

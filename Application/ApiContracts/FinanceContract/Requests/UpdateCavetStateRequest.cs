@@ -1,6 +1,6 @@
 namespace Application.ApiContracts.FinanceContract.Requests;
 
-public sealed class UpdateCavetStateRequest
+public class UpdateCavetStateRequest
 {
     public string State { get; set; } = string.Empty;
     public DateTime? ReceivedDate { get; set; }

@@ -7,7 +7,7 @@ using System;
 
 namespace Application.Features.Products.Commands.AttachTechnologies
 {
-    public sealed class AttachTechnologiesCommandHandler(
+    public class AttachTechnologiesCommandHandler(
         IProductReadRepository readRepository,
         IProductUpdateRepository updateRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<AttachTechnologiesCommand, Result<Unit>>

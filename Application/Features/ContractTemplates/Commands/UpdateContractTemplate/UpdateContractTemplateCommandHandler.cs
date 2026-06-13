@@ -1,5 +1,6 @@
 using Application.ApiContracts.ContractTemplate.Requests;
 using Application.Common.Models;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ContractTemplate;
 using Domain.Entities;
 using Domain.Enums;
@@ -11,18 +12,18 @@ using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Commands.UpdateContractTemplate;
 
-internal sealed class UpdateContractTemplateCommandHandler(
+public class UpdateContractTemplateCommandHandler(
     IContractTemplateReadRepository contractTemplateReadRepository,
     IContractTemplateUpdateRepository contractTemplateUpdateRepository,
     IContractTemplateInsertRepository contractTemplateInsertRepository,
-    Application.Interfaces.Repositories.IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateContractTemplateCommand, Result<Unit>>
 {
     public async Task<Result<Unit>> Handle(
         UpdateContractTemplateCommand request,
         CancellationToken cancellationToken)
     {
-        var entity = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken);
+        var entity = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (entity is null)
         {
@@ -37,10 +38,10 @@ internal sealed class UpdateContractTemplateCommandHandler(
 
         if (request.Request.Content is { Length: > 0 })
         {
-            var validationResult = ValidateSyntax(request.Request.Content);
-            if (!validationResult.IsValid)
+            var (IsValid, ErrorMessage) = ValidateSyntax(request.Request.Content);
+            if (!IsValid)
             {
-                return Result<Unit>.Failure(Error.Validation(validationResult.ErrorMessage!));
+                return Result<Unit>.Failure(Error.Validation(ErrorMessage!));
             }
         }
 
@@ -53,7 +54,7 @@ internal sealed class UpdateContractTemplateCommandHandler(
         entity.DynamicFields = request.Request.DynamicFields;
 
         contractTemplateUpdateRepository.Update(entity);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var auditLog = new ContractTemplateAuditLog
         {
@@ -64,12 +65,12 @@ internal sealed class UpdateContractTemplateCommandHandler(
             Details = $"Cập nhật mẫu '{entity.Name}' v{entity.Version}"
         };
         contractTemplateInsertRepository.AddAuditLog(auditLog);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result<Unit>.Success(Unit.Value);
     }
 
-    private (bool IsValid, string? ErrorMessage) ValidateSyntax(string htmlContent)
+    private static (bool IsValid, string? ErrorMessage) ValidateSyntax(string htmlContent)
     {
         var pattern = @"\{\{(.+?)\}\}";
         var matches = System.Text.RegularExpressions.Regex.Matches(htmlContent, pattern);

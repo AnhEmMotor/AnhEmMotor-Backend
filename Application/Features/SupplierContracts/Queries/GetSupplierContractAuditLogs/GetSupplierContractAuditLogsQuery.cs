@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.SupplierContracts.Queries.GetSupplierContractAuditLogs;
 
-public sealed class GetSupplierContractAuditLogsQuery : IRequest<Result<List<SupplierContractAuditLogResponse>>>
+public class GetSupplierContractAuditLogsQuery : IRequest<Result<List<SupplierContractAuditLogResponse>>>
 {
     public Guid SupplierContractId { get; set; }
 }

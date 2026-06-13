@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Application.Features.HR.Commands.ApprovePayroll
 {
-    public sealed class ApprovePayrollCommandHandler(
+    public class ApprovePayrollCommandHandler(
         ICommissionReadRepository commissionRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<ApprovePayrollCommand, Result>
     {

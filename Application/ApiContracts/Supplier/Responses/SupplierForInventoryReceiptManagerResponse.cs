@@ -1,6 +1,6 @@
 namespace Application.ApiContracts.Supplier.Responses
 {
-    public sealed class SupplierForInventoryReceiptManagerResponse
+    public class SupplierForInventoryReceiptManagerResponse
     {
         public int? Id { get; set; }
 

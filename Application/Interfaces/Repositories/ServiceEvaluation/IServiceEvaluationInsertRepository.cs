@@ -4,6 +4,6 @@ using Domain.Entities;
 
 public interface IServiceEvaluationInsertRepository
 {
-    void Add(ServiceEvaluation evaluation);
+    public void Add(ServiceEvaluation evaluation);
 }
 

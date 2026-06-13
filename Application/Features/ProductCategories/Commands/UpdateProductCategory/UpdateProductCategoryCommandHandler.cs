@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.UpdateProductCategory;
 
-public sealed class UpdateProductCategoryCommandHandler(
+public class UpdateProductCategoryCommandHandler(
     IProductCategoryReadRepository readRepository,
     IProductCategoryUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCategoryCommand, Result<ProductCategoryResponse?>>

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Application.Features.News.Queries.GetNewsById;
 
-public sealed class GetNewsByIdQueryHandler(INewsReadRepository repository, IMemoryCache cache) : IRequestHandler<GetNewsByIdQuery, Result<NewsResponse>>
+public class GetNewsByIdQueryHandler(INewsReadRepository repository, IMemoryCache cache) : IRequestHandler<GetNewsByIdQuery, Result<NewsResponse>>
 {
     public async Task<Result<NewsResponse>> Handle(GetNewsByIdQuery request, CancellationToken cancellationToken)
     {

@@ -15,7 +15,7 @@ namespace WebAPI.Controllers.V1;
 /// <summary>
 /// Controller quản lý các dịch vụ bảo trì và sửa chữa của cửa hàng.
 /// </summary>
-public sealed class ServicesController (IMediator mediator) : ApiController
+public class ServicesController (IMediator mediator) : ApiController
 {
     /// <summary>
     /// Tạo mới một dịch vụ trong hệ thống.

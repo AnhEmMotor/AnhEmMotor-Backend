@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.SupplierContracts.Commands.RestoreSupplierContract;
 
-public sealed class RestoreSupplierContractCommandHandler(
+public class RestoreSupplierContractCommandHandler(
     ISupplierContractReadRepository readRepo,
     ISupplierContractUpdateRepository updateRepo,
     IUnitOfWork unitOfWork

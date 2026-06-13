@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.FinanceContracts.Queries.GetFinanceContractDetail;
 
-public sealed class GetFinanceContractDetailQueryHandler(
+public class GetFinanceContractDetailQueryHandler(
     IUnitOfWork unitOfWork
 ) : IRequestHandler<GetFinanceContractDetailQuery, FinanceContractDetailResponse>
 {

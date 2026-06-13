@@ -8,7 +8,7 @@ using SupplierEntity = Domain.Entities.Supplier;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplier;
 
-public sealed class UpdateSupplierCommandHandler(
+public class UpdateSupplierCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateSupplierCommand, Result<SupplierResponse?>>

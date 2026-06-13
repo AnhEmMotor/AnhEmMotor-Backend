@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Application.Features.InventoryReports.Queries.GetInventoryReportSummary
 {
-    public sealed class GetInventoryReportSummaryQueryHandler(IInventoryOnHandReadRepository readRepository) : IRequestHandler<GetInventoryReportSummaryQuery, Result<PagedResult<InventoryReportSummaryResponse>>>
+    public class GetInventoryReportSummaryQueryHandler(IInventoryOnHandReadRepository readRepository) : IRequestHandler<GetInventoryReportSummaryQuery, Result<PagedResult<InventoryReportSummaryResponse>>>
     {
         public async Task<Result<PagedResult<InventoryReportSummaryResponse>>> Handle(
             GetInventoryReportSummaryQuery request,

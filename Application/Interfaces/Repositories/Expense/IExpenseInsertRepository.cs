@@ -4,5 +4,6 @@ namespace Application.Interfaces.Repositories.Expense;
 
 public interface IExpenseInsertRepository
 {
-    void Add(ExpenseEntity expense);
+    public void Add(ExpenseEntity expense);
 }
+

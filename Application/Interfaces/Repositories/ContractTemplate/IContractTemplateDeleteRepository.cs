@@ -4,5 +4,6 @@ namespace Application.Interfaces.Repositories.ContractTemplate;
 
 public interface IContractTemplateDeleteRepository
 {
-    void Remove(ContractTemplateEntity contractTemplate);
+    public void Remove(ContractTemplateEntity contractTemplate);
 }
+

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Application.Features.HR.Queries.GetPayrollSummary;
 
-public sealed class GetPayrollSummaryQueryHandler(
+public class GetPayrollSummaryQueryHandler(
     IEmployeeReadRepository employeeRepository,
     ICommissionReadRepository commissionRepository) : IRequestHandler<GetPayrollSummaryQuery, Result<List<PayrollResponse>>>
 {

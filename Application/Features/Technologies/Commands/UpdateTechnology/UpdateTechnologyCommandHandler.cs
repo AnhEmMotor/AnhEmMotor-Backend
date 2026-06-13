@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Technologies.Commands.UpdateTechnology
 {
-    public sealed class UpdateTechnologyCommandHandler(
+    public class UpdateTechnologyCommandHandler(
         ITechnologyReadRepository readRepository,
         ITechnologyUpdateRepository updateRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<UpdateTechnologyCommand, Result<TechnologyResponse>>

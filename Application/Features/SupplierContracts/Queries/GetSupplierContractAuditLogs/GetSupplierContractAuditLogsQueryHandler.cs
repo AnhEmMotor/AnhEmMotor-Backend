@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Features.SupplierContracts.Queries.GetSupplierContractAuditLogs;
 
-public sealed class GetSupplierContractAuditLogsQueryHandler(
+public class GetSupplierContractAuditLogsQueryHandler(
     ISupplierContractReadRepository repository) : IRequestHandler<GetSupplierContractAuditLogsQuery, Result<List<SupplierContractAuditLogResponse>>>
 {
     public async Task<Result<List<SupplierContractAuditLogResponse>>> Handle(
@@ -19,14 +19,14 @@ public sealed class GetSupplierContractAuditLogsQueryHandler(
         var contract = await repository.GetByIdAsync(
             request.SupplierContractId,
             cancellationToken,
-            DataFetchMode.All);
+            DataFetchMode.All).ConfigureAwait(false);
 
         if (contract == null)
         {
             return Result<List<SupplierContractAuditLogResponse>>.Failure("Supplier contract not found.");
         }
 
-        var auditLogs = await repository.GetAuditLogsAsync(request.SupplierContractId, cancellationToken);
+        var auditLogs = await repository.GetAuditLogsAsync(request.SupplierContractId, cancellationToken).ConfigureAwait(false);
 
         var result = auditLogs
             .OrderByDescending(al => al.CreatedAt)

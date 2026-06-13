@@ -6,7 +6,7 @@ using CategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Application.Features.ProductCategories.Mappings;
 
-public sealed class ProductCategoryMappingConfig : IRegister
+public class ProductCategoryMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {

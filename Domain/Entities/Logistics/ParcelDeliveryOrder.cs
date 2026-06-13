@@ -1,16 +1,7 @@
-using System;
+using Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Entities.Logistics;
-
-public enum ParcelDeliveryStatus
-{
-    Pending = 0,      // Chờ soạn
-    Packing = 1,      // Đang gói
-    Shipping = 2,     // Đang đi đường
-    Completed = 3,    // Giao thành công
-    Returned = 4      // Khách bom hàng/Chuyển hoàn
-}
 
 public class ParcelDeliveryOrder
 {
@@ -60,7 +51,7 @@ public class ParcelDeliveryOrder
 
     public string OriginalOrderCode { get; set; } = string.Empty;
 
-    public ICollection<ParcelDeliveryOrderItem> Items { get; set; } = new List<ParcelDeliveryOrderItem>();
+    public ICollection<ParcelDeliveryOrderItem> Items { get; set; } = [];
 
     public ParcelDeliveryOrder() { }
 }

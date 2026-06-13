@@ -8,7 +8,7 @@ public static class CarrierPartnerSeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        if (await context.CarrierPartners.AnyAsync(cancellationToken))
+        if (await context.CarrierPartners.AnyAsync(cancellationToken).ConfigureAwait(false))
             return;
 
         var carriers = new List<CarrierPartner>
@@ -78,7 +78,7 @@ public static class CarrierPartnerSeeder
         foreach (var carrier in carriers)
         {
             var existing = await context.CarrierPartners
-                .FirstOrDefaultAsync(c => c.CarrierCode == carrier.CarrierCode, cancellationToken)
+                .FirstOrDefaultAsync(c => string.Compare(c.CarrierCode, carrier.CarrierCode) == 0, cancellationToken)
                 .ConfigureAwait(false);
 
             if (existing == null)

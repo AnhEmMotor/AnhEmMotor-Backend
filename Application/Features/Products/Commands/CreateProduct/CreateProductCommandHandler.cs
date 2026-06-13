@@ -22,7 +22,7 @@ using ProductEntity = Domain.Entities.Product;
 
 namespace Application.Features.Products.Commands.CreateProduct;
 
-public sealed class CreateProductCommandHandler(
+public class CreateProductCommandHandler(
     IProductCategoryReadRepository productCategoryReadRepository,
     IBrandReadRepository brandReadRepository,
     IProductVariantReadRepository productVariantReadRepository,

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using OutputEntity = Domain.Entities.Output;
+using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
 
 namespace Infrastructure.Repositories.Output
 {
@@ -38,7 +39,7 @@ namespace Infrastructure.Repositories.Output
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
             var errors = new List<Error>();
-            var transactions = new List<(OutputInfo Info, List<InventoryReceiptInfo> Batches, int Quantity)>();
+            var transactions = new List<(OutputInfo Info, List<InventoryReceiptInfoEntity> Batches, int Quantity)>();
             foreach (var outputInfo in outputInfos)
             {
                 if (outputInfo.ProductVariantId is null || outputInfo.Count is null || outputInfo.Count <= 0)
@@ -97,7 +98,7 @@ namespace Infrastructure.Repositories.Output
             return true;
         }
 
-        private Task<List<InventoryReceiptInfo>> GetAvailableBatchesAsync(
+        private Task<List<InventoryReceiptInfoEntity>> GetAvailableBatchesAsync(
             int productId,
             int? colorId,
             CancellationToken cancellationToken)

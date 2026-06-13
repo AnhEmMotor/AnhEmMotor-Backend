@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Queries.GetContractTemplateById;
 
-internal sealed class GetContractTemplateByIdQueryHandler(IContractTemplateReadRepository contractTemplateReadRepository)
+public class GetContractTemplateByIdQueryHandler(IContractTemplateReadRepository contractTemplateReadRepository)
     : IRequestHandler<GetContractTemplateByIdQuery, Result<ContractTemplateResponse>>
 {
     public async Task<Result<ContractTemplateResponse>> Handle(
         GetContractTemplateByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var entity = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken);
+        var entity = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (entity is null)
         {

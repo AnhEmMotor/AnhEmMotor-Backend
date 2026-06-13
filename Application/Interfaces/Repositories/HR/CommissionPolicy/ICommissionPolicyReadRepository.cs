@@ -19,3 +19,4 @@ public interface ICommissionPolicyReadRepository
         DateTimeOffset effectiveDate,
         CancellationToken cancellationToken = default);
 }
+

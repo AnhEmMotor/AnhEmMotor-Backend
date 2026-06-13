@@ -5,22 +5,21 @@ using System.Text.RegularExpressions;
 
 namespace Application.Features.ContractTemplates.Commands.ValidateContractTemplateSyntax;
 
-internal sealed class ValidateContractTemplateSyntaxCommandHandler
+public partial class ValidateContractTemplateSyntaxCommandHandler
     : IRequestHandler<ValidateContractTemplateSyntaxCommand, Result<bool>>
 {
-    private static readonly Regex PlaceholderRegex = new(
-        @"\{\{.+?\}\}",
-        RegexOptions.Compiled | RegexOptions.Singleline);
+    private static readonly Regex PlaceholderRegex = MyRegex();
 
     public Task<Result<bool>> Handle(
         ValidateContractTemplateSyntaxCommand request,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var content = request.Content ?? string.Empty;
 
         foreach (Match match in PlaceholderRegex.Matches(content))
         {
-            var inner = match.Value.Substring(2, match.Value.Length - 4);
+            var inner = match.Value[2..^2];
 
             if (inner.Contains("{{") || inner.Contains("}}"))
             {
@@ -32,4 +31,7 @@ internal sealed class ValidateContractTemplateSyntaxCommandHandler
 
         return Task.FromResult(Result<bool>.Success(true));
     }
+
+    [GeneratedRegex(@"\{\{.+?\}\}", RegexOptions.Compiled | RegexOptions.Singleline)]
+    private static partial Regex MyRegex();
 }

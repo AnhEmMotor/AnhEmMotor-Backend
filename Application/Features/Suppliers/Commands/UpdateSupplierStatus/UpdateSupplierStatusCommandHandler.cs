@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 
-public sealed class UpdateSupplierStatusCommandHandler(
+public class UpdateSupplierStatusCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateSupplierStatusCommand, Result<SupplierResponse?>>

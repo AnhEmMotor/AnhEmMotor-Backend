@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Constants;
 
 namespace Domain.Entities
 {
@@ -46,7 +47,7 @@ namespace Domain.Entities
 
         [Required]
         [Column("Status", TypeName = "nvarchar(20)")]
-        public string Status { get; set; } = "Pending";
+        public string Status { get; set; } = RepairOrderStatus.Pending;
 
         [Column("LaborCost", TypeName = "decimal(18,2)")]
         public decimal LaborCost { get; set; }

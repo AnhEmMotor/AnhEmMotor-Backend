@@ -18,3 +18,4 @@ namespace Application.Interfaces.Repositories.NewsCategory
         public Task<Domain.Entities.NewsCategory?> GetBySlugAsync(string slug, CancellationToken cancellationToken);
     }
 }
+

@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Constants;
 
 namespace Domain.Entities
 {
@@ -59,8 +60,7 @@ namespace Domain.Entities
         public string? SpecialTerms { get; set; }
 
         // --- Trạng thái & File ---
-        // Draft, Signed, Fulfilled
-        public string Status { get; set; } = "Draft"; 
+        public string Status { get; set; } = SalesContractStatus.Draft; 
         
         public DateTimeOffset? SignedDate { get; set; }
         

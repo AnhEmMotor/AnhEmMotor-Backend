@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Application.Features.News.Queries.GetNewsListForStore;
 
-public sealed class GetNewsListForStoreQueryHandler(INewsReadRepository repository) : IRequestHandler<GetNewsListForStoreQuery, Result<PagedResult<NewsSummaryResponse>>>
+public class GetNewsListForStoreQueryHandler(INewsReadRepository repository) : IRequestHandler<GetNewsListForStoreQuery, Result<PagedResult<NewsSummaryResponse>>>
 {
     public async Task<Result<PagedResult<NewsSummaryResponse>>> Handle(
         GetNewsListForStoreQuery request,

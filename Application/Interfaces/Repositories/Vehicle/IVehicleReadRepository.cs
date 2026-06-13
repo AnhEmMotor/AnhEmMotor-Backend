@@ -49,3 +49,4 @@ public interface IVehicleReadRepository
 
     public Task<Domain.Entities.Vehicle?> GetByVinAsync(string vin, CancellationToken cancellationToken = default);
 }
+

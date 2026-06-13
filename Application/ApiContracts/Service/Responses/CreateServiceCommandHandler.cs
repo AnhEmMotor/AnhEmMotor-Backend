@@ -13,7 +13,7 @@ namespace Application.Features.Services.Commands.CreateService;
 /// <summary>
 /// Xử lý việc tạo mới một dịch vụ trong hệ thống.
 /// </summary>
-public sealed class CreateServiceCommandHandler (
+public class CreateServiceCommandHandler (
     IUnitOfWork unitOfWork,
     IServiceReadRepository serviceReadRepository,
     IServiceInsertRepository serviceInsertRepository,

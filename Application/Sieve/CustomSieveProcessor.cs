@@ -99,7 +99,23 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Lead>(l => l.PhoneNumber).CanSort().CanFilter();
         mapper.Property<Lead>(l => l.Tier).CanSort().CanFilter();
         mapper.Property<Lead>(l => l.Points).CanSort().CanFilter();
+        mapper.Property<ServiceEvaluation>(e => e.Id).CanSort().CanFilter();
+        mapper.Property<ServiceEvaluation>(e => e.Criteria).CanSort().CanFilter();
+        mapper.Property<ServiceEvaluation>(e => e.ProcessingStatus).CanSort().CanFilter().HasName("processingStatus");
+        mapper.Property<ServiceEvaluation>(e => e.Rating).CanSort().CanFilter();
+        mapper.Property<ServiceEvaluation>(e => e.Contact.FullName).CanFilter().HasName("customerName");
+        mapper.Property<ServiceEvaluation>(e => e.Contact.PhoneNumber).CanFilter().HasName("customerPhone");
         return mapper;
+    }
+
+    public IQueryable<ServiceEvaluation> Search(IQueryable<ServiceEvaluation> source, string op, string[] values)
+    {
+        var term = values[0];
+        return source.Where(e =>
+            e.Contact.FullName.Contains(term) ||
+            e.Contact.PhoneNumber.Contains(term) ||
+            e.Criteria.Contains(term) ||
+            e.ProcessingStatus.Contains(term));
     }
 
     public IQueryable<Product> SafetyStandard(IQueryable<Product> source, string op, string[] values)

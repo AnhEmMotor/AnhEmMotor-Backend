@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.DeleteProductCategory;
 
-public sealed class DeleteProductCategoryCommandHandler(
+public class DeleteProductCategoryCommandHandler(
     IProductCategoryReadRepository readRepository,
     IProductCategoryDeleteRepository deleteRepository,
     IProtectedProductCategoryService protectedCategoryService,

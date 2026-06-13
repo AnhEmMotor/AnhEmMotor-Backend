@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Application.Features.News.Queries.GetLatestNewsPublic;
 
-public sealed class GetLatestNewsPublicQueryHandler(INewsReadRepository repository) : IRequestHandler<GetLatestNewsPublicQuery, Result<List<NewsSummaryResponse>>>
+public class GetLatestNewsPublicQueryHandler(INewsReadRepository repository) : IRequestHandler<GetLatestNewsPublicQuery, Result<List<NewsSummaryResponse>>>
 {
     public async Task<Result<List<NewsSummaryResponse>>> Handle(
         GetLatestNewsPublicQuery request,
@@ -20,6 +20,6 @@ public sealed class GetLatestNewsPublicQueryHandler(INewsReadRepository reposito
             filter: filter,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-        return result.Items?.ToList() ?? new List<NewsSummaryResponse>();
+        return result.Items?.ToList() ?? [];
     }
 }

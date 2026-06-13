@@ -23,7 +23,7 @@ using OptionValueEntity = Domain.Entities.OptionValue;
 
 namespace Application.Features.Products.Commands.UpdateProduct;
 
-public sealed class UpdateProductCommandHandler(
+public class UpdateProductCommandHandler(
     IProductReadRepository productReadRepository,
     IProductTechnologyRepository productTechnologyRepository,
     IProductVariantReadRepository productVariantReadRepository,

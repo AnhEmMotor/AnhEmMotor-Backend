@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.ApiContracts.Logistics.Responses;
 using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Entities.Logistics;
+using Domain.Enums;
 using MediatR;
 
 namespace Application.Features.Logistics.Queries.GetLogisticsDashboard;
@@ -26,7 +28,7 @@ public class GetLogisticsDashboardQueryHandler(IParcelDeliveryOrderReadRepositor
             _ => now.AddDays(-1),
         };
 
-        var parcels = (await parcelDeliveryOrderReadRepository.GetAllAsync(cancellationToken))
+        var parcels = (await parcelDeliveryOrderReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false))
             .Where(x => x.CreatedAt >= from)
             .ToList();
 
@@ -60,10 +62,10 @@ public class GetLogisticsDashboardQueryHandler(IParcelDeliveryOrderReadRepositor
             .ToDictionary(g => g.Key.ToString(), g => g.Count());
 
         // Trends: delivered count + shipping cost by day
-        response.Trends = parcels
+        response.Trends = [.. parcels
             .Where(x => x.Status == ParcelDeliveryStatus.Completed)
             .GroupBy(x => x.DeliveredAt?.Date)
-            .Select(g => new LogisticsTrendPoint
+            .Select(g => new LogisticsTrendPointResponse
             {
                 DayLabel = g.Key?.ToString("dd/MM") ?? "-",
                 DeliveredCount = g.Count(),
@@ -71,30 +73,28 @@ public class GetLogisticsDashboardQueryHandler(IParcelDeliveryOrderReadRepositor
                     .Sum(x => x.ShippingCost)
             })
             .OrderBy(x => x.DayLabel)
-            .Take(14)
-            .ToList();
+            .Take(14)];
 
         // Carrier scorecard (simplified)
-        response.CarrierScorecard = parcels
+        response.CarrierScorecard = [.. parcels
             .Where(x => x.Status == ParcelDeliveryStatus.Completed)
             .GroupBy(x => x.Carrier)
-            .Select(g => new CarrierScoreRow
+            .Select(g => new CarrierScoreRowResponse
             {
                 Carrier = g.Key,
                 DeliveredCount = g.Count(),
                 AvgDeliveryDays = g.Average(x => (x.DeliveredAt!.Value - x.CreatedAt).TotalDays),
                 AvgShippingCostPerOrder = g.Any() ? g.Average(x => x.ShippingCost) : 0,
-                ReturnsRatio = parcels.Count(x => x.Carrier == g.Key && x.Status == ParcelDeliveryStatus.Returned) / (double)parcels.Count(x => x.Carrier == g.Key)
+                ReturnsRatio = parcels.Count(x => string.Compare(x.Carrier, g.Key) == 0 && x.Status == ParcelDeliveryStatus.Returned) / (double)parcels.Count(x => string.Compare(x.Carrier, g.Key) == 0)
             })
-            .OrderByDescending(x => x.DeliveredCount)
-            .ToList();
+            .OrderByDescending(x => x.DeliveredCount)];
 
         // Exceptions (simplified)
-        response.Exceptions = new List<LogisticsExceptionRow>();
+        response.Exceptions = [];
 
         // ngâm kho: pending >24h
         var ngams = parcels.Where(x => x.Status == ParcelDeliveryStatus.Pending && (now - x.CreatedAt).TotalHours > 24).Take(20);
-        response.Exceptions.AddRange(ngams.Select(x => new LogisticsExceptionRow
+        response.Exceptions.AddRange(ngams.Select(x => new LogisticsExceptionRowResponse
         {
             Type = "ngam_kho",
             TrackingNumber = x.TrackingNumber,
@@ -104,7 +104,7 @@ public class GetLogisticsDashboardQueryHandler(IParcelDeliveryOrderReadRepositor
 
         // giao chậm: shipping >4 days and not completed
         var chams = parcels.Where(x => x.Status == ParcelDeliveryStatus.Shipping && (now - x.CreatedAt).TotalDays > 4).Take(20);
-        response.Exceptions.AddRange(chams.Select(x => new LogisticsExceptionRow
+        response.Exceptions.AddRange(chams.Select(x => new LogisticsExceptionRowResponse
         {
             Type = "giao_cham",
             TrackingNumber = x.TrackingNumber,
@@ -114,7 +114,7 @@ public class GetLogisticsDashboardQueryHandler(IParcelDeliveryOrderReadRepositor
 
         // hoàn chờ kiểm tra: returned but needs inspection (simplified as InspectedAt == null)
         var hoanchams = parcels.Where(x => x.Status == ParcelDeliveryStatus.Returned && x.InspectedAt == null).Take(20);
-        response.Exceptions.AddRange(hoanchams.Select(x => new LogisticsExceptionRow
+        response.Exceptions.AddRange(hoanchams.Select(x => new LogisticsExceptionRowResponse
         {
             Type = "hoan_cho_kiem_tra",
             TrackingNumber = x.TrackingNumber,
@@ -122,7 +122,7 @@ public class GetLogisticsDashboardQueryHandler(IParcelDeliveryOrderReadRepositor
             CreatedAt = x.CreatedAt
         }));
 
-        return await Task.FromResult(response);
+        return response;
     }
 }
 

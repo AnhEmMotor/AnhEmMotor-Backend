@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequestById
 {
-    public sealed class GetApprovedPurchaseRequestByIdQueryHandler(IPurchaseRequestReadRepository repository) : IRequestHandler<GetApprovedPurchaseRequestByIdQuery, Result<ApprovedPurchaseRequestDetailResponse?>>
+    public class GetApprovedPurchaseRequestByIdQueryHandler(IPurchaseRequestReadRepository repository) : IRequestHandler<GetApprovedPurchaseRequestByIdQuery, Result<ApprovedPurchaseRequestDetailResponse?>>
     {
         public async Task<Result<ApprovedPurchaseRequestDetailResponse?>> Handle(
             GetApprovedPurchaseRequestByIdQuery request,

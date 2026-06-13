@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Vehicles.Commands.TransferOwnership;
 
-public sealed class TransferOwnershipCommandHandler(
+public class TransferOwnershipCommandHandler(
     IVehicleReadRepository readRepository,
     IVehicleUpdateRepository updateRepository,
     ILeadReadRepository leadReadRepository,

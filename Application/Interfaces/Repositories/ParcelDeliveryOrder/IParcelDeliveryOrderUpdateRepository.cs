@@ -5,6 +5,7 @@ namespace Application.Interfaces.Repositories.ParcelDeliveryOrder;
 
 public interface IParcelDeliveryOrderUpdateRepository
 {
-    void Update(ParcelDeliveryOrderEntity parcelDeliveryOrder);
-    void UpdateItem(ParcelDeliveryOrderItemEntity parcelDeliveryOrderItem);
+    public void Update(ParcelDeliveryOrderEntity parcelDeliveryOrder);
+    public void UpdateItem(ParcelDeliveryOrderItemEntity parcelDeliveryOrderItem);
 }
+

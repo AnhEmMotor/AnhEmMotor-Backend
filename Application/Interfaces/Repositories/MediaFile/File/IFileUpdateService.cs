@@ -9,3 +9,4 @@ public interface IFileUpdateService
         int? maxWidth,
         CancellationToken cancellationToken);
 }
+

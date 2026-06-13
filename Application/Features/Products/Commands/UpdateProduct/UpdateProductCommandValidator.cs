@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.Products.Commands.UpdateProduct;
 
-public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProductCommand>
+public class UpdateProductCommandValidator : AbstractValidator<UpdateProductCommand>
 {
     private static readonly string[] ColorOptionKeys = ["Color", "Màu sắc"];
 

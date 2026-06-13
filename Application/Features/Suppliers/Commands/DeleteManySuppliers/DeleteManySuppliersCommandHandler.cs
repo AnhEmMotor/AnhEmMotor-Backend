@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Application.Features.Suppliers.Commands.DeleteManySuppliers
 {
-    public sealed class DeleteManySuppliersCommandHandler(
+    public class DeleteManySuppliersCommandHandler(
         ISupplierReadRepository readRepository,
         ISupplierDeleteRepository deleteRepository,
         ISupplierDebtRepository supplierDebtRepository,

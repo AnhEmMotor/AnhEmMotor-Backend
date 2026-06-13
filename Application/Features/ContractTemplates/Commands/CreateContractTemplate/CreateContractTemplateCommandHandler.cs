@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Commands.CreateContractTemplate;
 
-internal sealed class CreateContractTemplateCommandHandler(IContractTemplateInsertRepository contractTemplateInsertRepository, Application.Interfaces.Repositories.IUnitOfWork unitOfWork)
+public class CreateContractTemplateCommandHandler(IContractTemplateInsertRepository contractTemplateInsertRepository, Application.Interfaces.Repositories.IUnitOfWork unitOfWork)
     : IRequestHandler<CreateContractTemplateCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(
@@ -28,7 +28,7 @@ internal sealed class CreateContractTemplateCommandHandler(IContractTemplateInse
         };
 
         contractTemplateInsertRepository.Add(entity);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result<Guid>.Success(entity.Id);
     }

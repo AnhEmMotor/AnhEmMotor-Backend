@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Features.InventoryReceipts.Commands.RestoreManyInventoryReceipts;
 
-public sealed class RestoreManyInventoryReceiptsCommandHandler(
+public class RestoreManyInventoryReceiptsCommandHandler(
     IInventoryReceiptReadRepository readRepository,
     IInventoryReceiptUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyInventoryReceiptsCommand, Result<List<InventoryReceiptDetailResponse>>>

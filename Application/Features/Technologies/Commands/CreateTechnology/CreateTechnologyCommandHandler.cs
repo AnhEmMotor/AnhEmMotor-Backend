@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Technologies.Commands.CreateTechnology;
 
-public sealed class CreateTechnologyCommandHandler(
+public class CreateTechnologyCommandHandler(
     ITechnologyReadRepository readRepository,
     ITechnologyInsertRepository insertRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateTechnologyCommand, Result<TechnologyResponse>>

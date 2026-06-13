@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 
-public sealed class GetProductCategoryStatsQueryHandler(IProductCategoryReadRepository productCategoryRepository) : IRequestHandler<GetProductCategoryStatsQuery, Result<ProductCategoryStatsResponse>>
+public class GetProductCategoryStatsQueryHandler(IProductCategoryReadRepository productCategoryRepository) : IRequestHandler<GetProductCategoryStatsQuery, Result<ProductCategoryStatsResponse>>
 {
     public async Task<Result<ProductCategoryStatsResponse>> Handle(
         GetProductCategoryStatsQuery request,

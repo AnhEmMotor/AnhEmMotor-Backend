@@ -37,3 +37,4 @@ public interface IStatisticalReadRepository
 
     public Task<IEnumerable<WarehouseTableDataResponse>> GetWarehouseTableDataAsync(CancellationToken cancellationToken);
 }
+

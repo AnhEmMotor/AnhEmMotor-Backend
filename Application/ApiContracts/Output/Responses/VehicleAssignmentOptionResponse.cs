@@ -2,7 +2,7 @@
 
 namespace Application.ApiContracts.Output.Responses;
 
-public sealed class VehicleAssignmentOptionResponse
+public class VehicleAssignmentOptionResponse
 {
     public int Id { get; set; }
 

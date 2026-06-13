@@ -65,3 +65,4 @@ public interface IProductCategoryReadRepository
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 }
+

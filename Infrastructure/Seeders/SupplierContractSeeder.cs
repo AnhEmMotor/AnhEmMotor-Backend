@@ -36,12 +36,10 @@ public static class SupplierContractSeeder
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        var now = DateTime.UtcNow;
-
         if (supplierHonda != null && hondaVariants.Count > 0)
         {
             var contractNumber = "HD-HONDA-2024-001";
-            if (!existingContracts.Any(c => c.ContractNumber == contractNumber))
+            if (!existingContracts.Any(c => string.Compare(c.ContractNumber, contractNumber) == 0))
             {
                 var contract = new SupplierContract
                 {
@@ -63,7 +61,7 @@ public static class SupplierContractSeeder
                     ContractFilePath = null,
                     CreatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
                     UpdatedAt = new DateTimeOffset(2024, 6, 15, 0, 0, 0, TimeSpan.Zero),
-                    ContractItems = new List<SupplierContractItem>()
+                    ContractItems = []
                 };
 
                 foreach (var v in hondaVariants)
@@ -95,7 +93,7 @@ public static class SupplierContractSeeder
         if (supplierYamaha != null && yamahaVariants.Count > 0)
         {
             var contractNumber = "HD-YAMAHA-2024-002";
-            if (!existingContracts.Any(c => c.ContractNumber == contractNumber))
+            if (!existingContracts.Any(c => string.Compare(c.ContractNumber, contractNumber.ToString()) == 0))
             {
                 var contract = new SupplierContract
                 {
@@ -117,7 +115,7 @@ public static class SupplierContractSeeder
                     ContractFilePath = null,
                     CreatedAt = new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero),
                     UpdatedAt = new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero),
-                    ContractItems = new List<SupplierContractItem>()
+                    ContractItems = []
                 };
 
                 foreach (var v in yamahaVariants)
@@ -149,7 +147,7 @@ public static class SupplierContractSeeder
         if (supplierSuzuki != null && suzukiVariants.Count > 0)
         {
             var contractNumber = "HD-SUZUKI-2024-003";
-            if (!existingContracts.Any(c => c.ContractNumber == contractNumber))
+            if (!existingContracts.Any(c => string.Compare(c.ContractNumber, contractNumber.ToString()) == 0))
             {
                 var contract = new SupplierContract
                 {
@@ -171,7 +169,7 @@ public static class SupplierContractSeeder
                     ContractFilePath = null,
                     CreatedAt = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero),
                     UpdatedAt = new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero),
-                    ContractItems = new List<SupplierContractItem>()
+                    ContractItems = []
                 };
 
                 foreach (var v in suzukiVariants)
@@ -214,7 +212,7 @@ public static class SupplierContractSeeder
         foreach (var (contractNumber, supplierId, effective, expiration, value, status, terms, note, creditLimit, paymentDays, bankName, bankAccount, minVolume, discount, createdAt) in extraContracts)
         {
             if (supplierId == 0) continue;
-            if (existingContracts.Any(c => c.ContractNumber == contractNumber))
+            if (existingContracts.Any(c => string.Compare(c.ContractNumber, contractNumber.ToString()) == 0))
                 continue;
 
             var contract = new SupplierContract
@@ -237,7 +235,7 @@ public static class SupplierContractSeeder
                 ContractFilePath = null,
                 CreatedAt = createdAt,
                 UpdatedAt = createdAt,
-                ContractItems = new List<SupplierContractItem>()
+                ContractItems = []
             };
 
             context.SupplierContracts.Add(contract);

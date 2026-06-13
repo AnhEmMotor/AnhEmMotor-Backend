@@ -3,14 +3,16 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.RepairOrder;
 using Application.Interfaces.Repositories.Service;
 using Application.Interfaces.Repositories.ProductVariant;
-using Application.Interfaces.Repositories.InventoryReceipt;
+using Application.Interfaces.Repositories.InventoryReceiptInfo;
 using Domain.Entities;
+using Domain.Constants;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Security.AccessControl;
 
 namespace Application.Features.RepairOrders.Commands.IssueParts
 {
@@ -33,14 +35,14 @@ namespace Application.Features.RepairOrders.Commands.IssueParts
             }
 
             // 1. Revert existing parts inventory deductions
-            var existingParts = repairOrder.Details.Where(d => d.Type == "Part").ToList();
+            var existingParts = repairOrder.Details.Where(d => string.Compare(d.Type, RepairOrderDetailType.Part) == 0).ToList();
             foreach (var detail in existingParts)
             {
                 if (detail.ProductVariantId == null) continue;
 
                 var inputInfos = await inventoryReceiptInfoReadRepository.GetFinishedInventoryReceiptInfosByVariantIdAsync(detail.ProductVariantId.Value, cancellationToken)
                     .ConfigureAwait(false);
-                inputInfos = inputInfos.OrderBy(ii => ii.Id).ToList();
+                inputInfos = [.. inputInfos.OrderBy(ii => ii.Id)];
 
                 var remainingToRevert = detail.Count;
                 foreach (var ii in inputInfos)
@@ -62,7 +64,7 @@ namespace Application.Features.RepairOrders.Commands.IssueParts
             }
 
             // 2. Clear old details
-            if (repairOrder.Details.Any())
+            if (repairOrder.Details.Count != 0)
             {
                 repairOrderUpdateRepository.RemoveDetailsRange(repairOrder.Details);
                 repairOrder.Details.Clear();
@@ -89,7 +91,7 @@ namespace Application.Features.RepairOrders.Commands.IssueParts
                     Count = 1,
                     Price = 0,
                     LaborCost = serviceItem.LaborCost,
-                    Type = "Service",
+                    Type = RepairOrderDetailType.Service,
                     Notes = serviceItem.Notes
                 };
                 laborCost += serviceItem.LaborCost;
@@ -142,7 +144,7 @@ namespace Application.Features.RepairOrders.Commands.IssueParts
                     Count = partItem.Count,
                     Price = partItem.Price,
                     LaborCost = 0,
-                    Type = "Part",
+                    Type = RepairOrderDetailType.Part,
                     Notes = partItem.Notes
                 };
                 partsCost += partItem.Count * partItem.Price;
@@ -158,9 +160,9 @@ namespace Application.Features.RepairOrders.Commands.IssueParts
             {
                 repairOrder.Status = request.Status;
             }
-            else if (repairOrder.Status == "Pending")
+            else if (string.Compare(repairOrder.Status, RepairOrderStatus.Pending) == 0)
             {
-                repairOrder.Status = "InProgress";
+                repairOrder.Status = RepairOrderStatus.InProgress;
             }
 
             repairOrderUpdateRepository.Update(repairOrder);

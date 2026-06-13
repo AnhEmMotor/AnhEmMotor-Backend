@@ -8,7 +8,7 @@ using System;
 
 namespace Application.Features.Payments.Commands.ProcessPayOSCallback
 {
-    public sealed class ProcessPayOSCallbackCommandHandler(
+    public class ProcessPayOSCallbackCommandHandler(
         IOutputReadRepository readRepository,
         IOutputUpdateRepository updateRepository,
         IUnitOfWork unitOfWork,

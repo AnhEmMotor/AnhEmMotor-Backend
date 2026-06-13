@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.Brands.Commands.CreateBrand;
 
-public sealed class CreateBrandCommandValidator : AbstractValidator<CreateBrandCommand>
+public class CreateBrandCommandValidator : AbstractValidator<CreateBrandCommand>
 {
     public CreateBrandCommandValidator()
     {

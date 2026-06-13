@@ -1,4 +1,5 @@
 using Application.Common.Models;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ContractTemplate;
 using Domain.Primitives;
 using MediatR;
@@ -7,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Commands.DeleteContractTemplate;
 
-internal sealed class DeleteContractTemplateCommandHandler(
+public class DeleteContractTemplateCommandHandler(
     IContractTemplateReadRepository contractTemplateReadRepository,
     IContractTemplateUpdateRepository contractTemplateUpdateRepository,
-    Application.Interfaces.Repositories.IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteContractTemplateCommand, Result<Unit>>
 {
     public async Task<Result<Unit>> Handle(
         DeleteContractTemplateCommand request,
         CancellationToken cancellationToken)
     {
-        var entity = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken);
+        var entity = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (entity is null)
         {
@@ -27,7 +28,7 @@ internal sealed class DeleteContractTemplateCommandHandler(
         entity.DeletedAt = DateTimeOffset.UtcNow;
 
         contractTemplateUpdateRepository.Update(entity);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result<Unit>.Success(Unit.Value);
     }

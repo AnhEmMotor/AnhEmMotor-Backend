@@ -25,7 +25,7 @@ public class GetNotificationStreamQueryHandler(INotificationService notification
             string message;
             try
             {
-                message = await notificationService.WaitForNotificationAsync(cancellationToken).ConfigureAwait(true);
+                message = await notificationService.WaitForNotificationAsync(cancellationToken).ConfigureAwait(false);
             } catch (OperationCanceledException)
             {
                 yield break;

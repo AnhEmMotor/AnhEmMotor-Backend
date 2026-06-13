@@ -12,7 +12,7 @@ namespace Application.Features.Services.Queries;
 /// <summary>
 /// Handler xử lý yêu cầu lấy danh sách dịch vụ có phân trang.
 /// </summary>
-public sealed class GetServicesListQueryHandler (
+public class GetServicesListQueryHandler (
     IServiceReadRepository serviceRepository,
     ISieveProcessor sieveProcessor) : IRequestHandler<GetServicesListQuery, Result<PagedResult<ServiceResponse>>>
 {
@@ -28,6 +28,7 @@ public sealed class GetServicesListQueryHandler (
         GetServicesListQuery request,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(request);
 
         var query = serviceRepository.GetQueryable();

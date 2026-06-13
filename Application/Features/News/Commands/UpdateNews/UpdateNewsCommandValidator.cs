@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.News.Commands.UpdateNews;
 
-public sealed class UpdateNewsCommandValidator : AbstractValidator<UpdateNewsCommand>
+public class UpdateNewsCommandValidator : AbstractValidator<UpdateNewsCommand>
 {
     public UpdateNewsCommandValidator()
     {

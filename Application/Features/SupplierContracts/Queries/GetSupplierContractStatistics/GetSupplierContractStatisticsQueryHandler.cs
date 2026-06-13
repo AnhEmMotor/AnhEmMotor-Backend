@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.SupplierContracts.Queries.GetSupplierContractStatistics;
 
-public sealed class GetSupplierContractStatisticsQueryHandler(
+public class GetSupplierContractStatisticsQueryHandler(
     ISupplierContractReadRepository repository)
     : IRequestHandler<GetSupplierContractStatisticsQuery, Result<SupplierContractStatisticsResponse>>
 {

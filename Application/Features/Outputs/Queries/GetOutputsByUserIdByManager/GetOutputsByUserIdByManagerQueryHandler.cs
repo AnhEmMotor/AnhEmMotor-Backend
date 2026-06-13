@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 
-public sealed class GetOutputsByUserIdByManagerQueryHandler(IOutputReadRepository repository) : IRequestHandler<GetOutputsByUserIdByManagerQuery, Result<PagedResult<OutputItemResponse>>>
+public class GetOutputsByUserIdByManagerQueryHandler(IOutputReadRepository repository) : IRequestHandler<GetOutputsByUserIdByManagerQuery, Result<PagedResult<OutputItemResponse>>>
 {
     public async Task<Result<PagedResult<OutputItemResponse>>> Handle(
         GetOutputsByUserIdByManagerQuery request,

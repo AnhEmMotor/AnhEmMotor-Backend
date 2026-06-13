@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.FinanceContracts.Commands.UpdateDisbursementPayment;
 
-public sealed class UpdateDisbursementPaymentCommandHandler(
+public class UpdateDisbursementPaymentCommandHandler(
     IUnitOfWork unitOfWork
 ) : IRequestHandler<UpdateDisbursementPaymentCommand>
 {

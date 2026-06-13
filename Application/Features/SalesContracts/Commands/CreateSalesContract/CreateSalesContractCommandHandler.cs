@@ -2,13 +2,14 @@ using Application.ApiContracts.SalesContracts.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.SalesContract;
+using Domain.Constants;
 using Domain.Entities;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.SalesContracts.Commands.CreateSalesContract;
 
-public sealed class CreateSalesContractCommandHandler(
+public class CreateSalesContractCommandHandler(
     ISalesContractReadRepository readRepo,
     ISalesContractInsertRepository insertRepo,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateSalesContractCommand, Result<SalesContractResponse>>
@@ -21,7 +22,7 @@ public sealed class CreateSalesContractCommandHandler(
 
         var entity = request.Adapt<SalesContract>();
         entity.ContractNumber = contractNumber;
-        entity.Status = "Draft";
+        entity.Status = SalesContractStatus.Draft;
 
         insertRepo.Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

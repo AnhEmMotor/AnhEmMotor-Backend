@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
 {
-    public sealed class UpdatePurchaseRequestCommandHandler(
+    public class UpdatePurchaseRequestCommandHandler(
         IPurchaseRequestReadRepository readRepository,
         IPurchaseRequestUpdateRepository updateRepository,
         IPurchaseRequestDeleteRepository deleteRepository,

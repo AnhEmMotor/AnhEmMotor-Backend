@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.Files.Commands.DeleteManyFiles;
 
-public sealed class DeleteManyFilesCommandHandler(
+public class DeleteManyFilesCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyFilesCommand, Result>

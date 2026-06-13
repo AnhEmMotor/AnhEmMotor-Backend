@@ -1,83 +1,71 @@
-using Application.Api.Contracts.Statistical.Responses;
-using Application.Interfaces.Repositories.InventoryReceipt;
+using Application.Interfaces.Repositories.InventoryReceiptInfo;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.RepairOrder;
 using Application.Interfaces.Repositories.HR.Employee;
+using Domain.Constants;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.ApiContracts.Statistical.Responses;
 
 namespace Application.Features.Statistical.Queries.GetWorkshopDashboard;
 
-public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashboardQuery, WorkshopDashboardResponse>
+public class GetWorkshopDashboardQueryHandler(
+    IRepairOrderReadRepository repairOrderReadRepository,
+    IOutputReadRepository outputReadRepository,
+    IEmployeeReadRepository employeeReadRepository,
+    IInventoryReceiptInfoReadRepository inventoryReceiptInfoReadRepository) : IRequestHandler<GetWorkshopDashboardQuery, WorkshopDashboardResponse>
 {
-    private readonly IRepairOrderReadRepository _repairOrderReadRepository;
-    private readonly IOutputReadRepository _outputReadRepository;
-    private readonly IEmployeeReadRepository _employeeReadRepository;
-    private readonly IInventoryReceiptInfoReadRepository _inventoryReceiptInfoReadRepository;
-
-    public GetWorkshopDashboardQueryHandler(
-        IRepairOrderReadRepository repairOrderReadRepository,
-        IOutputReadRepository outputReadRepository,
-        IEmployeeReadRepository employeeReadRepository,
-        IInventoryReceiptInfoReadRepository inventoryReceiptInfoReadRepository)
-    {
-        _repairOrderReadRepository = repairOrderReadRepository;
-        _outputReadRepository = outputReadRepository;
-        _employeeReadRepository = employeeReadRepository;
-        _inventoryReceiptInfoReadRepository = inventoryReceiptInfoReadRepository;
-    }
-
     public async Task<WorkshopDashboardResponse> Handle(GetWorkshopDashboardQuery request, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
         var response = new WorkshopDashboardResponse();
 
         // 1. KPI Cards
-        var allOrders = await _repairOrderReadRepository.GetAllAsync(cancellationToken);
-        var inProgressOrders = allOrders.Where(ro => ro.Status == "InProgress").ToList();
-        var completedOrders = allOrders.Where(ro => ro.Status == "Completed" && ro.StartTime != null && ro.CompletedDate != null).ToList();
+        var allOrders = await repairOrderReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var inProgressOrders = allOrders.Where(ro => string.Compare(ro.Status, RepairOrderStatus.InProgress) == 0).ToList();
+        var completedOrders = allOrders.Where(ro => string.Compare(ro.Status, RepairOrderStatus.Completed) == 0 && ro.StartTime != null && ro.CompletedDate != null).ToList();
         var revenueOrders = allOrders.Where(ro => ro.CreatedAt >= request.FromDate && ro.CreatedAt <= request.ToDate).ToList();
 
         response.KpiCards.InProgressCount = inProgressOrders.Count;
         response.KpiCards.CumulativeRevenue = revenueOrders.Sum(ro => ro.TotalAmount);
 
-        if (completedOrders.Any())
+        if (completedOrders.Count != 0)
         {
             var totalHours = completedOrders.Sum(ro => (ro.CompletedDate!.Value - ro.StartTime!.Value).TotalHours);
             response.KpiCards.AvgCompletionHours = totalHours / completedOrders.Count;
         }
 
         // 2. Urgent Alerts
-        response.Alerts.OverdueTickets = allOrders
-            .Where(ro => ro.Status != "Completed" && ro.ExpectedCompletionTime < now)
-            .Select(ro => new OverdueTicketDto
+        response.Alerts.OverdueTickets = [.. allOrders
+            .Where(ro => string.Compare(ro.Status, RepairOrderStatus.Completed) != 0 && ro.ExpectedCompletionTime < now)
+            .Select(ro => new OverdueTicketResponse
             {
                 TicketId = ro.Id,
                 CustomerName = ro.CustomerName,
                 ExpectedCompletionTime = ro.ExpectedCompletionTime ?? now,
                 Status = ro.Status
-            }).ToList();
+            })];
 
         // Part Shortage: Check RepairOrderDetails of InProgress tickets
         var activeItems = allOrders
             .SelectMany(ro => ro.Details)
-            .Where(rod => rod.RepairOrder.Status == "InProgress" && rod.Type == "Part" && rod.ProductVariantId != null)
+            .Where(rod => string.Compare(rod.RepairOrder.Status, RepairOrderStatus.InProgress) == 0 && string.Compare(rod.Type, RepairOrderDetailType.Part) == 0 && rod.ProductVariantId != null)
             .ToList();
 
         foreach (var item in activeItems)
         {
             // Mock logic: count finished receipt stock for the variant.
-            var stock = (await _inventoryReceiptInfoReadRepository.GetFinishedInventoryReceiptInfosByVariantIdAsync(item.ProductVariantId!.Value, cancellationToken))
+            var stock = (await inventoryReceiptInfoReadRepository.GetFinishedInventoryReceiptInfosByVariantIdAsync(item.ProductVariantId!.Value, cancellationToken).ConfigureAwait(false))
                 .Where(ii => ii.Count > 0)
                 .Sum(ii => ii.Count ?? 0);
 
             if (stock < item.Count)
             {
-                response.Alerts.PartShortages.Add(new PartShortageDto
+                response.Alerts.PartShortages.Add(new PartShortageResponse
                 {
                     TicketId = item.RepairOrderId,
                 PartName = item.ProductVariant?.Product?.Name ?? "Unknown Part",
@@ -89,7 +77,7 @@ public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashb
 
         // 3. Analytics
         var workshopRev = revenueOrders.Sum(ro => ro.TotalAmount);
-        var retailRev = (await _outputReadRepository.GetAllAsync(cancellationToken))
+        var retailRev = (await outputReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false))
             .Where(o => o.CreatedAt >= request.FromDate && o.CreatedAt <= request.ToDate)
             .Sum(o => o.Total);
 
@@ -99,33 +87,33 @@ public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashb
             RetailRevenue = retailRev
         };
 
-        response.Analytics.RevenueSources.Add(new RevenueSourceDto
+        response.Analytics.RevenueSources.Add(new RevenueSourceResponse
         {
-            Source = "Labor",
+            Source = WorkshopDashboardConstants.RevenueSource.Labor,
             Amount = revenueOrders.Sum(ro => ro.LaborCost)
         });
-        response.Analytics.RevenueSources.Add(new RevenueSourceDto
+        response.Analytics.RevenueSources.Add(new RevenueSourceResponse
         {
-            Source = "Parts",
+            Source = WorkshopDashboardConstants.RevenueSource.Parts,
             Amount = revenueOrders.Sum(ro => ro.PartsCost)
         });
 
         // 4. Productivity
-        var employees = await _employeeReadRepository.GetAllWithUsersAsync(cancellationToken);
+        var employees = await employeeReadRepository.GetAllWithUsersAsync(cancellationToken).ConfigureAwait(false);
         foreach (var emp in employees)
         {
             var currentOrder = inProgressOrders.FirstOrDefault(ro => ro.TechnicianId == emp.Id);
-            response.Productivity.TechnicianStatuses.Add(new TechnicianStatusDto
+            response.Productivity.TechnicianStatuses.Add(new TechnicianStatusResponse
             {
                 TechnicianName = emp.User?.FullName ?? "Unknown",
-                Status = currentOrder != null ? "Busy" : "Idle",
+                Status = currentOrder != null ? WorkshopDashboardConstants.TechnicianStatus.Busy : WorkshopDashboardConstants.TechnicianStatus.Idle,
                 CurrentTicketId = currentOrder?.Id
             });
 
             var completedCount = completedOrders.Count(ro => ro.TechnicianId == emp.Id);
             var empRev = completedOrders.Where(ro => ro.TechnicianId == emp.Id).Sum(ro => ro.TotalAmount);
 
-            response.Productivity.TechnicianRankings.Add(new TechnicianRankingDto
+            response.Productivity.TechnicianRankings.Add(new TechnicianRankingResponse
             {
                 TechnicianName = emp.User?.FullName ?? "Unknown",
                 CompletedTickets = completedCount,

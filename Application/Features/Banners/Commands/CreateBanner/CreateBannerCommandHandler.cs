@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Banners.Commands.CreateBanner;
 
-public sealed class CreateBannerCommandHandler(
+public class CreateBannerCommandHandler(
     IBannerInsertRepository bannerInsertRepository,
     ICurrentUserContext currentUserContext,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateBannerCommand, Result<int>>

@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Queries.GetContractTemplates;
 
-internal sealed class GetContractTemplatesQueryHandler(IContractTemplateReadRepository contractTemplateReadRepository)
+public class GetContractTemplatesQueryHandler(IContractTemplateReadRepository contractTemplateReadRepository)
 : IRequestHandler<GetContractTemplatesQuery, Result<PagedResult<ContractTemplateResponse>>>
 {
     public async Task<Result<PagedResult<ContractTemplateResponse>>> Handle(
         GetContractTemplatesQuery request,
         CancellationToken cancellationToken)
     {
-        var items = await contractTemplateReadRepository.GetAllAsync(cancellationToken);
+        var items = await contractTemplateReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         var query = items.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.Search))

@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.SalesContracts.Commands.DeleteSalesContract;
 
-public sealed class DeleteSalesContractCommandHandler(
+public class DeleteSalesContractCommandHandler(
     ISalesContractReadRepository readRepo,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteSalesContractCommand, Result>
 {
@@ -14,7 +14,7 @@ public sealed class DeleteSalesContractCommandHandler(
         DeleteSalesContractCommand request,
         CancellationToken cancellationToken)
     {
-        var contract = await readRepo.GetByIdAsync(request.Id, cancellationToken);
+        var contract = await readRepo.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (contract == null)
             return Result.Failure("Không tìm thấy hợp đồng.");
 

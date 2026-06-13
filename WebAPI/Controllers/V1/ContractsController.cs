@@ -19,7 +19,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> GetSalesContractsAsync([FromQuery] Sieve.Models.SieveModel request, CancellationToken cancellationToken)
   {
     var query = new Application.Features.SalesContracts.Queries.GetSalesContractsList.GetSalesContractsListQuery { SieveModel = request };
-    var result = await sender.Send(query, cancellationToken);
+    var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
   }
 
@@ -29,7 +29,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> GetSalesContractByIdAsync(Guid id, CancellationToken cancellationToken)
   {
     var query = new Application.Features.SalesContracts.Queries.GetSalesContractById.GetSalesContractByIdQuery(id);
-    var result = await sender.Send(query, cancellationToken);
+    var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
   }
 
@@ -39,7 +39,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> CreateSalesContractAsync([FromBody] Application.ApiContracts.SalesContracts.Requests.CreateSalesContractRequest request, CancellationToken cancellationToken)
   {
     var command = new Application.Features.SalesContracts.Commands.CreateSalesContract.CreateSalesContractCommand(request);
-    var result = await sender.Send(command, cancellationToken);
+    var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? CreatedAtAction(nameof(GetSalesContractByIdAsync), new { id = result.Value!.Id }, result.Value) : BadRequest(result.Error);
   }
 
@@ -49,7 +49,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> UpdateSalesContractAsync(Guid id, [FromBody] Application.ApiContracts.SalesContracts.Requests.UpdateSalesContractRequest request, CancellationToken cancellationToken)
   {
     var command = new Application.Features.SalesContracts.Commands.UpdateSalesContract.UpdateSalesContractCommand(id, request);
-    var result = await sender.Send(command, cancellationToken);
+    var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
   }
 
@@ -59,7 +59,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> DeleteSalesContractAsync(Guid id, CancellationToken cancellationToken)
   {
     var command = new Application.Features.SalesContracts.Commands.DeleteSalesContract.DeleteSalesContractCommand(id);
-    var result = await sender.Send(command, cancellationToken);
+    var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? NoContent() : BadRequest(result.Error);
   }
 
@@ -69,7 +69,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> UpdateSalesContractStatusAsync(Guid id, [FromBody] Application.ApiContracts.SalesContracts.Requests.UpdateContractStatusRequest request, CancellationToken cancellationToken)
   {
     var command = new Application.Features.SalesContracts.Commands.UpdateSalesContractStatus.UpdateSalesContractStatusCommand(id, request.Status);
-    var result = await sender.Send(command, cancellationToken);
+    var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
   }
 
@@ -79,7 +79,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> GetSalesContractStatisticsAsync(CancellationToken cancellationToken)
   {
     var query = new Application.Features.SalesContracts.Queries.GetSalesContractStatistics.GetSalesContractStatisticsQuery();
-    var result = await sender.Send(query, cancellationToken);
+    var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
   }
 
@@ -88,6 +88,7 @@ public class ContractsController(ISender sender) : ApiController
   [Authorize]
   public async Task<IActionResult> GetFinanceContractsAsync(CancellationToken cancellationToken)
   {
+    cancellationToken.ThrowIfCancellationRequested();
     return Ok(new { message = "Get Finance Contracts" });
   }
 
@@ -95,6 +96,7 @@ public class ContractsController(ISender sender) : ApiController
   [Authorize]
   public async Task<IActionResult> CreateFinanceContractAsync(CancellationToken cancellationToken)
   {
+    cancellationToken.ThrowIfCancellationRequested();
     return Ok(new { message = "Create Finance Contract" });
   }
 
@@ -103,6 +105,7 @@ public class ContractsController(ISender sender) : ApiController
   [Authorize]
   public async Task<IActionResult> GetSupplierContractsAsync(CancellationToken cancellationToken)
   {
+    cancellationToken.ThrowIfCancellationRequested();
     return Ok(new { message = "Get Supplier Contracts" });
   }
 
@@ -110,6 +113,7 @@ public class ContractsController(ISender sender) : ApiController
   [Authorize]
   public async Task<IActionResult> CreateSupplierContractAsync(CancellationToken cancellationToken)
   {
+    cancellationToken.ThrowIfCancellationRequested();
     return Ok(new { message = "Create Supplier Contract" });
   }
 
@@ -120,7 +124,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> GetContractTemplatesAsync([FromQuery] Sieve.Models.SieveModel request, CancellationToken cancellationToken)
   {
     var query = Application.Features.ContractTemplates.Queries.GetContractTemplates.GetContractTemplatesQuery.FromRequest(request);
-    var result = await sender.Send(query, cancellationToken);
+    var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
   }
 
@@ -130,7 +134,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> GetContractTemplateByIdAsync(Guid id, CancellationToken cancellationToken)
   {
     var query = new Application.Features.ContractTemplates.Queries.GetContractTemplateById.GetContractTemplateByIdQuery(id);
-    var result = await sender.Send(query, cancellationToken);
+    var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
   }
 
@@ -140,7 +144,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> CreateContractTemplateAsync([FromBody] Application.ApiContracts.ContractTemplate.Requests.CreateContractTemplateRequest request, CancellationToken cancellationToken)
   {
     var command = new Application.Features.ContractTemplates.Commands.CreateContractTemplate.CreateContractTemplateCommand(request);
-    var result = await sender.Send(command, cancellationToken);
+    var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? CreatedAtAction(nameof(GetContractTemplateByIdAsync), new { id = result.Value }, result.Value) : BadRequest(result.Error);
   }
 
@@ -150,7 +154,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> UpdateContractTemplateAsync(Guid id, [FromBody] Application.ApiContracts.ContractTemplate.Requests.UpdateContractTemplateRequest request, CancellationToken cancellationToken)
   {
     var command = new Application.Features.ContractTemplates.Commands.UpdateContractTemplate.UpdateContractTemplateCommand(id, request);
-    var result = await sender.Send(command, cancellationToken);
+    var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? NoContent() : BadRequest(result.Error);
   }
 
@@ -160,7 +164,7 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> DeleteContractTemplateAsync(Guid id, CancellationToken cancellationToken)
   {
     var command = new Application.Features.ContractTemplates.Commands.DeleteContractTemplate.DeleteContractTemplateCommand(id);
-    var result = await sender.Send(command, cancellationToken);
+    var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? NoContent() : BadRequest(result.Error);
   }
 
@@ -170,19 +174,16 @@ public class ContractsController(ISender sender) : ApiController
   public async Task<IActionResult> CloneContractTemplateAsync(Guid id, CancellationToken cancellationToken)
   {
     var command = new Application.Features.ContractTemplates.Commands.CloneContractTemplate.CloneContractTemplateCommand(id);
-    var result = await sender.Send(command, cancellationToken);
+    var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? Ok(new { id = result.Value }) : BadRequest(result.Error);
   }
 
   [HttpPost("templates/validate-syntax")]
   [Authorize]
   [SwaggerOperation(Summary = "Kiểm tra cú pháp từ khóa động {{...}} trong nội dung mẫu")]
-  public async Task<IActionResult> ValidateContractTemplateSyntaxAsync([FromBody] ValidateSyntaxRequest request, CancellationToken cancellationToken)
+  public async Task<IActionResult> ValidateContractTemplateSyntaxAsync([FromBody] Application.Features.ContractTemplates.Commands.ValidateContractTemplateSyntax.ValidateContractTemplateSyntaxCommand command, CancellationToken cancellationToken)
   {
-    var command = new Application.Features.ContractTemplates.Commands.ValidateContractTemplateSyntax.ValidateContractTemplateSyntaxCommand(request.Content);
-    var result = await sender.Send(command, cancellationToken);
+    var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
     return result.IsSuccess ? Ok(new { valid = true }) : BadRequest(new { valid = false, error = result.Error!.Message });
   }
 }
-
-public sealed record ValidateSyntaxRequest(string Content);

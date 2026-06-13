@@ -1,7 +1,7 @@
 using Application.Interfaces.Repositories.Contact;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
-using DomainEntities = global::Domain.Entities;
+using DomainEntities = Domain.Entities;
 
 namespace Infrastructure.Repositories.Contact.JobApplication;
 
@@ -24,12 +24,14 @@ public class JobApplicationRepository(ApplicationDBContext context) : IJobApplic
 
     public Task AddAsync(DomainEntities.JobApplication entity, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         context.JobApplications.Add(entity);
         return Task.CompletedTask;
     }
 
     public Task UpdateAsync(DomainEntities.JobApplication entity, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         context.JobApplications.Update(entity);
         return Task.CompletedTask;
     }

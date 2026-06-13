@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.InventoryReceipts.Commands.CloneInventoryReceipt;
 
-public sealed class CloneInventoryReceiptCommandValidator : AbstractValidator<CloneInventoryReceiptCommand>
+public class CloneInventoryReceiptCommandValidator : AbstractValidator<CloneInventoryReceiptCommand>
 {
     public CloneInventoryReceiptCommandValidator()
     {

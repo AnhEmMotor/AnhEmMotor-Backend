@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
 
-public sealed class GetActiveVariantLiteListForManagerQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetActiveVariantLiteListForManagerQuery, Result<PagedResult<ProductVariantLiteResponse>>>
+public class GetActiveVariantLiteListForManagerQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetActiveVariantLiteListForManagerQuery, Result<PagedResult<ProductVariantLiteResponse>>>
 {
     public async Task<Result<PagedResult<ProductVariantLiteResponse>>> Handle(
         GetActiveVariantLiteListForManagerQuery request,

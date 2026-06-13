@@ -64,3 +64,4 @@ public interface ISupplierReadRepository
 
     public Task<SupplierStatisticsResponse> GetStatisticsAsync(CancellationToken cancellationToken = default);
 }
+

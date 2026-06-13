@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Features.Outputs.Queries.GetPaymentLink
 {
-    public sealed class GetPaymentLinkQueryHandler(
+    public class GetPaymentLinkQueryHandler(
         IOutputReadRepository readRepository,
         IOutputUpdateRepository updateRepository,
         IUnitOfWork unitOfWork,

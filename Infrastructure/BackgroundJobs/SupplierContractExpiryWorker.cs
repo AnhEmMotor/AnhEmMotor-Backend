@@ -77,7 +77,7 @@ public class SupplierContractExpiryWorker(IServiceProvider serviceProvider) : Ba
             var alreadyLogged = await context.SupplierContractAuditLogs
                 .IgnoreQueryFilters()
                 .AnyAsync(al => al.SupplierContractId == contract.Id
-                    && al.Action == "ExpiryWarning"
+                    && string.Compare(al.Action, "ExpiryWarning") == 0
                     && al.CreatedAt > now.AddDays(-1), cancellationToken)
                 .ConfigureAwait(false);
 

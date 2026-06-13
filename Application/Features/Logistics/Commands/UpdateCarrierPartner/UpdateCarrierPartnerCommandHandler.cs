@@ -4,23 +4,24 @@ using Application.Interfaces.Repositories.CarrierPartner;
 using Application.ApiContracts.Logistics.CarrierSettings.Requests;
 using Domain.Entities.Logistics;
 using MediatR;
+using Application.Interfaces.Repositories;
 
 namespace Application.Features.Logistics.Commands.UpdateCarrierPartner;
 
 public class UpdateCarrierPartnerCommandHandler(
     ICarrierPartnerReadRepository carrierPartnerReadRepository,
     ICarrierPartnerUpdateRepository carrierPartnerUpdateRepository,
-    Application.Interfaces.Repositories.IUnitOfWork unitOfWork)
+   IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateCarrierPartnerCommand, bool>
 {
     public async Task<bool> Handle(UpdateCarrierPartnerCommand request, CancellationToken cancellationToken)
     {
-        var entity = await carrierPartnerReadRepository.GetByIdAsync(request.Id, cancellationToken);
+        var entity = await carrierPartnerReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (entity == null) return false;
 
         Apply(entity, request.Request);
         carrierPartnerUpdateRepository.Update(entity);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return true;
     }
 

@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.FinanceContracts.Commands.UpdateCavetState;
 
-public sealed class UpdateCavetStateCommandHandler(
+public class UpdateCavetStateCommandHandler(
     IUnitOfWork unitOfWork
 ) : IRequestHandler<UpdateCavetStateCommand>
 {

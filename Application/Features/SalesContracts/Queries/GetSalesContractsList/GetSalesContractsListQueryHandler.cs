@@ -6,14 +6,14 @@ using MediatR;
 
 namespace Application.Features.SalesContracts.Queries.GetSalesContractsList;
 
-public sealed class GetSalesContractsListQueryHandler(
+public class GetSalesContractsListQueryHandler(
     ISalesContractReadRepository readRepo) : IRequestHandler<GetSalesContractsListQuery, Result<PagedResult<SalesContractResponse>>>
 {
     public async Task<Result<PagedResult<SalesContractResponse>>> Handle(
         GetSalesContractsListQuery request,
         CancellationToken cancellationToken)
     {
-        var paged = await readRepo.GetPagedAsync(request.SieveModel ?? new(), cancellationToken);
+        var paged = await readRepo.GetPagedAsync(request.SieveModel ?? new(), cancellationToken).ConfigureAwait(false);
         return Result<PagedResult<SalesContractResponse>>.Success(paged);
     }
 }

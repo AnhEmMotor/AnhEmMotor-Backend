@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Features.SupplierContracts.Commands.CreateSupplierContract;
 
-public sealed class CreateSupplierContractCommandHandler(
+public class CreateSupplierContractCommandHandler(
     ISupplierContractReadRepository readRepo,
     ISupplierContractInsertRepository insertRepo,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateSupplierContractCommand, Result<SupplierContractResponse>>

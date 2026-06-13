@@ -6,7 +6,7 @@ using BrandEntity = Domain.Entities.Brand;
 
 namespace Application.Features.Brands.Mappings;
 
-public sealed class BrandMappingConfig : IRegister
+public class BrandMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {

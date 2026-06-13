@@ -24,3 +24,4 @@ public Task<Domain.Entities.RepairOrder?> GetByIdAsync(int id, CancellationToken
 public Task<List<Domain.Entities.RepairOrder>> GetByCustomerPhoneAsync(string phone, CancellationToken cancellationToken = default);
     }
 }
+

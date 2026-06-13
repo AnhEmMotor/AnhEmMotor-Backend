@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus
 {
-    public sealed class UpdateInventoryReceiptStatusCommandHandler(
+    public class UpdateInventoryReceiptStatusCommandHandler(
         IInventoryReceiptReadRepository readRepository,
         IInventoryReceiptUpdateRepository updateRepository,
         ICurrentUserContext currentUserContext,

@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.ProductQuotations.Commands.DeleteSupplierPrice
 {
-    public sealed class DeleteSupplierPriceCommandHandler(
+    public class DeleteSupplierPriceCommandHandler(
         IProductQuotationReadRepository quotationReadRepository,
         IProductQuotationDeleteRepository quotationDeleteRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<DeleteSupplierPriceCommand, Result<bool>>

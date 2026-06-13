@@ -4,7 +4,7 @@ using Mapster;
 
 namespace Application.Features.Vehicles.Mappings;
 
-public sealed class VehicleMappingConfig : IRegister
+public class VehicleMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {

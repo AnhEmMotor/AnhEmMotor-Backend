@@ -1,25 +1,27 @@
 using Application.Common.Models;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ContractTemplate;
 using Domain.Entities;
 using Domain.Primitives;
+using Mapster;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Commands.CloneContractTemplate;
 
-internal sealed class CloneContractTemplateCommandHandler(
+public class CloneContractTemplateCommandHandler(
     IContractTemplateReadRepository contractTemplateReadRepository,
     IContractTemplateInsertRepository contractTemplateInsertRepository,
     IContractTemplateUpdateRepository contractTemplateUpdateRepository,
-    Application.Interfaces.Repositories.IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork)
     : IRequestHandler<CloneContractTemplateCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(
         CloneContractTemplateCommand request,
         CancellationToken cancellationToken)
     {
-        var original = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken);
+        var original = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (original is null)
         {
@@ -42,7 +44,7 @@ internal sealed class CloneContractTemplateCommandHandler(
 
         contractTemplateUpdateRepository.Update(original);
         contractTemplateInsertRepository.Add(clone);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result<Guid>.Success(clone.Id);
     }

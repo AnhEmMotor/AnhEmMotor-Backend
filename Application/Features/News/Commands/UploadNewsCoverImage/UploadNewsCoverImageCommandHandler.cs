@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.News.Commands.UploadNewsCoverImage;
 
-public sealed class UploadNewsCoverImageCommandHandler(IFileInsertService fileInsertService) : IRequestHandler<UploadNewsCoverImageCommand, Result<UploadNewsCoverImageResponse>>
+public class UploadNewsCoverImageCommandHandler(IFileInsertService fileInsertService) : IRequestHandler<UploadNewsCoverImageCommand, Result<UploadNewsCoverImageResponse>>
 {
     public async Task<Result<UploadNewsCoverImageResponse>> Handle(
         UploadNewsCoverImageCommand request,

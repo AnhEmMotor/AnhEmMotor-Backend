@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.NewsCategories.Queries.GetNewsCategoryList;
 
-public sealed class GetNewsCategoryListQueryHandler(INewsCategoryReadRepository repository) : IRequestHandler<GetNewsCategoryListQuery, Result<PagedResult<NewsCategoryResponse>>>
+public class GetNewsCategoryListQueryHandler(INewsCategoryReadRepository repository) : IRequestHandler<GetNewsCategoryListQuery, Result<PagedResult<NewsCategoryResponse>>>
 {
     public async Task<Result<PagedResult<NewsCategoryResponse>>> Handle(
         GetNewsCategoryListQuery request,

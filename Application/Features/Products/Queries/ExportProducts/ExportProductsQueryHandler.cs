@@ -11,7 +11,7 @@ using System.Text;
 
 namespace Application.Features.Products.Queries.ExportProducts;
 
-public sealed class ExportProductsQueryHandler(IProductReadRepository repository) : IRequestHandler<ExportProductsQuery, Result<FileStreamResult>>
+public class ExportProductsQueryHandler(IProductReadRepository repository) : IRequestHandler<ExportProductsQuery, Result<FileStreamResult>>
 {
     public async Task<Result<FileStreamResult>> Handle(ExportProductsQuery request, CancellationToken cancellationToken)
     {

@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.FinanceContracts.Commands.UploadDisbursementEvidence;
 
-public sealed class UploadDisbursementEvidenceCommandHandler(
+public class UploadDisbursementEvidenceCommandHandler(
     IUnitOfWork unitOfWork
 ) : IRequestHandler<UploadDisbursementEvidenceCommand>
 {

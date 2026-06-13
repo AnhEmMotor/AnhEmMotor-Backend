@@ -80,3 +80,4 @@ public interface IProductReadRepository
         int variantId,
         CancellationToken cancellationToken);
 }
+

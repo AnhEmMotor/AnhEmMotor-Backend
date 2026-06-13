@@ -11,3 +11,4 @@ public interface IFileReadService
 
     public Task<Stream> ReadImageAsync(Stream InventoryReceiptStream, int? width, CancellationToken cancellationToken);
 }
+

@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.SalesContracts.Commands.CreateSalesContract;
 
-public sealed class CreateSalesContractCommand(CreateSalesContractRequest request) : IRequest<Result<SalesContractResponse>>
+public class CreateSalesContractCommand(CreateSalesContractRequest request) : IRequest<Result<SalesContractResponse>>
 {
     public int OrderId { get; } = request.OrderId;
     public string? SpecialTerms { get; init; } = request.SpecialTerms;

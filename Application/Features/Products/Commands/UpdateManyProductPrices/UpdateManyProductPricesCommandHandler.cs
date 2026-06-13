@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateManyProductPrices;
 
-public sealed class UpdateManyProductPricesCommandHandler(
+public class UpdateManyProductPricesCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyProductPricesCommand, Result<List<int>?>>

@@ -44,11 +44,13 @@ namespace WebAPI.Controllers
         /// <summary>
         /// Retrieves all expenses ordered by date descending.
         /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A list of expenses.</returns>
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            var expenses = await _expenseReadRepository.GetAllAsync();
+            var expenses = await _expenseReadRepository.GetAllAsync(cancellationToken)
+                .ConfigureAwait(false);
             return Ok(expenses);
         }
 
@@ -56,14 +58,16 @@ namespace WebAPI.Controllers
         /// Creates a new expense.
         /// </summary>
         /// <param name="expense">The expense to create.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The created expense.</returns>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Expense expense)
+        public async Task<IActionResult> Create([FromBody] Expense expense, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             _expenseInsertRepository.Add(expense);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return Ok(expense);
         }
@@ -72,15 +76,18 @@ namespace WebAPI.Controllers
         /// Deletes an expense by its identifier.
         /// </summary>
         /// <param name="id">The identifier of the expense to delete.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>An empty result if successful, or NotFound if the expense does not exist.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var expense = await _expenseReadRepository.GetByIdAsync(id);
+            var expense = await _expenseReadRepository.GetByIdAsync(id, cancellationToken)
+                .ConfigureAwait(false);
             if (expense == null) return NotFound();
 
             _expenseDeleteRepository.Remove(expense);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return Ok();
         }

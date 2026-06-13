@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStatusList;
 
-public sealed class GetInventoryReceiptStatusListQueryHandler : IRequestHandler<GetInventoryReceiptStatusListQuery, Result<Dictionary<string, string>>>
+public class GetInventoryReceiptStatusListQueryHandler : IRequestHandler<GetInventoryReceiptStatusListQuery, Result<Dictionary<string, string>>>
 {
     private static readonly Dictionary<string, string> Statuses = new()
     {

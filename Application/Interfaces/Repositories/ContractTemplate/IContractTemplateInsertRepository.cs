@@ -5,6 +5,7 @@ namespace Application.Interfaces.Repositories.ContractTemplate;
 
 public interface IContractTemplateInsertRepository
 {
-    void Add(ContractTemplateEntity contractTemplate);
-    void AddAuditLog(ContractTemplateAuditLogEntity auditLog);
+    public void Add(ContractTemplateEntity contractTemplate);
+    public void AddAuditLog(ContractTemplateAuditLogEntity auditLog);
 }
+

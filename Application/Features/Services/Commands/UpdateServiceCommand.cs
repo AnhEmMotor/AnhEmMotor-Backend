@@ -7,7 +7,7 @@ namespace Application.Features.Services.Commands.UpdateService;
 /// <summary>
 /// Lệnh yêu cầu cập nhật thông tin một dịch vụ hiện có.
 /// </summary>
-public sealed class UpdateServiceCommand : IRequest<Result<ServiceResponse>>
+public class UpdateServiceCommand : IRequest<Result<ServiceResponse>>
 {
     /// <summary>
     /// Mã định danh của dịch vụ cần cập nhật.

@@ -4,5 +4,6 @@ namespace Application.Interfaces.Repositories.Expense;
 
 public interface IExpenseDeleteRepository
 {
-    void Remove(ExpenseEntity expense);
+    public void Remove(ExpenseEntity expense);
 }
+

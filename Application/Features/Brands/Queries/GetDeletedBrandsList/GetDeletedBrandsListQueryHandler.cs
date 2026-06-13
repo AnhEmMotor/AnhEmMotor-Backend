@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Brands.Queries.GetDeletedBrandsList;
 
-public sealed class GetDeletedBrandsListQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetDeletedBrandsListQuery, Result<PagedResult<BrandResponse>>>
+public class GetDeletedBrandsListQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetDeletedBrandsListQuery, Result<PagedResult<BrandResponse>>>
 {
     public async Task<Result<PagedResult<BrandResponse>>> Handle(
         GetDeletedBrandsListQuery request,

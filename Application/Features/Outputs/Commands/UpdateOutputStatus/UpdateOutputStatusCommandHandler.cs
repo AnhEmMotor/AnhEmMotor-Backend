@@ -18,7 +18,7 @@ using VehicleEntity = Domain.Entities.Vehicle;
 
 namespace Application.Features.Outputs.Commands.UpdateOutputStatus;
 
-public sealed class UpdateOutputStatusCommandHandler(
+public class UpdateOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
     ICommissionUpdateRepository commissionUpdateRepository,

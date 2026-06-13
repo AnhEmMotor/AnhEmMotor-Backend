@@ -1,7 +1,7 @@
 using Application.Interfaces.Repositories.Contact;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
-using DomainEntities = global::Domain.Entities;
+using DomainEntities = Domain.Entities;
 
 namespace Infrastructure.Repositories.Contact.CustomerFeedback;
 
@@ -24,12 +24,14 @@ public class CustomerFeedbackRepository(ApplicationDBContext context) : ICustome
 
     public Task AddAsync(DomainEntities.CustomerFeedback entity, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         context.CustomerFeedbacks.Add(entity);
         return Task.CompletedTask;
     }
 
     public Task UpdateAsync(DomainEntities.CustomerFeedback entity, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         context.CustomerFeedbacks.Update(entity);
         return Task.CompletedTask;
     }

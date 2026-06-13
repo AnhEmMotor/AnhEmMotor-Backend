@@ -1,21 +1,21 @@
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Application.ApiContracts.Logistics.CarrierSettings.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.CarrierPartner;
 using Domain.Entities.Logistics;
 using MediatR;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Application.Features.Logistics.Queries.GetCarriers;
 
 public class GetCarriersQueryHandler(ICarrierPartnerReadRepository carrierPartnerReadRepository)
-    : IRequestHandler<GetCarriersQuery, GetCarriersResponse>
+    : IRequestHandler<GetCarriersQuery, Result<CarrierPartnerResponse>>
 {
-    public async Task<GetCarriersResponse> Handle(GetCarriersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<CarrierPartnerResponse>> Handle(GetCarriersQuery request, CancellationToken cancellationToken)
     {
-        // Note: async EF is available; using ToList + Task.FromResult for consistency.
-        var items = (await carrierPartnerReadRepository.GetAllAsync(cancellationToken))
-            .Select(x => new CarrierPartnerDto
+        var items = (await carrierPartnerReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false))
+            .Select(x => new CarrierPartnerItemResponse
             {
                 Id = x.Id,
                 CarrierCode = x.CarrierCode,
@@ -34,8 +34,10 @@ public class GetCarriersQueryHandler(ICarrierPartnerReadRepository carrierPartne
                 AllowOversizeCargo = x.AllowOversizeCargo,
             })
             .ToList();
-
-        return await Task.FromResult(new GetCarriersResponse { Items = items });
+        return Result<CarrierPartnerResponse>.Success(new CarrierPartnerResponse
+        {
+            Items = items
+        });
     }
 
     private static string MaskSecret(string? value)

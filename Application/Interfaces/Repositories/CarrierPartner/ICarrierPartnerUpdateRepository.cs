@@ -4,5 +4,6 @@ namespace Application.Interfaces.Repositories.CarrierPartner;
 
 public interface ICarrierPartnerUpdateRepository
 {
-    void Update(CarrierPartnerEntity carrierPartner);
+    public void Update(CarrierPartnerEntity carrierPartner);
 }
+

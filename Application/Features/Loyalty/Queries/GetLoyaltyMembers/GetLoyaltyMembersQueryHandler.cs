@@ -10,7 +10,7 @@ using System;
 
 namespace Application.Features.Loyalty.Queries.GetLoyaltyMembers
 {
-    public sealed class GetLoyaltyMembersQueryHandler(ILeadReadRepository leadRepository) : IRequestHandler<GetLoyaltyMembersQuery, Result<PagedResult<LoyaltyMemberResponse>>>
+    public class GetLoyaltyMembersQueryHandler(ILeadReadRepository leadRepository) : IRequestHandler<GetLoyaltyMembersQuery, Result<PagedResult<LoyaltyMemberResponse>>>
     {
         public async Task<Result<PagedResult<LoyaltyMemberResponse>>> Handle(
             GetLoyaltyMembersQuery request,

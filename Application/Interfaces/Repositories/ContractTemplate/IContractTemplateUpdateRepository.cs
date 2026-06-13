@@ -4,5 +4,6 @@ namespace Application.Interfaces.Repositories.ContractTemplate;
 
 public interface IContractTemplateUpdateRepository
 {
-    void Update(ContractTemplateEntity contractTemplate);
+    public void Update(ContractTemplateEntity contractTemplate);
 }
+

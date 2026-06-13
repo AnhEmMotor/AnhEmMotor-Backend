@@ -21,3 +21,4 @@ public Task<Domain.Entities.PlateDossier?> GetByIdAsync(int id, CancellationToke
 public Task<Domain.Entities.PlateDossier?> GetByOutputIdAsync(int outputId, CancellationToken cancellationToken = default);
     }
 }
+

@@ -4,5 +4,6 @@ namespace Application.Interfaces.Repositories.Expense;
 
 public interface IExpenseUpdateRepository
 {
-    void Update(ExpenseEntity expense);
+    public void Update(ExpenseEntity expense);
 }
+

@@ -13,7 +13,7 @@ public class TestCarrierConnectionCommandHandler(ICarrierPartnerReadRepository c
 {
     public async Task<TestCarrierConnectionResponse> Handle(TestCarrierConnectionCommand request, CancellationToken cancellationToken)
     {
-        var entity = await carrierPartnerReadRepository.GetByIdAsync(request.Id, cancellationToken);
+        var entity = await carrierPartnerReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (entity == null)
             return new TestCarrierConnectionResponse { IsSuccess = false, Message = "Không tìm thấy đối tác vận chuyển" };
 
@@ -22,11 +22,11 @@ public class TestCarrierConnectionCommandHandler(ICarrierPartnerReadRepository c
             return new TestCarrierConnectionResponse { IsSuccess = false, Message = "Thiếu ApiBaseUrl hoặc ApiToken" };
 
         // In real implementation: HTTP ping with provider SDK.
-        return await Task.FromResult(new TestCarrierConnectionResponse
+        return new TestCarrierConnectionResponse
         {
             IsSuccess = true,
             Message = "✓ Kết nối thành công (demo)"
-        });
+        };
     }
 }
 

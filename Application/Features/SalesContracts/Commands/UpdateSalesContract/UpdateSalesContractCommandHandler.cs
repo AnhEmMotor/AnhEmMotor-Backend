@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.SalesContracts.Commands.UpdateSalesContract;
 
-public sealed class UpdateSalesContractCommandHandler(
+public class UpdateSalesContractCommandHandler(
     ISalesContractReadRepository readRepo,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateSalesContractCommand, Result<SalesContractResponse>>
 {
@@ -16,7 +16,7 @@ public sealed class UpdateSalesContractCommandHandler(
         UpdateSalesContractCommand request,
         CancellationToken cancellationToken)
     {
-        var contract = await readRepo.GetByIdAsync(request.Id, cancellationToken);
+        var contract = await readRepo.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (contract == null)
             return Result<SalesContractResponse>.Failure("Không tìm thấy hợp đồng.");
 

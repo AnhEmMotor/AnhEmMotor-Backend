@@ -11,3 +11,4 @@ public interface IExternalAuthService
         string accessToken,
         CancellationToken cancellationToken);
 }
+

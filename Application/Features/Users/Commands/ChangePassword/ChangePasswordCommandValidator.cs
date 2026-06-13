@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.Users.Commands.ChangePassword;
 
-public sealed class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCommand>
+public class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCommand>
 {
     public ChangePasswordCommandValidator()
     {
