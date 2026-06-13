@@ -41,18 +41,10 @@ builder.Services
                 "CorsPolicy",
                 policy =>
                 {
-                    var rawOrigins = configuration["Cors:AllowedOrigins"];
-                    if (string.IsNullOrWhiteSpace(rawOrigins))
-                    {
-                        throw new InvalidOperationException("CORS AllowedOrigins is missing in appsettings.json.");
-                    }
-                    var allowedOrigins = rawOrigins.Split(';', StringSplitOptions.RemoveEmptyEntries);
-                    if (allowedOrigins.Any(origin => string.Compare(origin, "*") == 0))
-                    {
-                        throw new InvalidOperationException(
-                            "Wildcard '*' is not allowed when using AllowCredentials. Please specify exact origins.");
-                    }
-                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                    policy.SetIsOriginAllowed(origin => true)
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
                 });
         })
     .AddJwtAuthentication(configuration)
