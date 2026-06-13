@@ -18,7 +18,7 @@ namespace Domain.Entities
 
         [Required]
         [Column("Status", TypeName = "nvarchar(20)")]
-        public string Status { get; set; } = "Prepare"; // "Prepare", "TaxPaid", "PlateAssigned", "WaitingCard", "Completed"
+        public string Status { get; set; } = "Prepare";
 
         [Column("LicensePlate", TypeName = "nvarchar(50)")]
         public string LicensePlate { get; set; } = string.Empty;

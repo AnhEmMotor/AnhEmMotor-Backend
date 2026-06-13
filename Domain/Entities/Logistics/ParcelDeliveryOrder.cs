@@ -25,23 +25,23 @@ public class ParcelDeliveryOrder
 
     public DateTime? DeliveredAt { get; set; }
 
-    public decimal CodAmount { get; set; } // COD
+    public decimal CodAmount { get; set; }
 
-    public decimal ShippingCost { get; set; } // chi phí ship thực tế
+    public decimal ShippingCost { get; set; }
 
-    public DateTime? InspectedAt { get; set; } // hoàn đã khui hộp chưa
+    public DateTime? InspectedAt { get; set; }
 
-    public string? ReturnReason { get; set; } // Lý do hoàn từ hệ thống
+    public string? ReturnReason { get; set; }
 
-    public string? BoxCondition { get; set; } // Tình trạng vỏ hộp/bao bì
+    public string? BoxCondition { get; set; }
 
-    public string? ProductCondition { get; set; } // Tình trạng phụ tùng bên trong
+    public string? ProductCondition { get; set; }
 
-    public string? ReturnProofImage { get; set; } // Ảnh bằng chứng
+    public string? ReturnProofImage { get; set; }
 
-    public string? ReturnInternalNote { get; set; } // Ghi chú nội bộ
+    public string? ReturnInternalNote { get; set; }
 
-    public string? ReturnAction { get; set; } // Hành động: Restock, Defect, Refund
+    public string? ReturnAction { get; set; }
 
     [Required]
     public string CustomerPhone { get; set; } = string.Empty;
@@ -53,6 +53,8 @@ public class ParcelDeliveryOrder
 
     public ICollection<ParcelDeliveryOrderItem> Items { get; set; } = [];
 
-    public ParcelDeliveryOrder() { }
+    public ParcelDeliveryOrder()
+    {
+    }
 }
 

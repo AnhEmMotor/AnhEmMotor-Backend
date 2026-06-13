@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -11,10 +11,7 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ContactReply_Users_RepliedById",
-                table: "ContactReply");
-
+            migrationBuilder.DropForeignKey(name: "FK_ContactReply_Users_RepliedById", table: "ContactReply");
             migrationBuilder.AlterColumn<Guid>(
                 name: "RepliedById",
                 table: "ContactReply",
@@ -22,20 +19,17 @@ namespace Infrastructure.Migrations
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uniqueidentifier");
-
             migrationBuilder.AddColumn<bool>(
                 name: "IsInternal",
                 table: "ContactReply",
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
-
             migrationBuilder.CreateTable(
                 name: "CarrierPartners",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     CarrierCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -45,7 +39,11 @@ namespace Infrastructure.Migrations
                     WebhookSecret = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WebhookEndpointUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AutoSyncPricing = table.Column<bool>(type: "bit", nullable: false),
-                    MaxParcelWeightKg = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    MaxParcelWeightKg = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
                     AllowLiquidCargo = table.Column<bool>(type: "bit", nullable: false),
                     AllowOversizeCargo = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -55,7 +53,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_CarrierPartners", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ContractTemplates",
                 columns: table => new
@@ -79,13 +76,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_ContractTemplates", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "CurrentUnreconciledCods",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Value = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -93,13 +88,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_CurrentUnreconciledCods", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "CustomerFeedback",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ContactId = table.Column<int>(type: "int", nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
                     FeedbackArea = table.Column<string>(type: "nvarchar(50)", nullable: false),
@@ -121,13 +114,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Expenses",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     ExpenseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -140,7 +131,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Expenses", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "FinanceContracts",
                 columns: table => new
@@ -163,13 +153,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_FinanceContracts", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "JobApplication",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ContactId = table.Column<int>(type: "int", nullable: false),
                     FullName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", nullable: false),
@@ -192,13 +180,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ParcelDeliveryOrders",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     TrackingNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Carrier = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -207,7 +193,11 @@ namespace Infrastructure.Migrations
                     ExpectedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeliveredAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CodAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    ShippingCost = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    ShippingCost = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
                     InspectedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ReturnReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BoxCondition = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -223,13 +213,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_ParcelDeliveryOrders", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "PlateDossier",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     OutputId = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(20)", nullable: false),
                     LicensePlate = table.Column<string>(type: "nvarchar(50)", nullable: false),
@@ -251,13 +239,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "RepairOrder",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     VehicleId = table.Column<int>(type: "int", nullable: true),
                     CustomerName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     CustomerPhone = table.Column<string>(type: "nvarchar(20)", nullable: false),
@@ -292,7 +278,6 @@ namespace Infrastructure.Migrations
                         principalTable: "Vehicle",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "SalesContracts",
                 columns: table => new
@@ -343,13 +328,11 @@ namespace Infrastructure.Migrations
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ServiceCategories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -360,7 +343,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_ServiceCategories", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierContracts",
                 columns: table => new
@@ -400,7 +382,6 @@ namespace Infrastructure.Migrations
                         principalTable: "Supplier",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierDebtSettlements",
                 columns: table => new
@@ -425,7 +406,6 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierFinances",
                 columns: table => new
@@ -446,13 +426,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupportRequest",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ContactId = table.Column<int>(type: "int", nullable: false),
                     Subject = table.Column<string>(type: "nvarchar(200)", nullable: false),
                     Category = table.Column<string>(type: "nvarchar(50)", nullable: false),
@@ -475,7 +453,6 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ContractTemplateAuditLog",
                 columns: table => new
@@ -502,13 +479,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ParcelDeliveryOrderItems",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ParcelDeliveryOrderId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -530,13 +505,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Services",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BasePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -557,7 +530,6 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierContractAuditLog",
                 columns: table => new
@@ -584,7 +556,6 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierContractItem",
                 columns: table => new
@@ -613,13 +584,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "RepairOrderDetail",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     RepairOrderId = table.Column<int>(type: "int", nullable: false),
                     ServiceId = table.Column<int>(type: "int", nullable: true),
                     ProductVariantId = table.Column<int>(type: "int", nullable: true),
@@ -652,13 +621,11 @@ namespace Infrastructure.Migrations
                         principalTable: "Services",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ServiceBooking",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ServiceId = table.Column<int>(type: "int", nullable: false),
                     VehicleId = table.Column<int>(type: "int", nullable: true),
                     CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -706,13 +673,11 @@ namespace Infrastructure.Migrations
                         principalTable: "Vehicle",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ServiceEvaluation",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ServiceBookingId = table.Column<int>(type: "int", nullable: false),
                     ContactId = table.Column<int>(type: "int", nullable: false),
                     Criteria = table.Column<string>(type: "nvarchar(30)", nullable: false),
@@ -743,137 +708,101 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_ContractTemplateAuditLog_ContractTemplateId",
                 table: "ContractTemplateAuditLog",
                 column: "ContractTemplateId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_CustomerFeedback_ContactId",
                 table: "CustomerFeedback",
                 column: "ContactId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_JobApplication_ContactId",
                 table: "JobApplication",
                 column: "ContactId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ParcelDeliveryOrderItems_ParcelDeliveryOrderId",
                 table: "ParcelDeliveryOrderItems",
                 column: "ParcelDeliveryOrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlateDossier_OutputId",
-                table: "PlateDossier",
-                column: "OutputId");
-
+            migrationBuilder.CreateIndex(name: "IX_PlateDossier_OutputId", table: "PlateDossier", column: "OutputId");
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrder_TechnicianId",
                 table: "RepairOrder",
                 column: "TechnicianId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RepairOrder_VehicleId",
-                table: "RepairOrder",
-                column: "VehicleId");
-
+            migrationBuilder.CreateIndex(name: "IX_RepairOrder_VehicleId", table: "RepairOrder", column: "VehicleId");
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_ProductVariantId",
                 table: "RepairOrderDetail",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_RepairOrderId",
                 table: "RepairOrderDetail",
                 column: "RepairOrderId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_ServiceId",
                 table: "RepairOrderDetail",
                 column: "ServiceId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SalesContracts_CustomerId",
                 table: "SalesContracts",
                 column: "CustomerId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SalesContracts_OutputId",
                 table: "SalesContracts",
                 column: "OutputId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_CustomerId",
                 table: "ServiceBooking",
                 column: "CustomerId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_ServiceId",
                 table: "ServiceBooking",
                 column: "ServiceId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_TechnicianId",
                 table: "ServiceBooking",
                 column: "TechnicianId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_VehicleId",
                 table: "ServiceBooking",
                 column: "VehicleId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceEvaluation_ContactId",
                 table: "ServiceEvaluation",
                 column: "ContactId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceEvaluation_ServiceBookingId",
                 table: "ServiceEvaluation",
                 column: "ServiceBookingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Services_CategoryId",
-                table: "Services",
-                column: "CategoryId");
-
+            migrationBuilder.CreateIndex(name: "IX_Services_CategoryId", table: "Services", column: "CategoryId");
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContractAuditLog_SupplierContractId",
                 table: "SupplierContractAuditLog",
                 column: "SupplierContractId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContractItem_ProductVariantId",
                 table: "SupplierContractItem",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContractItem_SupplierContractId",
                 table: "SupplierContractItem",
                 column: "SupplierContractId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContracts_ParentContractId",
                 table: "SupplierContracts",
                 column: "ParentContractId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContracts_SupplierId",
                 table: "SupplierContracts",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierDebtSettlements_SupplierId",
                 table: "SupplierDebtSettlements",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupportRequest_ContactId",
                 table: "SupportRequest",
                 column: "ContactId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ContactReply_Users_RepliedById",
                 table: "ContactReply",
@@ -885,86 +814,32 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ContactReply_Users_RepliedById",
-                table: "ContactReply");
-
-            migrationBuilder.DropTable(
-                name: "CarrierPartners");
-
-            migrationBuilder.DropTable(
-                name: "ContractTemplateAuditLog");
-
-            migrationBuilder.DropTable(
-                name: "CurrentUnreconciledCods");
-
-            migrationBuilder.DropTable(
-                name: "CustomerFeedback");
-
-            migrationBuilder.DropTable(
-                name: "Expenses");
-
-            migrationBuilder.DropTable(
-                name: "FinanceContracts");
-
-            migrationBuilder.DropTable(
-                name: "JobApplication");
-
-            migrationBuilder.DropTable(
-                name: "ParcelDeliveryOrderItems");
-
-            migrationBuilder.DropTable(
-                name: "PlateDossier");
-
-            migrationBuilder.DropTable(
-                name: "RepairOrderDetail");
-
-            migrationBuilder.DropTable(
-                name: "SalesContracts");
-
-            migrationBuilder.DropTable(
-                name: "ServiceEvaluation");
-
-            migrationBuilder.DropTable(
-                name: "SupplierContractAuditLog");
-
-            migrationBuilder.DropTable(
-                name: "SupplierContractItem");
-
-            migrationBuilder.DropTable(
-                name: "SupplierDebtSettlements");
-
-            migrationBuilder.DropTable(
-                name: "SupplierFinances");
-
-            migrationBuilder.DropTable(
-                name: "SupportRequest");
-
-            migrationBuilder.DropTable(
-                name: "ContractTemplates");
-
-            migrationBuilder.DropTable(
-                name: "ParcelDeliveryOrders");
-
-            migrationBuilder.DropTable(
-                name: "RepairOrder");
-
-            migrationBuilder.DropTable(
-                name: "ServiceBooking");
-
-            migrationBuilder.DropTable(
-                name: "SupplierContracts");
-
-            migrationBuilder.DropTable(
-                name: "Services");
-
-            migrationBuilder.DropTable(
-                name: "ServiceCategories");
-
-            migrationBuilder.DropColumn(
-                name: "IsInternal",
-                table: "ContactReply");
-
+            migrationBuilder.DropForeignKey(name: "FK_ContactReply_Users_RepliedById", table: "ContactReply");
+            migrationBuilder.DropTable(name: "CarrierPartners");
+            migrationBuilder.DropTable(name: "ContractTemplateAuditLog");
+            migrationBuilder.DropTable(name: "CurrentUnreconciledCods");
+            migrationBuilder.DropTable(name: "CustomerFeedback");
+            migrationBuilder.DropTable(name: "Expenses");
+            migrationBuilder.DropTable(name: "FinanceContracts");
+            migrationBuilder.DropTable(name: "JobApplication");
+            migrationBuilder.DropTable(name: "ParcelDeliveryOrderItems");
+            migrationBuilder.DropTable(name: "PlateDossier");
+            migrationBuilder.DropTable(name: "RepairOrderDetail");
+            migrationBuilder.DropTable(name: "SalesContracts");
+            migrationBuilder.DropTable(name: "ServiceEvaluation");
+            migrationBuilder.DropTable(name: "SupplierContractAuditLog");
+            migrationBuilder.DropTable(name: "SupplierContractItem");
+            migrationBuilder.DropTable(name: "SupplierDebtSettlements");
+            migrationBuilder.DropTable(name: "SupplierFinances");
+            migrationBuilder.DropTable(name: "SupportRequest");
+            migrationBuilder.DropTable(name: "ContractTemplates");
+            migrationBuilder.DropTable(name: "ParcelDeliveryOrders");
+            migrationBuilder.DropTable(name: "RepairOrder");
+            migrationBuilder.DropTable(name: "ServiceBooking");
+            migrationBuilder.DropTable(name: "SupplierContracts");
+            migrationBuilder.DropTable(name: "Services");
+            migrationBuilder.DropTable(name: "ServiceCategories");
+            migrationBuilder.DropColumn(name: "IsInternal", table: "ContactReply");
             migrationBuilder.AlterColumn<Guid>(
                 name: "RepliedById",
                 table: "ContactReply",
@@ -974,7 +849,6 @@ namespace Infrastructure.Migrations
                 oldClrType: typeof(Guid),
                 oldType: "uniqueidentifier",
                 oldNullable: true);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ContactReply_Users_RepliedById",
                 table: "ContactReply",

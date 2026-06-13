@@ -4,14 +4,14 @@ using Application.Common.Models;
 using Application.Features.ServiceWorkshopEvaluations.Commands.CreateServiceEvaluationReply;
 using Application.Features.ServiceWorkshopEvaluations.Commands.MarkServiceEvaluationProcessed;
 using Application.Features.ServiceWorkshopEvaluations.Commands.UpdateServiceEvaluationInternalNotes;
-using Application.Features.ServiceWorkshopEvaluations.Queries.GetServiceWorkshopEvaluations;
 using Application.Features.ServiceWorkshopEvaluations.Queries.GetServiceWorkshopEvaluationDetail;
-using Domain.Primitives;
-using Sieve.Models;
+using Application.Features.ServiceWorkshopEvaluations.Queries.GetServiceWorkshopEvaluations;
 using Asp.Versioning;
+using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 
 namespace WebAPI.Controllers.V1;
 
@@ -19,7 +19,7 @@ namespace WebAPI.Controllers.V1;
 /// Controller for managing service workshop evaluations.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ServiceWorkshopEvaluationsController"/> class.
+/// Initializes a new instance of the <see cref="ServiceWorkshopEvaluationsController" /> class.
 /// </remarks>
 /// <param name="mediator">The mediator service.</param>
 [ApiController]
@@ -27,7 +27,6 @@ namespace WebAPI.Controllers.V1;
 [Route("api/v{version:apiVersion}/[controller]")]
 public class ServiceWorkshopEvaluationsController(IMediator mediator) : ControllerBase
 {
-
     /// <summary>
     /// Retrieves a paged list of service workshop evaluations.
     /// </summary>
@@ -42,7 +41,6 @@ public class ServiceWorkshopEvaluationsController(IMediator mediator) : Controll
         CancellationToken cancellationToken = default)
     {
         var query = new GetServiceWorkshopEvaluationsQuery { SieveModel = sieveModel };
-
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
@@ -122,7 +120,6 @@ public class ServiceWorkshopEvaluationsController(IMediator mediator) : Controll
             EvaluationId = request.EvaluationId,
             InternalNotes = request.InternalNotes,
         };
-
         var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }

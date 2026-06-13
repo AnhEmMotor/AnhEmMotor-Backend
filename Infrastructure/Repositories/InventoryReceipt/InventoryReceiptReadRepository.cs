@@ -2,7 +2,6 @@ using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;

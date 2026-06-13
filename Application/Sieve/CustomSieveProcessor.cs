@@ -111,11 +111,11 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
     public IQueryable<ServiceEvaluation> Search(IQueryable<ServiceEvaluation> source, string op, string[] values)
     {
         var term = values[0];
-        return source.Where(e =>
-            e.Contact.FullName.Contains(term) ||
-            e.Contact.PhoneNumber.Contains(term) ||
-            e.Criteria.Contains(term) ||
-            e.ProcessingStatus.Contains(term));
+        return source.Where(
+            e => e.Contact.FullName.Contains(term) ||
+                e.Contact.PhoneNumber.Contains(term) ||
+                e.Criteria.Contains(term) ||
+                e.ProcessingStatus.Contains(term));
     }
 
     public IQueryable<Product> SafetyStandard(IQueryable<Product> source, string op, string[] values)

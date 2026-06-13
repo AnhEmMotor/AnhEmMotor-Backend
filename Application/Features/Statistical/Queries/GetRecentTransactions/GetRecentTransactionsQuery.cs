@@ -1,6 +1,5 @@
 using Application.ApiContracts.Statistical.Responses;
 using MediatR;
-using System.Collections.Generic;
 
 namespace Application.Features.Statistical.Queries.GetRecentTransactions;
 

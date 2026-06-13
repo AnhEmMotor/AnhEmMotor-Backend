@@ -10,7 +10,6 @@ public static class CarrierPartnerSeeder
     {
         if (await context.CarrierPartners.AnyAsync(cancellationToken).ConfigureAwait(false))
             return;
-
         var carriers = new List<CarrierPartner>
         {
             new()
@@ -64,29 +63,26 @@ public static class CarrierPartnerSeeder
                 Name = "Shipper Nhà",
                 IsActive = false,
                 Environment = "sandbox",
-                ApiBaseUrl = "",
-                ApiToken = "",
-                WebhookSecret = "",
-                WebhookEndpointUrl = "",
+                ApiBaseUrl = string.Empty,
+                ApiToken = string.Empty,
+                WebhookSecret = string.Empty,
+                WebhookEndpointUrl = string.Empty,
                 AutoSyncPricing = false,
                 MaxParcelWeightKg = 20,
                 AllowLiquidCargo = true,
                 AllowOversizeCargo = false,
             },
         };
-
         foreach (var carrier in carriers)
         {
             var existing = await context.CarrierPartners
                 .FirstOrDefaultAsync(c => string.Compare(c.CarrierCode, carrier.CarrierCode) == 0, cancellationToken)
                 .ConfigureAwait(false);
-
             if (existing == null)
             {
                 await context.CarrierPartners.AddAsync(carrier, cancellationToken).ConfigureAwait(false);
             }
         }
-
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }

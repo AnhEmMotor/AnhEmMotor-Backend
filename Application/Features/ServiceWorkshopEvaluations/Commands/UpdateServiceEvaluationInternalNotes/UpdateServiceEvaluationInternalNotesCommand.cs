@@ -6,6 +6,7 @@ namespace Application.Features.ServiceWorkshopEvaluations.Commands.UpdateService
 public record UpdateServiceEvaluationInternalNotesCommand : IRequest<Result<bool>>
 {
     public int EvaluationId { get; init; }
+
     public string InternalNotes { get; init; } = string.Empty;
 }
 

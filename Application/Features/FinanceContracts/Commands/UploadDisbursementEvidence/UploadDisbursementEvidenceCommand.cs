@@ -3,6 +3,8 @@ using MediatR;
 
 namespace Application.Features.FinanceContracts.Commands.UploadDisbursementEvidence;
 
-public sealed record UploadDisbursementEvidenceCommand(Guid FinanceContractId, UploadDisbursementEvidenceRequest Request, Guid CurrentUserId)
-    : IRequest;
+public sealed record UploadDisbursementEvidenceCommand(
+    Guid FinanceContractId,
+    UploadDisbursementEvidenceRequest Request,
+    Guid CurrentUserId) : IRequest;
 

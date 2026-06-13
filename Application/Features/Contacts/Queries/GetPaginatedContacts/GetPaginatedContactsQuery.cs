@@ -1,8 +1,4 @@
-using Application.ApiContracts.Contacts.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Contact;
-using Domain.Entities;
-using Domain.Enums;
 using Domain.Primitives;
 using MediatR;
 

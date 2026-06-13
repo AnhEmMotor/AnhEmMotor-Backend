@@ -14,5 +14,5 @@ public class GetServicesListQuery : IRequest<Result<PagedResult<ServiceResponse>
     /// <summary>
     /// Model chứa thông tin lọc, sắp xếp và phân trang của Sieve.
     /// </summary>
-    public SieveModel SieveModel { get; set; } = new ();
+    public SieveModel SieveModel { get; set; } = new();
 }

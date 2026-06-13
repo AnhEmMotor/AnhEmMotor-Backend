@@ -32,7 +32,7 @@ public class ParcelDeliveryOrderItem
 
     public bool IsPicked { get; set; }
 
-    public bool IsRestricted { get; set; } // e.g. contains Vehicle, restricted for delivery
-    
-    public bool IsOutOfStock { get; set; } // Warn if not enough physical stock
+    public bool IsRestricted { get; set; }
+
+    public bool IsOutOfStock { get; set; }
 }

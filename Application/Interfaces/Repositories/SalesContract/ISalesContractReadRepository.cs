@@ -1,5 +1,4 @@
 using Application.ApiContracts.SalesContracts.Responses;
-using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
 
@@ -15,8 +14,7 @@ public interface ISalesContractReadRepository
         Guid id,
         CancellationToken cancellationToken = default);
 
-    public Task<List<global::Domain.Entities.SalesContract>> GetAllAsync(
-        CancellationToken cancellationToken = default);
+    public Task<List<global::Domain.Entities.SalesContract>> GetAllAsync(CancellationToken cancellationToken = default);
 
     public Task<global::Domain.Entities.SalesContract?> GetByOrderIdAsync(
         int? orderId,

@@ -4,6 +4,5 @@ using MediatR;
 
 namespace Application.Features.FinanceContracts.Queries.GetFinanceContractDetail;
 
-public sealed record GetFinanceContractDetailQuery(GetFinanceContractDetailRequest Request, Guid CurrentUserId)
-    : IRequest<FinanceContractDetailResponse>;
+public sealed record GetFinanceContractDetailQuery(GetFinanceContractDetailRequest Request, Guid CurrentUserId) : IRequest<FinanceContractDetailResponse>;
 

@@ -1,7 +1,6 @@
 using Application.ApiContracts.Vehicle.Responses;
 using Application.Common.Models;
 using Domain.Constants;
-using Domain.Primitives;
 using MediatR;
 
 namespace Application.Features.Vehicles.Queries.GetVehiclePortfolio;

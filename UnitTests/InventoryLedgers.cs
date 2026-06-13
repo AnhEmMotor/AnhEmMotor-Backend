@@ -8,6 +8,7 @@ using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
+using MediatR;
 using Moq;
 using System;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
@@ -49,7 +50,7 @@ namespace UnitTests
                 null!,
                 _supplierDebtRepoMock.Object,
                 _unitOfWorkMock.Object,
-                new Mock<MediatR.IPublisher>().Object);
+                new Mock<IPublisher>().Object);
             var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "approve" };
             var existingReceipt = new InventoryReceiptEntity
             {
@@ -96,7 +97,7 @@ namespace UnitTests
                 null!,
                 _supplierDebtRepoMock.Object,
                 _unitOfWorkMock.Object,
-                new Mock<MediatR.IPublisher>().Object);
+                new Mock<IPublisher>().Object);
             var command = new UpdateInventoryReceiptStatusCommand { Id = 1, StatusId = "approve" };
             var existingReceipt = new InventoryReceiptEntity
             {
@@ -144,7 +145,7 @@ namespace UnitTests
                 null!,
                 _supplierDebtRepoMock.Object,
                 _unitOfWorkMock.Object,
-                new Mock<MediatR.IPublisher>().Object);
+                new Mock<IPublisher>().Object);
             var command = new UpdateInventoryReceiptStatusCommand { Id = 42, StatusId = "approve" };
             var existingReceipt = new InventoryReceiptEntity
             {

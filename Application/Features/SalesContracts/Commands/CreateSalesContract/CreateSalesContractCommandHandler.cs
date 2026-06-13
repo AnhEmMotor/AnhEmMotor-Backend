@@ -19,18 +19,14 @@ public class CreateSalesContractCommandHandler(
         CancellationToken cancellationToken)
     {
         var contractNumber = $"HDMB-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString()[..8]}";
-
         var entity = request.Adapt<SalesContract>();
         entity.ContractNumber = contractNumber;
         entity.Status = SalesContractStatus.Draft;
-
         insertRepo.Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var created = await readRepo.GetByIdAsync(entity.Id, cancellationToken).ConfigureAwait(false);
         if (created == null)
             return Result<SalesContractResponse>.Failure("Không thể tạo hợp đồng.");
-
         return Result<SalesContractResponse>.Success(created.Adapt<SalesContractResponse>());
     }
 }

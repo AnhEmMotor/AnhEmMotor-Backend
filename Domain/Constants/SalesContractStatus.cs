@@ -16,7 +16,6 @@ public static class SalesContractStatus
         {
             return false;
         }
-
         return AllowedValues.Contains(value, StringComparer.OrdinalIgnoreCase);
     }
 }

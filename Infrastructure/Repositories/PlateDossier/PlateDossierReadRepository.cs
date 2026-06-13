@@ -8,14 +8,10 @@ using Sieve.Models;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.PlateDossier
 {
-    public class PlateDossierReadRepository(
-        ApplicationDBContext context,
-        ISievePaginator paginator) : IPlateDossierReadRepository
+    public class PlateDossierReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IPlateDossierReadRepository
     {
         public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
             SieveModel sieveModel,
@@ -28,21 +24,27 @@ namespace Infrastructure.Repositories.PlateDossier
             {
                 query = query.Where(filter);
             }
-            return paginator.ApplyAsync<Domain.Entities.PlateDossier, TResponse>(query, sieveModel, mode, cancellationToken);
+            return paginator.ApplyAsync<Domain.Entities.PlateDossier, TResponse>(
+                query,
+                sieveModel,
+                mode,
+                cancellationToken);
         }
 
         public Task<Domain.Entities.PlateDossier?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             return context.PlateDossiers
                 .Include(p => p.Output)
-                    .ThenInclude(o => o.OutputInfos)
-                        .ThenInclude(oi => oi.ProductVariantColor)
-                            .ThenInclude(pvc => pvc!.ProductVariant)
-                                .ThenInclude(pv => pv!.Product)
+                .ThenInclude(o => o.OutputInfos)
+                .ThenInclude(oi => oi.ProductVariantColor)
+                .ThenInclude(pvc => pvc!.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         }
 
-        public Task<Domain.Entities.PlateDossier?> GetByOutputIdAsync(int outputId, CancellationToken cancellationToken = default)
+        public Task<Domain.Entities.PlateDossier?> GetByOutputIdAsync(
+            int outputId,
+            CancellationToken cancellationToken = default)
         {
             return context.PlateDossiers
                 .Include(p => p.Output)
@@ -53,8 +55,8 @@ namespace Infrastructure.Repositories.PlateDossier
         {
             return context.GetQuery<Domain.Entities.PlateDossier>(mode)
                 .Include(p => p.Output)
-                    .ThenInclude(o => o.OutputInfos)
-                        .ThenInclude(oi => oi.ProductVariant);
+                .ThenInclude(o => o.OutputInfos)
+                .ThenInclude(oi => oi.ProductVariant);
         }
     }
 }

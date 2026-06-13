@@ -1,19 +1,15 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories.ContractTemplate;
 using Domain.Entities;
-using Domain.Primitives;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Commands.CreateContractTemplate;
 
-public class CreateContractTemplateCommandHandler(IContractTemplateInsertRepository contractTemplateInsertRepository, Application.Interfaces.Repositories.IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateContractTemplateCommand, Result<Guid>>
+public class CreateContractTemplateCommandHandler(
+    IContractTemplateInsertRepository contractTemplateInsertRepository,
+    Application.Interfaces.Repositories.IUnitOfWork unitOfWork) : IRequestHandler<CreateContractTemplateCommand, Result<Guid>>
 {
-    public async Task<Result<Guid>> Handle(
-        CreateContractTemplateCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateContractTemplateCommand request, CancellationToken cancellationToken)
     {
         var entity = new ContractTemplate
         {
@@ -26,10 +22,8 @@ public class CreateContractTemplateCommandHandler(IContractTemplateInsertReposit
             DynamicFields = request.Request.DynamicFields,
             IsActive = true
         };
-
         contractTemplateInsertRepository.Add(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result<Guid>.Success(entity.Id);
     }
 }

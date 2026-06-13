@@ -3,8 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.RepairOrder;
 using Domain.Entities;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.RepairOrders.Commands.CreateRepairOrder
 {
@@ -27,10 +25,8 @@ namespace Application.Features.RepairOrders.Commands.CreateRepairOrder
                 PartsCost = 0,
                 TotalAmount = 0
             };
-
             repairOrderUpdateRepository.Add(repairOrder);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return Result<int>.Success(repairOrder.Id);
         }
     }

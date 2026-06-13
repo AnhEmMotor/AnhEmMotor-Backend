@@ -21,7 +21,10 @@ public class TrackingMilestoneResponse
     public bool IsCurrentLocation { get; set; }
 
     public bool IsStuck { get; set; }
+
     public string? Location { get; set; }
+
     public bool IsCurrent { get; set; }
-    public string? StatusType { get; set; } // e.g. "Completed", "InTransit", "Pending"
+
+    public string? StatusType { get; set; }
 }

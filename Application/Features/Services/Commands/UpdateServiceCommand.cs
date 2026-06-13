@@ -2,7 +2,7 @@ using Application.ApiContracts.Service.Responses;
 using Application.Common.Models;
 using MediatR;
 
-namespace Application.Features.Services.Commands.UpdateService;
+namespace Application.Features.Services.Commands;
 
 /// <summary>
 /// Lệnh yêu cầu cập nhật thông tin một dịch vụ hiện có.

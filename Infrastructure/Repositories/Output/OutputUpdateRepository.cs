@@ -5,8 +5,8 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
-using OutputEntity = Domain.Entities.Output;
 using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
+using OutputEntity = Domain.Entities.Output;
 
 namespace Infrastructure.Repositories.Output
 {

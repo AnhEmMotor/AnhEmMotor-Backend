@@ -1,7 +1,6 @@
-using System;
-using System.Collections.Generic;
 using Application.ApiContracts.Logistics.Responses;
 using MediatR;
+using System;
 
 namespace Application.Features.Logistics.Queries.GetShipmentTracking
 {
@@ -9,8 +8,4 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
     {
         public string? TrackingNumberOrPhone { get; set; }
     }
-
-   
-
-    
 }

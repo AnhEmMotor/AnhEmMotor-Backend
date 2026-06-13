@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -12,10 +12,7 @@ namespace Infrastructure.MySqlMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ContactReply_Users_RepliedById",
-                table: "ContactReply");
-
+            migrationBuilder.DropForeignKey(name: "FK_ContactReply_Users_RepliedById", table: "ContactReply");
             migrationBuilder.AlterColumn<Guid>(
                 name: "RepliedById",
                 table: "ContactReply",
@@ -25,14 +22,12 @@ namespace Infrastructure.MySqlMigrations
                 oldClrType: typeof(Guid),
                 oldType: "char(36)")
                 .OldAnnotation("Relational:Collation", "ascii_general_ci");
-
             migrationBuilder.AddColumn<bool>(
                 name: "IsInternal",
                 table: "ContactReply",
                 type: "tinyint(1)",
                 nullable: false,
                 defaultValue: false);
-
             migrationBuilder.CreateTable(
                 name: "CarrierPartners",
                 columns: table => new
@@ -55,7 +50,11 @@ namespace Infrastructure.MySqlMigrations
                     WebhookEndpointUrl = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     AutoSyncPricing = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    MaxParcelWeightKg = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    MaxParcelWeightKg = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
                     AllowLiquidCargo = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     AllowOversizeCargo = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -66,7 +65,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_CarrierPartners", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ContractTemplates",
                 columns: table => new
@@ -96,7 +94,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_ContractTemplates", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "CurrentUnreconciledCods",
                 columns: table => new
@@ -111,7 +108,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_CurrentUnreconciledCods", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "CustomerFeedback",
                 columns: table => new
@@ -145,7 +141,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Expenses",
                 columns: table => new
@@ -157,8 +152,7 @@ namespace Infrastructure.MySqlMigrations
                     Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     ExpenseDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Category = table.Column<int>(type: "int", nullable: false),
-                    Note = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Note = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
@@ -167,7 +161,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_Expenses", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "FinanceContracts",
                 columns: table => new
@@ -195,7 +188,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_FinanceContracts", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "JobApplication",
                 columns: table => new
@@ -232,7 +224,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ParcelDeliveryOrders",
                 columns: table => new
@@ -250,7 +241,11 @@ namespace Infrastructure.MySqlMigrations
                     ExpectedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     DeliveredAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CodAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    ShippingCost = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    ShippingCost = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
                     InspectedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     ReturnReason = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -276,7 +271,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_ParcelDeliveryOrders", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "PlateDossier",
                 columns: table => new
@@ -308,7 +302,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "RepairOrder",
                 columns: table => new
@@ -357,7 +350,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "SalesContracts",
                 columns: table => new
@@ -408,8 +400,7 @@ namespace Infrastructure.MySqlMigrations
                     SignedDate = table.Column<long>(type: "bigint", nullable: true),
                     ScannedFileUrl = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Note = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Note = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
                     DeletedAt = table.Column<long>(type: "bigint", nullable: true)
@@ -429,7 +420,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ServiceCategories",
                 columns: table => new
@@ -449,7 +439,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_ServiceCategories", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "SupplierContracts",
                 columns: table => new
@@ -477,7 +466,10 @@ namespace Infrastructure.MySqlMigrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     MinimumVolumePerMonth = table.Column<int>(type: "int", nullable: true),
                     DiscountRate = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
-                    ParentContractId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    ParentContractId = table.Column<Guid>(
+                        type: "char(36)",
+                        nullable: true,
+                        collation: "ascii_general_ci"),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
                     DeletedAt = table.Column<long>(type: "bigint", nullable: true)
@@ -497,7 +489,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "SupplierDebtSettlements",
                 columns: table => new
@@ -525,7 +516,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "SupplierFinances",
                 columns: table => new
@@ -547,7 +537,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "SupportRequest",
                 columns: table => new
@@ -583,13 +572,15 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ContractTemplateAuditLog",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ContractTemplateId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ContractTemplateId = table.Column<Guid>(
+                        type: "char(36)",
+                        nullable: false,
+                        collation: "ascii_general_ci"),
                     Action = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Details = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
@@ -617,7 +608,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ParcelDeliveryOrderItems",
                 columns: table => new
@@ -628,8 +618,7 @@ namespace Infrastructure.MySqlMigrations
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     ProductName = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Sku = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Sku = table.Column<string>(type: "longtext", nullable: false).Annotation("MySql:CharSet", "utf8mb4"),
                     ThumbnailUrl = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ShelfLocation = table.Column<string>(type: "longtext", nullable: false)
@@ -650,7 +639,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Services",
                 columns: table => new
@@ -680,13 +668,15 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "SupplierContractAuditLog",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SupplierContractId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    SupplierContractId = table.Column<Guid>(
+                        type: "char(36)",
+                        nullable: false,
+                        collation: "ascii_general_ci"),
                     Action = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Details = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
@@ -714,13 +704,15 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "SupplierContractItem",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SupplierContractId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    SupplierContractId = table.Column<Guid>(
+                        type: "char(36)",
+                        nullable: false,
+                        collation: "ascii_general_ci"),
                     ProductVariantId = table.Column<int>(type: "int", nullable: false),
                     WholesalePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
@@ -744,7 +736,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "RepairOrderDetail",
                 columns: table => new
@@ -786,7 +777,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ServiceBooking",
                 columns: table => new
@@ -848,7 +838,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ServiceEvaluation",
                 columns: table => new
@@ -891,137 +880,101 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ContractTemplateAuditLog_ContractTemplateId",
                 table: "ContractTemplateAuditLog",
                 column: "ContractTemplateId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_CustomerFeedback_ContactId",
                 table: "CustomerFeedback",
                 column: "ContactId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_JobApplication_ContactId",
                 table: "JobApplication",
                 column: "ContactId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ParcelDeliveryOrderItems_ParcelDeliveryOrderId",
                 table: "ParcelDeliveryOrderItems",
                 column: "ParcelDeliveryOrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlateDossier_OutputId",
-                table: "PlateDossier",
-                column: "OutputId");
-
+            migrationBuilder.CreateIndex(name: "IX_PlateDossier_OutputId", table: "PlateDossier", column: "OutputId");
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrder_TechnicianId",
                 table: "RepairOrder",
                 column: "TechnicianId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RepairOrder_VehicleId",
-                table: "RepairOrder",
-                column: "VehicleId");
-
+            migrationBuilder.CreateIndex(name: "IX_RepairOrder_VehicleId", table: "RepairOrder", column: "VehicleId");
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_ProductVariantId",
                 table: "RepairOrderDetail",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_RepairOrderId",
                 table: "RepairOrderDetail",
                 column: "RepairOrderId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_ServiceId",
                 table: "RepairOrderDetail",
                 column: "ServiceId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SalesContracts_CustomerId",
                 table: "SalesContracts",
                 column: "CustomerId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SalesContracts_OutputId",
                 table: "SalesContracts",
                 column: "OutputId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_CustomerId",
                 table: "ServiceBooking",
                 column: "CustomerId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_ServiceId",
                 table: "ServiceBooking",
                 column: "ServiceId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_TechnicianId",
                 table: "ServiceBooking",
                 column: "TechnicianId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_VehicleId",
                 table: "ServiceBooking",
                 column: "VehicleId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceEvaluation_ContactId",
                 table: "ServiceEvaluation",
                 column: "ContactId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceEvaluation_ServiceBookingId",
                 table: "ServiceEvaluation",
                 column: "ServiceBookingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Services_CategoryId",
-                table: "Services",
-                column: "CategoryId");
-
+            migrationBuilder.CreateIndex(name: "IX_Services_CategoryId", table: "Services", column: "CategoryId");
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContractAuditLog_SupplierContractId",
                 table: "SupplierContractAuditLog",
                 column: "SupplierContractId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContractItem_ProductVariantId",
                 table: "SupplierContractItem",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContractItem_SupplierContractId",
                 table: "SupplierContractItem",
                 column: "SupplierContractId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContracts_ParentContractId",
                 table: "SupplierContracts",
                 column: "ParentContractId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContracts_SupplierId",
                 table: "SupplierContracts",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierDebtSettlements_SupplierId",
                 table: "SupplierDebtSettlements",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupportRequest_ContactId",
                 table: "SupportRequest",
                 column: "ContactId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ContactReply_Users_RepliedById",
                 table: "ContactReply",
@@ -1033,86 +986,32 @@ namespace Infrastructure.MySqlMigrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ContactReply_Users_RepliedById",
-                table: "ContactReply");
-
-            migrationBuilder.DropTable(
-                name: "CarrierPartners");
-
-            migrationBuilder.DropTable(
-                name: "ContractTemplateAuditLog");
-
-            migrationBuilder.DropTable(
-                name: "CurrentUnreconciledCods");
-
-            migrationBuilder.DropTable(
-                name: "CustomerFeedback");
-
-            migrationBuilder.DropTable(
-                name: "Expenses");
-
-            migrationBuilder.DropTable(
-                name: "FinanceContracts");
-
-            migrationBuilder.DropTable(
-                name: "JobApplication");
-
-            migrationBuilder.DropTable(
-                name: "ParcelDeliveryOrderItems");
-
-            migrationBuilder.DropTable(
-                name: "PlateDossier");
-
-            migrationBuilder.DropTable(
-                name: "RepairOrderDetail");
-
-            migrationBuilder.DropTable(
-                name: "SalesContracts");
-
-            migrationBuilder.DropTable(
-                name: "ServiceEvaluation");
-
-            migrationBuilder.DropTable(
-                name: "SupplierContractAuditLog");
-
-            migrationBuilder.DropTable(
-                name: "SupplierContractItem");
-
-            migrationBuilder.DropTable(
-                name: "SupplierDebtSettlements");
-
-            migrationBuilder.DropTable(
-                name: "SupplierFinances");
-
-            migrationBuilder.DropTable(
-                name: "SupportRequest");
-
-            migrationBuilder.DropTable(
-                name: "ContractTemplates");
-
-            migrationBuilder.DropTable(
-                name: "ParcelDeliveryOrders");
-
-            migrationBuilder.DropTable(
-                name: "RepairOrder");
-
-            migrationBuilder.DropTable(
-                name: "ServiceBooking");
-
-            migrationBuilder.DropTable(
-                name: "SupplierContracts");
-
-            migrationBuilder.DropTable(
-                name: "Services");
-
-            migrationBuilder.DropTable(
-                name: "ServiceCategories");
-
-            migrationBuilder.DropColumn(
-                name: "IsInternal",
-                table: "ContactReply");
-
+            migrationBuilder.DropForeignKey(name: "FK_ContactReply_Users_RepliedById", table: "ContactReply");
+            migrationBuilder.DropTable(name: "CarrierPartners");
+            migrationBuilder.DropTable(name: "ContractTemplateAuditLog");
+            migrationBuilder.DropTable(name: "CurrentUnreconciledCods");
+            migrationBuilder.DropTable(name: "CustomerFeedback");
+            migrationBuilder.DropTable(name: "Expenses");
+            migrationBuilder.DropTable(name: "FinanceContracts");
+            migrationBuilder.DropTable(name: "JobApplication");
+            migrationBuilder.DropTable(name: "ParcelDeliveryOrderItems");
+            migrationBuilder.DropTable(name: "PlateDossier");
+            migrationBuilder.DropTable(name: "RepairOrderDetail");
+            migrationBuilder.DropTable(name: "SalesContracts");
+            migrationBuilder.DropTable(name: "ServiceEvaluation");
+            migrationBuilder.DropTable(name: "SupplierContractAuditLog");
+            migrationBuilder.DropTable(name: "SupplierContractItem");
+            migrationBuilder.DropTable(name: "SupplierDebtSettlements");
+            migrationBuilder.DropTable(name: "SupplierFinances");
+            migrationBuilder.DropTable(name: "SupportRequest");
+            migrationBuilder.DropTable(name: "ContractTemplates");
+            migrationBuilder.DropTable(name: "ParcelDeliveryOrders");
+            migrationBuilder.DropTable(name: "RepairOrder");
+            migrationBuilder.DropTable(name: "ServiceBooking");
+            migrationBuilder.DropTable(name: "SupplierContracts");
+            migrationBuilder.DropTable(name: "Services");
+            migrationBuilder.DropTable(name: "ServiceCategories");
+            migrationBuilder.DropColumn(name: "IsInternal", table: "ContactReply");
             migrationBuilder.AlterColumn<Guid>(
                 name: "RepliedById",
                 table: "ContactReply",
@@ -1124,7 +1023,6 @@ namespace Infrastructure.MySqlMigrations
                 oldType: "char(36)",
                 oldNullable: true)
                 .OldAnnotation("Relational:Collation", "ascii_general_ci");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ContactReply_Users_RepliedById",
                 table: "ContactReply",

@@ -1,11 +1,8 @@
 using Application.ApiContracts.Service.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories;
-using Domain.Entities;
-using Mapster;
 using MediatR;
 
-namespace Application.Features.Services.Commands.CreateService;
+namespace Application.ApiContracts.Service.Responses;
 
 /// <summary>
 /// Lệnh yêu cầu tạo mới một dịch vụ.

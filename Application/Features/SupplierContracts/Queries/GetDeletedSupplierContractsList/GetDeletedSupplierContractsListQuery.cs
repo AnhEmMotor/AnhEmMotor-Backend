@@ -7,5 +7,5 @@ namespace Application.Features.SupplierContracts.Queries.GetDeletedSupplierContr
 
 public sealed record GetDeletedSupplierContractsListQuery : IRequest<Result<SupplierContractListResponse>>
 {
-public SieveModel? SieveModel { get; init; }
+    public SieveModel? SieveModel { get; init; }
 }

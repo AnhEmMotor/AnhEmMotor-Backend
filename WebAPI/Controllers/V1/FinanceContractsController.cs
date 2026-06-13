@@ -1,5 +1,7 @@
 using Application.ApiContracts.FinanceContract.Requests;
-using Application.Common.Models;
+using Application.Features.FinanceContracts.Commands.UpdateCavetState;
+using Application.Features.FinanceContracts.Commands.UpdateDisbursementPayment;
+using Application.Features.FinanceContracts.Commands.UploadDisbursementEvidence;
 using Application.Features.FinanceContracts.Queries.GetFinanceContractDetail;
 using Asp.Versioning;
 using MediatR;
@@ -19,9 +21,13 @@ public class FinanceContractsController(ISender sender) : ApiController
 {
     [HttpGet("{financeContractId:guid}")]
     [SwaggerOperation(Summary = "Get Finance Contract Detail")]
-    public async Task<IActionResult> GetFinanceContractDetail([FromRoute] Guid financeContractId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetFinanceContractDetail(
+        [FromRoute] Guid financeContractId,
+        CancellationToken cancellationToken)
     {
-        var query = new GetFinanceContractDetailQuery(new GetFinanceContractDetailRequest(financeContractId), Guid.Empty);
+        var query = new GetFinanceContractDetailQuery(
+            new GetFinanceContractDetailRequest(financeContractId),
+            Guid.Empty);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
@@ -29,36 +35,24 @@ public class FinanceContractsController(ISender sender) : ApiController
     [HttpPost("{financeContractId:guid}/disbursement/payment")]
     public async Task<IActionResult> UpdateDisbursementPayment(
         [FromRoute] Guid financeContractId,
-        [FromBody] Application.ApiContracts.FinanceContract.Requests.UpdateDisbursementPaymentRequest request,
+        [FromBody] UpdateDisbursementPaymentRequest request,
         CancellationToken cancellationToken)
     {
         await sender.Send(
-            new Application.Features.FinanceContracts.Commands.UpdateDisbursementPayment.UpdateDisbursementPaymentCommand(
-                financeContractId,
-                request,
-                Guid.Empty
-            ),
-            cancellationToken
-        ).ConfigureAwait(false);
-
+            new UpdateDisbursementPaymentCommand(financeContractId, request, Guid.Empty),
+            cancellationToken)
+            .ConfigureAwait(false);
         return Ok(new { success = true });
     }
 
     [HttpPost("{financeContractId:guid}/cavet/state")]
     public async Task<IActionResult> UpdateCavetState(
         [FromRoute] Guid financeContractId,
-        [FromBody] Application.ApiContracts.FinanceContract.Requests.UpdateCavetStateRequest request,
+        [FromBody] UpdateCavetStateRequest request,
         CancellationToken cancellationToken)
     {
-        await sender.Send(
-            new Application.Features.FinanceContracts.Commands.UpdateCavetState.UpdateCavetStateCommand(
-                financeContractId,
-                request,
-                Guid.Empty
-            ),
-            cancellationToken
-        ).ConfigureAwait(false);
-
+        await sender.Send(new UpdateCavetStateCommand(financeContractId, request, Guid.Empty), cancellationToken)
+            .ConfigureAwait(false);
         return Ok(new { success = true });
     }
 
@@ -68,24 +62,17 @@ public class FinanceContractsController(ISender sender) : ApiController
         IFormFile file,
         CancellationToken cancellationToken)
     {
-        if (file == null) return BadRequest(new { success = false, message = "File is required" });
-
+        if (file == null)
+            return BadRequest(new { success = false, message = "File is required" });
         using var stream = file.OpenReadStream();
         await sender.Send(
-            new Application.Features.FinanceContracts.Commands.UploadDisbursementEvidence.UploadDisbursementEvidenceCommand(
+            new UploadDisbursementEvidenceCommand(
                 financeContractId,
-                new Application.ApiContracts.FinanceContract.Requests.UploadDisbursementEvidenceRequest
-                {
-                    FileContent = stream,
-                    FileName = file.FileName
-                },
-                Guid.Empty
-            ),
-            cancellationToken
-        ).ConfigureAwait(false);
-
+                new UploadDisbursementEvidenceRequest { FileContent = stream, FileName = file.FileName },
+                Guid.Empty),
+            cancellationToken)
+            .ConfigureAwait(false);
         return Ok(new { success = true });
     }
 }
-
 

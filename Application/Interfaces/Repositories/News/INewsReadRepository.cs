@@ -19,4 +19,3 @@ namespace Application.Interfaces.Repositories.News
     }
 }
 
-

@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
 using Application.ApiContracts.Logistics.Responses;
-using Domain.Entities.Logistics;
 using MediatR;
+using System;
 
 namespace Application.Features.Logistics.Queries.GetFulfillmentDetail;
 

@@ -1,12 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
-using MediatR;
 using Application.Features.Statistical.Queries.GetDashboardSummary;
 using Application.Features.Statistical.Queries.GetPnlReport;
 using Application.Features.Statistical.Queries.GetRecentTransactions;
 using Application.Features.Statistical.Queries.GetStaffPerformance;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Text.Json;
 
 namespace WebAPI.Controllers
 {
@@ -14,7 +14,7 @@ namespace WebAPI.Controllers
     /// Controller for handling analytics and reporting data.
     /// </summary>
     /// <remarks>
-    /// Initializes a new instance of the <see cref="AnalyticsController"/> class.
+    /// Initializes a new instance of the <see cref="AnalyticsController" /> class.
     /// </remarks>
     /// <param name="mediator">The mediator service.</param>
     [Authorize]
@@ -22,7 +22,6 @@ namespace WebAPI.Controllers
     [Route("api/analytics")]
     public class AnalyticsController(IMediator mediator) : ControllerBase
     {
-
         /// <summary>
         /// Gets the dashboard summary for a specified date range.
         /// </summary>
@@ -31,21 +30,20 @@ namespace WebAPI.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The dashboard summary.</returns>
         [HttpGet("dashboard/summary")]
-        public async Task<IActionResult> GetSummary([FromQuery] DateTime? start, [FromQuery] DateTime? end, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSummary(
+            [FromQuery] DateTime? start,
+            [FromQuery] DateTime? end,
+            CancellationToken cancellationToken)
         {
             var startDate = start ?? DateTime.Today;
             var endDate = end ?? DateTime.Today.AddDays(1).AddTicks(-1);
-
             var summary = await mediator.Send(new GetDashboardSummaryQuery(startDate, endDate), cancellationToken)
                 .ConfigureAwait(false);
-
-            // Logic rào chắn màu sắc cho UI
             var now = DateTime.Now;
             if (now.Hour >= 15 && summary.MonthAchieved < (summary.MonthTarget * 0.5m))
             {
                 summary.IsRevenueAlert = true;
             }
-
             return Ok(summary);
         }
 
@@ -57,7 +55,10 @@ namespace WebAPI.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The PnL report.</returns>
         [HttpGet("pnl")]
-        public async Task<IActionResult> GetPnl([FromQuery] int month, [FromQuery] int year, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetPnl(
+            [FromQuery] int month,
+            [FromQuery] int year,
+            CancellationToken cancellationToken)
         {
             var report = await mediator.Send(new GetPnlReportQuery(month, year), cancellationToken)
                 .ConfigureAwait(false);
@@ -72,11 +73,13 @@ namespace WebAPI.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The staff performance data.</returns>
         [HttpGet("staff-performance")]
-        public async Task<IActionResult> GetStaff([FromQuery] DateTime? start, [FromQuery] DateTime? end, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetStaff(
+            [FromQuery] DateTime? start,
+            [FromQuery] DateTime? end,
+            CancellationToken cancellationToken)
         {
             var startDate = start ?? DateTime.Today.AddDays(-30);
             var endDate = end ?? DateTime.Today;
-
             var performance = await mediator.Send(new GetStaffPerformanceQuery(startDate, endDate), cancellationToken)
                 .ConfigureAwait(false);
             return Ok(performance);
@@ -89,8 +92,7 @@ namespace WebAPI.Controllers
         [HttpGet("transactions/recent")]
         public async Task<IActionResult> GetRecentTransactions(CancellationToken cancellationToken)
         {
-            var logs = await mediator.Send(new GetRecentTransactionsQuery(), cancellationToken)
-                .ConfigureAwait(false);
+            var logs = await mediator.Send(new GetRecentTransactionsQuery(), cancellationToken).ConfigureAwait(false);
             return Ok(logs);
         }
 
@@ -103,12 +105,10 @@ namespace WebAPI.Controllers
             Response.Headers.Append("Content-Type", "text/event-stream");
             Response.Headers.Append("Cache-Control", "no-cache");
             Response.Headers.Append("Connection", "keep-alive");
-
-            var logs = await mediator.Send(new GetRecentTransactionsQuery(), cancellationToken)
-                .ConfigureAwait(false);
+            var logs = await mediator.Send(new GetRecentTransactionsQuery(), cancellationToken).ConfigureAwait(false);
             foreach (var log in logs)
             {
-                var data = System.Text.Json.JsonSerializer.Serialize(log);
+                var data = JsonSerializer.Serialize(log);
                 await Response.WriteAsync($"data: {data}\n\n", cancellationToken).ConfigureAwait(false);
             }
             await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);

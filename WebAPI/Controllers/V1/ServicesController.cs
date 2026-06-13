@@ -1,21 +1,19 @@
 using Application.ApiContracts.Service.Responses;
 using Application.Common.Models;
-using Application.Features.Services.Commands.CreateService;
-using Application.Features.Services.Commands.UpdateService;
+using Application.Features.Services.Commands;
+using Application.Features.Services.Queries;
 using Domain.Primitives;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using WebAPI.Controllers.Base;
-using Application.Features.Services.Queries;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
 /// Controller quản lý các dịch vụ bảo trì và sửa chữa của cửa hàng.
 /// </summary>
-public class ServicesController (IMediator mediator) : ApiController
+public class ServicesController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Tạo mới một dịch vụ trong hệ thống.
@@ -24,21 +22,13 @@ public class ServicesController (IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ tác vụ.</param>
     /// <returns>Thông tin dịch vụ vừa được tạo thành công.</returns>
     /// <example>
-    /// <code>
-    /// POST /api/v1/services
-    /// {
-    ///     "name": "Thay nhớt Honda Vision",
-    ///     "description": "Thay nhớt máy và nhớt số chính hãng",
-    ///     "basePrice": 150000,
-    ///     "estimatedDurationMinutes": 15,
-    ///     "categoryId": 1
-    /// }
-    /// </code>
+    /// <code>POST /api/v1/services { "name": "Thay nhớt Honda Vision", "description": "Thay nhớt máy và nhớt số chính
+    /// hãng", "basePrice": 150000, "estimatedDurationMinutes": 15, "categoryId": 1 }</code>
     /// </example>
     [HttpPost]
     [ProducesResponseType(typeof(ServiceResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateServiceAsync (
+    public async Task<IActionResult> CreateServiceAsync(
         [FromBody] CreateServiceCommand command,
         CancellationToken cancellationToken)
     {
@@ -51,7 +41,7 @@ public class ServicesController (IMediator mediator) : ApiController
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<ServiceResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetServicesAsync (
+    public async Task<IActionResult> GetServicesAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
@@ -67,22 +57,23 @@ public class ServicesController (IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ServiceResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateServiceAsync (
+    public async Task<IActionResult> UpdateServiceAsync(
         int id,
         [FromBody] UpdateServiceCommand command,
         CancellationToken cancellationToken)
     {
         if (id != command.Id)
         {
-            return BadRequest(new ErrorResponse 
-            { 
-                Errors = new List<ErrorDetail> 
-                { 
-                    new () { Field = "Id", Message = "ID trong URL không khớp với ID trong body." } 
-                } 
-            });
+            return BadRequest(
+                new ErrorResponse
+                {
+                    Errors =
+                        new List<ErrorDetail>
+                            {
+                                new() { Field = "Id", Message = "ID trong URL không khớp với ID trong body." }
+                            }
+                });
         }
-
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

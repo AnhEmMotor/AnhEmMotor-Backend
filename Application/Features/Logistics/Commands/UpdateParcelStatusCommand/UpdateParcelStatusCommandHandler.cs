@@ -1,7 +1,7 @@
 using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using MediatR;
 
-namespace Application.Features.Logistics.Commands.ProcessFulfillment;
+namespace Application.Features.Logistics.Commands.UpdateParcelStatusCommand;
 
 public class UpdateParcelStatusCommandHandler(
     IParcelDeliveryOrderReadRepository readRepository,
@@ -10,8 +10,8 @@ public class UpdateParcelStatusCommandHandler(
     public async Task<bool> Handle(UpdateParcelStatusCommand request, CancellationToken cancellationToken)
     {
         var order = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-        if (order == null) return false;
-
+        if (order == null)
+            return false;
         order.Status = request.NewStatus;
         updateRepository.Update(order);
         return true;

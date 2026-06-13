@@ -6,8 +6,7 @@ using MediatR;
 
 namespace Application.Features.SalesContracts.Queries.GetSalesContractById;
 
-public class GetSalesContractByIdQueryHandler(
-    ISalesContractReadRepository readRepo) : IRequestHandler<GetSalesContractByIdQuery, Result<SalesContractResponse>>
+public class GetSalesContractByIdQueryHandler(ISalesContractReadRepository readRepo) : IRequestHandler<GetSalesContractByIdQuery, Result<SalesContractResponse>>
 {
     public async Task<Result<SalesContractResponse>> Handle(
         GetSalesContractByIdQuery request,
@@ -16,7 +15,6 @@ public class GetSalesContractByIdQueryHandler(
         var contract = await readRepo.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (contract == null)
             return Result<SalesContractResponse>.Failure("Không tìm thấy hợp đồng.");
-
         return Result<SalesContractResponse>.Success(contract.Adapt<SalesContractResponse>());
     }
 }

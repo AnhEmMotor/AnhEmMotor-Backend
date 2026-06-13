@@ -13,13 +13,14 @@ public class WorkshopTicketItem : BaseEntity
     [Column("WorkshopTicketId")]
     [ForeignKey("WorkshopTicket")]
     public int WorkshopTicketId { get; set; }
+
     public WorkshopTicket WorkshopTicket { get; set; } = null!;
 
     [Column("Description", TypeName = "nvarchar(MAX)")]
     public string Description { get; set; } = string.Empty;
 
     [Column("IsPart")]
-    public bool IsPart { get; set; } // true if it's a part, false if it's labor
+    public bool IsPart { get; set; }
 
     [Column("Quantity")]
     public int Quantity { get; set; } = 1;
@@ -30,5 +31,6 @@ public class WorkshopTicketItem : BaseEntity
     [Column("ProductVariantId")]
     [ForeignKey("ProductVariant")]
     public int? ProductVariantId { get; set; }
+
     public ProductVariant? ProductVariant { get; set; }
 }

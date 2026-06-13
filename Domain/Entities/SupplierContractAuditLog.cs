@@ -16,7 +16,7 @@ public class SupplierContractAuditLog : BaseEntity
     public SupplierContract? SupplierContract { get; set; }
 
     [MaxLength(100)]
-    public string Action { get; set; } = string.Empty; // Create, Update, StatusChange, FileUpload, Addendum, SoftDelete, Restore
+    public string Action { get; set; } = string.Empty;
 
     [MaxLength(500)]
     public string? Details { get; set; }

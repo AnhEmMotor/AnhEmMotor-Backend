@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using System;
 
 #nullable disable
 
@@ -12,10 +12,7 @@ namespace Infrastructure.PostgreSqlMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ContactReply_Users_RepliedById",
-                table: "ContactReply");
-
+            migrationBuilder.DropForeignKey(name: "FK_ContactReply_Users_RepliedById", table: "ContactReply");
             migrationBuilder.AlterColumn<Guid>(
                 name: "RepliedById",
                 table: "ContactReply",
@@ -23,20 +20,20 @@ namespace Infrastructure.PostgreSqlMigrations
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uuid");
-
             migrationBuilder.AddColumn<bool>(
                 name: "IsInternal",
                 table: "ContactReply",
                 type: "boolean",
                 nullable: false,
                 defaultValue: false);
-
             migrationBuilder.CreateTable(
                 name: "CarrierPartners",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CarrierCode = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
@@ -46,7 +43,11 @@ namespace Infrastructure.PostgreSqlMigrations
                     WebhookSecret = table.Column<string>(type: "text", nullable: false),
                     WebhookEndpointUrl = table.Column<string>(type: "text", nullable: false),
                     AutoSyncPricing = table.Column<bool>(type: "boolean", nullable: false),
-                    MaxParcelWeightKg = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    MaxParcelWeightKg = table.Column<decimal>(
+                        type: "numeric(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
                     AllowLiquidCargo = table.Column<bool>(type: "boolean", nullable: false),
                     AllowOversizeCargo = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -56,7 +57,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_CarrierPartners", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ContractTemplates",
                 columns: table => new
@@ -80,13 +80,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_ContractTemplates", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "CurrentUnreconciledCods",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Value = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -94,13 +95,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_CurrentUnreconciledCods", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "CustomerFeedback",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ContactId = table.Column<int>(type: "integer", nullable: false),
                     Rating = table.Column<int>(type: "integer", nullable: false),
                     FeedbackArea = table.Column<string>(type: "text", nullable: false),
@@ -122,13 +124,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Expenses",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     ExpenseDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -141,7 +144,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Expenses", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "FinanceContracts",
                 columns: table => new
@@ -164,13 +166,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_FinanceContracts", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "JobApplication",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ContactId = table.Column<int>(type: "integer", nullable: false),
                     FullName = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
@@ -193,13 +196,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ParcelDeliveryOrders",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TrackingNumber = table.Column<string>(type: "text", nullable: false),
                     CustomerName = table.Column<string>(type: "text", nullable: false),
                     Carrier = table.Column<string>(type: "text", nullable: false),
@@ -208,7 +212,11 @@ namespace Infrastructure.PostgreSqlMigrations
                     ExpectedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeliveredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CodAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
-                    ShippingCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    ShippingCost = table.Column<decimal>(
+                        type: "numeric(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
                     InspectedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ReturnReason = table.Column<string>(type: "text", nullable: true),
                     BoxCondition = table.Column<string>(type: "text", nullable: true),
@@ -224,13 +232,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_ParcelDeliveryOrders", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "PlateDossier",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     OutputId = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     LicensePlate = table.Column<string>(type: "text", nullable: false),
@@ -252,20 +261,23 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "RepairOrder",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     VehicleId = table.Column<int>(type: "integer", nullable: true),
                     CustomerName = table.Column<string>(type: "text", nullable: false),
                     CustomerPhone = table.Column<string>(type: "text", nullable: false),
                     Mileage = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     StartTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    ExpectedCompletionTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    ExpectedCompletionTime = table.Column<DateTimeOffset>(
+                        type: "timestamp with time zone",
+                        nullable: true),
                     TechnicianId = table.Column<int>(type: "integer", nullable: true),
                     Status = table.Column<string>(type: "text", nullable: false),
                     LaborCost = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
@@ -293,13 +305,15 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Vehicle",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "SalesContracts",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ContractNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ContractNumber = table.Column<string>(
+                        type: "character varying(100)",
+                        maxLength: 100,
+                        nullable: false),
                     OutputId = table.Column<int>(type: "integer", nullable: true),
                     CustomerId = table.Column<Guid>(type: "uuid", nullable: true),
                     ShowroomName = table.Column<string>(type: "text", nullable: true),
@@ -318,7 +332,9 @@ namespace Infrastructure.PostgreSqlMigrations
                     ActualSalePrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     DepositAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     RemainingAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    FinalPaymentDeadline = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    FinalPaymentDeadline = table.Column<DateTimeOffset>(
+                        type: "timestamp with time zone",
+                        nullable: true),
                     WarrantyPeriod = table.Column<string>(type: "text", nullable: true),
                     WarrantyScope = table.Column<string>(type: "text", nullable: true),
                     SpecialTerms = table.Column<string>(type: "text", nullable: true),
@@ -344,13 +360,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ServiceCategories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
@@ -361,15 +378,20 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_ServiceCategories", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierContracts",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SupplierId = table.Column<int>(type: "integer", nullable: true),
-                    ContractNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    ContractFilePath = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    ContractNumber = table.Column<string>(
+                        type: "character varying(100)",
+                        maxLength: 100,
+                        nullable: false),
+                    ContractFilePath = table.Column<string>(
+                        type: "character varying(500)",
+                        maxLength: 500,
+                        nullable: true),
                     EffectiveDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     ContractValue = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
@@ -378,7 +400,10 @@ namespace Infrastructure.PostgreSqlMigrations
                     Note = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     CreditLimit = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     PaymentWindowDays = table.Column<int>(type: "integer", nullable: true),
-                    BankAccountNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    BankAccountNumber = table.Column<string>(
+                        type: "character varying(50)",
+                        maxLength: 50,
+                        nullable: true),
                     BankName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     MinimumVolumePerMonth = table.Column<int>(type: "integer", nullable: true),
                     DiscountRate = table.Column<decimal>(type: "numeric(5,2)", nullable: true),
@@ -401,7 +426,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Supplier",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierDebtSettlements",
                 columns: table => new
@@ -426,7 +450,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierFinances",
                 columns: table => new
@@ -447,13 +470,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupportRequest",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ContactId = table.Column<int>(type: "integer", nullable: false),
                     Subject = table.Column<string>(type: "text", nullable: false),
                     Category = table.Column<string>(type: "text", nullable: false),
@@ -476,7 +500,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ContractTemplateAuditLog",
                 columns: table => new
@@ -503,13 +526,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ParcelDeliveryOrderItems",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ParcelDeliveryOrderId = table.Column<int>(type: "integer", nullable: false),
                     ProductId = table.Column<int>(type: "integer", nullable: false),
                     ProductName = table.Column<string>(type: "text", nullable: false),
@@ -531,13 +555,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Services",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     BasePrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
@@ -558,7 +583,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierContractAuditLog",
                 columns: table => new
@@ -585,7 +609,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierContractItem",
                 columns: table => new
@@ -614,13 +637,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "RepairOrderDetail",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     RepairOrderId = table.Column<int>(type: "integer", nullable: false),
                     ServiceId = table.Column<int>(type: "integer", nullable: true),
                     ProductVariantId = table.Column<int>(type: "integer", nullable: true),
@@ -653,13 +677,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Services",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ServiceBooking",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ServiceId = table.Column<int>(type: "integer", nullable: false),
                     VehicleId = table.Column<int>(type: "integer", nullable: true),
                     CustomerId = table.Column<Guid>(type: "uuid", nullable: true),
@@ -707,13 +732,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Vehicle",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ServiceEvaluation",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ServiceBookingId = table.Column<int>(type: "integer", nullable: false),
                     ContactId = table.Column<int>(type: "integer", nullable: false),
                     Criteria = table.Column<string>(type: "text", nullable: false),
@@ -744,137 +770,101 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_ContractTemplateAuditLog_ContractTemplateId",
                 table: "ContractTemplateAuditLog",
                 column: "ContractTemplateId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_CustomerFeedback_ContactId",
                 table: "CustomerFeedback",
                 column: "ContactId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_JobApplication_ContactId",
                 table: "JobApplication",
                 column: "ContactId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ParcelDeliveryOrderItems_ParcelDeliveryOrderId",
                 table: "ParcelDeliveryOrderItems",
                 column: "ParcelDeliveryOrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlateDossier_OutputId",
-                table: "PlateDossier",
-                column: "OutputId");
-
+            migrationBuilder.CreateIndex(name: "IX_PlateDossier_OutputId", table: "PlateDossier", column: "OutputId");
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrder_TechnicianId",
                 table: "RepairOrder",
                 column: "TechnicianId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RepairOrder_VehicleId",
-                table: "RepairOrder",
-                column: "VehicleId");
-
+            migrationBuilder.CreateIndex(name: "IX_RepairOrder_VehicleId", table: "RepairOrder", column: "VehicleId");
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_ProductVariantId",
                 table: "RepairOrderDetail",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_RepairOrderId",
                 table: "RepairOrderDetail",
                 column: "RepairOrderId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_ServiceId",
                 table: "RepairOrderDetail",
                 column: "ServiceId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SalesContracts_CustomerId",
                 table: "SalesContracts",
                 column: "CustomerId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SalesContracts_OutputId",
                 table: "SalesContracts",
                 column: "OutputId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_CustomerId",
                 table: "ServiceBooking",
                 column: "CustomerId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_ServiceId",
                 table: "ServiceBooking",
                 column: "ServiceId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_TechnicianId",
                 table: "ServiceBooking",
                 column: "TechnicianId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_VehicleId",
                 table: "ServiceBooking",
                 column: "VehicleId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceEvaluation_ContactId",
                 table: "ServiceEvaluation",
                 column: "ContactId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceEvaluation_ServiceBookingId",
                 table: "ServiceEvaluation",
                 column: "ServiceBookingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Services_CategoryId",
-                table: "Services",
-                column: "CategoryId");
-
+            migrationBuilder.CreateIndex(name: "IX_Services_CategoryId", table: "Services", column: "CategoryId");
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContractAuditLog_SupplierContractId",
                 table: "SupplierContractAuditLog",
                 column: "SupplierContractId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContractItem_ProductVariantId",
                 table: "SupplierContractItem",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContractItem_SupplierContractId",
                 table: "SupplierContractItem",
                 column: "SupplierContractId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContracts_ParentContractId",
                 table: "SupplierContracts",
                 column: "ParentContractId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContracts_SupplierId",
                 table: "SupplierContracts",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierDebtSettlements_SupplierId",
                 table: "SupplierDebtSettlements",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupportRequest_ContactId",
                 table: "SupportRequest",
                 column: "ContactId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ContactReply_Users_RepliedById",
                 table: "ContactReply",
@@ -886,86 +876,32 @@ namespace Infrastructure.PostgreSqlMigrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ContactReply_Users_RepliedById",
-                table: "ContactReply");
-
-            migrationBuilder.DropTable(
-                name: "CarrierPartners");
-
-            migrationBuilder.DropTable(
-                name: "ContractTemplateAuditLog");
-
-            migrationBuilder.DropTable(
-                name: "CurrentUnreconciledCods");
-
-            migrationBuilder.DropTable(
-                name: "CustomerFeedback");
-
-            migrationBuilder.DropTable(
-                name: "Expenses");
-
-            migrationBuilder.DropTable(
-                name: "FinanceContracts");
-
-            migrationBuilder.DropTable(
-                name: "JobApplication");
-
-            migrationBuilder.DropTable(
-                name: "ParcelDeliveryOrderItems");
-
-            migrationBuilder.DropTable(
-                name: "PlateDossier");
-
-            migrationBuilder.DropTable(
-                name: "RepairOrderDetail");
-
-            migrationBuilder.DropTable(
-                name: "SalesContracts");
-
-            migrationBuilder.DropTable(
-                name: "ServiceEvaluation");
-
-            migrationBuilder.DropTable(
-                name: "SupplierContractAuditLog");
-
-            migrationBuilder.DropTable(
-                name: "SupplierContractItem");
-
-            migrationBuilder.DropTable(
-                name: "SupplierDebtSettlements");
-
-            migrationBuilder.DropTable(
-                name: "SupplierFinances");
-
-            migrationBuilder.DropTable(
-                name: "SupportRequest");
-
-            migrationBuilder.DropTable(
-                name: "ContractTemplates");
-
-            migrationBuilder.DropTable(
-                name: "ParcelDeliveryOrders");
-
-            migrationBuilder.DropTable(
-                name: "RepairOrder");
-
-            migrationBuilder.DropTable(
-                name: "ServiceBooking");
-
-            migrationBuilder.DropTable(
-                name: "SupplierContracts");
-
-            migrationBuilder.DropTable(
-                name: "Services");
-
-            migrationBuilder.DropTable(
-                name: "ServiceCategories");
-
-            migrationBuilder.DropColumn(
-                name: "IsInternal",
-                table: "ContactReply");
-
+            migrationBuilder.DropForeignKey(name: "FK_ContactReply_Users_RepliedById", table: "ContactReply");
+            migrationBuilder.DropTable(name: "CarrierPartners");
+            migrationBuilder.DropTable(name: "ContractTemplateAuditLog");
+            migrationBuilder.DropTable(name: "CurrentUnreconciledCods");
+            migrationBuilder.DropTable(name: "CustomerFeedback");
+            migrationBuilder.DropTable(name: "Expenses");
+            migrationBuilder.DropTable(name: "FinanceContracts");
+            migrationBuilder.DropTable(name: "JobApplication");
+            migrationBuilder.DropTable(name: "ParcelDeliveryOrderItems");
+            migrationBuilder.DropTable(name: "PlateDossier");
+            migrationBuilder.DropTable(name: "RepairOrderDetail");
+            migrationBuilder.DropTable(name: "SalesContracts");
+            migrationBuilder.DropTable(name: "ServiceEvaluation");
+            migrationBuilder.DropTable(name: "SupplierContractAuditLog");
+            migrationBuilder.DropTable(name: "SupplierContractItem");
+            migrationBuilder.DropTable(name: "SupplierDebtSettlements");
+            migrationBuilder.DropTable(name: "SupplierFinances");
+            migrationBuilder.DropTable(name: "SupportRequest");
+            migrationBuilder.DropTable(name: "ContractTemplates");
+            migrationBuilder.DropTable(name: "ParcelDeliveryOrders");
+            migrationBuilder.DropTable(name: "RepairOrder");
+            migrationBuilder.DropTable(name: "ServiceBooking");
+            migrationBuilder.DropTable(name: "SupplierContracts");
+            migrationBuilder.DropTable(name: "Services");
+            migrationBuilder.DropTable(name: "ServiceCategories");
+            migrationBuilder.DropColumn(name: "IsInternal", table: "ContactReply");
             migrationBuilder.AlterColumn<Guid>(
                 name: "RepliedById",
                 table: "ContactReply",
@@ -975,7 +911,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 oldClrType: typeof(Guid),
                 oldType: "uuid",
                 oldNullable: true);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ContactReply_Users_RepliedById",
                 table: "ContactReply",

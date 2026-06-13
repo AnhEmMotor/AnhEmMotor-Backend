@@ -1,4 +1,4 @@
-using ExpenseEntity = AnhEmMotor.Domain.Entities.Expense;
+using ExpenseEntity = Domain.Entities.Expense;
 
 namespace Application.Interfaces.Repositories.Expense;
 

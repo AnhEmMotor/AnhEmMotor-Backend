@@ -1,19 +1,16 @@
 using Application.ApiContracts.Evaluation.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.ServiceEvaluation;
-using Domain.Entities;
-using Domain.Primitives;
-using Microsoft.EntityFrameworkCore;
-using Infrastructure.DBContexts;
-using Sieve.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.ServiceEvaluation;
 using Domain.Constants;
+using Domain.Primitives;
+using Infrastructure.DBContexts;
+using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
 
 namespace Infrastructure.Repositories.ServiceEvaluation;
 
-public class ServiceEvaluationReadRepository(
-    ApplicationDBContext dbContext,
-    ISievePaginator paginator) : IServiceEvaluationReadRepository
+public class ServiceEvaluationReadRepository(ApplicationDBContext dbContext, ISievePaginator paginator) : IServiceEvaluationReadRepository
 {
     public Task<Domain.Entities.ServiceEvaluation?> GetByIdAsync(int evaluationId, CancellationToken cancellationToken)
     {
@@ -31,7 +28,7 @@ public class ServiceEvaluationReadRepository(
             .AsNoTracking()
             .Include(e => e.Contact)
             .Include(e => e.ServiceBooking)
-                .ThenInclude(sb => sb.Technician);
+            .ThenInclude(sb => sb.Technician);
         var result = await paginator
             .ApplyAsync<Domain.Entities.ServiceEvaluation, ServiceEvaluationListRowResponse>(
                 query,
@@ -39,21 +36,23 @@ public class ServiceEvaluationReadRepository(
                 DataFetchMode.ActiveOnly,
                 cancellationToken)
             .ConfigureAwait(false);
-
         return Result<PagedResult<ServiceEvaluationListRowResponse>>.Success(result);
     }
 
-    public async Task<ServiceEvaluationDetailResponse> GetEvaluationDetailAsync(int evaluationId, CancellationToken cancellationToken)
+    public async Task<ServiceEvaluationDetailResponse> GetEvaluationDetailAsync(
+        int evaluationId,
+        CancellationToken cancellationToken)
     {
         var evaluation = await dbContext.ServiceEvaluations
-            .AsNoTracking()
-            .Include(e => e.Contact)
-            .Include(e => e.Contact.Replies)
-            .Include(e => e.ServiceBooking)
+                .AsNoTracking()
+                .Include(e => e.Contact)
+                .Include(e => e.Contact.Replies)
+                .Include(e => e.ServiceBooking)
                 .ThenInclude(sb => sb.Technician)
-            .Where(e => e.Id == evaluationId)
-            .FirstOrDefaultAsync(cancellationToken)
-            .ConfigureAwait(false) ?? throw new KeyNotFoundException("ServiceEvaluation not found");
+                .Where(e => e.Id == evaluationId)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false) ??
+            throw new KeyNotFoundException("ServiceEvaluation not found");
         return new ServiceEvaluationDetailResponse
         {
             Id = evaluation.Id,
@@ -65,15 +64,17 @@ public class ServiceEvaluationReadRepository(
             ProcessingStatus = evaluation.ProcessingStatus,
             TechnicianName = evaluation.ServiceBooking.Technician?.User?.UserName,
             RepairOrderCode = null,
-            ChatHistory = [.. evaluation.Contact.Replies
-                .OrderBy(r => r.CreatedAt)
-                .Select(r => new ServiceEvaluationChatMessageResponse
-                {
-                    Id = r.Id.ToString(),
-                    Sender = r.RepliedById == null ? "Customer" : "Admin",
-                    Content = r.Message,
-                    CreatedAt = r.CreatedAt ?? DateTimeOffset.UtcNow,
-                })],
+            ChatHistory =
+                [.. evaluation.Contact.Replies
+                    .OrderBy(r => r.CreatedAt)
+                    .Select(
+                        r => new ServiceEvaluationChatMessageResponse
+                    {
+                        Id = r.Id.ToString(),
+                        Sender = r.RepliedById == null ? "Customer" : "Admin",
+                        Content = r.Message,
+                        CreatedAt = r.CreatedAt ?? DateTimeOffset.UtcNow,
+                    })],
             DirectReplyText = evaluation.DirectReplyText,
             InternalNotes = evaluation.InternalNotes,
         };

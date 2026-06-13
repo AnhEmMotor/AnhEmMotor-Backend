@@ -9,9 +9,7 @@ public class CustomerFeedbackRepository(ApplicationDBContext context) : ICustome
 {
     public Task<DomainEntities.CustomerFeedback?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return context.CustomerFeedbacks
-            .Include(f => f.Contact)
-            .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
+        return context.CustomerFeedbacks.Include(f => f.Contact).FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
     }
 
     public Task<List<DomainEntities.CustomerFeedback>> GetAllAsync(CancellationToken cancellationToken)

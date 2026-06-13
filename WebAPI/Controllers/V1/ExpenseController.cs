@@ -1,13 +1,11 @@
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Expense;
+using Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Threading.Tasks;
-using AnhEmMotor.Domain.Entities;
-using AnhEmMotor.Domain.Enums;
-using Application.Interfaces.Repositories.Expense;
-using Application.Interfaces.Repositories;
-using Microsoft.AspNetCore.Authorization;
 
-namespace WebAPI.Controllers
+namespace WebAPI.Controllers.V1
 {
     /// <summary>
     /// Controller for managing expenses.
@@ -23,7 +21,7 @@ namespace WebAPI.Controllers
         private readonly IUnitOfWork _unitOfWork;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExpenseController"/> class.
+        /// Initializes a new instance of the <see cref="ExpenseController" /> class.
         /// </summary>
         /// <param name="expenseReadRepository">Read repository for expenses.</param>
         /// <param name="expenseInsertRepository">Insert repository for expenses.</param>
@@ -49,8 +47,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            var expenses = await _expenseReadRepository.GetAllAsync(cancellationToken)
-                .ConfigureAwait(false);
+            var expenses = await _expenseReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
             return Ok(expenses);
         }
 
@@ -63,12 +60,10 @@ namespace WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Expense expense, CancellationToken cancellationToken)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             _expenseInsertRepository.Add(expense);
-            await _unitOfWork.SaveChangesAsync(cancellationToken)
-                .ConfigureAwait(false);
-
+            await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Ok(expense);
         }
 
@@ -81,14 +76,11 @@ namespace WebAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var expense = await _expenseReadRepository.GetByIdAsync(id, cancellationToken)
-                .ConfigureAwait(false);
-            if (expense == null) return NotFound();
-
+            var expense = await _expenseReadRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+            if (expense == null)
+                return NotFound();
             _expenseDeleteRepository.Remove(expense);
-            await _unitOfWork.SaveChangesAsync(cancellationToken)
-                .ConfigureAwait(false);
-
+            await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Ok();
         }
     }

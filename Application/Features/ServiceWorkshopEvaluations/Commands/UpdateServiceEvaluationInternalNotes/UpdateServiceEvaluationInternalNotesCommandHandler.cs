@@ -26,17 +26,13 @@ public class UpdateServiceEvaluationInternalNotesCommandHandler(
         {
             return Result<bool>.Failure(Error.NotFound("Đánh giá không tồn tại."));
         }
-
         var userId = currentUserContext.GetUserId();
         if (userId == Guid.Empty)
         {
             return Result<bool>.Failure(Error.Unauthorized("Không thể xác định người dùng thực hiện ghi chú."));
         }
-
         evaluation.InternalNotes = request.InternalNotes;
         serviceEvaluationUpdateRepository.Update(evaluation);
-
-        // Append to Customer 360 as an internal note
         var internalReply = new ContactReply
         {
             ContactId = evaluation.ContactId,
@@ -45,9 +41,7 @@ public class UpdateServiceEvaluationInternalNotesCommandHandler(
             IsInternal = true
         };
         contactInsertRepository.AddReply(internalReply);
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result<bool>.Success(true);
     }
 }

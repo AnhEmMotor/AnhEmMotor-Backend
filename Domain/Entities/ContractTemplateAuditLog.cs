@@ -19,7 +19,7 @@ public class ContractTemplateAuditLog : BaseEntity
     public ContractTemplate? ContractTemplate { get; set; }
 
     [MaxLength(100)]
-    public string Action { get; set; } = string.Empty; // Create, UpdateContent, CloneToNewVersion, Activate, Deactivate, SoftDelete
+    public string Action { get; set; } = string.Empty;
 
     [MaxLength(500)]
     public string? Details { get; set; }
@@ -30,7 +30,6 @@ public class ContractTemplateAuditLog : BaseEntity
     [MaxLength(50)]
     public string? IpAddress { get; set; }
 
-    // Before/After payload snapshot (JSON string)
     [MaxLength(2000)]
     public string? OldValue { get; set; }
 

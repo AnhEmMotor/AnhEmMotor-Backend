@@ -12,7 +12,7 @@ public class ServiceEvaluationListRowResponse
 
     public string ReviewMessage { get; set; } = string.Empty;
 
-    public string Criteria { get; set; } = string.Empty; // QualityOfCar | AttitudeOfService
+    public string Criteria { get; set; } = string.Empty;
 
     public string ProcessingStatus { get; set; } = "Unprocessed";
 

@@ -3,8 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.RepairOrder;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.RepairOrders.Commands.CompleteRepairOrder
 {
@@ -17,12 +15,10 @@ namespace Application.Features.RepairOrders.Commands.CompleteRepairOrder
         {
             var repairOrder = await repairOrderReadRepository.GetByIdAsync(request.RepairOrderId, cancellationToken)
                 .ConfigureAwait(false);
-
             if (repairOrder == null)
             {
                 return Result<bool>.Failure(Error.NotFound("Phiếu sửa chữa không tồn tại."));
             }
-
             repairOrder.Status = "Completed";
             repairOrder.PaymentStatus = request.PaymentStatus;
             repairOrder.PaymentMethod = request.PaymentMethod;
@@ -31,10 +27,8 @@ namespace Application.Features.RepairOrders.Commands.CompleteRepairOrder
             {
                 repairOrder.Notes = request.Notes;
             }
-
             repairOrderUpdateRepository.Update(repairOrder);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return Result<bool>.Success(true);
         }
     }

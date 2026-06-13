@@ -1,10 +1,9 @@
 using Application.Features.Statistical.Queries.GetWorkshopDashboard;
-using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Threading.Tasks;
 
-namespace WebAPI.Controllers;
+namespace WebAPI.Controllers.V1;
 
 [ApiController]
 [Route("api/workshop/dashboard")]
@@ -18,7 +17,10 @@ public class WorkshopDashboardController : ControllerBase
     }
 
     [HttpGet("overview")]
-    public async Task<IActionResult> GetOverview([FromQuery] DateTimeOffset fromDate, [FromQuery] DateTimeOffset toDate, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOverview(
+        [FromQuery] DateTimeOffset fromDate,
+        [FromQuery] DateTimeOffset toDate,
+        CancellationToken cancellationToken)
     {
         var query = new GetWorkshopDashboardQuery(fromDate, toDate);
         var result = await _mediator.Send(query, cancellationToken).ConfigureAwait(false);

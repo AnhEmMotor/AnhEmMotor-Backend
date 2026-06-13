@@ -1,5 +1,3 @@
-using Domain.Primitives;
-
 namespace Domain.Entities;
 
 public class ServiceCategory : BaseEntity

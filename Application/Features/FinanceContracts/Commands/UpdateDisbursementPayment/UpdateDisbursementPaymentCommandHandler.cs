@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories;
-using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.FinanceContracts.Commands.UpdateDisbursementPayment;

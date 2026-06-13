@@ -12,9 +12,11 @@ namespace Application.Features.PlateDossiers.Mappings
             config.NewConfig<PlateDossier, PlateDossierResponse>()
                 .Map(dest => dest.CustomerName, src => src.Output.CustomerName)
                 .Map(dest => dest.CustomerPhone, src => src.Output.CustomerPhone)
-                .Map(dest => dest.VehicleName, src => src.Output.OutputInfos
-                    .Select(oi => oi.ProductVariant != null ? oi.ProductVariant.VariantName : null)
-                    .FirstOrDefault(name => name != null));
+                .Map(
+                    dest => dest.VehicleName,
+                    src => src.Output.OutputInfos
+                        .Select(oi => oi.ProductVariant != null ? oi.ProductVariant.VariantName : null)
+                        .FirstOrDefault(name => name != null));
         }
     }
 }

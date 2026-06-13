@@ -1,6 +1,6 @@
-using ExpenseEntity = AnhEmMotor.Domain.Entities.Expense;
 using Application.Interfaces.Repositories.Expense;
 using Infrastructure.DBContexts;
+using ExpenseEntity = Domain.Entities.Expense;
 
 namespace Infrastructure.Repositories.Expense;
 

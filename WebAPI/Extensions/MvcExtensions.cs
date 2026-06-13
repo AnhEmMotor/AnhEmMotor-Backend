@@ -1,6 +1,5 @@
 using Application.Common.Converters;
 using Asp.Versioning;
-using Microsoft.AspNetCore.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using WebAPI.Converters;
@@ -41,22 +40,20 @@ public static class MvcExtensions
                 options.LowercaseUrls = true;
                 options.LowercaseQueryStrings = true;
             });
-
         services.AddApiVersioning(
-                config =>
-                {
-                    config.DefaultApiVersion = new ApiVersion(1, 0);
-                    config.AssumeDefaultVersionWhenUnspecified = true;
-                    config.ReportApiVersions = true;
-                    config.ApiVersionReader = new UrlSegmentApiVersionReader();
-                })
+            config =>
+            {
+                config.DefaultApiVersion = new ApiVersion(1, 0);
+                config.AssumeDefaultVersionWhenUnspecified = true;
+                config.ReportApiVersions = true;
+                config.ApiVersionReader = new UrlSegmentApiVersionReader();
+            })
             .AddApiExplorer(
                 options =>
                 {
                     options.GroupNameFormat = "'v'VVV";
                     options.SubstituteApiVersionInUrl = true;
                 });
-
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
         services.AddControllers()
@@ -64,12 +61,11 @@ public static class MvcExtensions
                 options =>
                 {
                     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-                    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                     options.JsonSerializerOptions.Converters.Add(new EmptyStringConverter());
                     options.JsonSerializerOptions.Converters.Add(new NullableDecimalConverter());
                 });
-
         return services;
     }
 }

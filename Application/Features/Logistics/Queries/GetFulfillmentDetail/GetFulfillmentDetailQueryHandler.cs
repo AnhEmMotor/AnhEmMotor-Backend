@@ -1,9 +1,7 @@
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Application.ApiContracts.Logistics.Responses;
-using MediatR;
 using Application.Interfaces.Repositories.ParcelDeliveryOrder;
+using MediatR;
+using System.Linq;
 
 namespace Application.Features.Logistics.Queries.GetFulfillmentDetail;
 
@@ -16,13 +14,13 @@ public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDe
         _context = context;
     }
 
-    public async Task<FulfillmentDetailResponse> Handle(GetFulfillmentDetailQuery request, CancellationToken cancellationToken)
+    public async Task<FulfillmentDetailResponse> Handle(
+        GetFulfillmentDetailQuery request,
+        CancellationToken cancellationToken)
     {
         var order = await _context.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-
         if (order == null)
-            return null!; // Normally we throw NotFoundException
-
+            return null!;
         return new FulfillmentDetailResponse
         {
             Id = order.Id,
@@ -38,19 +36,23 @@ public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDe
             CreatedAt = order.CreatedAt,
             ExpectedAt = order.ExpectedAt,
             DeliveredAt = order.DeliveredAt,
-            Items = order.Items.Select(i => new FulfillmentDetailItemResponse
-            {
-                Id = i.Id,
-                ProductId = i.ProductId,
-                ProductName = i.ProductName,
-                Sku = i.Sku,
-                ThumbnailUrl = i.ThumbnailUrl,
-                ShelfLocation = i.ShelfLocation,
-                Quantity = i.Quantity,
-                IsPicked = i.IsPicked,
-                IsRestricted = i.IsRestricted,
-                IsOutOfStock = i.IsOutOfStock
-            }).ToList()
+            Items =
+                order.Items
+                    .Select(
+                        i => new FulfillmentDetailItemResponse
+                    {
+                        Id = i.Id,
+                        ProductId = i.ProductId,
+                        ProductName = i.ProductName,
+                        Sku = i.Sku,
+                        ThumbnailUrl = i.ThumbnailUrl,
+                        ShelfLocation = i.ShelfLocation,
+                        Quantity = i.Quantity,
+                        IsPicked = i.IsPicked,
+                        IsRestricted = i.IsRestricted,
+                        IsOutOfStock = i.IsOutOfStock
+                    })
+                    .ToList()
         };
     }
 }

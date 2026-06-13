@@ -6,10 +6,7 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using ServiceCategoryEntity = Domain.Entities.ServiceCategory;
 
 namespace Infrastructure.Repositories.ServiceCategory;
@@ -52,8 +49,7 @@ public class ServiceCategoryReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<ServiceCategoryEntity>(mode)
-            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+        return context.GetQuery<ServiceCategoryEntity>(mode).FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
     public Task<IEnumerable<ServiceCategoryEntity>> GetByIdAsync(
@@ -73,7 +69,6 @@ public class ServiceCategoryReadRepository(
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        // ServiceCategory does not have a Slug field in this schema.
         return Task.FromResult<ServiceCategoryEntity?>(null);
     }
 
@@ -81,7 +76,6 @@ public class ServiceCategoryReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        // ServiceCategory does not have a hierarchy (no ParentId). All are root.
         return GetAllAsync(cancellationToken, mode);
     }
 
@@ -91,7 +85,6 @@ public class ServiceCategoryReadRepository(
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        // ServiceCategory does not have a hierarchy (no subcategories).
         return Task.FromResult<IEnumerable<ServiceCategoryEntity>>([]);
     }
 

@@ -9,9 +9,7 @@ public class SupportRequestRepository(ApplicationDBContext context) : ISupportRe
 {
     public Task<DomainEntities.SupportRequest?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return context.SupportRequests
-            .Include(s => s.Contact)
-            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+        return context.SupportRequests.Include(s => s.Contact).FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
     public Task<List<DomainEntities.SupportRequest>> GetAllAsync(CancellationToken cancellationToken)

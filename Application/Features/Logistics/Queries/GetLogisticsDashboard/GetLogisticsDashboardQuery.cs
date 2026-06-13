@@ -4,8 +4,6 @@ namespace Application.Features.Logistics.Queries.GetLogisticsDashboard;
 
 public class GetLogisticsDashboardQuery : IRequest<LogisticsDashboardResponse>
 {
-    public string Range { get; init; } = "today"; // today | month | year
+    public string Range { get; init; } = "today";
 }
-
-
 

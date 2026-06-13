@@ -1,6 +1,5 @@
 using Application.ApiContracts.Evaluation.Responses;
 using Application.Common.Models;
-using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
 
@@ -14,7 +13,8 @@ public interface IServiceEvaluationReadRepository
         SieveModel sieveModel,
         CancellationToken cancellationToken);
 
-    public Task<ServiceEvaluationDetailResponse> GetEvaluationDetailAsync(int evaluationId, CancellationToken cancellationToken);
+    public Task<ServiceEvaluationDetailResponse> GetEvaluationDetailAsync(
+        int evaluationId,
+        CancellationToken cancellationToken);
 }
-
 

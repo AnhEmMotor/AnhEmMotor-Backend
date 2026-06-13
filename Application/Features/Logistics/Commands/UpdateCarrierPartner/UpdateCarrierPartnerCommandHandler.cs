@@ -1,24 +1,22 @@
-using System.Threading;
-using System.Threading.Tasks;
-using Application.Interfaces.Repositories.CarrierPartner;
 using Application.ApiContracts.Logistics.CarrierSettings.Requests;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.CarrierPartner;
 using Domain.Entities.Logistics;
 using MediatR;
-using Application.Interfaces.Repositories;
 
 namespace Application.Features.Logistics.Commands.UpdateCarrierPartner;
 
 public class UpdateCarrierPartnerCommandHandler(
     ICarrierPartnerReadRepository carrierPartnerReadRepository,
     ICarrierPartnerUpdateRepository carrierPartnerUpdateRepository,
-   IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateCarrierPartnerCommand, bool>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateCarrierPartnerCommand, bool>
 {
     public async Task<bool> Handle(UpdateCarrierPartnerCommand request, CancellationToken cancellationToken)
     {
-        var entity = await carrierPartnerReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-        if (entity == null) return false;
-
+        var entity = await carrierPartnerReadRepository.GetByIdAsync(request.Id, cancellationToken)
+            .ConfigureAwait(false);
+        if (entity == null)
+            return false;
         Apply(entity, request.Request);
         carrierPartnerUpdateRepository.Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -35,8 +33,6 @@ public class UpdateCarrierPartnerCommandHandler(
         entity.MaxParcelWeightKg = req.MaxParcelWeightKg;
         entity.AllowLiquidCargo = req.AllowLiquidCargo;
         entity.AllowOversizeCargo = req.AllowOversizeCargo;
-
-        // Only update secrets if provided (UI sends plain when user clicks show/edit; here accept optional)
         if (!string.IsNullOrWhiteSpace(req.ApiTokenPlain))
             entity.ApiToken = req.ApiTokenPlain!;
         if (!string.IsNullOrWhiteSpace(req.WebhookSecretPlain))
