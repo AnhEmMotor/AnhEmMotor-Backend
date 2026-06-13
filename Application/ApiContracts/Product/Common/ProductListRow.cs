@@ -1,7 +1,7 @@
 
 namespace Application.ApiContracts.Product.Common
 {
-    public sealed class ProductListRow
+    public class ProductListRow
     {
         public int Id { get; set; }
 

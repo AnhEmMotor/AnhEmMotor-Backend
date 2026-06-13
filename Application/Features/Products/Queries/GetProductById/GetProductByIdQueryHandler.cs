@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Application.Features.Products.Queries.GetProductById;
 
-public sealed class GetProductByIdQueryHandler(
+public class GetProductByIdQueryHandler(
     IProductReadRepository readRepository,
     IProductQuotationReadRepository? ProductQuotationReadRepository = null) : IRequestHandler<GetProductByIdQuery, Result<ProductDetailForManagerResponse?>>
 {

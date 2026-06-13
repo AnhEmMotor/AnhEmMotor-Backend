@@ -40,3 +40,4 @@ namespace Application.Interfaces.Repositories.Brand
         public Task<BrandStatisticsResponse> GetStatisticsAsync(CancellationToken cancellationToken);
     }
 }
+

@@ -1,6 +1,6 @@
 using Application.Common.Converters;
 using Asp.Versioning;
-using Microsoft.AspNetCore.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using WebAPI.Converters;
 using WebAPI.Middleware;
@@ -56,19 +56,12 @@ public static class MvcExtensions
                 });
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
-        services.Configure<JsonOptions>(
-            options =>
-            {
-                options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-                options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-                options.SerializerOptions.Converters.Add(new EmptyStringConverter());
-                options.SerializerOptions.Converters.Add(new NullableDecimalConverter());
-            });
         services.AddControllers()
             .AddJsonOptions(
                 options =>
                 {
                     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                     options.JsonSerializerOptions.Converters.Add(new EmptyStringConverter());
                     options.JsonSerializerOptions.Converters.Add(new NullableDecimalConverter());

@@ -7,7 +7,7 @@ using System;
 
 namespace Application.Features.PurchaseRequests.Commands.SendPurchaseRequest
 {
-    public sealed class SendPurchaseRequestCommandHandler(
+    public class SendPurchaseRequestCommandHandler(
         IPurchaseRequestReadRepository readRepository,
         IPurchaseRequestUpdateRepository updateRepository,
         IUnitOfWork unitOfWork,

@@ -1,7 +1,7 @@
 
 namespace Application.ApiContracts.Supplier.Responses;
 
-public sealed class SupplierPurchaseHistoryResponse
+public class SupplierPurchaseHistoryResponse
 {
     public int Id { get; set; }
 

@@ -13,3 +13,4 @@ namespace Application.Interfaces.Repositories.InventoryLedger
         public Task<List<Domain.Entities.InventoryLedger>> GetAllWithDetailsAsync(CancellationToken cancellationToken);
     }
 }
+

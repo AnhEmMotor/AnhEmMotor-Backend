@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.CreateOutputByManager
 {
-    public sealed class CreateOutputProductByManagerCommandValidator : AbstractValidator<CreateOutputInfoRequest>
+    public class CreateOutputProductByManagerCommandValidator : AbstractValidator<CreateOutputInfoRequest>
     {
         public CreateOutputProductByManagerCommandValidator()
         {

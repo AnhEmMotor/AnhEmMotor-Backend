@@ -2,7 +2,7 @@ using Application.ApiContracts.Product.Responses;
 
 namespace Application.ApiContracts.Product.Common
 {
-    public sealed class VariantRow
+    public class VariantRow
     {
         public int Id { get; set; }
 

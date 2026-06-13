@@ -68,6 +68,8 @@ public static class MigrationExtensions
                 await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
                 await LeadSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
                 await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await SupplierContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await CarrierPartnerSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
             }
         } catch (Exception ex)
         {

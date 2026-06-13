@@ -7,7 +7,7 @@ using Sieve.Models;
 
 namespace Application.Features.Suppliers.Queries.ExportSuppliers;
 
-public sealed class ExportSuppliersQueryHandler(ISupplierReadRepository repository) : IRequestHandler<ExportSuppliersQuery, Result<FileStreamResult>>
+public class ExportSuppliersQueryHandler(ISupplierReadRepository repository) : IRequestHandler<ExportSuppliersQuery, Result<FileStreamResult>>
 {
     public async Task<Result<FileStreamResult>> Handle(
         ExportSuppliersQuery request,

@@ -7,7 +7,7 @@ using SettingEntity = Domain.Entities.Setting;
 
 namespace Application.Features.Settings.Commands.SetSettings;
 
-public sealed class SetSettingsCommandHandler(ISettingRepository settingRepository, IUnitOfWork unitOfWork) : IRequestHandler<SetSettingsCommand, Result<Dictionary<string, string?>?>>
+public class SetSettingsCommandHandler(ISettingRepository settingRepository, IUnitOfWork unitOfWork) : IRequestHandler<SetSettingsCommand, Result<Dictionary<string, string?>?>>
 {
     public async Task<Result<Dictionary<string, string?>?>> Handle(
         SetSettingsCommand request,

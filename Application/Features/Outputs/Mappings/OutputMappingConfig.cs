@@ -7,7 +7,7 @@ using Mapster;
 
 namespace Application.Features.Outputs.Mappings;
 
-public sealed class OutputMappingConfig : IRegister
+public class OutputMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {

@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsList;
 
-public sealed class GetInventoryReceiptsListQueryHandler(IInventoryReceiptReadRepository repository) : IRequestHandler<GetInventoryReceiptsListQuery, Result<PagedResult<InventoryReceiptListResponse>>>
+public class GetInventoryReceiptsListQueryHandler(IInventoryReceiptReadRepository repository) : IRequestHandler<GetInventoryReceiptsListQuery, Result<PagedResult<InventoryReceiptListResponse>>>
 {
     public async Task<Result<PagedResult<InventoryReceiptListResponse>>> Handle(
         GetInventoryReceiptsListQuery request,

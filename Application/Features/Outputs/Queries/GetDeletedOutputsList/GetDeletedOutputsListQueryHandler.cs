@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetDeletedOutputsList;
 
-public sealed class GetDeletedOutputsListQueryHandler(IOutputReadRepository repository) : IRequestHandler<GetDeletedOutputsListQuery, Result<PagedResult<OutputItemResponse>>>
+public class GetDeletedOutputsListQueryHandler(IOutputReadRepository repository) : IRequestHandler<GetDeletedOutputsListQuery, Result<PagedResult<OutputItemResponse>>>
 {
     public async Task<Result<PagedResult<OutputItemResponse>>> Handle(
         GetDeletedOutputsListQuery request,

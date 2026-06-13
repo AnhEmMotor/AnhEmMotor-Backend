@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetAdminRevenueAnalysis;
 
-public sealed class GetAdminRevenueAnalysisQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetAdminRevenueAnalysisQuery, Result<AdminRevenueAnalysisResponse>>
+public class GetAdminRevenueAnalysisQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetAdminRevenueAnalysisQuery, Result<AdminRevenueAnalysisResponse>>
 {
     public async Task<Result<AdminRevenueAnalysisResponse>> Handle(
         GetAdminRevenueAnalysisQuery request,

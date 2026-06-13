@@ -39,3 +39,4 @@ public interface IOutputReadRepository
         DateTimeOffset expirationThreshold,
         CancellationToken cancellationToken);
 }
+

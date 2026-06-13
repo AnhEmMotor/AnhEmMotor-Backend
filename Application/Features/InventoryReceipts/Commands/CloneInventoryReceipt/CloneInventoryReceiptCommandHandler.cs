@@ -14,7 +14,7 @@ using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
 
 namespace Application.Features.InventoryReceipts.Commands.CloneInventoryReceipt
 {
-    public sealed class CloneInventoryReceiptCommandHandler(
+    public class CloneInventoryReceiptCommandHandler(
         IInventoryReceiptReadRepository InventoryReceiptReadRepository,
         IInventoryReceiptInsertRepository InventoryReceiptInsertRepository,
         IProductVariantReadRepository variantReadRepository,

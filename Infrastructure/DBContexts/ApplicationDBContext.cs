@@ -1,5 +1,6 @@
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Entities.Logistics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     }
 
     public new DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
+
+    public virtual DbSet<Expense> Expenses { get; set; }
 
     public virtual DbSet<Brand> Brands { get; set; }
 
@@ -107,7 +110,25 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ContactReply> ContactReplies { get; set; }
 
+    public virtual DbSet<SupportRequest> SupportRequests { get; set; }
+
+    public virtual DbSet<CustomerFeedback> CustomerFeedbacks { get; set; }
+
+    public virtual DbSet<JobApplication> JobApplications { get; set; }
+
     public virtual DbSet<Booking> Bookings { get; set; }
+
+    public virtual DbSet<PlateDossier> PlateDossiers { get; set; }
+
+    public virtual DbSet<RepairOrder> RepairOrders { get; set; }
+
+    public virtual DbSet<RepairOrderDetail> RepairOrderDetails { get; set; }
+
+    public virtual DbSet<ServiceCategory> ServiceCategories { get; set; }
+
+    public virtual DbSet<Service> Services { get; set; }
+
+    public virtual DbSet<ServiceEvaluation> ServiceEvaluations { get; set; }
 
     public virtual DbSet<Lead> Leads { get; set; }
 
@@ -143,9 +164,49 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<InventoryOnHand> InventoryOnHands { get; set; }
 
+    public virtual DbSet<ContractTemplate> ContractTemplates { get; set; }
+
+    public virtual DbSet<SalesContract> SalesContracts { get; set; }
+
+    public virtual DbSet<FinanceContract> FinanceContracts { get; set; }
+
+    public virtual DbSet<SupplierContract> SupplierContracts { get; set; }
+
+    public virtual DbSet<SupplierContractItem> SupplierContractItems { get; set; }
+
+    public virtual DbSet<SupplierContractAuditLog> SupplierContractAuditLogs { get; set; }
+
+    public virtual DbSet<ContractTemplateAuditLog> ContractTemplateAuditLogs { get; set; }
+
+    public virtual DbSet<SupplierFinance> SupplierFinances { get; set; }
+
+    public virtual DbSet<SupplierDebtSettlement> SupplierDebtSettlements { get; set; }
+
+    public virtual DbSet<ParcelDeliveryOrder> ParcelDeliveryOrders { get; set; }
+
+    public virtual DbSet<ParcelDeliveryOrderItem> ParcelDeliveryOrderItems { get; set; }
+
+    public virtual DbSet<CurrentUnreconciledCod> CurrentUnreconciledCods { get; set; }
+
+    public virtual DbSet<CarrierPartner> CarrierPartners { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Expense>().Property(e => e.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<ContractTemplate>().Property(e => e.Version).HasPrecision(18, 2);
+        modelBuilder.Entity<SupplierFinance>().Property(e => e.CurrentDebt).HasPrecision(18, 2);
+        modelBuilder.Entity<ContractTemplate>().Property(ct => ct.Version).HasPrecision(18, 2);
+        modelBuilder.Entity<SupplierFinance>().Property(sf => sf.CurrentDebt).HasPrecision(18, 2);
+        modelBuilder.Entity<CurrentUnreconciledCod>().Property(e => e.Value).HasPrecision(18, 2);
+        modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.CodAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.ShippingCost).HasPrecision(18, 2);
+        modelBuilder.Entity<CarrierPartner>().Property(e => e.MaxParcelWeightKg).HasPrecision(18, 2);
+        modelBuilder.Entity<ParcelDeliveryOrder>()
+            .HasMany(p => p.Items)
+            .WithOne(i => i.ParcelDeliveryOrder)
+            .HasForeignKey(i => i.ParcelDeliveryOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ApplicationUser>().ToTable("Users");
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");

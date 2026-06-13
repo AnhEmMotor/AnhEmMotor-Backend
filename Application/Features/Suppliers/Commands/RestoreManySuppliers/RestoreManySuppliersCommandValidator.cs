@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.Suppliers.Commands.RestoreManySuppliers;
 
-public sealed class RestoreManySuppliersCommandValidator : AbstractValidator<RestoreManySuppliersCommand>
+public class RestoreManySuppliersCommandValidator : AbstractValidator<RestoreManySuppliersCommand>
 {
     public RestoreManySuppliersCommandValidator()
     {

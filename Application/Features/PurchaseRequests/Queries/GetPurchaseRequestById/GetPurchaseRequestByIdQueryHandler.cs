@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById
 {
-    public sealed class GetPurchaseRequestByIdQueryHandler(IPurchaseRequestReadRepository repository) : IRequestHandler<GetPurchaseRequestByIdQuery, Result<PurchaseRequestDetailResponse?>>
+    public class GetPurchaseRequestByIdQueryHandler(IPurchaseRequestReadRepository repository) : IRequestHandler<GetPurchaseRequestByIdQuery, Result<PurchaseRequestDetailResponse?>>
     {
         public async Task<Result<PurchaseRequestDetailResponse?>> Handle(
             GetPurchaseRequestByIdQuery request,

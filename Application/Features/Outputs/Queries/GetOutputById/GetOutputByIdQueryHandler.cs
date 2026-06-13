@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Application.Features.Outputs.Queries.GetOutputById;
 
-public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository, ISettingRepository settingRepository) : IRequestHandler<GetOutputByIdQuery, Result<OrderDetailResponse>>
+public class GetOutputByIdQueryHandler(IOutputReadRepository repository, ISettingRepository settingRepository) : IRequestHandler<GetOutputByIdQuery, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         GetOutputByIdQuery request,

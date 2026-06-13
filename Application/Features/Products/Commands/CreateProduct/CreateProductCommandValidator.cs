@@ -2,7 +2,7 @@ using Application.ApiContracts.Product.Requests;
 using Application.Features.Products.Commands.CreateProduct;
 using FluentValidation;
 
-public sealed class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
 {
     public CreateProductCommandValidator()
     {

@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetDeletedVariantLiteList;
 
-public sealed class GetDeletedVariantLiteListQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetDeletedVariantLiteListQuery, Result<PagedResult<ProductVariantLiteResponse>>>
+public class GetDeletedVariantLiteListQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetDeletedVariantLiteListQuery, Result<PagedResult<ProductVariantLiteResponse>>>
 {
     public async Task<Result<PagedResult<ProductVariantLiteResponse>>> Handle(
         GetDeletedVariantLiteListQuery request,

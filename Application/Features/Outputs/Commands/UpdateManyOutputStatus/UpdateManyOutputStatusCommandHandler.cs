@@ -10,7 +10,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 
-public sealed class UpdateManyOutputStatusCommandHandler(
+public class UpdateManyOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
     ICommissionUpdateRepository commissionUpdateRepository,

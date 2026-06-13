@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Application.Features.Users.Commands.UpdateCurrentUser;
 
-public sealed class UpdateCurrentUserCommandValidator : AbstractValidator<UpdateCurrentUserCommand>
+public class UpdateCurrentUserCommandValidator : AbstractValidator<UpdateCurrentUserCommand>
 {
     public UpdateCurrentUserCommandValidator()
     {

@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOrderStatusMap;
 
-public sealed class GetOrderStatusMapQueryHandler : IRequestHandler<GetOrderStatusMapQuery, Result<IEnumerable<object>>>
+public class GetOrderStatusMapQueryHandler : IRequestHandler<GetOrderStatusMapQuery, Result<IEnumerable<object>>>
 {
     public Task<Result<IEnumerable<object>>> Handle(GetOrderStatusMapQuery request, CancellationToken cancellationToken)
     {

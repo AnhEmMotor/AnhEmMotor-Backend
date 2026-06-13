@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.Banners.Commands.CreateBanner;
 
-public sealed class CreateBannerCommandValidator : AbstractValidator<CreateBannerCommand>
+public class CreateBannerCommandValidator : AbstractValidator<CreateBannerCommand>
 {
     public CreateBannerCommandValidator()
     {

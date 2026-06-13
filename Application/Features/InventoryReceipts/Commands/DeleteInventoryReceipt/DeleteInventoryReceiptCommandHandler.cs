@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.InventoryReceipts.Commands.DeleteInventoryReceipt;
 
-public sealed class DeleteInventoryReceiptCommandHandler(
+public class DeleteInventoryReceiptCommandHandler(
     IInventoryReceiptReadRepository readRepository,
     IInventoryReceiptDeleteRepository deleteRepository,
     IPermissionReadRepository permissionRepository,

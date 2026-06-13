@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOutputStatusList;
 
-public sealed class GetOutputStatusListQueryHandler : IRequestHandler<GetOutputStatusListQuery, Result<Dictionary<string, string>>>
+public class GetOutputStatusListQueryHandler : IRequestHandler<GetOutputStatusListQuery, Result<Dictionary<string, string>>>
 {
     private static readonly Dictionary<string, string> Statuses = new()
     {

@@ -4,7 +4,7 @@ using Mapster;
 
 namespace Application.Features.UserManager.Mappings;
 
-public sealed class UserManagerMappingConfig : IRegister
+public class UserManagerMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {

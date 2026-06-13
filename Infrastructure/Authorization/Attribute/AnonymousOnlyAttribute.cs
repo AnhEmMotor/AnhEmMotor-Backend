@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace Infrastructure.Authorization.Attribute;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-public sealed class AnonymousOnlyAttribute : System.Attribute, IAsyncAuthorizationFilter
+public class AnonymousOnlyAttribute : System.Attribute, IAsyncAuthorizationFilter
 {
     public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {

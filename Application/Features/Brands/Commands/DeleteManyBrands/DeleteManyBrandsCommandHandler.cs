@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Brands.Commands.DeleteManyBrands;
 
-public sealed class DeleteManyBrandsCommandHandler(
+public class DeleteManyBrandsCommandHandler(
     IBrandReadRepository readRepository,
     IBrandDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyBrandsCommand, Result>

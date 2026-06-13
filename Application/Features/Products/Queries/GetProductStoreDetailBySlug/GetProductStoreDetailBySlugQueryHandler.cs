@@ -7,7 +7,7 @@ using System.Net;
 
 namespace Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 
-public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadRepository productReadRepository) : IRequestHandler<GetProductStoreDetailBySlugQuery, Result<ProductStoreDetailResponse>>
+public class GetProductStoreDetailBySlugQueryHandler(IProductReadRepository productReadRepository) : IRequestHandler<GetProductStoreDetailBySlugQuery, Result<ProductStoreDetailResponse>>
 {
     public async Task<Result<ProductStoreDetailResponse>> Handle(
         GetProductStoreDetailBySlugQuery request,

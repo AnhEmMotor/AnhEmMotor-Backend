@@ -16,3 +16,4 @@ namespace Application.Interfaces.Services
             CancellationToken cancellationToken);
     }
 }
+

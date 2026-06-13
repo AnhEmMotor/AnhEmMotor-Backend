@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 
-public sealed class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository repository) : IRequestHandler<GetDeletedSuppliersListQuery, Result<PagedResult<SupplierResponse>>>
+public class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository repository) : IRequestHandler<GetDeletedSuppliersListQuery, Result<PagedResult<SupplierResponse>>>
 {
     public async Task<Result<PagedResult<SupplierResponse>>> Handle(
         GetDeletedSuppliersListQuery request,

@@ -7,7 +7,7 @@ using System.Net;
 
 namespace Application.Features.Products.Queries.CheckSlugAvailability;
 
-public sealed class CheckSlugAvailabilityQueryHandler(IProductVariantReadRepository readRepository) : IRequestHandler<CheckSlugAvailabilityQuery, Result<SlugAvailabilityResponse>>
+public class CheckSlugAvailabilityQueryHandler(IProductVariantReadRepository readRepository) : IRequestHandler<CheckSlugAvailabilityQuery, Result<SlugAvailabilityResponse>>
 {
     public async Task<Result<SlugAvailabilityResponse>> Handle(
         CheckSlugAvailabilityQuery request,

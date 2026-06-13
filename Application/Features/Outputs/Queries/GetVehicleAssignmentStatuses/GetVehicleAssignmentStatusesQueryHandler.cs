@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetVehicleAssignmentStatuses;
 
-public sealed class GetVehicleAssignmentStatusesQueryHandler : IRequestHandler<GetVehicleAssignmentStatusesQuery, Result<IEnumerable<string>>>
+public class GetVehicleAssignmentStatusesQueryHandler : IRequestHandler<GetVehicleAssignmentStatusesQuery, Result<IEnumerable<string>>>
 {
     public Task<Result<IEnumerable<string>>> Handle(
         GetVehicleAssignmentStatusesQuery request,

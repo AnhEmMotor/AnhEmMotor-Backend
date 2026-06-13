@@ -9,3 +9,4 @@ public interface IFileInsertService
         CancellationToken cancellationToken,
         string subFolder = "");
 }
+

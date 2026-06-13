@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.Brands.Queries.GetBrandsList;
 
-public sealed class GetBrandsListQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandsListQuery, Result<PagedResult<BrandResponse>>>
+public class GetBrandsListQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandsListQuery, Result<PagedResult<BrandResponse>>>
 {
     public async Task<Result<PagedResult<BrandResponse>>> Handle(
         GetBrandsListQuery request,

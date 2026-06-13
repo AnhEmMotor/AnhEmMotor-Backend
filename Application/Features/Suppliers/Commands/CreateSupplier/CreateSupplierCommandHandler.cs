@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Commands.CreateSupplier;
 
-public sealed class CreateSupplierCommandHandler(
+public class CreateSupplierCommandHandler(
     ISupplierReadRepository supplierReadRepository,
     ISupplierInsertRepository supplierInsertRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateSupplierCommand, Result<SupplierResponse>>

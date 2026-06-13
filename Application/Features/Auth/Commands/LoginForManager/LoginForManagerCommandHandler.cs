@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Auth.Commands.LoginForManager;
 
-public sealed class LoginForManagerCommandHandler(
+public class LoginForManagerCommandHandler(
     IIdentityService identityService,
     ITokenManagerService tokenManagerService,
     ICookieTokenManager cookieTokenManager,

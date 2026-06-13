@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Banners.Commands.UpdateBanner;
 
-public sealed class UpdateBannerCommandHandler(
+public class UpdateBannerCommandHandler(
     IBannerReadRepository bannerReadRepository,
     IBannerInsertRepository bannerInsertRepository,
     IBannerUpdateRepository bannerUpdateRepository,

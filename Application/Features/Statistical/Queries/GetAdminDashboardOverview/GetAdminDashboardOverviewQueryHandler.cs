@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetAdminDashboardOverview;
 
-public sealed class GetAdminDashboardOverviewQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetAdminDashboardOverviewQuery, Result<AdminDashboardOverviewResponse>>
+public class GetAdminDashboardOverviewQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetAdminDashboardOverviewQuery, Result<AdminDashboardOverviewResponse>>
 {
     public async Task<Result<AdminDashboardOverviewResponse>> Handle(
         GetAdminDashboardOverviewQuery request,

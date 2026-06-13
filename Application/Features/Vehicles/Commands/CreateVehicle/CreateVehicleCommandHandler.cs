@@ -11,7 +11,7 @@ using MediatR;
 
 namespace Application.Features.Vehicles.Commands.CreateVehicle;
 
-public sealed class CreateVehicleCommandHandler(
+public class CreateVehicleCommandHandler(
     IVehicleReadRepository readRepository,
     IVehicleUpdateRepository updateRepository,
     ILeadReadRepository leadReadRepository,

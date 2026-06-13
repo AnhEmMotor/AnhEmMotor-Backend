@@ -38,7 +38,7 @@ public class GetCurrentUserStreamQueryHandler(
         }
         while (!cancellationToken.IsCancellationRequested)
         {
-            await userStreamService.WaitForUpdateAsync(userId, cancellationToken).ConfigureAwait(true);
+            await userStreamService.WaitForUpdateAsync(userId, cancellationToken).ConfigureAwait(false);
             using var scope = serviceProvider.CreateScope();
             var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var result = await scopedMediator.Send(new GetCurrentUserQuery(), cancellationToken).ConfigureAwait(false);

@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Brands.Commands.RestoreBrand;
 
-public sealed class RestoreBrandCommandHandler(
+public class RestoreBrandCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreBrandCommand, Result<BrandResponse>>

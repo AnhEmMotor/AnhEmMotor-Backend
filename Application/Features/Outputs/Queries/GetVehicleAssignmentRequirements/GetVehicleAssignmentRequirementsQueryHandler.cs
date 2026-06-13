@@ -10,7 +10,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
 
-public sealed class GetVehicleAssignmentRequirementsQueryHandler(
+public class GetVehicleAssignmentRequirementsQueryHandler(
     IOutputReadRepository outputReadRepository,
     IVehicleReadRepository vehicleReadRepository) : IRequestHandler<GetVehicleAssignmentRequirementsQuery, Result<VehicleAssignmentRequirementResponse>>
 {

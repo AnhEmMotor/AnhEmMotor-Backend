@@ -34,3 +34,4 @@ public interface ILeadReadRepository
 
     public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
 }
+

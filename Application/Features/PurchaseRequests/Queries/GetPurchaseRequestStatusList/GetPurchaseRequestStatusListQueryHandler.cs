@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;
 
-public sealed class GetPurchaseRequestStatusListQueryHandler : IRequestHandler<GetPurchaseRequestStatusListQuery, Result<Dictionary<string, string>>>
+public class GetPurchaseRequestStatusListQueryHandler : IRequestHandler<GetPurchaseRequestStatusListQuery, Result<Dictionary<string, string>>>
 {
     private static readonly Dictionary<string, string> Statuses = new()
     {

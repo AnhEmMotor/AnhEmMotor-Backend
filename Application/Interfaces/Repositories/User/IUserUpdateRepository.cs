@@ -34,3 +34,4 @@ namespace Application.Interfaces.Repositories.User
             CancellationToken cancellationToken = default);
     }
 }
+

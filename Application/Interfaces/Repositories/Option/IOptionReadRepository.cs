@@ -23,3 +23,4 @@ public interface IOptionReadRepository
 
     public Task<List<OptionEntity>> GetAllWithOptionsAsync(CancellationToken cancellationToken);
 }
+

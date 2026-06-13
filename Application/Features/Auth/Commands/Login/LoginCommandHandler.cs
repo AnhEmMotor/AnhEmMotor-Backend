@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.Auth.Commands.Login;
 
-public sealed class LoginCommandHandler(
+public class LoginCommandHandler(
     IIdentityService identityService,
     ITokenManagerService tokenManagerService,
     ICookieTokenManager cookieTokenManager,

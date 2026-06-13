@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Auth.Commands.RefreshToken;
 
-public sealed class RefreshTokenCommandHandler(
+public class RefreshTokenCommandHandler(
     ITokenManagerService tokenService,
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,

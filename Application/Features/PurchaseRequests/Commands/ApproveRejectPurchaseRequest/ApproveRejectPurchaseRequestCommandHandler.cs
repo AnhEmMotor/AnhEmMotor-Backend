@@ -8,7 +8,7 @@ using System;
 
 namespace Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRequest
 {
-    public sealed class ApproveRejectPurchaseRequestCommandHandler(
+    public class ApproveRejectPurchaseRequestCommandHandler(
         IPurchaseRequestReadRepository readRepository,
         IPurchaseRequestUpdateRepository updateRepository,
         IUnitOfWork unitOfWork,

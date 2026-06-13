@@ -33,3 +33,4 @@ namespace Application.Interfaces.Repositories.PurchaseRequest
             CancellationToken cancellationToken);
     }
 }
+

@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateVariantPrice;
 
-public sealed class UpdateVariantPriceCommandHandler(
+public class UpdateVariantPriceCommandHandler(
     IProductVariantReadRepository variantReadRepository,
     IProductVariantUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateVariantPriceCommand, Result<ProductVariantLiteResponse?>>

@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.InventoryReceipts.Queries.GetDeletedInventoryReceiptsList;
 
-public sealed class GetDeletedInventoryReceiptsListQueryHandler(IInventoryReceiptReadRepository repository) : IRequestHandler<GetDeletedInventoryReceiptsListQuery, Result<PagedResult<InventoryReceiptListResponse>>>
+public class GetDeletedInventoryReceiptsListQueryHandler(IInventoryReceiptReadRepository repository) : IRequestHandler<GetDeletedInventoryReceiptsListQuery, Result<PagedResult<InventoryReceiptListResponse>>>
 {
     public async Task<Result<PagedResult<InventoryReceiptListResponse>>> Handle(
         GetDeletedInventoryReceiptsListQuery request,

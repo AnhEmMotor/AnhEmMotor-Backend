@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetVariantLiteByProductId;
 
-public sealed class GetVariantLiteByProductIdQueryHandler(
+public class GetVariantLiteByProductIdQueryHandler(
     IProductReadRepository productReadRepository,
     IProductVariantReadRepository variantReadRepository) : IRequestHandler<GetVariantLiteByProductIdQuery, Result<List<ProductVariantLiteResponse>?>>
 {

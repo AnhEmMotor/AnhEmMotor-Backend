@@ -8,7 +8,7 @@ using BrandEntity = Domain.Entities.Brand;
 
 namespace Application.Features.Brands.Commands.CreateBrand;
 
-public sealed class CreateBrandCommandHandler(
+public class CreateBrandCommandHandler(
     IBrandInsertRepository repository,
     IBrandReadRepository brandReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateBrandCommand, Result<BrandResponse>>

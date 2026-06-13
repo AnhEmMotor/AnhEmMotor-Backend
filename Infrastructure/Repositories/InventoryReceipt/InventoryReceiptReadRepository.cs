@@ -2,7 +2,6 @@ using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +10,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
+using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
 
 namespace Infrastructure.Repositories.InventoryReceipt
 {
@@ -164,12 +164,12 @@ namespace Infrastructure.Repositories.InventoryReceipt
             throw new NotImplementedException();
         }
 
-        public Task<InventoryReceiptInfo?> GetInfoByIdAsync(int id, CancellationToken cancellationToken)
+        public Task<InventoryReceiptInfoEntity?> GetInfoByIdAsync(int id, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<InventoryReceiptInfo>> GetInfosByVariantAsync(
+        public Task<List<InventoryReceiptInfoEntity>> GetInfosByVariantAsync(
             int variantId,
             int? colorId,
             CancellationToken cancellationToken)

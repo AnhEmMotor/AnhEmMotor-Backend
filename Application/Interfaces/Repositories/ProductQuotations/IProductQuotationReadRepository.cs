@@ -13,3 +13,4 @@ namespace Application.Interfaces.Repositories.ProductQuotations
             CancellationToken cancellationToken);
     }
 }
+

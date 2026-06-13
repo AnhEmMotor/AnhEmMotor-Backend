@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.Products.Commands.UpdateManyProductPrices;
 
-public sealed class UpdateManyProductPricesCommandValidator : AbstractValidator<UpdateManyProductPricesCommand>
+public class UpdateManyProductPricesCommandValidator : AbstractValidator<UpdateManyProductPricesCommand>
 {
     public UpdateManyProductPricesCommandValidator()
     {

@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Banners.Commands.DeleteBanner;
 
-public sealed class DeleteBannerCommandHandler(
+public class DeleteBannerCommandHandler(
     IBannerReadRepository bannerReadRepository,
     IBannerDeleteRepository bannerDeleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteBannerCommand, Result<Unit>>

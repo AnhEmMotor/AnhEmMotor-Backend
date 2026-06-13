@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Queries.GetSupplierStatistics;
 
-public sealed class GetSupplierStatisticsQuery : IRequest<Result<SupplierStatisticsResponse>>;
+public class GetSupplierStatisticsQuery : IRequest<Result<SupplierStatisticsResponse>>;

@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.ProductCategories.Queries.GetDeletedProductCategoriesList;
 
-public sealed class GetDeletedProductCategoriesListQueryHandler(IProductCategoryReadRepository repository) : IRequestHandler<GetDeletedProductCategoriesListQuery, Result<PagedResult<ProductCategoryResponse>>>
+public class GetDeletedProductCategoriesListQueryHandler(IProductCategoryReadRepository repository) : IRequestHandler<GetDeletedProductCategoriesListQuery, Result<PagedResult<ProductCategoryResponse>>>
 {
     public async Task<Result<PagedResult<ProductCategoryResponse>>> Handle(
         GetDeletedProductCategoriesListQuery request,

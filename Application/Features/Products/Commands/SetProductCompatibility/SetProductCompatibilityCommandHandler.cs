@@ -7,7 +7,7 @@ using System;
 
 namespace Application.Features.Products.Commands.SetProductCompatibility
 {
-    public sealed class SetProductCompatibilityCommandHandler(
+    public class SetProductCompatibilityCommandHandler(
         IProductReadRepository readRepository,
         IProductUpdateRepository updateRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<SetProductCompatibilityCommand, Result<Unit>>
@@ -19,7 +19,7 @@ namespace Application.Features.Products.Commands.SetProductCompatibility
             var product = await readRepository.GetByIdWithDetailsAsync(request.ProductId, cancellationToken)
                 .ConfigureAwait(false);
             if (product == null)
-                return Result<Unit>.Failure(Error.NotFound("S?n ph?m không t?n t?i."));
+                return Result<Unit>.Failure(Error.NotFound("S?n ph?m khï¿½ng t?n t?i."));
             product.CompatibleWith.Clear();
             foreach (var vId in request.CompatibleVehicleIds.Distinct())
             {

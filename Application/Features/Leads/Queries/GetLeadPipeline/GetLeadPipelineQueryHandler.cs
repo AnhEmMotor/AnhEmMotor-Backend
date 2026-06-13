@@ -6,7 +6,7 @@ using System;
 
 namespace Application.Features.Leads.Queries.GetLeadPipeline
 {
-    public sealed class GetLeadPipelineQueryHandler(ILeadReadRepository leadRepository) : IRequestHandler<GetLeadPipelineQuery, Result<List<LeadPipelineGroupResponse>>>
+    public class GetLeadPipelineQueryHandler(ILeadReadRepository leadRepository) : IRequestHandler<GetLeadPipelineQuery, Result<List<LeadPipelineGroupResponse>>>
     {
         public async Task<Result<List<LeadPipelineGroupResponse>>> Handle(
             GetLeadPipelineQuery request,
@@ -16,11 +16,11 @@ namespace Application.Features.Leads.Queries.GetLeadPipeline
             var statuses = new[]
             {
                 new { Key = "New", Display = "M?i" },
-                new { Key = "Consulting", Display = "Ðang tu v?n" },
-                new { Key = "TestDriving", Display = "Ðang lái th?" },
-                new { Key = "Deposited", Display = "Ðã d?t c?c" },
-                new { Key = "Paperwork", Display = "Ðang ch? gi?y t?" },
-                new { Key = "Delivered", Display = "Ðã giao xe" }
+                new { Key = "Consulting", Display = "ï¿½ang tu v?n" },
+                new { Key = "TestDriving", Display = "ï¿½ang lï¿½i th?" },
+                new { Key = "Deposited", Display = "ï¿½ï¿½ d?t c?c" },
+                new { Key = "Paperwork", Display = "ï¿½ang ch? gi?y t?" },
+                new { Key = "Delivered", Display = "ï¿½ï¿½ giao xe" }
             };
             var result = statuses.Select(
                 s => new LeadPipelineGroupResponse

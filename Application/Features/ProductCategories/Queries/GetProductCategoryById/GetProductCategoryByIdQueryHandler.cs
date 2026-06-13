@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.ProductCategories.Queries.GetProductCategoryById;
 
-public sealed class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepository repository) : IRequestHandler<GetProductCategoryByIdQuery, Result<ProductCategoryResponse?>>
+public class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepository repository) : IRequestHandler<GetProductCategoryByIdQuery, Result<ProductCategoryResponse?>>
 {
     public async Task<Result<ProductCategoryResponse?>> Handle(
         GetProductCategoryByIdQuery request,

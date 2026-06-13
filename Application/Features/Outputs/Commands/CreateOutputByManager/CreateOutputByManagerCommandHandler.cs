@@ -13,7 +13,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.CreateOutputByManager;
 
-public sealed class CreateOutputByManagerCommandHandler(
+public class CreateOutputByManagerCommandHandler(
     IOutputReadRepository readRepository,
     IOutputInsertRepository insertRepository,
     IOutputUpdateRepository updateRepository,

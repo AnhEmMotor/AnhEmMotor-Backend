@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Application.Features.News.Commands.DeleteNews;
 
-public sealed class DeleteNewsCommandHandler(
+public class DeleteNewsCommandHandler(
     INewsReadRepository newsReadRepository,
     INewsDeleteRepository newsDeleteRepository,
     IUnitOfWork unitOfWork,

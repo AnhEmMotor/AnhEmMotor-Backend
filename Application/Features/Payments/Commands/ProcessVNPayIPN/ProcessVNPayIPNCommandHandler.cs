@@ -9,7 +9,7 @@ using System;
 
 namespace Application.Features.Payments.Commands.ProcessVNPayIPN
 {
-    public sealed class ProcessVNPayIPNCommandHandler(
+    public class ProcessVNPayIPNCommandHandler(
         IOutputReadRepository readRepository,
         IOutputUpdateRepository updateRepository,
         IUnitOfWork unitOfWork,

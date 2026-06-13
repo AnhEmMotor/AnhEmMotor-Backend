@@ -16,3 +16,4 @@ namespace Application.Interfaces.Repositories.Banner
         public Task<List<BannerAuditLog>> GetLogsByBannerIdAsync(int bannerId, CancellationToken cancellationToken);
     }
 }
+

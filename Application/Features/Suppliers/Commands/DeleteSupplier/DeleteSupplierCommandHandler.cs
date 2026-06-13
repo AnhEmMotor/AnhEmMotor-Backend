@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Application.Features.Suppliers.Commands.DeleteSupplier
 {
-    public sealed class DeleteSupplierCommandHandler(
+    public class DeleteSupplierCommandHandler(
         ISupplierReadRepository readRepository,
         ISupplierDeleteRepository deleteRepository,
         ISupplierDebtRepository supplierDebtRepository,

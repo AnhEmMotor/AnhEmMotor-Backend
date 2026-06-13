@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.News.Commands.CreateNews;
 
-public sealed class CreateNewsCommandHandler(
+public class CreateNewsCommandHandler(
     INewsInsertRepository newsInsertRepository,
     INewsReadRepository newsReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateNewsCommand, Result<int>>

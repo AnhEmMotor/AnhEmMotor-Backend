@@ -4,7 +4,7 @@ using Application.Interfaces.Services;
 using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
-
+using Infrastructure.BackgroundJobs;
 using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
@@ -28,7 +28,7 @@ public static class DependencyInjection
     {
         services.Configure<LocalFileStorageOptions>(configuration.GetSection(LocalFileStorageOptions.SectionName));
         var provider = configuration.GetValue("Provider", "SqlServer");
-        if (string.Compare(provider, "MySql") == 0)
+        if (string.Compare(provider, "MySql", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
@@ -38,7 +38,7 @@ public static class DependencyInjection
                     options.UseMySql(connectionString, serverVersion);
                     options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 });
-        } else if (string.Compare(provider, "PostgreSql") == 0)
+        } else if (string.Compare(provider, "PostgreSql", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
@@ -102,6 +102,7 @@ public static class DependencyInjection
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
+        services.AddHostedService<SupplierContractExpiryWorker>();
         return services;
     }
 }

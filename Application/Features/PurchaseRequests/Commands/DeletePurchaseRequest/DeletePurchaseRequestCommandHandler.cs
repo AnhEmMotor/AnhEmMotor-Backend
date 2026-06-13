@@ -8,7 +8,7 @@ using System;
 
 namespace Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest
 {
-    public sealed class DeletePurchaseRequestCommandHandler(
+    public class DeletePurchaseRequestCommandHandler(
         IPurchaseRequestReadRepository readRepository,
         IPurchaseRequestDeleteRepository deleteRepository,
         IPermissionReadRepository permissionReadRepository,

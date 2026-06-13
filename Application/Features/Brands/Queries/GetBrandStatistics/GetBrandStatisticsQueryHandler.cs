@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Brands.Queries.GetBrandStatistics;
 
-public sealed class GetBrandStatisticsQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandStatisticsQuery, Result<BrandStatisticsResponse>>
+public class GetBrandStatisticsQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandStatisticsQuery, Result<BrandStatisticsResponse>>
 {
     public async Task<Result<BrandStatisticsResponse>> Handle(
         GetBrandStatisticsQuery request,

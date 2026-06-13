@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.CreateOutputByManager
 {
-    public sealed class CreateOutputByManagerCommandValidator : AbstractValidator<CreateOutputByManagerCommand>
+    public class CreateOutputByManagerCommandValidator : AbstractValidator<CreateOutputByManagerCommand>
     {
         public CreateOutputByManagerCommandValidator()
         {

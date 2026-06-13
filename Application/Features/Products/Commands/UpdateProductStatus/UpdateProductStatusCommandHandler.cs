@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateProductStatus;
 
-public sealed class UpdateProductStatusCommandHandler(
+public class UpdateProductStatusCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductStatusCommand, Result<ProductDetailForManagerResponse?>>

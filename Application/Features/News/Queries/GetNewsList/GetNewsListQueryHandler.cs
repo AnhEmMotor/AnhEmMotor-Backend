@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.News.Queries.GetNewsList;
 
-public sealed class GetNewsListQueryHandler(INewsReadRepository repository) : IRequestHandler<GetNewsListQuery, Result<PagedResult<NewsSummaryResponse>>>
+public class GetNewsListQueryHandler(INewsReadRepository repository) : IRequestHandler<GetNewsListQuery, Result<PagedResult<NewsSummaryResponse>>>
 {
     public async Task<Result<PagedResult<NewsSummaryResponse>>> Handle(
         GetNewsListQuery request,

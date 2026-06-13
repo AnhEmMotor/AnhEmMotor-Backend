@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.ProductQuotations.Commands.SaveSupplierPrice
 {
-    public sealed class SaveSupplierPriceCommandHandler(
+    public class SaveSupplierPriceCommandHandler(
         IProductQuotationReadRepository quotationReadRepository,
         IProductQuotationUpdateRepository quotationUpdateRepository,
         IProductQuotationInsertRepository quotationInsertRepository,

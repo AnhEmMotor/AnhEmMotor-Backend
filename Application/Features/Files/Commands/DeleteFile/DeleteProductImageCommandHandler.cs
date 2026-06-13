@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Files.Commands.DeleteFile;
 
-public sealed class DeleteProductImageCommandHandler(
+public class DeleteProductImageCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork,

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Application.Features.ProductQuotations.Queries.GetSupplierPricesForVariant
 {
-    public sealed class GetSupplierPricesForVariantQueryHandler(IProductQuotationReadRepository quotationReadRepository) : IRequestHandler<GetSupplierPricesForVariantQuery, Result<List<PurchaseRequestQuotedPriceResponse>>>
+    public class GetSupplierPricesForVariantQueryHandler(IProductQuotationReadRepository quotationReadRepository) : IRequestHandler<GetSupplierPricesForVariantQuery, Result<List<PurchaseRequestQuotedPriceResponse>>>
     {
         public async Task<Result<List<PurchaseRequestQuotedPriceResponse>>> Handle(
             GetSupplierPricesForVariantQuery request,

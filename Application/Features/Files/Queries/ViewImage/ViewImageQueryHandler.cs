@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.Files.Queries.ViewImage;
 
-public sealed class ViewImageQueryHandler(IFileReadService fileReadService) : IRequestHandler<ViewImageQuery, Result<ViewImageResponse?>>
+public class ViewImageQueryHandler(IFileReadService fileReadService) : IRequestHandler<ViewImageQuery, Result<ViewImageResponse?>>
 {
     public async Task<Result<ViewImageResponse?>> Handle(ViewImageQuery request, CancellationToken cancellationToken)
     {

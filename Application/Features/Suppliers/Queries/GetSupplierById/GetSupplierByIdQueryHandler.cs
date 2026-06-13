@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Queries.GetSupplierById;
 
-public sealed class GetSupplierByIdQueryHandler(ISupplierReadRepository repository) : IRequestHandler<GetSupplierByIdQuery, Result<SupplierResponse?>>
+public class GetSupplierByIdQueryHandler(ISupplierReadRepository repository) : IRequestHandler<GetSupplierByIdQuery, Result<SupplierResponse?>>
 {
     public async Task<Result<SupplierResponse?>> Handle(
         GetSupplierByIdQuery request,

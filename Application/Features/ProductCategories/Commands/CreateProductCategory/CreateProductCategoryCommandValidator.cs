@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.ProductCategories.Commands.CreateProductCategory;
 
-public sealed class CreateProductCategoryCommandValidator : AbstractValidator<CreateProductCategoryCommand>
+public class CreateProductCategoryCommandValidator : AbstractValidator<CreateProductCategoryCommand>
 {
     public CreateProductCategoryCommandValidator()
     {

@@ -20,3 +20,4 @@ namespace Application.Interfaces.Repositories.Permission
             CancellationToken cancellationToken = default);
     }
 }
+

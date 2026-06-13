@@ -3,7 +3,7 @@ using SupplierStatusConstants = Domain.Constants.SupplierStatus;
 
 namespace Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
 
-public sealed class UpdateManySupplierStatusCommandValidator : AbstractValidator<UpdateManySupplierStatusCommand>
+public class UpdateManySupplierStatusCommandValidator : AbstractValidator<UpdateManySupplierStatusCommand>
 {
     public UpdateManySupplierStatusCommandValidator()
     {

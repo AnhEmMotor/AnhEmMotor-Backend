@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.RestoreProductCategory;
 
-public sealed class RestoreProductCategoryCommandHandler(
+public class RestoreProductCategoryCommandHandler(
     IProductCategoryReadRepository readRepository,
     IProductCategoryUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreProductCategoryCommand, Result<ProductCategoryResponse?>>

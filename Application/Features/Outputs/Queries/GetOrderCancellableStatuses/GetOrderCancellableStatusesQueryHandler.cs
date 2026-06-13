@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOrderCancellableStatuses;
 
-public sealed class GetOrderCancellableStatusesQueryHandler : IRequestHandler<GetOrderCancellableStatusesQuery, Result<IEnumerable<string>>>
+public class GetOrderCancellableStatusesQueryHandler : IRequestHandler<GetOrderCancellableStatusesQuery, Result<IEnumerable<string>>>
 {
     public Task<Result<IEnumerable<string>>> Handle(
         GetOrderCancellableStatusesQuery request,

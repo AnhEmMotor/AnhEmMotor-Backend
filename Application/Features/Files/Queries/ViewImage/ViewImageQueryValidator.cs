@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.Files.Queries.ViewImage;
 
-public sealed class ViewImageQueryValidator : AbstractValidator<ViewImageQuery>
+public class ViewImageQueryValidator : AbstractValidator<ViewImageQuery>
 {
     public ViewImageQueryValidator()
     {

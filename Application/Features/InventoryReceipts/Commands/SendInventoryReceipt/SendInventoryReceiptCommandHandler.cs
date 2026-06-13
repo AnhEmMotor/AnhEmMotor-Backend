@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Features.InventoryReceipts.Commands.SendInventoryReceipt;
 
-public sealed class SendInventoryReceiptCommandHandler(
+public class SendInventoryReceiptCommandHandler(
     IInventoryReceiptReadRepository readRepository,
     IInventoryReceiptUpdateRepository updateRepository,
     ICurrentUserContext currentUserContext,

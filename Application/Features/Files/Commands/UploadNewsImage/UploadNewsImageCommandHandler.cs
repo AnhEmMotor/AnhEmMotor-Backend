@@ -9,7 +9,7 @@ using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace Application.Features.Files.Commands.UploadNewsImage;
 
-public sealed class UploadNewsImageCommandHandler(
+public class UploadNewsImageCommandHandler(
     IFileReadService fileReadService,
     IFileInsertService fileInsertService,
     IMediaFileInsertRepository insertRepository,

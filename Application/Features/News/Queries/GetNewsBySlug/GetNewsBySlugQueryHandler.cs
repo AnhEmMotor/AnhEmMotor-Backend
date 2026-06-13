@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Application.Features.News.Queries.GetNewsBySlug;
 
-public sealed class GetNewsBySlugQueryHandler(INewsReadRepository repository, IMemoryCache cache) : IRequestHandler<GetNewsBySlugQuery, Result<NewsForStoreResponse>>
+public class GetNewsBySlugQueryHandler(INewsReadRepository repository, IMemoryCache cache) : IRequestHandler<GetNewsBySlugQuery, Result<NewsForStoreResponse>>
 {
     public async Task<Result<NewsForStoreResponse>> Handle(
         GetNewsBySlugQuery request,

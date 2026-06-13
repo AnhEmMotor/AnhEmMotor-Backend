@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Application.Features.InventoryReports.Queries.GetInventoryReportDetail
 {
-    public sealed class GetInventoryReportDetailQueryHandler(
+    public class GetInventoryReportDetailQueryHandler(
         IProductReadRepository productRepository,
         IInventoryReceiptReadRepository receiptRepository) : IRequestHandler<GetInventoryReportDetailQuery, Result<InventoryReportDetailResponse>>
     {

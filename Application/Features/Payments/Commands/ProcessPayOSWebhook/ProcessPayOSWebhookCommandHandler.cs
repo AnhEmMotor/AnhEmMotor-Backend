@@ -8,7 +8,7 @@ using System;
 
 namespace Application.Features.Payments.Commands.ProcessPayOSWebhook
 {
-    public sealed class ProcessPayOSWebhookCommandHandler(
+    public class ProcessPayOSWebhookCommandHandler(
         IOutputReadRepository readRepository,
         IOutputUpdateRepository updateRepository,
         IUnitOfWork unitOfWork,

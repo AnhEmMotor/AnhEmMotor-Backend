@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
 
-public sealed class GetPredefinedOptionsListQueryHandler(IPredefinedOptionReadRepository repository) : IRequestHandler<GetPredefinedOptionsListQuery, Result<Dictionary<string, string>>>
+public class GetPredefinedOptionsListQueryHandler(IPredefinedOptionReadRepository repository) : IRequestHandler<GetPredefinedOptionsListQuery, Result<Dictionary<string, string>>>
 {
     public async Task<Result<Dictionary<string, string>>> Handle(
         GetPredefinedOptionsListQuery request,

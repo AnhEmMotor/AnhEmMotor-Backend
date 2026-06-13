@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 
-public sealed class UpdateManyOutputStatusCommandValidator : AbstractValidator<UpdateManyOutputStatusCommand>
+public class UpdateManyOutputStatusCommandValidator : AbstractValidator<UpdateManyOutputStatusCommand>
 {
     public UpdateManyOutputStatusCommandValidator()
     {

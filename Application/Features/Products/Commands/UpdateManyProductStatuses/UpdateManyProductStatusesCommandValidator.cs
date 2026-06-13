@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.Products.Commands.UpdateManyProductStatuses;
 
-public sealed class UpdateManyProductStatusesCommandValidator : AbstractValidator<UpdateManyProductStatusesCommand>
+public class UpdateManyProductStatusesCommandValidator : AbstractValidator<UpdateManyProductStatusesCommand>
 {
     public UpdateManyProductStatusesCommandValidator()
     {

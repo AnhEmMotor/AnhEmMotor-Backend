@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt
 {
-    public sealed class CreateInventoryReceiptInfoCommandValidator : AbstractValidator<CreateInventoryReceiptInfoRequest>
+    public class CreateInventoryReceiptInfoCommandValidator : AbstractValidator<CreateInventoryReceiptInfoRequest>
     {
         public CreateInventoryReceiptInfoCommandValidator()
         {

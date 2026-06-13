@@ -6,7 +6,7 @@ using Sieve.Models;
 
 namespace Application.Features.Loyalty.Queries.GetLoyaltyMembers;
 
-public sealed class GetLoyaltyMembersQuery : IRequest<Result<PagedResult<LoyaltyMemberResponse>>>
+public class GetLoyaltyMembersQuery : IRequest<Result<PagedResult<LoyaltyMemberResponse>>>
 {
     public SieveModel? SieveModel { get; set; }
 }

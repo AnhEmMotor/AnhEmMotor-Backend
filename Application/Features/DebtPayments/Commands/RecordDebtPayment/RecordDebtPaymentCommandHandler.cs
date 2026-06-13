@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Application.Features.DebtPayments.Commands.RecordDebtPayment
 {
-    public sealed class RecordDebtPaymentCommandHandler(
+    public class RecordDebtPaymentCommandHandler(
         ISupplierDebtRepository supplierDebtRepository,
         IInventoryReceiptReadRepository inventoryReceiptReadRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<RecordDebtPaymentCommand, Result<InventoryReceiptDetailResponse>>

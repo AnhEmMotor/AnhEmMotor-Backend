@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.DeleteManyOutputs;
 
-public sealed class DeleteManyOutputsCommandValidator : AbstractValidator<DeleteManyOutputsCommand>
+public class DeleteManyOutputsCommandValidator : AbstractValidator<DeleteManyOutputsCommand>
 {
     public DeleteManyOutputsCommandValidator()
     {
