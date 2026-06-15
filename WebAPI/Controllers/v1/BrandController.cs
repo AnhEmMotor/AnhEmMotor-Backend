@@ -1,8 +1,10 @@
 using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
+using Application.Features.Brands.Commands.CloneManyBrands;
 using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteBrand;
 using Application.Features.Brands.Commands.DeleteManyBrands;
+using Application.Features.Brands.Commands.ImportBrands;
 using Application.Features.Brands.Commands.RestoreBrand;
 using Application.Features.Brands.Commands.RestoreManyBrands;
 using Application.Features.Brands.Commands.UpdateBrand;
@@ -11,6 +13,7 @@ using Application.Features.Brands.Queries.GetBrandById;
 using Application.Features.Brands.Queries.GetBrandsList;
 using Application.Features.Brands.Queries.GetBrandStatistics;
 using Application.Features.Brands.Queries.GetDeletedBrandsList;
+using Application.Features.Brands.Queries.GetImportTemplate;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -76,7 +79,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <returns>Danh sách thương hiệu đã xóa.</returns>
     [HttpGet("deleted")]
     [HasPermission(Brands.Delete)]
-    [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<BrandRestoreResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedBrandsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -115,6 +118,21 @@ public class BrandController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new ExportBrandsQuery { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Xuất file mẫu để nhập Excel.
+    /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>File Excel mẫu.</returns>
+    [HttpGet("import-template")]
+    [HasPermission(Brands.View)]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetImportTemplateAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetBrandImportTemplateQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -246,6 +264,44 @@ public class BrandController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyBrandsCommand>();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Clone (nhân bản) nhiều thương hiệu cùng lúc.
+    /// </summary>
+    /// <param name="request">Danh sách ID thương hiệu cần clone.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách thương hiệu sau khi clone.</returns>
+    [HttpPost("clone-many")]
+    [HasPermission(Brands.Create)]
+    [ProducesResponseType(typeof(List<BrandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CloneBrandsAsync(
+        [FromBody] CloneManyBrandsCommand request,
+        CancellationToken cancellationToken)
+    {
+        var command = request.Adapt<CloneManyBrandsCommand>();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Nhập danh sách thương hiệu từ file Excel.
+    /// </summary>
+    /// <param name="file">File Excel.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả nhập.</returns>
+    [HttpPost("import")]
+    [HasPermission(Brands.Create)]
+    [ProducesResponseType(typeof(ImportBrandsResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ImportBrandsAsync(
+        IFormFile file,
+        CancellationToken cancellationToken)
+    {
+        var command = new ImportBrandsCommand { File = file };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

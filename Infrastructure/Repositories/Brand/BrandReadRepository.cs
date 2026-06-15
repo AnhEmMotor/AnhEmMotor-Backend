@@ -77,6 +77,8 @@ public class BrandReadRepository(
     {
         var query = context.GetQuery<BrandEntity>(DataFetchMode.ActiveOnly);
         var totalBrands = await query.CountAsync(cancellationToken).ConfigureAwait(false);
+        var deletedBrandsCount = await context.GetQuery<BrandEntity>(DataFetchMode.DeletedOnly)
+            .CountAsync(cancellationToken).ConfigureAwait(false);
         var popularOriginGroup = await query
             .Where(b => !string.IsNullOrEmpty(b.Origin))
             .GroupBy(b => b.Origin)
@@ -95,7 +97,8 @@ public class BrandReadRepository(
             PopularOrigin = popularOriginGroup?.Origin,
             PopularOriginCount = popularOriginGroup?.Count ?? 0,
             LatestUpdatedBrandName = latestUpdatedBrand?.Name,
-            LatestUpdatedAt = latestUpdatedBrand?.LatestTime
+            LatestUpdatedAt = latestUpdatedBrand?.LatestTime,
+            DeletedBrandsCount = deletedBrandsCount
         };
     }
 

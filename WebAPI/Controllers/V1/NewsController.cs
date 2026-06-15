@@ -255,15 +255,9 @@ public class NewsController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Upload ảnh nội dung bài viết (WangEditor)")]
     public async Task<IActionResult> UploadContentImageAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        if (file == null || file.Length == 0)
-        {
-            return Ok(new UploadNewsContentImageResponse { Errno = 1, Message = "File không hợp lệ." });
-        }
         var command = new UploadNewsContentImageCommand
         {
-            FileStream = file.OpenReadStream(),
-            FileName = file.FileName,
-            BaseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{HttpContext.Request.PathBase}"
+            File = file
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return Ok(result);

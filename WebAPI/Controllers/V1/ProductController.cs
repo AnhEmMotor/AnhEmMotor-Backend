@@ -1,6 +1,7 @@
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.ApiContracts.PurchaseRequest.Responses;
+using Application.ApiContracts.Products.Responses;
 using Application.Common.Models;
 using Application.Features.ProductQuotations.Queries.GetSupplierPricesForVariant;
 using Application.Features.Products.Commands.AttachTechnologies;
@@ -10,6 +11,7 @@ using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.RestoreManyProducts;
 using Application.Features.Products.Commands.RestoreProduct;
 using Application.Features.Products.Commands.SetProductCompatibility;
+using Application.Features.Products.Commands.UploadProductContentImage;
 using Application.Features.Products.Commands.UpdateManyProductPrices;
 using Application.Features.Products.Commands.UpdateManyProductStatuses;
 using Application.Features.Products.Commands.UpdateManyVariantPrices;
@@ -558,6 +560,22 @@ public class ProductController(ISender sender) : ApiController
         var command = request with { ProductId = id };
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Upload ảnh trong nội dung sản phẩm (cho WangEditor).
+    /// </summary>
+    [HttpPost("images/content")]
+    [HasPermission(Products.Edit)]
+    [SwaggerOperation(Summary = "Upload ảnh nội dung sản phẩm (WangEditor)")]
+    public async Task<IActionResult> UploadContentImageAsync(IFormFile file, CancellationToken cancellationToken)
+    {
+        var command = new UploadProductContentImageCommand
+        {
+            File = file
+        };
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return Ok(result);
     }
 }
 

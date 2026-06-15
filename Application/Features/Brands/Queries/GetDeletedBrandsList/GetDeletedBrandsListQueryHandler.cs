@@ -7,13 +7,13 @@ using MediatR;
 
 namespace Application.Features.Brands.Queries.GetDeletedBrandsList;
 
-public class GetDeletedBrandsListQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetDeletedBrandsListQuery, Result<PagedResult<BrandResponse>>>
+public class GetDeletedBrandsListQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetDeletedBrandsListQuery, Result<PagedResult<BrandRestoreResponse>>>
 {
-    public async Task<Result<PagedResult<BrandResponse>>> Handle(
+    public async Task<Result<PagedResult<BrandRestoreResponse>>> Handle(
         GetDeletedBrandsListQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await repository.GetPagedAsync<BrandResponse>(
+        var result = await repository.GetPagedAsync<BrandRestoreResponse>(
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
             cancellationToken)
