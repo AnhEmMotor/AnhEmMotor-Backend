@@ -9,8 +9,7 @@ public static class SupplierContractSeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        if (!await context.Suppliers.AnyAsync(cancellationToken).ConfigureAwait(false))
-            return;
+        await EnsureDemoSuppliersAsync(context, cancellationToken).ConfigureAwait(false);
 
         if (!await context.ProductVariants.AnyAsync(cancellationToken).ConfigureAwait(false))
             return;
@@ -254,6 +253,66 @@ public static class SupplierContractSeeder
             });
         }
 
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task EnsureDemoSuppliersAsync(ApplicationDBContext context, CancellationToken cancellationToken)
+    {
+        var suppliers = await context.Suppliers.ToListAsync(cancellationToken).ConfigureAwait(false);
+        var newSuppliers = new List<Supplier>();
+
+        if (!suppliers.Any(s => s.Name != null && s.Name.Contains("Honda")))
+        {
+            newSuppliers.Add(new Supplier
+            {
+                Name = "Honda Viet Nam",
+                Phone = "02838383838",
+                Email = "contract@honda-vietnam.vn",
+                StatusId = Domain.Constants.SupplierStatus.Active,
+                Address = "Phuc Thang, Phuc Yen, Vinh Phuc",
+                TaxIdentificationNumber = "2500150543",
+                Notes = "Nha cung cap xe may Honda chinh hang.",
+                CreatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                UpdatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero)
+            });
+        }
+
+        if (!suppliers.Any(s => s.Name != null && s.Name.Contains("Yamaha")))
+        {
+            newSuppliers.Add(new Supplier
+            {
+                Name = "Yamaha Motor Viet Nam",
+                Phone = "02839393939",
+                Email = "contract@yamaha-motor.vn",
+                StatusId = Domain.Constants.SupplierStatus.Active,
+                Address = "Trung Gia, Soc Son, Ha Noi",
+                TaxIdentificationNumber = "0100774342",
+                Notes = "Nha cung cap xe may Yamaha chinh hang.",
+                CreatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                UpdatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero)
+            });
+        }
+
+        if (!suppliers.Any(s => s.Name != null && s.Name.Contains("Suzuki")))
+        {
+            newSuppliers.Add(new Supplier
+            {
+                Name = "Suzuki Viet Nam",
+                Phone = "02837373737",
+                Email = "contract@suzuki.com.vn",
+                StatusId = Domain.Constants.SupplierStatus.Active,
+                Address = "Long Binh, Bien Hoa, Dong Nai",
+                TaxIdentificationNumber = "3600240973",
+                Notes = "Nha cung cap xe may Suzuki chinh hang.",
+                CreatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                UpdatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero)
+            });
+        }
+
+        if (newSuppliers.Count == 0)
+            return;
+
+        context.Suppliers.AddRange(newSuppliers);
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }

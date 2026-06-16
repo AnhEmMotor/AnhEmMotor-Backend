@@ -16,11 +16,39 @@ public class ContractsController(ISender sender) : ApiController
   [HttpGet("sales")]
   [Authorize]
   [SwaggerOperation(Summary = "Lấy danh sách hợp đồng bán xe", Description = "Hỗ trợ phân trang, tìm kiếm và lọc")]
-  public async Task<IActionResult> GetSalesContractsAsync([FromQuery] Sieve.Models.SieveModel request, CancellationToken cancellationToken)
+  public async Task<IActionResult> GetSalesContractsAsync(
+      [FromQuery] string? keyword,
+      [FromQuery] string? status,
+      [FromQuery] string? vehicleModel,
+      [FromQuery] int page = 1,
+      [FromQuery] int pageSize = 10,
+      CancellationToken cancellationToken = default)
   {
-    var query = new Application.Features.SalesContracts.Queries.GetSalesContractsList.GetSalesContractsListQuery { SieveModel = request };
-    var result = await sender.Send(query, cancellationToken);
-    return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+      var filters = new System.Collections.Generic.List<string>();
+      if (!string.IsNullOrWhiteSpace(status))
+      {
+          filters.Add($"Status=={status}");
+      }
+      if (!string.IsNullOrWhiteSpace(vehicleModel))
+      {
+          filters.Add($"VehicleModel@={vehicleModel}");
+      }
+      if (!string.IsNullOrWhiteSpace(keyword))
+      {
+          filters.Add($"ContractNumber@={keyword}|CustomerFullName@={keyword}|CustomerCCCD@={keyword}|CustomerPhone@={keyword}|FrameNumber@={keyword}|EngineNumber@={keyword}");
+      }
+
+      var sieveModel = new Sieve.Models.SieveModel
+      {
+          Page = page,
+          PageSize = pageSize,
+          Filters = filters.Count > 0 ? string.Join(",", filters) : null,
+          Sorts = "createdAt desc"
+      };
+
+      var query = new Application.Features.SalesContracts.Queries.GetSalesContractsList.GetSalesContractsListQuery { SieveModel = sieveModel };
+      var result = await sender.Send(query, cancellationToken);
+      return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
   }
 
   [HttpGet("sales/{id:guid}")]

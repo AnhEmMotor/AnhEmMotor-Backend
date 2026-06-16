@@ -107,7 +107,7 @@ public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashb
         });
 
         // 4. Productivity
-        var employees = await _context.EmployeeProfiles.ToListAsync(cancellationToken);
+        var employees = await _context.EmployeeProfiles.Include(e => e.User).ToListAsync(cancellationToken);
         foreach (var emp in employees)
         {
             var currentOrder = inProgressOrders.FirstOrDefault(ro => ro.TechnicianId == emp.Id);

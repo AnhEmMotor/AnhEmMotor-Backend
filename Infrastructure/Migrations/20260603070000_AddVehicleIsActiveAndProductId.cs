@@ -1,3 +1,5 @@
+using Infrastructure.DBContexts;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
@@ -6,6 +8,8 @@ using System;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(ApplicationDBContext))]
+    [Migration("20260603070000_AddVehicleIsActiveAndProductId")]
     public partial class AddVehicleIsActiveAndProductId : Migration
     {
         /// <inheritdoc />

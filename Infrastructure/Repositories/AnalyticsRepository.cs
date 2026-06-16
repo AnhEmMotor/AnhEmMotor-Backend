@@ -94,7 +94,7 @@ namespace Infrastructure.Repositories
                 .Include(e => e.User)
                 .Select(e => new
                 {
-                    FullName = e.User.UserName, // Giả định dùng UserName làm FullName nếu không có field riêng
+                    FullName = e.User.FullName ?? e.User.UserName,
                     Role = e.JobTitle,
                     Sales = _context.OutputOrders
                         .Where(o => o.FinishedBy == e.User.Id && o.CreatedAt >= start && o.CreatedAt <= end && o.StatusId == "Completed")

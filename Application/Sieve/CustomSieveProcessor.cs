@@ -61,6 +61,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Supplier>(s => s.Name).CanSort().CanFilter();
         mapper.Property<Supplier>(s => s.Phone).CanFilter();
         mapper.Property<Supplier>(s => s.Email).CanFilter();
+        mapper.Property<Supplier>(s => s.TaxIdentificationNumber).CanFilter();
         mapper.Property<Supplier>(s => s.StatusId).CanSort().CanFilter();
         mapper.Property<Supplier>(s => s.Address).CanFilter();
         mapper.Property<Supplier>(s => s.PartnerTypeId).CanSort().CanFilter();
@@ -75,6 +76,14 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<SupplierWithTotalInputResponse>(s => s.DeletedAt).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.TotalInput).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.PartnerTypeId).CanSort().CanFilter();
+        mapper.Property<SupplierResponse>(s => s.Id).CanSort().CanFilter();
+        mapper.Property<SupplierResponse>(s => s.Name).CanSort().CanFilter();
+        mapper.Property<SupplierResponse>(s => s.Phone).CanFilter();
+        mapper.Property<SupplierResponse>(s => s.Email).CanFilter();
+        mapper.Property<SupplierResponse>(s => s.Address).CanFilter();
+        mapper.Property<SupplierResponse>(s => s.StatusId).CanSort().CanFilter();
+        mapper.Property<SupplierResponse>(s => s.PartnerTypeId).CanSort().CanFilter();
+        mapper.Property<SupplierResponse>(s => s.TaxIdentificationNumber).CanFilter();
         mapper.Property<ApplicationUser>(p => p.Id).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.UserName).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.FullName).CanSort().CanFilter();
@@ -92,7 +101,28 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Vehicle>(v => v.LicensePlate).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.PurchaseDate).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.Lead!.FullName).CanSort().CanFilter().HasName("FullName");
-        mapper.Property<Vehicle>(v => v.Lead!.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
+mapper.Property<Vehicle>(v => v.Lead!.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
+mapper.Property<FinanceContract>(p => p.ContractNumber).CanSort().CanFilter();
+mapper.Property<FinanceContract>(p => p.DisbursementStatus).CanSort().CanFilter();
+mapper.Property<FinanceContract>(p => p.BankName).CanSort().CanFilter();
+mapper.Property<FinanceContract>(p => p.CavetLocation).CanSort().CanFilter();
+
+        mapper.Property<SupplierContract>(p => p.ContractNumber).CanSort().CanFilter();
+        mapper.Property<SupplierContract>(p => p.Status).CanSort().CanFilter();
+        mapper.Property<SupplierContract>(p => p.Supplier!.Name).CanFilter().HasName("Supplier.Name");
+        mapper.Property<SupplierContract>(p => p.EffectiveDate).CanSort().CanFilter();
+        mapper.Property<SupplierContract>(p => p.ExpirationDate).CanSort().CanFilter();
+        mapper.Property<SupplierContract>(p => p.ContractValue).CanSort().CanFilter();
+
+        mapper.Property<SalesContract>(p => p.ContractNumber).CanSort().CanFilter();
+        mapper.Property<SalesContract>(p => p.Status).CanSort().CanFilter();
+        mapper.Property<SalesContract>(p => p.VehicleModel).CanSort().CanFilter();
+        mapper.Property<SalesContract>(p => p.CustomerFullName).CanFilter();
+        mapper.Property<SalesContract>(p => p.CustomerCCCD).CanFilter();
+        mapper.Property<SalesContract>(p => p.CustomerPhone).CanFilter();
+        mapper.Property<SalesContract>(p => p.FrameNumber).CanFilter();
+        mapper.Property<SalesContract>(p => p.EngineNumber).CanFilter();
+
         return mapper;
     }
 

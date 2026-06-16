@@ -102,6 +102,69 @@ public static class LeadSeeder
                             CreatedAt = DateTimeOffset.UtcNow.AddHours(-1)
                         }
                     }
+            },
+            new Lead
+            {
+                FullName = "Hoàng Văn Tuấn",
+                Email = "tuan.hoang@gmail.com",
+                PhoneNumber = "0945999888",
+                Status = "Consulting",
+                Source = "Shop",
+                Score = 75,
+                InterestedVehicle = "Honda SH 150i",
+                AssignedToId = firstSale?.Id,
+                CreatedAt = DateTimeOffset.UtcNow.AddDays(-12),
+                UpdatedAt = DateTimeOffset.UtcNow.AddDays(-10)
+            },
+            new Lead
+            {
+                FullName = "Đỗ Thị Lan",
+                Email = "lan.do@gmail.com",
+                PhoneNumber = "0932888777",
+                Status = "Converted",
+                Source = "WebStore",
+                Score = 95,
+                InterestedVehicle = "Yamaha Exciter 155",
+                AssignedToId = firstSale?.Id,
+                CreatedAt = DateTimeOffset.UtcNow.AddDays(-20),
+                UpdatedAt = DateTimeOffset.UtcNow.AddDays(-18)
+            },
+            new Lead
+            {
+                FullName = "Vũ Anh Đức",
+                Email = "duc.vu@gmail.com",
+                PhoneNumber = "0923777666",
+                Status = "Lost",
+                Source = "Facebook",
+                Score = 20,
+                InterestedVehicle = "Honda Winner X",
+                AssignedToId = firstSale?.Id,
+                CreatedAt = DateTimeOffset.UtcNow.AddDays(-15),
+                UpdatedAt = DateTimeOffset.UtcNow.AddDays(-12)
+            },
+            new Lead
+            {
+                FullName = "Bùi Minh Tú",
+                Email = "tu.bui@gmail.com",
+                PhoneNumber = "0965123789",
+                Status = "New",
+                Source = "WebStore",
+                Score = 45,
+                InterestedVehicle = "Suzuki Raider R150",
+                CreatedAt = DateTimeOffset.UtcNow.AddHours(-18)
+            },
+            new Lead
+            {
+                FullName = "Đặng Phương Thảo",
+                Email = "thao.dang@gmail.com",
+                PhoneNumber = "0977222333",
+                Status = "Consulting",
+                Source = "Facebook",
+                Score = 55,
+                InterestedVehicle = "Honda Vision",
+                AssignedToId = firstSale?.Id,
+                CreatedAt = DateTimeOffset.UtcNow.AddDays(-3),
+                UpdatedAt = DateTimeOffset.UtcNow.AddDays(-1)
             }
         };
         context.Leads.AddRange(leads);

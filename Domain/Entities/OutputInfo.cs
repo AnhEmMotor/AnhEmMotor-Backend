@@ -10,7 +10,7 @@ namespace Domain.Entities
         [Column("id")]
         public int Id { get; set; }
 
-        [Column("ProductVarientId")]
+        [Column("ProductVariantId")]
         [ForeignKey("ProductVariant")]
         public int? ProductVarientId { get; set; }
 

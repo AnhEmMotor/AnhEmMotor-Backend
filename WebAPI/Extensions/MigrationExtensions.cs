@@ -41,6 +41,8 @@ public static class MigrationExtensions
             var dbContext = services.GetRequiredService<ApplicationDBContext>();
             await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
             var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
+            var shouldSeedDemoData =
+                configuration.GetValue<bool>("SeedingOptions:RunDemoDataSeedingOnStartup");
             if (shouldSeed)
             {
                 var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
@@ -67,10 +69,16 @@ public static class MigrationExtensions
                     configuration,
                     cancellationToken)
                     .ConfigureAwait(false);
-                await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
-                await LeadSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
-                await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-await SupplierContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                if (shouldSeedDemoData)
+                {
+                    await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
+                    await LeadSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
+                    await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                    await SupplierContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                    await FinanceContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                    await ContractTemplateSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                    await SalesAndInventorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                }
             }
         } catch (Exception ex)
         {

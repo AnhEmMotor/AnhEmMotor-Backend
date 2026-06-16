@@ -2,6 +2,7 @@ using Application.ApiContracts.Service.Responses;
 using Application.Common.Models;
 using Application.Features.Services.Commands.CreateService;
 using Application.Features.Services.Commands.UpdateService;
+using Application.Features.Services.Queries;
 using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Http;

@@ -1,15 +1,23 @@
 using Application.ApiContracts.FinanceContract.Requests;
 using Application.Common.Models;
+using Application.Features.FinanceContracts.Commands.UpdateCavetState;
+using Application.Features.FinanceContracts.Commands.UpdateDisbursementPayment;
+using Application.Features.FinanceContracts.Commands.UploadDisbursementEvidence;
 using Application.Features.FinanceContracts.Queries.GetFinanceContractDetail;
+using Application.Features.FinanceContracts.Queries.GetFinanceContractsList;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
+/// <summary>
+/// Manages finance contract operations including retrieval, disbursement updates, and evidence uploads.
+/// </summary>
 [ApiVersion("1.0")]
 [SwaggerTag("Finance Contracts")]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -17,6 +25,21 @@ namespace WebAPI.Controllers.V1;
 [Authorize]
 public class FinanceContractsController(ISender sender) : ApiController
 {
+    /// <summary>
+    /// Retrieves a paginated and filterable list of finance contracts.
+    /// </summary>
+    [HttpGet]
+    [SwaggerOperation(Summary = "Get Finance Contracts List")]
+    public async Task<IActionResult> GetFinanceContractsList([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    {
+        var query = new GetFinanceContractsListQuery { SieveModel = sieveModel };
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Retrieves the details of a specific finance contract by its identifier.
+    /// </summary>
     [HttpGet("{financeContractId:guid}")]
     [SwaggerOperation(Summary = "Get Finance Contract Detail")]
     public async Task<IActionResult> GetFinanceContractDetail([FromRoute] Guid financeContractId, CancellationToken cancellationToken)
@@ -26,14 +49,17 @@ public class FinanceContractsController(ISender sender) : ApiController
         return Ok(result);
     }
 
+    /// <summary>
+    /// Updates the disbursement payment information for a finance contract.
+    /// </summary>
     [HttpPost("{financeContractId:guid}/disbursement/payment")]
     public async Task<IActionResult> UpdateDisbursementPayment(
         [FromRoute] Guid financeContractId,
-        [FromBody] Application.ApiContracts.FinanceContract.Requests.UpdateDisbursementPaymentRequest request,
+        [FromBody] UpdateDisbursementPaymentRequest request,
         CancellationToken cancellationToken)
     {
         await sender.Send(
-            new Application.Features.FinanceContracts.Commands.UpdateDisbursementPayment.UpdateDisbursementPaymentCommand(
+            new UpdateDisbursementPaymentCommand(
                 financeContractId,
                 request,
                 Guid.Empty
@@ -44,14 +70,17 @@ public class FinanceContractsController(ISender sender) : ApiController
         return Ok(new { success = true });
     }
 
+    /// <summary>
+    /// Updates the state of a CAVET document associated with a finance contract.
+    /// </summary>
     [HttpPost("{financeContractId:guid}/cavet/state")]
     public async Task<IActionResult> UpdateCavetState(
         [FromRoute] Guid financeContractId,
-        [FromBody] Application.ApiContracts.FinanceContract.Requests.UpdateCavetStateRequest request,
+        [FromBody] UpdateCavetStateRequest request,
         CancellationToken cancellationToken)
     {
         await sender.Send(
-            new Application.Features.FinanceContracts.Commands.UpdateCavetState.UpdateCavetStateCommand(
+            new UpdateCavetStateCommand(
                 financeContractId,
                 request,
                 Guid.Empty
@@ -62,6 +91,9 @@ public class FinanceContractsController(ISender sender) : ApiController
         return Ok(new { success = true });
     }
 
+    /// <summary>
+    /// Uploads evidence documentation for a finance contract's disbursement.
+    /// </summary>
     [HttpPost("{financeContractId:guid}/disbursement/evidence/upload")]
     public async Task<IActionResult> UploadDisbursementEvidence(
         [FromRoute] Guid financeContractId,
@@ -72,9 +104,9 @@ public class FinanceContractsController(ISender sender) : ApiController
 
         using var stream = file.OpenReadStream();
         await sender.Send(
-            new Application.Features.FinanceContracts.Commands.UploadDisbursementEvidence.UploadDisbursementEvidenceCommand(
+            new UploadDisbursementEvidenceCommand(
                 financeContractId,
-                new Application.ApiContracts.FinanceContract.Requests.UploadDisbursementEvidenceRequest
+                new UploadDisbursementEvidenceRequest
                 {
                     FileContent = stream,
                     FileName = file.FileName
@@ -87,5 +119,3 @@ public class FinanceContractsController(ISender sender) : ApiController
         return Ok(new { success = true });
     }
 }
-
-
