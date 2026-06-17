@@ -108,8 +108,8 @@ if (!app.Environment.IsEnvironment("Test"))
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-if (!app.Environment.IsEnvironment("Test"))
-{
-    await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
-}
+// if (!app.Environment.IsEnvironment("Test"))
+// {
+//     await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
+// }
 app.Run();

@@ -13,7 +13,7 @@ namespace Domain.Entities
         public int VehicleId { get; set; }
         public virtual Vehicle Vehicle { get; set; } = null!;
 
-        public string ServiceType { get; set; } = string.Empty; // Bảo dưỡng định kỳ / Sửa chữa / Lái thử
+        public string ServiceType { get; set; } = string.Empty; // Báº£o dÆ°á»¡ng Ä‘á»‹nh ká»³ / Sá»­a chá»¯a / LÃ¡i thá»­
         public DateTime AppointmentDate { get; set; }
         public TimeSpan AppointmentTime { get; set; }
         public string Notes { get; set; } = string.Empty;
@@ -29,3 +29,5 @@ namespace Domain.Entities
         public string CancellationReason { get; set; } = string.Empty;
     }
 }
+
+
