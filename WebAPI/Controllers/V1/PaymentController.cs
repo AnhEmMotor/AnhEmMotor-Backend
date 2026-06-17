@@ -1,8 +1,10 @@
 using Application.ApiContracts.Payment.Requests;
+using Application.ApiContracts.Payment.Responses;
 using Application.Features.Outputs.Queries.GetPaymentLink;
 using Application.Features.Payments.Commands.ProcessPayOSCallback;
 using Application.Features.Payments.Commands.ProcessPayOSWebhook;
 using Application.Features.Payments.Commands.ProcessVNPayIPN;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +19,8 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 [ApiController]
 [SwaggerTag("Quản lý các hoạt động thanh toán")]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class PaymentController(ISender sender) : ApiController
 {
     /// <summary>
@@ -40,7 +43,7 @@ public class PaymentController(ISender sender) : ApiController
     /// <param name="orderId">ID của đơn hàng.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Dữ liệu link thanh toán.</returns>
-    [HttpGet("link/{orderId}")]
+    [HttpGet("{orderId}/link")]
     [Authorize]
     public async Task<IActionResult> GetPaymentLink(int orderId, CancellationToken cancellationToken)
     {

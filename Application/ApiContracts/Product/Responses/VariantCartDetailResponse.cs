@@ -14,4 +14,10 @@ public class VariantCartDetailResponse
 
     [JsonPropertyName("product_limit")]
     public int? ProductLimit { get; set; }
+
+    [JsonPropertyName("effectiveMax")]
+    public int? EffectiveMax { get; set; }
+
+    [JsonPropertyName("colors")]
+    public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
 }

@@ -28,4 +28,6 @@ public class InventoryReceiptListResponse
 
     [JsonPropertyName("deleted_at")]
     public DateTimeOffset? DeletedAt { get; set; }
+
+    public long? TotalPayable { get; set; }
 }

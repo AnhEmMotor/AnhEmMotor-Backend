@@ -27,7 +27,10 @@ namespace Infrastructure.Persistence
             var connectionString = configuration.GetConnectionString("StringConnection");
             if (string.IsNullOrEmpty(connectionString) ||
                 connectionString.Contains("Initial Catalog") ||
-                connectionString.Contains("Data Source"))
+                connectionString.Contains("Data Source") ||
+                connectionString.Contains("MSSQLLocalDB") ||
+                connectionString.Contains("Trusted_Connection") ||
+                configuration["Provider"] != "MySql")
             {
                 connectionString = "Server=localhost;Database=anhemmotor;User=root;Password=root;";
             }

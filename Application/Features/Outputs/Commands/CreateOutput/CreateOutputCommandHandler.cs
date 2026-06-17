@@ -52,28 +52,60 @@ public class CreateOutputCommandHandler(
         for (int i = 0; i < request.OutputInfos.Count; i++)
         {
             var info = request.OutputInfos[i];
-            var variant = variantsList.FirstOrDefault(v => v.Id == info.ProductVariantId);
+            if (!info.ProductVariantId.HasValue)
+            {
+                errors.Add(Error.BadRequest("ProductVariantId là bắt buộc.", $"products[{i}].productVariantId"));
+                continue;
+            }
+            var variant = variantsList.FirstOrDefault(v => v.Id == info.ProductVariantId.Value);
             var colorValidation = ValidateVariantColor(variant, info.ProductVariantColorId);
             if (colorValidation is not null)
             {
                 errors.Add(colorValidation);
             }
-            if (variant?.Product?.ProductCategory != null &&
-                variant.Product.ProductCategory.MaxPurchaseQuantity.HasValue)
-            {
-                var category = variant.Product.ProductCategory;
-                var maxAllowed = category.MaxPurchaseQuantity.Value;
-                var totalCountForProduct = request.OutputInfos
-                    .Where(oi => oi.ProductVariantId == info.ProductVariantId)
-                    .Sum(oi => oi.Count ?? 0);
-                if (totalCountForProduct > maxAllowed)
+        }
+        foreach (var group in request.OutputInfos
+            .Select((Info, Index) => new { Info, Index })
+            .Where(x => x.Info.ProductVariantId.HasValue)
+            .GroupBy(
+                x => new
                 {
-                    errors.Add(
-                        Error.BadRequest(
-                            $"Số lượng mua tối đa cho sản phẩm '{variant.Product.Name}' là {maxAllowed} sản phẩm.",
-                            $"products[{i}]"));
-                }
+                    ProductVariantId = x.Info.ProductVariantId!.Value,
+                    ProductVariantColorId = NormalizeColorId(x.Info.ProductVariantColorId)
+                }))
+        {
+            var variant = variantsList.FirstOrDefault(v => v.Id == group.Key.ProductVariantId);
+            if (variant is null)
+            {
+                continue;
             }
+            var color = group.Key.ProductVariantColorId.HasValue
+                ? variant.ProductVariantColors.FirstOrDefault(c => c.Id == group.Key.ProductVariantColorId.Value)
+                : null;
+            if (group.Key.ProductVariantColorId.HasValue && color is null)
+            {
+                continue;
+            }
+            var effectiveMax = GetEffectiveMaxPurchaseQuantity(variant, color);
+            if (!effectiveMax.HasValue)
+            {
+                continue;
+            }
+            var totalCount = group.Sum(x => x.Info.Count ?? 0);
+            if (totalCount <= effectiveMax.Value)
+            {
+                continue;
+            }
+            var nameParts = new[]
+            {
+                variant.Product?.Name,
+                variant.VariantName,
+                color?.ColorName ?? color?.ColorCode
+            }.Where(part => !string.IsNullOrWhiteSpace(part));
+            errors.Add(
+                Error.BadRequest(
+                    $"Số lượng mua tối đa cho sản phẩm '{string.Join(" - ", nameParts)}' là {effectiveMax.Value} sản phẩm.",
+                    $"products[{group.Min(x => x.Index)}]"));
         }
         if (errors.Count > 0)
         {
@@ -106,7 +138,8 @@ public class CreateOutputCommandHandler(
         if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
         {
             output.DepositRatio = parsedRatio;
-        } else
+        }
+        else
         {
             output.DepositRatio = 50;
         }
@@ -129,7 +162,7 @@ public class CreateOutputCommandHandler(
         }
         if (variant.ProductVariantColors.Count == 0)
         {
-            return productVariantColorId.HasValue
+            return productVariantColorId.HasValue && productVariantColorId.Value > 0
                 ? Error.BadRequest("Biến thể sản phẩm này không có màu sắc để chọn.", "ProductVariantColorId")
                 : null;
         }
@@ -143,5 +176,42 @@ public class CreateOutputCommandHandler(
             ? null
             : Error.BadRequest("ProductVariantColorId không thuộc biến thể sản phẩm đã chọn.", "ProductVariantColorId");
     }
-}
 
+    private static int? NormalizeColorId(int? productVariantColorId)
+    {
+        return productVariantColorId.HasValue && productVariantColorId.Value > 0
+            ? productVariantColorId.Value
+            : null;
+    }
+
+    private static int? GetEffectiveMaxPurchaseQuantity(ProductVariant variant, ProductVariantColor? color)
+    {
+        if (color?.MaxPurchaseQuantity.HasValue == true)
+        {
+            return color.MaxPurchaseQuantity.Value;
+        }
+        if (variant.MaxPurchaseQuantity.HasValue)
+        {
+            return variant.MaxPurchaseQuantity.Value;
+        }
+        if (variant.Product?.MaxPurchaseQuantity.HasValue == true)
+        {
+            return variant.Product.MaxPurchaseQuantity.Value;
+        }
+        return GetEffectiveMaxPurchaseQuantity(variant.Product?.ProductCategory);
+    }
+
+    private static int? GetEffectiveMaxPurchaseQuantity(ProductCategory? category)
+    {
+        var current = category;
+        while (current != null)
+        {
+            if (current.MaxPurchaseQuantity.HasValue)
+            {
+                return current.MaxPurchaseQuantity.Value;
+            }
+            current = current.Parent;
+        }
+        return null;
+    }
+}

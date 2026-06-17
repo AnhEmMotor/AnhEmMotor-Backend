@@ -82,6 +82,8 @@ namespace Domain.Entities
         [InverseProperty("Output")]
         public ICollection<InventoryReceipt> Returns { get; set; } = [];
 
+        public ICollection<OrderStatusHistory> StatusHistories { get; set; } = [];
+
         [NotMapped]
         public decimal Total => OutputInfos?.Sum(x => (x.Price ?? 0) * (x.Count ?? 0)) ?? 0;
 

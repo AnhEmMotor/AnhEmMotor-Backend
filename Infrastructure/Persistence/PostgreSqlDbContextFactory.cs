@@ -25,6 +25,13 @@ namespace Infrastructure.Persistence
                 .AddEnvironmentVariables()
                 .Build();
             var connectionString = configuration.GetConnectionString("StringConnection");
+            if (string.IsNullOrEmpty(connectionString) ||
+                connectionString.Contains("MSSQLLocalDB") ||
+                connectionString.Contains("Trusted_Connection") ||
+                configuration["Provider"] != "PostgreSql")
+            {
+                connectionString = "Host=localhost;Database=anhemmotor;Username=postgres;Password=postgres;";
+            }
             var builder = new DbContextOptionsBuilder<PostgreSqlDbContext>();
             builder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Infrastructure"));
             return new PostgreSqlDbContext(builder.Options);

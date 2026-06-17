@@ -24,4 +24,22 @@ public class ApplicationUser : IdentityUser<Guid>
     public DateTime? DateOfBirth { get; set; }
 
     public ICollection<IdentityUserRole<Guid>> UserRoles { get; set; } = [];
+
+    public ICollection<InventoryTransaction> InventoryTransactions { get; set; } = [];
+
+    public ICollection<OrderStatusHistory> OrderStatusHistories { get; set; } = [];
+
+    public ICollection<CustomerContact> ProcessedContacts { get; set; } = [];
+
+    public ICollection<CustomerContactReply> ContactReplies { get; set; } = [];
+
+    public ICollection<BookingAppointment> ConfirmedBookings { get; set; } = [];
+
+    public ICollection<NewsArticle> AuthoredNewsArticles { get; set; } = [];
+
+    public ICollection<NewsArticle> PublishedNewsArticles { get; set; } = [];
+
+    public ICollection<PromotionBanner> CreatedBanners { get; set; } = [];
+
+    public ICollection<PromotionBanner> UpdatedBanners { get; set; } = [];
 }

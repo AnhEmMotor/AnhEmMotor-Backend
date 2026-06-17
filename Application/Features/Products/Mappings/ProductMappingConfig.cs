@@ -497,14 +497,59 @@ public class ProductMappingConfig : IRegister
             : (!string.IsNullOrWhiteSpace(variant.CoverImageUrl)
                 ? variant.CoverImageUrl
                 : variant.ProductCollectionPhotos.FirstOrDefault()?.ImageUrl);
+        var effectiveMax = GetEffectiveMaxPurchaseQuantity(variant, null);
         return new VariantCartDetailResponse
         {
             Id = variant.Id,
             DisplayName = displayName,
             Price = variant.Price ?? 0,
             CoverImageUrl = coverImage,
-            ProductLimit = variant.Product?.ProductCategory?.MaxPurchaseQuantity
+            ProductLimit = effectiveMax,
+            EffectiveMax = effectiveMax,
+            Colors = MapVariantColors(variant)
         };
+    }
+
+    public static int? GetEffectiveMaxPurchaseQuantity(
+        ProductVariantEntity variant,
+        Domain.Entities.ProductVariantColor? color)
+    {
+        if (color?.MaxPurchaseQuantity.HasValue == true)
+        {
+            return color.MaxPurchaseQuantity.Value;
+        }
+        if (variant.MaxPurchaseQuantity.HasValue)
+        {
+            return variant.MaxPurchaseQuantity.Value;
+        }
+        if (variant.Product?.MaxPurchaseQuantity.HasValue == true)
+        {
+            return variant.Product.MaxPurchaseQuantity.Value;
+        }
+        return GetEffectiveMaxPurchaseQuantity(variant.Product?.ProductCategory);
+    }
+
+    private static int? GetEffectiveMaxPurchaseQuantity(ProductEntity product)
+    {
+        if (product.MaxPurchaseQuantity.HasValue)
+        {
+            return product.MaxPurchaseQuantity.Value;
+        }
+        return GetEffectiveMaxPurchaseQuantity(product.ProductCategory);
+    }
+
+    private static int? GetEffectiveMaxPurchaseQuantity(Domain.Entities.ProductCategory? category)
+    {
+        var current = category;
+        while (current != null)
+        {
+            if (current.MaxPurchaseQuantity.HasValue)
+            {
+                return current.MaxPurchaseQuantity.Value;
+            }
+            current = current.Parent;
+        }
+        return null;
     }
 
     public static string CalculateProductInventoryStatus(ProductEntity product, long alertLevel)

@@ -17,7 +17,8 @@ using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
 using Application.Features.Outputs.Queries.GetOrderStatusMap;
 using Application.Features.Outputs.Queries.GetOrderStatusTransitionMap;
 using Application.Features.Outputs.Queries.GetOutputById;
-using Application.Features.Outputs.Queries.GetOutputsByUserId;
+using Application.Features.Outputs.Queries.GetOutputsByUserIdForManager;
+using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
@@ -46,10 +47,12 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý đơn hàng/phiếu xuất")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class SalesOrdersController(IMediator mediator) : ApiController
+public class SalesOrdersController(
+    IMediator mediator,
+    ICurrentUserContext currentUserContext) : ApiController
 {
     /// <summary>
-    /// Lấy danh sách đơn hàng của khách hàng hiện tại (dựa trên JWT token).
+    /// Lấy danh sách đơn hàng của người dùng hiện tại (dựa trên JWT token).
     /// </summary>
     [HttpGet("my-purchases")]
     [ProducesResponseType(typeof(PagedResult<MyOrderResponse>), StatusCodes.Status200OK)]
@@ -58,21 +61,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(currentUserId) || !Guid.TryParse(currentUserId, out var buyerId))
-        {
-            return Unauthorized(
-                new ErrorResponse
-                {
-                    Errors =
-                        [new ErrorDetail
-                            {
-                                Field = "Authorization",
-                                Message = "Không thể lấy thông tin người dùng từ token."
-                            }]
-                });
-        }
-        var query = new GetOutputsByUserIdQuery() { BuyerId = buyerId, SieveModel = sieveModel };
+        var query = new GetOutputsForCurrentUserQuery(sieveModel);
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -82,14 +71,14 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("get-purchases/{id:Guid}")]
     [HasPermission(Outputs.View)]
-    [ProducesResponseType(typeof(PagedResult<MyOrderResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetPurchasesByIDAsync(
         [FromQuery] SieveModel sieveModel,
         Guid id,
         CancellationToken cancellationToken)
     {
-        var query = new GetOutputsByUserIdQuery() { BuyerId = id, SieveModel = sieveModel };
+        var query = new GetOutputsByUserIdForManagerQuery(id, sieveModel);
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -254,10 +243,10 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         [FromBody] CreateOutputByManagerCommand request,
         CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = currentUserContext.GetUserId();
         var command = request.Adapt<CreateOutputByManagerCommand>() with
         {
-            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+            CurrentUserId = currentUserId
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result, SaleOrders.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
@@ -274,10 +263,10 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         [FromBody] CreateOutputCommand request,
         CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = currentUserContext.GetUserId();
         var command = request.Adapt<CreateOutputCommand>() with
         {
-            BuyerId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+            BuyerId = currentUserId
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result, SaleOrders.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
@@ -296,11 +285,11 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         [FromBody] UpdateOutputCommand request,
         CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = currentUserContext.GetUserId();
         var command = request.Adapt<UpdateOutputCommand>() with
         {
             Id = id,
-            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+            CurrentUserId = currentUserId
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -317,11 +306,10 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CancelMyOrderAsync(int id, CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var command = new CancelOrderByBuyerCommand
         {
             Id = id,
-            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+            CurrentUserId = currentUserContext.GetUserId()
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -341,11 +329,11 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         [FromBody] UpdateOutputForManagerCommand request,
         CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = currentUserContext.GetUserId();
         var command = request.Adapt<UpdateOutputForManagerCommand>() with
         {
             Id = id,
-            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+            CurrentUserId = currentUserId
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -368,7 +356,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         var command = request.Adapt<UpdateOutputStatusCommand>() with
         {
             Id = id,
-            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+            CurrentUserId = currentUserContext.GetUserId()
         };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);

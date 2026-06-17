@@ -52,6 +52,21 @@ public class Vehicle : BaseEntity
     [Column("LicensePlate", TypeName = "nvarchar(50)")]
     public string LicensePlate { get; set; } = string.Empty;
 
+    [Column("CurrentOdo")]
+    public double CurrentOdo { get; set; }
+
+    [Column("LastMaintenanceDate")]
+    public DateTime? LastMaintenanceDate { get; set; }
+
+    [Column("NextMaintenanceDate")]
+    public DateTime? NextMaintenanceDate { get; set; }
+
+    [Column("NextMaintenanceOdo")]
+    public double? NextMaintenanceOdo { get; set; }
+
+    [Column("ElectronicWarrantyQrCode", TypeName = "nvarchar(255)")]
+    public string ElectronicWarrantyQrCode { get; set; } = string.Empty;
+
     [Column("IsActive")]
     public bool IsActive { get; set; } = true;
 

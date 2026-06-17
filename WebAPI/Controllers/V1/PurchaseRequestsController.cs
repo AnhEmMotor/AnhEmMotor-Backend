@@ -159,11 +159,10 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
-        /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu Purchase Order - phiếu đặt
-        /// hàng).
+        /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu nhập).
         /// </summary>
         [HttpGet("approved")]
-        [RequiresAnyPermissions(PurchaseOrder.Create, PurchaseOrder.Edit)]
+        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
         [ProducesResponseType(typeof(PagedResult<PurchaseRequestListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetApprovedAsync(
             [FromQuery] SieveModel sieveModel,

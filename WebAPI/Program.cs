@@ -27,6 +27,7 @@ if (!string.IsNullOrWhiteSpace(customUploadPath))
     environment.WebRootFileProvider = new PhysicalFileProvider(absolutePath);
 }
 builder.Services.AddApplicationServices();
+builder.Services.AddMemoryCache();
 if (!environment.IsEnvironment("Test"))
 {
     builder.Services.AddInfrastructureServices(configuration);
