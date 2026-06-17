@@ -62,9 +62,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <returns>Danh sách nhà cung cấp.</returns>
     [HttpGet]
     [RequiresAnyPermissions(
-        Suppliers.View,
-        Domain.Constants.Permission.Permissions.Quotations.Edit,
-        Domain.Constants.Permission.Permissions.Quotations.Create)]
+        Suppliers.View)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersAsync(
         [FromQuery] SieveModel sieveModel,

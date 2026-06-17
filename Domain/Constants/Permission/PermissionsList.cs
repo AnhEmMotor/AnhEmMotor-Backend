@@ -101,17 +101,6 @@ public static class PermissionsList
         { Payroll.Configure, new PermissionMetadata("Configure Payroll", "Cấu hình chính sách hoa hồng") },
         { Payroll.Approve, new PermissionMetadata("Approve Payroll", "Duyệt chi lương") },
 
-        { Quotations.View, new PermissionMetadata("View Quotations", "Xem danh sách báo giá") },
-        { Quotations.Create, new PermissionMetadata("Create Quotation", "Tạo báo giá mới") },
-        { Quotations.Edit, new PermissionMetadata("Edit Quotation", "Chỉnh sửa báo giá") },
-        { Quotations.Delete, new PermissionMetadata("Delete Quotation", "Xóa báo giá") },
-        { Quotations.Send, new PermissionMetadata("Send Quotation", "Gửi báo giá") },
-        {
-            Quotations.Approve,
-            new PermissionMetadata(
-            "Approve Quotation",
-            "Duyệt/Từ chối báo giá; và bắt buộc đi kèm quyền Sửa/Xóa đối với báo giá đã gửi (Sent), hoặc quyền Xóa đối với báo giá đã duyệt (Approved)")
-        },
 
         { PurchaseRequests.View, new PermissionMetadata("View Purchase Requests", "Xem danh sách yêu cầu mua hàng") },
         { PurchaseRequests.Create, new PermissionMetadata("Create Purchase Request", "Tạo yêu cầu mua hàng mới") },
@@ -274,11 +263,6 @@ public static class PermissionsList
         { Payroll.Configure, [Payroll.View] },
         { Payroll.Approve, [Payroll.View] },
 
-        { Quotations.Create, [Quotations.View] },
-        { Quotations.Edit, [Quotations.View] },
-        { Quotations.Delete, [Quotations.View] },
-        { Quotations.Send, [Quotations.View] },
-        { Quotations.Approve, [Quotations.View] },
 
         { PurchaseRequests.Create, [PurchaseRequests.View] },
         { PurchaseRequests.Edit, [PurchaseRequests.View] },

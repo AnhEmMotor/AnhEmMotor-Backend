@@ -25,6 +25,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         }
         mapper.Property<Brand>(p => p.Id).CanSort().CanFilter();
         mapper.Property<PurchaseRequest>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<PurchaseRequest>(p => p.Status).CanSort().CanFilter();
         mapper.Property<InventoryReceipt>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Output>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Product>(p => p.Id).CanSort().CanFilter();
@@ -139,8 +140,8 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
 
     private static void MapBaseProperties<T>(SievePropertyMapper mapper) where T : BaseEntity
     {
-        mapper.Property<T>(x => x.CreatedAt).CanSort().HasName("createdAt");
-        mapper.Property<T>(x => x.UpdatedAt).CanSort().HasName("updatedAt");
-        mapper.Property<T>(x => x.DeletedAt).CanSort().HasName("deletedAt");
+        mapper.Property<T>(x => x.CreatedAt).CanSort().CanFilter().HasName("createdAt");
+        mapper.Property<T>(x => x.UpdatedAt).CanSort().CanFilter().HasName("updatedAt");
+        mapper.Property<T>(x => x.DeletedAt).CanSort().CanFilter().HasName("deletedAt");
     }
 }
