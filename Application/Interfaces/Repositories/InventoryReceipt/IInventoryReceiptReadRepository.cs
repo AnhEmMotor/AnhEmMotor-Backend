@@ -53,5 +53,9 @@ public interface IInventoryReceiptReadRepository
         int variantId,
         int? colorId,
         CancellationToken cancellationToken);
+
+    public Task<List<Domain.Entities.InventoryReceiptAuditLog>> GetAuditLogsAsync(int inventoryReceiptId, CancellationToken cancellationToken);
+    public Task<List<Domain.Entities.InventoryReceiptInfoAuditLog>> GetInfoAuditLogsAsync(int inventoryReceiptId, CancellationToken cancellationToken);
+    public Task<List<Domain.Entities.VehicleAuditLog>> GetVehicleAuditLogsAsync(int inventoryReceiptId, CancellationToken cancellationToken);
 }
 

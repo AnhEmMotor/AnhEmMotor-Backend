@@ -1,6 +1,6 @@
 using Application.ApiContracts.PurchaseRequest.Responses;
-using Domain.Constants;
 using Domain.Constants.Product;
+using Domain.Constants.PurchaseRequest;
 using Domain.Entities;
 using Mapster;
 using System.Linq;
@@ -101,7 +101,7 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                     ii.InventoryReceipt.DeletedAt == null &&
                                                     string.Compare(
                                                         ii.InventoryReceipt.StatusId,
-                                                        Domain.Constants.InventoryReceiptStatus.Approve,
+                                                        Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                                         StringComparison.OrdinalIgnoreCase) ==
                                                     0)
                                 .Sum(ii => ii.Count ?? 0)
@@ -123,12 +123,12 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                     ii.InventoryReceipt.DeletedAt == null &&
                                                     (string.Compare(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Draft,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                                             StringComparison.OrdinalIgnoreCase) ==
                                                         0 ||
                                                         string.Compare(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Sent,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                                             StringComparison.OrdinalIgnoreCase) ==
                                                         0))
                                 .Sum(ii => ii.Count ?? 0)
@@ -151,17 +151,17 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                             ii.InventoryReceipt.DeletedAt == null &&
                                                             (string.Compare(
                                                                     ii.InventoryReceipt.StatusId,
-                                                                    Domain.Constants.InventoryReceiptStatus.Approve,
+                                                                    Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                                                     StringComparison.OrdinalIgnoreCase) ==
                                                                 0 ||
                                                                 string.Compare(
                                                                     ii.InventoryReceipt.StatusId,
-                                                                    Domain.Constants.InventoryReceiptStatus.Sent,
+                                                                    Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                                                     StringComparison.OrdinalIgnoreCase) ==
                                                                 0 ||
                                                                 string.Compare(
                                                                     ii.InventoryReceipt.StatusId,
-                                                                    Domain.Constants.InventoryReceiptStatus.Draft,
+                                                                    Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                                                     StringComparison.OrdinalIgnoreCase) ==
                                                                 0))
                                     .Sum(ii => ii.Count ?? 0)
@@ -193,17 +193,17 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                     ii.InventoryReceipt.DeletedAt == null &&
                                                     (string.Compare(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Approve,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                                             StringComparison.OrdinalIgnoreCase) ==
                                                         0 ||
                                                         string.Compare(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Sent,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                                             StringComparison.OrdinalIgnoreCase) ==
                                                         0 ||
                                                         string.Compare(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Draft,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                                             StringComparison.OrdinalIgnoreCase) ==
                                                         0))
                                 .Sum(ii => ii.Count ?? 0)

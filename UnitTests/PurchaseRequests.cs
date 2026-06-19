@@ -301,6 +301,7 @@ public class PurchaseRequests
         var handler = new UpdatePurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
@@ -338,6 +339,7 @@ public class PurchaseRequests
         var handler = new UpdatePurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
@@ -357,6 +359,7 @@ public class PurchaseRequests
         var handler = new UpdatePurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
@@ -401,6 +404,7 @@ public class PurchaseRequests
         var handler = new UpdatePurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
@@ -430,6 +434,7 @@ public class PurchaseRequests
         var handler = new UpdatePurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
@@ -449,6 +454,7 @@ public class PurchaseRequests
         var handler = new DeletePurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _deleteRepoMock.Object,
+            _insertRepoMock.Object,
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
@@ -466,6 +472,7 @@ public class PurchaseRequests
         var handler = new DeletePurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _deleteRepoMock.Object,
+            _insertRepoMock.Object,
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
@@ -483,6 +490,7 @@ public class PurchaseRequests
         var handler = new DeletePurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _deleteRepoMock.Object,
+            _insertRepoMock.Object,
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
@@ -508,6 +516,7 @@ public class PurchaseRequests
         var handler = new DeletePurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _deleteRepoMock.Object,
+            _insertRepoMock.Object,
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
@@ -533,6 +542,7 @@ public class PurchaseRequests
         var handler = new SendPurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new SendPurchaseRequestCommand(1);
         var existingPR = new PurchaseRequestEntity { Id = 1, Status = "draft" };
@@ -549,6 +559,7 @@ public class PurchaseRequests
         var handler = new SendPurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new SendPurchaseRequestCommand(1);
         var existingPR = new PurchaseRequestEntity { Id = 1, Status = "approve" };
@@ -564,6 +575,7 @@ public class PurchaseRequests
         var handler = new ApproveRejectPurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
         var command = new ApproveRejectPurchaseRequestCommand(1, "approve");
@@ -584,6 +596,7 @@ public class PurchaseRequests
         var handler = new ApproveRejectPurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
         var command = new ApproveRejectPurchaseRequestCommand(1, "reject");
@@ -604,6 +617,7 @@ public class PurchaseRequests
         var handler = new ApproveRejectPurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
         var command = new ApproveRejectPurchaseRequestCommand(1, "draft");
@@ -622,6 +636,7 @@ public class PurchaseRequests
         var handler = new ApproveRejectPurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
         var command = new ApproveRejectPurchaseRequestCommand(1, "approve");
@@ -638,6 +653,7 @@ public class PurchaseRequests
         var handler = new SendPurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
         var command = new SendPurchaseRequestCommand(1);
@@ -659,6 +675,7 @@ public class PurchaseRequests
         var handler = new ApproveRejectPurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
         var command = new ApproveRejectPurchaseRequestCommand(1, "approve");
@@ -681,6 +698,7 @@ public class PurchaseRequests
         var handler = new ApproveRejectPurchaseRequestCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
         var command = new ApproveRejectPurchaseRequestCommand(1, "reject");

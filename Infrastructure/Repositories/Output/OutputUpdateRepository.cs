@@ -103,7 +103,7 @@ namespace Infrastructure.Repositories.Output
             int? colorId,
             CancellationToken cancellationToken)
         {
-            var finishedStatuses = Domain.Constants.InventoryReceiptStatus.FinishInventoryReceiptValues;
+            var finishedStatuses = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.FinishInventoryReceiptValues;
             return context.InventoryReceiptInfos
                 .Include(ii => ii.InventoryReceipt)
                 .Include(ii => ii.PurchaseRequestItem)

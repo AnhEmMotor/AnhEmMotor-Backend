@@ -11,6 +11,7 @@ using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Order;
+using Domain.Constants.PurchaseRequest;
 using Domain.Entities;
 using Mapster;
 using MediatR;
@@ -49,14 +50,14 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
-        if (Domain.Constants.InventoryReceiptStatus.IsCannotEdit(inventoryReceipt.StatusId))
+        if (Domain.Constants.InventoryReceipt.InventoryReceiptStatus.IsCannotEdit(inventoryReceipt.StatusId))
         {
             return Error.BadRequest("Khi đã phê duyệt hoặc từ chối thì không được sửa phiếu.", "StatusId");
         }
         Guid userId = currentUserContext.GetUserId();
         if (string.Equals(
             inventoryReceipt.StatusId,
-            Domain.Constants.InventoryReceiptStatus.Sent,
+            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
             StringComparison.OrdinalIgnoreCase))
         {
             var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
@@ -72,7 +73,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             }
         } else if (!string.Equals(
             inventoryReceipt.StatusId,
-            Domain.Constants.InventoryReceiptStatus.Draft,
+            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
             StringComparison.OrdinalIgnoreCase))
         {
             var hasEditOrApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
@@ -194,15 +195,15 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                                     ii.InventoryReceipt.DeletedAt == null &&
                                     (string.Equals(
                                             ii.InventoryReceipt.StatusId,
-                                            Domain.Constants.InventoryReceiptStatus.Approve,
+                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                             StringComparison.OrdinalIgnoreCase) ||
                                         string.Equals(
                                             ii.InventoryReceipt.StatusId,
-                                            Domain.Constants.InventoryReceiptStatus.Sent,
+                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                             StringComparison.OrdinalIgnoreCase) ||
                                         string.Equals(
                                             ii.InventoryReceipt.StatusId,
-                                            Domain.Constants.InventoryReceiptStatus.Draft,
+                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                             StringComparison.OrdinalIgnoreCase)))
                             .Sum(ii => ii.Count ?? 0);
                         var remainingAllowed = prItem.Quantity - occupiedQty;

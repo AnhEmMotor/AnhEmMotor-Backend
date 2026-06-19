@@ -9,6 +9,7 @@ using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Order;
+using Domain.Constants.PurchaseRequest;
 using Domain.Entities;
 using Mapster;
 using MediatR;
@@ -93,15 +94,15 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                                 ii.InventoryReceipt.DeletedAt == null &&
                                 (string.Equals(
                                         ii.InventoryReceipt.StatusId,
-                                        Domain.Constants.InventoryReceiptStatus.Approve,
+                                        Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                         StringComparison.OrdinalIgnoreCase) ||
                                     string.Equals(
                                         ii.InventoryReceipt.StatusId,
-                                        Domain.Constants.InventoryReceiptStatus.Sent,
+                                        Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                         StringComparison.OrdinalIgnoreCase) ||
                                     string.Equals(
                                         ii.InventoryReceipt.StatusId,
-                                        Domain.Constants.InventoryReceiptStatus.Draft,
+                                        Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                         StringComparison.OrdinalIgnoreCase)))
                         .Sum(ii => ii.Count ?? 0);
                     var remainingAllowed = prItem.Quantity - occupiedQty;
@@ -217,7 +218,7 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
         {
             inventoryReceipt.Notes = HtmlTagRegex().Replace(inventoryReceipt.Notes, string.Empty);
         }
-        inventoryReceipt.StatusId = Domain.Constants.InventoryReceiptStatus.Draft;
+        inventoryReceipt.StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft;
         inventoryReceipt.CreatedBy = currentUserContext?.GetUserId();
         var inventoryReceiptInfos = new List<InventoryReceiptInfoEntity>();
         foreach (var p in request.Products)
@@ -287,6 +288,36 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
         }
         inventoryReceipt.InventoryReceiptInfos = inventoryReceiptInfos;
         insertRepository.Add(inventoryReceipt);
+
+        var currentUserId = currentUserContext?.GetUserId();
+        var receiptAuditLogs = new List<Domain.Entities.InventoryReceiptAuditLog>
+        {
+            new Domain.Entities.InventoryReceiptAuditLog
+            {
+                InventoryReceipt = inventoryReceipt,
+                Action = "Add",
+                ChangedById = currentUserId,
+                ChangedAt = DateTimeOffset.UtcNow,
+                NewStatusId = inventoryReceipt.StatusId,
+                NewNotes = inventoryReceipt.Notes
+            }
+        };
+
+        var infoAuditLogs = new List<Domain.Entities.InventoryReceiptInfoAuditLog>();
+        foreach (var info in inventoryReceiptInfos)
+        {
+            infoAuditLogs.Add(new Domain.Entities.InventoryReceiptInfoAuditLog
+            {
+                InventoryReceiptInfo = info,
+                Action = "Add",
+                NewQuantity = info.Count,
+                NewPrice = info.UnitPrice
+            });
+        }
+
+        await insertRepository.InsertAuditLogsAsync(receiptAuditLogs, cancellationToken).ConfigureAwait(false);
+        await insertRepository.InsertInfoAuditLogsAsync(infoAuditLogs, cancellationToken).ConfigureAwait(false);
+
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var created = await readRepository.GetByIdWithDetailsAsync(inventoryReceipt.Id, cancellationToken)
             .ConfigureAwait(false);

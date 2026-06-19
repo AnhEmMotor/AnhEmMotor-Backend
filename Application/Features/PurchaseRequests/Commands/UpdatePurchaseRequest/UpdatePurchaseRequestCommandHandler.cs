@@ -17,6 +17,7 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
     public class UpdatePurchaseRequestCommandHandler(
         IPurchaseRequestReadRepository readRepository,
         IPurchaseRequestUpdateRepository updateRepository,
+        IPurchaseRequestInsertRepository insertRepository,
         IPurchaseRequestDeleteRepository deleteRepository,
         IProductVariantReadRepository variantRepository,
         IPermissionReadRepository permissionReadRepository,
@@ -101,12 +102,36 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                     return Error.BadRequest("Số lượng sản phẩm yêu cầu phải lớn hơn 0.", "Items");
                 }
             }
+            var currentUserId = currentUserContext.GetUserId();
+            var oldNotes = pr.Note;
             pr.Note = request.Note;
+            
+            var auditLog = new Domain.Entities.PurchaseRequestAuditLog
+            {
+                PurchaseRequest = pr,
+                Action = "Update",
+                ChangedById = currentUserId,
+                ChangedAt = DateTimeOffset.UtcNow,
+                OldNotes = oldNotes,
+                NewNotes = pr.Note
+            };
+            var auditLogs = new List<Domain.Entities.PurchaseRequestAuditLog> { auditLog };
+
             var existingItemsDict = pr.PurchaseRequestItems.ToDictionary(x => x.Id);
             var requestItemsDict = request.Items.Where(x => x.Id.HasValue && x.Id > 0).ToDictionary(x => x.Id!.Value);
             var toDelete = pr.PurchaseRequestItems.Where(x => !requestItemsDict.ContainsKey(x.Id)).ToList();
+            var itemAuditLogs = new List<Domain.Entities.PurchaseRequestItemAuditLog>();
+            
             foreach (var item in toDelete)
             {
+                itemAuditLogs.Add(new Domain.Entities.PurchaseRequestItemAuditLog
+                {
+                    PurchaseRequestItem = item,
+                    Action = "Delete",
+                    OldQuantity = item.Quantity,
+                    OldProductVariantId = item.ProductVariantId,
+                    OldProductVariantColorId = item.ProductVariantColorId
+                });
                 deleteRepository.DeleteItem(item);
                 pr.PurchaseRequestItems.Remove(item);
             }
@@ -116,9 +141,28 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                 {
                     if (existingItemsDict.TryGetValue(itemRequest.Id.Value, out var existingItem))
                     {
+                        var oldQuantity = existingItem.Quantity;
+                        var oldVariantId = existingItem.ProductVariantId;
+                        var oldColorId = existingItem.ProductVariantColorId;
+                        
                         existingItem.ProductVariantId = itemRequest.ProductVariantId!.Value;
                         existingItem.ProductVariantColorId = itemRequest.ProductVariantColorId;
                         existingItem.Quantity = itemRequest.Quantity!.Value;
+
+                        if (oldQuantity != existingItem.Quantity || oldVariantId != existingItem.ProductVariantId || oldColorId != existingItem.ProductVariantColorId)
+                        {
+                            itemAuditLogs.Add(new Domain.Entities.PurchaseRequestItemAuditLog
+                            {
+                                PurchaseRequestItem = existingItem,
+                                Action = "Update",
+                                OldQuantity = oldQuantity,
+                                NewQuantity = existingItem.Quantity,
+                                OldProductVariantId = oldVariantId,
+                                NewProductVariantId = existingItem.ProductVariantId,
+                                OldProductVariantColorId = oldColorId,
+                                NewProductVariantColorId = existingItem.ProductVariantColorId
+                            });
+                        }
                     }
                 } else
                 {
@@ -129,9 +173,20 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                         Quantity = itemRequest.Quantity!.Value
                     };
                     pr.PurchaseRequestItems.Add(newItem);
+                    
+                    itemAuditLogs.Add(new Domain.Entities.PurchaseRequestItemAuditLog
+                    {
+                        PurchaseRequestItem = newItem,
+                        Action = "Add",
+                        NewQuantity = newItem.Quantity,
+                        NewProductVariantId = newItem.ProductVariantId,
+                        NewProductVariantColorId = newItem.ProductVariantColorId
+                    });
                 }
             }
             updateRepository.Update(pr);
+            await insertRepository.InsertAuditLogsAsync(auditLogs, cancellationToken).ConfigureAwait(false);
+            await insertRepository.InsertItemAuditLogsAsync(itemAuditLogs, cancellationToken).ConfigureAwait(false);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             var updated = await readRepository.GetByIdWithDetailsAsync(pr.Id, cancellationToken).ConfigureAwait(false);
             return updated!.Adapt<PurchaseRequestDetailResponse?>();

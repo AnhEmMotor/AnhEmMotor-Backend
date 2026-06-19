@@ -1,7 +1,8 @@
 using Application.Features.DebtPayments.Commands.RecordDebtPayment;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
-using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.SupplierDebt;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using FluentAssertions;
 using Moq;
@@ -13,29 +14,38 @@ namespace UnitTests
     public class DebtPayments
     {
         private readonly Mock<IInventoryReceiptReadRepository> _readRepoMock;
-        private readonly Mock<ISupplierDebtRepository> _supplierDebtRepoMock;
+        private readonly Mock<ISupplierDebtReadRepository> _supplierDebtReadRepoMock;
+        private readonly Mock<ISupplierDebtUpdateRepository> _supplierDebtUpdateRepoMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+        private readonly Mock<ICurrentUserContext> _currentUserContext;
+        private readonly Mock<ISupplierDebtAuditLogInsertRepository> _supplierDebtAuditLogInsertRepository;
 
         public DebtPayments()
         {
             _readRepoMock = new Mock<IInventoryReceiptReadRepository>();
-            _supplierDebtRepoMock = new Mock<ISupplierDebtRepository>();
+            _supplierDebtReadRepoMock = new Mock<ISupplierDebtReadRepository>();
+            _supplierDebtUpdateRepoMock = new Mock<ISupplierDebtUpdateRepository>();
             _unitOfWorkMock = new Mock<IUnitOfWork>();
+            _currentUserContext = new Mock<ICurrentUserContext>();
+            _supplierDebtAuditLogInsertRepository = new Mock<ISupplierDebtAuditLogInsertRepository>();
         }
 
         [Fact(DisplayName = "DP_005 - Thanh toán trả nợ một phần phiếu nhập thành công")]
         public async Task DP_005_PayDebt_PartialPayment_Success()
         {
             var handler = new RecordDebtPaymentCommandHandler(
-                _supplierDebtRepoMock.Object,
+                _supplierDebtReadRepoMock.Object,
+                _supplierDebtUpdateRepoMock.Object,
                 _readRepoMock.Object,
+                _supplierDebtAuditLogInsertRepository.Object,
+                _currentUserContext.Object,
                 _unitOfWorkMock.Object);
             var command = new RecordDebtPaymentCommand { LineId = 1, Amount = 1000000 };
             var existingReceipt = new InventoryReceiptEntity
             {
                 Id = 1,
                 StatusId = "approve",
-                SupplierDebts = new List<SupplierDebtEntity>()
+                SupplierDebts = []
             };
             var supplierDebt = new SupplierDebtEntity
             {
@@ -46,7 +56,7 @@ namespace UnitTests
                 PaidAmount = 500000
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
-            _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            _supplierDebtReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(supplierDebt);
             _readRepoMock.Setup(
                 x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -56,7 +66,7 @@ namespace UnitTests
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
             result.IsSuccess.Should().BeTrue();
             supplierDebt.PaidAmount.Should().Be(1500000);
-            _supplierDebtRepoMock.Verify(x => x.Update(supplierDebt), Times.Once);
+            _supplierDebtUpdateRepoMock.Verify(x => x.Update(supplierDebt), Times.Once);
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -64,8 +74,12 @@ namespace UnitTests
         public async Task DP_006_PayDebt_FullPayment_Success()
         {
             var handler = new RecordDebtPaymentCommandHandler(
-                _supplierDebtRepoMock.Object,
+                _supplierDebtReadRepoMock.Object,
+                _supplierDebtUpdateRepoMock.Object,
                 _readRepoMock.Object,
+
+                _supplierDebtAuditLogInsertRepository.Object,
+                _currentUserContext.Object,
                 _unitOfWorkMock.Object);
             var command = new RecordDebtPaymentCommand { LineId = 1, Amount = 1500000 };
             var existingReceipt = new InventoryReceiptEntity
@@ -83,7 +97,7 @@ namespace UnitTests
                 PaidAmount = 500000
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
-            _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            _supplierDebtReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(supplierDebt);
             _readRepoMock.Setup(
                 x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -93,7 +107,7 @@ namespace UnitTests
             var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
             result.IsSuccess.Should().BeTrue();
             supplierDebt.PaidAmount.Should().Be(2000000);
-            _supplierDebtRepoMock.Verify(x => x.Update(supplierDebt), Times.Once);
+            _supplierDebtUpdateRepoMock.Verify(x => x.Update(supplierDebt), Times.Once);
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -101,8 +115,12 @@ namespace UnitTests
         public async Task DP_007_PayDebt_InvalidAmount()
         {
             var handler = new RecordDebtPaymentCommandHandler(
-                _supplierDebtRepoMock.Object,
+                _supplierDebtReadRepoMock.Object,
+                _supplierDebtUpdateRepoMock.Object,
                 _readRepoMock.Object,
+
+                _supplierDebtAuditLogInsertRepository.Object,
+                _currentUserContext.Object,
                 _unitOfWorkMock.Object);
             var command = new RecordDebtPaymentCommand { LineId = 1, Amount = 0 };
             var existingReceipt = new InventoryReceiptEntity
@@ -120,7 +138,7 @@ namespace UnitTests
                 PaidAmount = 500000
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
-            _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            _supplierDebtReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(supplierDebt);
             _readRepoMock.Setup(
                 x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -134,8 +152,11 @@ namespace UnitTests
         public async Task DP_008_PayDebt_AmountExceedsDebt()
         {
             var handler = new RecordDebtPaymentCommandHandler(
-                _supplierDebtRepoMock.Object,
+                _supplierDebtReadRepoMock.Object,
+                _supplierDebtUpdateRepoMock.Object,
                 _readRepoMock.Object,
+                _supplierDebtAuditLogInsertRepository.Object,
+                _currentUserContext.Object,
                 _unitOfWorkMock.Object);
             var command = new RecordDebtPaymentCommand { LineId = 1, Amount = 2000000 };
             var existingReceipt = new InventoryReceiptEntity
@@ -153,7 +174,7 @@ namespace UnitTests
                 PaidAmount = 500000
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
-            _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            _supplierDebtReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(supplierDebt);
             _readRepoMock.Setup(
                 x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -167,8 +188,11 @@ namespace UnitTests
         public async Task DP_009_PayDebt_ReceiptNotApproved()
         {
             var handler = new RecordDebtPaymentCommandHandler(
-                _supplierDebtRepoMock.Object,
+                _supplierDebtReadRepoMock.Object,
+                _supplierDebtUpdateRepoMock.Object,
                 _readRepoMock.Object,
+                _supplierDebtAuditLogInsertRepository.Object,
+                _currentUserContext.Object,
                 _unitOfWorkMock.Object);
             var command = new RecordDebtPaymentCommand { LineId = 1, Amount = 1000000 };
             var existingReceipt = new InventoryReceiptEntity
@@ -186,7 +210,7 @@ namespace UnitTests
                 PaidAmount = 500000
             };
             existingReceipt.SupplierDebts.Add(supplierDebt);
-            _supplierDebtRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            _supplierDebtReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(supplierDebt);
             _readRepoMock.Setup(
                 x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))

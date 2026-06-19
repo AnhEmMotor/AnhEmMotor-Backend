@@ -2,7 +2,7 @@ using Application.ApiContracts.InventoryReport.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Product;
-using Domain.Constants;
+using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using MediatR;
 using System;

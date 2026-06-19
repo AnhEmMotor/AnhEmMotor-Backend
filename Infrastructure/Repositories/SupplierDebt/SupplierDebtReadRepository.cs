@@ -1,25 +1,17 @@
-using Application.Interfaces.Repositories.Supplier;
-using Domain.Entities;
+using Application.Interfaces.Repositories.SupplierDebt;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Infrastructure.Repositories.Supplier
+namespace Infrastructure.Repositories.SupplierDebt
 {
-    public class SupplierDebtRepository(ApplicationDBContext context) : ISupplierDebtRepository
+    public class SupplierDebtReadRepository(ApplicationDBContext context) : ISupplierDebtReadRepository
     {
-        public void Add(SupplierDebt supplierDebt)
-        {
-            context.SupplierDebts.Add(supplierDebt);
-        }
-
-        public void Update(SupplierDebt supplierDebt)
-        {
-            context.SupplierDebts.Update(supplierDebt);
-        }
-
-        public Task<SupplierDebt?> GetByReceiptAndSupplierAsync(
+        public Task<Domain.Entities.SupplierDebt?> GetByReceiptAndSupplierAsync(
             int receiptId,
             int supplierId,
             CancellationToken cancellationToken)
@@ -32,7 +24,7 @@ namespace Infrastructure.Repositories.Supplier
                     cancellationToken);
         }
 
-        public Task<SupplierDebt?> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public Task<Domain.Entities.SupplierDebt?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             return context.SupplierDebts
                 .Include(d => d.Supplier)
@@ -41,7 +33,7 @@ namespace Infrastructure.Repositories.Supplier
                 .FirstOrDefaultAsync(d => d.Id == id && d.DeletedAt == null, cancellationToken);
         }
 
-        public Task<List<SupplierDebt>> GetBySupplierIdAsync(int supplierId, CancellationToken cancellationToken)
+        public Task<List<Domain.Entities.SupplierDebt>> GetBySupplierIdAsync(int supplierId, CancellationToken cancellationToken)
         {
             return context.SupplierDebts
                 .Include(d => d.Supplier)
@@ -58,12 +50,22 @@ namespace Infrastructure.Repositories.Supplier
                 .ToListAsync(cancellationToken);
         }
 
-        public Task<List<SupplierDebt>> GetAllAsync(CancellationToken cancellationToken)
+        public Task<List<Domain.Entities.SupplierDebt>> GetAllAsync(CancellationToken cancellationToken)
         {
             return context.SupplierDebts
                 .Include(d => d.Supplier)
                 .Include(d => d.InventoryReceipt)
                 .Where(d => d.DeletedAt == null)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Domain.Entities.SupplierDebtAuditLog>> GetSupplierDebtAuditLogsAsync(int supplierDebtId, CancellationToken cancellationToken)
+        {
+            return await context.SupplierDebtAuditLogs
+                .IgnoreQueryFilters()
+                .Include(l => l.ChangedBy)
+                .Where(l => l.SupplierDebtId == supplierDebtId)
+                .OrderByDescending(l => l.ChangedAt)
                 .ToListAsync(cancellationToken);
         }
     }

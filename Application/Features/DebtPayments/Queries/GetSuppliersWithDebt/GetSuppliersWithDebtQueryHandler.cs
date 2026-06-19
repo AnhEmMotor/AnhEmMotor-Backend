@@ -1,6 +1,6 @@
 using Application.ApiContracts.DebtPayment.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.SupplierDebt;
 using MediatR;
 using System;
 
@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Application.Features.DebtPayments.Queries.GetSuppliersWithDebt
 {
-    public class GetSuppliersWithDebtQueryHandler(ISupplierDebtRepository supplierDebtRepository) : IRequestHandler<GetSuppliersWithDebtQuery, Result<List<SupplierDebtResponse>>>
+    public class GetSuppliersWithDebtQueryHandler(ISupplierDebtReadRepository supplierDebtRepository) : IRequestHandler<GetSuppliersWithDebtQuery, Result<List<SupplierDebtResponse>>>
     {
         public async Task<Result<List<SupplierDebtResponse>>> Handle(
             GetSuppliersWithDebtQuery request,

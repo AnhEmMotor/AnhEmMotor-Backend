@@ -186,5 +186,38 @@ namespace Infrastructure.Repositories.InventoryReceipt
             }
             return query.ToListAsync(cancellationToken);
         }
+
+        public async Task<List<Domain.Entities.InventoryReceiptAuditLog>> GetAuditLogsAsync(int inventoryReceiptId, CancellationToken cancellationToken)
+        {
+            return await context.InventoryReceiptAuditLogs
+                .Include(l => l.ChangedBy)
+                .Where(l => l.InventoryReceiptId == inventoryReceiptId)
+                .OrderByDescending(l => l.ChangedAt)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Domain.Entities.InventoryReceiptInfoAuditLog>> GetInfoAuditLogsAsync(int inventoryReceiptId, CancellationToken cancellationToken)
+        {
+            return await context.InventoryReceiptInfoAuditLogs
+                .IgnoreQueryFilters()
+                .Include(il => il.InventoryReceiptInfo)
+                    .ThenInclude(i => i!.PurchaseRequestItem)
+                        .ThenInclude(pri => pri!.ProductVariant)
+                            .ThenInclude(pv => pv!.Product)
+                .Where(il => il.InventoryReceiptInfo.InventoryReceiptId == inventoryReceiptId)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Domain.Entities.VehicleAuditLog>> GetVehicleAuditLogsAsync(int inventoryReceiptId, CancellationToken cancellationToken)
+        {
+            return await context.VehicleAuditLogs
+                .IgnoreQueryFilters()
+                .Include(vl => vl.ChangedBy)
+                .Include(vl => vl.Vehicle)
+                    .ThenInclude(v => v.InventoryReceiptInfo)
+                .Where(vl => vl.Vehicle.InventoryReceiptInfo!.InventoryReceiptId == inventoryReceiptId)
+                .OrderByDescending(vl => vl.ChangedAt)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

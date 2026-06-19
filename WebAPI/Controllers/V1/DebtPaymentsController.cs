@@ -68,5 +68,20 @@ namespace WebAPI.Controllers.V1
             var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
+
+        /// <summary>
+        /// Lấy lịch sử thay đổi (Audit Trail) của phiếu trả nợ NCC.
+        /// </summary>
+        [HttpGet("~/api/v{version:apiVersion}/SupplierDebtSettlements/{id:int}/audit-logs")]
+        [HasPermission(DebtPayments.View)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSupplierDebtSettlementAuditLogsAsync(
+            [FromRoute] int id,
+            CancellationToken cancellationToken)
+        {
+            var query = new Application.Features.DebtPayments.Queries.GetDebtPaymentAuditLogs.GetDebtPaymentAuditLogsQuery { Id = id };
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
     }
 }

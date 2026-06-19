@@ -15,6 +15,7 @@ using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.SupplierDebt;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -45,7 +46,7 @@ public class InventoryReceipts
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IPermissionReadRepository> _permissionRepoMock;
     private readonly Mock<IInventoryLedgerRepository> _ledgerRepoMock;
-    private readonly Mock<ISupplierDebtRepository> _supplierDebtRepoMock;
+    private readonly Mock<ISupplierDebtInsertRepository> _supplierDebtRepoMock;
     private readonly Mock<IVehicleUpdateRepository> _vehicleUpdateRepoMock;
     private readonly Mock<IProductQuotationReadRepository> _ProductQuotationRepoMock;
 
@@ -64,7 +65,7 @@ public class InventoryReceipts
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _permissionRepoMock = new Mock<IPermissionReadRepository>();
         _ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
-        _supplierDebtRepoMock = new Mock<ISupplierDebtRepository>();
+        _supplierDebtRepoMock = new Mock<ISupplierDebtInsertRepository>();
         _vehicleUpdateRepoMock = new Mock<IVehicleUpdateRepository>();
         _ProductQuotationRepoMock = new Mock<IProductQuotationReadRepository>();
     }
@@ -388,6 +389,7 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _ProductQuotationRepoMock.Object,
@@ -418,6 +420,7 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _ProductQuotationRepoMock.Object,
@@ -584,6 +587,7 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _ProductQuotationRepoMock.Object,
@@ -614,6 +618,7 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
             _ProductQuotationRepoMock.Object,

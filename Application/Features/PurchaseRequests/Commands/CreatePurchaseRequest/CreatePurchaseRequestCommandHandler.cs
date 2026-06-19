@@ -95,6 +95,31 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
                         })]
             };
             insertRepository.Add(purchaseRequest);
+
+            var auditLogs = new List<Domain.Entities.PurchaseRequestAuditLog>
+            {
+                new Domain.Entities.PurchaseRequestAuditLog
+                {
+                    PurchaseRequest = purchaseRequest,
+                    Action = "Add",
+                    ChangedById = currentUserId,
+                    ChangedAt = DateTimeOffset.UtcNow,
+                    NewStatusId = purchaseRequest.Status,
+                    NewNotes = purchaseRequest.Note
+                }
+            };
+            await insertRepository.InsertAuditLogsAsync(auditLogs, cancellationToken).ConfigureAwait(false);
+
+            var itemAuditLogs = purchaseRequest.PurchaseRequestItems.Select(item => new Domain.Entities.PurchaseRequestItemAuditLog
+            {
+                PurchaseRequestItem = item,
+                Action = "Add",
+                NewQuantity = item.Quantity,
+                NewProductVariantId = item.ProductVariantId,
+                NewProductVariantColorId = item.ProductVariantColorId
+            }).ToList();
+            await insertRepository.InsertItemAuditLogsAsync(itemAuditLogs, cancellationToken).ConfigureAwait(false);
+
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             var created = await readRepository.GetByIdWithDetailsAsync(purchaseRequest.Id, cancellationToken)
                 .ConfigureAwait(false);

@@ -1,6 +1,7 @@
 using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Responses;
 using Domain.Constants;
+using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
 using Mapster;

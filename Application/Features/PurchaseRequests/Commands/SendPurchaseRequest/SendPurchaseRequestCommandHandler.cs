@@ -10,6 +10,7 @@ namespace Application.Features.PurchaseRequests.Commands.SendPurchaseRequest
     public class SendPurchaseRequestCommandHandler(
         IPurchaseRequestReadRepository readRepository,
         IPurchaseRequestUpdateRepository updateRepository,
+        IPurchaseRequestInsertRepository insertRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserContext? currentUserContext = null) : IRequestHandler<SendPurchaseRequestCommand, Result>
     {
@@ -25,9 +26,24 @@ namespace Application.Features.PurchaseRequests.Commands.SendPurchaseRequest
                 return Result.Failure(
                     Error.BadRequest("Chỉ có thể gửi yêu cầu mua hàng đang ở trạng thái Nháp (Draft).", "Status"));
             }
+            var oldStatus = pr.Status;
             pr.Status = "sent";
             pr.SentBy = currentUserContext?.GetUserId();
             updateRepository.Update(pr);
+
+            var auditLog = new Domain.Entities.PurchaseRequestAuditLog
+            {
+                PurchaseRequest = pr,
+                Action = "UpdateStatus",
+                ChangedById = pr.SentBy,
+                ChangedAt = DateTimeOffset.UtcNow,
+                OldStatusId = oldStatus,
+                NewStatusId = pr.Status,
+                OldNotes = pr.Note,
+                NewNotes = pr.Note
+            };
+            await insertRepository.InsertAuditLogsAsync([auditLog], cancellationToken).ConfigureAwait(false);
+
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();
         }

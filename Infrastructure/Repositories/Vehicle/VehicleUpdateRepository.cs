@@ -19,4 +19,10 @@ public class VehicleUpdateRepository(ApplicationDBContext dbContext) : IVehicleU
     {
         dbContext.Vehicles.Remove(vehicle);
     }
+
+    public Task InsertAuditLogsAsync(IEnumerable<Domain.Entities.VehicleAuditLog> logs, CancellationToken ct = default)
+    {
+        dbContext.VehicleAuditLogs.AddRange(logs);
+        return Task.CompletedTask;
+    }
 }

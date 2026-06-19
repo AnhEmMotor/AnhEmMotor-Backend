@@ -288,4 +288,18 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
+    /// <summary>
+    /// Lấy lịch sử thay đổi (Audit Trail) của phiếu nhập kho.
+    /// </summary>
+    [HttpGet("{id}/audit-logs")]
+    [HasPermission(InventoryReceipts.View)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetInventoryReceiptAuditLogsAsync(
+        [FromRoute] int id,
+        CancellationToken cancellationToken)
+    {
+        var query = new Application.Features.InventoryReceipts.Queries.GetInventoryReceiptAuditLogs.GetInventoryReceiptAuditLogsQuery { Id = id };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
 }

@@ -88,15 +88,15 @@ namespace Application.Features.InventoryReceipts.Mappings
                                                     ii.InventoryReceipt.DeletedAt == null &&
                                                     (string.Equals(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Approve,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                                             StringComparison.OrdinalIgnoreCase) ||
                                                         string.Equals(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Sent,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                                             StringComparison.OrdinalIgnoreCase) ||
                                                         string.Equals(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Draft,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                                             StringComparison.OrdinalIgnoreCase)))
                                 .Sum(ii => ii.Count ?? 0)
                         : (int?)null)

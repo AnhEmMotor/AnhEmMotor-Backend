@@ -1,7 +1,8 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
-using Domain.Constants;
+using Application.Interfaces.Repositories.SupplierDebt;
+using Domain.Constants.InventoryReceipt;
 using MediatR;
 using System.Linq;
 
@@ -10,7 +11,7 @@ namespace Application.Features.Suppliers.Commands.DeleteManySuppliers
     public class DeleteManySuppliersCommandHandler(
         ISupplierReadRepository readRepository,
         ISupplierDeleteRepository deleteRepository,
-        ISupplierDebtRepository supplierDebtRepository,
+        ISupplierDebtReadRepository supplierDebtReadRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<DeleteManySuppliersCommand, Result>
     {
         public async Task<Result> Handle(DeleteManySuppliersCommand request, CancellationToken cancellationToken)
@@ -26,7 +27,7 @@ namespace Application.Features.Suppliers.Commands.DeleteManySuppliers
                 {
                     return Result.Failure(Error.NotFound($"Supplier with Id {id} not found."));
                 }
-                var supplierDebts = await supplierDebtRepository.GetBySupplierIdAsync(id, cancellationToken)
+                var supplierDebts = await supplierDebtReadRepository.GetBySupplierIdAsync(id, cancellationToken)
                     .ConfigureAwait(false);
                 if (supplierDebts.Any(
                     sd => sd.InventoryReceipt != null && InventoryReceiptStatus.IsCanEdit(sd.InventoryReceipt.StatusId)))

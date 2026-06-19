@@ -1,13 +1,13 @@
 using Application.ApiContracts.DebtPayment.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.SupplierDebt;
 using MediatR;
 using System;
 using System.Linq;
 
 namespace Application.Features.DebtPayments.Queries.GetReceiptsWithDebtBySupplierId
 {
-    public class GetReceiptsWithDebtBySupplierIdQueryHandler(ISupplierDebtRepository supplierDebtRepository) : IRequestHandler<GetReceiptsWithDebtBySupplierIdQuery, Result<List<InventoryReceiptDebtLineResponse>>>
+    public class GetReceiptsWithDebtBySupplierIdQueryHandler(ISupplierDebtReadRepository supplierDebtRepository) : IRequestHandler<GetReceiptsWithDebtBySupplierIdQuery, Result<List<InventoryReceiptDebtLineResponse>>>
     {
         public async Task<Result<List<InventoryReceiptDebtLineResponse>>> Handle(
             GetReceiptsWithDebtBySupplierIdQuery request,

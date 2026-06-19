@@ -1,6 +1,8 @@
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Entities.Logistics;
+using Microsoft.Extensions.DependencyInjection;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -180,7 +182,19 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<SupplierFinance> SupplierFinances { get; set; }
 
-    public virtual DbSet<SupplierDebtSettlement> SupplierDebtSettlements { get; set; }
+
+    public virtual DbSet<SupplierDebtAuditLog> SupplierDebtAuditLogs { get; set; }
+
+    public virtual DbSet<InventoryReceiptAuditLog> InventoryReceiptAuditLogs { get; set; }
+
+    public virtual DbSet<InventoryReceiptInfoAuditLog> InventoryReceiptInfoAuditLogs { get; set; }
+
+    public virtual DbSet<VehicleAuditLog> VehicleAuditLogs { get; set; }
+
+    public virtual DbSet<PurchaseRequestAuditLog> PurchaseRequestAuditLogs { get; set; }
+    public virtual DbSet<PurchaseRequestItemAuditLog> PurchaseRequestItemAuditLogs { get; set; }
+
+
 
     public virtual DbSet<ParcelDeliveryOrder> ParcelDeliveryOrders { get; set; }
 
@@ -202,6 +216,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.CodAmount).HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.ShippingCost).HasPrecision(18, 2);
         modelBuilder.Entity<CarrierPartner>().Property(e => e.MaxParcelWeightKg).HasPrecision(18, 2);
+        modelBuilder.Entity<InventoryReceiptInfoAuditLog>().Property(e => e.NewPrice).HasPrecision(18, 2);
+        modelBuilder.Entity<InventoryReceiptInfoAuditLog>().Property(e => e.OldPrice).HasPrecision(18, 2);
+
+
+        modelBuilder.Entity<SupplierDebtAuditLog>().Property(e => e.NewAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<SupplierDebtAuditLog>().Property(e => e.OldAmount).HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>()
             .HasMany(p => p.Items)
             .WithOne(i => i.ParcelDeliveryOrder)
@@ -554,4 +574,5 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             _ => Set<T>()
         };
     }
+
 }

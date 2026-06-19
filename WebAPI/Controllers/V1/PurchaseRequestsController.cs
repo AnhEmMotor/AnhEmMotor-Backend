@@ -201,5 +201,20 @@ namespace WebAPI.Controllers.V1
                 .ConfigureAwait(true);
             return HandleResult(result);
         }
+
+        /// <summary>
+        /// Lấy lịch sử chỉnh sửa yêu cầu mua hàng.
+        /// </summary>
+        [HttpGet("{id:int}/audit-logs")]
+        [HasPermission(PurchaseRequests.View)]
+        [ProducesResponseType(typeof(List<PurchaseRequestAuditLogResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPurchaseRequestAuditLogsAsync(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var query = new Application.Features.PurchaseRequests.Queries.GetPurchaseRequestAuditLogs.GetPurchaseRequestAuditLogsQuery { Id = id };
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
     }
 }

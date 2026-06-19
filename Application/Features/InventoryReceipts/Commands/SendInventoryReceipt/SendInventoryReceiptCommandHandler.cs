@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Services;
 using Domain.Constants;
+using Domain.Constants.InventoryReceipt;
 using Mapster;
 using MediatR;
 

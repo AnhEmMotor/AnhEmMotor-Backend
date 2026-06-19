@@ -1,5 +1,5 @@
 using Application.Common.Models;
-using Domain.Constants;
+using Domain.Constants.InventoryReceipt;
 using MediatR;
 
 namespace Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStatusList;

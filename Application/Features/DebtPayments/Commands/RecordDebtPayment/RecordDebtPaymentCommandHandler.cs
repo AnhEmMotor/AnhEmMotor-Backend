@@ -2,8 +2,9 @@ using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
-using Application.Interfaces.Repositories.Supplier;
-using Domain.Constants;
+using Application.Interfaces.Repositories.SupplierDebt;
+using Application.Interfaces.Services;
+using Domain.Constants.InventoryReceipt;
 using Mapster;
 using MediatR;
 using System;
@@ -12,15 +13,18 @@ using System.Linq;
 namespace Application.Features.DebtPayments.Commands.RecordDebtPayment
 {
     public class RecordDebtPaymentCommandHandler(
-        ISupplierDebtRepository supplierDebtRepository,
+        ISupplierDebtReadRepository supplierDebtReadRepository,
+        ISupplierDebtUpdateRepository supplierDebtUpdateRepository,
         IInventoryReceiptReadRepository inventoryReceiptReadRepository,
+        ISupplierDebtAuditLogInsertRepository auditLogInsertRepository,
+        ICurrentUserContext currentUserContext,
         IUnitOfWork unitOfWork) : IRequestHandler<RecordDebtPaymentCommand, Result<InventoryReceiptDetailResponse>>
     {
         public async Task<Result<InventoryReceiptDetailResponse>> Handle(
             RecordDebtPaymentCommand request,
             CancellationToken cancellationToken)
         {
-            var debt = await supplierDebtRepository.GetByIdAsync(request.LineId, cancellationToken)
+            var debt = await supplierDebtReadRepository.GetByIdAsync(request.LineId, cancellationToken)
                 .ConfigureAwait(false);
             if (debt == null)
             {
@@ -46,8 +50,22 @@ namespace Application.Features.DebtPayments.Commands.RecordDebtPayment
                     $"Số tiền thanh toán ({amountToPay}) vượt quá dư nợ còn lại ({remainingDebt}).",
                     "Amount");
             }
+            decimal oldPaidAmount = debt.PaidAmount;
             debt.PaidAmount += amountToPay;
-            supplierDebtRepository.Update(debt);
+            supplierDebtUpdateRepository.Update(debt);
+
+            var auditLog = new Domain.Entities.SupplierDebtAuditLog
+            {
+                SupplierDebtId = debt.Id,
+                Action = "Thanh toán công nợ",
+                OldAmount = oldPaidAmount,
+                NewAmount = debt.PaidAmount,
+                ChangedById = currentUserContext.GetUserId(),
+                ChangedAt = DateTimeOffset.UtcNow,
+                NewPaymentDate = DateTimeOffset.UtcNow
+            };
+            await auditLogInsertRepository.InsertAsync(auditLog, cancellationToken).ConfigureAwait(false);
+
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             int inventoryReceiptId = debt.InventoryReceiptId;
             if (inventoryReceiptId == 0)

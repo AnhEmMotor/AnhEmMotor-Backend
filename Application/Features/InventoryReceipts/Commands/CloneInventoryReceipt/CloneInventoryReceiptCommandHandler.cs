@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
+using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Product;
 using Mapster;
 using MediatR;
