@@ -35,26 +35,54 @@ public class GetInventoryReceiptAuditLogsQueryHandler(IInventoryReceiptReadRepos
             // we will group them globally like the Output logs did.
             InfoLogs = infoLogs
                 .Where(il => Math.Abs((il.CreatedAt.GetValueOrDefault() - l.ChangedAt).TotalSeconds) <= 5)
-                .Select(il => new InventoryReceiptInfoAuditLogResponse
-            {
-                Action = InventoryReceiptAuditLogAction.Translate(il.Action),
-                OldQuantity = il.Action == "Delete" ? null : il.OldQuantity,
-                NewQuantity = il.Action == "Delete" ? null : il.NewQuantity,
-                OldPrice = il.Action == "Delete" ? null : il.OldPrice,
-                NewPrice = il.Action == "Delete" ? null : il.NewPrice
-            }).ToList(),
+                .Select(il => 
+                {
+                    var info = il.InventoryReceiptInfo;
+                    var prItem = info?.PurchaseRequestItem;
+                    var productVariantName = prItem?.ProductVariant != null ? $"{prItem.ProductVariant.Product?.Name}" : null;
+                    if (prItem?.ProductVariant != null && !string.IsNullOrEmpty(prItem.ProductVariant.VariantName)) {
+                        productVariantName += $" - {prItem.ProductVariant.VariantName}";
+                    }
+                    if (prItem?.ProductVariantColor != null && productVariantName != null) {
+                        productVariantName += $" - {prItem.ProductVariantColor.ColorName}";
+                    }
+
+                    return new InventoryReceiptInfoAuditLogResponse
+                    {
+                        Action = InventoryReceiptAuditLogAction.Translate(il.Action),
+                        OldQuantity = il.Action == "Delete" ? null : il.OldQuantity,
+                        NewQuantity = il.Action == "Delete" ? null : il.NewQuantity,
+                        OldPrice = il.Action == "Delete" ? null : il.OldPrice,
+                        NewPrice = il.Action == "Delete" ? null : il.NewPrice,
+                        ProductVariantName = productVariantName,
+                        SupplierName = info?.Supplier?.Name
+                    };
+                }).ToList(),
             VehicleLogs = vehicleLogs
                 .Where(vl => Math.Abs((vl.ChangedAt - l.ChangedAt).TotalSeconds) <= 5)
-                .Select(vl => new VehicleAuditLogResponse
-            {
-                Action = InventoryReceiptAuditLogAction.Translate(vl.Action),
-                ChangedByFullName = vl.ChangedBy?.FullName,
-                ChangedAt = vl.ChangedAt,
-                OldVinNumber = vl.OldVinNumber,
-                NewVinNumber = vl.NewVinNumber,
-                OldEngineNumber = vl.OldEngineNumber,
-                NewEngineNumber = vl.NewEngineNumber
-            }).ToList()
+                .Select(vl => {
+                    var info = vl.Vehicle.InventoryReceiptInfo;
+                    var prItem = info?.PurchaseRequestItem;
+                    var productVariantName = prItem?.ProductVariant != null ? $"{prItem.ProductVariant.Product?.Name}" : null;
+                    if (prItem?.ProductVariant != null && !string.IsNullOrEmpty(prItem.ProductVariant.VariantName)) {
+                        productVariantName += $" - {prItem.ProductVariant.VariantName}";
+                    }
+                    if (prItem?.ProductVariantColor != null && productVariantName != null) {
+                        productVariantName += $" - {prItem.ProductVariantColor.ColorName}";
+                    }
+
+                    return new VehicleAuditLogResponse
+                    {
+                        Action = InventoryReceiptAuditLogAction.Translate(vl.Action),
+                        ChangedByFullName = vl.ChangedBy?.FullName,
+                        ChangedAt = vl.ChangedAt,
+                        OldVinNumber = vl.OldVinNumber,
+                        NewVinNumber = vl.NewVinNumber,
+                        OldEngineNumber = vl.OldEngineNumber,
+                        NewEngineNumber = vl.NewEngineNumber,
+                        ProductVariantName = productVariantName
+                    };
+                }).ToList()
         }).ToList();
 
         return result;

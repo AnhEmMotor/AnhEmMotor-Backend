@@ -25,5 +25,9 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
         public int InvoicingQuantity { get; set; }
 
         public int UninvoicedQuantity { get; set; }
+
+        public int? SupplierId { get; set; }
+
+        public string? SupplierName { get; set; }
     }
 }

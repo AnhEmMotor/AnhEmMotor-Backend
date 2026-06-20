@@ -8,6 +8,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
+using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
@@ -24,6 +25,7 @@ public class PurchaseRequests
     private readonly Mock<IPurchaseRequestUpdateRepository> _updateRepoMock;
     private readonly Mock<IPurchaseRequestDeleteRepository> _deleteRepoMock;
     private readonly Mock<IProductVariantReadRepository> _variantRepoMock;
+    private readonly Mock<ISupplierReadRepository> _supplierRepoMock;
     private readonly Mock<IPermissionReadRepository> _permissionRepoMock;
     private readonly Mock<ICurrentUserContext> _currentUserContextMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
@@ -35,9 +37,11 @@ public class PurchaseRequests
         _updateRepoMock = new Mock<IPurchaseRequestUpdateRepository>();
         _deleteRepoMock = new Mock<IPurchaseRequestDeleteRepository>();
         _variantRepoMock = new Mock<IProductVariantReadRepository>();
+        _supplierRepoMock = new Mock<ISupplierReadRepository>();
         _permissionRepoMock = new Mock<IPermissionReadRepository>();
         _currentUserContextMock = new Mock<ICurrentUserContext>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _supplierRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync([]);
     }
 
     #pragma warning disable IDE0079 
@@ -49,6 +53,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreatePurchaseRequestCommand
@@ -88,6 +93,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreatePurchaseRequestCommand
@@ -127,6 +133,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreatePurchaseRequestCommand { Note = "Test Empty Items", Items = [] };
@@ -142,6 +149,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreatePurchaseRequestCommand
@@ -161,6 +169,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreatePurchaseRequestCommand
@@ -183,6 +192,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreatePurchaseRequestCommand
@@ -215,6 +225,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreatePurchaseRequestCommand
@@ -247,6 +258,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreatePurchaseRequestCommand
@@ -276,6 +288,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreatePurchaseRequestCommand
@@ -304,6 +317,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
@@ -342,6 +356,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
@@ -362,6 +377,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
@@ -407,6 +423,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
@@ -437,6 +454,7 @@ public class PurchaseRequests
             _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
+            _supplierRepoMock.Object,
             _permissionRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
@@ -717,3 +735,4 @@ public class PurchaseRequests
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
+

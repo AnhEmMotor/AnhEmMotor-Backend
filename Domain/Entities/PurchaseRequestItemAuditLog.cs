@@ -22,6 +22,9 @@ namespace Domain.Entities
         public int? OldProductVariantColorId { get; set; }
         public int? NewProductVariantColorId { get; set; }
 
+        public string? OldSupplierName { get; set; }
+        public string? NewSupplierName { get; set; }
+
         [ForeignKey("PurchaseRequestItemId")]
         public virtual PurchaseRequestItem PurchaseRequestItem { get; set; } = null!;
     }

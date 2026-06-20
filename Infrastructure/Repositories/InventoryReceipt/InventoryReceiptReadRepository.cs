@@ -204,6 +204,11 @@ namespace Infrastructure.Repositories.InventoryReceipt
                     .ThenInclude(i => i!.PurchaseRequestItem)
                         .ThenInclude(pri => pri!.ProductVariant)
                             .ThenInclude(pv => pv!.Product)
+                .Include(il => il.InventoryReceiptInfo)
+                    .ThenInclude(i => i!.PurchaseRequestItem)
+                        .ThenInclude(pri => pri!.ProductVariantColor)
+                .Include(il => il.InventoryReceiptInfo)
+                    .ThenInclude(i => i!.Supplier)
                 .Where(il => il.InventoryReceiptInfo.InventoryReceiptId == inventoryReceiptId)
                 .ToListAsync(cancellationToken);
         }
@@ -215,6 +220,13 @@ namespace Infrastructure.Repositories.InventoryReceipt
                 .Include(vl => vl.ChangedBy)
                 .Include(vl => vl.Vehicle)
                     .ThenInclude(v => v.InventoryReceiptInfo)
+                        .ThenInclude(i => i!.PurchaseRequestItem)
+                            .ThenInclude(pri => pri!.ProductVariant)
+                                .ThenInclude(pv => pv!.Product)
+                .Include(vl => vl.Vehicle)
+                    .ThenInclude(v => v.InventoryReceiptInfo)
+                        .ThenInclude(i => i!.PurchaseRequestItem)
+                            .ThenInclude(pri => pri!.ProductVariantColor)
                 .Where(vl => vl.Vehicle.InventoryReceiptInfo!.InventoryReceiptId == inventoryReceiptId)
                 .OrderByDescending(vl => vl.ChangedAt)
                 .ToListAsync(cancellationToken);

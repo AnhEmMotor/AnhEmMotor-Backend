@@ -15,6 +15,8 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
         public int? NewProductVariantColorId { get; set; }
         public string? OldProductVariantColorName { get; set; }
         public string? NewProductVariantColorName { get; set; }
+        public string? OldSupplierName { get; set; }
+        public string? NewSupplierName { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
     }
 }

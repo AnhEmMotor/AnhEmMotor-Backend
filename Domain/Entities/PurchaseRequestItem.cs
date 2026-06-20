@@ -31,6 +31,12 @@ namespace Domain.Entities
 
         public ProductVariantColor? ProductVariantColor { get; set; }
 
+        [Column("SupplierId")]
+        [ForeignKey("Supplier")]
+        public int? SupplierId { get; set; }
+
+        public Supplier? Supplier { get; set; }
+
         public ICollection<InventoryReceiptInfo> InventoryReceiptInfos { get; set; } = [];
     }
 }

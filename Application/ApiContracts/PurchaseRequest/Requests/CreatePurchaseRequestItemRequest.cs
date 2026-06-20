@@ -7,5 +7,7 @@ namespace Application.ApiContracts.PurchaseRequest.Requests
         public int? ProductVariantColorId { get; set; }
 
         public int? Quantity { get; set; }
+
+        public int? SupplierId { get; set; }
     }
 }

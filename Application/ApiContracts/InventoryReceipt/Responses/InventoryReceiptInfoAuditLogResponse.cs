@@ -7,4 +7,6 @@ public class InventoryReceiptInfoAuditLogResponse
     public int? NewQuantity { get; set; }
     public decimal? OldPrice { get; set; }
     public decimal? NewPrice { get; set; }
+    public string? ProductVariantName { get; set; }
+    public string? SupplierName { get; set; }
 }

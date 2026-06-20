@@ -11,4 +11,5 @@ public class VehicleAuditLogResponse
     public string? NewVinNumber { get; set; }
     public string? OldEngineNumber { get; set; }
     public string? NewEngineNumber { get; set; }
+    public string? ProductVariantName { get; set; }
 }

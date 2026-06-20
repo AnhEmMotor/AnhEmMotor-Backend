@@ -168,7 +168,8 @@ namespace Application.Features.PurchaseRequests.Mappings
                                 : 0)))
                 .Map(dest => dest.InvoicedQuantity, src => 0)
                 .Map(dest => dest.InvoicingQuantity, src => 0)
-                .Map(dest => dest.UninvoicedQuantity, src => src.Quantity);
+                .Map(dest => dest.UninvoicedQuantity, src => src.Quantity)
+                .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null);
             config.NewConfig<PurchaseRequest, ApprovedPurchaseRequestDetailResponse>()
                 .Map(dest => dest.Items, src => src.PurchaseRequestItems);
             config.NewConfig<PurchaseRequestItem, ApprovedPurchaseRequestItemResponse>()
@@ -220,7 +221,8 @@ namespace Application.Features.PurchaseRequests.Mappings
                             src.ProductVariant.Product.ProductCategory.ManagementType,
                             ProductManagementType.VinNumber,
                             StringComparison.OrdinalIgnoreCase) ==
-                        0);
+                        0)
+                .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null);
         }
     }
 }

@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
+using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
@@ -20,6 +21,7 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
         IPurchaseRequestInsertRepository insertRepository,
         IPurchaseRequestDeleteRepository deleteRepository,
         IProductVariantReadRepository variantRepository,
+        ISupplierReadRepository supplierReadRepository,
         IPermissionReadRepository permissionReadRepository,
         ICurrentUserContext currentUserContext,
         IUnitOfWork unitOfWork) : IRequestHandler<UpdatePurchaseRequestCommand, Result<PurchaseRequestDetailResponse?>>
@@ -61,6 +63,16 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
             var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
             var variantDict = variants.ToDictionary(v => v.Id);
+
+            var supplierIds = request.Items
+                .Where(x => x.SupplierId.HasValue)
+                .Select(x => x.SupplierId!.Value)
+                .Concat(pr.PurchaseRequestItems.Where(x => x.SupplierId.HasValue).Select(x => x.SupplierId!.Value))
+                .Distinct()
+                .ToList();
+            var suppliers = await supplierReadRepository.GetByIdAsync(supplierIds, cancellationToken, DataFetchMode.ActiveOnly).ConfigureAwait(false);
+            var supplierDict = suppliers.ToDictionary(s => s.Id, s => s.Name);
+
             foreach (var item in request.Items)
             {
                 if (!item.ProductVariantId.HasValue)
@@ -130,7 +142,8 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                     Action = "Delete",
                     OldQuantity = item.Quantity,
                     OldProductVariantId = item.ProductVariantId,
-                    OldProductVariantColorId = item.ProductVariantColorId
+                    OldProductVariantColorId = item.ProductVariantColorId,
+                    OldSupplierName = item.SupplierId.HasValue && supplierDict.TryGetValue(item.SupplierId.Value, out var supplierName) ? supplierName : null
                 });
                 deleteRepository.DeleteItem(item);
                 pr.PurchaseRequestItems.Remove(item);
@@ -148,6 +161,7 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                         existingItem.ProductVariantId = itemRequest.ProductVariantId!.Value;
                         existingItem.ProductVariantColorId = itemRequest.ProductVariantColorId;
                         existingItem.Quantity = itemRequest.Quantity!.Value;
+                        existingItem.SupplierId = itemRequest.SupplierId;
 
                         if (oldQuantity != existingItem.Quantity || oldVariantId != existingItem.ProductVariantId || oldColorId != existingItem.ProductVariantColorId)
                         {
@@ -160,7 +174,9 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                                 OldProductVariantId = oldVariantId,
                                 NewProductVariantId = existingItem.ProductVariantId,
                                 OldProductVariantColorId = oldColorId,
-                                NewProductVariantColorId = existingItem.ProductVariantColorId
+                                NewProductVariantColorId = existingItem.ProductVariantColorId,
+                                OldSupplierName = existingItem.SupplierId.HasValue && supplierDict.TryGetValue(existingItem.SupplierId.Value, out var oldSupplierName) ? oldSupplierName : null,
+                                NewSupplierName = itemRequest.SupplierId.HasValue && supplierDict.TryGetValue(itemRequest.SupplierId.Value, out var newSupplierName) ? newSupplierName : null
                             });
                         }
                     }
@@ -170,7 +186,8 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                     {
                         ProductVariantId = itemRequest.ProductVariantId!.Value,
                         ProductVariantColorId = itemRequest.ProductVariantColorId,
-                        Quantity = itemRequest.Quantity!.Value
+                        Quantity = itemRequest.Quantity!.Value,
+                        SupplierId = itemRequest.SupplierId
                     };
                     pr.PurchaseRequestItems.Add(newItem);
                     
@@ -180,7 +197,8 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                         Action = "Add",
                         NewQuantity = newItem.Quantity,
                         NewProductVariantId = newItem.ProductVariantId,
-                        NewProductVariantColorId = newItem.ProductVariantColorId
+                        NewProductVariantColorId = newItem.ProductVariantColorId,
+                        NewSupplierName = newItem.SupplierId.HasValue && supplierDict.TryGetValue(newItem.SupplierId.Value, out var nSupplierName) ? nSupplierName : null
                     });
                 }
             }
