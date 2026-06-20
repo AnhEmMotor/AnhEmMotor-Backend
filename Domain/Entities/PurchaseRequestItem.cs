@@ -31,6 +31,15 @@ namespace Domain.Entities
 
         public ProductVariantColor? ProductVariantColor { get; set; }
 
+        [Column("ProductQuotationId")]
+        [ForeignKey("ProductQuotation")]
+        public int? ProductQuotationId { get; set; }
+
+        public ProductQuotation? ProductQuotation { get; set; }
+
+        [Column("UnitPrice", TypeName = "decimal(18, 2)")]
+        public decimal? UnitPrice { get; set; }
+
         [Column("SupplierId")]
         [ForeignKey("Supplier")]
         public int? SupplierId { get; set; }

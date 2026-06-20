@@ -41,9 +41,9 @@ namespace Application.Features.InventoryReports.Queries.GetInventoryReportDetail
                     ii => new InventoryTransactionResponse
                     {
                         Id = ii.InventoryReceipt!.Id,
-                        PartnerName = ii.Supplier?.Name ?? "Nhà cung cấp",
+                        PartnerName = ii.PurchaseRequestItem?.Supplier?.Name ?? "Nhà cung cấp",
                         Qty = ii.Count ?? 0,
-                        Price = (int)(ii.UnitPrice ?? 0),
+                        Price = (int)(ii.PurchaseRequestItem?.UnitPrice ?? 0),
                         Date =
                             ii.InventoryReceipt!.InventoryReceiptDate ??
                                     ii.InventoryReceipt.CreatedAt ??

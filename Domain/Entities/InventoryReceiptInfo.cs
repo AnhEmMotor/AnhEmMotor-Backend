@@ -28,18 +28,9 @@ namespace Domain.Entities
         [ForeignKey("PurchaseRequestItem")]
         public int? PurchaseRequestItemId { get; set; }
 
-        [Column("SupplierId")]
-        [ForeignKey("Supplier")]
-        public int? SupplierId { get; set; }
-
-        [Column("UnitPrice", TypeName = "decimal(18, 2)")]
-        public decimal? UnitPrice { get; set; }
-
         public InventoryReceipt? InventoryReceipt { get; set; }
 
         public PurchaseRequestItem? PurchaseRequestItem { get; set; }
-
-        public Supplier? Supplier { get; set; }
 
         public OutputInfo? ParentOutputInfo { get; set; }
 

@@ -182,7 +182,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                         prItemsDict.TryGetValue(purchaseRequestItemId.Value, out var prItem2)
                     ? prItem2.ProductVariantColorId
                     : (int?)null;
-                var resolvedSupplierId = product.SupplierId;
                 if (resolvedVariantId.HasValue)
                 {
                     if (prItem != null)
@@ -214,21 +213,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                                 $"Biến thể #{prItem.ProductVariantId}";
                             return Error.BadRequest(
                                 $"Số lượng nhập ({requestedQty}) cho sản phẩm '{productName}' vượt quá số lượng còn lại được phép nhập từ yêu cầu mua hàng ({remainingAllowed}).",
-                                "Products");
-                        }
-                    }
-                    if (resolvedSupplierId.HasValue)
-                    {
-                        var supplier = await supplierRepository.GetByIdAsync(
-                            resolvedSupplierId.Value,
-                            cancellationToken,
-                            DataFetchMode.ActiveOnly)
-                            .ConfigureAwait(false);
-                        if (supplier is null ||
-                            string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
-                        {
-                            return Error.BadRequest(
-                                $"Nhà cung cấp với ID {resolvedSupplierId.Value} không tồn tại hoặc không còn hoạt động.",
                                 "Products");
                         }
                     }

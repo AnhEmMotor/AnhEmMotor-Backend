@@ -25,6 +25,12 @@ namespace Domain.Entities
         public string? OldSupplierName { get; set; }
         public string? NewSupplierName { get; set; }
 
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? OldUnitPrice { get; set; }
+
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? NewUnitPrice { get; set; }
+
         [ForeignKey("PurchaseRequestItemId")]
         public virtual PurchaseRequestItem PurchaseRequestItem { get; set; } = null!;
     }

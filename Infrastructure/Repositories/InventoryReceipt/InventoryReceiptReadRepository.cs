@@ -60,7 +60,8 @@ namespace Infrastructure.Repositories.InventoryReceipt
                 .ThenInclude(pri => pri!.InventoryReceiptInfos.Where(rii => rii.DeletedAt == null))
                 .ThenInclude(rii => rii.InventoryReceipt)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                .ThenInclude(ii => ii.Supplier)
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.Supplier)
                 .Include(x => x.PurchaseRequest)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.SentByUser)
@@ -139,7 +140,8 @@ namespace Infrastructure.Repositories.InventoryReceipt
                 .ThenInclude(pri => pri!.InventoryReceiptInfos.Where(rii => rii.DeletedAt == null))
                 .ThenInclude(rii => rii.InventoryReceipt)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                .ThenInclude(ii => ii.Supplier)
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.Supplier)
                 .Include(x => x.PurchaseRequest)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.SentByUser)
@@ -177,7 +179,8 @@ namespace Infrastructure.Repositories.InventoryReceipt
             var query = context.InventoryReceiptInfos
                 .Where(x => x.DeletedAt == null && x.InventoryReceipt != null && x.InventoryReceipt.DeletedAt == null)
                 .Include(x => x.InventoryReceipt)
-                .Include(x => x.Supplier)
+                .Include(x => x.PurchaseRequestItem)
+                .ThenInclude(x => x!.Supplier)
                 .Include(x => x.PurchaseRequestItem)
                 .Where(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.ProductVariantId == variantId);
             if (colorId.HasValue)
@@ -208,7 +211,8 @@ namespace Infrastructure.Repositories.InventoryReceipt
                     .ThenInclude(i => i!.PurchaseRequestItem)
                         .ThenInclude(pri => pri!.ProductVariantColor)
                 .Include(il => il.InventoryReceiptInfo)
-                    .ThenInclude(i => i!.Supplier)
+                    .ThenInclude(i => i!.PurchaseRequestItem)
+                        .ThenInclude(pri => pri!.Supplier)
                 .Where(il => il.InventoryReceiptInfo.InventoryReceiptId == inventoryReceiptId)
                 .ToListAsync(cancellationToken);
         }

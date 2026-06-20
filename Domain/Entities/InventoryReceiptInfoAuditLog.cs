@@ -16,8 +16,6 @@ namespace Domain.Entities
         public int? OldQuantity { get; set; }
         public int? NewQuantity { get; set; }
 
-        public decimal? OldPrice { get; set; }
-        public decimal? NewPrice { get; set; }
 
         [ForeignKey("InventoryReceiptInfoId")]
         public virtual InventoryReceiptInfo InventoryReceiptInfo { get; set; } = null!;

@@ -52,10 +52,8 @@ public class GetInventoryReceiptAuditLogsQueryHandler(IInventoryReceiptReadRepos
                         Action = InventoryReceiptAuditLogAction.Translate(il.Action),
                         OldQuantity = il.Action == "Delete" ? null : il.OldQuantity,
                         NewQuantity = il.Action == "Delete" ? null : il.NewQuantity,
-                        OldPrice = il.Action == "Delete" ? null : il.OldPrice,
-                        NewPrice = il.Action == "Delete" ? null : il.NewPrice,
                         ProductVariantName = productVariantName,
-                        SupplierName = info?.Supplier?.Name
+                        SupplierName = prItem?.Supplier?.Name
                     };
                 }).ToList(),
             VehicleLogs = vehicleLogs

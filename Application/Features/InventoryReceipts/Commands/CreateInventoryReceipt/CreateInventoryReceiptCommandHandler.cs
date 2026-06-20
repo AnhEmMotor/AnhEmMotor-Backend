@@ -88,7 +88,7 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
             var resolvedSupplierId = product.PurchaseRequestItemId.HasValue &&
                     prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItm) && prItm.SupplierId.HasValue
                 ? prItm.SupplierId
-                : product.SupplierId;
+                : (int?)null;
             if (resolvedVariantId.HasValue)
             {
                 if (prItem != null)
@@ -239,23 +239,7 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                 : (int?)null;
             var inventoryReceiptInfo = p.Adapt<InventoryReceiptInfoEntity>();
             inventoryReceiptInfo.RemainingCount = p.Count ?? 0;
-            if (!inventoryReceiptInfo.SupplierId.HasValue && p.PurchaseRequestItemId.HasValue && prItemsDict.TryGetValue(p.PurchaseRequestItemId.Value, out var prItm2) && prItm2.SupplierId.HasValue)
-            {
-                inventoryReceiptInfo.SupplierId = prItm2.SupplierId;
-            }
 
-            if (resolvedVariantId.HasValue && inventoryReceiptInfo.SupplierId.HasValue && (!inventoryReceiptInfo.UnitPrice.HasValue || inventoryReceiptInfo.UnitPrice == 0))
-            {
-                var quotation = await productQuotationReadRepository.GetBySupplierAndVariantAsync(
-                    resolvedVariantId.Value,
-                    resolvedColorId,
-                    inventoryReceiptInfo.SupplierId.Value,
-                    cancellationToken).ConfigureAwait(false);
-                if (quotation != null && quotation.QuotePrice.HasValue)
-                {
-                    inventoryReceiptInfo.UnitPrice = quotation.QuotePrice.Value;
-                }
-            }
             if (resolvedVariantId.HasValue && variantMap.TryGetValue(resolvedVariantId.Value, out var variant))
             {
                 var managementType = variant.Product?.ProductCategory?.ManagementType;
@@ -334,8 +318,7 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
             {
                 InventoryReceiptInfo = info,
                 Action = "Add",
-                NewQuantity = info.Count,
-                NewPrice = info.UnitPrice
+                NewQuantity = info.Count
             });
 
             if (info.Vehicles != null)

@@ -17,6 +17,8 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
         public string? NewProductVariantColorName { get; set; }
         public string? OldSupplierName { get; set; }
         public string? NewSupplierName { get; set; }
+        public decimal? OldUnitPrice { get; set; }
+        public decimal? NewUnitPrice { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
     }
 }

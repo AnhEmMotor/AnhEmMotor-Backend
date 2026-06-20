@@ -216,8 +216,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.CodAmount).HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.ShippingCost).HasPrecision(18, 2);
         modelBuilder.Entity<CarrierPartner>().Property(e => e.MaxParcelWeightKg).HasPrecision(18, 2);
-        modelBuilder.Entity<InventoryReceiptInfoAuditLog>().Property(e => e.NewPrice).HasPrecision(18, 2);
-        modelBuilder.Entity<InventoryReceiptInfoAuditLog>().Property(e => e.OldPrice).HasPrecision(18, 2);
+
 
 
         modelBuilder.Entity<SupplierDebtAuditLog>().Property(e => e.NewAmount).HasPrecision(18, 2);
@@ -361,11 +360,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(pri => pri.InventoryReceiptInfos)
             .HasForeignKey(ii => ii.PurchaseRequestItemId)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<InventoryReceiptInfo>()
-            .HasOne(ii => ii.Supplier)
-            .WithMany()
-            .HasForeignKey(ii => ii.SupplierId)
-            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<OutputInfo>()
             .HasOne(oi => oi.ProductVariantColor)
             .WithMany()

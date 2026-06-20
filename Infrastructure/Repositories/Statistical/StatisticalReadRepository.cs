@@ -784,7 +784,7 @@ namespace Infrastructure.Repositories.Statistical
                     {
                         VariantId = g.Key,
                         TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)),
-                        AvgInventoryReceiptPrice = g.Sum(x => (x.ii.UnitPrice ?? 0) * (x.ii.Count ?? 0)) /
+                        AvgInventoryReceiptPrice = g.Sum(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.UnitPrice ?? 0 : 0) * (x.ii.Count ?? 0)) /
                             (g.Sum(x => (long)(x.ii.Count ?? 0)) == 0
                                     ? 1M
                                     : (decimal)(g.Sum(x => (long)(x.ii.Count ?? 0))))

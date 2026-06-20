@@ -81,6 +81,8 @@ namespace Application.Features.PurchaseRequests.Queries.GetPurchaseRequestAuditL
                     NewProductVariantColorName = il.PurchaseRequestItem?.ProductVariantColor?.ColorName,
                     OldSupplierName = il.OldSupplierName,
                     NewSupplierName = il.NewSupplierName,
+                    OldUnitPrice = il.OldUnitPrice,
+                    NewUnitPrice = il.NewUnitPrice,
                     CreatedAt = il.CreatedAt.GetValueOrDefault()
                 }).ToList()
             }).ToList();

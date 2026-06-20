@@ -103,7 +103,9 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
                             ProductVariantId = item.ProductVariantId!.Value,
                             ProductVariantColorId = item.ProductVariantColorId,
                             Quantity = item.Quantity!.Value,
-                            SupplierId = item.SupplierId
+                            SupplierId = item.SupplierId,
+                            ProductQuotationId = item.ProductQuotationId,
+                            UnitPrice = item.UnitPrice
                         })]
             };
             insertRepository.Add(purchaseRequest);
@@ -129,7 +131,8 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
                 NewQuantity = item.Quantity,
                 NewProductVariantId = item.ProductVariantId,
                 NewProductVariantColorId = item.ProductVariantColorId,
-                NewSupplierName = item.SupplierId.HasValue && supplierDict.TryGetValue(item.SupplierId.Value, out var supplierName) ? supplierName : null
+                NewSupplierName = item.SupplierId.HasValue && supplierDict.TryGetValue(item.SupplierId.Value, out var supplierName) ? supplierName : null,
+                NewUnitPrice = item.UnitPrice
             }).ToList();
             await insertRepository.InsertItemAuditLogsAsync(itemAuditLogs, cancellationToken).ConfigureAwait(false);
 

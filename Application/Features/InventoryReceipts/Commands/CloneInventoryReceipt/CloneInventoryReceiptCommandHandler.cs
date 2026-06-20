@@ -72,8 +72,6 @@ namespace Application.Features.InventoryReceipts.Commands.CloneInventoryReceipt
                     new InventoryReceiptInfoEntity
                     {
                         PurchaseRequestItemId = originalProduct.PurchaseRequestItemId,
-                        SupplierId = originalProduct.SupplierId,
-                        UnitPrice = originalProduct.UnitPrice,
                         Count = originalProduct.Count,
                         RemainingCount = originalProduct.Count,
                         CreatedAt = DateTimeOffset.UtcNow,

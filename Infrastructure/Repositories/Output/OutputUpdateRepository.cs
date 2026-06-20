@@ -79,7 +79,7 @@ namespace Infrastructure.Repositories.Output
                         if (remainingToDeduct <= 0)
                             break;
                         var batchRemaining = batch.RemainingCount ?? 0;
-                        var batchPrice = batch.UnitPrice ?? 0;
+                        var batchPrice = batch.PurchaseRequestItem?.UnitPrice ?? 0;
                         if (batchRemaining >= remainingToDeduct)
                         {
                             totalCost += remainingToDeduct * batchPrice;

@@ -98,47 +98,20 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                         TransactionType = "Nhập kho",
                         ProductVariantId = variantId,
                         ProductVariantColorId = colorId,
-                        PartnerName = info.Supplier?.Name,
+                        PartnerName = info.PurchaseRequestItem?.Supplier?.Name,
                         ImportQty = importQty,
                         ExportQty = 0,
-                        UnitPrice = info.UnitPrice ?? 0,
-                        TotalAmount = importQty * (info.UnitPrice ?? 0),
+                        UnitPrice = info.PurchaseRequestItem?.UnitPrice ?? 0,
+                        TotalAmount = importQty * (info.PurchaseRequestItem?.UnitPrice ?? 0),
                         StockAfter = newStock
                     };
                     await ledgerRepository.AddAsync(ledger, cancellationToken).ConfigureAwait(false);
-                    if (info.SupplierId.HasValue && info.UnitPrice.HasValue && variantId > 0)
-                    {
-                        var existingQuote = await quotationReadRepository.GetBySupplierAndVariantAsync(
-                            variantId,
-                            colorId,
-                            info.SupplierId.Value,
-                            cancellationToken)
-                            .ConfigureAwait(false);
-                        if (existingQuote != null)
-                        {
-                            if (existingQuote.QuotePrice != (int)info.UnitPrice.Value)
-                            {
-                                existingQuote.QuotePrice = (int)info.UnitPrice.Value;
-                                quotationUpdateRepository.Update(existingQuote);
-                            }
-                        } else
-                        {
-                            var newQuote = new ProductQuotation
-                            {
-                                ProductVariantId = variantId,
-                                ProductVariantColorId = colorId,
-                                SupplierId = info.SupplierId.Value,
-                                QuotePrice = (int)info.UnitPrice.Value
-                            };
-                            await quotationInsertRepository.AddAsync(newQuote, cancellationToken).ConfigureAwait(false);
-                        }
-                    }
                 }
                 var debtsToCreate = receipt.InventoryReceiptInfos
-                    .Where(info => info.SupplierId.HasValue && info.Count.HasValue && info.Count.Value > 0)
-                    .GroupBy(info => info.SupplierId!.Value)
+                    .Where(info => info.PurchaseRequestItem?.SupplierId != null && info.Count.HasValue && info.Count.Value > 0)
+                    .GroupBy(info => info.PurchaseRequestItem!.SupplierId!.Value)
                     .Select(
-                        g => new { SupplierId = g.Key, TotalAmount = g.Sum(i => (i.Count ?? 0) * (i.UnitPrice ?? 0)) })
+                        g => new { SupplierId = g.Key, TotalAmount = g.Sum(i => (i.Count ?? 0) * (i.PurchaseRequestItem?.UnitPrice ?? 0)) })
                     .Where(x => x.TotalAmount > 0)
                     .ToList();
                 foreach (var debtInfo in debtsToCreate)
