@@ -10,6 +10,8 @@ using Moq;
 using System;
 using WebAPI.Controllers.V1;
 
+using Domain.Primitives;
+
 namespace ControllerTests
 {
     public class DebtPayments
@@ -32,24 +34,26 @@ namespace ControllerTests
             {
                 new() { Id = 1, Name = "Supplier A", Phone = "0123", TotalDebt = 5000000 }
             };
+            var pagedResponse = new PagedResult<SupplierDebtResponse>(mockResponse, mockResponse.Count, 1, 10);
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersWithDebtQuery>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<List<SupplierDebtResponse>>.Success(mockResponse));
-            var result = await _controller.GetSuppliersWithDebtAsync(CancellationToken.None).ConfigureAwait(true);
+                .ReturnsAsync(Result<PagedResult<SupplierDebtResponse>>.Success(pagedResponse));
+            var result = await _controller.GetSuppliersWithDebtAsync(null!, CancellationToken.None).ConfigureAwait(true);
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult!.Value.Should().BeEquivalentTo(mockResponse);
+            okResult!.Value.Should().BeEquivalentTo(pagedResponse);
         }
 
         [Fact(DisplayName = "DP_002 - Lấy danh sách nhà cung cấp còn nợ trả về rỗng khi không có nợ")]
         public async Task DP_002_GetSuppliersWithDebt_ReturnsEmpty()
         {
             var mockResponse = new List<SupplierDebtResponse>();
+            var pagedResponse = new PagedResult<SupplierDebtResponse>(mockResponse, 0, 1, 10);
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersWithDebtQuery>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<List<SupplierDebtResponse>>.Success(mockResponse));
-            var result = await _controller.GetSuppliersWithDebtAsync(CancellationToken.None).ConfigureAwait(true);
+                .ReturnsAsync(Result<PagedResult<SupplierDebtResponse>>.Success(pagedResponse));
+            var result = await _controller.GetSuppliersWithDebtAsync(null!, CancellationToken.None).ConfigureAwait(true);
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult!.Value.Should().BeEquivalentTo(mockResponse);
+            okResult!.Value.Should().BeEquivalentTo(pagedResponse);
         }
 
         [Fact(DisplayName = "DP_003 - Lấy chi tiết các phiếu nhập còn nợ theo ID nhà cung cấp thành công")]

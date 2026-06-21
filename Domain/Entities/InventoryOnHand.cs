@@ -18,6 +18,15 @@ namespace Domain.Entities
         [ForeignKey("ProductVariantColor")]
         public int? ProductVariantColorId { get; set; }
 
+        [Column("Month")]
+        public int Month { get; set; }
+
+        [Column("Year")]
+        public int Year { get; set; }
+
+        [Column("BeginningQty")]
+        public int BeginningQty { get; set; }
+
         [Column("StockQty")]
         public int StockQty { get; set; }
 

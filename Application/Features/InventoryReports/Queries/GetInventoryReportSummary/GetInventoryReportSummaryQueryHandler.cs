@@ -17,6 +17,8 @@ namespace Application.Features.InventoryReports.Queries.GetInventoryReportSummar
                 request.PageNumber,
                 request.PageSize,
                 request.SearchTerm,
+                request.Month,
+                request.Year,
                 cancellationToken)
                 .ConfigureAwait(false);
             return new PagedResult<InventoryReportSummaryResponse>(

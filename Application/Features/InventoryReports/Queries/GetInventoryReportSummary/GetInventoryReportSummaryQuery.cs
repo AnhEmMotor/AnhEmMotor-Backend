@@ -12,6 +12,10 @@ namespace Application.Features.InventoryReports.Queries.GetInventoryReportSummar
         public int PageSize { get; set; } = 10;
 
         public string? SearchTerm { get; set; }
+
+        public int? Month { get; set; }
+
+        public int? Year { get; set; }
     }
 }
 

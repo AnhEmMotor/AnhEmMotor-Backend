@@ -14,6 +14,8 @@ namespace Application.ApiContracts.InventoryReport.Responses
 
         public string? ColorName { get; set; }
 
+        public int BeginningQty { get; set; }
+
         public int ImportedQty { get; set; }
 
         public int ExportedQty { get; set; }
