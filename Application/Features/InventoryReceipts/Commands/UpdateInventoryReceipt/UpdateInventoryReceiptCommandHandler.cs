@@ -26,7 +26,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
     IInventoryReceiptUpdateRepository updateRepository,
     IInventoryReceiptDeleteRepository deleteRepository,
     IPurchaseRequestReadRepository prReadRepository,
-    ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
     IPermissionReadRepository permissionRepository,
     IVehicleUpdateRepository vehicleUpdateRepository,

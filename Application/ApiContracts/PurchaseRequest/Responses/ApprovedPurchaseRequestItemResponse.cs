@@ -16,12 +16,6 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
 
         public int UnimportedQuantity { get; set; }
 
-        public int InvoicedQuantity { get; set; }
-
-        public int InvoicingQuantity { get; set; }
-
-        public int UninvoicedQuantity { get; set; }
-
         public bool NeedVin { get; set; }
 
         public int? SupplierId { get; set; }

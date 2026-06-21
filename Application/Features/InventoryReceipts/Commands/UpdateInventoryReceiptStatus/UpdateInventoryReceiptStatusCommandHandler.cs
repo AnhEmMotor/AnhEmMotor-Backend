@@ -21,9 +21,6 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
         IInventoryReceiptInsertRepository insertRepository,
         ICurrentUserContext currentUserContext,
         IInventoryLedgerRepository ledgerRepository,
-        IProductQuotationReadRepository quotationReadRepository,
-        IProductQuotationUpdateRepository quotationUpdateRepository,
-        IProductQuotationInsertRepository quotationInsertRepository,
         ISupplierDebtInsertRepository supplierDebtInsertRepository,
         IUnitOfWork unitOfWork,
         IPublisher publisher) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>

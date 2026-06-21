@@ -21,5 +21,7 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
         public DateTimeOffset? CreatedAt { get; set; }
 
         public int TotalItems { get; set; }
+
+        public bool IsFullyImported { get; set; }
     }
 }

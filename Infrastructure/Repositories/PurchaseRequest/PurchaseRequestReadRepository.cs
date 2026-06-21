@@ -21,7 +21,10 @@ namespace Infrastructure.Repositories.PurchaseRequest
         {
             var query = GetQueryable(mode)
                 .Include(x => x.CreatedByUser)
-                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null));
+                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                .ThenInclude(ii => ii.InventoryReceipt)
+                .AsSplitQuery();
             return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 
@@ -33,6 +36,8 @@ namespace Infrastructure.Repositories.PurchaseRequest
             var query = GetQueryable(mode)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                .ThenInclude(ii => ii.InventoryReceipt)
                 .Where(x => x.Status == PurchaseRequestStatus.Approve)
                 .Where(
                     x => x.PurchaseRequestItems
@@ -48,7 +53,8 @@ namespace Infrastructure.Repositories.PurchaseRequest
                                                                 ii.InventoryReceipt.StatusId,
                                                                 Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve) ==
                                                             0)
-                                        .Sum(ii => ii.Count ?? 0)));
+                                        .Sum(ii => ii.Count ?? 0)))
+                .AsSplitQuery();
             return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 

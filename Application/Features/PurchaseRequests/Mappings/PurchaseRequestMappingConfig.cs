@@ -72,7 +72,18 @@ namespace Application.Features.PurchaseRequests.Mappings
                         : null)
                 .Map(
                     dest => dest.TotalItems,
-                    src => src.PurchaseRequestItems != null ? src.PurchaseRequestItems.Count : 0);
+                    src => src.PurchaseRequestItems != null ? src.PurchaseRequestItems.Count : 0)
+                .Map(
+                    dest => dest.IsFullyImported,
+                    src => src.Status == PurchaseRequestStatus.Approve &&
+                           src.PurchaseRequestItems.Any() &&
+                           !src.PurchaseRequestItems.Any(i =>
+                               i.Quantity > (i.InventoryReceiptInfos
+                                   .Where(ii => ii.DeletedAt == null &&
+                                                ii.InventoryReceipt != null &&
+                                                ii.InventoryReceipt.DeletedAt == null &&
+                                                ii.InventoryReceipt.StatusId == Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve)
+                                   .Sum(ii => ii.Count) ?? 0)));
             config.NewConfig<PurchaseRequestItem, PurchaseRequestItemResponse>()
                 .Map(
                     dest => dest.ProductName,
@@ -166,9 +177,6 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                                 0))
                                     .Sum(ii => ii.Count ?? 0)
                                 : 0)))
-                .Map(dest => dest.InvoicedQuantity, src => 0)
-                .Map(dest => dest.InvoicingQuantity, src => 0)
-                .Map(dest => dest.UninvoicedQuantity, src => src.Quantity)
                 .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null);
             config.NewConfig<PurchaseRequest, ApprovedPurchaseRequestDetailResponse>()
                 .Map(dest => dest.Items, src => src.PurchaseRequestItems);
@@ -209,9 +217,7 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                         0))
                                 .Sum(ii => ii.Count ?? 0)
                             : 0))
-                .Map(dest => dest.InvoicedQuantity, src => 0)
-                .Map(dest => dest.InvoicingQuantity, src => 0)
-                .Map(dest => dest.UninvoicedQuantity, src => src.Quantity)
+
                 .Map(
                     dest => dest.NeedVin,
                     src => src.ProductVariant != null &&

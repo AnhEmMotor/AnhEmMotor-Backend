@@ -32,7 +32,6 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
     IProductVariantReadRepository variantRepository,
     IVehicleReadRepository vehicleReadRepository,
     IVehicleUpdateRepository vehicleUpdateRepository,
-    IProductQuotationReadRepository productQuotationReadRepository,
     IUnitOfWork unitOfWork,
     ICurrentUserContext? currentUserContext = null) : IRequestHandler<CreateInventoryReceiptCommand, Result<InventoryReceiptDetailResponse?>>
 {
