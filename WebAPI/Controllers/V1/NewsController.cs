@@ -10,6 +10,7 @@ using Application.Features.News.Commands.UploadNewsCoverImage;
 using Application.Features.News.Queries.GetLatestNewsPublic;
 using Application.Features.News.Queries.GetNewsById;
 using Application.Features.News.Queries.GetNewsBySlug;
+using Application.Features.News.Queries.GetRelatedNewsPublic;
 using Application.Features.News.Queries.GetNewsList;
 using Application.Features.News.Queries.GetNewsListForStore;
 using Application.Features.News.Queries.GetProductsForNews;
@@ -103,6 +104,22 @@ public class NewsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetLatestPublicAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetLatestNewsPublicQuery(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy 5 tin tức liên quan theo slug bài viết (Public API cho Store).
+    /// </summary>
+    /// <param name="slug">Slug của bài viết hiện tại</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns></returns>
+    [HttpGet("public/{slug}/related")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Lấy 5 tin tức liên quan (Public API)")]
+    [ProducesResponseType(typeof(List<NewsSummaryResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetRelatedPublicAsync(string slug, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetRelatedNewsPublicQuery(slug), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
