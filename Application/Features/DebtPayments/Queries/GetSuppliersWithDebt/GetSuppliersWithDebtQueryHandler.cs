@@ -6,11 +6,13 @@ using System;
 
 using System.Linq;
 
+using Domain.Primitives;
+
 namespace Application.Features.DebtPayments.Queries.GetSuppliersWithDebt
 {
-    public class GetSuppliersWithDebtQueryHandler(ISupplierDebtReadRepository supplierDebtRepository) : IRequestHandler<GetSuppliersWithDebtQuery, Result<List<SupplierDebtResponse>>>
+    public class GetSuppliersWithDebtQueryHandler(ISupplierDebtReadRepository supplierDebtRepository) : IRequestHandler<GetSuppliersWithDebtQuery, Result<PagedResult<SupplierDebtResponse>>>
     {
-        public async Task<Result<List<SupplierDebtResponse>>> Handle(
+        public async Task<Result<PagedResult<SupplierDebtResponse>>> Handle(
             GetSuppliersWithDebtQuery request,
             CancellationToken cancellationToken)
         {
@@ -32,7 +34,7 @@ namespace Application.Features.DebtPayments.Queries.GetSuppliersWithDebt
                     supplierDebts[supplier.Id] = (supplier.Name ?? string.Empty, supplier.Phone, remainingDebt);
                 }
             }
-            var result = supplierDebts
+            var allSuppliers = supplierDebts
                 .Where(kvp => kvp.Value.TotalDebt > 0)
                 .Select(
                     kvp => new SupplierDebtResponse
@@ -42,8 +44,16 @@ namespace Application.Features.DebtPayments.Queries.GetSuppliersWithDebt
                         Phone = kvp.Value.Phone,
                         TotalDebt = kvp.Value.TotalDebt
                     })
+                .OrderByDescending(x => x.TotalDebt)
                 .ToList();
-            return result;
+
+            var page = request.SieveModel?.Page ?? 1;
+            var pageSize = request.SieveModel?.PageSize ?? 10;
+            var totalCount = allSuppliers.Count;
+            var pagedSuppliers = allSuppliers.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            var pagedResult = new PagedResult<SupplierDebtResponse>(pagedSuppliers, totalCount, page, pageSize);
+            return Result<PagedResult<SupplierDebtResponse>>.Success(pagedResult);
         }
     }
 }

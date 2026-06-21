@@ -1,7 +1,5 @@
-using Application.ApiContracts.DebtPayment.Requests;
 using Application.ApiContracts.DebtPayment.Responses;
 using Application.Common.Models;
-using Application.Features.DebtPayments.Commands.RecordDebtPayment;
 using Application.Features.DebtPayments.Queries.GetReceiptsWithDebtBySupplierId;
 using Application.Features.DebtPayments.Queries.GetSuppliersWithDebt;
 using FluentAssertions;
@@ -83,14 +81,5 @@ namespace ControllerTests
             result.Should().BeOfType<NotFoundObjectResult>();
         }
 
-        [Fact(DisplayName = "DP_010 - Trả về lỗi 403 Forbidden nếu tài khoản thực hiện không có quyền trả nợ")]
-        public async Task DP_010_PayDebt_Forbidden()
-        {
-            _mediatorMock.Setup(m => m.Send(It.IsAny<RecordDebtPaymentCommand>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new UnauthorizedAccessException());
-            await Assert.ThrowsAsync<UnauthorizedAccessException>(
-                () => _controller.PayDebtAsync(1, new PayDebtRequest { Amount = 100000 }, CancellationToken.None))
-                .ConfigureAwait(true);
-        }
     }
 }

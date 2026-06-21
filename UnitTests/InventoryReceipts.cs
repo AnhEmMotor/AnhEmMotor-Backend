@@ -84,7 +84,6 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
-            _quotationRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand
         {
@@ -122,7 +121,6 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
-            _quotationRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand { PurchaseRequestId = 99, Products = [] };
         _prReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(99, It.IsAny<CancellationToken>()))
@@ -143,7 +141,6 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
-            _quotationRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand { PurchaseRequestId = 1, Products = [] };
         var pr = new PurchaseRequest { Id = 1, Status = "draft" };
@@ -164,7 +161,6 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
-            _quotationRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand
         {
@@ -192,7 +188,6 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
-            _quotationRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand
         {
@@ -234,7 +229,6 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
-            _quotationRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand
         {
@@ -290,7 +284,6 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
-            _quotationRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand
         {
@@ -340,7 +333,6 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _deleteRepoMock.Object,
             _prReadRepoMock.Object,
-            _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
@@ -375,7 +367,6 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _deleteRepoMock.Object,
             _prReadRepoMock.Object,
-            _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
@@ -406,9 +397,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object,
-            null!,
-            null!,
             _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object,
             new Mock<IPublisher>().Object);
@@ -437,9 +425,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object,
-            null!,
-            null!,
             _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object,
             new Mock<IPublisher>().Object);
@@ -535,7 +520,6 @@ public class InventoryReceipts
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
-            _quotationRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
         var command = new CreateInventoryReceiptCommand
@@ -606,9 +590,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object,
-            null!,
-            null!,
             _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object,
             new Mock<IPublisher>().Object);
@@ -637,9 +618,6 @@ public class InventoryReceipts
             _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object,
-            null!,
-            null!,
             _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object,
             new Mock<IPublisher>().Object);

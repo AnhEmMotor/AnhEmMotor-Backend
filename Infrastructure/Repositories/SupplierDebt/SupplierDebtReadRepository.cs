@@ -59,14 +59,15 @@ namespace Infrastructure.Repositories.SupplierDebt
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<Domain.Entities.SupplierDebtAuditLog>> GetSupplierDebtAuditLogsAsync(int supplierDebtId, CancellationToken cancellationToken)
+        public async Task<List<Domain.Entities.SupplierDebtLog>> GetSupplierDebtLogsBySupplierIdAsync(int supplierId, CancellationToken cancellationToken)
         {
-            return await context.SupplierDebtAuditLogs
-                .IgnoreQueryFilters()
-                .Include(l => l.ChangedBy)
-                .Where(l => l.SupplierDebtId == supplierDebtId)
-                .OrderByDescending(l => l.ChangedAt)
-                .ToListAsync(cancellationToken);
+            return await context.SupplierDebtLogs
+                .AsNoTracking()
+                .Include(l => l.CreatedBy)
+                .Where(l => l.SupplierId == supplierId)
+                .OrderByDescending(l => l.PaymentDate)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
     }
 }

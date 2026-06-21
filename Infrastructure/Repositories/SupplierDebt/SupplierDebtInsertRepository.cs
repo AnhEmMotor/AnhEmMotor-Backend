@@ -12,5 +12,10 @@ namespace Infrastructure.Repositories.SupplierDebt
         {
             context.SupplierDebts.Add(supplierDebt);
         }
+
+        public async Task InsertSupplierDebtLogAsync(Domain.Entities.SupplierDebtLog supplierDebtLog, CancellationToken cancellationToken)
+        {
+            await context.SupplierDebtLogs.AddAsync(supplierDebtLog, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

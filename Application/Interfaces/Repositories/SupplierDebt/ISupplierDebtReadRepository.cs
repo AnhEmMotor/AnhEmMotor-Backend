@@ -15,6 +15,6 @@ namespace Application.Interfaces.Repositories.SupplierDebt
 
         public Task<List<Domain.Entities.SupplierDebt>> GetAllAsync(CancellationToken cancellationToken);
 
-        public Task<List<SupplierDebtAuditLog>> GetSupplierDebtAuditLogsAsync(int supplierDebtId, CancellationToken cancellationToken);
+        public Task<List<Domain.Entities.SupplierDebtLog>> GetSupplierDebtLogsBySupplierIdAsync(int supplierId, CancellationToken cancellationToken);
     }
 }

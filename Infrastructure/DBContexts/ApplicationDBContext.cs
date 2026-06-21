@@ -183,7 +183,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<SupplierFinance> SupplierFinances { get; set; }
 
 
-    public virtual DbSet<SupplierDebtAuditLog> SupplierDebtAuditLogs { get; set; }
+    public virtual DbSet<SupplierDebtLog> SupplierDebtLogs { get; set; }
 
     public virtual DbSet<InventoryReceiptAuditLog> InventoryReceiptAuditLogs { get; set; }
 
@@ -219,8 +219,13 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
 
 
-        modelBuilder.Entity<SupplierDebtAuditLog>().Property(e => e.NewAmount).HasPrecision(18, 2);
-        modelBuilder.Entity<SupplierDebtAuditLog>().Property(e => e.OldAmount).HasPrecision(18, 2);
+            modelBuilder.Entity<SupplierDebtLog>()
+                .Property(l => l.AmountPaid)
+                .HasPrecision(18, 2);
+            
+            modelBuilder.Entity<SupplierDebtLog>()
+                .Property(l => l.RemainingDebt)
+                .HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>()
             .HasMany(p => p.Items)
             .WithOne(i => i.ParcelDeliveryOrder)

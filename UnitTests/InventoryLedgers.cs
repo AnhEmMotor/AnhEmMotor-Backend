@@ -46,9 +46,6 @@ namespace UnitTests
                 new Mock<IInventoryReceiptInsertRepository>().Object,
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
-                _ProductQuotationRepoMock.Object,
-                null!,
-                null!,
                 _supplierDebtRepoMock.Object,
                 _unitOfWorkMock.Object,
                 new Mock<IPublisher>().Object);
@@ -93,9 +90,6 @@ namespace UnitTests
                 new Mock<IInventoryReceiptInsertRepository>().Object,
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
-                _ProductQuotationRepoMock.Object,
-                null!,
-                null!,
                 _supplierDebtRepoMock.Object,
                 _unitOfWorkMock.Object,
                 new Mock<IPublisher>().Object);
@@ -141,9 +135,6 @@ namespace UnitTests
                 new Mock<IInventoryReceiptInsertRepository>().Object,
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
-                _ProductQuotationRepoMock.Object,
-                null!,
-                null!,
                 _supplierDebtRepoMock.Object,
                 _unitOfWorkMock.Object,
                 new Mock<IPublisher>().Object);
