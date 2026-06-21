@@ -18,9 +18,9 @@ public class CreateSupportRequestCommandHandler(
     {
         var contact = new Contact
         {
-            FullName = string.Empty,
+            FullName = request.Request.FullName ?? string.Empty,
             Email = request.Request.Email,
-            PhoneNumber = string.Empty,
+            PhoneNumber = request.Request.PhoneNumber ?? string.Empty,
             Subject = request.Request.Subject,
             Message = request.Request.Content,
             Status = "Pending"
@@ -40,7 +40,7 @@ public class CreateSupportRequestCommandHandler(
             Status = SupportRequestStatus.New
         };
 
-        supportRequestRepository.AddAsync(supportRequest, cancellationToken).ConfigureAwait(false);
+        await supportRequestRepository.AddAsync(supportRequest, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result<int>.Success(supportRequest.Id);

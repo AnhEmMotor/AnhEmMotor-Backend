@@ -4,6 +4,12 @@ namespace Application.ApiContracts.Contacts.Requests;
 
 public record CreateSupportRequestRequest
 {
+    [MaxLength(100)]
+    public string? FullName { get; set; }
+
+    [MaxLength(20)]
+    public string? PhoneNumber { get; set; }
+
     [Required]
     [MaxLength(200)]
     public string Subject { get; set; } = string.Empty;

@@ -41,7 +41,7 @@ public class CreateJobApplicationCommandHandler(
             Status = AppStatus.New
         };
 
-        jobApplicationRepository.AddAsync(application, cancellationToken).ConfigureAwait(false);
+        await jobApplicationRepository.AddAsync(application, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return Result<int>.Success(application.Id);
