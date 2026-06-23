@@ -13,5 +13,7 @@ public interface IParcelDeliveryOrderReadRepository
     public Task<ParcelDeliveryOrderEntity?> FindByTrackingOrPhoneAsync(
         string? search,
         CancellationToken cancellationToken = default);
+
+    public Task<List<ParcelDeliveryOrderEntity>> GetActiveShipmentsAsync(CancellationToken cancellationToken = default);
 }
 

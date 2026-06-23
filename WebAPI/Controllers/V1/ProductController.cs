@@ -67,7 +67,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetSitemapSlugsAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetSitemapSlugsQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetSitemapSlugsQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -83,7 +83,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var query = GetProductsListQuery.FromRequest(request, minPrice, maxPrice);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -99,7 +99,7 @@ public class ProductController(ISender sender) : ApiController
     {
         var query = GetProductsListForManagerQuery
             .FromRequest(request);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -114,7 +114,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var query = GetProductsListForPriceManagementQuery.FromRequest(request);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -129,7 +129,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var query = GetDeletedProductsListQuery.FromRequest(request);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -146,7 +146,7 @@ public class ProductController(ISender sender) : ApiController
     {
         var query = GetActiveVariantLiteListForManagerQuery
             .FromRequest(request);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -167,7 +167,7 @@ public class ProductController(ISender sender) : ApiController
     {
         var query = GetActiveVariantLiteListForInventoryReceiptQuery
             .FromRequest(request);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -183,7 +183,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken = default)
     {
         var query = GetActiveVariantLiteListForOutputQuery.FromRequest(request);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -201,7 +201,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new ExportProductsQuery { SieveModel = sieveModel };
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -232,7 +232,7 @@ public class ProductController(ISender sender) : ApiController
         int id,
         CancellationToken cancellationToken = default)
     {
-        var result = await sender.Send(new GetProductByIdQuery() { Id = id }, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetProductByIdQuery() { Id = id }, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -250,7 +250,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(
             new GetVariantLiteByProductIdQuery() { IncludeDeleted = false, ProductId = id },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -265,7 +265,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new CheckSlugAvailabilityQuery() { Slug = slug }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -280,7 +280,7 @@ public class ProductController(ISender sender) : ApiController
         [FromBody] CreateProductCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(request, cancellationToken).ConfigureAwait(false);
         return HandleCreated(
             result,
             Product.GetVariantByIdForManager,
@@ -301,7 +301,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request with { Id = id };
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -314,7 +314,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProductAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new DeleteProductCommand() { Id = id }, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new DeleteProductCommand() { Id = id }, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -330,7 +330,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new DeleteManyProductsCommand() { Ids = request.Ids }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -343,7 +343,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreProductAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new RestoreProductCommand() { Id = id }, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new RestoreProductCommand() { Id = id }, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -359,7 +359,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new RestoreManyProductsCommand() { Ids = request.Ids }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -379,7 +379,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(
             new UpdateProductPriceCommand() { Id = id, Price = request.Price },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -397,7 +397,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(
             new UpdateManyProductPricesCommand() { Ids = request.Ids, Price = request.Price },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -432,7 +432,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(
             new UpdateVariantPriceCommand() { Price = request.Price, VariantId = variantId },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -450,7 +450,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(
             new UpdateManyVariantPricesCommand() { Ids = request.Ids, Price = request.Price },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -470,7 +470,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(
             new UpdateProductStatusCommand() { Id = id, StatusId = request.StatusId },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -488,7 +488,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(
             new UpdateManyProductStatusesCommand() { Ids = request.Ids, StatusId = request.StatusId },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -501,7 +501,7 @@ public class ProductController(ISender sender) : ApiController
     public async Task<IActionResult> GetProductDetailBySlugAsync(string slug, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetProductStoreDetailBySlugQuery(slug), cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -512,7 +512,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAttributeLabelsAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetProductAttributeLabelsQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetProductAttributeLabelsQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -528,7 +528,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(
             new GetVariantCartDetailsBatchQuery { VariantIds = variantIds },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -543,7 +543,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request with { ProductId = id };
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -558,7 +558,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request with { ProductId = id };
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

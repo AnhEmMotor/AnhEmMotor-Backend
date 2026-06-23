@@ -12,11 +12,11 @@ public class DeleteCommissionPolicyCommandHandler(
 {
     public async Task<Result> Handle(DeleteCommissionPolicyCommand request, CancellationToken cancellationToken)
     {
-        var policy = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(true);
+        var policy = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (policy == null)
             return Result.Failure(Error.NotFound($"Commission policy with ID {request.Id} not found."));
         deleteRepository.Remove(policy);
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result.Success();
     }
 }

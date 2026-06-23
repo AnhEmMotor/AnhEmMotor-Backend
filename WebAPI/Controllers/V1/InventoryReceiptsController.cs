@@ -52,7 +52,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetInventoryReceiptsListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -65,7 +65,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetInventoryReceiptStatsAsync(CancellationToken cancellationToken)
     {
         var query = new GetInventoryReceiptStatsQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -78,7 +78,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetInventoryReceiptStatusesAsync(CancellationToken cancellationToken)
     {
         var query = new GetInventoryReceiptStatusListQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -93,7 +93,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetDeletedInventoryReceiptsListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -107,7 +107,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetInventoryReceiptByIdAsync(int id, CancellationToken cancellationToken)
     {
         var query = new GetInventoryReceiptByIdQuery() { Id = id };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -123,7 +123,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetInventoryReceiptsBySupplierIdQuery() { SieveModel = sieveModel, SupplierId = supplierId };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -139,7 +139,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateInventoryReceiptCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleCreated(
             result,
             Domain.Constants.RouteNames.InventoryReceipts.GetById,
@@ -160,7 +160,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateInventoryReceiptCommand>() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -178,7 +178,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateInventoryReceiptStatusCommand>() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -193,7 +193,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     public async Task<IActionResult> SendInventoryReceiptAsync(int id, CancellationToken cancellationToken)
     {
         var command = new SendInventoryReceiptCommand() { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -210,7 +210,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -224,7 +224,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     public async Task<IActionResult> DeleteInventoryReceiptAsync(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteInventoryReceiptCommand() { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -240,7 +240,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyInventoryReceiptsCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -254,7 +254,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     public async Task<IActionResult> RestoreInventoryReceiptAsync(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreInventoryReceiptCommand() { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -270,7 +270,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyInventoryReceiptsCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
     /// <summary>

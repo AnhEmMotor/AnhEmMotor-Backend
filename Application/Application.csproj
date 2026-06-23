@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+      <NoWarn>$(NoWarn);IDE0040</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

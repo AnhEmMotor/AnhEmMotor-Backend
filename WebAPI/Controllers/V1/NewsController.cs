@@ -51,7 +51,7 @@ public class NewsController(IMediator mediator) : ApiController
         [FromBody] CreateNewsCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -69,7 +69,7 @@ public class NewsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetNewsListQuery { SieveModel = sieveModel }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -172,7 +172,7 @@ public class NewsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateNewsCommand>() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -187,7 +187,7 @@ public class NewsController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Xóa bài viết")]
     public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteNewsCommand(id), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new DeleteNewsCommand(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -220,7 +220,7 @@ public class NewsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetBySlugPublicAsync(string slug, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug }, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -240,7 +240,7 @@ public class NewsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateNewsStatusCommand>() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

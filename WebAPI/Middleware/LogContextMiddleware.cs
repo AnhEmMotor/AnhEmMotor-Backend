@@ -26,7 +26,7 @@ public class LogContextMiddleware(RequestDelegate next)
             using (LogContext.PushProperty("RequestMethod", method))
                 using (LogContext.PushProperty("RequestPath", path))
                 {
-                    await next(context).ConfigureAwait(true);
+                    await next(context).ConfigureAwait(false);
                 }
     }
 }

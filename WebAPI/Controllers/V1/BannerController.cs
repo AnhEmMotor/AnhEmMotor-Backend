@@ -37,7 +37,7 @@ public class BannerController(ISender sender) : ApiController
         [FromBody] CreateBannerCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -57,7 +57,7 @@ public class BannerController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateBannerCommand>() with { Id = id };
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -72,7 +72,7 @@ public class BannerController(ISender sender) : ApiController
     [SwaggerOperation(Summary = "Xóa banner")]
     public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new DeleteBannerCommand(id), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new DeleteBannerCommand(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -131,7 +131,7 @@ public class BannerController(ISender sender) : ApiController
     [SwaggerOperation(Summary = "Lấy lịch sử thay đổi của banner")]
     public async Task<IActionResult> GetAuditLogsAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetBannerAuditLogsQuery(id), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetBannerAuditLogsQuery(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

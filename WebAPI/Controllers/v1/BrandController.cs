@@ -49,7 +49,7 @@ public class BrandController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetBrandsListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -67,7 +67,7 @@ public class BrandController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetBrandsListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -85,7 +85,7 @@ public class BrandController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetDeletedBrandsListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -100,7 +100,7 @@ public class BrandController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetBrandStatisticsAsync(CancellationToken cancellationToken)
     {
         var query = new GetBrandStatisticsQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -118,7 +118,7 @@ public class BrandController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new ExportBrandsQuery { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -150,7 +150,7 @@ public class BrandController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetBrandByIdAsync(int id, CancellationToken cancellationToken)
     {
         var query = new GetBrandByIdQuery() { Id = id };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -168,7 +168,7 @@ public class BrandController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateBrandCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleCreated(
             result,
             Domain.Constants.RouteNames.Brands.GetById,
@@ -192,7 +192,7 @@ public class BrandController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateBrandCommand>() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -209,7 +209,7 @@ public class BrandController(IMediator mediator) : ApiController
     public async Task<IActionResult> DeleteBrandAsync(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteBrandCommand() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -226,7 +226,7 @@ public class BrandController(IMediator mediator) : ApiController
     public async Task<IActionResult> RestoreBrandAsync(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreBrandCommand() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -245,7 +245,7 @@ public class BrandController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyBrandsCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -264,7 +264,7 @@ public class BrandController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyBrandsCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

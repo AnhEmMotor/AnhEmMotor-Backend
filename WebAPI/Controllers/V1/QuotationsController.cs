@@ -46,7 +46,7 @@ namespace WebAPI.Controllers.V1
             CancellationToken cancellationToken)
         {
             var query = new GetQuotationsListQuery { SieveModel = sieveModel };
-            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -58,7 +58,7 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetQuotationStatusesAsync(CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new GetQuotationStatusListQuery(), cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(new GetQuotationStatusListQuery(), cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -75,7 +75,7 @@ namespace WebAPI.Controllers.V1
         public async Task<IActionResult> GetQuotationByIdAsync(int id, CancellationToken cancellationToken)
         {
             var query = new GetQuotationByIdQuery { Id = id };
-            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -93,7 +93,7 @@ namespace WebAPI.Controllers.V1
             [FromBody] CreateQuotationCommand command,
             CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleCreated(
                 result,
                 Domain.Constants.RouteNames.Quotations.GetById,
@@ -118,7 +118,7 @@ namespace WebAPI.Controllers.V1
             CancellationToken cancellationToken)
         {
             var request = command with { Id = id };
-            var result = await mediator.Send(request, cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -133,7 +133,7 @@ namespace WebAPI.Controllers.V1
         public async Task<IActionResult> SendQuotationAsync(int id, CancellationToken cancellationToken)
         {
             var command = new SendQuotationCommand(id);
-            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -151,7 +151,7 @@ namespace WebAPI.Controllers.V1
             CancellationToken cancellationToken)
         {
             var command = new ApproveRejectQuotationCommand(id, request.Status);
-            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -168,7 +168,7 @@ namespace WebAPI.Controllers.V1
         public async Task<IActionResult> DeleteQuotationAsync(int id, CancellationToken cancellationToken)
         {
             var command = new DeleteQuotationCommand { Id = id };
-            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -188,7 +188,7 @@ namespace WebAPI.Controllers.V1
             CancellationToken cancellationToken)
         {
             var query = new GetApprovedPricesForVariantQuery(variantId, colorId);
-            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
     }

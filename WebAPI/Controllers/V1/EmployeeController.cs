@@ -32,7 +32,7 @@ public class EmployeeController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<EmployeeResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetEmployeesAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetEmployeesQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetEmployeesQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -49,7 +49,7 @@ public class EmployeeController(IMediator mediator) : ApiController
         [FromBody] CreateEmployeeCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -69,7 +69,7 @@ public class EmployeeController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateEmployeeCommand>() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

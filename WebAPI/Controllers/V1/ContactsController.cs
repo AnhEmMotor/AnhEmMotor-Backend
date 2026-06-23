@@ -33,7 +33,7 @@ public class ContactsController(ISender sender) : ApiController
     [AllowAnonymous]
     public async Task<IActionResult> CreateAsync(CreateContactCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -57,7 +57,7 @@ public class ContactsController(ISender sender) : ApiController
         CreateSupportRequestCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -70,7 +70,7 @@ public class ContactsController(ISender sender) : ApiController
         CreateFeedbackCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -83,7 +83,7 @@ public class ContactsController(ISender sender) : ApiController
         CreateJobApplicationCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -100,7 +100,7 @@ public class ContactsController(ISender sender) : ApiController
         CancellationToken cancellationToken = default)
     {
         var query = new GetPaginatedContactsQuery(contactType, status, page, pageSize);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -116,7 +116,7 @@ public class ContactsController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var command = new UpdateContactStatusCommand(contactType, id, request);
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -127,7 +127,7 @@ public class ContactsController(ISender sender) : ApiController
     [Authorize]
     public async Task<IActionResult> ReplyAsync(CreateContactReplyCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -140,7 +140,7 @@ public class ContactsController(ISender sender) : ApiController
         UpdateInternalNoteCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

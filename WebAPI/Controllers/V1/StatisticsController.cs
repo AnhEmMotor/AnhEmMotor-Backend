@@ -43,7 +43,7 @@ public class StatisticsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken = default)
     {
         var query = new GetDailyRevenueQuery() { Days = days };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -56,7 +56,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetDashboardStatsAsync(CancellationToken cancellationToken)
     {
         var query = new GetDashboardStatsQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -73,7 +73,7 @@ public class StatisticsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken = default)
     {
         var query = new GetMonthlyRevenueProfitQuery() { Months = months };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -86,7 +86,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetOrderStatusCountsAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderStatusCountsQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -99,7 +99,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetProductReportLastMonthAsync(CancellationToken cancellationToken)
     {
         var query = new GetProductReportLastMonthQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -113,7 +113,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetProductStockAndPriceAsync(int variantId, CancellationToken cancellationToken)
     {
         var query = new GetProductStockAndPriceQuery() { VariantId = variantId };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -126,7 +126,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetAdminDashboardOverviewAsync(CancellationToken cancellationToken)
     {
         var query = new GetAdminDashboardOverviewQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -139,7 +139,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetAdminRevenueAnalysisAsync(CancellationToken cancellationToken)
     {
         var query = new GetAdminRevenueAnalysisQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -152,7 +152,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetAdminProductReportAsync(CancellationToken cancellationToken)
     {
         var query = new GetAdminProductReportQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -165,7 +165,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetAdminWarehouseReportAsync(CancellationToken cancellationToken)
     {
         var query = new GetAdminWarehouseReportQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

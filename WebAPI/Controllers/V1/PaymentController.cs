@@ -33,7 +33,7 @@ public class PaymentController(ISender sender) : ApiController
     [AllowAnonymous]
     public async Task<IActionResult> PayOSWebhook([FromBody] PayOSWebhookData data, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new ProcessPayOSWebhookCommand(data), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new ProcessPayOSWebhookCommand(data), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -49,7 +49,7 @@ public class PaymentController(ISender sender) : ApiController
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await sender.Send(new GetPaymentLinkQuery(orderId, currentUserId), cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -62,7 +62,7 @@ public class PaymentController(ISender sender) : ApiController
     public async Task<IActionResult> VNPayCallback(CancellationToken cancellationToken)
     {
         var result = await sender.Send(new ProcessVNPayIPNCommand(Request.Query), cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandlePaymentRedirect(
             result,
             method: "VNPay",
@@ -81,7 +81,7 @@ public class PaymentController(ISender sender) : ApiController
     public async Task<IActionResult> PayOSCallback([FromQuery] long? orderCode, CancellationToken cancellationToken)
     {
         var command = new ProcessPayOSCallbackCommand(orderCode);
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandlePaymentRedirect(
             result,
             method: "PayOS",

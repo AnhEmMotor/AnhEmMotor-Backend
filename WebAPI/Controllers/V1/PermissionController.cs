@@ -43,7 +43,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllPermissionsAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetAllPermissionsQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetAllPermissionsQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -57,7 +57,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(PermissionStructureResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPermissionStructureAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetPermissionStructureQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetPermissionStructureQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -73,7 +73,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMyPermissionsAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetMyPermissionsQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetMyPermissionsQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -90,7 +90,7 @@ public class PermissionController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetUserPermissionsByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetUserPermissionsByIdQuery() { UserId = userId }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -107,7 +107,7 @@ public class PermissionController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetRolePermissionsAsync(Guid roleId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetRolePermissionsQuery() { RoleId = roleId }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -137,7 +137,7 @@ public class PermissionController(IMediator mediator) : ApiController
                 Permissions = model.Permissions
             },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -163,7 +163,7 @@ public class PermissionController(IMediator mediator) : ApiController
                 Sorts = sieveModel.Sorts
             },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -189,7 +189,7 @@ public class PermissionController(IMediator mediator) : ApiController
                 RoleName = model.RoleName
             },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleCreated(
             result,
             Permission.GetRolePermissions,
@@ -210,7 +210,7 @@ public class PermissionController(IMediator mediator) : ApiController
     public async Task<IActionResult> DeleteRoleAsync(Guid roleId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new DeleteRoleCommand() { RoleId = roleId }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -229,7 +229,7 @@ public class PermissionController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new DeleteMultipleRolesCommand() { RoleNames = roleNames }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 }

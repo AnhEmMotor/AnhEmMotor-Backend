@@ -30,7 +30,7 @@ public static class RateLimitingExtensions
                 options.OnRejected = async (context, token) =>
                 {
                     context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-                    await context.HttpContext.Response.WriteAsync("Busy", token).ConfigureAwait(true);
+                    await context.HttpContext.Response.WriteAsync("Busy", token).ConfigureAwait(false);
                 };
                 options.AddPolicy(
                     policyName: "public_api",

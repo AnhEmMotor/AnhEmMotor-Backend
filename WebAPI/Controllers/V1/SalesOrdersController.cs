@@ -2,49 +2,27 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.CancelOrderByBuyer;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.CreateOutput;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.DeleteOutput;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.RestoreManyOutputs;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.RestoreOutput;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.UpdateManyOutputStatus;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.UpdateOutput;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.UpdateOutputForManager;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetOrderCancellableStatuses;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetOrderStatusMap;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetOrderStatusTransitionMap;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetOutputById;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetOutputsByUserIdForManager;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetOutputsList;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentStatuses;
 using Asp.Versioning;
 using Domain.Constants.Order;
@@ -85,7 +63,7 @@ public class SalesOrdersController(
         CancellationToken cancellationToken)
     {
         var query = new GetOutputsForCurrentUserQuery(sieveModel);
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -102,7 +80,7 @@ public class SalesOrdersController(
         CancellationToken cancellationToken)
     {
         var query = new GetOutputsByUserIdForManagerQuery(id, sieveModel);
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -143,7 +121,7 @@ public class SalesOrdersController(
         CancellationToken cancellationToken)
     {
         var query = new GetDeletedOutputsListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -156,7 +134,7 @@ public class SalesOrdersController(
     public async Task<IActionResult> GetOutputStatusesAsync(CancellationToken cancellationToken)
     {
         var query = new GetOutputStatusListQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -169,7 +147,7 @@ public class SalesOrdersController(
     public async Task<IActionResult> GetStatusMapAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderStatusMapQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -182,7 +160,7 @@ public class SalesOrdersController(
     public async Task<IActionResult> GetTransitionMapAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderStatusTransitionMapQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -195,7 +173,7 @@ public class SalesOrdersController(
     public async Task<IActionResult> GetLockedStatusesAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderLockedStatusesQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -208,7 +186,7 @@ public class SalesOrdersController(
     public async Task<IActionResult> GetCancellableStatusesAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderCancellableStatusesQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -221,7 +199,7 @@ public class SalesOrdersController(
     public async Task<IActionResult> GetVehicleAssignmentStatusesAsync(CancellationToken cancellationToken)
     {
         var query = new GetVehicleAssignmentStatusesQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -237,7 +215,7 @@ public class SalesOrdersController(
         CancellationToken cancellationToken)
     {
         var query = new GetVehicleAssignmentRequirementsQuery { Id = id, TargetStatusId = targetStatusId };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -251,7 +229,7 @@ public class SalesOrdersController(
     public async Task<IActionResult> GetOutputByIdAsync(int id, CancellationToken cancellationToken)
     {
         var query = new GetOutputByIdQuery() { Id = id };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -271,7 +249,7 @@ public class SalesOrdersController(
         {
             CurrentUserId = currentUserId
         };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleCreated(result, SaleOrders.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
@@ -291,7 +269,7 @@ public class SalesOrdersController(
         {
             BuyerId = currentUserId
         };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleCreated(result, SaleOrders.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
@@ -314,7 +292,7 @@ public class SalesOrdersController(
             Id = id,
             CurrentUserId = currentUserId
         };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -334,7 +312,7 @@ public class SalesOrdersController(
             Id = id,
             CurrentUserId = currentUserContext.GetUserId()
         };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -358,7 +336,7 @@ public class SalesOrdersController(
             Id = id,
             CurrentUserId = currentUserId
         };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -381,7 +359,7 @@ public class SalesOrdersController(
             Id = id,
             CurrentUserId = currentUserContext.GetUserId()
         };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -397,7 +375,7 @@ public class SalesOrdersController(
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateManyOutputStatusCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -410,7 +388,7 @@ public class SalesOrdersController(
     public async Task<IActionResult> DeleteOutputAsync(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteOutputCommand() { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -425,7 +403,7 @@ public class SalesOrdersController(
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyOutputsCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -438,7 +416,7 @@ public class SalesOrdersController(
     public async Task<IActionResult> RestoreOutputAsync(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreOutputCommand() { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -453,7 +431,7 @@ public class SalesOrdersController(
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyOutputsCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -463,7 +441,7 @@ public class SalesOrdersController(
         CancellationToken cancellationToken)
     {
         var query = new GetOutputsListQuery { SieveModel = sieveModel, StatusIds = statusIds };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

@@ -31,7 +31,7 @@ public class OptionController(ISender sender) : ApiController
     public async Task<IActionResult> GetOptionsAsync(CancellationToken cancellationToken)
     {
         var query = new GetOptionsListQuery();
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -44,7 +44,7 @@ public class OptionController(ISender sender) : ApiController
     public async Task<IActionResult> GetAllOptionsAsync(CancellationToken cancellationToken)
     {
         var query = new GetOptionsListQuery();
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -58,7 +58,7 @@ public class OptionController(ISender sender) : ApiController
     public async Task<IActionResult> GetPredefinedOptionsAsync(CancellationToken cancellationToken)
     {
         var query = new GetPredefinedOptionsListQuery();
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -72,7 +72,7 @@ public class OptionController(ISender sender) : ApiController
         [FromBody] CreateOptionValueCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(request, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -88,7 +88,7 @@ public class OptionController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request with { Id = id };
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -100,7 +100,7 @@ public class OptionController(ISender sender) : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteOptionValueAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new DeleteOptionValueCommand(id), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new DeleteOptionValueCommand(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

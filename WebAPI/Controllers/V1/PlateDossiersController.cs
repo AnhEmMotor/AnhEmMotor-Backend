@@ -28,7 +28,7 @@ namespace WebAPI.Controllers.V1
             CreatePlateDossierCommand command,
             CancellationToken cancellationToken)
         {
-            var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -53,7 +53,7 @@ namespace WebAPI.Controllers.V1
             UpdatePlateDossierStatusCommand command,
             CancellationToken cancellationToken)
         {
-            var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
     }
