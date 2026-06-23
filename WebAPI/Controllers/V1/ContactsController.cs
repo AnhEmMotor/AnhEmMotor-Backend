@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
+using Microsoft.AspNetCore.Http;
 namespace WebAPI.Controllers.V1;
 /// <summary>
 /// Controller quản lý liên hệ khách hàng (Support, Feedback, JobApplication).
@@ -60,6 +61,28 @@ public class ContactsController(ISender sender) : ApiController
     [AllowAnonymous]
     public async Task<IActionResult> CreateJobApplicationAsync(CreateJobApplicationCommand command, CancellationToken cancellationToken)
     {
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tải lên tệp CV ứng viên (PDF, DOCX, hình ảnh).
+    /// </summary>
+    [HttpPost("upload-cv")]
+    [AllowAnonymous]
+    public async Task<IActionResult> UploadCvAsync(IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest("File is empty.");
+        }
+
+        var command = new Application.Features.Contacts.Commands.UploadCv.UploadCvCommand
+        {
+            FileContent = file.OpenReadStream(),
+            FileName = file.FileName
+        };
+
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

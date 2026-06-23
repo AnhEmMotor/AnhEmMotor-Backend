@@ -215,6 +215,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     public async Task<IActionResult> ViewImageWithResizeAsync(
         string storagePath,
         [FromQuery] int? width,
+        [FromQuery] bool download,
         CancellationToken cancellationToken)
     {
         var query = new ViewImageQuery { StoragePath = storagePath, Width = width };
@@ -226,6 +227,11 @@ public class MediaFileController(IMediator mediator) : ApiController
         if (result.Value is { } imageData)
         {
             var (fileStream, contentType) = imageData;
+            if (download)
+            {
+                var fileName = System.IO.Path.GetFileName(storagePath);
+                return File(fileStream, contentType, fileName);
+            }
             return File(fileStream, contentType);
         }
         return StatusCode(StatusCodes.Status500InternalServerError);
