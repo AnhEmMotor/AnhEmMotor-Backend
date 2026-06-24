@@ -1,11 +1,11 @@
-using AnhEmMotor.Domain.Constants;
+using Domain.Constants;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Entities;
 
-namespace AnhEmMotor.Domain.Entities
+namespace Domain.Entities
 {
     [Table("SupportTicket")]
     public class SupportTicket : BaseEntity

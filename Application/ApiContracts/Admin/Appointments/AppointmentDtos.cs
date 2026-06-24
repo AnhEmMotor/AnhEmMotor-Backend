@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Admin.Appointments
+namespace Application.ApiContracts.Admin.Appointments
 {
     public record AdminAppointmentResponse(
         int Id, 

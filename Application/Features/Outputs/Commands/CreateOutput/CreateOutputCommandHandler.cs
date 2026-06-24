@@ -194,10 +194,7 @@ public class CreateOutputCommandHandler(
         {
             return variant.MaxPurchaseQuantity.Value;
         }
-        if (variant.Product?.MaxPurchaseQuantity.HasValue == true)
-        {
-            return variant.Product.MaxPurchaseQuantity.Value;
-        }
+
         return GetEffectiveMaxPurchaseQuantity(variant.Product?.ProductCategory);
     }
 

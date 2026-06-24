@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Quotation.Responses;
+using Application.ApiContracts.Quotation.Responses;
 using Application.Common.Models;
 using Domain.Primitives;
 using MediatR;

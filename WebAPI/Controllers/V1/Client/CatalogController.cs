@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Catalog;
-using AnhEmMotor.Application.Features.Client.Catalog;
+using Application.ApiContracts.Client.Catalog;
+using Application.Features.Client.Catalog;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 

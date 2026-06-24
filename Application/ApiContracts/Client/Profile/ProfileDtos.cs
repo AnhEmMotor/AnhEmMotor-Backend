@@ -1,4 +1,4 @@
-namespace AnhEmMotor.Application.ApiContracts.Client.Profile
+namespace Application.ApiContracts.Client.Profile
 {
     public record ProfileResponse(
         string FullName, 

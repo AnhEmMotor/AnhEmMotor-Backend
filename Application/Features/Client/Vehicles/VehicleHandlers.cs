@@ -1,13 +1,13 @@
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Vehicles;
-using AnhEmMotor.Application.Interfaces.Repositories.Vehicle;
+using Application.ApiContracts.Client.Vehicles;
+using Application.Interfaces.Repositories.Vehicle;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
 
-namespace AnhEmMotor.Application.Features.Client.Vehicles
+namespace Application.Features.Client.Vehicles
 {
     public record GetMyVehiclesQuery() : IRequest<List<VehicleSummaryResponse>>;
     public record GetVehicleDetailQuery(int Id) : IRequest<VehicleDetailResponse?>;
@@ -54,7 +54,8 @@ namespace AnhEmMotor.Application.Features.Client.Vehicles
 
         public async Task<bool> Handle(UpdateOdoCommand request, CancellationToken cancellationToken)
         {
-            return await _updateRepo.UpdateOdoAsync(request.VehicleId, request.NewOdo, cancellationToken);
+            await _updateRepo.UpdateOdoAsync(request.VehicleId, request.NewOdo, cancellationToken);
+            return true;
         }
     }
 }

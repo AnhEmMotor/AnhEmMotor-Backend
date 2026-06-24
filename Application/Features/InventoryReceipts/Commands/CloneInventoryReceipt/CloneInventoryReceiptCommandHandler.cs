@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
+using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Product;
 using Mapster;
 using MediatR;
@@ -36,10 +37,7 @@ public sealed class CloneInventoryReceiptCommandHandler(
             return Error.NotFound($"Phiếu nhập với Id = {command.Id.Value} không tồn tại", "Id");
         }
         var productVariantIds = originalInventoryReceipt.InventoryReceiptInfos
-            .Select(
-                p => p.QuotationProductRow != null
-                    ? p.QuotationProductRow.ProductVariantId
-                    : (p.PurchaseRequestItem != null ? p.PurchaseRequestItem.ProductVariantId : (int?)null))
+            .Select(p => p.PurchaseRequestItem != null ? p.PurchaseRequestItem.ProductVariantId : (int?)null)
             .Where(id => id.HasValue)
             .Select(id => id!.Value)
             .Distinct()
@@ -53,11 +51,9 @@ public sealed class CloneInventoryReceiptCommandHandler(
         var validProducts = new List<InventoryReceiptInfoEntity>();
         foreach (var originalProduct in originalInventoryReceipt.InventoryReceiptInfos)
         {
-            var resolvedVariantId = originalProduct.QuotationProductRow != null
-                ? originalProduct.QuotationProductRow.ProductVariantId
-                : (originalProduct.PurchaseRequestItem != null
-                    ? originalProduct.PurchaseRequestItem.ProductVariantId
-                    : (int?)null);
+            var resolvedVariantId = originalProduct.PurchaseRequestItem != null
+                ? originalProduct.PurchaseRequestItem.ProductVariantId
+                : (int?)null;
             if (!resolvedVariantId.HasValue)
             {
                 continue;
@@ -74,7 +70,6 @@ public sealed class CloneInventoryReceiptCommandHandler(
                 new InventoryReceiptInfoEntity
                 {
                     PurchaseRequestItemId = originalProduct.PurchaseRequestItemId,
-                    QuotationProductRowId = originalProduct.QuotationProductRowId,
                     Count = originalProduct.Count,
                     RemainingCount = originalProduct.Count,
                     CreatedAt = DateTimeOffset.UtcNow,

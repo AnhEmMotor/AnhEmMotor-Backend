@@ -2,7 +2,7 @@ using LeadEntity = global::Domain.Entities.Lead;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AnhEmMotor.Application.Interfaces.Repositories.Lead
+namespace Application.Interfaces.Repositories.Lead
 {
     public interface ILeadInsertRepository
     {

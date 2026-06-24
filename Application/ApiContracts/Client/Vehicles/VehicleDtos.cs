@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Client.Vehicles
+namespace Application.ApiContracts.Client.Vehicles
 {
     public record VehicleSummaryResponse(
         int Id, 

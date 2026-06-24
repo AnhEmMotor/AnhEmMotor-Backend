@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Admin.Analytics
+namespace Application.ApiContracts.Admin.Analytics
 {
     public record DashboardKpisResponse(
         decimal TotalRevenue, 

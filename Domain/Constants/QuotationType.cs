@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Domain.Constants
 {
@@ -13,10 +13,10 @@ namespace Domain.Constants
 
         public static string GetDisplayName(string status) => status.ToLower() switch
         {
-            "draft" => "Phiếu tạm",
-            "sent" => "Đã gửi",
-            "approved" => "Đã duyệt",
-            "rejected" => "Đã từ chối",
+            "draft" => "Phi?u t?m",
+            "sent" => "�� g?i",
+            "approved" => "�� duy?t",
+            "rejected" => "�� t? ch?i",
             _ => status
         };
 

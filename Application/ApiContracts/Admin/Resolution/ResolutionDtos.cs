@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Admin.Resolution
+namespace Application.ApiContracts.Admin.Resolution
 {
     public record TicketSummaryResponse(
         int Id, 

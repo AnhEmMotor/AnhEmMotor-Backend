@@ -1,4 +1,4 @@
-namespace AnhEmMotor.Application.ApiContracts.Client.Auth
+namespace Application.ApiContracts.Client.Auth
 {
     public record LoginPhoneRequest(string PhoneNumber);
     public record VerifyOtpRequest(string PhoneNumber, string OtpCode);

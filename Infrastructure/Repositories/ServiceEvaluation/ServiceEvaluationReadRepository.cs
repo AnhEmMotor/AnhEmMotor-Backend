@@ -28,7 +28,7 @@ public class ServiceEvaluationReadRepository(ApplicationDBContext dbContext, ISi
             .AsNoTracking()
             .Include(e => e.Contact)
             .Include(e => e.ServiceBooking)
-            .ThenInclude(sb => sb.Technician);
+            .ThenInclude(sb => sb.AssignedSale);
         var result = await paginator
             .ApplyAsync<Domain.Entities.ServiceEvaluation, ServiceEvaluationListRowResponse>(
                 query,
@@ -48,7 +48,7 @@ public class ServiceEvaluationReadRepository(ApplicationDBContext dbContext, ISi
                 .Include(e => e.Contact)
                 .Include(e => e.Contact.Replies)
                 .Include(e => e.ServiceBooking)
-                .ThenInclude(sb => sb.Technician)
+                .ThenInclude(sb => sb.AssignedSale)
                 .Where(e => e.Id == evaluationId)
                 .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false) ??
@@ -62,7 +62,7 @@ public class ServiceEvaluationReadRepository(ApplicationDBContext dbContext, ISi
             ReviewMessage = evaluation.Review,
             Criteria = evaluation.Criteria,
             ProcessingStatus = evaluation.ProcessingStatus,
-            TechnicianName = evaluation.ServiceBooking.Technician?.User?.UserName,
+            TechnicianName = evaluation.ServiceBooking.AssignedSale?.UserName,
             RepairOrderCode = null,
             ChatHistory =
                 [.. evaluation.Contact.Replies

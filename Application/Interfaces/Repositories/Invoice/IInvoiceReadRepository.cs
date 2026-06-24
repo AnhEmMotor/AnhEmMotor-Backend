@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using InvoiceEntity = Domain.Entities.Invoice;
 
-namespace AnhEmMotor.Application.Interfaces.Repositories.Invoice
+namespace Application.Interfaces.Repositories.Invoice
 {
     public interface IInvoiceReadRepository
     {

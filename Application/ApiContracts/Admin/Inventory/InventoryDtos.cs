@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Admin.Inventory
+namespace Application.ApiContracts.Admin.Inventory
 {
     public record InventoryVehicleResponse(
         int Id, 

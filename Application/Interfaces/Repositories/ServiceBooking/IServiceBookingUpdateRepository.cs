@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AnhEmMotor.Application.Interfaces.Repositories.ServiceBooking
+namespace Application.Interfaces.Repositories.ServiceBooking
 {
     public interface IServiceBookingUpdateRepository
     {

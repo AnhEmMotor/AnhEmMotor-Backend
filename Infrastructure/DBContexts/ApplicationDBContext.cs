@@ -1,4 +1,3 @@
-using AnhEmMotor.Domain.Entities;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Entities.Logistics;
@@ -228,10 +227,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<Quotation> Quotations { get; set; }
 
     public virtual DbSet<QuotationProductRow> QuotationProductRows { get; set; }
-
-    public virtual DbSet<PurchaseRequest> PurchaseRequests { get; set; }
-
-    public virtual DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

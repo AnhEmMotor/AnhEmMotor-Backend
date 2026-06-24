@@ -1,15 +1,15 @@
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Bookings;
-using AnhEmMotor.Domain.Constants;
-using AnhEmMotor.Application.Interfaces.Repositories.ServiceBooking;
-using AnhEmMotor.Domain.Entities;
+using Application.ApiContracts.Client.Bookings;
+using Domain.Constants;
+using Application.Interfaces.Repositories.ServiceBooking;
+using Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
 
-namespace AnhEmMotor.Application.Features.Client.Bookings
+namespace Application.Features.Client.Bookings
 {
     public record GetAvailableSlotsQuery(DateTime Date) : IRequest<List<AvailableSlotResponse>>;
     public record CreateBookingCommand(CreateBookingRequest Request) : IRequest<int>;

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Admin.CRM
+namespace Application.ApiContracts.Admin.CRM
 {
     public record LeadSummaryResponse(
         int Id, 

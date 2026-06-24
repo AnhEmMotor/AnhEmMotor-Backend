@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Support;
-using AnhEmMotor.Application.Features.Client.Support;
+using Application.ApiContracts.Client.Support;
+using Application.Features.Client.Support;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 

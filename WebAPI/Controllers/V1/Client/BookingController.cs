@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Bookings;
-using AnhEmMotor.Application.Features.Client.Bookings;
+using Application.ApiContracts.Client.Bookings;
+using Application.Features.Client.Bookings;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;

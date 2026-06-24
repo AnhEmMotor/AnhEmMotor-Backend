@@ -48,5 +48,8 @@ namespace Application.Interfaces.Repositories.Vehicle
         CancellationToken cancellationToken = default);
 
     public Task<Domain.Entities.Vehicle?> GetByVinAsync(string vin, CancellationToken cancellationToken = default);
+
+    public Task<List<Domain.Entities.Vehicle>> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default);
+    }
 }
 

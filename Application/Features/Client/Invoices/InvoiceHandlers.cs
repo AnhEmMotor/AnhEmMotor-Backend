@@ -1,12 +1,12 @@
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Invoices;
-using AnhEmMotor.Application.Interfaces.Repositories.Invoice;
+using Application.ApiContracts.Client.Invoices;
+using Application.Interfaces.Repositories.Invoice;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
 
-namespace AnhEmMotor.Application.Features.Client.Invoices
+namespace Application.Features.Client.Invoices
 {
     public record GetMyInvoicesQuery() : IRequest<List<InvoiceSummaryResponse>>;
     public record GetInvoiceDetailQuery(int Id) : IRequest<InvoiceDetailResponse?>;

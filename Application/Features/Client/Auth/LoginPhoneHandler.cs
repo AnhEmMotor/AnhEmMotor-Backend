@@ -1,9 +1,9 @@
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Auth;
+using Application.ApiContracts.Client.Auth;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AnhEmMotor.Application.Features.Client.Auth
+namespace Application.Features.Client.Auth
 {
     public record LoginPhoneCommand(string PhoneNumber) : IRequest<bool>;
 

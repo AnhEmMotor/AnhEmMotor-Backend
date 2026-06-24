@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Admin.Analytics;
-using AnhEmMotor.Application.Features.Admin.Analytics;
+using Application.ApiContracts.Admin.Analytics;
+using Application.Features.Admin.Analytics;
 using System.Threading.Tasks;
 
 namespace AnhEmMotor.WebAPI.Controllers.V1.Admin

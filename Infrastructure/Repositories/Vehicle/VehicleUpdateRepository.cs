@@ -25,4 +25,14 @@ public class VehicleUpdateRepository(ApplicationDBContext dbContext) : IVehicleU
         dbContext.VehicleAuditLogs.AddRange(logs);
         return Task.CompletedTask;
     }
+
+    public async Task UpdateOdoAsync(int vehicleId, double newOdo, CancellationToken cancellationToken = default)
+    {
+        var vehicle = await dbContext.Vehicles.FindAsync(new object[] { vehicleId }, cancellationToken);
+        if (vehicle != null)
+        {
+            vehicle.CurrentOdo = newOdo;
+            dbContext.Vehicles.Update(vehicle);
+        }
+    }
 }

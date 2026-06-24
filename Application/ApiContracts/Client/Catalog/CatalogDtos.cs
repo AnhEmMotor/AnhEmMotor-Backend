@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Client.Catalog
+namespace Application.ApiContracts.Client.Catalog
 {
     public record ProductSummaryResponse(
         int Id, 

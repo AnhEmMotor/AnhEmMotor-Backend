@@ -433,7 +433,7 @@ public class ProductMappingConfig : IRegister
         };
     }
 
-    private static List<ProductVariantColorLiteResponse> MapVariantColors(ProductVariantEntity variant)
+    public static List<ProductVariantColorLiteResponse> MapVariantColors(ProductVariantEntity variant)
     {
         return[.. variant.ProductVariantColors
             .Select(
@@ -522,19 +522,12 @@ public class ProductMappingConfig : IRegister
         {
             return variant.MaxPurchaseQuantity.Value;
         }
-        if (variant.Product?.MaxPurchaseQuantity.HasValue == true)
-        {
-            return variant.Product.MaxPurchaseQuantity.Value;
-        }
+
         return GetEffectiveMaxPurchaseQuantity(variant.Product?.ProductCategory);
     }
 
     private static int? GetEffectiveMaxPurchaseQuantity(ProductEntity product)
     {
-        if (product.MaxPurchaseQuantity.HasValue)
-        {
-            return product.MaxPurchaseQuantity.Value;
-        }
         return GetEffectiveMaxPurchaseQuantity(product.ProductCategory);
     }
 

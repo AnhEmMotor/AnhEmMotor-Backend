@@ -1,14 +1,14 @@
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Support;
-using AnhEmMotor.Application.Interfaces.Repositories.Lead;
+using Application.ApiContracts.Client.Support;
+using Application.Interfaces.Repositories.Lead;
 using Domain.Entities;
-using AnhEmMotor.Domain.Constants;
+using Domain.Constants;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
 
-namespace AnhEmMotor.Application.Features.Client.Support
+namespace Application.Features.Client.Support
 {
     public record GetFaqsQuery(string Search) : IRequest<List<FaqResponse>>;
     public record RequestCallbackCommand(CallbackRequest Request) : IRequest<bool>;

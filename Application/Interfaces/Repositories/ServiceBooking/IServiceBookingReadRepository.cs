@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ServiceBookingEntity = AnhEmMotor.Domain.Entities.ServiceBooking;
+using ServiceBookingEntity = Domain.Entities.ServiceBooking;
 
-namespace AnhEmMotor.Application.Interfaces.Repositories.ServiceBooking
+namespace Application.Interfaces.Repositories.ServiceBooking
 {
     public interface IServiceBookingReadRepository
     {

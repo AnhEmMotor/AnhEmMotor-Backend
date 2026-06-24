@@ -1,12 +1,12 @@
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Admin.Analytics;
+using Application.ApiContracts.Admin.Analytics;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AnhEmMotor.Application.Features.Admin.Analytics
+namespace Application.Features.Admin.Analytics
 {
     public record GetDashboardKpisQuery() : IRequest<DashboardKpisResponse>;
     public record GetAnalyticsChartsQuery() : IRequest<AnalyticsChartsResponse>;

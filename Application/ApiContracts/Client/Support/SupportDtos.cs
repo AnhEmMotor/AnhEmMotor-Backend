@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Client.Support
+namespace Application.ApiContracts.Client.Support
 {
     public record FaqResponse(string Question, string Answer);
     

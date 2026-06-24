@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Profile;
-using AnhEmMotor.Application.Features.Client.Profile;
+using Application.ApiContracts.Client.Profile;
+using Application.Features.Client.Profile;
 using System.Threading.Tasks;
 
 namespace AnhEmMotor.WebAPI.Controllers.V1.Client

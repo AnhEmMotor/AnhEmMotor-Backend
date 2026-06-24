@@ -1,6 +1,6 @@
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Catalog;
-using AnhEmMotor.Application.Interfaces.Repositories.Lead;
+using Application.ApiContracts.Client.Catalog;
+using Application.Interfaces.Repositories.Lead;
 using Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System;
 
-namespace AnhEmMotor.Application.Features.Client.Catalog
+namespace Application.Features.Client.Catalog
 {
     public record GetProductsQuery(string Search, int? CategoryId) : IRequest<List<ProductSummaryResponse>>;
     public record GetProductDetailQuery(int Id) : IRequest<ProductDetailResponse>;

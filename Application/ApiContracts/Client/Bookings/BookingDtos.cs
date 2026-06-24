@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Client.Bookings
+namespace Application.ApiContracts.Client.Bookings
 {
     public record AvailableSlotResponse(DateTime SlotStart, DateTime SlotEnd, bool IsAvailable);
     

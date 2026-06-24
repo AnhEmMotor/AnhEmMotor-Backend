@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Admin.Logistics
+namespace Application.ApiContracts.Admin.Logistics
 {
     public record OrderPipelineResponse(
         int OrderId, 

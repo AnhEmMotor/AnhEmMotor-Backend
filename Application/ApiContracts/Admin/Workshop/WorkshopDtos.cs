@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Admin.Workshop
+namespace Application.ApiContracts.Admin.Workshop
 {
     public record WorkshopQueueResponse(
         int VehicleId, 

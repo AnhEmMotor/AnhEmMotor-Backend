@@ -22,15 +22,7 @@ public sealed class GetPaymentLinkQueryHandler(
     IRoleReadRepository roleReadRepository,
     IHttpContextAccessor httpContextAccessor) : IRequestHandler<GetPaymentLinkQuery, Result<PaymentLinkResponse>>
 {
-    public class GetPaymentLinkQueryHandler(
-        IOutputReadRepository readRepository,
-        IOutputUpdateRepository updateRepository,
-        IUnitOfWork unitOfWork,
-        IVNPayService vnpayService,
-        IPayOSService payosService,
-        IUserReadRepository userReadRepository,
-        IRoleReadRepository roleReadRepository,
-        IHttpContextAccessor httpContextAccessor) : IRequestHandler<GetPaymentLinkQuery, Result<string>>
+    public async Task<Result<PaymentLinkResponse>> Handle(GetPaymentLinkQuery request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(request.CurrentUserId) || !Guid.TryParse(request.CurrentUserId, out var currentUserId))
         {

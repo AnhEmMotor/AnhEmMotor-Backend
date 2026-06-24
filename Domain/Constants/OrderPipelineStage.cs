@@ -1,4 +1,4 @@
-namespace AnhEmMotor.Domain.Constants
+namespace Domain.Constants
 {
     public enum OrderPipelineStage
     {

@@ -9,4 +9,7 @@ namespace Application.Interfaces.Repositories.Vehicle
     public void Remove(Domain.Entities.Vehicle vehicle);
 
     public Task InsertAuditLogsAsync(IEnumerable<Domain.Entities.VehicleAuditLog> logs, CancellationToken ct = default);
+
+    public Task UpdateOdoAsync(int vehicleId, double newOdo, CancellationToken cancellationToken = default);
+    }
 }

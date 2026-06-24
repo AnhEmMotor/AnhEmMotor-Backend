@@ -1,4 +1,4 @@
-﻿using Domain.Constants;
+using Domain.Constants;
 using System;
 
 namespace Application.ApiContracts.Vehicle.Responses

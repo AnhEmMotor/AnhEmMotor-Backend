@@ -1,9 +1,9 @@
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Profile;
+using Application.ApiContracts.Client.Profile;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AnhEmMotor.Application.Features.Client.Profile
+namespace Application.Features.Client.Profile
 {
     public record GetProfileQuery() : IRequest<ProfileResponse>;
     public record UpdateProfileCommand(UpdateProfileRequest Request) : IRequest<bool>;

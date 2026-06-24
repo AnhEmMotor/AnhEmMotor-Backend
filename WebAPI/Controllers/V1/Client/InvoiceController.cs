@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using AnhEmMotor.Application.ApiContracts.Client.Invoices;
-using AnhEmMotor.Application.Features.Client.Invoices;
+using Application.ApiContracts.Client.Invoices;
+using Application.Features.Client.Invoices;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 

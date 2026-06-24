@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.ApiContracts.Client.Invoices
+namespace Application.ApiContracts.Client.Invoices
 {
     public record InvoiceSummaryResponse(
         int Id, 
