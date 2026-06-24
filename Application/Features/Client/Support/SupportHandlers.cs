@@ -1,6 +1,6 @@
 using MediatR;
 using Application.ApiContracts.Client.Support;
-using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Repositories.Lead.Lead;
 using Domain.Entities;
 using Domain.Constants;
 using System.Collections.Generic;

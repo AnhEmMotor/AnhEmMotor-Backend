@@ -44,8 +44,8 @@ msbuild.err
 msbuild.wrn
 
 # Block upload ENV (Configuration)
-# appsettings.json
-# appsettings.*.json
+appsettings.json
+appsettings.*.json
 !appsettings.*template*.json
 !appsettings.*test*.json
 

@@ -13,13 +13,9 @@ namespace Application.Features.Client.Invoices
 
     public class GetMyInvoicesHandler : IRequestHandler<GetMyInvoicesQuery, List<InvoiceSummaryResponse>>
     {
-        private readonly IInvoiceReadRepository _invoiceRepo;
-        public GetMyInvoicesHandler(IInvoiceReadRepository invoiceRepo) => _invoiceRepo = invoiceRepo;
-
         public async Task<List<InvoiceSummaryResponse>> Handle(GetMyInvoicesQuery request, CancellationToken cancellationToken)
         {
             // In a real app, get current userId from HttpContext
-            var invoices = await _invoiceRepo.GetByUserIdAsync("mock-user-id", cancellationToken);
             
             // Mapping logic
             return await Task.FromResult(new List<InvoiceSummaryResponse>
@@ -32,13 +28,8 @@ namespace Application.Features.Client.Invoices
 
     public class GetInvoiceDetailHandler : IRequestHandler<GetInvoiceDetailQuery, InvoiceDetailResponse?>
     {
-        private readonly IInvoiceReadRepository _invoiceRepo;
-        public GetInvoiceDetailHandler(IInvoiceReadRepository invoiceRepo) => _invoiceRepo = invoiceRepo;
-
         public async Task<InvoiceDetailResponse?> Handle(GetInvoiceDetailQuery request, CancellationToken cancellationToken)
         {
-            var invoice = await _invoiceRepo.GetByIdAsync(request.Id, cancellationToken);
-            if(invoice == null) return null;
             
             return await Task.FromResult(new InvoiceDetailResponse(
                 request.Id, "INV-001", DateTime.UtcNow, 50000000, 

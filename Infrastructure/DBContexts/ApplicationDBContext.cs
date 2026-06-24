@@ -224,10 +224,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<CarrierPartner> CarrierPartners { get; set; }
 
-    // Quotations and Purchase Requests
-    public virtual DbSet<Quotation> Quotations { get; set; }
-
-    public virtual DbSet<QuotationProductRow> QuotationProductRows { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
