@@ -373,6 +373,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     .WithMany()
                     .HasForeignKey(b => b.AssignedSaleId)
                     .OnDelete(DeleteBehavior.SetNull);
+                entity.Property(b => b.Status).HasConversion<string>();
             });
         modelBuilder.Entity<SupportTicket>(
             entity =>
@@ -554,6 +555,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<InventoryOnHand>()
             .HasIndex(i => new { i.ProductVariantId, i.ProductVariantColorId, i.Month, i.Year })
             .IsUnique();
+        modelBuilder.Entity<InventoryOnHand>()
+            .HasIndex(i => i.ProductVariantId);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
         if (isNotSqlServer)
