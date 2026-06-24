@@ -20,10 +20,12 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
 
         public int? UnimportedQuantity { get; set; }
 
-        public int InvoicedQuantity { get; set; }
+        public int? SupplierId { get; set; }
 
-        public int InvoicingQuantity { get; set; }
+        public string? SupplierName { get; set; }
 
-        public int UninvoicedQuantity { get; set; }
+        public int? ProductQuotationId { get; set; }
+
+        public decimal? UnitPrice { get; set; }
     }
 }

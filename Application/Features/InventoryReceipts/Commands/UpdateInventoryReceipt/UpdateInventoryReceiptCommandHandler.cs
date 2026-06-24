@@ -11,6 +11,7 @@ using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Order;
+using Domain.Constants.PurchaseRequest;
 using Domain.Entities;
 using Mapster;
 using MediatR;
@@ -25,7 +26,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
     IInventoryReceiptUpdateRepository updateRepository,
     IInventoryReceiptDeleteRepository deleteRepository,
     IPurchaseRequestReadRepository prReadRepository,
-    ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
     IPermissionReadRepository permissionRepository,
     IVehicleUpdateRepository vehicleUpdateRepository,
@@ -49,14 +49,14 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
-        if (Domain.Constants.InventoryReceiptStatus.IsCannotEdit(inventoryReceipt.StatusId))
+        if (Domain.Constants.InventoryReceipt.InventoryReceiptStatus.IsCannotEdit(inventoryReceipt.StatusId))
         {
             return Error.BadRequest("Khi đã phê duyệt hoặc từ chối thì không được sửa phiếu.", "StatusId");
         }
         Guid userId = currentUserContext.GetUserId();
         if (string.Equals(
             inventoryReceipt.StatusId,
-            Domain.Constants.InventoryReceiptStatus.Sent,
+            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
             StringComparison.OrdinalIgnoreCase))
         {
             var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
@@ -72,7 +72,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             }
         } else if (!string.Equals(
             inventoryReceipt.StatusId,
-            Domain.Constants.InventoryReceiptStatus.Draft,
+            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
             StringComparison.OrdinalIgnoreCase))
         {
             var hasEditOrApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
@@ -181,7 +181,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                         prItemsDict.TryGetValue(purchaseRequestItemId.Value, out var prItem2)
                     ? prItem2.ProductVariantColorId
                     : (int?)null;
-                var resolvedSupplierId = product.SupplierId;
                 if (resolvedVariantId.HasValue)
                 {
                     if (prItem != null)
@@ -194,15 +193,15 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                                     ii.InventoryReceipt.DeletedAt == null &&
                                     (string.Equals(
                                             ii.InventoryReceipt.StatusId,
-                                            Domain.Constants.InventoryReceiptStatus.Approve,
+                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                             StringComparison.OrdinalIgnoreCase) ||
                                         string.Equals(
                                             ii.InventoryReceipt.StatusId,
-                                            Domain.Constants.InventoryReceiptStatus.Sent,
+                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                             StringComparison.OrdinalIgnoreCase) ||
                                         string.Equals(
                                             ii.InventoryReceipt.StatusId,
-                                            Domain.Constants.InventoryReceiptStatus.Draft,
+                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                             StringComparison.OrdinalIgnoreCase)))
                             .Sum(ii => ii.Count ?? 0);
                         var remainingAllowed = prItem.Quantity - occupiedQty;
@@ -213,21 +212,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                                 $"Biến thể #{prItem.ProductVariantId}";
                             return Error.BadRequest(
                                 $"Số lượng nhập ({requestedQty}) cho sản phẩm '{productName}' vượt quá số lượng còn lại được phép nhập từ yêu cầu mua hàng ({remainingAllowed}).",
-                                "Products");
-                        }
-                    }
-                    if (resolvedSupplierId.HasValue)
-                    {
-                        var supplier = await supplierRepository.GetByIdAsync(
-                            resolvedSupplierId.Value,
-                            cancellationToken,
-                            DataFetchMode.ActiveOnly)
-                            .ConfigureAwait(false);
-                        if (supplier is null ||
-                            string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
-                        {
-                            return Error.BadRequest(
-                                $"Nhà cung cấp với ID {resolvedSupplierId.Value} không tồn tại hoặc không còn hoạt động.",
                                 "Products");
                         }
                     }
@@ -275,6 +259,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         }
         var config = new TypeAdapterConfig();
         config.NewConfig<UpdateInventoryReceiptInfoRequest, InventoryReceiptInfo>().Ignore(dest => dest.Vehicles);
+        var vehicleAuditLogs = new List<Domain.Entities.VehicleAuditLog>();
         foreach (var productRequest in request.Products)
         {
             InventoryReceiptInfo? existingInfo = null;
@@ -313,6 +298,8 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     resolvedColorId,
                     vehicleUpdateRepository,
                     vehicleReadRepository,
+                    userId,
+                    vehicleAuditLogs,
                     cancellationToken)
                     .ConfigureAwait(false);
             } else
@@ -327,12 +314,18 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     resolvedColorId,
                     vehicleUpdateRepository,
                     vehicleReadRepository,
+                    userId,
+                    vehicleAuditLogs,
                     cancellationToken)
                     .ConfigureAwait(false);
                 inventoryReceipt.InventoryReceiptInfos.Add(newInfo);
             }
         }
         updateRepository.Update(inventoryReceipt);
+        if (vehicleAuditLogs.Any())
+        {
+            await vehicleUpdateRepository.InsertAuditLogsAsync(vehicleAuditLogs, cancellationToken).ConfigureAwait(false);
+        }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var updated = await readRepository.GetByIdWithDetailsAsync(inventoryReceipt.Id, cancellationToken)
             .ConfigureAwait(false);
@@ -408,6 +401,8 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         int? resolvedColorId,
         IVehicleUpdateRepository vehicleUpdateRepository,
         IVehicleReadRepository vehicleReadRepository,
+        Guid? currentUserId,
+        List<Domain.Entities.VehicleAuditLog> vehicleAuditLogs,
         CancellationToken cancellationToken)
     {
         var managementType = variant?.Product?.ProductCategory?.ManagementType;
@@ -415,6 +410,15 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         {
             foreach (var vehicle in inventoryReceiptInfo.Vehicles.ToList())
             {
+                vehicleAuditLogs.Add(new Domain.Entities.VehicleAuditLog
+                {
+                    Vehicle = vehicle,
+                    Action = "Delete",
+                    ChangedById = currentUserId,
+                    ChangedAt = DateTimeOffset.UtcNow,
+                    OldVinNumber = vehicle.VinNumber,
+                    OldEngineNumber = vehicle.EngineNumber
+                });
                 vehicleUpdateRepository.Remove(vehicle);
                 inventoryReceiptInfo.Vehicles.Remove(vehicle);
             }
@@ -427,6 +431,15 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         {
             if (!requestedIds.Contains(existingVehicle.Id))
             {
+                vehicleAuditLogs.Add(new Domain.Entities.VehicleAuditLog
+                {
+                    Vehicle = existingVehicle,
+                    Action = "Delete",
+                    ChangedById = currentUserId,
+                    ChangedAt = DateTimeOffset.UtcNow,
+                    OldVinNumber = existingVehicle.VinNumber,
+                    OldEngineNumber = existingVehicle.EngineNumber
+                });
                 vehicleUpdateRepository.Remove(existingVehicle);
                 inventoryReceiptInfo.Vehicles.Remove(existingVehicle);
             }
@@ -458,6 +471,32 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     IsActive = true,
                     Status = VehicleStatus.Available
                 };
+                vehicleAuditLogs.Add(new Domain.Entities.VehicleAuditLog
+                {
+                    Vehicle = vehicle,
+                    Action = "Add",
+                    ChangedById = currentUserId,
+                    ChangedAt = DateTimeOffset.UtcNow,
+                    NewVinNumber = vehicleRequest.VinNumber.Trim(),
+                    NewEngineNumber = vehicleRequest.EngineNumber.Trim()
+                });
+            }
+            else
+            {
+                if (vehicle.VinNumber != vehicleRequest.VinNumber.Trim() || vehicle.EngineNumber != vehicleRequest.EngineNumber.Trim())
+                {
+                    vehicleAuditLogs.Add(new Domain.Entities.VehicleAuditLog
+                    {
+                        Vehicle = vehicle,
+                        Action = "Update",
+                        ChangedById = currentUserId,
+                        ChangedAt = DateTimeOffset.UtcNow,
+                        OldVinNumber = vehicle.VinNumber,
+                        OldEngineNumber = vehicle.EngineNumber,
+                        NewVinNumber = vehicleRequest.VinNumber.Trim(),
+                        NewEngineNumber = vehicleRequest.EngineNumber.Trim()
+                    });
+                }
             }
             vehicle.VinNumber = vehicleRequest.VinNumber.Trim();
             vehicle.EngineNumber = vehicleRequest.EngineNumber.Trim();

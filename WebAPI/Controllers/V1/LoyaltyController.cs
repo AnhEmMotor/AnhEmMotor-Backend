@@ -31,7 +31,7 @@ public class LoyaltyController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetLoyaltyMembersQuery { SieveModel = sieveModel }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 }

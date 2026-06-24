@@ -111,6 +111,14 @@ public class UpdateOutputForManagerCommandHandler(
                 return Error.BadRequest("Trạng thái đơn hàng hiện tại không cho phép thay đổi ghi chú.", "StatusId");
             }
         }
+        if (request.DepositRatio.HasValue &&
+            request.DepositRatio.Value != (output.DepositRatio ?? 0) &&
+            OrderLockStatus.DepositRatioLockedStatuses.Contains(output.StatusId ?? string.Empty))
+        {
+            return Error.BadRequest(
+                "Trạng thái đơn hàng hiện tại không cho phép thay đổi tỷ lệ đặt cọc.",
+                "DepositRatio");
+        }
         request.Adapt(output);
         if (request.DepositRatio.HasValue)
         {

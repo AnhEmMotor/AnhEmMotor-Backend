@@ -12,21 +12,36 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
     public Task<InventoryOnHandEntity?> GetByVariantAndColorAsync(
         int productVariantId,
         int? productVariantColorId,
+        int? month,
+        int? year,
         CancellationToken cancellationToken)
     {
+        var targetMonth = month ?? DateTimeOffset.UtcNow.Month;
+        var targetYear = year ?? DateTimeOffset.UtcNow.Year;
         return context.InventoryOnHands
             .FirstOrDefaultAsync(
-                x => x.ProductVariantId == productVariantId && x.ProductVariantColorId == productVariantColorId,
+                x => x.ProductVariantId == productVariantId &&
+                    x.ProductVariantColorId == productVariantColorId &&
+                    x.Month == targetMonth &&
+                    x.Year == targetYear,
                 cancellationToken);
     }
 
     public Task<List<InventoryReportSummaryRowResponse>> GetInventoryReportSummaryRowsAsync(
         string? searchTerm,
+        int? month,
+        int? year,
         CancellationToken cancellationToken)
     {
+        var targetMonth = month ?? DateTimeOffset.UtcNow.Month;
+        var targetYear = year ?? DateTimeOffset.UtcNow.Year;
         var query = context.InventoryOnHands
             .AsNoTracking()
-            .Where(x => x.ProductVariant != null && x.ProductVariant.Product != null);
+            .Where(
+                x => x.ProductVariant != null &&
+                    x.ProductVariant.Product != null &&
+                    x.Month == targetMonth &&
+                    x.Year == targetYear);
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             var term = searchTerm.Trim().ToLower();
@@ -53,7 +68,8 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                 ImportedQty = x.ImportedQty,
                 ExportedQty = x.ExportedQty,
                 StockQty = x.StockQty,
-                OrderedQty = x.OrderedQty
+                OrderedQty = x.OrderedQty,
+                BeginningQty = x.BeginningQty
             })
             .ToListAsync(cancellationToken);
     }
@@ -62,9 +78,12 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
         int pageNumber,
         int pageSize,
         string? searchTerm,
+        int? month,
+        int? year,
         CancellationToken cancellationToken)
     {
-        var allData = await GetInventoryReportSummaryRowsAsync(searchTerm, cancellationToken).ConfigureAwait(false);
+        var allData = await GetInventoryReportSummaryRowsAsync(searchTerm, month, year, cancellationToken)
+            .ConfigureAwait(false);
         var totalCount = allData.Select(x => x.ProductId).Distinct().Count();
         var paginatedProductIds = allData.Select(x => x.ProductId)
             .Distinct()
@@ -80,6 +99,7 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                 {
                     ProductId = gp.Key.ProductId,
                     ProductName = gp.Key.ProductName,
+                    BeginningQty = gp.Sum(x => x.BeginningQty),
                     ImportedQty = gp.Sum(x => x.ImportedQty),
                     ExportedQty = gp.Sum(x => x.ExportedQty),
                     InventoryQty = gp.Sum(x => x.StockQty),
@@ -92,6 +112,7 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                                 {
                                     VariantId = gv.Key.VariantId,
                                     VariantName = gv.Key.VariantName,
+                                    BeginningQty = gv.Sum(x => x.BeginningQty),
                                     ImportedQty = gv.Sum(x => x.ImportedQty),
                                     ExportedQty = gv.Sum(x => x.ExportedQty),
                                     InventoryQty = gv.Sum(x => x.StockQty),
@@ -104,6 +125,7 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                                                         {
                                                             ColorId = gc.ColorId!.Value,
                                                             ColorName = gc.ColorName,
+                                                            BeginningQty = gc.BeginningQty,
                                                             ImportedQty = gc.ImportedQty,
                                                             ExportedQty = gc.ExportedQty,
                                                             InventoryQty = gc.StockQty,

@@ -27,6 +27,7 @@ if (!string.IsNullOrWhiteSpace(customUploadPath))
     environment.WebRootFileProvider = new PhysicalFileProvider(absolutePath);
 }
 builder.Services.AddApplicationServices();
+builder.Services.AddMemoryCache();
 if (!environment.IsEnvironment("Test"))
 {
     builder.Services.AddInfrastructureServices(configuration);
@@ -41,18 +42,7 @@ builder.Services
                 "CorsPolicy",
                 policy =>
                 {
-                    var rawOrigins = configuration["Cors:AllowedOrigins"];
-                    if (string.IsNullOrWhiteSpace(rawOrigins))
-                    {
-                        throw new InvalidOperationException("CORS AllowedOrigins is missing in appsettings.json.");
-                    }
-                    var allowedOrigins = rawOrigins.Split(';', StringSplitOptions.RemoveEmptyEntries);
-                    if (allowedOrigins.Any(origin => string.Compare(origin, "*") == 0))
-                    {
-                        throw new InvalidOperationException(
-                            "Wildcard '*' is not allowed when using AllowCredentials. Please specify exact origins.");
-                    }
-                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                    policy.SetIsOriginAllowed(origin => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
                 });
         })
     .AddJwtAuthentication(configuration)
@@ -117,6 +107,6 @@ app.UseAuthorization();
 app.MapControllers();
 if (!app.Environment.IsEnvironment("Test"))
 {
-    await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
+    await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
 }
 app.Run();

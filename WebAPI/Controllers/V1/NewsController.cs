@@ -13,6 +13,7 @@ using Application.Features.News.Queries.GetNewsBySlug;
 using Application.Features.News.Queries.GetNewsList;
 using Application.Features.News.Queries.GetNewsListForStore;
 using Application.Features.News.Queries.GetProductsForNews;
+using Application.Features.News.Queries.GetRelatedNewsPublic;
 using Application.Features.NewsCategories.Queries.GetNewsCategoryList;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
@@ -50,7 +51,7 @@ public class NewsController(IMediator mediator) : ApiController
         [FromBody] CreateNewsCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -68,7 +69,7 @@ public class NewsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetNewsListQuery { SieveModel = sieveModel }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -103,6 +104,22 @@ public class NewsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetLatestPublicAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetLatestNewsPublicQuery(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy 5 tin tức liên quan theo slug bài viết (Public API cho Store).
+    /// </summary>
+    /// <param name="slug">Slug của bài viết hiện tại</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns></returns>
+    [HttpGet("public/{slug}/related")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Lấy 5 tin tức liên quan (Public API)")]
+    [ProducesResponseType(typeof(List<NewsSummaryResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetRelatedPublicAsync(string slug, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetRelatedNewsPublicQuery(slug), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -155,7 +172,7 @@ public class NewsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateNewsCommand>() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -170,7 +187,7 @@ public class NewsController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Xóa bài viết")]
     public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteNewsCommand(id), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new DeleteNewsCommand(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -203,7 +220,8 @@ public class NewsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetBySlugPublicAsync(string slug, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug }, cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -223,7 +241,7 @@ public class NewsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateNewsStatusCommand>() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -255,16 +273,7 @@ public class NewsController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Upload ảnh nội dung bài viết (WangEditor)")]
     public async Task<IActionResult> UploadContentImageAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        if (file == null || file.Length == 0)
-        {
-            return Ok(new UploadNewsContentImageResponse { Errno = 1, Message = "File không hợp lệ." });
-        }
-        var command = new UploadNewsContentImageCommand
-        {
-            FileStream = file.OpenReadStream(),
-            FileName = file.FileName,
-            BaseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{HttpContext.Request.PathBase}"
-        };
+        var command = new UploadNewsContentImageCommand { File = file };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }

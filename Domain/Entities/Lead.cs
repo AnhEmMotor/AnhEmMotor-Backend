@@ -32,6 +32,12 @@ public class Lead : BaseEntity
     [Column("InterestedVehicle", TypeName = "nvarchar(255)")]
     public string InterestedVehicle { get; set; } = string.Empty;
 
+    [Column("Notes", TypeName = "nvarchar(MAX)")]
+    public string Notes { get; set; } = string.Empty;
+
+    [Column("Priority", TypeName = "nvarchar(20)")]
+    public string Priority { get; set; } = string.Empty;
+
     [Column("Address", TypeName = "nvarchar(500)")]
     public string Address { get; set; } = string.Empty;
 

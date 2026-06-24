@@ -1,15 +1,18 @@
 using Application.ApiContracts.DebtPayment.Requests;
 using Application.ApiContracts.DebtPayment.Responses;
-using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
-using Application.Features.DebtPayments.Commands.RecordDebtPayment;
+using Application.Features.DebtPayments.Commands.PaySupplierDebt;
 using Application.Features.DebtPayments.Queries.GetReceiptsWithDebtBySupplierId;
+using Application.Features.DebtPayments.Queries.GetSupplierDebtLogs;
 using Application.Features.DebtPayments.Queries.GetSuppliersWithDebt;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
+using Domain.Entities;
+using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
@@ -29,10 +32,12 @@ namespace WebAPI.Controllers.V1
         /// </summary>
         [HttpGet("suppliers")]
         [HasPermission(DebtPayments.View)]
-        [ProducesResponseType(typeof(List<SupplierDebtResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetSuppliersWithDebtAsync(CancellationToken cancellationToken)
+        [ProducesResponseType(typeof(PagedResult<SupplierDebtResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSuppliersWithDebtAsync(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
         {
-            var query = new GetSuppliersWithDebtQuery();
+            var query = new GetSuppliersWithDebtQuery { SieveModel = sieveModel };
             var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
@@ -53,19 +58,33 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
-        /// Thực hiện thanh toán nợ cho dòng chi tiết phiếu nhập hàng
+        /// Thanh toán nợ cho nhà cung cấp (tự động cấn trừ từ cũ đến mới)
         /// </summary>
-        [HttpPost("{lineId:int}/pay")]
+        [HttpPost("suppliers/{supplierId:int}/pay")]
         [HasPermission(DebtPayments.Create)]
-        [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> PayDebtAsync(
-            [FromRoute] int lineId,
-            [FromBody] PayDebtRequest request,
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> PaySupplierDebtAsync(
+            [FromRoute] int supplierId,
+            [FromBody] PaySupplierDebtRequest request,
             CancellationToken cancellationToken)
         {
-            var command = new RecordDebtPaymentCommand { LineId = lineId, Amount = request.Amount };
+            var command = new PaySupplierDebtCommand { SupplierId = supplierId, Amount = request.Amount };
             var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy lịch sử thanh toán nợ của nhà cung cấp
+        /// </summary>
+        [HttpGet("suppliers/{supplierId:int}/debt-logs")]
+        [HasPermission(DebtPayments.View)]
+        [ProducesResponseType(typeof(List<SupplierDebtLog>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSupplierDebtLogsAsync(
+            [FromRoute] int supplierId,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetSupplierDebtLogsQuery { SupplierId = supplierId };
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
     }

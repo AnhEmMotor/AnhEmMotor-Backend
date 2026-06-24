@@ -334,7 +334,13 @@ public class UpdateProductCommandHandler(
             }
             var oldSlug = variantEntity.UrlSlug;
             variantReq.Adapt(variantEntity);
-            if (HasColorRequests(variantReq))
+            var colorRequests = GetColorRequests(variantReq);
+            var colorSyncError = SynchronizeVariantColors(variantEntity, colorRequests);
+            if (colorSyncError is not null)
+            {
+                return colorSyncError;
+            }
+            if (colorRequests.Count > 0)
             {
                 var incomingColors = GetColorRequests(variantReq);
                 var existingColors = variantEntity.ProductVariantColors.ToList();
@@ -391,7 +397,6 @@ public class UpdateProductCommandHandler(
                 variantEntity.CoverImageUrl = null;
             } else
             {
-                variantEntity.ProductVariantColors.Clear();
                 variantEntity.CoverImageUrl = variantReq.CoverImageUrl?.Trim();
             }
             if (!string.IsNullOrWhiteSpace(variantReq.UrlSlug))
@@ -727,6 +732,64 @@ public class UpdateProductCommandHandler(
                     nameof(VariantSupplierPriceRequest.SupplierId));
             }
         }
+        return null;
+    }
+
+    private static Error? SynchronizeVariantColors(
+        ProductVariant variant,
+        List<UpdateProductVariantColorRequest> colorRequests)
+    {
+        var requestedIds = colorRequests
+            .Where(color => color.Id is > 0)
+            .Select(color => color.Id!.Value)
+            .ToList();
+        if (requestedIds.Count != requestedIds.Distinct().Count())
+        {
+            return Error.BadRequest(
+                "Danh sách màu sắc chứa ID trùng lặp.",
+                "Variants.Colors");
+        }
+
+        var existingColorsById = variant.ProductVariantColors
+            .Where(color => color.Id > 0)
+            .ToDictionary(color => color.Id);
+        var unknownIds = requestedIds.Where(id => !existingColorsById.ContainsKey(id)).ToList();
+        if (unknownIds.Count > 0)
+        {
+            return Error.BadRequest(
+                $"Các màu sắc với ID {string.Join(", ", unknownIds)} không thuộc biến thể này.",
+                "Variants.Colors");
+        }
+
+        var requestedIdSet = requestedIds.ToHashSet();
+        foreach (var existingColor in variant.ProductVariantColors
+                     .Where(color => color.Id > 0 && !requestedIdSet.Contains(color.Id))
+                     .ToList())
+        {
+            variant.ProductVariantColors.Remove(existingColor);
+        }
+
+        foreach (var colorRequest in colorRequests)
+        {
+            if (colorRequest.Id is > 0)
+            {
+                var existingColor = existingColorsById[colorRequest.Id.Value];
+                existingColor.ColorName = colorRequest.ColorName?.Trim();
+                existingColor.ColorCode = colorRequest.ColorCode?.Trim();
+                existingColor.CoverImageUrl = colorRequest.CoverImageUrl?.Trim();
+                continue;
+            }
+
+            variant.ProductVariantColors.Add(
+                new ProductVariantColor
+                {
+                    ProductVariantId = variant.Id,
+                    ColorName = colorRequest.ColorName?.Trim(),
+                    ColorCode = colorRequest.ColorCode?.Trim(),
+                    CoverImageUrl = colorRequest.CoverImageUrl?.Trim()
+                });
+        }
+
         return null;
     }
 

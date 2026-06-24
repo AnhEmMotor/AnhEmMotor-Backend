@@ -118,7 +118,7 @@ public class ProductCategoryReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<CategoryEntity>(mode).ToListAsync(cancellationToken);
+        return context.GetQuery<CategoryEntity>(mode).Include(c => c.Products).ToListAsync(cancellationToken);
     }
 
     public Task<CategoryEntity?> GetByIdAsync(
@@ -126,7 +126,9 @@ public class ProductCategoryReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<CategoryEntity>(mode).FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return context.GetQuery<CategoryEntity>(mode)
+            .Include(c => c.Products)
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
     public Task<List<CategoryEntity>> GetByIdAsync(
@@ -134,7 +136,10 @@ public class ProductCategoryReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<CategoryEntity>(mode).Where(c => ids.Contains(c.Id)).ToListAsync(cancellationToken);
+        return context.GetQuery<CategoryEntity>(mode)
+            .Include(c => c.Products)
+            .Where(c => ids.Contains(c.Id))
+            .ToListAsync(cancellationToken);
     }
 
     public Task<bool> HasSubCategoriesAsync(
@@ -150,7 +155,10 @@ public class ProductCategoryReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<CategoryEntity>(mode).Where(x => x.ParentId == parentId).ToListAsync(cancellationToken);
+        return context.GetQuery<CategoryEntity>(mode)
+            .Include(c => c.Products)
+            .Where(x => x.ParentId == parentId)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<bool> AnyCategoryInTreeHasProductsAsync(
@@ -198,7 +206,7 @@ public class ProductCategoryReadRepository(
 
     internal IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<CategoryEntity>(mode);
+        return context.GetQuery<CategoryEntity>(mode).Include(c => c.Products);
     }
 
     private static string RemoveDiacritics(string text)

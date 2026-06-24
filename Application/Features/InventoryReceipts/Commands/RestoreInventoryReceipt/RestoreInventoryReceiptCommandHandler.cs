@@ -25,7 +25,7 @@ public class RestoreInventoryReceiptCommandHandler(
             .ConfigureAwait(false);
         if (InventoryReceipt is null)
         {
-            return Error.NotFound($"Kh�ng t�m th?y phi?u nh?p d� x�a c� ID {request.Id}.", "Id");
+            return Error.NotFound($"Không tìm thấy phiếu nhập đã xoá có ID {request.Id}.", "Id");
         }
         updateRepository.Restore(InventoryReceipt);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

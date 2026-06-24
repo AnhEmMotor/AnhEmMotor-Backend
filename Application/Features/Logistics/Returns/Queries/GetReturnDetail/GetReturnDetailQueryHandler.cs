@@ -1,4 +1,4 @@
-Ôªøusing Application.ApiContracts.Return.Responses;
+using Application.ApiContracts.Return.Responses;
 using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Entities.Logistics;
 using Domain.Enums;
@@ -24,7 +24,7 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturnDetail
                 OriginalTrackingNumber = order.TrackingNumber ?? string.Empty,
                 CustomerName = order.CustomerName ?? string.Empty,
                 Carrier = order.Carrier ?? string.Empty,
-                Reason = order.ReturnReason ?? "Kh√°ch bom h√†ng",
+                Reason = order.ReturnReason ?? "Kh·ch bom h‡ng",
                 Status = GetReturnStatus(order),
                 CreatedAt = order.CreatedAt,
                 BoxCondition = order.BoxCondition,

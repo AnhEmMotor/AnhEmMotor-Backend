@@ -30,7 +30,7 @@ public class CommissionController(ISender mediator) : ApiController
     [HttpGet]
     public async Task<IActionResult> GetRecordsAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetCommissionRecordsQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetCommissionRecordsQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -48,7 +48,7 @@ public class CommissionController(ISender mediator) : ApiController
         [FromQuery] int year,
         CancellationToken ct)
     {
-        var result = await mediator.Send(new GetPayrollSummaryQuery(month, year), ct).ConfigureAwait(true);
+        var result = await mediator.Send(new GetPayrollSummaryQuery(month, year), ct).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -61,7 +61,7 @@ public class CommissionController(ISender mediator) : ApiController
     [HasPermission(Payroll.Approve)]
     public async Task<IActionResult> ApprovePayrollAsync([FromBody] ApprovePayrollCommand command, CancellationToken ct)
     {
-        var result = await mediator.Send(command, ct).ConfigureAwait(true);
+        var result = await mediator.Send(command, ct).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

@@ -18,22 +18,6 @@ namespace Infrastructure.MySqlMigrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
             modelBuilder.Entity(
-                "AnhEmMotor.Domain.Entities.Expense",
-                b =>
-                {
-                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-                    b.Property<decimal>("Amount").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
-                    b.Property<int>("Category").HasColumnType("int");
-                    b.Property<DateTime>("CreatedAt").HasColumnType("datetime(6)");
-                    b.Property<DateTime>("ExpenseDate").HasColumnType("datetime(6)");
-                    b.Property<string>("Name").IsRequired().HasMaxLength(255).HasColumnType("varchar(255)");
-                    b.Property<string>("Note").HasColumnType("longtext");
-                    b.Property<DateTime?>("UpdatedAt").HasColumnType("datetime(6)");
-                    b.HasKey("Id");
-                    b.ToTable("Expenses");
-                });
-            modelBuilder.Entity(
                 "Domain.Entities.ApplicationRole",
                 b =>
                 {
@@ -145,6 +129,34 @@ namespace Infrastructure.MySqlMigrations
                     b.HasKey("Id");
                     b.HasIndex("ProductVariantId");
                     b.ToTable("Booking");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.BookingAppointment",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<long?>("AppointmentAt").HasColumnType("bigint").HasColumnName("AppointmentAt");
+                    b.Property<string>("CancelReason").HasColumnType("longtext").HasColumnName("CancelReason");
+                    b.Property<long?>("ConfirmedAt").HasColumnType("bigint").HasColumnName("ConfirmedAt");
+                    b.Property<Guid?>("ConfirmedBy").HasColumnType("char(36)").HasColumnName("ConfirmedBy");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("Email").HasColumnType("longtext").HasColumnName("Email");
+                    b.Property<string>("FullName").IsRequired().HasColumnType("longtext").HasColumnName("FullName");
+                    b.Property<string>("Notes").HasColumnType("longtext").HasColumnName("Notes");
+                    b.Property<string>("Phone").IsRequired().HasColumnType("longtext").HasColumnName("Phone");
+                    b.Property<DateTime?>("PreferredDate").HasColumnType("datetime(6)").HasColumnName("PreferredDate");
+                    b.Property<string>("PreferredTimeSlot").HasColumnType("longtext").HasColumnName("PreferredTimeSlot");
+                    b.Property<int?>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
+                    b.Property<string>("Showroom").HasColumnType("longtext").HasColumnName("Showroom");
+                    b.Property<string>("Status").IsRequired().HasColumnType("varchar(255)").HasColumnName("Status");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.HasIndex("ConfirmedBy");
+                    b.HasIndex("ProductVariantId");
+                    b.HasIndex("Status", "AppointmentAt");
+                    b.ToTable("BookingAppointment");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Brand",
@@ -317,6 +329,55 @@ namespace Infrastructure.MySqlMigrations
                     b.ToTable("ContractTemplateAuditLog");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.CustomerContact",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("Email").HasColumnType("longtext").HasColumnName("Email");
+                    b.Property<string>("FullName").IsRequired().HasColumnType("longtext").HasColumnName("FullName");
+                    b.Property<string>("InternalNote").HasColumnType("longtext").HasColumnName("InternalNote");
+                    b.Property<string>("Message").IsRequired().HasColumnType("longtext").HasColumnName("Message");
+                    b.Property<string>("Phone").IsRequired().HasColumnType("longtext").HasColumnName("Phone");
+                    b.Property<long?>("ProcessedAt").HasColumnType("bigint").HasColumnName("ProcessedAt");
+                    b.Property<Guid?>("ProcessedBy").HasColumnType("char(36)").HasColumnName("ProcessedBy");
+                    b.Property<long?>("RepliedAt").HasColumnType("bigint").HasColumnName("RepliedAt");
+                    b.Property<string>("Source").HasColumnType("longtext").HasColumnName("Source");
+                    b.Property<string>("Status").IsRequired().HasColumnType("varchar(255)").HasColumnName("Status");
+                    b.Property<string>("Subject").HasColumnType("longtext").HasColumnName("Subject");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.HasIndex("ProcessedBy");
+                    b.HasIndex("Status", "CreatedAt");
+                    b.ToTable("CustomerContact");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.CustomerContactReply",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("ContactId").HasColumnType("int").HasColumnName("ContactId");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<bool>("IsInternal").HasColumnType("tinyint(1)").HasColumnName("IsInternal");
+                    b.Property<Guid?>("RepliedBy").HasColumnType("char(36)").HasColumnName("RepliedBy");
+                    b.Property<string>("ReplyContent")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("ReplyContent");
+                    b.Property<long?>("SentAt").HasColumnType("bigint").HasColumnName("SentAt");
+                    b.Property<int?>("SupportTicketId").HasColumnType("int");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.HasIndex("RepliedBy");
+                    b.HasIndex("SupportTicketId");
+                    b.HasIndex("ContactId", "SentAt");
+                    b.ToTable("CustomerContactReply");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.CustomerFeedback",
                 b =>
                 {
@@ -365,6 +426,22 @@ namespace Infrastructure.MySqlMigrations
                     b.HasKey("Id");
                     b.HasIndex("UserId");
                     b.ToTable("EmployeeProfile");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.Expense",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<decimal>("Amount").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<int>("Category").HasColumnType("int");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("datetime(6)");
+                    b.Property<DateTime>("ExpenseDate").HasColumnType("datetime(6)");
+                    b.Property<string>("Name").IsRequired().HasMaxLength(255).HasColumnType("varchar(255)");
+                    b.Property<string>("Note").HasColumnType("longtext");
+                    b.Property<DateTime?>("UpdatedAt").HasColumnType("datetime(6)");
+                    b.HasKey("Id");
+                    b.ToTable("Expenses");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.FinanceContract",
@@ -425,10 +502,12 @@ namespace Infrastructure.MySqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("BeginningQty").HasColumnType("int").HasColumnName("BeginningQty");
                     b.Property<long?>("CreatedAt").HasColumnType("bigint");
                     b.Property<long?>("DeletedAt").HasColumnType("bigint");
                     b.Property<int>("ExportedQty").HasColumnType("int").HasColumnName("ExportedQty");
                     b.Property<int>("ImportedQty").HasColumnType("int").HasColumnName("ImportedQty");
+                    b.Property<int>("Month").HasColumnType("int").HasColumnName("Month");
                     b.Property<int>("OrderedQty").HasColumnType("int").HasColumnName("OrderedQty");
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("int")
@@ -436,9 +515,10 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<int>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
                     b.Property<int>("StockQty").HasColumnType("int").HasColumnName("StockQty");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.Property<int>("Year").HasColumnType("int").HasColumnName("Year");
                     b.HasKey("Id");
                     b.HasIndex("ProductVariantColorId");
-                    b.HasIndex("ProductVariantId");
+                    b.HasIndex("ProductVariantId", "ProductVariantColorId", "Month", "Year").IsUnique();
                     b.ToTable("InventoryOnHand");
                 });
             modelBuilder.Entity(
@@ -474,6 +554,28 @@ namespace Infrastructure.MySqlMigrations
                     b.ToTable("InventoryReceipt");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.InventoryReceiptAuditLog",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Action").IsRequired().HasColumnType("longtext");
+                    b.Property<long>("ChangedAt").HasColumnType("bigint");
+                    b.Property<Guid?>("ChangedById").HasColumnType("char(36)");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<int>("InventoryReceiptId").HasColumnType("int");
+                    b.Property<string>("NewNotes").HasColumnType("longtext");
+                    b.Property<string>("NewStatusId").HasColumnType("longtext");
+                    b.Property<string>("OldNotes").HasColumnType("longtext");
+                    b.Property<string>("OldStatusId").HasColumnType("longtext");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.HasIndex("ChangedById");
+                    b.HasIndex("InventoryReceiptId");
+                    b.ToTable("InventoryReceiptAuditLog");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.InventoryReceiptInfo",
                 b =>
                 {
@@ -489,16 +591,30 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("int")
                         .HasColumnName("PurchaseRequestItemId");
                     b.Property<int?>("RemainingCount").HasColumnType("int").HasColumnName("RemainingCount");
-                    b.Property<int?>("SupplierId").HasColumnType("int").HasColumnName("SupplierId");
-                    b.Property<decimal?>("UnitPrice").HasColumnType("decimal(18, 2)").HasColumnName("UnitPrice");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
                     b.HasKey("Id");
                     b.HasIndex("InventoryReceiptId");
                     b.HasIndex("ParentOutputInfoId");
                     b.HasIndex("ProductVariantId");
                     b.HasIndex("PurchaseRequestItemId");
-                    b.HasIndex("SupplierId");
                     b.ToTable("InventoryReceiptInfo");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.InventoryReceiptInfoAuditLog",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Action").IsRequired().HasColumnType("longtext");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<int>("InventoryReceiptInfoId").HasColumnType("int");
+                    b.Property<int?>("NewQuantity").HasColumnType("int");
+                    b.Property<int?>("OldQuantity").HasColumnType("int");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.HasIndex("InventoryReceiptInfoId");
+                    b.ToTable("InventoryReceiptInfoAuditLog");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.InventoryReceiptStatus",
@@ -510,6 +626,33 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
                     b.HasKey("Key");
                     b.ToTable("InventoryReceiptStatus");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.InventoryTransaction",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("Note").HasColumnType("longtext").HasColumnName("Note");
+                    b.Property<long?>("PerformedAt").HasColumnType("bigint").HasColumnName("PerformedAt");
+                    b.Property<Guid?>("PerformedBy").HasColumnType("char(36)").HasColumnName("PerformedBy");
+                    b.Property<int>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
+                    b.Property<int>("Quantity").HasColumnType("int").HasColumnName("Quantity");
+                    b.Property<int?>("ReferenceId").HasColumnType("int").HasColumnName("ReferenceId");
+                    b.Property<string>("ReferenceType").HasColumnType("longtext").HasColumnName("ReferenceType");
+                    b.Property<int>("StockAfter").HasColumnType("int").HasColumnName("StockAfter");
+                    b.Property<int>("StockBefore").HasColumnType("int").HasColumnName("StockBefore");
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("TransactionType");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.HasIndex("PerformedBy");
+                    b.HasIndex("ProductVariantId", "PerformedAt");
+                    b.ToTable("InventoryTransaction");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.JobApplication",
@@ -585,11 +728,13 @@ namespace Infrastructure.MySqlMigrations
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("InterestedVehicle");
+                    b.Property<string>("Notes").IsRequired().HasColumnType("longtext").HasColumnName("Notes");
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
                     b.Property<int>("Points").HasColumnType("int").HasColumnName("Points");
+                    b.Property<string>("Priority").IsRequired().HasColumnType("longtext").HasColumnName("Priority");
                     b.Property<string>("Province").IsRequired().HasColumnType("longtext").HasColumnName("Province");
                     b.Property<int>("Score").HasColumnType("int").HasColumnName("Score");
                     b.Property<string>("Source").IsRequired().HasColumnType("longtext").HasColumnName("Source");
@@ -770,6 +915,36 @@ namespace Infrastructure.MySqlMigrations
                     b.ToTable("News");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.NewsArticle",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid?>("AuthorId").HasColumnType("char(36)").HasColumnName("AuthorId");
+                    b.Property<string>("Content").HasColumnType("longtext").HasColumnName("Content");
+                    b.Property<string>("CoverImageUrl").HasColumnType("longtext").HasColumnName("CoverImageUrl");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("Excerpt").HasColumnType("longtext").HasColumnName("Excerpt");
+                    b.Property<bool>("IsFeatured").HasColumnType("tinyint(1)").HasColumnName("IsFeatured");
+                    b.Property<long?>("PublishedAt").HasColumnType("bigint").HasColumnName("PublishedAt");
+                    b.Property<Guid?>("PublishedBy").HasColumnType("char(36)").HasColumnName("PublishedBy");
+                    b.Property<string>("SeoDescription").HasColumnType("longtext").HasColumnName("SeoDescription");
+                    b.Property<string>("SeoKeywords").HasColumnType("longtext").HasColumnName("SeoKeywords");
+                    b.Property<string>("SeoTitle").HasColumnType("longtext").HasColumnName("SeoTitle");
+                    b.Property<string>("Slug").IsRequired().HasColumnType("varchar(255)").HasColumnName("Slug");
+                    b.Property<string>("Status").IsRequired().HasColumnType("varchar(255)").HasColumnName("Status");
+                    b.Property<string>("Title").IsRequired().HasColumnType("longtext").HasColumnName("Title");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.Property<int>("ViewCount").HasColumnType("int").HasColumnName("ViewCount");
+                    b.HasKey("Id");
+                    b.HasIndex("AuthorId");
+                    b.HasIndex("PublishedBy");
+                    b.HasIndex("Slug").IsUnique();
+                    b.HasIndex("Status", "PublishedAt");
+                    b.ToTable("NewsArticle");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.NewsCategory",
                 b =>
                 {
@@ -858,6 +1033,48 @@ namespace Infrastructure.MySqlMigrations
                     b.HasKey("Id");
                     b.HasIndex("OptionId");
                     b.ToTable("OptionValue");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.OrderLogistics",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("BottleneckDescription").IsRequired().HasColumnType("longtext");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<double>("CurrentLat").HasColumnType("double");
+                    b.Property<double>("CurrentLng").HasColumnType("double");
+                    b.Property<int>("CurrentStage").HasColumnType("int");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("DriverName").IsRequired().HasColumnType("longtext");
+                    b.Property<string>("DriverPhone").IsRequired().HasColumnType("longtext");
+                    b.Property<DateTime?>("EstimatedArrivalTime").HasColumnType("datetime(6)");
+                    b.Property<bool>("IsBottleneck").HasColumnType("tinyint(1)");
+                    b.Property<DateTime>("LastUpdated").HasColumnType("datetime(6)");
+                    b.Property<int>("OrderId").HasColumnType("int");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.ToTable("OrderLogistics");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.OrderStatusHistory",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<long?>("ChangedAt").HasColumnType("bigint").HasColumnName("ChangedAt");
+                    b.Property<Guid?>("ChangedBy").HasColumnType("char(36)").HasColumnName("ChangedBy");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("FromStatus").HasColumnType("longtext").HasColumnName("FromStatus");
+                    b.Property<string>("Note").HasColumnType("longtext").HasColumnName("Note");
+                    b.Property<int>("OutputId").HasColumnType("int").HasColumnName("OutputId");
+                    b.Property<string>("ToStatus").IsRequired().HasColumnType("longtext").HasColumnName("ToStatus");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.HasIndex("ChangedBy");
+                    b.HasIndex("OutputId", "ChangedAt");
+                    b.ToTable("OrderStatusHistory");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Output",
@@ -1046,6 +1263,7 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<string>("LightingSystem").HasColumnType("longtext").HasColumnName("LightingSystem");
                     b.Property<string>("Material").HasColumnType("longtext").HasColumnName("Material");
                     b.Property<string>("MaxPower").HasColumnType("longtext").HasColumnName("MaxPower");
+                    b.Property<int?>("MaxPurchaseQuantity").HasColumnType("int");
                     b.Property<string>("MaxTorque").HasColumnType("longtext").HasColumnName("MaxTorque");
                     b.Property<string>("MetaDescription").HasColumnType("longtext").HasColumnName("MetaDescription");
                     b.Property<string>("MetaTitle").HasColumnType("longtext").HasColumnName("MetaTitle");
@@ -1204,6 +1422,7 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<decimal?>("GroundClearance")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("GroundClearance");
+                    b.Property<int?>("MaxPurchaseQuantity").HasColumnType("int");
                     b.Property<decimal?>("Price").HasColumnType("decimal(18, 2)").HasColumnName("Price");
                     b.Property<int>("ProductId").HasColumnType("int").HasColumnName("ProductId");
                     b.Property<string>("RearBrake").HasColumnType("longtext").HasColumnName("RearBrake");
@@ -1231,11 +1450,37 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<string>("CoverImageUrl").HasColumnType("longtext").HasColumnName("CoverImageUrl");
                     b.Property<long?>("CreatedAt").HasColumnType("bigint");
                     b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<int?>("MaxPurchaseQuantity").HasColumnType("int");
                     b.Property<int>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
                     b.HasKey("Id");
                     b.HasIndex("ProductVariantId");
                     b.ToTable("ProductVariantColor");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.PromotionBanner",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<Guid?>("CreatedBy").HasColumnType("char(36)").HasColumnName("CreatedBy");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("Description").HasColumnType("longtext").HasColumnName("Description");
+                    b.Property<long>("EndDate").HasColumnType("bigint").HasColumnName("EndDate");
+                    b.Property<string>("ImageUrl").HasColumnType("longtext").HasColumnName("ImageUrl");
+                    b.Property<bool>("IsEnabled").HasColumnType("tinyint(1)").HasColumnName("IsEnabled");
+                    b.Property<string>("LinkUrl").HasColumnType("longtext").HasColumnName("LinkUrl");
+                    b.Property<int>("SortOrder").HasColumnType("int").HasColumnName("SortOrder");
+                    b.Property<long>("StartDate").HasColumnType("bigint").HasColumnName("StartDate");
+                    b.Property<string>("Title").IsRequired().HasColumnType("longtext").HasColumnName("Title");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.Property<Guid?>("UpdatedBy").HasColumnType("char(36)").HasColumnName("UpdatedBy");
+                    b.HasKey("Id");
+                    b.HasIndex("CreatedBy");
+                    b.HasIndex("UpdatedBy");
+                    b.HasIndex("IsEnabled", "StartDate", "EndDate");
+                    b.ToTable("PromotionBanner");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.PurchaseRequest",
@@ -1260,6 +1505,28 @@ namespace Infrastructure.MySqlMigrations
                     b.ToTable("PurchaseRequest");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.PurchaseRequestAuditLog",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Action").IsRequired().HasColumnType("longtext");
+                    b.Property<long>("ChangedAt").HasColumnType("bigint");
+                    b.Property<Guid?>("ChangedById").HasColumnType("char(36)");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("NewNotes").HasColumnType("longtext");
+                    b.Property<string>("NewStatusId").HasColumnType("longtext");
+                    b.Property<string>("OldNotes").HasColumnType("longtext");
+                    b.Property<string>("OldStatusId").HasColumnType("longtext");
+                    b.Property<int>("PurchaseRequestId").HasColumnType("int");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.HasIndex("ChangedById");
+                    b.HasIndex("PurchaseRequestId");
+                    b.ToTable("PurchaseRequestAuditLog");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.PurchaseRequestItem",
                 b =>
                 {
@@ -1267,18 +1534,48 @@ namespace Infrastructure.MySqlMigrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
                     b.Property<long?>("CreatedAt").HasColumnType("bigint");
                     b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<int?>("ProductQuotationId").HasColumnType("int").HasColumnName("ProductQuotationId");
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
                     b.Property<int>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
                     b.Property<int>("PurchaseRequestId").HasColumnType("int").HasColumnName("PurchaseRequestId");
                     b.Property<int>("Quantity").HasColumnType("int").HasColumnName("Quantity");
+                    b.Property<int?>("SupplierId").HasColumnType("int").HasColumnName("SupplierId");
+                    b.Property<decimal?>("UnitPrice").HasColumnType("decimal(18, 2)").HasColumnName("UnitPrice");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
                     b.HasKey("Id");
+                    b.HasIndex("ProductQuotationId");
                     b.HasIndex("ProductVariantColorId");
                     b.HasIndex("ProductVariantId");
                     b.HasIndex("PurchaseRequestId");
+                    b.HasIndex("SupplierId");
                     b.ToTable("PurchaseRequestItem");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.PurchaseRequestItemAuditLog",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Action").IsRequired().HasColumnType("longtext");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<int?>("NewProductVariantColorId").HasColumnType("int");
+                    b.Property<int?>("NewProductVariantId").HasColumnType("int");
+                    b.Property<int?>("NewQuantity").HasColumnType("int");
+                    b.Property<string>("NewSupplierName").HasColumnType("longtext");
+                    b.Property<decimal?>("NewUnitPrice").HasColumnType("decimal(18, 2)");
+                    b.Property<int?>("OldProductVariantColorId").HasColumnType("int");
+                    b.Property<int?>("OldProductVariantId").HasColumnType("int");
+                    b.Property<int?>("OldQuantity").HasColumnType("int");
+                    b.Property<string>("OldSupplierName").HasColumnType("longtext");
+                    b.Property<decimal?>("OldUnitPrice").HasColumnType("decimal(18, 2)");
+                    b.Property<int>("PurchaseRequestItemId").HasColumnType("int");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.HasIndex("PurchaseRequestItemId");
+                    b.ToTable("PurchaseRequestItemAuditLog");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.RepairOrder",
@@ -1422,38 +1719,24 @@ namespace Infrastructure.MySqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-                    b.Property<long?>("CancelledDate").HasColumnType("bigint").HasColumnName("CancelledDate");
-                    b.Property<string>("CancelledReason").HasColumnType("longtext").HasColumnName("CancelledReason");
-                    b.Property<long?>("CompletedDate").HasColumnType("bigint").HasColumnName("CompletedDate");
+                    b.Property<string>("AdminNote").IsRequired().HasColumnType("longtext");
+                    b.Property<DateTime>("AppointmentDate").HasColumnType("datetime(6)");
+                    b.Property<TimeSpan>("AppointmentTime").HasColumnType("time(6)");
+                    b.Property<Guid?>("AssignedSaleId").HasColumnType("char(36)");
+                    b.Property<string>("CancellationReason").IsRequired().HasColumnType("longtext");
+                    b.Property<DateTime?>("CancelledAt").HasColumnType("datetime(6)");
                     b.Property<long?>("CreatedAt").HasColumnType("bigint");
-                    b.Property<Guid?>("CustomerId").HasColumnType("char(36)").HasColumnName("CustomerId");
-                    b.Property<string>("CustomerNotes").HasColumnType("longtext").HasColumnName("CustomerNotes");
+                    b.Property<string>("CustomerNote").IsRequired().HasColumnType("longtext");
                     b.Property<long?>("DeletedAt").HasColumnType("bigint");
-                    b.Property<decimal?>("DepositAmount").HasColumnType("decimal(18,2)").HasColumnName("DepositAmount");
-                    b.Property<int?>("EstimatedDurationMinutes")
-                        .HasColumnType("int")
-                        .HasColumnName("EstimatedDurationMinutes");
-                    b.Property<string>("Notes").HasColumnType("longtext").HasColumnName("Notes");
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("PaymentStatus");
-                    b.Property<int?>("Rating").HasColumnType("int").HasColumnName("Rating");
-                    b.Property<string>("Review").HasColumnType("longtext").HasColumnName("Review");
-                    b.Property<long>("ScheduledDate").HasColumnType("bigint").HasColumnName("ScheduledDate");
-                    b.Property<int>("ServiceId").HasColumnType("int").HasColumnName("ServiceId");
-                    b.Property<string>("Status").IsRequired().HasColumnType("longtext").HasColumnName("Status");
-                    b.Property<int?>("TechnicianId").HasColumnType("int").HasColumnName("TechnicianId");
-                    b.Property<string>("TechnicianNotes").HasColumnType("longtext").HasColumnName("TechnicianNotes");
-                    b.Property<decimal>("TotalAmount").HasColumnType("decimal(18,2)").HasColumnName("TotalAmount");
+                    b.Property<string>("Notes").IsRequired().HasColumnType("longtext");
+                    b.Property<string>("ServiceType").IsRequired().HasColumnType("longtext");
+                    b.Property<int>("Status").HasColumnType("int");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
-                    b.Property<int?>("VehicleId").HasColumnType("int").HasColumnName("VehicleId");
+                    b.Property<int>("VehicleId").HasColumnType("int");
                     b.HasKey("Id");
-                    b.HasIndex("CustomerId");
-                    b.HasIndex("ServiceId");
-                    b.HasIndex("TechnicianId");
+                    b.HasIndex("AssignedSaleId");
                     b.HasIndex("VehicleId");
-                    b.ToTable("ServiceBooking");
+                    b.ToTable("ServiceBookings");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ServiceCategory",
@@ -1633,21 +1916,23 @@ namespace Infrastructure.MySqlMigrations
                     b.ToTable("SupplierDebt");
                 });
             modelBuilder.Entity(
-                "Domain.Entities.SupplierDebtSettlement",
+                "Domain.Entities.SupplierDebtLog",
                 b =>
                 {
-                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("char(36)");
-                    b.Property<decimal>("Amount").HasColumnType("decimal(18,2)");
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<decimal>("AmountPaid").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
                     b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<Guid?>("CreatedById").HasColumnType("char(36)");
                     b.Property<long?>("DeletedAt").HasColumnType("bigint");
-                    b.Property<string>("EvidenceUrl").HasMaxLength(500).HasColumnType("varchar(500)");
-                    b.Property<string>("Notes").HasColumnType("longtext");
                     b.Property<long>("PaymentDate").HasColumnType("bigint");
+                    b.Property<decimal>("RemainingDebt").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
                     b.Property<int>("SupplierId").HasColumnType("int");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
                     b.HasKey("Id");
+                    b.HasIndex("CreatedById");
                     b.HasIndex("SupplierId");
-                    b.ToTable("SupplierDebtSettlements");
+                    b.ToTable("SupplierDebtLog");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.SupplierFinance",
@@ -1692,6 +1977,28 @@ namespace Infrastructure.MySqlMigrations
                     b.HasKey("Id");
                     b.HasIndex("ContactId");
                     b.ToTable("SupportRequest");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.SupportTicket",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid?>("AssignedAdminId").HasColumnType("char(36)");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<Guid?>("CustomerId").HasColumnType("char(36)");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("Description").IsRequired().HasColumnType("longtext");
+                    b.Property<int>("Priority").HasColumnType("int");
+                    b.Property<DateTime?>("ResolvedAt").HasColumnType("datetime(6)");
+                    b.Property<DateTime>("SLADeadline").HasColumnType("datetime(6)");
+                    b.Property<string>("Status").IsRequired().HasColumnType("longtext");
+                    b.Property<string>("Subject").IsRequired().HasColumnType("longtext");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.HasKey("Id");
+                    b.HasIndex("AssignedAdminId");
+                    b.HasIndex("CustomerId");
+                    b.ToTable("SupportTicket");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Technology",
@@ -1767,7 +2074,12 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
                     b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<double>("CurrentOdo").HasColumnType("double").HasColumnName("CurrentOdo");
                     b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("ElectronicWarrantyQrCode")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("ElectronicWarrantyQrCode");
                     b.Property<string>("EngineNumber")
                         .IsRequired()
                         .HasColumnType("longtext")
@@ -1777,13 +2089,22 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("int")
                         .HasColumnName("InventoryReceiptInfoId");
                     b.Property<bool>("IsActive").HasColumnType("tinyint(1)").HasColumnName("IsActive");
+                    b.Property<DateTime?>("LastMaintenanceDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("LastMaintenanceDate");
                     b.Property<int?>("LeadId").HasColumnType("int").HasColumnName("LeadId");
                     b.Property<string>("LicensePlate")
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("LicensePlate");
+                    b.Property<DateTime?>("NextMaintenanceDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("NextMaintenanceDate");
+                    b.Property<double?>("NextMaintenanceOdo")
+                        .HasColumnType("double")
+                        .HasColumnName("NextMaintenanceOdo");
                     b.Property<int?>("OutputInfoId").HasColumnType("int").HasColumnName("OutputInfoId");
-                    b.Property<int?>("ProductId").HasColumnType("int");
+                    b.Property<int?>("ProductId").HasColumnType("int").HasColumnName("ProductId");
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
@@ -1791,6 +2112,7 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<long>("PurchaseDate").HasColumnType("bigint").HasColumnName("PurchaseDate");
                     b.Property<string>("Status").IsRequired().HasColumnType("longtext").HasColumnName("Status");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.Property<Guid?>("UserId").HasColumnType("char(36)").HasColumnName("UserId");
                     b.Property<string>("VinNumber").IsRequired().HasColumnType("longtext").HasColumnName("VinNumber");
                     b.HasKey("Id");
                     b.HasIndex("InventoryReceiptInfoId");
@@ -1799,7 +2121,30 @@ namespace Infrastructure.MySqlMigrations
                     b.HasIndex("ProductId");
                     b.HasIndex("ProductVariantColorId");
                     b.HasIndex("ProductVariantId");
+                    b.HasIndex("UserId");
                     b.ToTable("Vehicle");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.VehicleAuditLog",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Action").IsRequired().HasColumnType("longtext");
+                    b.Property<long>("ChangedAt").HasColumnType("bigint");
+                    b.Property<Guid?>("ChangedById").HasColumnType("char(36)");
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+                    b.Property<string>("NewEngineNumber").HasColumnType("longtext");
+                    b.Property<string>("NewVinNumber").HasColumnType("longtext");
+                    b.Property<string>("OldEngineNumber").HasColumnType("longtext");
+                    b.Property<string>("OldVinNumber").HasColumnType("longtext");
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+                    b.Property<int>("VehicleId").HasColumnType("int");
+                    b.HasKey("Id");
+                    b.HasIndex("ChangedById");
+                    b.HasIndex("VehicleId");
+                    b.ToTable("VehicleAuditLog");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.VehicleDocument",
@@ -1906,6 +2251,21 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("ProductVariant");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.BookingAppointment",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "ConfirmedByUser")
+                        .WithMany("ConfirmedBookings")
+                        .HasForeignKey("ConfirmedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("BookingAppointments")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.Navigation("ConfirmedByUser");
+                    b.Navigation("ProductVariant");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.CommissionPolicy",
                 b =>
                 {
@@ -1965,6 +2325,33 @@ namespace Infrastructure.MySqlMigrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                     b.Navigation("ContractTemplate");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.CustomerContact",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "ProcessedByUser")
+                        .WithMany("ProcessedContacts")
+                        .HasForeignKey("ProcessedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.Navigation("ProcessedByUser");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.CustomerContactReply",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.CustomerContact", "CustomerContact")
+                        .WithMany("Replies")
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.HasOne("Domain.Entities.ApplicationUser", "RepliedByUser")
+                        .WithMany("ContactReplies")
+                        .HasForeignKey("RepliedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Domain.Entities.SupportTicket", null).WithMany("Replies").HasForeignKey("SupportTicketId");
+                    b.Navigation("CustomerContact");
+                    b.Navigation("RepliedByUser");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.CustomerFeedback",
@@ -2049,6 +2436,19 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("SentByUser");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.InventoryReceiptAuditLog",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "ChangedBy").WithMany().HasForeignKey("ChangedById");
+                    b.HasOne("Domain.Entities.InventoryReceipt", "InventoryReceipt")
+                        .WithMany()
+                        .HasForeignKey("InventoryReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("ChangedBy");
+                    b.Navigation("InventoryReceipt");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.InventoryReceiptInfo",
                 b =>
                 {
@@ -2067,14 +2467,36 @@ namespace Infrastructure.MySqlMigrations
                         .WithMany("InventoryReceiptInfos")
                         .HasForeignKey("PurchaseRequestItemId")
                         .OnDelete(DeleteBehavior.Restrict);
-                    b.HasOne("Domain.Entities.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict);
                     b.Navigation("InventoryReceipt");
                     b.Navigation("ParentOutputInfo");
                     b.Navigation("PurchaseRequestItem");
-                    b.Navigation("Supplier");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.InventoryReceiptInfoAuditLog",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.InventoryReceiptInfo", "InventoryReceiptInfo")
+                        .WithMany()
+                        .HasForeignKey("InventoryReceiptInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("InventoryReceiptInfo");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.InventoryTransaction",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "PerformedByUser")
+                        .WithMany("InventoryTransactions")
+                        .HasForeignKey("PerformedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("InventoryTransactions")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                    b.Navigation("PerformedByUser");
+                    b.Navigation("ProductVariant");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.JobApplication",
@@ -2154,6 +2576,21 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("Category");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.NewsArticle",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "Author")
+                        .WithMany("AuthoredNewsArticles")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Domain.Entities.ApplicationUser", "PublishedByUser")
+                        .WithMany("PublishedNewsArticles")
+                        .HasForeignKey("PublishedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+                    b.Navigation("Author");
+                    b.Navigation("PublishedByUser");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.NewsComment",
                 b =>
                 {
@@ -2206,6 +2643,22 @@ namespace Infrastructure.MySqlMigrations
                 {
                     b.HasOne("Domain.Entities.Option", "Option").WithMany("OptionValues").HasForeignKey("OptionId");
                     b.Navigation("Option");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.OrderStatusHistory",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "ChangedByUser")
+                        .WithMany("OrderStatusHistories")
+                        .HasForeignKey("ChangedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Domain.Entities.Output", "Output")
+                        .WithMany("StatusHistories")
+                        .HasForeignKey("OutputId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("ChangedByUser");
+                    b.Navigation("Output");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Output",
@@ -2373,6 +2826,21 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("ProductVariant");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.PromotionBanner",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "CreatedByUser")
+                        .WithMany("CreatedBanners")
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Domain.Entities.ApplicationUser", "UpdatedByUser")
+                        .WithMany("UpdatedBanners")
+                        .HasForeignKey("UpdatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+                    b.Navigation("CreatedByUser");
+                    b.Navigation("UpdatedByUser");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.PurchaseRequest",
                 b =>
                 {
@@ -2386,9 +2854,25 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("SentByUser");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.PurchaseRequestAuditLog",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "ChangedBy").WithMany().HasForeignKey("ChangedById");
+                    b.HasOne("Domain.Entities.PurchaseRequest", "PurchaseRequest")
+                        .WithMany()
+                        .HasForeignKey("PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("ChangedBy");
+                    b.Navigation("PurchaseRequest");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.PurchaseRequestItem",
                 b =>
                 {
+                    b.HasOne("Domain.Entities.ProductQuotation", "ProductQuotation")
+                        .WithMany()
+                        .HasForeignKey("ProductQuotationId");
                     b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
                         .WithMany()
                         .HasForeignKey("ProductVariantColorId")
@@ -2401,9 +2885,23 @@ namespace Infrastructure.MySqlMigrations
                         .WithMany("PurchaseRequestItems")
                         .HasForeignKey("PurchaseRequestId")
                         .OnDelete(DeleteBehavior.Cascade);
+                    b.HasOne("Domain.Entities.Supplier", "Supplier").WithMany().HasForeignKey("SupplierId");
+                    b.Navigation("ProductQuotation");
                     b.Navigation("ProductVariant");
                     b.Navigation("ProductVariantColor");
                     b.Navigation("PurchaseRequest");
+                    b.Navigation("Supplier");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.PurchaseRequestItemAuditLog",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.PurchaseRequestItem", "PurchaseRequestItem")
+                        .WithMany()
+                        .HasForeignKey("PurchaseRequestItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("PurchaseRequestItem");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.RepairOrder",
@@ -2472,17 +2970,16 @@ namespace Infrastructure.MySqlMigrations
                 "Domain.Entities.ServiceBooking",
                 b =>
                 {
-                    b.HasOne("Domain.Entities.ApplicationUser", "Customer").WithMany().HasForeignKey("CustomerId");
-                    b.HasOne("Domain.Entities.Service", "Service")
+                    b.HasOne("Domain.Entities.ApplicationUser", "AssignedSale")
                         .WithMany()
-                        .HasForeignKey("ServiceId")
+                        .HasForeignKey("AssignedSaleId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                    b.HasOne("Domain.Entities.EmployeeProfile", "Technician").WithMany().HasForeignKey("TechnicianId");
-                    b.HasOne("Domain.Entities.Vehicle", "Vehicle").WithMany().HasForeignKey("VehicleId");
-                    b.Navigation("Customer");
-                    b.Navigation("Service");
-                    b.Navigation("Technician");
+                    b.Navigation("AssignedSale");
                     b.Navigation("Vehicle");
                 });
             modelBuilder.Entity(
@@ -2581,14 +3078,16 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("Supplier");
                 });
             modelBuilder.Entity(
-                "Domain.Entities.SupplierDebtSettlement",
+                "Domain.Entities.SupplierDebtLog",
                 b =>
                 {
+                    b.HasOne("Domain.Entities.ApplicationUser", "CreatedBy").WithMany().HasForeignKey("CreatedById");
                     b.HasOne("Domain.Entities.Supplier", "Supplier")
                         .WithMany()
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                    b.Navigation("CreatedBy");
                     b.Navigation("Supplier");
                 });
             modelBuilder.Entity(
@@ -2612,6 +3111,21 @@ namespace Infrastructure.MySqlMigrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                     b.Navigation("Contact");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.SupportTicket",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "AssignedAdmin")
+                        .WithMany()
+                        .HasForeignKey("AssignedAdminId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Domain.Entities.ApplicationUser", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                    b.Navigation("AssignedAdmin");
+                    b.Navigation("Customer");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Technology",
@@ -2663,7 +3177,10 @@ namespace Infrastructure.MySqlMigrations
                         .WithMany("Vehicles")
                         .HasForeignKey("OutputInfoId")
                         .OnDelete(DeleteBehavior.Restrict);
-                    b.HasOne("Domain.Entities.Product", "Product").WithMany().HasForeignKey("ProductId");
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict);
                     b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
                         .WithMany()
                         .HasForeignKey("ProductVariantColorId")
@@ -2672,12 +3189,30 @@ namespace Infrastructure.MySqlMigrations
                         .WithMany()
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("Domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
                     b.Navigation("InventoryReceiptInfo");
                     b.Navigation("Lead");
                     b.Navigation("OutputInfo");
                     b.Navigation("Product");
                     b.Navigation("ProductVariant");
                     b.Navigation("ProductVariantColor");
+                    b.Navigation("User");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.VehicleAuditLog",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "ChangedBy").WithMany().HasForeignKey("ChangedById");
+                    b.HasOne("Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("ChangedBy");
+                    b.Navigation("Vehicle");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.VehicleDocument",
@@ -2758,6 +3293,15 @@ namespace Infrastructure.MySqlMigrations
                 "Domain.Entities.ApplicationUser",
                 b =>
                 {
+                    b.Navigation("AuthoredNewsArticles");
+                    b.Navigation("ConfirmedBookings");
+                    b.Navigation("ContactReplies");
+                    b.Navigation("CreatedBanners");
+                    b.Navigation("InventoryTransactions");
+                    b.Navigation("OrderStatusHistories");
+                    b.Navigation("ProcessedContacts");
+                    b.Navigation("PublishedNewsArticles");
+                    b.Navigation("UpdatedBanners");
                     b.Navigation("UserRoles");
                 });
             modelBuilder.Entity(
@@ -2768,6 +3312,12 @@ namespace Infrastructure.MySqlMigrations
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Contact",
+                b =>
+                {
+                    b.Navigation("Replies");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.CustomerContact",
                 b =>
                 {
                     b.Navigation("Replies");
@@ -2841,6 +3391,7 @@ namespace Infrastructure.MySqlMigrations
                 {
                     b.Navigation("OutputInfos");
                     b.Navigation("Returns");
+                    b.Navigation("StatusHistories");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.OutputInfo",
@@ -2893,7 +3444,9 @@ namespace Infrastructure.MySqlMigrations
                 "Domain.Entities.ProductVariant",
                 b =>
                 {
+                    b.Navigation("BookingAppointments");
                     b.Navigation("InventoryReceiptInfos");
+                    b.Navigation("InventoryTransactions");
                     b.Navigation("OutputInfos");
                     b.Navigation("ProductCollectionPhotos");
                     b.Navigation("ProductVariantColors");
@@ -2943,6 +3496,12 @@ namespace Infrastructure.MySqlMigrations
                 b =>
                 {
                     b.Navigation("Suppliers");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.SupportTicket",
+                b =>
+                {
+                    b.Navigation("Replies");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Technology",

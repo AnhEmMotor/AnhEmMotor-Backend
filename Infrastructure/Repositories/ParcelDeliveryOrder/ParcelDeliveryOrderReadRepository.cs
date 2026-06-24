@@ -37,4 +37,10 @@ public class ParcelDeliveryOrderReadRepository(ApplicationDBContext context) : I
                     string.Compare(x.OriginalOrderCode, normalized) == 0,
                 cancellationToken);
     }
+
+    public Task<List<ParcelDeliveryOrderEntity>> GetActiveShipmentsAsync(CancellationToken cancellationToken = default) => context.Set<ParcelDeliveryOrderEntity>(
+        )
+        .Where(x => x.Status == ParcelDeliveryStatus.Shipping)
+        .OrderByDescending(x => x.CreatedAt)
+        .ToListAsync(cancellationToken);
 }

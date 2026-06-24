@@ -3,7 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductQuotations;
-using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.SupplierDebt;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
@@ -22,7 +22,7 @@ namespace UnitTests
         private readonly Mock<IInventoryReceiptUpdateRepository> _updateRepoMock;
         private readonly Mock<ICurrentUserContext> _currentUserContextMock;
         private readonly Mock<IInventoryLedgerRepository> _ledgerRepoMock;
-        private readonly Mock<ISupplierDebtRepository> _supplierDebtRepoMock;
+        private readonly Mock<ISupplierDebtInsertRepository> _supplierDebtRepoMock;
         private readonly Mock<IProductQuotationReadRepository> _ProductQuotationRepoMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
@@ -32,7 +32,7 @@ namespace UnitTests
             _updateRepoMock = new Mock<IInventoryReceiptUpdateRepository>();
             _currentUserContextMock = new Mock<ICurrentUserContext>();
             _ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
-            _supplierDebtRepoMock = new Mock<ISupplierDebtRepository>();
+            _supplierDebtRepoMock = new Mock<ISupplierDebtInsertRepository>();
             _ProductQuotationRepoMock = new Mock<IProductQuotationReadRepository>();
             _unitOfWorkMock = new Mock<IUnitOfWork>();
         }
@@ -43,11 +43,9 @@ namespace UnitTests
             var handler = new UpdateInventoryReceiptStatusCommandHandler(
                 _readRepoMock.Object,
                 _updateRepoMock.Object,
+                new Mock<IInventoryReceiptInsertRepository>().Object,
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
-                _ProductQuotationRepoMock.Object,
-                null!,
-                null!,
                 _supplierDebtRepoMock.Object,
                 _unitOfWorkMock.Object,
                 new Mock<IPublisher>().Object);
@@ -62,8 +60,7 @@ namespace UnitTests
                         new()
                         {
                             Count = 5,
-                            UnitPrice = 100000,
-                            PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100 }
+                            PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100, UnitPrice = 100000 }
                         }
                     }
             };
@@ -90,11 +87,9 @@ namespace UnitTests
             var handler = new UpdateInventoryReceiptStatusCommandHandler(
                 _readRepoMock.Object,
                 _updateRepoMock.Object,
+                new Mock<IInventoryReceiptInsertRepository>().Object,
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
-                _ProductQuotationRepoMock.Object,
-                null!,
-                null!,
                 _supplierDebtRepoMock.Object,
                 _unitOfWorkMock.Object,
                 new Mock<IPublisher>().Object);
@@ -109,8 +104,7 @@ namespace UnitTests
                         new()
                         {
                             Count = 5,
-                            UnitPrice = 100000,
-                            PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100 }
+                            PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100, UnitPrice = 100000 }
                         }
                     }
             };
@@ -138,11 +132,9 @@ namespace UnitTests
             var handler = new UpdateInventoryReceiptStatusCommandHandler(
                 _readRepoMock.Object,
                 _updateRepoMock.Object,
+                new Mock<IInventoryReceiptInsertRepository>().Object,
                 _currentUserContextMock.Object,
                 _ledgerRepoMock.Object,
-                _ProductQuotationRepoMock.Object,
-                null!,
-                null!,
                 _supplierDebtRepoMock.Object,
                 _unitOfWorkMock.Object,
                 new Mock<IPublisher>().Object);
@@ -157,9 +149,7 @@ namespace UnitTests
                         new()
                         {
                             Count = 3,
-                            UnitPrice = 150000,
-                            PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100 },
-                            Supplier = new Domain.Entities.Supplier { Name = "Supplier Auto" }
+                            PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100, UnitPrice = 150000, Supplier = new Domain.Entities.Supplier { Name = "Supplier Auto" } }
                         }
                     }
             };

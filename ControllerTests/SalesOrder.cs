@@ -1,3 +1,5 @@
+using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
+using Application.Features.Outputs.Queries.GetOutputsByUserIdForManager;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Features.Outputs.Commands.CreateOutput;
@@ -35,12 +37,14 @@ namespace ControllerTests;
 public class SalesOrder
 {
     private readonly Mock<IMediator> _mediatorMock;
+    private readonly Mock<Application.Interfaces.Services.ICurrentUserContext> _currentUserContextMock;
     private readonly SalesOrdersController _controller;
 
     public SalesOrder()
     {
         _mediatorMock = new Mock<IMediator>();
-        _controller = new SalesOrdersController(_mediatorMock.Object);
+        _currentUserContextMock = new Mock<Application.Interfaces.Services.ICurrentUserContext>();
+        _controller = new SalesOrdersController(_mediatorMock.Object, _currentUserContextMock.Object);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
@@ -51,6 +55,7 @@ public class SalesOrder
     public async Task GetMyPurchases_UserAuthenticated_ReturnsOrders()
     {
         var buyerId = Guid.NewGuid();
+        _currentUserContextMock.Setup(c => c.GetUserId()).Returns(buyerId);
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, buyerId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
@@ -60,30 +65,27 @@ public class SalesOrder
         };
         var sieveModel = new SieveModel();
         var expectedOrder = new MyOrderResponse { Id = 1 };
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                Result<PagedResult<MyOrderResponse>>.Success(
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsForCurrentUserQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync(Result<PagedResult<MyOrderResponse>>.Success(
                     new PagedResult<MyOrderResponse>([expectedOrder], 1, 1, 10)));
         var result = await _controller.GetMyPurchasesAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         _mediatorMock.Verify(
-            m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()),
-            Times.Once);
+            m => m.Send(It.IsAny<GetOutputsForCurrentUserQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "SO_082 - GetPurchasesByID - L?y don h?ng theo BuyerId (c? quy?n)")]
     public async Task GetPurchasesByID_WithPermission_ReturnsOrders()
     {
         var buyerId = Guid.NewGuid();
+        _currentUserContextMock.Setup(c => c.GetUserId()).Returns(buyerId);
         var sieveModel = new SieveModel();
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PagedResult<MyOrderResponse>>.Success(new PagedResult<MyOrderResponse>([], 0, 1, 10)));
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdForManagerQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
         var result = await _controller.GetPurchasesByIDAsync(sieveModel, buyerId, CancellationToken.None)
             .ConfigureAwait(true);
         result.Should().NotBeNull();
         _mediatorMock.Verify(
-            m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()),
-            Times.Once);
+            m => m.Send(It.IsAny<GetOutputsByUserIdForManagerQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "SO_084 - GetDeletedOutputs - L?y danh s?ch don h?ng d? x?a")]
@@ -128,6 +130,7 @@ public class SalesOrder
     public async Task CreateOutputForAdmin_WithManagerPermission_CreatesOrder()
     {
         var managerId = Guid.NewGuid();
+        _currentUserContextMock.Setup(c => c.GetUserId()).Returns(managerId);
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, managerId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
@@ -161,6 +164,7 @@ public class SalesOrder
     public async Task UpdateOutput_WithManagerPermission_UpdatesOrder()
     {
         var managerId = Guid.NewGuid();
+        _currentUserContextMock.Setup(c => c.GetUserId()).Returns(managerId);
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, managerId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
@@ -467,4 +471,13 @@ public class SalesOrder
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
+
+
+
+
+
+
+
+
+
 

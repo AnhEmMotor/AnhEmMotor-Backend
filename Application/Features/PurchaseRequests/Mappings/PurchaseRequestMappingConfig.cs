@@ -1,6 +1,6 @@
 using Application.ApiContracts.PurchaseRequest.Responses;
-using Domain.Constants;
 using Domain.Constants.Product;
+using Domain.Constants.PurchaseRequest;
 using Domain.Entities;
 using Mapster;
 using System.Linq;
@@ -72,7 +72,18 @@ namespace Application.Features.PurchaseRequests.Mappings
                         : null)
                 .Map(
                     dest => dest.TotalItems,
-                    src => src.PurchaseRequestItems != null ? src.PurchaseRequestItems.Count : 0);
+                    src => src.PurchaseRequestItems != null ? src.PurchaseRequestItems.Count : 0)
+                .Map(
+                    dest => dest.IsFullyImported,
+                    src => src.Status == PurchaseRequestStatus.Approve &&
+                           src.PurchaseRequestItems.Any() &&
+                           !src.PurchaseRequestItems.Any(i =>
+                               i.Quantity > (i.InventoryReceiptInfos
+                                   .Where(ii => ii.DeletedAt == null &&
+                                                ii.InventoryReceipt != null &&
+                                                ii.InventoryReceipt.DeletedAt == null &&
+                                                ii.InventoryReceipt.StatusId == Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve)
+                                   .Sum(ii => ii.Count) ?? 0)));
             config.NewConfig<PurchaseRequestItem, PurchaseRequestItemResponse>()
                 .Map(
                     dest => dest.ProductName,
@@ -101,7 +112,7 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                     ii.InventoryReceipt.DeletedAt == null &&
                                                     string.Compare(
                                                         ii.InventoryReceipt.StatusId,
-                                                        Domain.Constants.InventoryReceiptStatus.Approve,
+                                                        Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                                         StringComparison.OrdinalIgnoreCase) ==
                                                     0)
                                 .Sum(ii => ii.Count ?? 0)
@@ -123,12 +134,12 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                     ii.InventoryReceipt.DeletedAt == null &&
                                                     (string.Compare(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Draft,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                                             StringComparison.OrdinalIgnoreCase) ==
                                                         0 ||
                                                         string.Compare(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Sent,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                                             StringComparison.OrdinalIgnoreCase) ==
                                                         0))
                                 .Sum(ii => ii.Count ?? 0)
@@ -151,24 +162,23 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                             ii.InventoryReceipt.DeletedAt == null &&
                                                             (string.Compare(
                                                                     ii.InventoryReceipt.StatusId,
-                                                                    Domain.Constants.InventoryReceiptStatus.Approve,
+                                                                    Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                                                     StringComparison.OrdinalIgnoreCase) ==
                                                                 0 ||
                                                                 string.Compare(
                                                                     ii.InventoryReceipt.StatusId,
-                                                                    Domain.Constants.InventoryReceiptStatus.Sent,
+                                                                    Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                                                     StringComparison.OrdinalIgnoreCase) ==
                                                                 0 ||
                                                                 string.Compare(
                                                                     ii.InventoryReceipt.StatusId,
-                                                                    Domain.Constants.InventoryReceiptStatus.Draft,
+                                                                    Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                                                     StringComparison.OrdinalIgnoreCase) ==
                                                                 0))
                                     .Sum(ii => ii.Count ?? 0)
                                 : 0)))
-                .Map(dest => dest.InvoicedQuantity, src => 0)
-                .Map(dest => dest.InvoicingQuantity, src => 0)
-                .Map(dest => dest.UninvoicedQuantity, src => src.Quantity);
+                .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
+                .Map(dest => dest.ProductQuotationId, src => src.ProductQuotationId);
             config.NewConfig<PurchaseRequest, ApprovedPurchaseRequestDetailResponse>()
                 .Map(dest => dest.Items, src => src.PurchaseRequestItems);
             config.NewConfig<PurchaseRequestItem, ApprovedPurchaseRequestItemResponse>()
@@ -193,24 +203,22 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                     ii.InventoryReceipt.DeletedAt == null &&
                                                     (string.Compare(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Approve,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                                             StringComparison.OrdinalIgnoreCase) ==
                                                         0 ||
                                                         string.Compare(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Sent,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                                             StringComparison.OrdinalIgnoreCase) ==
                                                         0 ||
                                                         string.Compare(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Draft,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                                             StringComparison.OrdinalIgnoreCase) ==
                                                         0))
                                 .Sum(ii => ii.Count ?? 0)
                             : 0))
-                .Map(dest => dest.InvoicedQuantity, src => 0)
-                .Map(dest => dest.InvoicingQuantity, src => 0)
-                .Map(dest => dest.UninvoicedQuantity, src => src.Quantity)
+
                 .Map(
                     dest => dest.NeedVin,
                     src => src.ProductVariant != null &&
@@ -220,7 +228,9 @@ namespace Application.Features.PurchaseRequests.Mappings
                             src.ProductVariant.Product.ProductCategory.ManagementType,
                             ProductManagementType.VinNumber,
                             StringComparison.OrdinalIgnoreCase) ==
-                        0);
+                        0)
+                .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
+                .Map(dest => dest.ProductQuotationId, src => src.ProductQuotationId);
         }
     }
 }

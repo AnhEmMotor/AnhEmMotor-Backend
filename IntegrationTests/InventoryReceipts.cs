@@ -10,7 +10,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using InventoryReceiptEntities = Domain.Entities.InventoryReceipt;
-using InventoryReceiptStatusConstants = Domain.Constants.InventoryReceiptStatus;
+using InventoryReceiptStatusConstants = Domain.Constants.InventoryReceipt.InventoryReceiptStatus;
 using InventoryReceiptStatusEntity = Domain.Entities.InventoryReceiptStatus;
 
 namespace IntegrationTests;

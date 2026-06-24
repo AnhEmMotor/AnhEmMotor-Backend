@@ -5,7 +5,9 @@ using Application.Features.Suppliers.Commands.RestoreSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.SupplierDebt;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
@@ -22,7 +24,7 @@ public class Supplier
     private readonly Mock<ISupplierUpdateRepository> _updateRepoMock;
     private readonly Mock<ISupplierDeleteRepository> _deleteRepoMock;
     private readonly Mock<ISupplierReadRepository> _readRepoMock;
-    private readonly Mock<ISupplierDebtRepository> _supplierDebtRepoMock;
+    private readonly Mock<ISupplierDebtReadRepository> _supplierDebtRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
     public Supplier()
@@ -31,7 +33,7 @@ public class Supplier
         _updateRepoMock = new Mock<ISupplierUpdateRepository>();
         _deleteRepoMock = new Mock<ISupplierDeleteRepository>();
         _readRepoMock = new Mock<ISupplierReadRepository>();
-        _supplierDebtRepoMock = new Mock<ISupplierDebtRepository>();
+        _supplierDebtRepoMock = new Mock<ISupplierDebtReadRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 

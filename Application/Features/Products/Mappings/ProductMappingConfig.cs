@@ -1,6 +1,7 @@
 using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Responses;
 using Domain.Constants;
+using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
 using Mapster;
@@ -80,7 +81,8 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.Category, src => src.ProductCategory != null ? src.ProductCategory.Name : null)
             .Map(
                 dest => dest.ProductLimit,
-                src => src.ProductCategory != null ? src.ProductCategory.MaxPurchaseQuantity : null)
+                src => GetEffectiveMaxPurchaseQuantity(src))
+            .Map(dest => dest.EffectiveMax, src => GetEffectiveMaxPurchaseQuantity(src))
             .Map(dest => dest.ProductTechnologies, src => MapProductTechnologiesList(src))
             .AfterMapping(
                 (src, dest) =>
@@ -102,6 +104,8 @@ public class ProductMappingConfig : IRegister
         config.NewConfig<ProductVariantEntity, CurrentVariantStoreResponse>()
             .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src))
             .Map(dest => dest.Colors, src => MapVariantColors(src))
+            .Map(dest => dest.ProductLimit, src => GetEffectiveMaxPurchaseQuantity(src, null))
+            .Map(dest => dest.EffectiveMax, src => GetEffectiveMaxPurchaseQuantity(src, null))
             .Map(
                 dest => dest.CoverImageUrl,
                 src => src.ProductVariantColors != null &&
@@ -432,7 +436,7 @@ public class ProductMappingConfig : IRegister
         };
     }
 
-    private static List<ProductVariantColorLiteResponse> MapVariantColors(ProductVariantEntity variant)
+    public static List<ProductVariantColorLiteResponse> MapVariantColors(ProductVariantEntity variant)
     {
         return[.. variant.ProductVariantColors
             .Select(
@@ -441,7 +445,8 @@ public class ProductMappingConfig : IRegister
                     Id = c.Id,
                     ColorName = c.ColorName,
                     ColorCode = c.ColorCode,
-                    CoverImageUrl = c.CoverImageUrl
+                    CoverImageUrl = c.CoverImageUrl,
+                    MaxPurchaseQuantity = c.MaxPurchaseQuantity
                 })];
     }
 
@@ -496,14 +501,51 @@ public class ProductMappingConfig : IRegister
             : (!string.IsNullOrWhiteSpace(variant.CoverImageUrl)
                 ? variant.CoverImageUrl
                 : variant.ProductCollectionPhotos.FirstOrDefault()?.ImageUrl);
+        var effectiveMax = GetEffectiveMaxPurchaseQuantity(variant, null);
         return new VariantCartDetailResponse
         {
             Id = variant.Id,
             DisplayName = displayName,
             Price = variant.Price ?? 0,
             CoverImageUrl = coverImage,
-            ProductLimit = variant.Product?.ProductCategory?.MaxPurchaseQuantity
+            ProductLimit = effectiveMax,
+            EffectiveMax = effectiveMax,
+            Colors = MapVariantColors(variant)
         };
+    }
+
+    public static int? GetEffectiveMaxPurchaseQuantity(
+        ProductVariantEntity variant,
+        Domain.Entities.ProductVariantColor? color)
+    {
+        if (color?.MaxPurchaseQuantity.HasValue == true)
+        {
+            return color.MaxPurchaseQuantity.Value;
+        }
+        if (variant.MaxPurchaseQuantity.HasValue)
+        {
+            return variant.MaxPurchaseQuantity.Value;
+        }
+        return GetEffectiveMaxPurchaseQuantity(variant.Product?.ProductCategory);
+    }
+
+    private static int? GetEffectiveMaxPurchaseQuantity(ProductEntity product)
+    {
+        return GetEffectiveMaxPurchaseQuantity(product.ProductCategory);
+    }
+
+    private static int? GetEffectiveMaxPurchaseQuantity(Domain.Entities.ProductCategory? category)
+    {
+        var current = category;
+        while (current != null)
+        {
+            if (current.MaxPurchaseQuantity.HasValue)
+            {
+                return current.MaxPurchaseQuantity.Value;
+            }
+            current = current.Parent;
+        }
+        return null;
     }
 
     public static string CalculateProductInventoryStatus(ProductEntity product, long alertLevel)

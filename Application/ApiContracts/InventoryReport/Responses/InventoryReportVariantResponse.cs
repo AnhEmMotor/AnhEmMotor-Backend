@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Application.ApiContracts.InventoryReport.Responses
 {
@@ -7,6 +7,8 @@ namespace Application.ApiContracts.InventoryReport.Responses
         public int VariantId { get; set; }
 
         public string? VariantName { get; set; }
+
+        public int BeginningQty { get; set; }
 
         public int ImportedQty { get; set; }
 

@@ -1,9 +1,11 @@
 using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId;
+using Application.Features.Suppliers.Commands.CloneManySuppliers;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
+using Application.Features.Suppliers.Commands.ImportSuppliers;
 using Application.Features.Suppliers.Commands.RestoreManySuppliers;
 using Application.Features.Suppliers.Commands.RestoreSupplier;
 using Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
@@ -11,6 +13,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Features.Suppliers.Queries.ExportSuppliers;
 using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
+using Application.Features.Suppliers.Queries.GetImportSupplierTemplate;
 using Application.Features.Suppliers.Queries.GetPartnerTypesList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
@@ -50,7 +53,7 @@ public class SupplierController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetPartnerTypesAsync(CancellationToken cancellationToken)
     {
         var query = new GetPartnerTypesListQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -61,17 +64,14 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp.</returns>
     [HttpGet]
-    [RequiresAnyPermissions(
-        Suppliers.View,
-        Domain.Constants.Permission.Permissions.Quotations.Edit,
-        Domain.Constants.Permission.Permissions.Quotations.Create)]
+    [RequiresAnyPermissions(Suppliers.View)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
         var query = new GetSuppliersListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -89,7 +89,7 @@ public class SupplierController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetDeletedSuppliersListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -106,7 +106,7 @@ public class SupplierController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetSupplierByIdAsync(int id, CancellationToken cancellationToken)
     {
         var query = new GetSupplierByIdQuery() { Id = id };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -126,7 +126,7 @@ public class SupplierController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetSupplierPurchaseHistoryQuery() { SupplierId = id, SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -144,7 +144,7 @@ public class SupplierController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateSupplierCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleCreated(result, Supplier.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
@@ -164,7 +164,7 @@ public class SupplierController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetSuppliersListForInventoryReceiptManagerQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -185,7 +185,7 @@ public class SupplierController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateSupplierCommand>() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -223,7 +223,7 @@ public class SupplierController(IMediator mediator) : ApiController
     public async Task<IActionResult> DeleteSupplierAsync(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteSupplierCommand() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -240,7 +240,7 @@ public class SupplierController(IMediator mediator) : ApiController
     public async Task<IActionResult> RestoreSupplierAsync(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreSupplierCommand() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -315,7 +315,7 @@ public class SupplierController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetSupplierStatisticsAsync(CancellationToken cancellationToken)
     {
         var query = new GetSupplierStatisticsQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -333,7 +333,59 @@ public class SupplierController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new ExportSuppliersQuery { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Nhân bản nhiều nhà cung cấp.
+    /// </summary>
+    /// <param name="request">Danh sách ID cần nhân bản.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả nhân bản.</returns>
+    [HttpPost("clone-many")]
+    [HasPermission(Suppliers.Create)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CloneManySuppliersAsync(
+        [FromBody] CloneManySuppliersCommand request,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Nhập danh sách nhà cung cấp từ file Excel.
+    /// </summary>
+    /// <param name="request">Command chứa file Excel.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả nhập dữ liệu.</returns>
+    [HttpPost("import")]
+    [HasPermission(Suppliers.Create)]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(ImportSuppliersResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ImportSuppliersAsync(
+        [FromForm] ImportSuppliersCommand request,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tải file Excel mẫu để nhập nhà cung cấp.
+    /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>File Excel mẫu.</returns>
+    [HttpGet("import-template")]
+    [HasPermission(Suppliers.Create)]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetImportTemplateAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetImportSupplierTemplateQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

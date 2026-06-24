@@ -28,7 +28,7 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     [HttpGet]
     public async Task<IActionResult> GetPoliciesAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetCommissionPoliciesQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetCommissionPoliciesQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -43,7 +43,7 @@ public class CommissionPolicyController(ISender mediator) : ApiController
         [FromBody] CreateCommissionPolicyCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -62,7 +62,7 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     {
         if (id != command.Id)
             return BadRequest();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -76,7 +76,7 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     public async Task<IActionResult> GetAuditLogsAsync(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetCommissionPolicyAuditLogsQuery(id), cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -89,7 +89,7 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePolicyAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteCommissionPolicyCommand(id), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new DeleteCommissionPolicyCommand(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

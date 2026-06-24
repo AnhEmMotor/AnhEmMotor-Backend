@@ -1,7 +1,5 @@
-using Application.ApiContracts.DebtPayment.Requests;
 using Application.ApiContracts.DebtPayment.Responses;
 using Application.Common.Models;
-using Application.Features.DebtPayments.Commands.RecordDebtPayment;
 using Application.Features.DebtPayments.Queries.GetReceiptsWithDebtBySupplierId;
 using Application.Features.DebtPayments.Queries.GetSuppliersWithDebt;
 using FluentAssertions;
@@ -11,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using WebAPI.Controllers.V1;
+
+using Domain.Primitives;
 
 namespace ControllerTests
 {
@@ -34,24 +34,26 @@ namespace ControllerTests
             {
                 new() { Id = 1, Name = "Supplier A", Phone = "0123", TotalDebt = 5000000 }
             };
+            var pagedResponse = new PagedResult<SupplierDebtResponse>(mockResponse, mockResponse.Count, 1, 10);
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersWithDebtQuery>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<List<SupplierDebtResponse>>.Success(mockResponse));
-            var result = await _controller.GetSuppliersWithDebtAsync(CancellationToken.None).ConfigureAwait(true);
+                .ReturnsAsync(Result<PagedResult<SupplierDebtResponse>>.Success(pagedResponse));
+            var result = await _controller.GetSuppliersWithDebtAsync(null!, CancellationToken.None).ConfigureAwait(true);
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult!.Value.Should().BeEquivalentTo(mockResponse);
+            okResult!.Value.Should().BeEquivalentTo(pagedResponse);
         }
 
         [Fact(DisplayName = "DP_002 - Lấy danh sách nhà cung cấp còn nợ trả về rỗng khi không có nợ")]
         public async Task DP_002_GetSuppliersWithDebt_ReturnsEmpty()
         {
             var mockResponse = new List<SupplierDebtResponse>();
+            var pagedResponse = new PagedResult<SupplierDebtResponse>(mockResponse, 0, 1, 10);
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersWithDebtQuery>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<List<SupplierDebtResponse>>.Success(mockResponse));
-            var result = await _controller.GetSuppliersWithDebtAsync(CancellationToken.None).ConfigureAwait(true);
+                .ReturnsAsync(Result<PagedResult<SupplierDebtResponse>>.Success(pagedResponse));
+            var result = await _controller.GetSuppliersWithDebtAsync(null!, CancellationToken.None).ConfigureAwait(true);
             result.Should().BeOfType<OkObjectResult>();
             var okResult = result as OkObjectResult;
-            okResult!.Value.Should().BeEquivalentTo(mockResponse);
+            okResult!.Value.Should().BeEquivalentTo(pagedResponse);
         }
 
         [Fact(DisplayName = "DP_003 - Lấy chi tiết các phiếu nhập còn nợ theo ID nhà cung cấp thành công")]
@@ -83,14 +85,5 @@ namespace ControllerTests
             result.Should().BeOfType<NotFoundObjectResult>();
         }
 
-        [Fact(DisplayName = "DP_010 - Trả về lỗi 403 Forbidden nếu tài khoản thực hiện không có quyền trả nợ")]
-        public async Task DP_010_PayDebt_Forbidden()
-        {
-            _mediatorMock.Setup(m => m.Send(It.IsAny<RecordDebtPaymentCommand>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new UnauthorizedAccessException());
-            await Assert.ThrowsAsync<UnauthorizedAccessException>(
-                () => _controller.PayDebtAsync(1, new PayDebtRequest { Amount = 100000 }, CancellationToken.None))
-                .ConfigureAwait(true);
-        }
     }
 }

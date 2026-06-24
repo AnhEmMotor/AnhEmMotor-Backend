@@ -26,7 +26,9 @@ namespace Infrastructure.Services
         private List<string> GetListFromConfig(string key)
         {
             var fullKey = $"{SectionName}:{key}";
-            return configuration.GetSection(fullKey).Get<List<string>>() ?? [];
+            var list = configuration.GetSection(fullKey).Get<List<string>>() ?? [];
+            return list.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
         }
     }
 }
+

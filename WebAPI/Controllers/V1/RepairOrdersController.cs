@@ -31,7 +31,7 @@ namespace WebAPI.Controllers.V1
             CreateRepairOrderCommand command,
             CancellationToken cancellationToken)
         {
-            var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -67,7 +67,7 @@ namespace WebAPI.Controllers.V1
             AssignTechnicianCommand command,
             CancellationToken cancellationToken)
         {
-            var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -77,7 +77,7 @@ namespace WebAPI.Controllers.V1
         [HttpPost("issue-parts")]
         public async Task<IActionResult> IssuePartsAsync(IssuePartsCommand command, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -89,7 +89,7 @@ namespace WebAPI.Controllers.V1
             CompleteRepairOrderCommand command,
             CancellationToken cancellationToken)
         {
-            var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
     }

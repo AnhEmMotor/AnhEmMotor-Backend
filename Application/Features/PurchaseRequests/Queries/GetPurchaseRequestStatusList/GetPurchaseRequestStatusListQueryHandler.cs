@@ -1,5 +1,5 @@
 using Application.Common.Models;
-using Domain.Constants;
+using Domain.Constants.PurchaseRequest;
 using MediatR;
 
 namespace Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;

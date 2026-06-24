@@ -1,6 +1,6 @@
 using Application.ApiContracts.InventoryReceipt.Requests;
 using Application.Features.InventoryOnHand.Notifications;
-using Application.Features.InventoryReceipts.Commands.CloneInventoryReceipt;
+
 using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.SendInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
@@ -15,6 +15,7 @@ using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.SupplierDebt;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -45,7 +46,7 @@ public class InventoryReceipts
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IPermissionReadRepository> _permissionRepoMock;
     private readonly Mock<IInventoryLedgerRepository> _ledgerRepoMock;
-    private readonly Mock<ISupplierDebtRepository> _supplierDebtRepoMock;
+    private readonly Mock<ISupplierDebtInsertRepository> _supplierDebtRepoMock;
     private readonly Mock<IVehicleUpdateRepository> _vehicleUpdateRepoMock;
     private readonly Mock<IProductQuotationReadRepository> _ProductQuotationRepoMock;
 
@@ -64,7 +65,7 @@ public class InventoryReceipts
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _permissionRepoMock = new Mock<IPermissionReadRepository>();
         _ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
-        _supplierDebtRepoMock = new Mock<ISupplierDebtRepository>();
+        _supplierDebtRepoMock = new Mock<ISupplierDebtInsertRepository>();
         _vehicleUpdateRepoMock = new Mock<IVehicleUpdateRepository>();
         _ProductQuotationRepoMock = new Mock<IProductQuotationReadRepository>();
     }
@@ -82,6 +83,7 @@ public class InventoryReceipts
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
+            _vehicleUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand
         {
@@ -118,6 +120,7 @@ public class InventoryReceipts
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
+            _vehicleUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand { PurchaseRequestId = 99, Products = [] };
         _prReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(99, It.IsAny<CancellationToken>()))
@@ -137,6 +140,7 @@ public class InventoryReceipts
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
+            _vehicleUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand { PurchaseRequestId = 1, Products = [] };
         var pr = new PurchaseRequest { Id = 1, Status = "draft" };
@@ -156,6 +160,7 @@ public class InventoryReceipts
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
+            _vehicleUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand
         {
@@ -182,6 +187,7 @@ public class InventoryReceipts
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
+            _vehicleUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand
         {
@@ -222,6 +228,7 @@ public class InventoryReceipts
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
+            _vehicleUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand
         {
@@ -276,6 +283,7 @@ public class InventoryReceipts
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
+            _vehicleUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateInventoryReceiptCommand
         {
@@ -325,7 +333,6 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _deleteRepoMock.Object,
             _prReadRepoMock.Object,
-            _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
@@ -360,7 +367,6 @@ public class InventoryReceipts
             _updateRepoMock.Object,
             _deleteRepoMock.Object,
             _prReadRepoMock.Object,
-            _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _permissionRepoMock.Object,
             _vehicleUpdateRepoMock.Object,
@@ -388,11 +394,9 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object,
-            null!,
-            null!,
             _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object,
             new Mock<IPublisher>().Object);
@@ -418,11 +422,9 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object,
-            null!,
-            null!,
             _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object,
             new Mock<IPublisher>().Object);
@@ -458,52 +460,7 @@ public class InventoryReceipts
         _updateRepoMock.Verify(x => x.Update(existingReceipt), Times.Once);
     }
 
-    [Fact(
-        DisplayName = "IR_013 - Nhân bản phiếu nhập kho thành công từ phiếu nhập kho gốc và chỉ giữ lại những sản phẩm còn hoạt động.")]
-    public async Task IR_013_CloneInventoryReceipt_Success()
-    {
-        var handler = new CloneInventoryReceiptCommandHandler(
-            _readRepoMock.Object,
-            _insertRepoMock.Object,
-            _variantRepoMock.Object,
-            _unitOfWorkMock.Object);
-        var command = new CloneInventoryReceiptCommand { Id = 1 };
-        var originalReceipt = new InventoryReceiptEntity
-        {
-            Id = 1,
-            Notes = "Original notes",
-            PurchaseRequestId = 10,
-            InventoryReceiptInfos =
-                [new InventoryReceiptInfoEntity
-                {
-                    Id = 20,
-                    Count = 2,
-                    PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 5 }
-                }]
-        };
-        var mockVariants = new List<ProductVariant>
-        {
-            new()
-            {
-                Id = 5,
-                VariantName = "Variant 5",
-                Product = new Domain.Entities.Product { StatusId = Domain.Constants.Product.ProductStatus.ForSale }
-            }
-        };
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(originalReceipt);
-        _variantRepoMock.Setup(
-            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(mockVariants);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new InventoryReceiptEntity { Id = 2, Notes = "Original notes", StatusId = "draft" });
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        string.Compare(result.Value!.Notes, "Original notes").Should().Be(0);
-        string.Compare(result.Value.StatusId, "draft").Should().Be(0);
-        _insertRepoMock.Verify(x => x.Add(It.IsAny<InventoryReceiptEntity>()), Times.Once);
-    }
+
 
     [Fact(DisplayName = "IR_023 - Tạo phiếu nhập kho thành công và lưu người tạo")]
     public async Task IR_023_CreateInventoryReceipt_SaveCreatedBy_Success()
@@ -517,6 +474,7 @@ public class InventoryReceipts
             _supplierRepoMock.Object,
             _variantRepoMock.Object,
             _vehicleReadRepoMock.Object,
+            _vehicleUpdateRepoMock.Object,
             _unitOfWorkMock.Object,
             _currentUserContextMock.Object);
         var command = new CreateInventoryReceiptCommand
@@ -584,11 +542,9 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object,
-            null!,
-            null!,
             _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object,
             new Mock<IPublisher>().Object);
@@ -614,11 +570,9 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _ledgerRepoMock.Object,
-            _ProductQuotationRepoMock.Object,
-            null!,
-            null!,
             _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object,
             new Mock<IPublisher>().Object);

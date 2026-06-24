@@ -35,14 +35,14 @@ public class SseResult<T>(IAsyncEnumerable<Result<T>> stream) : IActionResult
                 if (result.IsSuccess)
                 {
                     var json = JsonSerializer.Serialize(result.Value, JsonSerializerOptions);
-                    await response.WriteAsync($"data: {json}\n\n", cancellationToken).ConfigureAwait(true);
+                    await response.WriteAsync($"data: {json}\n\n", cancellationToken).ConfigureAwait(false);
                 } else
                 {
                     var errorJson = JsonSerializer.Serialize(result.Error, JsonSerializerOptions);
                     await response.WriteAsync($"event: error\ndata: {errorJson}\n\n", cancellationToken)
-                        .ConfigureAwait(true);
+                        .ConfigureAwait(false);
                 }
-                await response.Body.FlushAsync(cancellationToken).ConfigureAwait(true);
+                await response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         } catch (OperationCanceledException)
         {

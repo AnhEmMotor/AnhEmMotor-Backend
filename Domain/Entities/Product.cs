@@ -34,6 +34,8 @@ namespace Domain.Entities
         [ForeignKey("Brand")]
         public int? BrandId { get; set; }
 
+        public Brand? Brand { get; set; }
+
         [Column("Weight", TypeName = "nvarchar(20)")]
         public decimal? Weight { get; set; }
 
@@ -148,7 +150,7 @@ namespace Domain.Entities
         [Column("Description", TypeName = "nvarchar(MAX)")]
         public string? Description { get; set; }
 
-        public Brand? Brand { get; set; }
+        public int? MaxPurchaseQuantity { get; set; }
 
         public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
 

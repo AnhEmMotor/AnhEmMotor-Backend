@@ -1,7 +1,7 @@
 using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.PurchaseRequest;
-using Domain.Constants;
+using Domain.Constants.PurchaseRequest;
 using Mapster;
 using MediatR;
 using System.Linq;

@@ -11,14 +11,14 @@ namespace Application.Features.InventoryReceipts.Mappings
             config.NewConfig<InventoryReceipt, InventoryReceiptListResponse>()
                 .Map(
                     dest => dest.SupplierId,
-                    src => src.InventoryReceiptInfos.FirstOrDefault(x => x.SupplierId.HasValue) != null
-                        ? src.InventoryReceiptInfos.FirstOrDefault(x => x.SupplierId.HasValue)!.SupplierId
+                    src => src.InventoryReceiptInfos.FirstOrDefault(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue) != null
+                        ? src.InventoryReceiptInfos.FirstOrDefault(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue)!.PurchaseRequestItem!.SupplierId
                         : (int?)null)
                 .Map(
                     dest => dest.SupplierName,
-                    src => src.InventoryReceiptInfos.FirstOrDefault(x => x.SupplierId.HasValue) != null &&
-                            src.InventoryReceiptInfos.FirstOrDefault(x => x.SupplierId.HasValue)!.Supplier != null
-                        ? src.InventoryReceiptInfos.FirstOrDefault(x => x.SupplierId.HasValue)!.Supplier!.Name
+                    src => src.InventoryReceiptInfos.FirstOrDefault(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue) != null &&
+                            src.InventoryReceiptInfos.FirstOrDefault(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue)!.PurchaseRequestItem!.Supplier != null
+                        ? src.InventoryReceiptInfos.FirstOrDefault(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue)!.PurchaseRequestItem!.Supplier!.Name
                         : null)
                 .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null)
                 .Map(dest => dest.SentByName, src => src.SentByUser != null ? src.SentByUser.FullName : null)
@@ -32,14 +32,14 @@ namespace Application.Features.InventoryReceipts.Mappings
             config.NewConfig<InventoryReceipt, InventoryReceiptDetailResponse>()
                 .Map(
                     dest => dest.SupplierId,
-                    src => src.InventoryReceiptInfos.FirstOrDefault(x => x.SupplierId.HasValue) != null
-                        ? src.InventoryReceiptInfos.FirstOrDefault(x => x.SupplierId.HasValue)!.SupplierId
+                    src => src.InventoryReceiptInfos.FirstOrDefault(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue) != null
+                        ? src.InventoryReceiptInfos.FirstOrDefault(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue)!.PurchaseRequestItem!.SupplierId
                         : (int?)null)
                 .Map(
                     dest => dest.SupplierName,
-                    src => src.InventoryReceiptInfos.FirstOrDefault(x => x.SupplierId.HasValue) != null &&
-                            src.InventoryReceiptInfos.FirstOrDefault(x => x.SupplierId.HasValue)!.Supplier != null
-                        ? src.InventoryReceiptInfos.FirstOrDefault(x => x.SupplierId.HasValue)!.Supplier!.Name
+                    src => src.InventoryReceiptInfos.FirstOrDefault(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue) != null &&
+                            src.InventoryReceiptInfos.FirstOrDefault(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue)!.PurchaseRequestItem!.Supplier != null
+                        ? src.InventoryReceiptInfos.FirstOrDefault(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.SupplierId.HasValue)!.PurchaseRequestItem!.Supplier!.Name
                         : null)
                 .Map(dest => dest.CreatedByName, src => src.CreatedByUser != null ? src.CreatedByUser.FullName : null)
                 .Map(dest => dest.SentByName, src => src.SentByUser != null ? src.SentByUser.FullName : null)
@@ -62,8 +62,8 @@ namespace Application.Features.InventoryReceipts.Mappings
                     src => src.PurchaseRequestItem != null && src.PurchaseRequestItem.ProductVariantColor != null
                         ? src.PurchaseRequestItem.ProductVariantColor.ColorName
                         : null)
-                .Map(dest => dest.SupplierId, src => src.SupplierId)
-                .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
+                .Map(dest => dest.SupplierId, src => src.PurchaseRequestItem != null ? src.PurchaseRequestItem.SupplierId : (int?)null)
+                .Map(dest => dest.SupplierName, src => src.PurchaseRequestItem != null && src.PurchaseRequestItem.Supplier != null ? src.PurchaseRequestItem.Supplier.Name : null)
                 .Map(
                     dest => dest.Name,
                     src => src.PurchaseRequestItem != null &&
@@ -72,7 +72,7 @@ namespace Application.Features.InventoryReceipts.Mappings
                         ? src.PurchaseRequestItem.ProductVariant.Product.Name
                         : null)
                 .Map(dest => dest.Quantity, src => src.Count)
-                .Map(dest => dest.UnitPrice, src => src.UnitPrice)
+                .Map(dest => dest.UnitPrice, src => src.PurchaseRequestItem != null ? src.PurchaseRequestItem.UnitPrice : null)
                 .Map(
                     dest => dest.OrderedQuantity,
                     src => src.PurchaseRequestItem != null ? src.PurchaseRequestItem.Quantity : (int?)null)
@@ -88,15 +88,15 @@ namespace Application.Features.InventoryReceipts.Mappings
                                                     ii.InventoryReceipt.DeletedAt == null &&
                                                     (string.Equals(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Approve,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                                             StringComparison.OrdinalIgnoreCase) ||
                                                         string.Equals(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Sent,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                                             StringComparison.OrdinalIgnoreCase) ||
                                                         string.Equals(
                                                             ii.InventoryReceipt.StatusId,
-                                                            Domain.Constants.InventoryReceiptStatus.Draft,
+                                                            Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                                             StringComparison.OrdinalIgnoreCase)))
                                 .Sum(ii => ii.Count ?? 0)
                         : (int?)null)

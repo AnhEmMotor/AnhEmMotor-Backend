@@ -73,7 +73,7 @@ public static class AuthenticationExtensions
                                     context.Fail("Unauthorized");
                                     return;
                                 }
-                                var user = await userManager.FindByIdAsync(userId).ConfigureAwait(true);
+                                var user = await userManager.FindByIdAsync(userId).ConfigureAwait(false);
                                 if (user == null || user.DeletedAt is not null)
                                 {
                                     context.Fail("Unauthorized");

@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
+using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
@@ -18,6 +19,7 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
         IPurchaseRequestInsertRepository insertRepository,
         IPurchaseRequestReadRepository readRepository,
         IProductVariantReadRepository variantRepository,
+        ISupplierReadRepository supplierReadRepository,
         ICurrentUserContext currentUserContext,
         IUnitOfWork unitOfWork) : IRequestHandler<CreatePurchaseRequestCommand, Result<PurchaseRequestDetailResponse?>>
     {
@@ -37,6 +39,15 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
             var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
             var variantDict = variants.ToDictionary(v => v.Id);
+
+            var supplierIds = request.Items
+                .Where(x => x.SupplierId.HasValue)
+                .Select(x => x.SupplierId!.Value)
+                .Distinct()
+                .ToList();
+            var suppliers = await supplierReadRepository.GetByIdAsync(supplierIds, cancellationToken, DataFetchMode.ActiveOnly).ConfigureAwait(false);
+            var supplierDict = suppliers.ToDictionary(s => s.Id, s => s.Name);
+
             foreach (var item in request.Items)
             {
                 if (!item.ProductVariantId.HasValue)
@@ -91,10 +102,40 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
                         {
                             ProductVariantId = item.ProductVariantId!.Value,
                             ProductVariantColorId = item.ProductVariantColorId,
-                            Quantity = item.Quantity!.Value
+                            Quantity = item.Quantity!.Value,
+                            SupplierId = item.SupplierId,
+                            ProductQuotationId = item.ProductQuotationId,
+                            UnitPrice = item.UnitPrice
                         })]
             };
             insertRepository.Add(purchaseRequest);
+
+            var auditLogs = new List<Domain.Entities.PurchaseRequestAuditLog>
+            {
+                new Domain.Entities.PurchaseRequestAuditLog
+                {
+                    PurchaseRequest = purchaseRequest,
+                    Action = "Add",
+                    ChangedById = currentUserId,
+                    ChangedAt = DateTimeOffset.UtcNow,
+                    NewStatusId = purchaseRequest.Status,
+                    NewNotes = purchaseRequest.Note
+                }
+            };
+            await insertRepository.InsertAuditLogsAsync(auditLogs, cancellationToken).ConfigureAwait(false);
+
+            var itemAuditLogs = purchaseRequest.PurchaseRequestItems.Select(item => new Domain.Entities.PurchaseRequestItemAuditLog
+            {
+                PurchaseRequestItem = item,
+                Action = "Add",
+                NewQuantity = item.Quantity,
+                NewProductVariantId = item.ProductVariantId,
+                NewProductVariantColorId = item.ProductVariantColorId,
+                NewSupplierName = item.SupplierId.HasValue && supplierDict.TryGetValue(item.SupplierId.Value, out var supplierName) ? supplierName : null,
+                NewUnitPrice = item.UnitPrice
+            }).ToList();
+            await insertRepository.InsertItemAuditLogsAsync(itemAuditLogs, cancellationToken).ConfigureAwait(false);
+
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             var created = await readRepository.GetByIdWithDetailsAsync(purchaseRequest.Id, cancellationToken)
                 .ConfigureAwait(false);

@@ -3,6 +3,7 @@ using Application.Features.Outputs.Queries.GetPaymentLink;
 using Application.Features.Payments.Commands.ProcessPayOSCallback;
 using Application.Features.Payments.Commands.ProcessPayOSWebhook;
 using Application.Features.Payments.Commands.ProcessVNPayIPN;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,8 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 [ApiController]
 [SwaggerTag("Quản lý các hoạt động thanh toán")]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class PaymentController(ISender sender) : ApiController
 {
     /// <summary>
@@ -30,7 +32,7 @@ public class PaymentController(ISender sender) : ApiController
     [AllowAnonymous]
     public async Task<IActionResult> PayOSWebhook([FromBody] PayOSWebhookData data, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new ProcessPayOSWebhookCommand(data), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new ProcessPayOSWebhookCommand(data), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -40,13 +42,13 @@ public class PaymentController(ISender sender) : ApiController
     /// <param name="orderId">ID của đơn hàng.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Dữ liệu link thanh toán.</returns>
-    [HttpGet("link/{orderId}")]
+    [HttpGet("{orderId}/link")]
     [Authorize]
     public async Task<IActionResult> GetPaymentLink(int orderId, CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await sender.Send(new GetPaymentLinkQuery(orderId, currentUserId), cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -59,7 +61,7 @@ public class PaymentController(ISender sender) : ApiController
     public async Task<IActionResult> VNPayCallback(CancellationToken cancellationToken)
     {
         var result = await sender.Send(new ProcessVNPayIPNCommand(Request.Query), cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandlePaymentRedirect(
             result,
             method: "VNPay",
@@ -78,7 +80,7 @@ public class PaymentController(ISender sender) : ApiController
     public async Task<IActionResult> PayOSCallback([FromQuery] long? orderCode, CancellationToken cancellationToken)
     {
         var command = new ProcessPayOSCallbackCommand(orderCode);
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandlePaymentRedirect(
             result,
             method: "PayOS",

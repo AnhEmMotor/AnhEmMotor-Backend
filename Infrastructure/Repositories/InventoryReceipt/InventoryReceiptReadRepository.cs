@@ -2,6 +2,7 @@ using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Domain.Constants;
+using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +61,8 @@ namespace Infrastructure.Repositories.InventoryReceipt
                 .ThenInclude(pri => pri!.InventoryReceiptInfos.Where(rii => rii.DeletedAt == null))
                 .ThenInclude(rii => rii.InventoryReceipt)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                .ThenInclude(ii => ii.Supplier)
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.Supplier)
                 .Include(x => x.PurchaseRequest)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.SentByUser)
@@ -139,7 +141,8 @@ namespace Infrastructure.Repositories.InventoryReceipt
                 .ThenInclude(pri => pri!.InventoryReceiptInfos.Where(rii => rii.DeletedAt == null))
                 .ThenInclude(rii => rii.InventoryReceipt)
                 .Include(x => x.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
-                .ThenInclude(ii => ii.Supplier)
+                .ThenInclude(ii => ii.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.Supplier)
                 .Include(x => x.PurchaseRequest)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.SentByUser)
@@ -169,6 +172,21 @@ namespace Infrastructure.Repositories.InventoryReceipt
             throw new NotImplementedException();
         }
 
+        public Task<List<InventoryReceiptInfoEntity>> GetInfosByInventoryReceiptIdsAsync(
+            IEnumerable<int> inventoryReceiptIds,
+            CancellationToken cancellationToken)
+        {
+            return context.InventoryReceiptInfos
+                .Include(x => x.Vehicles)
+                .Include(x => x.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
+                .Include(x => x.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.ProductVariantColor)
+                .Where(x => inventoryReceiptIds.Contains(x.InventoryReceiptId))
+                .ToListAsync(cancellationToken);
+        }
+
         public Task<List<InventoryReceiptInfoEntity>> GetInfosByVariantAsync(
             int variantId,
             int? colorId,
@@ -177,7 +195,8 @@ namespace Infrastructure.Repositories.InventoryReceipt
             var query = context.InventoryReceiptInfos
                 .Where(x => x.DeletedAt == null && x.InventoryReceipt != null && x.InventoryReceipt.DeletedAt == null)
                 .Include(x => x.InventoryReceipt)
-                .Include(x => x.Supplier)
+                .Include(x => x.PurchaseRequestItem)
+                .ThenInclude(x => x!.Supplier)
                 .Include(x => x.PurchaseRequestItem)
                 .Where(x => x.PurchaseRequestItem != null && x.PurchaseRequestItem.ProductVariantId == variantId);
             if (colorId.HasValue)
@@ -185,6 +204,58 @@ namespace Infrastructure.Repositories.InventoryReceipt
                 query = query.Where(x => x.PurchaseRequestItem!.ProductVariantColorId == colorId.Value);
             }
             return query.ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<InventoryReceiptAuditLog>> GetAuditLogsAsync(
+            int inventoryReceiptId,
+            CancellationToken cancellationToken)
+        {
+            return await context.InventoryReceiptAuditLogs
+                .Include(l => l.ChangedBy)
+                .Where(l => l.InventoryReceiptId == inventoryReceiptId)
+                .OrderByDescending(l => l.ChangedAt)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<InventoryReceiptInfoAuditLog>> GetInfoAuditLogsAsync(
+            int inventoryReceiptId,
+            CancellationToken cancellationToken)
+        {
+            return await context.InventoryReceiptInfoAuditLogs
+                .IgnoreQueryFilters()
+                .Include(il => il.InventoryReceiptInfo)
+                .ThenInclude(i => i!.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
+                .Include(il => il.InventoryReceiptInfo)
+                .ThenInclude(i => i!.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.ProductVariantColor)
+                .Include(il => il.InventoryReceiptInfo)
+                .ThenInclude(i => i!.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.Supplier)
+                .Where(il => il.InventoryReceiptInfo.InventoryReceiptId == inventoryReceiptId)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<VehicleAuditLog>> GetVehicleAuditLogsAsync(
+            int inventoryReceiptId,
+            CancellationToken cancellationToken)
+        {
+            return await context.VehicleAuditLogs
+                .IgnoreQueryFilters()
+                .Include(vl => vl.ChangedBy)
+                .Include(vl => vl.Vehicle)
+                .ThenInclude(v => v.InventoryReceiptInfo)
+                .ThenInclude(i => i!.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
+                .Include(vl => vl.Vehicle)
+                .ThenInclude(v => v.InventoryReceiptInfo)
+                .ThenInclude(i => i!.PurchaseRequestItem)
+                .ThenInclude(pri => pri!.ProductVariantColor)
+                .Where(vl => vl.Vehicle.InventoryReceiptInfo!.InventoryReceiptId == inventoryReceiptId)
+                .OrderByDescending(vl => vl.ChangedAt)
+                .ToListAsync(cancellationToken);
         }
     }
 }

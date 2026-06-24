@@ -2,7 +2,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Services;
-using Domain.Constants;
+using Domain.Constants.PurchaseRequest;
 using MediatR;
 using System;
 
@@ -11,6 +11,7 @@ namespace Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRe
     public class ApproveRejectPurchaseRequestCommandHandler(
         IPurchaseRequestReadRepository readRepository,
         IPurchaseRequestUpdateRepository updateRepository,
+        IPurchaseRequestInsertRepository insertRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserContext currentUserContext) : IRequestHandler<ApproveRejectPurchaseRequestCommand, Result>
     {
@@ -35,8 +36,10 @@ namespace Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRe
                         "Chỉ có thể phê duyệt hoặc từ chối yêu cầu mua hàng đang ở trạng thái Sent.",
                         "Status"));
             }
-            pr.Status = request.Status;
             var currentUserId = currentUserContext.GetUserId();
+            var oldStatus = pr.Status;
+            pr.Status = request.Status;
+            
             if (string.Equals(request.Status, PurchaseRequestStatus.Approve, StringComparison.OrdinalIgnoreCase))
             {
                 pr.ApprovedBy = currentUserId;
@@ -47,6 +50,20 @@ namespace Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRe
                 pr.ApprovedBy = null;
             }
             updateRepository.Update(pr);
+
+            var auditLog = new Domain.Entities.PurchaseRequestAuditLog
+            {
+                PurchaseRequest = pr,
+                Action = "UpdateStatus",
+                ChangedById = currentUserId,
+                ChangedAt = DateTimeOffset.UtcNow,
+                OldStatusId = oldStatus,
+                NewStatusId = pr.Status,
+                OldNotes = pr.Note,
+                NewNotes = pr.Note
+            };
+            await insertRepository.InsertAuditLogsAsync([auditLog], cancellationToken).ConfigureAwait(false);
+
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();
         }

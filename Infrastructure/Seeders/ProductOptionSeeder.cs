@@ -19,7 +19,18 @@ public static class ProductOptionSeeder
             await context.Set<Option>().AddAsync(typeOption, cancellationToken).ConfigureAwait(false);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-        var types = new[] { "Xe ga", "Xe số", "Tay côn", "Xe điện" };
+        var legacyManualType = await context.Set<OptionValue>()
+            .FirstOrDefaultAsync(v => v.OptionId == typeOption.Id && v.Name == "Tay côn", cancellationToken)
+            .ConfigureAwait(false);
+        var manualTypeExists = await context.Set<OptionValue>()
+            .AnyAsync(v => v.OptionId == typeOption.Id && v.Name == "Xe côn tay", cancellationToken)
+            .ConfigureAwait(false);
+        if (legacyManualType != null && !manualTypeExists)
+        {
+            legacyManualType.Name = "Xe côn tay";
+            legacyManualType.UpdatedAt = DateTimeOffset.UtcNow;
+        }
+        var types = new[] { "Xe ga", "Xe số", "Xe côn tay", "Moto phân khối lớn" };
         foreach (var type in types)
         {
             if (!await context.Set<OptionValue>()

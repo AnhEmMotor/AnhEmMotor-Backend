@@ -32,7 +32,7 @@ public class ServicesController(IMediator mediator) : ApiController
         [FromBody] CreateServiceCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -46,7 +46,7 @@ public class ServicesController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetServicesListQuery { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

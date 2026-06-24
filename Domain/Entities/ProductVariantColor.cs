@@ -22,6 +22,8 @@ namespace Domain.Entities
         [Column("CoverImageUrl", TypeName = "nvarchar(1000)")]
         public string? CoverImageUrl { get; set; }
 
+        public int? MaxPurchaseQuantity { get; set; }
+
         public ProductVariant? ProductVariant { get; set; }
     }
 }

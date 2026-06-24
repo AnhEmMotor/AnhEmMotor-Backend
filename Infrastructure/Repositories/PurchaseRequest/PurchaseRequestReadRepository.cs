@@ -1,6 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Domain.Constants;
+using Domain.Constants.PurchaseRequest;
 using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
@@ -20,7 +21,10 @@ namespace Infrastructure.Repositories.PurchaseRequest
         {
             var query = GetQueryable(mode)
                 .Include(x => x.CreatedByUser)
-                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null));
+                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                .ThenInclude(ii => ii.InventoryReceipt)
+                .AsSplitQuery();
             return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 
@@ -32,6 +36,8 @@ namespace Infrastructure.Repositories.PurchaseRequest
             var query = GetQueryable(mode)
                 .Include(x => x.CreatedByUser)
                 .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+                .ThenInclude(ii => ii.InventoryReceipt)
                 .Where(x => x.Status == PurchaseRequestStatus.Approve)
                 .Where(
                     x => x.PurchaseRequestItems
@@ -45,9 +51,10 @@ namespace Infrastructure.Repositories.PurchaseRequest
                                                             ii.InventoryReceipt.DeletedAt == null &&
                                                             string.Compare(
                                                                 ii.InventoryReceipt.StatusId,
-                                                                Domain.Constants.InventoryReceiptStatus.Approve) ==
+                                                                Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve) ==
                                                             0)
-                                        .Sum(ii => ii.Count ?? 0)));
+                                        .Sum(ii => ii.Count ?? 0)))
+                .AsSplitQuery();
             return paginator.ApplyAsync<PurchaseRequestEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 
@@ -77,6 +84,8 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
                 .ThenInclude(r => r.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
                 .ThenInclude(ii => ii.InventoryReceipt)
+                .Include(x => x.PurchaseRequestItems.Where(item => item.DeletedAt == null))
+                .ThenInclude(r => r.Supplier)
                 .AsSplitQuery();
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
@@ -108,6 +117,55 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .ThenInclude(p => p!.ProductCategory)
                 .Include(x => x.ProductVariantColor)
                 .Where(x => ids.Contains(x.Id))
+                .ToListAsync(cancellationToken);
+        }
+
+        public Task<List<PurchaseRequestItem>> GetItemsByPurchaseRequestIdsAsync(
+            IEnumerable<int> purchaseRequestIds,
+            CancellationToken cancellationToken)
+        {
+            return context.PurchaseRequestItems
+                .IgnoreQueryFilters()
+                .Include(x => x.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
+                .ThenInclude(p => p!.ProductCategory)
+                .Include(x => x.ProductVariantColor)
+                .Include(x => x.InventoryReceiptInfos)
+                .Where(x => purchaseRequestIds.Contains(x.PurchaseRequestId))
+                .ToListAsync(cancellationToken);
+        }
+
+        public Task<List<PurchaseRequestAuditLog>> GetAuditLogsAsync(
+            int purchaseRequestId,
+            CancellationToken cancellationToken)
+        {
+            return context.PurchaseRequestAuditLogs
+                .Include(x => x.ChangedBy)
+                .Where(x => x.PurchaseRequestId == purchaseRequestId)
+                .OrderByDescending(x => x.ChangedAt)
+                .ToListAsync(cancellationToken);
+        }
+
+        public Task<List<PurchaseRequestItemAuditLog>> GetItemAuditLogsAsync(
+            IEnumerable<int> itemIds,
+            CancellationToken cancellationToken)
+        {
+            return context.PurchaseRequestItemAuditLogs
+                .IgnoreQueryFilters()
+                .Include(x => x.PurchaseRequestItem)
+                .ThenInclude(x => x!.ProductVariant)
+                .ThenInclude(x => x!.Product)
+                .Where(x => itemIds.Contains(x.PurchaseRequestItemId))
+                .OrderByDescending(x => x.CreatedAt)
+                .ToListAsync(cancellationToken);
+        }
+
+        public Task<List<int>> GetAllItemIdsAsync(int purchaseRequestId, CancellationToken cancellationToken)
+        {
+            return context.PurchaseRequestItems
+                .IgnoreQueryFilters()
+                .Where(x => x.PurchaseRequestId == purchaseRequestId)
+                .Select(x => x.Id)
                 .ToListAsync(cancellationToken);
         }
     }

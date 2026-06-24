@@ -38,7 +38,7 @@ public class SettingController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = new SetSettingsCommand() { Settings = request };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleCreated(result, Domain.Constants.RouteNames.Settings.GetAllSettings);
     }
 
@@ -53,7 +53,7 @@ public class SettingController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetAllSettingsAsync(CancellationToken cancellationToken)
     {
         var query = new GetAllSettingsQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -67,7 +67,7 @@ public class SettingController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetStoreSettingsAsync(CancellationToken cancellationToken)
     {
         var query = new GetStoreSettingsQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

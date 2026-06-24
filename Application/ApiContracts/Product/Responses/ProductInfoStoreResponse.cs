@@ -14,6 +14,9 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("product_limit")]
         public int? ProductLimit { get; set; }
 
+        [JsonPropertyName("effectiveMax")]
+        public int? EffectiveMax { get; set; }
+
         public string? Description { get; set; }
 
         [JsonPropertyName("short_description")]

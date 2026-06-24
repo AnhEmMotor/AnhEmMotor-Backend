@@ -35,17 +35,29 @@ namespace Infrastructure.Repositories.ProductVariant
             return context.GetQuery<ProductVariantEntity>(mode);
         }
 
-        public Task<ProductVariantEntity?> GetByIdWithDetailsAsync(
+        public async Task<ProductVariantEntity?> GetByIdWithDetailsAsync(
             int id,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
-            return context.GetQuery<ProductVariantEntity>(mode)
+            return await context.ProductVariants
+                .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
-                .Include(v => v.ProductVariantColors)
+                .ThenInclude(ov => ov!.Option)
                 .FirstOrDefaultAsync(v => v.Id == id, cancellationToken)
-                .ContinueWith(t => t.Result, cancellationToken);
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IEnumerable<ProductVariantEntity>> GetAllAsync(
+            CancellationToken cancellationToken,
+            DataFetchMode mode = DataFetchMode.ActiveOnly)
+        {
+            var query = context.ProductVariants.AsQueryable();
+            return await query
+                .Include(v => v.ProductVariantColors)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
 
         public Task<ProductVariantEntity?> GetBySlugAsync(
@@ -87,6 +99,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Where(v => ids.Contains(v.Id))
                 .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
+                .ThenInclude(c => c!.Parent)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)

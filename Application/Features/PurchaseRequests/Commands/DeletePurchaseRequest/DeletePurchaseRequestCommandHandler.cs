@@ -11,6 +11,7 @@ namespace Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest
     public class DeletePurchaseRequestCommandHandler(
         IPurchaseRequestReadRepository readRepository,
         IPurchaseRequestDeleteRepository deleteRepository,
+        IPurchaseRequestInsertRepository insertRepository,
         IPermissionReadRepository permissionReadRepository,
         ICurrentUserContext currentUserContext,
         IUnitOfWork unitOfWork) : IRequestHandler<DeletePurchaseRequestCommand, Result>
@@ -37,6 +38,20 @@ namespace Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest
                             "Status"));
                 }
             }
+            var currentUserId = currentUserContext.GetUserId();
+            var auditLog = new Domain.Entities.PurchaseRequestAuditLog
+            {
+                PurchaseRequest = pr,
+                Action = "Delete",
+                ChangedById = currentUserId,
+                ChangedAt = DateTimeOffset.UtcNow,
+                OldStatusId = pr.Status,
+                NewStatusId = "deleted",
+                OldNotes = pr.Note,
+                NewNotes = pr.Note
+            };
+            await insertRepository.InsertAuditLogsAsync([auditLog], cancellationToken).ConfigureAwait(false);
+
             deleteRepository.Delete(pr);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();

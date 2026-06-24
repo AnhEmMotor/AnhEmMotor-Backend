@@ -8,7 +8,7 @@ public static class InventoryReceiptStatusSeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        var allStatuses = Domain.Constants.InventoryReceiptStatus.AllowedValues;
+        var allStatuses = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.AllowedValues;
         if (allStatuses.Length == 0)
         {
             return;

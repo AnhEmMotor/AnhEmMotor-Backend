@@ -5,7 +5,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductQuotations;
-using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.SupplierDebt;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Mapster;
@@ -18,12 +18,10 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
     public class UpdateInventoryReceiptStatusCommandHandler(
         IInventoryReceiptReadRepository readRepository,
         IInventoryReceiptUpdateRepository updateRepository,
+        IInventoryReceiptInsertRepository insertRepository,
         ICurrentUserContext currentUserContext,
         IInventoryLedgerRepository ledgerRepository,
-        IProductQuotationReadRepository quotationReadRepository,
-        IProductQuotationUpdateRepository quotationUpdateRepository,
-        IProductQuotationInsertRepository quotationInsertRepository,
-        ISupplierDebtRepository supplierDebtRepository,
+        ISupplierDebtInsertRepository supplierDebtInsertRepository,
         IUnitOfWork unitOfWork,
         IPublisher publisher) : IRequestHandler<UpdateInventoryReceiptStatusCommand, Result<InventoryReceiptDetailResponse>>
     {
@@ -37,7 +35,7 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
             {
                 return Error.NotFound($"Không tìm thấy phiếu nhập kho với ID {request.Id}.", "Id");
             }
-            if (string.Compare(receipt.StatusId, Domain.Constants.InventoryReceiptStatus.Sent) != 0)
+            if (string.Compare(receipt.StatusId, Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent) != 0)
             {
                 return Error.BadRequest(
                     "Phiếu nhập kho phải ở trạng thái đã gửi (sent) mới có thể phê duyệt hoặc từ chối.",
@@ -46,7 +44,7 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
             var currentUserId = currentUserContext.GetUserId();
             if (string.Equals(
                 request.StatusId,
-                Domain.Constants.InventoryReceiptStatus.Approve,
+                Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                 StringComparison.OrdinalIgnoreCase))
             {
                 foreach (var info in receipt.InventoryReceiptInfos)
@@ -62,7 +60,7 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                                     ii.InventoryReceipt.DeletedAt == null &&
                                     string.Equals(
                                         ii.InventoryReceipt.StatusId,
-                                        Domain.Constants.InventoryReceiptStatus.Approve,
+                                        Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                         StringComparison.OrdinalIgnoreCase))
                             .Sum(ii => ii.Count ?? 0);
                         var remainingAllowed = prItem.Quantity - importedQty;
@@ -77,7 +75,7 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                         }
                     }
                 }
-                receipt.StatusId = Domain.Constants.InventoryReceiptStatus.Approve;
+                receipt.StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve;
                 receipt.ApprovedBy = currentUserId;
                 receipt.ConfirmedBy = currentUserId;
                 receipt.RejectedBy = null;
@@ -97,47 +95,20 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                         TransactionType = "Nhập kho",
                         ProductVariantId = variantId,
                         ProductVariantColorId = colorId,
-                        PartnerName = info.Supplier?.Name,
+                        PartnerName = info.PurchaseRequestItem?.Supplier?.Name,
                         ImportQty = importQty,
                         ExportQty = 0,
-                        UnitPrice = info.UnitPrice ?? 0,
-                        TotalAmount = importQty * (info.UnitPrice ?? 0),
+                        UnitPrice = info.PurchaseRequestItem?.UnitPrice ?? 0,
+                        TotalAmount = importQty * (info.PurchaseRequestItem?.UnitPrice ?? 0),
                         StockAfter = newStock
                     };
                     await ledgerRepository.AddAsync(ledger, cancellationToken).ConfigureAwait(false);
-                    if (info.SupplierId.HasValue && info.UnitPrice.HasValue && variantId > 0)
-                    {
-                        var existingQuote = await quotationReadRepository.GetBySupplierAndVariantAsync(
-                            variantId,
-                            colorId,
-                            info.SupplierId.Value,
-                            cancellationToken)
-                            .ConfigureAwait(false);
-                        if (existingQuote != null)
-                        {
-                            if (existingQuote.QuotePrice != (int)info.UnitPrice.Value)
-                            {
-                                existingQuote.QuotePrice = (int)info.UnitPrice.Value;
-                                quotationUpdateRepository.Update(existingQuote);
-                            }
-                        } else
-                        {
-                            var newQuote = new ProductQuotation
-                            {
-                                ProductVariantId = variantId,
-                                ProductVariantColorId = colorId,
-                                SupplierId = info.SupplierId.Value,
-                                QuotePrice = (int)info.UnitPrice.Value
-                            };
-                            await quotationInsertRepository.AddAsync(newQuote, cancellationToken).ConfigureAwait(false);
-                        }
-                    }
                 }
                 var debtsToCreate = receipt.InventoryReceiptInfos
-                    .Where(info => info.SupplierId.HasValue && info.Count.HasValue && info.Count.Value > 0)
-                    .GroupBy(info => info.SupplierId!.Value)
+                    .Where(info => info.PurchaseRequestItem?.SupplierId != null && info.Count.HasValue && info.Count.Value > 0)
+                    .GroupBy(info => info.PurchaseRequestItem!.SupplierId!.Value)
                     .Select(
-                        g => new { SupplierId = g.Key, TotalAmount = g.Sum(i => (i.Count ?? 0) * (i.UnitPrice ?? 0)) })
+                        g => new { SupplierId = g.Key, TotalAmount = g.Sum(i => (i.Count ?? 0) * (i.PurchaseRequestItem?.UnitPrice ?? 0)) })
                     .Where(x => x.TotalAmount > 0)
                     .ToList();
                 foreach (var debtInfo in debtsToCreate)
@@ -149,14 +120,14 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                         TotalAmount = debtInfo.TotalAmount,
                         PaidAmount = 0
                     };
-                    supplierDebtRepository.Add(debt);
+                    supplierDebtInsertRepository.Add(debt);
                 }
             } else if (string.Equals(
                        request.StatusId,
-                       Domain.Constants.InventoryReceiptStatus.Reject,
+                       Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Reject,
                        StringComparison.OrdinalIgnoreCase))
             {
-                receipt.StatusId = Domain.Constants.InventoryReceiptStatus.Reject;
+                receipt.StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Reject;
                 receipt.RejectedBy = currentUserId;
                 receipt.ApprovedBy = null;
                 receipt.ConfirmedBy = null;
@@ -165,7 +136,25 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                 return Error.BadRequest("Trạng thái phê duyệt không hợp lệ.", "StatusId");
             }
             updateRepository.Update(receipt);
+
+            var receiptAuditLogs = new List<Domain.Entities.InventoryReceiptAuditLog>
+            {
+                new Domain.Entities.InventoryReceiptAuditLog
+                {
+                    InventoryReceipt = receipt,
+                    Action = "Update",
+                    ChangedById = currentUserId,
+                    ChangedAt = DateTimeOffset.UtcNow,
+                    OldStatusId = receipt.StatusId,
+                    NewStatusId = request.StatusId,
+                    OldNotes = receipt.Notes,
+                    NewNotes = receipt.Notes
+                }
+            };
+            
+            await insertRepository.InsertAuditLogsAsync(receiptAuditLogs, cancellationToken).ConfigureAwait(false);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
             var combos = new HashSet<(int VariantId, int? ColorId)>();
             foreach (var info in receipt.InventoryReceiptInfos)
             {

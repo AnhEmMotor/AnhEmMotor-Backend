@@ -4,11 +4,13 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
+using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Constants.Order;
+using Domain.Constants.PurchaseRequest;
 using Domain.Entities;
 using Mapster;
 using MediatR;
@@ -29,6 +31,7 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
     IVehicleReadRepository vehicleReadRepository,
+    IVehicleUpdateRepository vehicleUpdateRepository,
     IUnitOfWork unitOfWork,
     ICurrentUserContext? currentUserContext = null) : IRequestHandler<CreateInventoryReceiptCommand, Result<InventoryReceiptDetailResponse?>>
 {
@@ -81,7 +84,10 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                     prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItem2)
                 ? prItem2.ProductVariantColorId
                 : (int?)null;
-            var resolvedSupplierId = product.SupplierId;
+            var resolvedSupplierId = product.PurchaseRequestItemId.HasValue &&
+                    prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItm) && prItm.SupplierId.HasValue
+                ? prItm.SupplierId
+                : (int?)null;
             if (resolvedVariantId.HasValue)
             {
                 if (prItem != null)
@@ -93,15 +99,15 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                                 ii.InventoryReceipt.DeletedAt == null &&
                                 (string.Equals(
                                         ii.InventoryReceipt.StatusId,
-                                        Domain.Constants.InventoryReceiptStatus.Approve,
+                                        Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                                         StringComparison.OrdinalIgnoreCase) ||
                                     string.Equals(
                                         ii.InventoryReceipt.StatusId,
-                                        Domain.Constants.InventoryReceiptStatus.Sent,
+                                        Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Sent,
                                         StringComparison.OrdinalIgnoreCase) ||
                                     string.Equals(
                                         ii.InventoryReceipt.StatusId,
-                                        Domain.Constants.InventoryReceiptStatus.Draft,
+                                        Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft,
                                         StringComparison.OrdinalIgnoreCase)))
                         .Sum(ii => ii.Count ?? 0);
                     var remainingAllowed = prItem.Quantity - occupiedQty;
@@ -217,7 +223,7 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
         {
             inventoryReceipt.Notes = HtmlTagRegex().Replace(inventoryReceipt.Notes, string.Empty);
         }
-        inventoryReceipt.StatusId = Domain.Constants.InventoryReceiptStatus.Draft;
+        inventoryReceipt.StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Draft;
         inventoryReceipt.CreatedBy = currentUserContext?.GetUserId();
         var inventoryReceiptInfos = new List<InventoryReceiptInfoEntity>();
         foreach (var p in request.Products)
@@ -232,6 +238,7 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                 : (int?)null;
             var inventoryReceiptInfo = p.Adapt<InventoryReceiptInfoEntity>();
             inventoryReceiptInfo.RemainingCount = p.Count ?? 0;
+
             if (resolvedVariantId.HasValue && variantMap.TryGetValue(resolvedVariantId.Value, out var variant))
             {
                 var managementType = variant.Product?.ProductCategory?.ManagementType;
@@ -287,6 +294,56 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
         }
         inventoryReceipt.InventoryReceiptInfos = inventoryReceiptInfos;
         insertRepository.Add(inventoryReceipt);
+
+        var currentUserId = currentUserContext?.GetUserId();
+        var receiptAuditLogs = new List<Domain.Entities.InventoryReceiptAuditLog>
+        {
+            new Domain.Entities.InventoryReceiptAuditLog
+            {
+                InventoryReceipt = inventoryReceipt,
+                Action = "Add",
+                ChangedById = currentUserId,
+                ChangedAt = DateTimeOffset.UtcNow,
+                NewStatusId = inventoryReceipt.StatusId,
+                NewNotes = inventoryReceipt.Notes
+            }
+        };
+
+        var infoAuditLogs = new List<Domain.Entities.InventoryReceiptInfoAuditLog>();
+        var vehicleAuditLogs = new List<Domain.Entities.VehicleAuditLog>();
+        foreach (var info in inventoryReceiptInfos)
+        {
+            infoAuditLogs.Add(new Domain.Entities.InventoryReceiptInfoAuditLog
+            {
+                InventoryReceiptInfo = info,
+                Action = "Add",
+                NewQuantity = info.Count
+            });
+
+            if (info.Vehicles != null)
+            {
+                foreach (var v in info.Vehicles)
+                {
+                    vehicleAuditLogs.Add(new Domain.Entities.VehicleAuditLog
+                    {
+                        Vehicle = v,
+                        Action = "Add",
+                        ChangedById = currentUserId,
+                        ChangedAt = DateTimeOffset.UtcNow,
+                        NewVinNumber = v.VinNumber,
+                        NewEngineNumber = v.EngineNumber
+                    });
+                }
+            }
+        }
+
+        await insertRepository.InsertAuditLogsAsync(receiptAuditLogs, cancellationToken).ConfigureAwait(false);
+        await insertRepository.InsertInfoAuditLogsAsync(infoAuditLogs, cancellationToken).ConfigureAwait(false);
+        if (vehicleAuditLogs.Any())
+        {
+            await vehicleUpdateRepository.InsertAuditLogsAsync(vehicleAuditLogs, cancellationToken).ConfigureAwait(false);
+        }
+
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var created = await readRepository.GetByIdWithDetailsAsync(inventoryReceipt.Id, cancellationToken)
             .ConfigureAwait(false);

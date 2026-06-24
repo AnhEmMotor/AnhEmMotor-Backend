@@ -2,12 +2,21 @@ using Application.ApiContracts.PurchaseRequest.Requests;
 using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Common.Models;
 using Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRequest;
+using Application.Features.PurchaseRequests.Commands.CloneManyPurchaseRequests;
 using Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest;
+using Application.Features.PurchaseRequests.Commands.DeleteManyPurchaseRequests;
 using Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest;
+using Application.Features.PurchaseRequests.Commands.ImportPurchaseRequests;
+using Application.Features.PurchaseRequests.Commands.RestoreManyPurchaseRequests;
+using Application.Features.PurchaseRequests.Commands.RestorePurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.SendPurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
+using Application.Features.PurchaseRequests.Queries.ExportPurchaseRequests;
 using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequestById;
 using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequests;
+using Application.Features.PurchaseRequests.Queries.GetDeletedPurchaseRequestsList;
+using Application.Features.PurchaseRequests.Queries.GetImportPurchaseRequestTemplate;
+using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestAuditLogs;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequests;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;
@@ -47,7 +56,7 @@ namespace WebAPI.Controllers.V1
             var result = await mediator.Send(
                 new CreatePurchaseRequestCommand { Note = command.Note, Items = command.Items, },
                 cancellationToken)
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -67,7 +76,7 @@ namespace WebAPI.Controllers.V1
             var result = await mediator.Send(
                 new UpdatePurchaseRequestCommand { Id = id, Note = command.Note, Items = command.Items },
                 cancellationToken)
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -82,7 +91,7 @@ namespace WebAPI.Controllers.V1
         public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
         {
             var result = await mediator.Send(new DeletePurchaseRequestCommand(id), cancellationToken)
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -96,7 +105,8 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> SendAsync(int id, CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new SendPurchaseRequestCommand(id), cancellationToken).ConfigureAwait(true);
+            var result = await mediator.Send(new SendPurchaseRequestCommand(id), cancellationToken)
+                .ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -116,7 +126,7 @@ namespace WebAPI.Controllers.V1
             var result = await mediator.Send(
                 new ApproveRejectPurchaseRequestCommand(id, request.Status),
                 cancellationToken)
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -146,16 +156,15 @@ namespace WebAPI.Controllers.V1
             var result = await mediator.Send(
                 new GetPurchaseRequestsQuery { SieveModel = sieveModel },
                 cancellationToken)
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
             return HandleResult(result);
         }
 
         /// <summary>
-        /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu Purchase Order - phiếu đặt
-        /// hàng).
+        /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu nhập).
         /// </summary>
         [HttpGet("approved")]
-        [RequiresAnyPermissions(PurchaseOrder.Create, PurchaseOrder.Edit)]
+        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
         [ProducesResponseType(typeof(PagedResult<PurchaseRequestListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetApprovedAsync(
             [FromQuery] SieveModel sieveModel,
@@ -164,7 +173,7 @@ namespace WebAPI.Controllers.V1
             var result = await mediator.Send(
                 new GetApprovedPurchaseRequestsQuery { SieveModel = sieveModel },
                 cancellationToken)
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -198,7 +207,119 @@ namespace WebAPI.Controllers.V1
         public async Task<IActionResult> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             var result = await mediator.Send(new GetPurchaseRequestByIdQuery(id), cancellationToken)
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Lấy lịch sử chỉnh sửa yêu cầu mua hàng.
+        /// </summary>
+        [HttpGet("{id:int}/audit-logs")]
+        [HasPermission(PurchaseRequests.View)]
+        [ProducesResponseType(typeof(List<PurchaseRequestAuditLogResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPurchaseRequestAuditLogsAsync(int id, CancellationToken cancellationToken)
+        {
+            var query = new GetPurchaseRequestAuditLogsQuery { Id = id };
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        [HttpDelete("delete-many")]
+        [HasPermission(PurchaseRequests.Delete)]
+        [ProducesResponseType(typeof(Result<int>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteManyPurchaseRequestsAsync(
+            [FromBody] DeleteManyPurchaseRequestsCommand command,
+            CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+            return HandleResult(result);
+        }
+
+        [HttpPost("restore/{id:int}")]
+        [HasPermission(PurchaseRequests.Delete)]
+        [ProducesResponseType(typeof(Result<int>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> RestorePurchaseRequestAsync(int id, CancellationToken cancellationToken)
+        {
+            var command = new RestorePurchaseRequestCommand { Id = id };
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+            return HandleResult(result);
+        }
+
+        [HttpPost("restore-many")]
+        [HasPermission(PurchaseRequests.Delete)]
+        [ProducesResponseType(typeof(Result<int>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> RestoreManyPurchaseRequestsAsync(
+            [FromBody] RestoreManyPurchaseRequestsCommand command,
+            CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+            return HandleResult(result);
+        }
+
+        [HttpPost("clone-many")]
+        [HasPermission(PurchaseRequests.Create)]
+        [ProducesResponseType(typeof(Result<int>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CloneManyPurchaseRequestsAsync(
+            [FromBody] CloneManyPurchaseRequestsCommand command,
+            CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+            return HandleResult(result);
+        }
+
+        [HttpPost("import")]
+        [HasPermission(PurchaseRequests.Create)]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(Result<ImportPurchaseRequestsResult>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ImportPurchaseRequestsAsync(
+            [FromForm] ImportPurchaseRequestsCommand command,
+            CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+            return HandleResult(result);
+        }
+
+        [HttpGet("import-template")]
+        [HasPermission(PurchaseRequests.Create)]
+        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetImportTemplateAsync(CancellationToken cancellationToken)
+        {
+            var query = new GetImportPurchaseRequestTemplateQuery();
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+            if (result.IsSuccess)
+            {
+                return File(
+                    result.Value,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "Mau_nhap_yeu_cau_mua_hang.xlsx");
+            }
+            return HandleResult(result);
+        }
+
+        [HttpGet("export")]
+        [HasPermission(PurchaseRequests.View)]
+        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ExportPurchaseRequestsAsync(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
+        {
+            var query = new ExportPurchaseRequestsQuery { SieveModel = sieveModel };
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+            return File(
+                result,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "Danh_sach_yeu_cau_mua_hang.xlsx");
+        }
+
+        [HttpGet("deleted")]
+        [HasPermission(PurchaseRequests.View)]
+        [ProducesResponseType(typeof(PagedResult<PurchaseRequestListResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDeletedPurchaseRequestsAsync(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetDeletedPurchaseRequestsListQuery { SieveModel = sieveModel };
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
     }

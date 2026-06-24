@@ -54,7 +54,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetProductCategoryStatsAsync(CancellationToken cancellationToken)
     {
         var query = new GetProductCategoryStatsQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -69,7 +69,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new ExportProductCategoriesQuery { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -83,7 +83,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetProductCategoriesListQuery() { SieveModel = sieveModel, ProductOnly = false };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -98,7 +98,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetProductCategoriesListQuery() { SieveModel = sieveModel, ProductOnly = true };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -113,7 +113,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetDeletedProductCategoriesListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -127,7 +127,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetProductCategoryByIdAsync(int id, CancellationToken cancellationToken)
     {
         var query = new GetProductCategoryByIdQuery() { Id = id };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -142,7 +142,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateProductCategoryCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleCreated(result, ProductCategory.GetById, new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
@@ -159,7 +159,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateProductCategoryCommand>() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -173,7 +173,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     public async Task<IActionResult> DeleteProductCategoryAsync(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteProductCategoryCommand() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -189,7 +189,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyProductCategoriesCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -204,7 +204,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     public async Task<IActionResult> RestoreProductCategoryAsync(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreProductCategoryCommand() with { Id = id };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -220,7 +220,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyProductCategoriesCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }
