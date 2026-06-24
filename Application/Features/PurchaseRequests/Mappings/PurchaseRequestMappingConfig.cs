@@ -177,7 +177,8 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                                 0))
                                     .Sum(ii => ii.Count ?? 0)
                                 : 0)))
-                .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null);
+                .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
+                .Map(dest => dest.ProductQuotationId, src => src.ProductQuotationId);
             config.NewConfig<PurchaseRequest, ApprovedPurchaseRequestDetailResponse>()
                 .Map(dest => dest.Items, src => src.PurchaseRequestItems);
             config.NewConfig<PurchaseRequestItem, ApprovedPurchaseRequestItemResponse>()
@@ -228,7 +229,8 @@ namespace Application.Features.PurchaseRequests.Mappings
                             ProductManagementType.VinNumber,
                             StringComparison.OrdinalIgnoreCase) ==
                         0)
-                .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null);
+                .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
+                .Map(dest => dest.ProductQuotationId, src => src.ProductQuotationId);
         }
     }
 }

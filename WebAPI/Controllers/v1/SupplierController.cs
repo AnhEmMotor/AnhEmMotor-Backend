@@ -1,9 +1,11 @@
 using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId;
+using Application.Features.Suppliers.Commands.CloneManySuppliers;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
+using Application.Features.Suppliers.Commands.ImportSuppliers;
 using Application.Features.Suppliers.Commands.RestoreManySuppliers;
 using Application.Features.Suppliers.Commands.RestoreSupplier;
 using Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
@@ -11,6 +13,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Features.Suppliers.Queries.ExportSuppliers;
 using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
+using Application.Features.Suppliers.Queries.GetImportSupplierTemplate;
 using Application.Features.Suppliers.Queries.GetPartnerTypesList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
@@ -332,6 +335,58 @@ public class SupplierController(IMediator mediator) : ApiController
     {
         var query = new ExportSuppliersQuery { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Nhân bản nhiều nhà cung cấp.
+    /// </summary>
+    /// <param name="request">Danh sách ID cần nhân bản.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả nhân bản.</returns>
+    [HttpPost("clone-many")]
+    [HasPermission(Suppliers.Create)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CloneManySuppliersAsync(
+        [FromBody] CloneManySuppliersCommand request,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Nhập danh sách nhà cung cấp từ file Excel.
+    /// </summary>
+    /// <param name="request">Command chứa file Excel.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả nhập dữ liệu.</returns>
+    [HttpPost("import")]
+    [HasPermission(Suppliers.Create)]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(ImportSuppliersResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ImportSuppliersAsync(
+        [FromForm] ImportSuppliersCommand request,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tải file Excel mẫu để nhập nhà cung cấp.
+    /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>File Excel mẫu.</returns>
+    [HttpGet("import-template")]
+    [HasPermission(Suppliers.Create)]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetImportTemplateAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetImportSupplierTemplateQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

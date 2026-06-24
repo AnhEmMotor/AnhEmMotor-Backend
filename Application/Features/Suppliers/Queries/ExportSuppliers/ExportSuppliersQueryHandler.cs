@@ -38,7 +38,7 @@ public class ExportSuppliersQueryHandler(ISupplierReadRepository repository) : I
         subtitleRange.Style.Font.FontSize = 10;
         subtitleRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
         subtitleRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
-        string[] headers = { "STT", "Tên Đối Tác", "Loại Đối Tác", "Điện Thoại", "Email", "Mã Số Thuế", "Địa Chỉ" };
+        string[] headers = { "Loại đối tác", "Tên đối tác", "Điện thoại", "Email", "Mã số thuế", "Địa chỉ", "Ghi chú" };
         for (int i = 0; i < headers.Length; i++)
         {
             var cell = worksheet.Cell(4, i + 1);
@@ -50,25 +50,24 @@ public class ExportSuppliersQueryHandler(ISupplierReadRepository repository) : I
             cell.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
             cell.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
         }
-        worksheet.Column(1).Width = 8;
-        worksheet.Column(2).Width = 25;
-        worksheet.Column(3).Width = 18;
-        worksheet.Column(4).Width = 15;
-        worksheet.Column(5).Width = 25;
-        worksheet.Column(6).Width = 18;
-        worksheet.Column(7).Width = 35;
+        worksheet.Column(1).Width = 20;
+        worksheet.Column(2).Width = 35;
+        worksheet.Column(3).Width = 15;
+        worksheet.Column(4).Width = 30;
+        worksheet.Column(5).Width = 20;
+        worksheet.Column(6).Width = 50;
+        worksheet.Column(7).Width = 40;
         int rowIndex = 5;
-        int stt = 1;
         foreach (var supplier in suppliers)
         {
             worksheet.Row(rowIndex).Height = 24;
-            worksheet.Cell(rowIndex, 1).Value = stt++;
+            worksheet.Cell(rowIndex, 1).Value = PartnerType.GetName(supplier.PartnerTypeId);
             worksheet.Cell(rowIndex, 2).Value = supplier.Name ?? string.Empty;
-            worksheet.Cell(rowIndex, 3).Value = PartnerType.GetName(supplier.PartnerTypeId);
-            worksheet.Cell(rowIndex, 4).Value = supplier.Phone ?? string.Empty;
-            worksheet.Cell(rowIndex, 5).Value = supplier.Email ?? string.Empty;
-            worksheet.Cell(rowIndex, 6).Value = supplier.TaxIdentificationNumber ?? string.Empty;
-            worksheet.Cell(rowIndex, 7).Value = supplier.Address ?? string.Empty;
+            worksheet.Cell(rowIndex, 3).Value = supplier.Phone ?? string.Empty;
+            worksheet.Cell(rowIndex, 4).Value = supplier.Email ?? string.Empty;
+            worksheet.Cell(rowIndex, 5).Value = supplier.TaxIdentificationNumber ?? string.Empty;
+            worksheet.Cell(rowIndex, 6).Value = supplier.Address ?? string.Empty;
+            worksheet.Cell(rowIndex, 7).Value = supplier.Notes ?? string.Empty;
             worksheet.Cell(rowIndex, 1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
             worksheet.Cell(rowIndex, 1).Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
             worksheet.Cell(rowIndex, 2).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left);
@@ -79,7 +78,7 @@ public class ExportSuppliersQueryHandler(ISupplierReadRepository repository) : I
             worksheet.Cell(rowIndex, 4).Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
             worksheet.Cell(rowIndex, 5).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left);
             worksheet.Cell(rowIndex, 5).Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
-            worksheet.Cell(rowIndex, 6).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+            worksheet.Cell(rowIndex, 6).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left);
             worksheet.Cell(rowIndex, 6).Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
             worksheet.Cell(rowIndex, 7).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left);
             worksheet.Cell(rowIndex, 7).Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);

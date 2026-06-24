@@ -120,6 +120,21 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .ToListAsync(cancellationToken);
         }
 
+        public Task<List<PurchaseRequestItem>> GetItemsByPurchaseRequestIdsAsync(
+            IEnumerable<int> purchaseRequestIds,
+            CancellationToken cancellationToken)
+        {
+            return context.PurchaseRequestItems
+                .IgnoreQueryFilters()
+                .Include(x => x.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
+                .ThenInclude(p => p!.ProductCategory)
+                .Include(x => x.ProductVariantColor)
+                .Include(x => x.InventoryReceiptInfos)
+                .Where(x => purchaseRequestIds.Contains(x.PurchaseRequestId))
+                .ToListAsync(cancellationToken);
+        }
+
         public Task<List<Domain.Entities.PurchaseRequestAuditLog>> GetAuditLogsAsync(int purchaseRequestId, CancellationToken cancellationToken)
         {
             return context.PurchaseRequestAuditLogs

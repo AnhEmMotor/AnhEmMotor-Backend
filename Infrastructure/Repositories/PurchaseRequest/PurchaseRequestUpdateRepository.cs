@@ -10,5 +10,11 @@ namespace Infrastructure.Repositories.PurchaseRequest
         {
             context.PurchaseRequests.Update(purchaseRequest);
         }
+
+        public void Restore(PurchaseRequestEntity purchaseRequest)
+        {
+            purchaseRequest.DeletedAt = null;
+            context.PurchaseRequests.Update(purchaseRequest);
+        }
     }
 }

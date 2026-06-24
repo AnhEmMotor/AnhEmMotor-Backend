@@ -30,6 +30,11 @@ namespace Infrastructure.Repositories.ProductQuotations
                     cancellationToken);
         }
 
+        public Task<List<ProductQuotation>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            return context.ProductQuotations.ToListAsync(cancellationToken);
+        }
+
         public void Update(ProductQuotation row)
         {
             context.ProductQuotations.Update(row);

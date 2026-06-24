@@ -11,6 +11,8 @@ namespace Application.Interfaces.Repositories.ProductQuotations
             int? colorId,
             int supplierId,
             CancellationToken cancellationToken);
+
+        public Task<List<ProductQuotation>> GetAllAsync(CancellationToken cancellationToken);
     }
 }
 

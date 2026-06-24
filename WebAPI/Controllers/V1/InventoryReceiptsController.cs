@@ -1,6 +1,5 @@
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
-using Application.Features.InventoryReceipts.Commands.CloneInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.DeleteInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.DeleteManyInventoryReceipts;
@@ -16,6 +15,9 @@ using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySuppl
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsList;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStats;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStatusList;
+using Application.Features.InventoryReceipts.Commands.ImportInventoryReceipts;
+using Application.Features.InventoryReceipts.Queries.ExportInventoryReceipts;
+using Application.Features.InventoryReceipts.Queries.GetImportInventoryReceiptTemplate;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -136,24 +138,6 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateInventoryReceiptCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(
-            result,
-            Domain.Constants.RouteNames.InventoryReceipts.GetById,
-            new { id = result.IsSuccess ? result.Value?.Id : null });
-    }
-
-    /// <summary>
-    /// Clone phiếu nhập từ phiếu nhập gốc. Chỉ clone các sản phẩm còn hợp lệ (chưa xóa, còn đang bán).
-    /// </summary>
-    [HttpPost("{id:int}/clone")]
-    [HasPermission(InventoryReceipts.Create)]
-    [ProducesResponseType(typeof(InventoryReceiptDetailResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CloneInventoryReceiptAsync(int id, CancellationToken cancellationToken)
-    {
-        var command = new CloneInventoryReceiptCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
@@ -301,5 +285,43 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         var query = new Application.Features.InventoryReceipts.Queries.GetInventoryReceiptAuditLogs.GetInventoryReceiptAuditLogsQuery { Id = id };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
+    }
+
+    [HttpPost("import")]
+    [HasPermission(InventoryReceipts.Create)]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(Result<ImportInventoryReceiptsResult>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ImportInventoryReceiptsAsync(
+        [FromForm] ImportInventoryReceiptsCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    [HttpGet("import-template")]
+    [HasPermission(InventoryReceipts.Create)]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetImportTemplateAsync([FromQuery] int purchaseRequestId, CancellationToken cancellationToken)
+    {
+        var query = new GetImportInventoryReceiptTemplateQuery { PurchaseRequestId = purchaseRequestId };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        if (result.IsSuccess)
+        {
+            return File(result.Value, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_nhap_phieu_nhap_kho.xlsx");
+        }
+        return HandleResult(result);
+    }
+
+    [HttpGet("export")]
+    [HasPermission(InventoryReceipts.View)]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportInventoryReceiptsAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
+    {
+        var query = new ExportInventoryReceiptsQuery { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Danh_sach_phieu_nhap_kho.xlsx");
     }
 }

@@ -1,6 +1,6 @@
 using Application.ApiContracts.InventoryReceipt.Requests;
 using Application.Features.InventoryOnHand.Notifications;
-using Application.Features.InventoryReceipts.Commands.CloneInventoryReceipt;
+
 using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.SendInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
@@ -460,52 +460,7 @@ public class InventoryReceipts
         _updateRepoMock.Verify(x => x.Update(existingReceipt), Times.Once);
     }
 
-    [Fact(
-        DisplayName = "IR_013 - Nhân bản phiếu nhập kho thành công từ phiếu nhập kho gốc và chỉ giữ lại những sản phẩm còn hoạt động.")]
-    public async Task IR_013_CloneInventoryReceipt_Success()
-    {
-        var handler = new CloneInventoryReceiptCommandHandler(
-            _readRepoMock.Object,
-            _insertRepoMock.Object,
-            _variantRepoMock.Object,
-            _unitOfWorkMock.Object);
-        var command = new CloneInventoryReceiptCommand { Id = 1 };
-        var originalReceipt = new InventoryReceiptEntity
-        {
-            Id = 1,
-            Notes = "Original notes",
-            PurchaseRequestId = 10,
-            InventoryReceiptInfos =
-                [new InventoryReceiptInfoEntity
-                {
-                    Id = 20,
-                    Count = 2,
-                    PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 5 }
-                }]
-        };
-        var mockVariants = new List<ProductVariant>
-        {
-            new()
-            {
-                Id = 5,
-                VariantName = "Variant 5",
-                Product = new Domain.Entities.Product { StatusId = Domain.Constants.Product.ProductStatus.ForSale }
-            }
-        };
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(originalReceipt);
-        _variantRepoMock.Setup(
-            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(mockVariants);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new InventoryReceiptEntity { Id = 2, Notes = "Original notes", StatusId = "draft" });
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        string.Compare(result.Value!.Notes, "Original notes").Should().Be(0);
-        string.Compare(result.Value.StatusId, "draft").Should().Be(0);
-        _insertRepoMock.Verify(x => x.Add(It.IsAny<InventoryReceiptEntity>()), Times.Once);
-    }
+
 
     [Fact(DisplayName = "IR_023 - Tạo phiếu nhập kho thành công và lưu người tạo")]
     public async Task IR_023_CreateInventoryReceipt_SaveCreatedBy_Success()

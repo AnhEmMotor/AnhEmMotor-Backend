@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.InventoryReceipt.Responses;
 
@@ -24,4 +25,7 @@ public class InventoryReceiptListResponse
     public DateTimeOffset? CreatedAt { get; set; }
 
     public List<InventoryReceiptInfoResponse> Products { get; set; } = [];
+
+    [JsonPropertyName("deleted_at")]
+    public DateTimeOffset? DeletedAt { get; set; }
 }

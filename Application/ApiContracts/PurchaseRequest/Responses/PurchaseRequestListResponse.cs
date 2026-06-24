@@ -1,4 +1,6 @@
 using System;
+using System.Text.Json.Serialization;
+
 
 namespace Application.ApiContracts.PurchaseRequest.Responses
 {
@@ -23,5 +25,8 @@ namespace Application.ApiContracts.PurchaseRequest.Responses
         public int TotalItems { get; set; }
 
         public bool IsFullyImported { get; set; }
+
+        [JsonPropertyName("deleted_at")]
+        public DateTimeOffset? DeletedAt { get; set; }
     }
 }

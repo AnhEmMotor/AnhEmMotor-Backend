@@ -171,6 +171,21 @@ namespace Infrastructure.Repositories.InventoryReceipt
             throw new NotImplementedException();
         }
 
+        public Task<List<InventoryReceiptInfoEntity>> GetInfosByInventoryReceiptIdsAsync(
+            IEnumerable<int> inventoryReceiptIds,
+            CancellationToken cancellationToken)
+        {
+            return context.InventoryReceiptInfos
+                .Include(x => x.Vehicles)
+                .Include(x => x.PurchaseRequestItem)
+                    .ThenInclude(pri => pri!.ProductVariant)
+                        .ThenInclude(pv => pv!.Product)
+                .Include(x => x.PurchaseRequestItem)
+                    .ThenInclude(pri => pri!.ProductVariantColor)
+                .Where(x => inventoryReceiptIds.Contains(x.InventoryReceiptId))
+                .ToListAsync(cancellationToken);
+        }
+
         public Task<List<InventoryReceiptInfoEntity>> GetInfosByVariantAsync(
             int variantId,
             int? colorId,
