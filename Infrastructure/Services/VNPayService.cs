@@ -16,6 +16,18 @@ public class VNPayService(IConfiguration configuration) : IVNPayService
         var vnp_HashSecret = configuration["VNPay:HashSecret"];
         var vnp_BaseUrl = configuration["VNPay:BaseUrl"];
         var vnp_ReturnUrl = configuration["VNPay:CallbackUrl"];
+        var missingSettings = new Dictionary<string, string?>
+        {
+            ["TmnCode"] = vnp_TmnCode,
+            ["HashSecret"] = vnp_HashSecret,
+            ["BaseUrl"] = vnp_BaseUrl,
+            ["CallbackUrl"] = vnp_ReturnUrl
+        }.Where(setting => string.IsNullOrWhiteSpace(setting.Value)).Select(setting => setting.Key).ToList();
+        if (missingSettings.Count > 0)
+        {
+            throw new InvalidOperationException(
+                $"VNPay chưa được cấu hình: {string.Join(", ", missingSettings)}.");
+        }
         vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
         vnpay.AddRequestData("vnp_Command", "pay");
         vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode!);

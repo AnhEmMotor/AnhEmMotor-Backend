@@ -81,7 +81,8 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.Category, src => src.ProductCategory != null ? src.ProductCategory.Name : null)
             .Map(
                 dest => dest.ProductLimit,
-                src => src.ProductCategory != null ? src.ProductCategory.MaxPurchaseQuantity : null)
+                src => GetEffectiveMaxPurchaseQuantity(src))
+            .Map(dest => dest.EffectiveMax, src => GetEffectiveMaxPurchaseQuantity(src))
             .Map(dest => dest.ProductTechnologies, src => MapProductTechnologiesList(src))
             .AfterMapping(
                 (src, dest) =>
@@ -103,6 +104,8 @@ public class ProductMappingConfig : IRegister
         config.NewConfig<ProductVariantEntity, CurrentVariantStoreResponse>()
             .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src))
             .Map(dest => dest.Colors, src => MapVariantColors(src))
+            .Map(dest => dest.ProductLimit, src => GetEffectiveMaxPurchaseQuantity(src, null))
+            .Map(dest => dest.EffectiveMax, src => GetEffectiveMaxPurchaseQuantity(src, null))
             .Map(
                 dest => dest.CoverImageUrl,
                 src => src.ProductVariantColors != null &&
@@ -442,7 +445,8 @@ public class ProductMappingConfig : IRegister
                     Id = c.Id,
                     ColorName = c.ColorName,
                     ColorCode = c.ColorCode,
-                    CoverImageUrl = c.CoverImageUrl
+                    CoverImageUrl = c.CoverImageUrl,
+                    MaxPurchaseQuantity = c.MaxPurchaseQuantity
                 })];
     }
 
@@ -522,7 +526,6 @@ public class ProductMappingConfig : IRegister
         {
             return variant.MaxPurchaseQuantity.Value;
         }
-
         return GetEffectiveMaxPurchaseQuantity(variant.Product?.ProductCategory);
     }
 

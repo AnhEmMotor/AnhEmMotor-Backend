@@ -18,13 +18,11 @@ namespace Domain.Entities
         public TimeSpan AppointmentTime { get; set; }
         public string Notes { get; set; } = string.Empty;
         public BookingStatus Status { get; set; }
-
         public Guid? AssignedSaleId { get; set; }
         public virtual ApplicationUser? AssignedSale { get; set; }
 
         public string CustomerNote { get; set; } = string.Empty;
         public string AdminNote { get; set; } = string.Empty;
-
         public DateTime? CancelledAt { get; set; }
         public string CancellationReason { get; set; } = string.Empty;
     }

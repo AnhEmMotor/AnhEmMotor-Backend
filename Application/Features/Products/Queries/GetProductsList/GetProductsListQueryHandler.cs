@@ -37,19 +37,82 @@ public class GetProductsListQueryHandler(IProductReadRepository readRepository) 
             request.Sorts,
             cancellationToken)
             .ConfigureAwait(false);
+        var normalizedSearch = request.Search?.Trim();
         var items = entities.Select(
-            e => new ProductListStoreResponse
+            e =>
             {
-                Id = e.Id,
-                Name = e.Name,
-                Category = e.ProductCategory?.Name,
-                Brand = e.Brand?.Name,
-                Displacement = e.Displacement,
-                HasBeenBooked = e.Id % 20,
-                Variants =
-                    [.. e.ProductVariants
+                var isExactVariantSearch = !string.IsNullOrWhiteSpace(normalizedSearch) &&
+                    e.ProductVariants.Any(
+                        v => string.Equals(
+                                v.VariantName?.Trim(),
+                                normalizedSearch,
+                                StringComparison.OrdinalIgnoreCase) ||
+                            v.VariantOptionValues.Any(
+                                vov => string.Equals(
+                                    vov.OptionValue?.Name?.Trim(),
+                                    normalizedSearch,
+                                    StringComparison.OrdinalIgnoreCase)));
+                var productMetadataMatches = string.IsNullOrWhiteSpace(normalizedSearch) ||
+                    (!string.IsNullOrWhiteSpace(e.Name) &&
+                        e.Name.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(e.ProductCategory?.Name) &&
+                        e.ProductCategory.Name.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(e.Brand?.Name) &&
+                        e.Brand.Name.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase));
+
+                bool MatchesSearch(Domain.Entities.ProductVariant variant)
+                {
+                    var exactVariantMatches =
+                        string.Equals(
+                            variant.VariantName?.Trim(),
+                            normalizedSearch,
+                            StringComparison.OrdinalIgnoreCase) ||
+                        variant.VariantOptionValues.Any(
+                            vov => string.Equals(
+                                vov.OptionValue?.Name?.Trim(),
+                                normalizedSearch,
+                                StringComparison.OrdinalIgnoreCase));
+                    if (isExactVariantSearch)
+                    {
+                        return exactVariantMatches;
+                    }
+
+                    return productMetadataMatches ||
+                        (!string.IsNullOrWhiteSpace(variant.VariantName) &&
+                            variant.VariantName.Contains(
+                                normalizedSearch!,
+                                StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrWhiteSpace(variant.SKU) &&
+                            variant.SKU.Contains(normalizedSearch!, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrWhiteSpace(variant.UrlSlug) &&
+                            variant.UrlSlug.Contains(normalizedSearch!, StringComparison.OrdinalIgnoreCase)) ||
+                        variant.ProductVariantColors.Any(
+                            c => !string.IsNullOrWhiteSpace(c.ColorName) &&
+                                c.ColorName.Contains(
+                                    normalizedSearch!,
+                                    StringComparison.OrdinalIgnoreCase)) ||
+                        variant.VariantOptionValues.Any(
+                            vov => !string.IsNullOrWhiteSpace(vov.OptionValue?.Name) &&
+                                vov.OptionValue.Name.Contains(
+                                    normalizedSearch!,
+                                    StringComparison.OrdinalIgnoreCase));
+                }
+
+                return new ProductListStoreResponse
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    CategoryId = e.CategoryId,
+                    Category = e.ProductCategory?.Name,
+                    BrandId = e.BrandId,
+                    Brand = e.Brand?.Name,
+                    Displacement = e.Displacement,
+                    HasBeenBooked = e.Id % 20,
+                    Variants =
+                        [.. e.ProductVariants
                             .Where(
-                                v => (request.OptionValueIds.Count == 0 ||
+                                v => MatchesSearch(v) &&
+                                    (request.OptionValueIds.Count == 0 ||
                                                 (groupedOptionFilters?.Count > 0 &&
                                                     groupedOptionFilters.All(
                                                         group => v.VariantOptionValues
@@ -78,11 +141,25 @@ public class GetProductsListQueryHandler(IProductReadRepository readRepository) 
                             .Select(
                                 v =>
                                 {
+                                    var allColors = ProductMappingConfig.MapVariantColors(v);
+                                    var matchingColors = productMetadataMatches || string.IsNullOrWhiteSpace(normalizedSearch)
+                                        ? []
+                                        : allColors
+                                            .Where(
+                                                c => !string.IsNullOrWhiteSpace(c.ColorName) &&
+                                                    c.ColorName.Contains(
+                                                        normalizedSearch,
+                                                        StringComparison.OrdinalIgnoreCase))
+                                            .ToList();
+                                    var responseColors = matchingColors.Count > 0 ? matchingColors : allColors;
                                     var photos = v.ProductCollectionPhotos
                                         .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
                                         .Select(p => p.ImageUrl!)
                                         .ToList();
-                                    var variantColor = v.ProductVariantColors.FirstOrDefault();
+                                    var preferredColorId = matchingColors.FirstOrDefault()?.Id;
+                                    var variantColor = preferredColorId.HasValue
+                                        ? v.ProductVariantColors.FirstOrDefault(c => c.Id == preferredColorId.Value)
+                                        : v.ProductVariantColors.FirstOrDefault();
                                     var colorName = variantColor?.ColorName;
                                     var coverImageUrl = !string.IsNullOrWhiteSpace(variantColor?.CoverImageUrl)
                                         ? variantColor.CoverImageUrl
@@ -110,6 +187,7 @@ public class GetProductsListQueryHandler(IProductReadRepository readRepository) 
                                 })
                             .OrderBy(v => v.Price)
                             .ToList()]
+                };
             })
             .ToList();
         return new PagedResult<ProductListStoreResponse>(items, totalCount, request.Page, request.PageSize);

@@ -1,6 +1,7 @@
 using Application.ApiContracts.Payment.Requests;
 using Application.ApiContracts.Payment.Responses;
 using Application.Common.Models;
+using Application.Common.Payments;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Role;

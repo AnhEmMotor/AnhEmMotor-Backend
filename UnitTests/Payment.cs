@@ -29,7 +29,7 @@ public class Payment
     {
         var orderId = 123;
         var fullOrderCode = (long)orderId * 100000;
-        var totalAmount = 100000m;
+        var totalAmount = 15000000m;
         var order = new Output
         {
             Id = orderId,
@@ -67,8 +67,8 @@ public class Payment
     {
         var orderId = 124;
         var fullOrderCode = (long)orderId * 100000;
-        var totalAmount = 100000m;
-        var depositAmount = 50000m;
+        var totalAmount = 15000000m;
+        var depositAmount = 7500000m;
         var order = new Output
         {
             Id = orderId,
@@ -105,7 +105,7 @@ public class Payment
     {
         var orderId = 125;
         var fullOrderCode = (long)orderId * 100000;
-        var totalAmount = 100000m;
+        var totalAmount = 15000000m;
         var order = new Output
         {
             Id = orderId,
@@ -177,7 +177,7 @@ public class Payment
     public async Task PAY_006_VNPayIPN_Success()
     {
         var orderId = 200;
-        var totalAmount = 200000m;
+        var totalAmount = 15000000m;
         var order = new Output
         {
             Id = orderId,
@@ -258,7 +258,7 @@ public class Payment
     public async Task PAY_009_VNPayIPN_AmountMismatch()
     {
         var orderId = 202;
-        var totalAmount = 100000m;
+        var totalAmount = 15000000m;
         var order = new Output
         {
             Id = orderId,

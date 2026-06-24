@@ -20,11 +20,14 @@ using Application.Features.Outputs.Queries.GetOrderStatusTransitionMap;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserIdForManager;
 using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
+using Application.Features.Outputs.Queries.GetOutputForCurrentUserById;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentStatuses;
+using Application.Interfaces.Services;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Constants.Permission.Permissions;
 using Domain.Constants.RouteNames;
@@ -68,7 +71,22 @@ public class SalesOrdersController(
     }
 
     /// <summary>
-    /// Lấy danh sách đơn hàng của ID khách hàng (chỉ cho phép vào khi có quyền xem đơn hàng).
+    /// Lấy chi tiết một đơn hàng thuộc về người dùng hiện tại.
+    /// </summary>
+    [HttpGet("my-purchases/{id:int}")]
+    [Authorize]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetMyPurchaseByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetOutputForCurrentUserByIdQuery(id), cancellationToken)
+            .ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách đơn hàng theo ID khách hàng (dành cho manager có quyền Outputs.View).
     /// </summary>
     [HttpGet("get-purchases/{id:Guid}")]
     [HasPermission(Outputs.View)]
@@ -353,7 +371,6 @@ public class SalesOrdersController(
         [FromBody] UpdateOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var command = request.Adapt<UpdateOutputStatusCommand>() with
         {
             Id = id,

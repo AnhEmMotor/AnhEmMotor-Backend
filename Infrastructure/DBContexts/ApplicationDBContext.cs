@@ -1,3 +1,4 @@
+using Domain.Entities;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Entities.Logistics;
