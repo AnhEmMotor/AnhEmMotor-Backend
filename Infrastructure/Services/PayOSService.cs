@@ -35,7 +35,9 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
             ["BaseUrl"] = baseUrl,
             ["ReturnUrl"] = returnUrl,
             ["CancelUrl"] = cancelUrl
-        }.Where(setting => string.IsNullOrWhiteSpace(setting.Value)).Select(setting => setting.Key).ToList();
+        }.Where(setting => string.IsNullOrWhiteSpace(setting.Value))
+            .Select(setting => setting.Key)
+            .ToList();
         if (missingSettings.Count > 0)
         {
             return new PayOSPaymentResponse

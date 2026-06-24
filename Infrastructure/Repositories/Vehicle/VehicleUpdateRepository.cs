@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.Vehicle;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.Vehicle;
@@ -20,7 +21,7 @@ public class VehicleUpdateRepository(ApplicationDBContext dbContext) : IVehicleU
         dbContext.Vehicles.Remove(vehicle);
     }
 
-    public Task InsertAuditLogsAsync(IEnumerable<Domain.Entities.VehicleAuditLog> logs, CancellationToken ct = default)
+    public Task InsertAuditLogsAsync(IEnumerable<VehicleAuditLog> logs, CancellationToken ct = default)
     {
         dbContext.VehicleAuditLogs.AddRange(logs);
         return Task.CompletedTask;

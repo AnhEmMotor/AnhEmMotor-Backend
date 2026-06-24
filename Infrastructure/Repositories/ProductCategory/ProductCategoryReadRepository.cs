@@ -118,9 +118,7 @@ public class ProductCategoryReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<CategoryEntity>(mode)
-            .Include(c => c.Products)
-            .ToListAsync(cancellationToken);
+        return context.GetQuery<CategoryEntity>(mode).Include(c => c.Products).ToListAsync(cancellationToken);
     }
 
     public Task<CategoryEntity?> GetByIdAsync(

@@ -109,15 +109,15 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
             .ConfigureAwait(false);
         return[.. staffSales.Select(
             (s, index) => new StaffPerformanceResponse
-        {
-            EmployeeName = s.FullName ?? string.Empty,
-            Role = s.Role ?? string.Empty,
-            TotalSales = s.Sales,
-            TargetSales = 120000000m,
-            CommissionPaid = s.Sales * 0.02m,
-            KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện"),
-            IsTopSeller = index == 0
-        })];
+            {
+                EmployeeName = s.FullName ?? string.Empty,
+                Role = s.Role ?? string.Empty,
+                TotalSales = s.Sales,
+                TargetSales = 120000000m,
+                CommissionPaid = s.Sales * 0.02m,
+                KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện"),
+                IsTopSeller = index == 0
+            })];
     }
 
     public async Task<List<TransactionLogResponse>> GetRecentTransactionsAsync(

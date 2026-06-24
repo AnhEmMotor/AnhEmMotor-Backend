@@ -1,11 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using MediatR;
 using Application.ApiContracts.Client.Profile;
 using Application.Features.Client.Profile;
-using System.Threading.Tasks;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace AnhEmMotor.WebAPI.Controllers.V1.Client
+namespace WebAPI.Controllers.V1.Client
 {
     [ApiController]
     [Route("api/v1/client/profile")]
@@ -13,6 +12,7 @@ namespace AnhEmMotor.WebAPI.Controllers.V1.Client
     public class ProfileController : ControllerBase
     {
         private readonly IMediator _mediator;
+
         public ProfileController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet]

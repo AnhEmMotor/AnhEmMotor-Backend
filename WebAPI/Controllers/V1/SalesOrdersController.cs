@@ -1,6 +1,5 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Services;
 using Application.Features.Outputs.Commands.CancelOrderByBuyer;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
@@ -18,16 +17,15 @@ using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
 using Application.Features.Outputs.Queries.GetOrderStatusMap;
 using Application.Features.Outputs.Queries.GetOrderStatusTransitionMap;
 using Application.Features.Outputs.Queries.GetOutputById;
+using Application.Features.Outputs.Queries.GetOutputForCurrentUserById;
 using Application.Features.Outputs.Queries.GetOutputsByUserIdForManager;
 using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
-using Application.Features.Outputs.Queries.GetOutputForCurrentUserById;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentStatuses;
 using Application.Interfaces.Services;
 using Asp.Versioning;
-using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Constants.Permission.Permissions;
 using Domain.Constants.RouteNames;
@@ -39,7 +37,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -51,9 +48,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý đơn hàng/phiếu xuất")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class SalesOrdersController(
-    IMediator mediator,
-    ICurrentUserContext currentUserContext) : ApiController
+public class SalesOrdersController(IMediator mediator, ICurrentUserContext currentUserContext) : ApiController
 {
     /// <summary>
     /// Lấy danh sách đơn hàng của người dùng hiện tại (dựa trên JWT token).
@@ -325,11 +320,7 @@ public class SalesOrdersController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CancelMyOrderAsync(int id, CancellationToken cancellationToken)
     {
-        var command = new CancelOrderByBuyerCommand
-        {
-            Id = id,
-            CurrentUserId = currentUserContext.GetUserId()
-        };
+        var command = new CancelOrderByBuyerCommand { Id = id, CurrentUserId = currentUserContext.GetUserId() };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }

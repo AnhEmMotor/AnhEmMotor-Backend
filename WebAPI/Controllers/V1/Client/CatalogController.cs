@@ -1,17 +1,16 @@
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
 using Application.ApiContracts.Client.Catalog;
 using Application.Features.Client.Catalog;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
-namespace AnhEmMotor.WebAPI.Controllers.V1.Client
+namespace WebAPI.Controllers.V1.Client
 {
     [ApiController]
     [Route("api/v1/client/catalog")]
     public class CatalogController : ControllerBase
     {
         private readonly IMediator _mediator;
+
         public CatalogController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet("products")]

@@ -14,15 +14,19 @@ namespace Domain.Entities
         public string Action { get; set; } = string.Empty;
 
         public int? OldQuantity { get; set; }
+
         public int? NewQuantity { get; set; }
-        
+
         public int? OldProductVariantId { get; set; }
+
         public int? NewProductVariantId { get; set; }
-        
+
         public int? OldProductVariantColorId { get; set; }
+
         public int? NewProductVariantColorId { get; set; }
 
         public string? OldSupplierName { get; set; }
+
         public string? NewSupplierName { get; set; }
 
         [Column(TypeName = "decimal(18, 2)")]

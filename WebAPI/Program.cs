@@ -42,10 +42,7 @@ builder.Services
                 "CorsPolicy",
                 policy =>
                 {
-                    policy.SetIsOriginAllowed(origin => true)
-                          .AllowAnyMethod()
-                          .AllowAnyHeader()
-                          .AllowCredentials();
+                    policy.SetIsOriginAllowed(origin => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
                 });
         })
     .AddJwtAuthentication(configuration)

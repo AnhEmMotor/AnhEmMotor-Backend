@@ -18,9 +18,11 @@ namespace Domain.Entities
         public DateTimeOffset ChangedAt { get; set; } = DateTimeOffset.UtcNow;
 
         public string? OldVinNumber { get; set; }
+
         public string? NewVinNumber { get; set; }
 
         public string? OldEngineNumber { get; set; }
+
         public string? NewEngineNumber { get; set; }
 
         [ForeignKey("VehicleId")]

@@ -50,7 +50,8 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             Gender = "Male"
         };
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
-        var body = await response.Content.ReadAsStringAsync(); response!.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response!.Content
             .ReadFromJsonAsync<RegisterResponse>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -281,7 +282,4 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     }
     #pragma warning restore CRR0035
 }
-
-
-
 

@@ -1,11 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using MediatR;
-using Application.ApiContracts.Admin.Analytics;
 using Application.Features.Admin.Analytics;
-using System.Threading.Tasks;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace AnhEmMotor.WebAPI.Controllers.V1.Admin
+namespace WebAPI.Controllers.V1.Admin
 {
     [ApiController]
     [Route("api/v1/admin/analytics")]
@@ -13,6 +11,7 @@ namespace AnhEmMotor.WebAPI.Controllers.V1.Admin
     public class AnalyticsController : ControllerBase
     {
         private readonly IMediator _mediator;
+
         public AnalyticsController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet("dashboard-kpis")]

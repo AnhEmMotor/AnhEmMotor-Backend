@@ -148,11 +148,11 @@ namespace Domain.Entities
         public string? OtherStandards { get; set; }
 
         [Column("Description", TypeName = "nvarchar(MAX)")]
- public string? Description { get; set; }
+        public string? Description { get; set; }
 
- public int? MaxPurchaseQuantity { get; set; }
+        public int? MaxPurchaseQuantity { get; set; }
 
- public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
+        public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
 
         public ProductCategory? ProductCategory { get; set; }
 

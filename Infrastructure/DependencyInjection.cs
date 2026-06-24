@@ -1,8 +1,5 @@
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Invoice;
-using Application.Interfaces.Repositories.Lead;
 using Application.Interfaces.Repositories.MediaFile.File;
-using Application.Interfaces.Repositories.ServiceBooking;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Infrastructure.Authorization;
@@ -11,7 +8,6 @@ using Infrastructure.BackgroundJobs;
 using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
-using Infrastructure.Repositories.Lead.Lead;
 using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -107,7 +103,6 @@ public static class DependencyInjection
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
         services.AddHostedService<SupplierContractExpiryWorker>();
-
         return services;
     }
 }

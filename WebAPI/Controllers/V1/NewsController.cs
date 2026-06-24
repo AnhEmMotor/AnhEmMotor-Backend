@@ -10,10 +10,10 @@ using Application.Features.News.Commands.UploadNewsCoverImage;
 using Application.Features.News.Queries.GetLatestNewsPublic;
 using Application.Features.News.Queries.GetNewsById;
 using Application.Features.News.Queries.GetNewsBySlug;
-using Application.Features.News.Queries.GetRelatedNewsPublic;
 using Application.Features.News.Queries.GetNewsList;
 using Application.Features.News.Queries.GetNewsListForStore;
 using Application.Features.News.Queries.GetProductsForNews;
+using Application.Features.News.Queries.GetRelatedNewsPublic;
 using Application.Features.NewsCategories.Queries.GetNewsCategoryList;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
@@ -220,7 +220,8 @@ public class NewsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetBySlugPublicAsync(string slug, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug }, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug }, cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -272,10 +273,7 @@ public class NewsController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Upload ảnh nội dung bài viết (WangEditor)")]
     public async Task<IActionResult> UploadContentImageAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        var command = new UploadNewsContentImageCommand
-        {
-            File = file
-        };
+        var command = new UploadNewsContentImageCommand { File = file };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }

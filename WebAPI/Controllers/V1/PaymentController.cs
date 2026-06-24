@@ -1,5 +1,4 @@
 using Application.ApiContracts.Payment.Requests;
-using Application.ApiContracts.Payment.Responses;
 using Application.Features.Outputs.Queries.GetPaymentLink;
 using Application.Features.Payments.Commands.ProcessPayOSCallback;
 using Application.Features.Payments.Commands.ProcessPayOSWebhook;

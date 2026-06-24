@@ -18,9 +18,11 @@ namespace Domain.Entities
         public DateTimeOffset ChangedAt { get; set; } = DateTimeOffset.UtcNow;
 
         public string? OldStatusId { get; set; }
+
         public string? NewStatusId { get; set; }
 
         public string? OldNotes { get; set; }
+
         public string? NewNotes { get; set; }
 
         [ForeignKey("PurchaseRequestId")]

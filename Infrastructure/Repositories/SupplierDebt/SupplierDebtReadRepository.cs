@@ -1,11 +1,9 @@
 using Application.Interfaces.Repositories.SupplierDebt;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.SupplierDebt
 {
@@ -33,7 +31,9 @@ namespace Infrastructure.Repositories.SupplierDebt
                 .FirstOrDefaultAsync(d => d.Id == id && d.DeletedAt == null, cancellationToken);
         }
 
-        public Task<List<Domain.Entities.SupplierDebt>> GetBySupplierIdAsync(int supplierId, CancellationToken cancellationToken)
+        public Task<List<Domain.Entities.SupplierDebt>> GetBySupplierIdAsync(
+            int supplierId,
+            CancellationToken cancellationToken)
         {
             return context.SupplierDebts
                 .Include(d => d.Supplier)
@@ -59,7 +59,9 @@ namespace Infrastructure.Repositories.SupplierDebt
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<Domain.Entities.SupplierDebtLog>> GetSupplierDebtLogsBySupplierIdAsync(int supplierId, CancellationToken cancellationToken)
+        public async Task<List<SupplierDebtLog>> GetSupplierDebtLogsBySupplierIdAsync(
+            int supplierId,
+            CancellationToken cancellationToken)
         {
             return await context.SupplierDebtLogs
                 .AsNoTracking()

@@ -135,7 +135,9 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .ToListAsync(cancellationToken);
         }
 
-        public Task<List<Domain.Entities.PurchaseRequestAuditLog>> GetAuditLogsAsync(int purchaseRequestId, CancellationToken cancellationToken)
+        public Task<List<PurchaseRequestAuditLog>> GetAuditLogsAsync(
+            int purchaseRequestId,
+            CancellationToken cancellationToken)
         {
             return context.PurchaseRequestAuditLogs
                 .Include(x => x.ChangedBy)
@@ -144,13 +146,15 @@ namespace Infrastructure.Repositories.PurchaseRequest
                 .ToListAsync(cancellationToken);
         }
 
-        public Task<List<Domain.Entities.PurchaseRequestItemAuditLog>> GetItemAuditLogsAsync(IEnumerable<int> itemIds, CancellationToken cancellationToken)
+        public Task<List<PurchaseRequestItemAuditLog>> GetItemAuditLogsAsync(
+            IEnumerable<int> itemIds,
+            CancellationToken cancellationToken)
         {
             return context.PurchaseRequestItemAuditLogs
                 .IgnoreQueryFilters()
                 .Include(x => x.PurchaseRequestItem)
-                    .ThenInclude(x => x!.ProductVariant)
-                        .ThenInclude(x => x!.Product)
+                .ThenInclude(x => x!.ProductVariant)
+                .ThenInclude(x => x!.Product)
                 .Where(x => itemIds.Contains(x.PurchaseRequestItemId))
                 .OrderByDescending(x => x.CreatedAt)
                 .ToListAsync(cancellationToken);

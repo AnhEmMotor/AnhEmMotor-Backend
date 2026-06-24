@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.InventoryReceipt;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
 
@@ -11,13 +12,13 @@ public class InventoryReceiptInsertRepository(ApplicationDBContext context) : II
         context.InventoryReceipts.Add(InventoryReceipt);
     }
 
-    public Task InsertAuditLogsAsync(IEnumerable<Domain.Entities.InventoryReceiptAuditLog> logs, CancellationToken ct = default)
+    public Task InsertAuditLogsAsync(IEnumerable<InventoryReceiptAuditLog> logs, CancellationToken ct = default)
     {
         context.InventoryReceiptAuditLogs.AddRange(logs);
         return Task.CompletedTask;
     }
 
-    public Task InsertInfoAuditLogsAsync(IEnumerable<Domain.Entities.InventoryReceiptInfoAuditLog> logs, CancellationToken ct = default)
+    public Task InsertInfoAuditLogsAsync(IEnumerable<InventoryReceiptInfoAuditLog> logs, CancellationToken ct = default)
     {
         context.InventoryReceiptInfoAuditLogs.AddRange(logs);
         return Task.CompletedTask;

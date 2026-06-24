@@ -1,8 +1,6 @@
 using Application.Interfaces.Repositories.SupplierDebt;
+using Domain.Entities;
 using Infrastructure.DBContexts;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.SupplierDebt
 {
@@ -13,7 +11,9 @@ namespace Infrastructure.Repositories.SupplierDebt
             context.SupplierDebts.Add(supplierDebt);
         }
 
-        public async Task InsertSupplierDebtLogAsync(Domain.Entities.SupplierDebtLog supplierDebtLog, CancellationToken cancellationToken)
+        public async Task InsertSupplierDebtLogAsync(
+            SupplierDebtLog supplierDebtLog,
+            CancellationToken cancellationToken)
         {
             await context.SupplierDebtLogs.AddAsync(supplierDebtLog, cancellationToken).ConfigureAwait(false);
         }

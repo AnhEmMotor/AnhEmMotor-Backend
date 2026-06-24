@@ -1,6 +1,5 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Interfaces.Repositories.Statistical;
-using Domain.Constants;
 using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Infrastructure.DBContexts;
@@ -103,7 +102,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 BrandName = variants.FirstOrDefault(v => v.Id == r.ProductVariantId)?.Product?.Brand?.Name ?? "Khác",
                 Revenue = r.Price * r.Count
             });
-        return [.. revenueData.GroupBy(r => r.BrandName)
+        return[.. revenueData.GroupBy(r => r.BrandName)
             .Select(g => new BrandRevenueResponse { BrandName = g.Key, Revenue = g.Sum(x => x.Revenue) })
             .OrderByDescending(b => b.Revenue)];
     }
@@ -303,8 +302,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 i => i.Id,
                 (ii, i) => new { ii, i })
             .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
-            .GroupBy(
-                x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
+            .GroupBy(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -363,8 +361,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 (ii, i) => new { ii, i })
             .Where(
                 x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
-            .Select(
-                x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
+            .Select(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
             .Distinct()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -593,8 +590,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 i => i.Id,
                 (ii, i) => new { ii, i })
             .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
-            .GroupBy(
-                x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
+            .GroupBy(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -655,8 +651,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
                     x.i.DeletedAt == null)
-            .GroupBy(
-                x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
+            .GroupBy(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -693,7 +688,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Include(pv => pv.ProductVariantColors)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-        return [.. variants.Select(
+        return[.. variants.Select(
             pv =>
             {
                 var stock = (int)((confirmedInventoryReceipts.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -
@@ -738,17 +733,14 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
                     x.i.DeletedAt == null)
-            .GroupBy(
-                x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
+            .GroupBy(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
             .Select(
                 g => new
                 {
                     VariantId = g.Key,
                     TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)),
                     AvgInventoryReceiptPrice = g.Sum(
-                                x => (decimal)(x.ii.PurchaseRequestItem != null
-                                        ? (x.ii.PurchaseRequestItem.UnitPrice ?? 0)
-                                        : 0) *
+                                x => x.ii.PurchaseRequestItem != null ? (x.ii.PurchaseRequestItem.UnitPrice ?? 0) : 0 *
                                     (x.ii.Count ?? 0)) /
                         (g.Sum(x => (long)(x.ii.Count ?? 0)) == 0 ? 1M : (decimal)(g.Sum(x => (long)(x.ii.Count ?? 0))))
                 })

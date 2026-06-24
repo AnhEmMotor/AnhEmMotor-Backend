@@ -297,9 +297,7 @@ public class BrandController(IMediator mediator) : ApiController
     [HasPermission(Brands.Create)]
     [ProducesResponseType(typeof(ImportBrandsResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ImportBrandsAsync(
-        IFormFile file,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ImportBrandsAsync(IFormFile file, CancellationToken cancellationToken)
     {
         var command = new ImportBrandsCommand { File = file };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);

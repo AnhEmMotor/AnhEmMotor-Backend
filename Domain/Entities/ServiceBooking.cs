@@ -1,6 +1,6 @@
+using Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Constants;
 
 namespace Domain.Entities
 {
@@ -11,21 +11,30 @@ namespace Domain.Entities
         public int Id { get; set; }
 
         public int VehicleId { get; set; }
+
         public virtual Vehicle Vehicle { get; set; } = null!;
 
-        public string ServiceType { get; set; } = string.Empty; // Báº£o dÆ°á»¡ng Ä‘á»‹nh ká»³ / Sá»­a chá»¯a / LÃ¡i thá»­
+        public string ServiceType { get; set; } = string.Empty;
+
         public DateTime AppointmentDate { get; set; }
+
         public TimeSpan AppointmentTime { get; set; }
+
         public string Notes { get; set; } = string.Empty;
+
         public BookingStatus Status { get; set; }
+
         public Guid? AssignedSaleId { get; set; }
+
         public virtual ApplicationUser? AssignedSale { get; set; }
 
         public string CustomerNote { get; set; } = string.Empty;
+
         public string AdminNote { get; set; } = string.Empty;
+
         public DateTime? CancelledAt { get; set; }
+
         public string CancellationReason { get; set; } = string.Empty;
     }
 }
-
 

@@ -1,12 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using MediatR;
 using Application.ApiContracts.Client.Vehicles;
 using Application.Features.Client.Vehicles;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace AnhEmMotor.WebAPI.Controllers.V1.Client
+namespace WebAPI.Controllers.V1.Client
 {
     [ApiController]
     [Route("api/v1/client/vehicles")]
@@ -14,6 +12,7 @@ namespace AnhEmMotor.WebAPI.Controllers.V1.Client
     public class VehicleController : ControllerBase
     {
         private readonly IMediator _mediator;
+
         public VehicleController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet]

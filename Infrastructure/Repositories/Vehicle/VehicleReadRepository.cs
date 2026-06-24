@@ -126,7 +126,9 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
         return context.Vehicles.FirstOrDefaultAsync(v => string.Compare(v.VinNumber, vin) == 0, cancellationToken);
     }
 
-    public Task<List<Domain.Entities.Vehicle>> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+    public Task<List<Domain.Entities.Vehicle>> GetByUserIdAsync(
+        string userId,
+        CancellationToken cancellationToken = default)
     {
         if (Guid.TryParse(userId, out var parsedUserId))
         {

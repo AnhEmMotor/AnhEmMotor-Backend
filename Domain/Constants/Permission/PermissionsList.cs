@@ -101,7 +101,6 @@ public static class PermissionsList
         { Payroll.Configure, new PermissionMetadata("Configure Payroll", "Cấu hình chính sách hoa hồng") },
         { Payroll.Approve, new PermissionMetadata("Approve Payroll", "Duyệt chi lương") },
 
-
         { PurchaseRequests.View, new PermissionMetadata("View Purchase Requests", "Xem danh sách yêu cầu mua hàng") },
         { PurchaseRequests.Create, new PermissionMetadata("Create Purchase Request", "Tạo yêu cầu mua hàng mới") },
         { PurchaseRequests.Edit, new PermissionMetadata("Edit Purchase Request", "Chỉnh sửa yêu cầu mua hàng") },
@@ -262,7 +261,6 @@ public static class PermissionsList
 
         { Payroll.Configure, [Payroll.View] },
         { Payroll.Approve, [Payroll.View] },
-
 
         { PurchaseRequests.Create, [PurchaseRequests.View] },
         { PurchaseRequests.Edit, [PurchaseRequests.View] },

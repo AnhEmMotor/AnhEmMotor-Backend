@@ -1,7 +1,6 @@
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.ApiContracts.PurchaseRequest.Responses;
-using Application.ApiContracts.Products.Responses;
 using Application.Common.Models;
 using Application.Features.ProductQuotations.Queries.GetSupplierPricesForVariant;
 using Application.Features.Products.Commands.AttachTechnologies;
@@ -11,7 +10,6 @@ using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.RestoreManyProducts;
 using Application.Features.Products.Commands.RestoreProduct;
 using Application.Features.Products.Commands.SetProductCompatibility;
-using Application.Features.Products.Commands.UploadProductContentImage;
 using Application.Features.Products.Commands.UpdateManyProductPrices;
 using Application.Features.Products.Commands.UpdateManyProductStatuses;
 using Application.Features.Products.Commands.UpdateManyVariantPrices;
@@ -19,6 +17,7 @@ using Application.Features.Products.Commands.UpdateProduct;
 using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
+using Application.Features.Products.Commands.UploadProductContentImage;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.ExportProducts;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForInventoryReceipt;
@@ -570,10 +569,7 @@ public class ProductController(ISender sender) : ApiController
     [SwaggerOperation(Summary = "Upload ảnh nội dung sản phẩm (WangEditor)")]
     public async Task<IActionResult> UploadContentImageAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        var command = new UploadProductContentImageCommand
-        {
-            File = file
-        };
+        var command = new UploadProductContentImageCommand { File = file };
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }

@@ -22,11 +22,12 @@ public class VNPayService(IConfiguration configuration) : IVNPayService
             ["HashSecret"] = vnp_HashSecret,
             ["BaseUrl"] = vnp_BaseUrl,
             ["CallbackUrl"] = vnp_ReturnUrl
-        }.Where(setting => string.IsNullOrWhiteSpace(setting.Value)).Select(setting => setting.Key).ToList();
+        }.Where(setting => string.IsNullOrWhiteSpace(setting.Value))
+            .Select(setting => setting.Key)
+            .ToList();
         if (missingSettings.Count > 0)
         {
-            throw new InvalidOperationException(
-                $"VNPay chưa được cấu hình: {string.Join(", ", missingSettings)}.");
+            throw new InvalidOperationException($"VNPay chưa được cấu hình: {string.Join(", ", missingSettings)}.");
         }
         vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
         vnpay.AddRequestData("vnp_Command", "pay");

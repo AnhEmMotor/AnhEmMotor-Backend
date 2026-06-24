@@ -2,23 +2,24 @@ using Application.ApiContracts.PurchaseRequest.Requests;
 using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Common.Models;
 using Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRequest;
-using Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest;
-using Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest;
-using Application.Features.PurchaseRequests.Commands.SendPurchaseRequest;
-using Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
-using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequestById;
-using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequests;
-using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
-using Application.Features.PurchaseRequests.Queries.GetPurchaseRequests;
-using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;
 using Application.Features.PurchaseRequests.Commands.CloneManyPurchaseRequests;
+using Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.DeleteManyPurchaseRequests;
+using Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.ImportPurchaseRequests;
 using Application.Features.PurchaseRequests.Commands.RestoreManyPurchaseRequests;
 using Application.Features.PurchaseRequests.Commands.RestorePurchaseRequest;
+using Application.Features.PurchaseRequests.Commands.SendPurchaseRequest;
+using Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
 using Application.Features.PurchaseRequests.Queries.ExportPurchaseRequests;
+using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequestById;
+using Application.Features.PurchaseRequests.Queries.GetApprovedPurchaseRequests;
 using Application.Features.PurchaseRequests.Queries.GetDeletedPurchaseRequestsList;
 using Application.Features.PurchaseRequests.Queries.GetImportPurchaseRequestTemplate;
+using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestAuditLogs;
+using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
+using Application.Features.PurchaseRequests.Queries.GetPurchaseRequests;
+using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -104,7 +105,8 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> SendAsync(int id, CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(new SendPurchaseRequestCommand(id), cancellationToken).ConfigureAwait(false);
+            var result = await mediator.Send(new SendPurchaseRequestCommand(id), cancellationToken)
+                .ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -215,11 +217,9 @@ namespace WebAPI.Controllers.V1
         [HttpGet("{id:int}/audit-logs")]
         [HasPermission(PurchaseRequests.View)]
         [ProducesResponseType(typeof(List<PurchaseRequestAuditLogResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetPurchaseRequestAuditLogsAsync(
-            int id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> GetPurchaseRequestAuditLogsAsync(int id, CancellationToken cancellationToken)
         {
-            var query = new Application.Features.PurchaseRequests.Queries.GetPurchaseRequestAuditLogs.GetPurchaseRequestAuditLogsQuery { Id = id };
+            var query = new GetPurchaseRequestAuditLogsQuery { Id = id };
             var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
@@ -238,9 +238,7 @@ namespace WebAPI.Controllers.V1
         [HttpPost("restore/{id:int}")]
         [HasPermission(PurchaseRequests.Delete)]
         [ProducesResponseType(typeof(Result<int>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> RestorePurchaseRequestAsync(
-            int id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> RestorePurchaseRequestAsync(int id, CancellationToken cancellationToken)
         {
             var command = new RestorePurchaseRequestCommand { Id = id };
             var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
@@ -290,7 +288,10 @@ namespace WebAPI.Controllers.V1
             var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
             if (result.IsSuccess)
             {
-                return File(result.Value, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_nhap_yeu_cau_mua_hang.xlsx");
+                return File(
+                    result.Value,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "Mau_nhap_yeu_cau_mua_hang.xlsx");
             }
             return HandleResult(result);
         }
@@ -304,7 +305,10 @@ namespace WebAPI.Controllers.V1
         {
             var query = new ExportPurchaseRequestsQuery { SieveModel = sieveModel };
             var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
-            return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Danh_sach_yeu_cau_mua_hang.xlsx");
+            return File(
+                result,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "Danh_sach_yeu_cau_mua_hang.xlsx");
         }
 
         [HttpGet("deleted")]

@@ -1,9 +1,6 @@
 using Application.Interfaces.Repositories.ServiceBooking;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.ServiceBooking;
 
@@ -19,7 +16,9 @@ public class ServiceBookingReadRepository(ApplicationDBContext context) : IServi
         return context.ServiceBookings.ToListAsync(cancellationToken);
     }
 
-    public Task<List<Domain.Entities.ServiceBooking>> GetByUserIdAsync(string userId, CancellationToken cancellationToken)
+    public Task<List<Domain.Entities.ServiceBooking>> GetByUserIdAsync(
+        string userId,
+        CancellationToken cancellationToken)
     {
         return context.ServiceBookings.ToListAsync(cancellationToken);
     }

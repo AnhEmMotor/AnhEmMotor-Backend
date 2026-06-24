@@ -1,16 +1,16 @@
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
 using Application.ApiContracts.Client.Auth;
 using Application.Features.Client.Auth;
-using System.Threading.Tasks;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
-namespace AnhEmMotor.WebAPI.Controllers.V1.Client
+namespace WebAPI.Controllers.V1.Client
 {
     [ApiController]
     [Route("api/v1/client/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
+
         public AuthController(IMediator mediator) => _mediator = mediator;
 
         [HttpPost("login-phone")]

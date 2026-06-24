@@ -18,10 +18,12 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
     {
         var targetMonth = month ?? DateTimeOffset.UtcNow.Month;
         var targetYear = year ?? DateTimeOffset.UtcNow.Year;
-
         return context.InventoryOnHands
             .FirstOrDefaultAsync(
-                x => x.ProductVariantId == productVariantId && x.ProductVariantColorId == productVariantColorId && x.Month == targetMonth && x.Year == targetYear,
+                x => x.ProductVariantId == productVariantId &&
+                    x.ProductVariantColorId == productVariantColorId &&
+                    x.Month == targetMonth &&
+                    x.Year == targetYear,
                 cancellationToken);
     }
 
@@ -33,10 +35,13 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
     {
         var targetMonth = month ?? DateTimeOffset.UtcNow.Month;
         var targetYear = year ?? DateTimeOffset.UtcNow.Year;
-
         var query = context.InventoryOnHands
             .AsNoTracking()
-            .Where(x => x.ProductVariant != null && x.ProductVariant.Product != null && x.Month == targetMonth && x.Year == targetYear);
+            .Where(
+                x => x.ProductVariant != null &&
+                    x.ProductVariant.Product != null &&
+                    x.Month == targetMonth &&
+                    x.Year == targetYear);
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             var term = searchTerm.Trim().ToLower();
@@ -64,7 +69,7 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                 ExportedQty = x.ExportedQty,
                 StockQty = x.StockQty,
                 OrderedQty = x.OrderedQty,
-                BeginningQty = x.BeginningQty // assuming we want to add this to response later, but for now leave as is if not in DTO
+                BeginningQty = x.BeginningQty
             })
             .ToListAsync(cancellationToken);
     }
@@ -77,7 +82,8 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
         int? year,
         CancellationToken cancellationToken)
     {
-        var allData = await GetInventoryReportSummaryRowsAsync(searchTerm, month, year, cancellationToken).ConfigureAwait(false);
+        var allData = await GetInventoryReportSummaryRowsAsync(searchTerm, month, year, cancellationToken)
+            .ConfigureAwait(false);
         var totalCount = allData.Select(x => x.ProductId).Distinct().Count();
         var paginatedProductIds = allData.Select(x => x.ProductId)
             .Distinct()

@@ -1,24 +1,24 @@
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
-using Application.Features.InventoryReceipts.Commands.CloneInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.DeleteInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.DeleteManyInventoryReceipts;
+using Application.Features.InventoryReceipts.Commands.ImportInventoryReceipts;
 using Application.Features.InventoryReceipts.Commands.RestoreInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.RestoreManyInventoryReceipts;
 using Application.Features.InventoryReceipts.Commands.SendInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptNotes;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
+using Application.Features.InventoryReceipts.Queries.ExportInventoryReceipts;
 using Application.Features.InventoryReceipts.Queries.GetDeletedInventoryReceiptsList;
+using Application.Features.InventoryReceipts.Queries.GetImportInventoryReceiptTemplate;
+using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptAuditLogs;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptById;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsList;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStats;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStatusList;
-using Application.Features.InventoryReceipts.Commands.ImportInventoryReceipts;
-using Application.Features.InventoryReceipts.Queries.ExportInventoryReceipts;
-using Application.Features.InventoryReceipts.Queries.GetImportInventoryReceiptTemplate;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -273,6 +273,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
+
     /// <summary>
     /// Lấy lịch sử thay đổi (Audit Trail) của phiếu nhập kho.
     /// </summary>
@@ -283,7 +284,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         [FromRoute] int id,
         CancellationToken cancellationToken)
     {
-        var query = new Application.Features.InventoryReceipts.Queries.GetInventoryReceiptAuditLogs.GetInventoryReceiptAuditLogsQuery { Id = id };
+        var query = new GetInventoryReceiptAuditLogsQuery { Id = id };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -303,13 +304,18 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [HttpGet("import-template")]
     [HasPermission(InventoryReceipts.Create)]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetImportTemplateAsync([FromQuery] int purchaseRequestId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetImportTemplateAsync(
+        [FromQuery] int purchaseRequestId,
+        CancellationToken cancellationToken)
     {
         var query = new GetImportInventoryReceiptTemplateQuery { PurchaseRequestId = purchaseRequestId };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         if (result.IsSuccess)
         {
-            return File(result.Value, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Mau_nhap_phieu_nhap_kho.xlsx");
+            return File(
+                result.Value,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "Mau_nhap_phieu_nhap_kho.xlsx");
         }
         return HandleResult(result);
     }
@@ -323,6 +329,9 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var query = new ExportInventoryReceiptsQuery { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
-        return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Danh_sach_phieu_nhap_kho.xlsx");
+        return File(
+            result,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Danh_sach_phieu_nhap_kho.xlsx");
     }
 }

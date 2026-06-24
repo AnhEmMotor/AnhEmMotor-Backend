@@ -64,8 +64,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp.</returns>
     [HttpGet]
-    [RequiresAnyPermissions(
-        Suppliers.View)]
+    [RequiresAnyPermissions(Suppliers.View)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersAsync(
         [FromQuery] SieveModel sieveModel,

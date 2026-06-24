@@ -1,12 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using MediatR;
-using Application.ApiContracts.Client.Invoices;
 using Application.Features.Client.Invoices;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-namespace AnhEmMotor.WebAPI.Controllers.V1.Client
+namespace WebAPI.Controllers.V1.Client
 {
     [ApiController]
     [Route("api/v1/client/invoices")]
@@ -14,6 +11,7 @@ namespace AnhEmMotor.WebAPI.Controllers.V1.Client
     public class InvoiceController : ControllerBase
     {
         private readonly IMediator _mediator;
+
         public InvoiceController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet]

@@ -54,7 +54,6 @@ namespace Infrastructure.Repositories.ProductVariant
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             var query = context.ProductVariants.AsQueryable();
-            // Note: ProductVariant doesn't have IsDeleted property.
             return await query
                 .Include(v => v.ProductVariantColors)
                 .ToListAsync(cancellationToken)

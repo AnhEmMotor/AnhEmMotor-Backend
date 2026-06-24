@@ -12,11 +12,15 @@ namespace Domain.Entities
         public int Id { get; set; }
 
         public string InvoiceNumber { get; set; } = string.Empty;
+
         public DateTime IssueDate { get; set; }
+
         public decimal TotalAmount { get; set; }
-        public string Type { get; set; } = string.Empty; // Mua xe / Dịch vụ & Phụ tùng
-        
+
+        public string Type { get; set; } = string.Empty;
+
         public string UserId { get; set; } = string.Empty;
+
         public virtual ApplicationUser User { get; set; } = null!;
     }
 }
