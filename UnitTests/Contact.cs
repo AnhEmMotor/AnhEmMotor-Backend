@@ -1,7 +1,5 @@
-using Application.ApiContracts.Contacts.Requests;
 using Application.Features.Contacts.Commands.CreateContact;
 using Application.Features.Contacts.Commands.CreateContactReply;
-using Application.Features.Contacts.Commands.CreateSupportRequest;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Contact;
@@ -18,7 +16,6 @@ public class Contact
     private readonly Mock<IContactReadRepository> _contactReadRepoMock;
     private readonly Mock<IContactInsertRepository> _contactInsertRepoMock;
     private readonly Mock<IContactUpdateRepository> _contactUpdateRepoMock;
-    private readonly Mock<ISupportRequestRepository> _supportRequestRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ICurrentUserContext> _tokenAccessorMock;
 
@@ -27,7 +24,6 @@ public class Contact
         _contactReadRepoMock = new Mock<IContactReadRepository>();
         _contactInsertRepoMock = new Mock<IContactInsertRepository>();
         _contactUpdateRepoMock = new Mock<IContactUpdateRepository>();
-        _supportRequestRepoMock = new Mock<ISupportRequestRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _tokenAccessorMock = new Mock<ICurrentUserContext>();
     }
@@ -45,42 +41,6 @@ public class Contact
         var handler = new CreateContactCommandHandler(_contactInsertRepoMock.Object, _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
-    }
-
-    [Fact(DisplayName = "CONT_016 - Yêu cầu hỗ trợ lưu tên và SĐT khách từ Store")]
-    public async Task CreateSupportRequest_WithCustomerIdentity_SavesContactIdentity()
-    {
-        var command = new CreateSupportRequestCommand(
-            new CreateSupportRequestRequest
-            {
-                FullName = "Nguyen Van A",
-                PhoneNumber = "0909123456",
-                Email = "customer@example.com",
-                Subject = "Tu van mua xe",
-                Category = "Sales",
-                Content = "Can tu van xe moi"
-            });
-        var handler = new CreateSupportRequestCommandHandler(
-            _supportRequestRepoMock.Object,
-            _contactInsertRepoMock.Object,
-            _unitOfWorkMock.Object);
-
-        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
-        _contactInsertRepoMock.Verify(
-            x => x.Add(It.Is<Domain.Entities.Contact>(c =>
-                c.FullName == "Nguyen Van A" &&
-                c.PhoneNumber == "0909123456" &&
-                c.Email == "customer@example.com")),
-            Times.Once);
-        _supportRequestRepoMock.Verify(
-            x => x.AddAsync(
-                It.Is<SupportRequest>(s =>
-                    s.Subject == "Tu van mua xe" &&
-                    s.Category == "Sales" &&
-                    s.Content == "Can tu van xe moi"),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
     }
 
     [Fact(DisplayName = "CONT_005 - Tự động chuyển trạng thái liên hệ sang 'Đã xử lý'")]

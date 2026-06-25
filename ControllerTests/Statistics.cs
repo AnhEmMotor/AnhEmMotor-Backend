@@ -13,21 +13,17 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using WebAPI.Controllers.V1;
 
-using Application.Interfaces.Repositories.Statistical;
-
 namespace ControllerTests;
 
 public class Statistics
 {
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IStatisticalReadRepository> _repositoryMock;
     private readonly StatisticsController _controller;
 
     public Statistics()
     {
         _mediatorMock = new Mock<IMediator>();
-        _repositoryMock = new Mock<IStatisticalReadRepository>();
-        _controller = new StatisticsController(_mediatorMock.Object, _repositoryMock.Object);
+        _controller = new StatisticsController(_mediatorMock.Object);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }

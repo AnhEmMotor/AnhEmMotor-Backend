@@ -113,55 +113,6 @@ public class InventoryReceipts
     [Fact(DisplayName = "IR_002 - Ngăn chặn tạo phiếu nhập kho khi mã yêu cầu mua hàng không tồn tại trên hệ thống.")]
     public async Task IR_002_CreateInventoryReceipt_PurchaseRequestNotFound()
     {
-<<<<<<< HEAD
-<<<<<<< HEAD
-        var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputInfoRequest { ProductVarientId = null, Count = 10, InputPrice = 100000 };
-        var result = validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.ProductVarientId);
-    }
-
-    [Fact(DisplayName = "INPUT_050 - Validator kiểm tra UpdateInputRequest với Products chứa Quantity âm")]
-    public void UpdateInputProductValidator_NegativeQuantity_ReturnsValidationError()
-    {
-        var validator = new UpdateInputInfoCommandValidator();
-        var command = new UpdateInputInfoRequest { ProductId = 1, Count = -10, InputPrice = 100000 };
-        var result = validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Count);
-    }
-
-    [Fact(DisplayName = "INPUT_051 - Validator kiểm tra UpdateInputStatusRequest với StatusId không hợp lệ")]
-    public void UpdateInputStatusValidator_InvalidStatusId_ReturnsValidationError()
-    {
-        var statusId = "invalid_status";
-        bool isValid = Domain.Constants.Input.InputStatus.IsValid(statusId);
-        isValid.Should().BeFalse();
-    }
-
-    [Fact(DisplayName = "INPUT_053 - Handler xử lý CreateInput ném ngoại lệ khi DB connection fail")]
-    public async Task CreateInputHandler_DbConnectionFails_ThrowsException()
-    {
-        var mockInsertRepo = new Mock<IInputInsertRepository>();
-        var mockReadRepo = new Mock<IInputReadRepository>();
-        mockInsertRepo.Setup(x => x.Add(It.IsAny<Input>())).Throws(new Exception("DB Connection Failed"));
-        var handler = new CreateInputCommandHandler(
-            mockInsertRepo.Object,
-            mockReadRepo.Object,
-            Mock.Of<ISupplierReadRepository>(),
-            Mock.Of<IProductVariantReadRepository>(),
-            Mock.Of<IVehicleReadRepository>(),
-            Mock.Of<Application.Interfaces.Repositories.SupplierContract.ISupplierContractReadRepository>(),
-            Mock.Of<IUnitOfWork>());
-
-        var command = new CreateInputCommand
-        {
-            Notes = "Test",
-            SupplierId = 1,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
-        };
-=======
-=======
->>>>>>> main
         var handler = new CreateInventoryReceiptCommandHandler(
             _insertRepoMock.Object,
             _readRepoMock.Object,
@@ -174,10 +125,6 @@ public class InventoryReceipts
         var command = new CreateInventoryReceiptCommand { PurchaseRequestId = 99, Products = [] };
         _prReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(99, It.IsAny<CancellationToken>()))
             .ReturnsAsync((PurchaseRequest?)null);
-<<<<<<< HEAD
->>>>>>> main
-=======
->>>>>>> main
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "NotFound").Should().Be(0);
@@ -400,64 +347,10 @@ public class InventoryReceipts
             Notes = "Old notes",
             InventoryReceiptInfos = []
         };
-<<<<<<< HEAD
-<<<<<<< HEAD
-        var response = input.Adapt<InputDetailResponse>(config);
-        response.TotalPayable.Should().Be((2 * 150000) + (3 * 50000) + 0 + 0);
-    }
-    
-
-    [Fact(DisplayName = "PRODUCT_196 - Tạo phiếu nhập với sản phẩm quản lý theo số khung nhưng thiếu thông tin xe")]
-    public async Task CreateInputHandler_VinManagedProduct_MissingVehicles_ReturnsError()
-    {
-        var mockInsertRepo = new Mock<IInputInsertRepository>();
-        var mockReadRepo = new Mock<IInputReadRepository>();
-        var mockVariantRepo = new Mock<IProductVariantReadRepository>();
-        var mockVehicleReadRepo = new Mock<IVehicleReadRepository>();
-        var mockUnitOfWork = new Mock<IUnitOfWork>();
-
-        var variant = new ProductVariant
-        {
-            ProductId = 1,
-            Product = new Domain.Entities.Product
-            {
-                Name = "Xe máy Test",
-                ProductCategory = new Domain.Entities.ProductCategory
-                {
-                    ManagementType = "vin_number"
-                }
-            }
-        };
-
-        mockVariantRepo.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync([variant]);
-
-        var handler = new CreateInputCommandHandler(
-            mockInsertRepo.Object,
-            mockReadRepo.Object,
-            Mock.Of<ISupplierReadRepository>(),
-            mockVariantRepo.Object,
-            mockVehicleReadRepo.Object,
-            Mock.Of<Application.Interfaces.Repositories.SupplierContract.ISupplierContractReadRepository>(),
-            mockUnitOfWork.Object);
-
-        var command = new CreateInputCommand
-        {
-            SupplierId = null,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 2, InputPrice = 100000, Vehicles = null }]
-        };
-
-=======
-=======
->>>>>>> main
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingReceipt);
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingReceipt);
-<<<<<<< HEAD
->>>>>>> main
-=======
->>>>>>> main
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         _updateRepoMock.Verify(x => x.Update(It.IsAny<InventoryReceiptEntity>()), Times.Once);
@@ -486,49 +379,9 @@ public class InventoryReceipts
             Notes = "Updated notes",
             Products = [new UpdateInventoryReceiptInfoRequest { Count = 5 }]
         };
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-        mockVariantRepo.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync([variant]);
-
-        mockVehicleReadRepo.Setup(x => x.ExistsByVinAsync("VIN123", It.IsAny<CancellationToken>())).ReturnsAsync(true);
-
-        var handler = new CreateInputCommandHandler(
-            mockInsertRepo.Object,
-            mockReadRepo.Object,
-            Mock.Of<ISupplierReadRepository>(),
-            mockVariantRepo.Object,
-            mockVehicleReadRepo.Object,
-            Mock.Of<Application.Interfaces.Repositories.SupplierContract.ISupplierContractReadRepository>(),
-            mockUnitOfWork.Object);
-
-        var command = new CreateInputCommand
-        {
-            SupplierId = null,
-            Products = [
-                new CreateInputInfoRequest { 
-                    ProductId = 1, 
-                    Count = 2, 
-                    InputPrice = 100000, 
-                    Vehicles = [
-                        new VehicleInputRequest { VinNumber = "VIN123", EngineNumber = "ENG123" },
-                        new VehicleInputRequest { VinNumber = "VIN456", EngineNumber = "ENG456" }
-                    ] 
-                }
-            ]
-        };
-
-=======
         var existingReceipt = new InventoryReceiptEntity { Id = 1, StatusId = status, Notes = "Old notes" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingReceipt);
->>>>>>> main
-=======
-        var existingReceipt = new InventoryReceiptEntity { Id = 1, StatusId = status, Notes = "Old notes" };
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(existingReceipt);
->>>>>>> main
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         string.Compare(result.Error?.Code ?? string.Empty, "BadRequest").Should().Be(0);
