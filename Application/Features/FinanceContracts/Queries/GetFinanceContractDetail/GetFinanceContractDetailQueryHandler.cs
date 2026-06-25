@@ -4,7 +4,7 @@ using Application.Interfaces.Repositories.FinanceContract;
 using Domain.Entities;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace Application.Features.FinanceContracts.Queries.GetFinanceContractDetail;
 

@@ -12,6 +12,7 @@ using Application.Features.Statistical.Queries.GetOrderStatusCounts;
 using Application.Features.Statistical.Queries.GetProductReportLastMonth;
 using Application.Features.Statistical.Queries.GetProductStockAndPrice;
 using Asp.Versioning;
+using Application.Interfaces.Repositories.Statistical;
 using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -24,7 +25,8 @@ namespace WebAPI.Controllers.V1;
 /// <summary>
 /// Thống kê và báo cáo.
 /// </summary>
-/// <param name="mediator"></param>
+/// <param name="mediator">The mediator.</param>
+/// <param name="repository">The read repository for statistics.</param>
 [ApiVersion("1.0")]
 [SwaggerTag("Thống kê và báo cáo")]
 [Route("api/v{version:apiVersion}/[controller]")]

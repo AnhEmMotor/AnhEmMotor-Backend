@@ -3,7 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.FinanceContract;
 using Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace Application.Features.FinanceContracts.Commands.UpdateCavetState;
 

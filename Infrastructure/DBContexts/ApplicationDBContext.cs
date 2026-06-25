@@ -14,7 +14,7 @@ using SupplierStatus = Domain.Entities.SupplierStatus;
 
 namespace Infrastructure.DBContexts;
 
-public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, Application.Common.Interfaces.IApplicationDbContext
+public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     private readonly IServiceProvider? _serviceProvider;
 
@@ -370,9 +370,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     .WithMany()
                     .HasForeignKey(b => b.VehicleId)
                     .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(b => b.AssignedSale)
+                entity.HasOne(b => b.Technician)
                     .WithMany()
-                    .HasForeignKey(b => b.AssignedSaleId)
+                    .HasForeignKey(b => b.TechnicianId)
                     .OnDelete(DeleteBehavior.SetNull);
                 entity.Property(b => b.Status).HasConversion<string>();
             });

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Text.Json;
+using Infrastructure.Repositories;
 
 namespace WebAPI.Controllers
 {
@@ -19,14 +20,17 @@ namespace WebAPI.Controllers
     public class AnalyticsController : ControllerBase
     {
         private readonly IAnalyticsRepository _analyticsRepository;
+        private readonly IMediator mediator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AnalyticsController"/> class.
         /// </summary>
         /// <param name="analyticsRepository">The analytics repository.</param>
-        public AnalyticsController(IAnalyticsRepository analyticsRepository)
+        /// <param name="mediator">The mediator.</param>
+        public AnalyticsController(IAnalyticsRepository analyticsRepository, IMediator mediator)
         {
             _analyticsRepository = analyticsRepository;
+            this.mediator = mediator;
         }
 
         /// <summary>

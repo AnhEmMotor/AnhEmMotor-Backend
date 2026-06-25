@@ -14,5 +14,7 @@ public class GetServiceWorkshopEvaluationsQuery : IRequest<Result<PagedResult<Se
 
     public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 20;
+
+    public global::Sieve.Models.SieveModel? SieveModel { get; set; }
 }
 

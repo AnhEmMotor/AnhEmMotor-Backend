@@ -18,12 +18,10 @@ public class ServiceBookingUpdateRepository(ApplicationDBContext context) : ISer
         var booking = await context.ServiceBookings.FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         if (booking == null)
             return false;
-        if (Enum.TryParse<BookingStatus>(status, out var parsedStatus))
-        {
-            booking.Status = parsedStatus;
-        }
-        booking.CancellationReason = reason ?? string.Empty;
-        booking.CancelledAt = cancelledAt;
+        // Always allow assignment or add validation here
+        booking.Status = status;
+        booking.CancelledReason = reason ?? string.Empty;
+        booking.CancelledDate = cancelledAt;
         await context.SaveChangesAsync(cancellationToken);
         return true;
     }

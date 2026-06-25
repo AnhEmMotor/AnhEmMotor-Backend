@@ -60,26 +60,7 @@ public static class DependencyInjection
                     options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 });
         }
-        services.AddIdentity<ApplicationUser, ApplicationRole>(
-            options =>
-            {
-                options.UseNpgsql(connectionString);
-            });
-            services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
-        }
-        else
-        {
-            services.AddDbContextPool<ApplicationDBContext>(
-            options =>
-            {
-                options.UseSqlServer(
-                configuration.GetConnectionString("StringConnection"),
-                b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
-                .CommandTimeout(30)
-                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-            });
-            services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
-        }
+
         services.AddIdentity<ApplicationUser, ApplicationRole>(
         options =>
         {

@@ -3,12 +3,11 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.FinanceContract;
 using Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace Application.Features.FinanceContracts.Commands.UploadDisbursementEvidence;
 
 public sealed class UploadDisbursementEvidenceCommandHandler(
-    IUnitOfWork unitOfWork,
     IFinanceContractReadRepository repository
 ) : IRequestHandler<UploadDisbursementEvidenceCommand>
 {

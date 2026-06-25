@@ -32,12 +32,4 @@ public class ContactReadRepository(ApplicationDBContext context) : IContactReadR
             .ToListAsync(cancellationToken);
     }
 
-    public Task<List<Domain.Entities.Contact>> GetByTypeAsync(string contactType, CancellationToken cancellationToken)
-    {
-        return context.Contacts
-            .Include(c => c.Replies)
-            .ThenInclude(r => r.RepliedBy)
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync(cancellationToken);
-    }
 }

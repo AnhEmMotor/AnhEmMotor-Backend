@@ -15,10 +15,10 @@ public class SalesContractMapsterRegister : IRegister
             .Ignore(dest => dest.Id)
             .Ignore(dest => dest.ContractNumber)
             .Ignore(dest => dest.Status)
-            .Ignore(dest => dest.CreatedAt)
-            .Ignore(dest => dest.UpdatedAt)
-            .Ignore(dest => dest.DeletedAt)
-            .Ignore(dest => dest.SignedDate)
-            .Ignore(dest => dest.ScannedFileUrl);
+            .Ignore(dest => dest.CreatedAt!)
+            .Ignore(dest => dest.UpdatedAt!)
+            .Ignore(dest => dest.DeletedAt!)
+            .Ignore(dest => dest.SignedDate!)
+            .Ignore(dest => dest.ScannedFileUrl!);
     }
 }

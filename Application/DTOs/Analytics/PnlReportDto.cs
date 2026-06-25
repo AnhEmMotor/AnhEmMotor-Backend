@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace AnhEmMotor.Application.DTOs.Analytics
+namespace Application.DTOs.Analytics
 {
     public class PnlReportDto
     {

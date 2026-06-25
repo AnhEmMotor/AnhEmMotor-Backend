@@ -37,11 +37,10 @@ namespace Application.Features.Client.Bookings
             var booking = new ServiceBooking
             {
                 VehicleId = request.Request.VehicleId,
-                ServiceType = request.Request.ServiceType,
-                AppointmentDate = request.Request.AppointmentDate,
-                AppointmentTime = request.Request.AppointmentTime,
+                ServiceId = int.TryParse(request.Request.ServiceType, out var sid) ? sid : 1,
+                ScheduledDate = request.Request.AppointmentDate.Add(request.Request.AppointmentTime),
                 Notes = request.Request.Notes,
-                Status = BookingStatus.PendingAllocation
+                Status = Domain.Enums.BookingServiceStatus.Pending.ToString()
             };
             return await _insertRepo.AddAsync(booking, cancellationToken);
         }
@@ -57,7 +56,7 @@ namespace Application.Features.Client.Bookings
             // Ideally pass current UserId here
             var bookings = await _readRepo.GetAllAsync(cancellationToken);
             return bookings.Select(b => new BookingHistoryResponse(
-                b.Id, b.AppointmentDate, b.ServiceType, b.Status.ToString(), b.Status.ToString())).ToList();
+                b.Id, b.ScheduledDate.DateTime, b.ServiceId.ToString(), b.Status, b.Status)).ToList();
         }
     }
 

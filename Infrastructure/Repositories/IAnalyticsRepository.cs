@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AnhEmMotor.Application.DTOs.Analytics;
+using Application.DTOs.Analytics;
 
 namespace Infrastructure.Repositories
 {

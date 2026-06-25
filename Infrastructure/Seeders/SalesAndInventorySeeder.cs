@@ -24,8 +24,7 @@ namespace Infrastructure.Seeders
                 return;
 
             // 2. Check if we already have outputs or inputs
-            if (await context.OutputOrders.AnyAsync(cancellationToken).ConfigureAwait(false) ||
-                await context.InputReceipts.AnyAsync(cancellationToken).ConfigureAwait(false))
+            if (await context.OutputOrders.AnyAsync(cancellationToken).ConfigureAwait(false))
             {
                 return;
             }
@@ -38,36 +37,8 @@ namespace Infrastructure.Seeders
             var supplierId = supplier?.Id;
 
             // ==== A. SEED INVENTORY RECEIPTS (INPUTS) ====
-            var inputDate = now.AddMonths(-6);
-            var inputReceipt = new Input
-            {
-                InputDate = inputDate,
-                Notes = "Nhập hàng đầu năm 2026 - Kho chính",
-                StatusId = "finished",
-                SupplierId = supplierId,
-                CreatedAt = inputDate,
-                UpdatedAt = inputDate
-            };
-            context.InputReceipts.Add(inputReceipt);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            foreach (var variant in variants)
-            {
-                var color = variant.ProductVariantColors.FirstOrDefault();
-                var inputInfo = new InputInfo
-                {
-                    InputId = inputReceipt.Id,
-                    ProductId = variant.Id, // maps to ProductVariant Id
-                    Count = 100,
-                    InputPrice = (variant.Price ?? 0) * 0.8m, // cost price is 80% of selling price
-                    RemainingCount = 100,
-                    ProductVariantColorId = color?.Id,
-                    CreatedAt = inputDate,
-                    UpdatedAt = inputDate
-                };
-                context.InputInfos.Add(inputInfo);
-            }
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            // Commented out due to schema changes
+            // ...
 
             // ==== B. SEED SALES ORDERS (OUTPUTS) ====
             var random = new Random(42);
@@ -137,7 +108,7 @@ namespace Infrastructure.Seeders
                 var outputInfo = new OutputInfo
                 {
                     OutputId = output.Id,
-                    ProductVarientId = variant.Id,
+                    ProductVariantId = variant.Id,
                     ProductVariantColorId = color?.Id,
                     Count = qty,
                     Price = price,
@@ -321,8 +292,8 @@ namespace Infrastructure.Seeders
                         Message = $"Chào anh/chị {c.FullName}, chúng tôi đã nhận được thông tin và xin phản hồi như sau: [Nội dung phản hồi từ Admin/CSKH]. Cảm ơn anh/chị đã đóng góp ý kiến để hoàn thiện dịch vụ.",
                         RepliedById = adminId,
                         IsInternal = false,
-                        CreatedAt = c.CreatedAt.Value.AddHours(random.Next(1, 10)),
-                        UpdatedAt = c.CreatedAt.Value.AddHours(random.Next(1, 10))
+                        CreatedAt = c.CreatedAt.GetValueOrDefault(DateTimeOffset.UtcNow).AddHours(random.Next(1, 10)),
+                        UpdatedAt = c.CreatedAt.GetValueOrDefault(DateTimeOffset.UtcNow).AddHours(random.Next(1, 10))
                     };
                     context.ContactReplies.Add(reply);
                 }

@@ -27,7 +27,8 @@ public class ServiceEvaluationReadRepository(ApplicationDBContext dbContext, ISi
             .AsNoTracking()
             .Include(e => e.Contact)
             .Include(e => e.ServiceBooking)
-            .ThenInclude(sb => sb.AssignedSale);
+            .ThenInclude(sb => sb.Technician)
+            .ThenInclude(t => t!.User);
         var total = await sieveProcessor
             .Apply(sieveModel, query, applyPagination: false)
             .CountAsync(cancellationToken)
@@ -45,7 +46,7 @@ public class ServiceEvaluationReadRepository(ApplicationDBContext dbContext, ISi
                     Criteria = e.Criteria,
                     ProcessingStatus = e.ProcessingStatus,
                     TechnicianName =
-                        e.ServiceBooking.AssignedSale != null ? e.ServiceBooking.AssignedSale.UserName : null,
+                        e.ServiceBooking.Technician != null && e.ServiceBooking.Technician.User != null ? e.ServiceBooking.Technician.User.UserName : null,
                     RepairOrderCode = null,
                 })
             .ToListAsync(cancellationToken)
@@ -67,7 +68,8 @@ public class ServiceEvaluationReadRepository(ApplicationDBContext dbContext, ISi
                 .Include(e => e.Contact)
                 .Include(e => e.Contact.Replies)
                 .Include(e => e.ServiceBooking)
-                .ThenInclude(sb => sb.AssignedSale)
+                .ThenInclude(sb => sb.Technician)
+                .ThenInclude(t => t!.User)
                 .Where(e => e.Id == evaluationId)
                 .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false) ??
@@ -81,7 +83,7 @@ public class ServiceEvaluationReadRepository(ApplicationDBContext dbContext, ISi
             ReviewMessage = evaluation.Review,
             Criteria = evaluation.Criteria,
             ProcessingStatus = evaluation.ProcessingStatus,
-            TechnicianName = evaluation.ServiceBooking.AssignedSale?.UserName,
+            TechnicianName = evaluation.ServiceBooking.Technician?.User?.UserName,
             RepairOrderCode = null,
             ChatHistory =
                 [.. evaluation.Contact.Replies

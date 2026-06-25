@@ -191,7 +191,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
              string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
         .Select(x => new
         {
-            x.oi.ProductVarientId,
+            x.oi.ProductVariantId,
             x.o.CreatedBy,
             Price = x.oi.Price ?? 0,
             Count = x.oi.Count ?? 0
@@ -199,7 +199,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         .ToListAsync(cancellationToken)
         .ConfigureAwait(false);
 
-    var variantIds = rawData.Select(x => x.ProductVarientId).Distinct().ToList();
+    var variantIds = rawData.Select(x => x.ProductVariantId).Distinct().ToList();
     var userIds = rawData.Select(x => x.CreatedBy).Where(id => id.HasValue).Select(id => id!.Value).Distinct().ToList();
 
     var variants = await context.ProductVariants
@@ -216,10 +216,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         .ConfigureAwait(false);
 
     return rawData
-        .GroupBy(x => new { x.ProductVarientId, CreatedBy = x.CreatedBy ?? Guid.Empty })
+        .GroupBy(x => new { x.ProductVariantId, CreatedBy = x.CreatedBy ?? Guid.Empty })
         .Select(g =>
         {
-            var variant = variants.FirstOrDefault(v => v.Id == g.Key.ProductVarientId);
+            var variant = variants.FirstOrDefault(v => v.Id == g.Key.ProductVariantId);
             var user = users.FirstOrDefault(u => u.Id == g.Key.CreatedBy);
             return new DailyRevenueDetailResponse
             {
@@ -428,7 +428,7 @@ public async Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(
                 x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
             .Select(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
             .Distinct()
-            .ToList();
+            .ToListAsync(cancellationToken);
         int overstockCount = 0;
         foreach (var vId in oldInventoryReceiptVariants)
         {
@@ -905,20 +905,20 @@ public async Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(
         if (string.Compare(context.Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0)
         {
             var query = includeDeleted
-                ? context.InputInfos
+                ? context.InventoryReceiptInfos
                     .IgnoreQueryFilters()
-                    .Join(context.InputReceipts.IgnoreQueryFilters(), ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
-                : context.InputInfos
-                    .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i });
+                    .Join(context.InventoryReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
+                : context.InventoryReceiptInfos
+                    .Join(context.InventoryReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i });
 
             return await query
-                .Where(x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0)
-                .GroupBy(x => x.ii.ProductId)
+                .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
+                .GroupBy(x => x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null)
                 .Select(
                     g => new ConfirmedInputSummary(
                         g.Key,
                         g.Sum(x => (long)(x.ii.Count ?? 0)),
-                        g.Sum(x => (x.ii.InputPrice ?? 0) * (x.ii.Count ?? 0)),
+                        g.Sum(x => (decimal)((x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.UnitPrice ?? 0m : 0m) * (x.ii.Count ?? 0))),
                         g.Min(x => x.i.CreatedAt)))
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -1020,7 +1020,7 @@ public async Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(
         {
             using var command = connection.CreateCommand();
             command.CommandText = commandText;
-            command.Parameters.Add(CreateParameter(command, "@FinishedStatus", InputStatus.Finish));
+            command.Parameters.Add(CreateParameter(command, "@FinishedStatus", InventoryReceiptStatus.Approve));
             command.Parameters.Add(CreateParameter(command, "@IncludeDeleted", includeDeleted ? 1 : 0));
             await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
             while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
@@ -1081,7 +1081,7 @@ public async Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(
         double avgCompletionHours = 0;
         if (completedOrders.Count > 0)
         {
-            avgCompletionHours = completedOrders.Average(ro => (ro.CompletedDate.Value - ro.StartTime.Value).TotalHours);
+            avgCompletionHours = completedOrders.Average(ro => (ro.CompletedDate.GetValueOrDefault() - ro.StartTime.GetValueOrDefault()).TotalHours);
         }
 
         var monthlyRevenue = allOrders
@@ -1255,7 +1255,7 @@ public async Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(
             .ToListAsync(cancellationToken);
 
         var totalWithRating = contacts.Where(c => c.Rating != null).ToList();
-        double avgRating = totalWithRating.Count > 0 ? totalWithRating.Average(c => c.Rating.Value) : 5.0;
+        double avgRating = totalWithRating.Count > 0 ? totalWithRating.Average(c => c.Rating.GetValueOrDefault()) : 5.0;
 
         var newComplaints = contacts.Count(c => c.Status == "Pending");
         var resolvedCount = contacts.Count(c => c.Status == "Closed");
