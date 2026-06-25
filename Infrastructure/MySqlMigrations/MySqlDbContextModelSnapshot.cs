@@ -4261,61 +4261,100 @@ namespace Infrastructure.MySqlMigrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AdminNote")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<long?>("CancelledDate")
+                        .HasColumnType("bigint")
+                        .HasColumnName("CancelledDate");
 
-                    b.Property<DateTime>("AppointmentDate")
-                        .HasColumnType("datetime(6)");
+                    b.Property<string>("CancelledReason")
+                        .HasColumnType("longtext")
+                        .HasColumnName("CancelledReason");
 
-                    b.Property<TimeSpan>("AppointmentTime")
-                        .HasColumnType("time(6)");
-
-                    b.Property<Guid?>("AssignedSaleId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("CancellationReason")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime(6)");
+                    b.Property<long?>("CompletedDate")
+                        .HasColumnType("bigint")
+                        .HasColumnName("CompletedDate");
 
                     b.Property<long?>("CreatedAt")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("CustomerNote")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("CustomerId");
+
+                    b.Property<string>("CustomerNotes")
+                        .HasColumnType("longtext")
+                        .HasColumnName("CustomerNotes");
 
                     b.Property<long?>("DeletedAt")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<decimal?>("DepositAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("DepositAmount");
 
-                    b.Property<string>("ServiceType")
+                    b.Property<int?>("EstimatedDurationMinutes")
+                        .HasColumnType("int")
+                        .HasColumnName("EstimatedDurationMinutes");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("longtext")
+                        .HasColumnName("Notes");
+
+                    b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("PaymentStatus");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("int")
+                        .HasColumnName("Rating");
+
+                    b.Property<string>("Review")
+                        .HasColumnType("longtext")
+                        .HasColumnName("Review");
+
+                    b.Property<long>("ScheduledDate")
+                        .HasColumnType("bigint")
+                        .HasColumnName("ScheduledDate");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("int")
+                        .HasColumnName("ServiceId");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("Status");
+
+                    b.Property<int?>("TechnicianId")
+                        .HasColumnType("int")
+                        .HasColumnName("TechnicianId");
+
+                    b.Property<string>("TechnicianNotes")
+                        .HasColumnType("longtext")
+                        .HasColumnName("TechnicianNotes");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("TotalAmount");
 
                     b.Property<long?>("UpdatedAt")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("VehicleId")
-                        .HasColumnType("int");
+                    b.Property<int?>("VehicleId")
+                        .HasColumnType("int")
+                        .HasColumnName("VehicleId");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AssignedSaleId");
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.HasIndex("TechnicianId");
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("ServiceBookings");
+                    b.ToTable("ServiceBooking");
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceCategory", b =>
@@ -4793,6 +4832,44 @@ namespace Infrastructure.MySqlMigrations
                     b.HasIndex("SupplierId");
 
                     b.ToTable("SupplierDebtLog");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SupplierDebtSettlement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("EvidenceUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("longtext");
+
+                    b.Property<long>("PaymentDate")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("SupplierDebtSettlements");
                 });
 
             modelBuilder.Entity("Domain.Entities.SupplierFinance", b =>
@@ -6316,18 +6393,31 @@ namespace Infrastructure.MySqlMigrations
 
             modelBuilder.Entity("Domain.Entities.ServiceBooking", b =>
                 {
-                    b.HasOne("Domain.Entities.ApplicationUser", "AssignedSale")
+                    b.HasOne("Domain.Entities.ApplicationUser", "Customer")
                         .WithMany()
-                        .HasForeignKey("AssignedSaleId")
+                        .HasForeignKey("CustomerId");
+
+                    b.HasOne("Domain.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.EmployeeProfile", "Technician")
+                        .WithMany()
+                        .HasForeignKey("TechnicianId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Domain.Entities.Vehicle", "Vehicle")
                         .WithMany()
                         .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.Navigation("AssignedSale");
+                    b.Navigation("Customer");
+
+                    b.Navigation("Service");
+
+                    b.Navigation("Technician");
 
                     b.Navigation("Vehicle");
                 });
@@ -6452,6 +6542,17 @@ namespace Infrastructure.MySqlMigrations
                         .IsRequired();
 
                     b.Navigation("CreatedBy");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SupplierDebtSettlement", b =>
+                {
+                    b.HasOne("Domain.Entities.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Supplier");
                 });

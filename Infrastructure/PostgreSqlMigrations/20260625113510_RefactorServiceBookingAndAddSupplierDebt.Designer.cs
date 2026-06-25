@@ -3,52 +3,54 @@ using System;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.PostgreSqlMigrations
 {
-    [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(PostgreSqlDbContext))]
+    [Migration("20260625113510_RefactorServiceBookingAndAddSupplierDebt")]
+    partial class RefactorServiceBookingAndAddSupplierDebt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.9")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Domain.Entities.ApplicationRole", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("Roles", (string)null);
                 });
@@ -57,84 +59,84 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Gender")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("RefreshTokenExpiryTime")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -143,8 +145,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("Users", (string)null);
                 });
@@ -153,49 +154,49 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CtaLabel")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("CtaLabel");
 
                     b.Property<string>("CtaLink")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("CtaLink");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("text")
                         .HasColumnName("Description");
 
                     b.Property<string>("DesktopImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("DesktopImageUrl");
 
                     b.Property<string>("MobileImageUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("MobileImageUrl");
 
                     b.Property<string>("Placement")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("Placement");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("Title");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -206,37 +207,37 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("Action");
 
                     b.Property<int>("BannerId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("BannerId");
 
                     b.Property<string>("ChangedBy")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("ChangedBy");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("Details");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -249,62 +250,62 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BookingType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("BookingType");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("FullName");
 
                     b.Property<string>("Location")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("text")
                         .HasColumnName("Location");
 
                     b.Property<string>("Note")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Note");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<DateTimeOffset>("PreferredDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("PreferredDate");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -317,74 +318,74 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("AppointmentAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("AppointmentAt");
 
                     b.Property<string>("CancelReason")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("CancelReason");
 
                     b.Property<DateTimeOffset?>("ConfirmedAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("ConfirmedAt");
 
                     b.Property<Guid?>("ConfirmedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("ConfirmedBy");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("text")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("text")
                         .HasColumnName("FullName");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Notes");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Phone");
 
                     b.Property<DateTime?>("PreferredDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("PreferredDate");
 
                     b.Property<string>("PreferredTimeSlot")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("PreferredTimeSlot");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<string>("Showroom")
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("text")
                         .HasColumnName("Showroom");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -401,41 +402,41 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Description");
 
                     b.Property<string>("LogoUrl")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("text")
                         .HasColumnName("LogoUrl");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Name");
 
                     b.Property<string>("Origin")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Origin");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion")
+                        .HasColumnType("bytea")
                         .HasColumnName("RowVersion");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -446,50 +447,50 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CategoryId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("EffectiveDate")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("EmployeeId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("text");
 
                     b.Property<int?>("ProductId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("TargetGroup")
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Unit")
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("decimal(18,2)");
@@ -507,44 +508,44 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ChangedByName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("ChangedByUserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("text");
 
                     b.Property<string>("NewValueSnapshot")
-                        .HasColumnType("nvarchar(MAX)");
+                        .HasColumnType("text");
 
                     b.Property<string>("OldValueSnapshot")
-                        .HasColumnType("nvarchar(MAX)");
+                        .HasColumnType("text");
 
                     b.Property<int>("PolicyId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -557,42 +558,42 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("DateEarned")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("EmployeeProfileId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("OutputId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PolicySnapshot")
-                        .HasColumnType("nvarchar(MAX)");
+                        .HasColumnType("text");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -607,57 +608,57 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("FullName");
 
                     b.Property<string>("InternalNote")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("InternalNote");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Message");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<int?>("Rating")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Rating");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("text")
                         .HasColumnName("Subject");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -668,36 +669,36 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ContactId");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsInternal")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("IsInternal");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Message");
 
                     b.Property<Guid?>("RepliedById")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("RepliedById");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -712,52 +713,52 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DynamicFields")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("ParentId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("Version")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.HasKey("Id");
 
@@ -768,44 +769,44 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Action")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("ChangedBy")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<Guid>("ContractTemplateId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Details")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("NewValue")
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("OldValue")
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -818,67 +819,67 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("text")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("text")
                         .HasColumnName("FullName");
 
                     b.Property<string>("InternalNote")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("InternalNote");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Message");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Phone");
 
                     b.Property<DateTimeOffset?>("ProcessedAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("ProcessedAt");
 
                     b.Property<Guid?>("ProcessedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("ProcessedBy");
 
                     b.Property<DateTimeOffset?>("RepliedAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("RepliedAt");
 
                     b.Property<string>("Source")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("text")
                         .HasColumnName("Source");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<string>("Subject")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("text")
                         .HasColumnName("Subject");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -893,43 +894,43 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ContactId");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsInternal")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("IsInternal");
 
                     b.Property<Guid?>("RepliedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("RepliedBy");
 
                     b.Property<string>("ReplyContent")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("ReplyContent");
 
                     b.Property<DateTimeOffset?>("SentAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("SentAt");
 
                     b.Property<int?>("SupportTicketId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -946,52 +947,52 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ContactId");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Content");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("CustomerName");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FeedbackArea")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("FeedbackArea");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<int>("Rating")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Rating");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1004,47 +1005,47 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("text");
 
                     b.Property<string>("BankAccountNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("text");
 
                     b.Property<string>("BankName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("BaseSalary")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("ContractDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("IdentityNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("text");
 
                     b.Property<string>("JobTitle")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -1057,33 +1058,33 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<int>("Category")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("ExpenseDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1094,32 +1095,32 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("BankName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("CavetLocation")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ContractNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DisbursementStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("InterestRate")
                         .HasColumnType("decimal(18,2)");
@@ -1128,13 +1129,13 @@ namespace Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("SignedDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("TermMonths")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1145,44 +1146,44 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DocumentCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("DocumentCode");
 
                     b.Property<int>("ExportQty")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ExportQty");
 
                     b.Property<int>("ImportQty")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ImportQty");
 
                     b.Property<string>("PartnerName")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("PartnerName");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int>("StockAfter")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("StockAfter");
 
                     b.Property<decimal>("TotalAmount")
@@ -1190,12 +1191,12 @@ namespace Infrastructure.Migrations
                         .HasColumnName("TotalAmount");
 
                     b.Property<DateTimeOffset>("TransactionDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("TransactionDate");
 
                     b.Property<string>("TransactionType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("TransactionType");
 
                     b.Property<decimal>("UnitPrice")
@@ -1203,7 +1204,7 @@ namespace Infrastructure.Migrations
                         .HasColumnName("UnitPrice");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1218,54 +1219,54 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BeginningQty")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("BeginningQty");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ExportedQty")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ExportedQty");
 
                     b.Property<int>("ImportedQty")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ImportedQty");
 
                     b.Property<int>("Month")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Month");
 
                     b.Property<int>("OrderedQty")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("OrderedQty");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int>("StockQty")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("StockQty");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Year")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Year");
 
                     b.HasKey("Id");
@@ -1275,8 +1276,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ProductVariantId");
 
                     b.HasIndex("ProductVariantId", "ProductVariantColorId", "Month", "Year")
-                        .IsUnique()
-                        .HasFilter("[ProductVariantColorId] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("InventoryOnHand");
                 });
@@ -1285,59 +1285,59 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("ApprovedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("ApprovedBy");
 
                     b.Property<Guid?>("ConfirmedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("ConfirmedBy");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("CreatedBy");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("InventoryReceiptDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("InventoryReceiptDate");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Notes");
 
                     b.Property<int?>("PurchaseRequestId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("PurchaseRequestId");
 
                     b.Property<Guid?>("RejectedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("RejectedBy");
 
                     b.Property<Guid?>("SentBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("SentBy");
 
                     b.Property<int?>("SourceOrderId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("SourceOrderId");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("text")
                         .HasColumnName("StatusId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1364,43 +1364,43 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("ChangedById")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("InventoryReceiptId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("NewNotes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("NewStatusId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("OldNotes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("OldStatusId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1415,42 +1415,42 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("Count")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Count");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("InventoryReceiptId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("InventoryReceiptId");
 
                     b.Property<int?>("ParentOutputInfoId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ParentOutputInfoId");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("PurchaseRequestItemId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("PurchaseRequestItemId");
 
                     b.Property<int?>("RemainingCount")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("RemainingCount");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1469,31 +1469,31 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("InventoryReceiptInfoId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("NewQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("OldQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1505,17 +1505,17 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("text")
                         .HasColumnName("Key");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Key");
 
@@ -1526,60 +1526,60 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("Note");
 
                     b.Property<DateTimeOffset?>("PerformedAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("PerformedAt");
 
                     b.Property<Guid?>("PerformedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("PerformedBy");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Quantity");
 
                     b.Property<int?>("ReferenceId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ReferenceId");
 
                     b.Property<string>("ReferenceType")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("text")
                         .HasColumnName("ReferenceType");
 
                     b.Property<int>("StockAfter")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("StockAfter");
 
                     b.Property<int>("StockBefore")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("StockBefore");
 
                     b.Property<string>("TransactionType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("text")
                         .HasColumnName("TransactionType");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1594,57 +1594,57 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AppliedPosition")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("AppliedPosition");
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ContactId");
 
                     b.Property<string>("CoverLetter")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("CoverLetter");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CvFileUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("CvFileUrl");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("FullName");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1657,40 +1657,40 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("ActualValue")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(MAX)");
+                        .HasColumnType("text");
 
                     b.Property<int>("EmployeeProfileId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("MetricName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("PeriodEnd")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("PeriodStart")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("TargetValue")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1703,114 +1703,114 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("Address");
 
                     b.Property<string>("AddressDetail")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("AddressDetail");
 
                     b.Property<Guid?>("AssignedToId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("AssignedToId");
 
                     b.Property<DateTime?>("Birthday")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("Birthday");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("District")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("District");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("FullName");
 
                     b.Property<string>("Gender")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Gender");
 
                     b.Property<string>("IdentificationNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("IdentificationNumber");
 
                     b.Property<string>("InterestedVehicle")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("InterestedVehicle");
 
                     b.Property<string>("Notes")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Notes");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<int>("Points")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Points");
 
                     b.Property<string>("Priority")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Priority");
 
                     b.Property<string>("Province")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Province");
 
                     b.Property<int>("Score")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Score");
 
                     b.Property<string>("Source")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("Source");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<string>("Tier")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("Tier");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Ward")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Ward");
 
                     b.HasKey("Id");
@@ -1824,33 +1824,33 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ActivityType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("ActivityType");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Description");
 
                     b.Property<int>("LeadId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("LeadId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -1863,59 +1863,59 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("AllowLiquidCargo")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("AllowOversizeCargo")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ApiBaseUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ApiToken")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("AutoSyncPricing")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("CarrierCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Environment")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<decimal>("MaxParcelWeightKg")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("WebhookEndpointUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("WebhookSecret")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -1926,16 +1926,16 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("Value")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.HasKey("Id");
 
@@ -1946,74 +1946,74 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BoxCondition")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Carrier")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("CodAmount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CustomerAddress")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("DeliveredAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("ExpectedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("InspectedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("OriginalOrderCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProductCondition")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ReturnAction")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ReturnInternalNote")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ReturnProofImage")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ReturnReason")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("ShippingCost")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("TrackingNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -2024,42 +2024,42 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsOutOfStock")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsPicked")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsRestricted")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("ParcelDeliveryOrderId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ShelfLocation")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Sku")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ThumbnailUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -2072,35 +2072,35 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Description");
 
                     b.Property<DateTimeOffset>("MaintenanceDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("MaintenanceDate");
 
                     b.Property<int>("Mileage")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Mileage");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("VehicleId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("VehicleId");
 
                     b.HasKey("Id");
@@ -2114,42 +2114,42 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ContentType")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FileExtension")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<long?>("FileSize")
                         .HasColumnType("bigint");
 
                     b.Property<string>("OriginalFileName")
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("StoragePath")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("StorageType")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2160,55 +2160,55 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("AuthorId");
 
                     b.Property<string>("AuthorName")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("AuthorName");
 
                     b.Property<int?>("CategoryId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("CategoryId");
 
                     b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("Content");
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("CoverImageUrl");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsPublished")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("IsPublished");
 
                     b.Property<string>("MetaDescription")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("MetaDescription");
 
                     b.Property<string>("MetaKeywords")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("MetaKeywords");
 
                     b.Property<string>("MetaTitle")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("MetaTitle");
 
                     b.Property<DateTimeOffset?>("PublishedDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("PublishedDate");
 
                     b.Property<string>("Slug")
@@ -2218,11 +2218,11 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("Title");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2237,77 +2237,77 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("AuthorId");
 
                     b.Property<string>("Content")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Content");
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("CoverImageUrl");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Excerpt")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("Excerpt");
 
                     b.Property<bool>("IsFeatured")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("IsFeatured");
 
                     b.Property<DateTimeOffset?>("PublishedAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("PublishedAt");
 
                     b.Property<Guid?>("PublishedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("PublishedBy");
 
                     b.Property<string>("SeoDescription")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("SeoDescription");
 
                     b.Property<string>("SeoKeywords")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("SeoKeywords");
 
                     b.Property<string>("SeoTitle")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("SeoTitle");
 
                     b.Property<string>("Slug")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("Slug");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("Title");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ViewCount")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ViewCount");
 
                     b.HasKey("Id");
@@ -2328,24 +2328,24 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("IsActive");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("Name");
 
                     b.Property<string>("Slug")
@@ -2354,7 +2354,7 @@ namespace Infrastructure.Migrations
                         .HasColumnName("Slug");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2365,43 +2365,43 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AuthorEmail")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("AuthorEmail");
 
                     b.Property<string>("AuthorName")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("AuthorName");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("Content");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsApproved")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("IsApproved");
 
                     b.Property<int>("NewsId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("NewsId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("UserId");
 
                     b.HasKey("Id");
@@ -2417,31 +2417,31 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("NewsId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("NewsId");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2458,23 +2458,23 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Name");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2487,51 +2487,51 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ColorCode")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("ColorCode");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Description");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("IsActive");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Name");
 
                     b.Property<int?>("OptionId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("OptionId");
 
                     b.Property<string>("SeoDescription")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("SeoDescription");
 
                     b.Property<string>("SeoTitle")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("text")
                         .HasColumnName("SeoTitle");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2544,52 +2544,52 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BottleneckDescription")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<double>("CurrentLat")
-                        .HasColumnType("float");
+                        .HasColumnType("double precision");
 
                     b.Property<double>("CurrentLng")
-                        .HasColumnType("float");
+                        .HasColumnType("double precision");
 
                     b.Property<int>("CurrentStage")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DriverName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("DriverPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("EstimatedArrivalTime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsBottleneck")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("OrderId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2600,44 +2600,44 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("ChangedAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("ChangedAt");
 
                     b.Property<Guid?>("ChangedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("ChangedBy");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FromStatus")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("FromStatus");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("Note");
 
                     b.Property<int>("OutputId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("OutputId");
 
                     b.Property<string>("ToStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("ToStatus");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2652,51 +2652,51 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("BuyerId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("BuyerId");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("CreatedBy");
 
                     b.Property<string>("CustomerAddress")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("CustomerAddress");
 
                     b.Property<string>("CustomerName")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("CustomerName");
 
                     b.Property<string>("CustomerPhone")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("CustomerPhone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("DepositRatio")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("DepositRatio");
 
                     b.Property<Guid?>("FinishedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("FinishedBy");
 
                     b.Property<DateTimeOffset?>("LastStatusChangedAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("LastStatusChangedAt");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Notes");
 
                     b.Property<decimal?>("PaidAmount")
@@ -2704,39 +2704,39 @@ namespace Infrastructure.Migrations
                         .HasColumnName("PaidAmount");
 
                     b.Property<DateTimeOffset?>("PaidAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("PaidAt");
 
                     b.Property<string>("PaymentCode")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("PaymentCode");
 
                     b.Property<DateTimeOffset?>("PaymentExpiredAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("PaymentExpiredAt");
 
                     b.Property<string>("PaymentMethod")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("PaymentMethod");
 
                     b.Property<string>("PaymentStatus")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("PaymentStatus");
 
                     b.Property<string>("PaymentUrl")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("PaymentUrl");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("text")
                         .HasColumnName("StatusId");
 
                     b.Property<string>("TransactionId")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("TransactionId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2755,27 +2755,27 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal?>("CostPrice")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("CostPrice");
 
                     b.Property<int?>("Count")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Count");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("OutputId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("OutputId");
 
                     b.Property<decimal?>("Price")
@@ -2783,15 +2783,15 @@ namespace Infrastructure.Migrations
                         .HasColumnName("Price");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2807,17 +2807,17 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.OutputStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("text")
                         .HasColumnName("Key");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Key");
 
@@ -2827,17 +2827,17 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.PartnerType", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("Key");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Key");
 
@@ -2862,15 +2862,15 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("ApprovedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("BaseSalary")
                         .HasColumnType("decimal(18,2)");
@@ -2879,19 +2879,19 @@ namespace Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("EmployeeProfileId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Month")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("Penalty")
                         .HasColumnType("decimal(18,2)");
@@ -2903,10 +2903,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Year")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -2919,13 +2919,13 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -2936,32 +2936,32 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("ActualCost")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("ActualCost");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LicensePlate")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("LicensePlate");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Notes");
 
                     b.Property<int>("OutputId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("OutputId");
 
                     b.Property<decimal>("RegistrationFee")
@@ -2974,11 +2974,11 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -2991,28 +2991,28 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Key");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("text")
                         .HasColumnName("Value");
 
                     b.HasKey("Id");
@@ -3027,201 +3027,201 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BatteryType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("BatteryType");
 
                     b.Property<string>("BoreStroke")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("text")
                         .HasColumnName("BoreStroke");
 
                     b.Property<int?>("BrandId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("BrandId");
 
                     b.Property<int?>("CategoryId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("CategoryId");
 
                     b.Property<string>("CompressionRatio")
-                        .HasColumnType("nvarchar(10)")
+                        .HasColumnType("text")
                         .HasColumnName("CompressionRatio");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DashboardType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("DashboardType");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Description");
 
                     b.Property<string>("Dimensions")
-                        .HasColumnType("nvarchar(35)")
+                        .HasColumnType("text")
                         .HasColumnName("Dimensions");
 
-                    b.Property<string>("Displacement")
-                        .HasColumnType("nvarchar(50)")
+                    b.Property<decimal?>("Displacement")
+                        .HasColumnType("numeric")
                         .HasColumnName("Displacement");
 
                     b.Property<string>("EngineType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("EngineType");
 
                     b.Property<string>("FrameType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("FrameType");
 
                     b.Property<string>("FrontBrake")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("FrontBrake");
 
                     b.Property<string>("FrontSuspension")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("FrontSuspension");
 
                     b.Property<string>("FrontTireSize")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("FrontTireSize");
 
-                    b.Property<string>("FuelCapacity")
-                        .HasColumnType("nvarchar(20)")
+                    b.Property<decimal?>("FuelCapacity")
+                        .HasColumnType("numeric")
                         .HasColumnName("FuelCapacity");
 
                     b.Property<string>("FuelConsumption")
-                        .HasColumnType("nvarchar(35)")
+                        .HasColumnType("text")
                         .HasColumnName("FuelConsumption");
 
                     b.Property<string>("FuelSystem")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("FuelSystem");
 
-                    b.Property<string>("GroundClearance")
-                        .HasColumnType("nvarchar(20)")
+                    b.Property<decimal?>("GroundClearance")
+                        .HasColumnType("numeric")
                         .HasColumnName("GroundClearance");
 
                     b.Property<string>("LightingSystem")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("LightingSystem");
 
                     b.Property<string>("Material")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Material");
 
                     b.Property<string>("MaxPower")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("MaxPower");
 
                     b.Property<int?>("MaxPurchaseQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("MaxTorque")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("MaxTorque");
 
                     b.Property<string>("MetaDescription")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("MetaDescription");
 
                     b.Property<string>("MetaTitle")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("MetaTitle");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Name");
 
-                    b.Property<string>("OilCapacity")
-                        .HasColumnType("nvarchar(250)")
+                    b.Property<decimal?>("OilCapacity")
+                        .HasColumnType("numeric")
                         .HasColumnName("OilCapacity");
 
                     b.Property<string>("Origin")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Origin");
 
                     b.Property<string>("OtherStandards")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("OtherStandards");
 
                     b.Property<string>("RearBrake")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("RearBrake");
 
                     b.Property<string>("RearSuspension")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("RearSuspension");
 
                     b.Property<string>("RearTireSize")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("RearTireSize");
 
-                    b.Property<string>("SeatHeight")
-                        .HasColumnType("nvarchar(20)")
+                    b.Property<decimal?>("SeatHeight")
+                        .HasColumnType("numeric")
                         .HasColumnName("SeatHeight");
 
                     b.Property<string>("ShortDescription")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("ShortDescription");
 
                     b.Property<string>("StarterSystem")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("text")
                         .HasColumnName("StarterSystem");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("text")
                         .HasColumnName("StatusId");
 
                     b.Property<bool>("StdDot")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("StdDot");
 
                     b.Property<bool>("StdEce")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("StdEce");
 
                     b.Property<bool>("StdJis")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("StdJis");
 
                     b.Property<bool>("StdSnell")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("StdSnell");
 
                     b.Property<string>("TireSize")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("TireSize");
 
                     b.Property<string>("TransmissionType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("TransmissionType");
 
                     b.Property<string>("Unit")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Unit");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("WarrantyPeriod")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("WarrantyPeriod");
 
-                    b.Property<string>("Weight")
-                        .HasColumnType("nvarchar(20)")
+                    b.Property<decimal?>("Weight")
+                        .HasColumnType("numeric")
                         .HasColumnName("Weight");
 
                     b.Property<string>("Wheelbase")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Wheelbase");
 
                     b.HasKey("Id");
@@ -3239,87 +3239,85 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("Description");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("IsActive");
 
                     b.Property<string>("ManagementType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("ManagementType");
 
                     b.Property<int?>("MaxPurchaseQuantity")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("MaxPurchaseQuantity");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("Name");
 
                     b.Property<int?>("ParentId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ParentId");
 
                     b.Property<string>("Slug")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("Slug");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ParentId");
 
                     b.ToTable("ProductCategory");
-
-                    b.HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCollectionPhoto", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("ImageUrl");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -3332,31 +3330,31 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BaseProductId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("BaseProductId");
 
                     b.Property<int>("CompatibleVehicleModelId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("CompatibleVehicleModelId");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("Notes");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -3371,29 +3369,29 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Note");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int?>("QuotePrice")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("QuotePrice");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("SupplierId");
 
                     b.HasKey("Id");
@@ -3410,17 +3408,17 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.ProductStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("text")
                         .HasColumnName("Key");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Key");
 
@@ -3441,43 +3439,43 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CustomDescription")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("CustomDescription");
 
                     b.Property<string>("CustomImageUrl")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("text")
                         .HasColumnName("CustomImageUrl");
 
                     b.Property<string>("CustomTitle")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("CustomTitle");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("DisplayOrder")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("DisplayOrder");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductId");
 
                     b.Property<int>("TechnologyId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("TechnologyId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -3492,35 +3490,35 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("text")
                         .HasColumnName("CoverImageUrl");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Dimensions")
-                        .HasColumnType("nvarchar(35)")
+                        .HasColumnType("text")
                         .HasColumnName("Dimensions");
 
                     b.Property<string>("EngineType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("EngineType");
 
                     b.Property<string>("FrontBrake")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("FrontBrake");
 
                     b.Property<string>("FrontSuspension")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("FrontSuspension");
 
                     b.Property<decimal?>("FuelCapacity")
@@ -3532,26 +3530,26 @@ namespace Infrastructure.Migrations
                         .HasColumnName("GroundClearance");
 
                     b.Property<int?>("MaxPurchaseQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("Price");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductId");
 
                     b.Property<string>("RearBrake")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("RearBrake");
 
                     b.Property<string>("RearSuspension")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("RearSuspension");
 
                     b.Property<string>("SKU")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("SKU");
 
                     b.Property<decimal?>("SeatHeight")
@@ -3559,18 +3557,18 @@ namespace Infrastructure.Migrations
                         .HasColumnName("SeatHeight");
 
                     b.Property<string>("TireSize")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("TireSize");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UrlSlug")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("UrlSlug");
 
                     b.Property<string>("VariantName")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("VariantName");
 
                     b.Property<decimal?>("Weight")
@@ -3592,38 +3590,38 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ColorCode")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("text")
                         .HasColumnName("ColorCode");
 
                     b.Property<string>("ColorName")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("ColorName");
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("text")
                         .HasColumnName("CoverImageUrl");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("MaxPurchaseQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -3636,59 +3634,59 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("CreatedBy");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("Description");
 
                     b.Property<DateTimeOffset>("EndDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("EndDate");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("IsEnabled");
 
                     b.Property<string>("LinkUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("LinkUrl");
 
                     b.Property<int>("SortOrder")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("SortOrder");
 
                     b.Property<DateTimeOffset>("StartDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("StartDate");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("text")
                         .HasColumnName("Title");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("UpdatedBy");
 
                     b.HasKey("Id");
@@ -3706,35 +3704,35 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("ApprovedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("ApprovedBy");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("CreatedBy");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Note");
 
                     b.Property<Guid?>("RejectedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("RejectedBy");
 
                     b.Property<Guid?>("SentBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("SentBy");
 
                     b.Property<string>("Status")
@@ -3743,7 +3741,7 @@ namespace Infrastructure.Migrations
                         .HasColumnName("Status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -3762,43 +3760,43 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("ChangedById")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NewNotes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("NewStatusId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("OldNotes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("OldStatusId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("PurchaseRequestId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -3813,39 +3811,39 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("ProductQuotationId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductQuotationId");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int>("PurchaseRequestId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("PurchaseRequestId");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Quantity");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("SupplierId");
 
                     b.Property<decimal?>("UnitPrice")
@@ -3853,7 +3851,7 @@ namespace Infrastructure.Migrations
                         .HasColumnName("UnitPrice");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -3874,55 +3872,55 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("NewProductVariantColorId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("NewProductVariantId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("NewQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("NewSupplierName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<decimal?>("NewUnitPrice")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<int?>("OldProductVariantColorId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("OldProductVariantId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("OldQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("OldSupplierName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<decimal?>("OldUnitPrice")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("PurchaseRequestItemId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -3935,38 +3933,38 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CompletedDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("CompletedDate");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("CustomerName");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("CustomerPhone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Description");
 
                     b.Property<DateTimeOffset?>("ExpectedCompletionTime")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("ExpectedCompletionTime");
 
                     b.Property<decimal>("LaborCost")
@@ -3974,11 +3972,11 @@ namespace Infrastructure.Migrations
                         .HasColumnName("LaborCost");
 
                     b.Property<int>("Mileage")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Mileage");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Notes");
 
                     b.Property<decimal>("PartsCost")
@@ -3986,25 +3984,25 @@ namespace Infrastructure.Migrations
                         .HasColumnName("PartsCost");
 
                     b.Property<string>("PaymentMethod")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("PaymentMethod");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("PaymentStatus");
 
                     b.Property<DateTimeOffset?>("StartTime")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("StartTime");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<int?>("TechnicianId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("TechnicianId");
 
                     b.Property<decimal>("TotalAmount")
@@ -4012,10 +4010,10 @@ namespace Infrastructure.Migrations
                         .HasColumnName("TotalAmount");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("VehicleId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("VehicleId");
 
                     b.HasKey("Id");
@@ -4031,27 +4029,27 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Count")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Count");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("LaborCost")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("LaborCost");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("Notes");
 
                     b.Property<decimal>("Price")
@@ -4059,24 +4057,24 @@ namespace Infrastructure.Migrations
                         .HasColumnName("Price");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<int>("RepairOrderId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("RepairOrderId");
 
                     b.Property<int?>("ServiceId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ServiceId");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Type");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4092,10 +4090,10 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
                 {
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<int>("PermissionId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("RoleId", "PermissionId");
 
@@ -4108,7 +4106,7 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("ActualSalePrice")
                         .HasColumnType("decimal(18, 2)");
@@ -4116,92 +4114,92 @@ namespace Infrastructure.Migrations
                     b.Property<string>("ContractNumber")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CustomerAddress")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("CustomerCCCD")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("CustomerFullName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CustomerPhone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("DepositAmount")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("EngineNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("FinalPaymentDeadline")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FrameNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int?>("OutputId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("RemainingAmount")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("ScannedFileUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ShowroomAddress")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ShowroomName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ShowroomRepresentative")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ShowroomTaxCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("SignedDate")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SpecialTerms")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("VehicleColor")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("VehicleModel")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("VehicleVersion")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("WarrantyPeriod")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("WarrantyScope")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -4216,37 +4214,37 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("BasePrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("CategoryId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int?>("EstimatedDurationMinutes")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4259,81 +4257,81 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CancelledDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("CancelledDate");
 
                     b.Property<string>("CancelledReason")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("CancelledReason");
 
                     b.Property<DateTimeOffset?>("CompletedDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("CompletedDate");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("CustomerId");
 
                     b.Property<string>("CustomerNotes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("CustomerNotes");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal?>("DepositAmount")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("DepositAmount");
 
                     b.Property<int?>("EstimatedDurationMinutes")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("EstimatedDurationMinutes");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Notes");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("PaymentStatus");
 
                     b.Property<int?>("Rating")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Rating");
 
                     b.Property<string>("Review")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Review");
 
                     b.Property<DateTimeOffset>("ScheduledDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("ScheduledDate");
 
                     b.Property<int>("ServiceId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ServiceId");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<int?>("TechnicianId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("TechnicianId");
 
                     b.Property<string>("TechnicianNotes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("TechnicianNotes");
 
                     b.Property<decimal>("TotalAmount")
@@ -4341,10 +4339,10 @@ namespace Infrastructure.Migrations
                         .HasColumnName("TotalAmount");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("VehicleId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("VehicleId");
 
                     b.HasKey("Id");
@@ -4364,25 +4362,25 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4393,62 +4391,62 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("AdminRepliedById")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("AdminRepliedById");
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ContactId");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Criteria")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("text")
                         .HasColumnName("Criteria");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DirectReplyText")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("DirectReplyText");
 
                     b.Property<string>("InternalNotes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("InternalNotes");
 
                     b.Property<DateTimeOffset?>("ProcessedAt")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("ProcessedAt");
 
                     b.Property<string>("ProcessingStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("text")
                         .HasColumnName("ProcessingStatus");
 
                     b.Property<int>("Rating")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Rating");
 
                     b.Property<string>("Review")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Review");
 
                     b.Property<int>("ServiceBookingId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ServiceBookingId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4462,20 +4460,20 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Setting", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("text")
                         .HasColumnName("Key");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Value");
 
                     b.HasKey("Key");
@@ -4487,43 +4485,43 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("Address");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("Email");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Name");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Notes");
 
                     b.Property<string>("PartnerTypeId")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("PartnerTypeId");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(15)")
+                        .HasColumnType("text")
                         .HasColumnName("Phone");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("text")
                         .HasColumnName("StatusId");
 
                     b.Property<string>("TaxIdentificationNumber")
@@ -4531,7 +4529,7 @@ namespace Infrastructure.Migrations
                         .HasColumnName("TaxIdentificationNumber");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4546,39 +4544,39 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CitizenID")
                         .HasColumnType("varchar(20)")
                         .HasColumnName("CitizenID");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("Email");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Name");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(15)")
+                        .HasColumnType("text")
                         .HasColumnName("Phone");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("SupplierId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4591,73 +4589,73 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("BankAccountNumber")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("BankName")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("ContractFilePath")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("ContractNumber")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<decimal>("ContractValue")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal?>("CreditLimit")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal?>("DiscountRate")
                         .HasColumnType("decimal(5, 2)");
 
                     b.Property<DateTime>("EffectiveDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("MinimumVolumePerMonth")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Note")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<Guid?>("ParentContractId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<int?>("PaymentWindowDays")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Terms")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4672,44 +4670,44 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Action")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("ChangedBy")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Details")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("NewValue")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("OldValue")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<Guid>("SupplierContractId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4722,22 +4720,22 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("SupplierContractId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("WholesalePrice")
                         .HasColumnType("decimal(18, 2)");
@@ -4755,19 +4753,19 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("InventoryReceiptId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("InventoryReceiptId");
 
                     b.Property<decimal>("PaidAmount")
@@ -4775,7 +4773,7 @@ namespace Infrastructure.Migrations
                         .HasColumnName("PaidAmount");
 
                     b.Property<int>("SupplierId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("SupplierId");
 
                     b.Property<decimal>("TotalAmount")
@@ -4783,7 +4781,7 @@ namespace Infrastructure.Migrations
                         .HasColumnName("TotalAmount");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4798,35 +4796,35 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("AmountPaid")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CreatedById")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("PaymentDate")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("RemainingDebt")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<int>("SupplierId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4841,32 +4839,32 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EvidenceUrl")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("PaymentDate")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("SupplierId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4878,20 +4876,20 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.SupplierFinance", b =>
                 {
                     b.Property<int>("SupplierId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("CurrentDebt")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("SupplierId");
 
@@ -4901,17 +4899,17 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.SupplierStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("text")
                         .HasColumnName("Key");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Key");
 
@@ -4922,56 +4920,56 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AssignedUserId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("AssignedUserId");
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("Category");
 
                     b.Property<int>("ContactId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ContactId");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("Content");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("Email");
 
                     b.Property<string>("OrderCode")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("OrderCode");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("text")
                         .HasColumnName("Subject");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -4984,46 +4982,46 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AssignedAdminId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("Priority")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("SLADeadline")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -5038,41 +5036,41 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("BrandId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("CategoryId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DefaultDescription")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("text")
                         .HasColumnName("DefaultDescription");
 
                     b.Property<string>("DefaultImageUrl")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("text")
                         .HasColumnName("DefaultImageUrl");
 
                     b.Property<string>("DefaultTitle")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("DefaultTitle");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("Name");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -5087,23 +5085,23 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("Name");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -5114,31 +5112,31 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("text")
                         .HasColumnName("ImageUrl");
 
                     b.Property<int>("TechnologyId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("Type");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -5151,26 +5149,26 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("OptionValueId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("OptionValueId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("VariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("VariantId");
 
                     b.HasKey("Id");
@@ -5186,29 +5184,29 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<double>("CurrentOdo")
-                        .HasColumnType("float")
+                        .HasColumnType("double precision")
                         .HasColumnName("CurrentOdo");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ElectronicWarrantyQrCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("text")
                         .HasColumnName("ElectronicWarrantyQrCode");
 
                     b.Property<string>("EngineNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("EngineNumber");
 
                     b.Property<decimal>("ImportPrice")
@@ -5216,69 +5214,69 @@ namespace Infrastructure.Migrations
                         .HasColumnName("ImportPrice");
 
                     b.Property<int?>("InventoryReceiptInfoId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("InventoryReceiptInfoId");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
+                        .HasColumnType("boolean")
                         .HasColumnName("IsActive");
 
                     b.Property<DateTime?>("LastMaintenanceDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("LastMaintenanceDate");
 
                     b.Property<int?>("LeadId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("LeadId");
 
                     b.Property<string>("LicensePlate")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("LicensePlate");
 
                     b.Property<DateTime?>("NextMaintenanceDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("NextMaintenanceDate");
 
                     b.Property<double?>("NextMaintenanceOdo")
-                        .HasColumnType("float")
+                        .HasColumnType("double precision")
                         .HasColumnName("NextMaintenanceOdo");
 
                     b.Property<int?>("OutputInfoId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("OutputInfoId");
 
                     b.Property<int?>("ProductId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductId");
 
                     b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantColorId");
 
                     b.Property<int?>("ProductVariantId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
                     b.Property<DateTimeOffset>("PurchaseDate")
-                        .HasColumnType("datetimeoffset")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("PurchaseDate");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("Status");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("uuid")
                         .HasColumnName("UserId");
 
                     b.Property<string>("VinNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("text")
                         .HasColumnName("VinNumber");
 
                     b.HasKey("Id");
@@ -5304,43 +5302,43 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("ChangedById")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NewEngineNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("NewVinNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("OldEngineNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("OldVinNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("VehicleId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -5355,37 +5353,37 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("text")
                         .HasColumnName("Description");
 
                     b.Property<string>("DocumentType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("text")
                         .HasColumnName("DocumentType");
 
                     b.Property<string>("FileUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("text")
                         .HasColumnName("FileUrl");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("VehicleId")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("VehicleId");
 
                     b.HasKey("Id");
@@ -5399,18 +5397,18 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -5423,18 +5421,18 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -5446,16 +5444,16 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -5467,13 +5465,13 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -5487,16 +5485,16 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
