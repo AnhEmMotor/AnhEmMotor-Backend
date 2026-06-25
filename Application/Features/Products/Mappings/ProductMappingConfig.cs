@@ -79,9 +79,7 @@ public class ProductMappingConfig : IRegister
         config.NewConfig<ProductEntity, ProductInfoStoreResponse>()
             .Map(dest => dest.Brand, src => src.Brand != null ? src.Brand.Name : null)
             .Map(dest => dest.Category, src => src.ProductCategory != null ? src.ProductCategory.Name : null)
-            .Map(
-                dest => dest.ProductLimit,
-                src => GetEffectiveMaxPurchaseQuantity(src))
+            .Map(dest => dest.ProductLimit, src => GetEffectiveMaxPurchaseQuantity(src))
             .Map(dest => dest.EffectiveMax, src => GetEffectiveMaxPurchaseQuantity(src))
             .Map(dest => dest.ProductTechnologies, src => MapProductTechnologiesList(src))
             .AfterMapping(

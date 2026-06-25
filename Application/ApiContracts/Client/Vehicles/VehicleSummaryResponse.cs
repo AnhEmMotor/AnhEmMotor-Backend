@@ -1,16 +1,15 @@
 using System;
-using System.Collections.Generic;
 
 namespace Application.ApiContracts.Client.Vehicles
 {
     public record VehicleSummaryResponse(
-        int Id, 
-        string ImageUrl, 
-        string ModelName, 
-        string LicensePlate, 
-        double CurrentOdo, 
-        int DaysToMaintenance, 
-        double KmToMaintenance, 
+        int Id,
+        string ImageUrl,
+        string ModelName,
+        string LicensePlate,
+        double CurrentOdo,
+        int DaysToMaintenance,
+        double KmToMaintenance,
         string WarrantyQrCode,
         string WarrantyStatus);
 
@@ -22,11 +21,7 @@ namespace Application.ApiContracts.Client.Vehicles
         string TechnicalSpecs,
         List<MaintenanceHistoryDto> History);
 
-    public record MaintenanceHistoryDto(
-        DateTime Date, 
-        string Description, 
-        decimal Cost, 
-        string TechnicianName);
+    public record MaintenanceHistoryDto(DateTime Date, string Description, decimal Cost, string TechnicianName);
 
     public record UpdateOdoRequest(double NewOdo);
 }

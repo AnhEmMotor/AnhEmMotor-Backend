@@ -84,4 +84,59 @@ public class FileInsertService : IFileInsertService
             return Result<FileUpload>.Failure(ex.Message);
         }
     }
+
+    private static string SanitizeFileName(string fileName)
+    {
+        var invalid = Path.GetInvalidFileNameChars();
+        var sanitized = new string(fileName.Where(c => !invalid.Contains(c)).ToArray());
+        sanitized = sanitized.Replace(' ', '_');
+        if (string.IsNullOrWhiteSpace(sanitized))
+        {
+            sanitized = "file";
+        }
+        return sanitized;
+    }
+
+    public async Task<Result<FileUpload>> SaveFileAsIsAsync(
+        Stream file,
+        string fileName,
+        CancellationToken cancellationToken,
+        string subFolder = "")
+    {
+        try
+        {
+            if (file is null || file.Length is 0)
+            {
+                return Result<FileUpload>.Failure("File stream is empty");
+            }
+            var targetFolder = string.IsNullOrWhiteSpace(subFolder)
+                ? _uploadFolder
+                : Path.Combine(_uploadFolder, subFolder);
+            if (!Directory.Exists(targetFolder))
+            {
+                Directory.CreateDirectory(targetFolder);
+            }
+            if (file.CanSeek)
+            {
+                file.Position = 0;
+            }
+            var extension = Path.GetExtension(fileName).ToLower();
+            var originalNameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+            var sanitizedName = SanitizeFileName(originalNameWithoutExt);
+            var storageFileName = $"{sanitizedName}_{Guid.NewGuid()}{extension}";
+            var relativePath = string.IsNullOrWhiteSpace(subFolder)
+                ? storageFileName
+                : Path.Combine(subFolder, storageFileName).Replace("\\", "/");
+            var fullPath = Path.Combine(_uploadFolder, relativePath);
+            using (var fileStream = new FileStream(fullPath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
+            }
+            var size = file.Length;
+            return new FileUpload(relativePath, extension, size);
+        } catch (Exception ex)
+        {
+            return Result<FileUpload>.Failure(ex.Message);
+        }
+    }
 }

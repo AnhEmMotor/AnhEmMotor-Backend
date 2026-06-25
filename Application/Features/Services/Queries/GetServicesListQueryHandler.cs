@@ -8,19 +8,8 @@ using Sieve.Services;
 
 namespace Application.Features.Services.Queries;
 
-/// <summary>
-/// Handler xử lý yêu cầu lấy danh sách dịch vụ có phân trang.
-/// </summary>
 public class GetServicesListQueryHandler(IServiceReadRepository serviceRepository, ISieveProcessor sieveProcessor) : IRequestHandler<GetServicesListQuery, Result<PagedResult<ServiceResponse>>>
 {
-    /// <summary>
-    /// Thực hiện truy vấn danh sách dịch vụ, áp dụng bộ lọc Sieve và phân trang.
-    /// </summary>
-    /// <param name="request">Thông tin phân trang và lọc.</param>
-    /// <param name="cancellationToken">Token hủy bỏ.</param>
-    /// <returns>
-    /// Danh sách dịch vụ được phân trang.
-    /// </returns>
     public async Task<Result<PagedResult<ServiceResponse>>> Handle(
         GetServicesListQuery request,
         CancellationToken cancellationToken)

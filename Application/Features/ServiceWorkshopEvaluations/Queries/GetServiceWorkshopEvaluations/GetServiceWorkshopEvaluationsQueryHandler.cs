@@ -14,7 +14,7 @@ public class GetServiceWorkshopEvaluationsQueryHandler(
         GetServiceWorkshopEvaluationsQuery request,
         CancellationToken cancellationToken)
     {
-        var sieveModel = request.SieveModel ?? new();
+        var sieveModel = new global::Sieve.Models.SieveModel { Page = request.Page, PageSize = request.PageSize };
         return serviceEvaluationReadRepository.GetPagedEvaluationsAsync(sieveModel, cancellationToken);
     }
 }

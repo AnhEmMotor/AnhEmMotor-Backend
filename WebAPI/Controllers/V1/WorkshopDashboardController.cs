@@ -17,13 +17,10 @@ public class WorkshopDashboardController : ControllerBase
     }
 
     [HttpGet("overview")]
-    public async Task<IActionResult> GetOverview(
-        [FromQuery] DateTimeOffset fromDate,
-        [FromQuery] DateTimeOffset toDate,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOverview([FromQuery] DateTimeOffset fromDate, [FromQuery] DateTimeOffset toDate)
     {
         var query = new GetWorkshopDashboardQuery(fromDate, toDate);
-        var result = await _mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        var result = await _mediator.Send(query);
         return Ok(result);
     }
 }

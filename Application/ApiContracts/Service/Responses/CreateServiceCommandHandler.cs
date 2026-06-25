@@ -1,30 +1,19 @@
-using Application.ApiContracts.Service.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Service;
 using Application.Interfaces.Repositories.ServiceCategory;
-using Domain.Entities;
 using Mapster;
 using MediatR;
 using ServiceEntity = Domain.Entities.Service;
 
 namespace Application.ApiContracts.Service.Responses;
 
-/// <summary>
-/// Xử lý việc tạo mới một dịch vụ trong hệ thống.
-/// </summary>
 public class CreateServiceCommandHandler(
     IUnitOfWork unitOfWork,
     IServiceReadRepository serviceReadRepository,
     IServiceInsertRepository serviceInsertRepository,
     IServiceCategoryReadRepository categoryRepository) : IRequestHandler<CreateServiceCommand, Result<ServiceResponse>>
 {
-    /// <summary>
-    /// Xử lý logic tạo dịch vụ: kiểm tra danh mục và tính duy nhất của tên.
-    /// </summary>
-    /// <param name="request">Dữ liệu yêu cầu tạo.</param>
-    /// <param name="cancellationToken">Token hủy bỏ.</param>
-    /// <returns>Kết quả chứa thông tin dịch vụ vừa tạo.</returns>
     public async Task<Result<ServiceResponse>> Handle(CreateServiceCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);

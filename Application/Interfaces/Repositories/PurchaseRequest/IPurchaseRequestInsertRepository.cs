@@ -1,3 +1,4 @@
+using Domain.Entities;
 using PurchaseRequestEntity = Domain.Entities.PurchaseRequest;
 
 namespace Application.Interfaces.Repositories.PurchaseRequest
@@ -6,7 +7,10 @@ namespace Application.Interfaces.Repositories.PurchaseRequest
     {
         public void Add(PurchaseRequestEntity purchaseRequest);
 
-        public Task InsertAuditLogsAsync(IEnumerable<Domain.Entities.PurchaseRequestAuditLog> logs, CancellationToken ct = default);
-        public Task InsertItemAuditLogsAsync(IEnumerable<Domain.Entities.PurchaseRequestItemAuditLog> logs, CancellationToken ct = default);
+        public Task InsertAuditLogsAsync(IEnumerable<PurchaseRequestAuditLog> logs, CancellationToken ct = default);
+
+        public Task InsertItemAuditLogsAsync(
+            IEnumerable<PurchaseRequestItemAuditLog> logs,
+            CancellationToken ct = default);
     }
 }

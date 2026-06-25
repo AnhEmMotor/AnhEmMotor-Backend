@@ -46,4 +46,3 @@ namespace Application.Interfaces.Repositories.ServiceCategory
             DataFetchMode mode = DataFetchMode.ActiveOnly);
     }
 }
-

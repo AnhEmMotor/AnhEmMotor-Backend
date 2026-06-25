@@ -79,7 +79,7 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                             ThumbnailUrl = string.Empty
                         });
             }
-            dto.Milestones =[new TrackingMilestoneResponse
+            dto.Milestones = [new TrackingMilestoneResponse
             {
                 Id = 1,
                 Timestamp = DateTimeOffset.UtcNow.AddHours(-1),

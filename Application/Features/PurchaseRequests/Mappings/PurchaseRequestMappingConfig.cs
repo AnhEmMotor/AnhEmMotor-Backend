@@ -76,14 +76,19 @@ namespace Application.Features.PurchaseRequests.Mappings
                 .Map(
                     dest => dest.IsFullyImported,
                     src => src.Status == PurchaseRequestStatus.Approve &&
-                           src.PurchaseRequestItems.Any() &&
-                           !src.PurchaseRequestItems.Any(i =>
-                               i.Quantity > (i.InventoryReceiptInfos
-                                   .Where(ii => ii.DeletedAt == null &&
-                                                ii.InventoryReceipt != null &&
-                                                ii.InventoryReceipt.DeletedAt == null &&
-                                                ii.InventoryReceipt.StatusId == Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve)
-                                   .Sum(ii => ii.Count) ?? 0)));
+                        src.PurchaseRequestItems.Any() &&
+                        !src.PurchaseRequestItems
+                            .Any(
+                                i => i.Quantity >
+                                            (i.InventoryReceiptInfos
+                                                    .Where(
+                                                        ii => ii.DeletedAt == null &&
+                                                                                ii.InventoryReceipt != null &&
+                                                                                ii.InventoryReceipt.DeletedAt == null &&
+                                                                                ii.InventoryReceipt.StatusId ==
+                                                                                Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve)
+                                                    .Sum(ii => ii.Count) ??
+                                                0)));
             config.NewConfig<PurchaseRequestItem, PurchaseRequestItemResponse>()
                 .Map(
                     dest => dest.ProductName,
@@ -218,7 +223,6 @@ namespace Application.Features.PurchaseRequests.Mappings
                                                         0))
                                 .Sum(ii => ii.Count ?? 0)
                             : 0))
-
                 .Map(
                     dest => dest.NeedVin,
                     src => src.ProductVariant != null &&

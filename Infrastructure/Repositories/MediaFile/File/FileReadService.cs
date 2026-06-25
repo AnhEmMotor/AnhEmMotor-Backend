@@ -49,7 +49,19 @@ public class FileReadService : IFileReadService
         if (!System.IO.File.Exists(fullPath))
             return null;
         var fileBytes = await System.IO.File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);
-        return (fileBytes, "image/webp");
+        var extension = Path.GetExtension(storagePath).ToLower();
+        var contentType = extension switch
+        {
+            ".pdf" => "application/pdf",
+            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".doc" => "application/msword",
+            ".png" => "image/png",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".webp" => "image/webp",
+            ".gif" => "image/gif",
+            _ => "application/octet-stream"
+        };
+        return (fileBytes, contentType);
     }
 
     public Task<Stream> ReadImageAsync(Stream InventoryReceiptStream, int? width, CancellationToken cancellationToken)

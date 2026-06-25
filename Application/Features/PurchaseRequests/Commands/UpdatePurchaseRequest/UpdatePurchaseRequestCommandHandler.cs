@@ -63,16 +63,18 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
             var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
             var variantDict = variants.ToDictionary(v => v.Id);
-
             var supplierIds = request.Items
                 .Where(x => x.SupplierId.HasValue)
                 .Select(x => x.SupplierId!.Value)
                 .Concat(pr.PurchaseRequestItems.Where(x => x.SupplierId.HasValue).Select(x => x.SupplierId!.Value))
                 .Distinct()
                 .ToList();
-            var suppliers = await supplierReadRepository.GetByIdAsync(supplierIds, cancellationToken, DataFetchMode.ActiveOnly).ConfigureAwait(false);
+            var suppliers = await supplierReadRepository.GetByIdAsync(
+                supplierIds,
+                cancellationToken,
+                DataFetchMode.ActiveOnly)
+                .ConfigureAwait(false);
             var supplierDict = suppliers.ToDictionary(s => s.Id, s => s.Name);
-
             foreach (var item in request.Items)
             {
                 if (!item.ProductVariantId.HasValue)
@@ -117,8 +119,7 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
             var currentUserId = currentUserContext.GetUserId();
             var oldNotes = pr.Note;
             pr.Note = request.Note;
-            
-            var auditLog = new Domain.Entities.PurchaseRequestAuditLog
+            var auditLog = new PurchaseRequestAuditLog
             {
                 PurchaseRequest = pr,
                 Action = "Update",
@@ -127,25 +128,28 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                 OldNotes = oldNotes,
                 NewNotes = pr.Note
             };
-            var auditLogs = new List<Domain.Entities.PurchaseRequestAuditLog> { auditLog };
-
+            var auditLogs = new List<PurchaseRequestAuditLog> { auditLog };
             var existingItemsDict = pr.PurchaseRequestItems.ToDictionary(x => x.Id);
             var requestItemsDict = request.Items.Where(x => x.Id.HasValue && x.Id > 0).ToDictionary(x => x.Id!.Value);
             var toDelete = pr.PurchaseRequestItems.Where(x => !requestItemsDict.ContainsKey(x.Id)).ToList();
-            var itemAuditLogs = new List<Domain.Entities.PurchaseRequestItemAuditLog>();
-            
+            var itemAuditLogs = new List<PurchaseRequestItemAuditLog>();
             foreach (var item in toDelete)
             {
-                itemAuditLogs.Add(new Domain.Entities.PurchaseRequestItemAuditLog
-                {
-                    PurchaseRequestItem = item,
-                    Action = "Delete",
-                    OldQuantity = item.Quantity,
-                    OldProductVariantId = item.ProductVariantId,
-                    OldProductVariantColorId = item.ProductVariantColorId,
-                    OldSupplierName = item.SupplierId.HasValue && supplierDict.TryGetValue(item.SupplierId.Value, out var supplierName) ? supplierName : null,
-                    OldUnitPrice = item.UnitPrice
-                });
+                itemAuditLogs.Add(
+                    new PurchaseRequestItemAuditLog
+                    {
+                        PurchaseRequestItem = item,
+                        Action = "Delete",
+                        OldQuantity = item.Quantity,
+                        OldProductVariantId = item.ProductVariantId,
+                        OldProductVariantColorId = item.ProductVariantColorId,
+                        OldSupplierName =
+                            item.SupplierId.HasValue &&
+                                        supplierDict.TryGetValue(item.SupplierId.Value, out var supplierName)
+                                    ? supplierName
+                                    : null,
+                        OldUnitPrice = item.UnitPrice
+                    });
                 deleteRepository.DeleteItem(item);
                 pr.PurchaseRequestItems.Remove(item);
             }
@@ -159,31 +163,45 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                         var oldVariantId = existingItem.ProductVariantId;
                         var oldColorId = existingItem.ProductVariantColorId;
                         var oldUnitPrice = existingItem.UnitPrice;
-                        
                         existingItem.ProductVariantId = itemRequest.ProductVariantId!.Value;
                         existingItem.ProductVariantColorId = itemRequest.ProductVariantColorId;
                         existingItem.Quantity = itemRequest.Quantity!.Value;
                         existingItem.SupplierId = itemRequest.SupplierId;
                         existingItem.ProductQuotationId = itemRequest.ProductQuotationId;
                         existingItem.UnitPrice = itemRequest.UnitPrice;
-
-                        if (oldQuantity != existingItem.Quantity || oldVariantId != existingItem.ProductVariantId || oldColorId != existingItem.ProductVariantColorId || oldUnitPrice != existingItem.UnitPrice)
+                        if (oldQuantity != existingItem.Quantity ||
+                            oldVariantId != existingItem.ProductVariantId ||
+                            oldColorId != existingItem.ProductVariantColorId ||
+                            oldUnitPrice != existingItem.UnitPrice)
                         {
-                            itemAuditLogs.Add(new Domain.Entities.PurchaseRequestItemAuditLog
-                            {
-                                PurchaseRequestItem = existingItem,
-                                Action = "Update",
-                                OldQuantity = oldQuantity,
-                                NewQuantity = existingItem.Quantity,
-                                OldProductVariantId = oldVariantId,
-                                NewProductVariantId = existingItem.ProductVariantId,
-                                OldProductVariantColorId = oldColorId,
-                                NewProductVariantColorId = existingItem.ProductVariantColorId,
-                                OldSupplierName = existingItem.SupplierId.HasValue && supplierDict.TryGetValue(existingItem.SupplierId.Value, out var oldSupplierName) ? oldSupplierName : null,
-                                NewSupplierName = itemRequest.SupplierId.HasValue && supplierDict.TryGetValue(itemRequest.SupplierId.Value, out var newSupplierName) ? newSupplierName : null,
-                                OldUnitPrice = oldUnitPrice,
-                                NewUnitPrice = existingItem.UnitPrice
-                            });
+                            itemAuditLogs.Add(
+                                new PurchaseRequestItemAuditLog
+                                {
+                                    PurchaseRequestItem = existingItem,
+                                    Action = "Update",
+                                    OldQuantity = oldQuantity,
+                                    NewQuantity = existingItem.Quantity,
+                                    OldProductVariantId = oldVariantId,
+                                    NewProductVariantId = existingItem.ProductVariantId,
+                                    OldProductVariantColorId = oldColorId,
+                                    NewProductVariantColorId = existingItem.ProductVariantColorId,
+                                    OldSupplierName =
+                                        existingItem.SupplierId.HasValue &&
+                                                    supplierDict.TryGetValue(
+                                                        existingItem.SupplierId.Value,
+                                                        out var oldSupplierName)
+                                                ? oldSupplierName
+                                                : null,
+                                    NewSupplierName =
+                                        itemRequest.SupplierId.HasValue &&
+                                                    supplierDict.TryGetValue(
+                                                        itemRequest.SupplierId.Value,
+                                                        out var newSupplierName)
+                                                ? newSupplierName
+                                                : null,
+                                    OldUnitPrice = oldUnitPrice,
+                                    NewUnitPrice = existingItem.UnitPrice
+                                });
                         }
                     }
                 } else
@@ -198,17 +216,21 @@ namespace Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest
                         UnitPrice = itemRequest.UnitPrice
                     };
                     pr.PurchaseRequestItems.Add(newItem);
-                    
-                    itemAuditLogs.Add(new Domain.Entities.PurchaseRequestItemAuditLog
-                    {
-                        PurchaseRequestItem = newItem,
-                        Action = "Add",
-                        NewQuantity = newItem.Quantity,
-                        NewProductVariantId = newItem.ProductVariantId,
-                        NewProductVariantColorId = newItem.ProductVariantColorId,
-                        NewSupplierName = newItem.SupplierId.HasValue && supplierDict.TryGetValue(newItem.SupplierId.Value, out var nSupplierName) ? nSupplierName : null,
-                        NewUnitPrice = newItem.UnitPrice
-                    });
+                    itemAuditLogs.Add(
+                        new PurchaseRequestItemAuditLog
+                        {
+                            PurchaseRequestItem = newItem,
+                            Action = "Add",
+                            NewQuantity = newItem.Quantity,
+                            NewProductVariantId = newItem.ProductVariantId,
+                            NewProductVariantColorId = newItem.ProductVariantColorId,
+                            NewSupplierName =
+                                newItem.SupplierId.HasValue &&
+                                            supplierDict.TryGetValue(newItem.SupplierId.Value, out var nSupplierName)
+                                        ? nSupplierName
+                                        : null,
+                            NewUnitPrice = newItem.UnitPrice
+                        });
                 }
             }
             updateRepository.Update(pr);

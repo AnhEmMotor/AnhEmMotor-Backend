@@ -200,6 +200,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<SupplierFinance> SupplierFinances { get; set; }
 
+    public virtual DbSet<SupplierDebtSettlement> SupplierDebtSettlements { get; set; }
+
     public virtual DbSet<SupplierDebtLog> SupplierDebtLogs { get; set; }
 
     public virtual DbSet<InventoryReceiptAuditLog> InventoryReceiptAuditLogs { get; set; }
@@ -369,9 +371,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     .WithMany()
                     .HasForeignKey(b => b.VehicleId)
                     .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(b => b.AssignedSale)
+                entity.HasOne(b => b.Technician)
                     .WithMany()
-                    .HasForeignKey(b => b.AssignedSaleId)
+                    .HasForeignKey(b => b.TechnicianId)
                     .OnDelete(DeleteBehavior.SetNull);
                 entity.Property(b => b.Status).HasConversion<string>();
             });
@@ -555,8 +557,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<InventoryOnHand>()
             .HasIndex(i => new { i.ProductVariantId, i.ProductVariantColorId, i.Month, i.Year })
             .IsUnique();
-        modelBuilder.Entity<InventoryOnHand>()
-            .HasIndex(i => i.ProductVariantId);
+        modelBuilder.Entity<InventoryOnHand>().HasIndex(i => i.ProductVariantId);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
         if (isNotSqlServer)

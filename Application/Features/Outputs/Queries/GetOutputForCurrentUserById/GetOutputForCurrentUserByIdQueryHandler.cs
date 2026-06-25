@@ -12,8 +12,7 @@ namespace Application.Features.Outputs.Queries.GetOutputForCurrentUserById;
 public sealed class GetOutputForCurrentUserByIdQueryHandler(
     ICurrentUserContext currentUserContext,
     IOutputReadRepository repository,
-    ISettingRepository settingRepository)
-    : IRequestHandler<GetOutputForCurrentUserByIdQuery, Result<OrderDetailResponse>>
+    ISettingRepository settingRepository) : IRequestHandler<GetOutputForCurrentUserByIdQuery, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         GetOutputForCurrentUserByIdQuery request,
@@ -24,26 +23,20 @@ public sealed class GetOutputForCurrentUserByIdQueryHandler(
         {
             return Error.NotFound($"Không tìm thấy đơn hàng {request.Id}.", nameof(request.Id));
         }
-
         if (output.BuyerId != currentUserContext.GetUserId())
         {
             return Error.Forbidden("Bạn không có quyền xem đơn hàng này.");
         }
-
         if (output.DepositRatio == null)
         {
             var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
             var ratioSetting = settings.FirstOrDefault(
-                setting => string.Equals(
-                    setting.Key,
-                    SettingKeys.DepositRatio,
-                    StringComparison.OrdinalIgnoreCase));
+                setting => string.Equals(setting.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
             if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
             {
                 output.DepositRatio = parsedRatio;
             }
         }
-
         return output.Adapt<OrderDetailResponse>();
     }
 }

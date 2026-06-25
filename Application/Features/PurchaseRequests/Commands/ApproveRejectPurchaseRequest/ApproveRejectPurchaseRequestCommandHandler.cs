@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Services;
 using Domain.Constants.PurchaseRequest;
+using Domain.Entities;
 using MediatR;
 using System;
 
@@ -39,7 +40,6 @@ namespace Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRe
             var currentUserId = currentUserContext.GetUserId();
             var oldStatus = pr.Status;
             pr.Status = request.Status;
-            
             if (string.Equals(request.Status, PurchaseRequestStatus.Approve, StringComparison.OrdinalIgnoreCase))
             {
                 pr.ApprovedBy = currentUserId;
@@ -50,8 +50,7 @@ namespace Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRe
                 pr.ApprovedBy = null;
             }
             updateRepository.Update(pr);
-
-            var auditLog = new Domain.Entities.PurchaseRequestAuditLog
+            var auditLog = new PurchaseRequestAuditLog
             {
                 PurchaseRequest = pr,
                 Action = "UpdateStatus",
@@ -63,7 +62,6 @@ namespace Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRe
                 NewNotes = pr.Note
             };
             await insertRepository.InsertAuditLogsAsync([auditLog], cancellationToken).ConfigureAwait(false);
-
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();
         }

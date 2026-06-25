@@ -1,12 +1,12 @@
 using Application.ApiContracts.DebtPayment.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.SupplierDebt;
+using Domain.Primitives;
 using MediatR;
+
 using System;
 
 using System.Linq;
-
-using Domain.Primitives;
 
 namespace Application.Features.DebtPayments.Queries.GetSuppliersWithDebt
 {
@@ -46,12 +46,10 @@ namespace Application.Features.DebtPayments.Queries.GetSuppliersWithDebt
                     })
                 .OrderByDescending(x => x.TotalDebt)
                 .ToList();
-
             var page = request.SieveModel?.Page ?? 1;
             var pageSize = request.SieveModel?.PageSize ?? 10;
             var totalCount = allSuppliers.Count;
             var pagedSuppliers = allSuppliers.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
             var pagedResult = new PagedResult<SupplierDebtResponse>(pagedSuppliers, totalCount, page, pageSize);
             return Result<PagedResult<SupplierDebtResponse>>.Success(pagedResult);
         }

@@ -36,9 +36,13 @@ namespace Application.Interfaces.Repositories.PurchaseRequest
             IEnumerable<int> purchaseRequestIds,
             CancellationToken cancellationToken);
 
-        public Task<List<Domain.Entities.PurchaseRequestAuditLog>> GetAuditLogsAsync(int purchaseRequestId, CancellationToken cancellationToken);
-        
-        public Task<List<Domain.Entities.PurchaseRequestItemAuditLog>> GetItemAuditLogsAsync(IEnumerable<int> itemIds, CancellationToken cancellationToken);
+        public Task<List<PurchaseRequestAuditLog>> GetAuditLogsAsync(
+            int purchaseRequestId,
+            CancellationToken cancellationToken);
+
+        public Task<List<PurchaseRequestItemAuditLog>> GetItemAuditLogsAsync(
+            IEnumerable<int> itemIds,
+            CancellationToken cancellationToken);
 
         public Task<List<int>> GetAllItemIdsAsync(int purchaseRequestId, CancellationToken cancellationToken);
     }

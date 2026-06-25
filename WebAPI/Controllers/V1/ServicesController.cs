@@ -13,7 +13,7 @@ namespace WebAPI.Controllers.V1;
 /// <summary>
 /// Controller quản lý các dịch vụ bảo trì và sửa chữa của cửa hàng.
 /// </summary>
-public class ServicesController(IMediator mediator) : ApiController
+public sealed class ServicesController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Tạo mới một dịch vụ trong hệ thống.
@@ -32,7 +32,7 @@ public class ServicesController(IMediator mediator) : ApiController
         [FromBody] CreateServiceCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -46,7 +46,7 @@ public class ServicesController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetServicesListQuery { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

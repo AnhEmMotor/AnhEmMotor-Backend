@@ -6,8 +6,7 @@ using MediatR;
 
 namespace Application.Features.SupplierContracts.Queries.GetSupplierContractById;
 
-public class GetSupplierContractByIdQueryHandler(
-    ISupplierContractReadRepository repository) : IRequestHandler<GetSupplierContractByIdQuery, Result<SupplierContractDetailResponse>>
+public class GetSupplierContractByIdQueryHandler(ISupplierContractReadRepository repository) : IRequestHandler<GetSupplierContractByIdQuery, Result<SupplierContractDetailResponse>>
 {
     public async Task<Result<SupplierContractDetailResponse>> Handle(
         GetSupplierContractByIdQuery request,

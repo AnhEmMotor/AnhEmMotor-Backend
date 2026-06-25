@@ -17,7 +17,6 @@ public class CloneManyPurchaseRequestsCommandHandler(
         {
             return Result<int>.Failure(Error.BadRequest("Danh sách ID trống."));
         }
-
         var sourceRequests = new List<PurchaseRequest>();
         foreach (var id in request.Ids)
         {
@@ -27,14 +26,11 @@ public class CloneManyPurchaseRequestsCommandHandler(
                 sourceRequests.Add(req);
             }
         }
-
         if (sourceRequests == null || sourceRequests.Count == 0)
         {
             return Result<int>.Failure(Error.NotFound("Không tìm thấy yêu cầu mua hàng."));
         }
-
         int clonedCount = 0;
-
         foreach (var src in sourceRequests)
         {
             var newRequest = new PurchaseRequest
@@ -45,23 +41,24 @@ public class CloneManyPurchaseRequestsCommandHandler(
                 SentBy = null,
                 ApprovedBy = null,
                 RejectedBy = null,
-                PurchaseRequestItems = src.PurchaseRequestItems?.Select(item => new PurchaseRequestItem
-                {
-                    ProductVariantId = item.ProductVariantId,
-                    ProductVariantColorId = item.ProductVariantColorId,
-                    Quantity = item.Quantity,
-                    SupplierId = item.SupplierId,
-                    UnitPrice = item.UnitPrice,
-                    ProductQuotationId = item.ProductQuotationId
-                }).ToList() ?? new List<PurchaseRequestItem>()
+                PurchaseRequestItems =
+                    src.PurchaseRequestItems?.Select(
+                            item => new PurchaseRequestItem
+                            {
+                                ProductVariantId = item.ProductVariantId,
+                                ProductVariantColorId = item.ProductVariantColorId,
+                                Quantity = item.Quantity,
+                                SupplierId = item.SupplierId,
+                                UnitPrice = item.UnitPrice,
+                                ProductQuotationId = item.ProductQuotationId
+                            })
+                            .ToList() ??
+                        new List<PurchaseRequestItem>()
             };
-
             insertRepository.Add(newRequest);
             clonedCount++;
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result<int>.Success(clonedCount);
     }
 }

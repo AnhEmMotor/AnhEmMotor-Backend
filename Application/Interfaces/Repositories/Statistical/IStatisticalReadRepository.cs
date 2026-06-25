@@ -6,6 +6,11 @@ public interface IStatisticalReadRepository
 {
     public Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(int days, CancellationToken cancellationToken);
 
+    public Task<IEnumerable<DailyRevenueDetailResponse>> GetDailyRevenueDetailAsync(
+        DateOnly reportDay,
+        int days,
+        CancellationToken cancellationToken);
+
     public Task<DashboardStatsResponse?> GetDashboardStatsAsync(CancellationToken cancellationToken);
 
     public Task<IEnumerable<MonthlyRevenueProfitResponse>> GetMonthlyRevenueProfitAsync(
@@ -36,5 +41,13 @@ public interface IStatisticalReadRepository
         CancellationToken cancellationToken);
 
     public Task<IEnumerable<WarehouseTableDataResponse>> GetWarehouseTableDataAsync(CancellationToken cancellationToken);
+
+    public Task<WorkshopOverviewResponse> GetWorkshopOverviewAsync(CancellationToken cancellationToken);
+
+    public Task<FinancingOverviewResponse> GetFinancingOverviewAsync(CancellationToken cancellationToken);
+
+    public Task<CustomerAnalyticsResponse> GetCustomerAnalyticsAsync(CancellationToken cancellationToken);
+
+    public Task<CustomerServiceAnalyticsResponse> GetCustomerServiceAnalyticsAsync(CancellationToken cancellationToken);
 }
 

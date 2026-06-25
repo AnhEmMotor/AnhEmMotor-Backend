@@ -6,7 +6,6 @@ namespace Application.ApiContracts.InventoryReceipt.Requests
 
         public int? PurchaseRequestItemId { get; set; }
 
-
         public int? Count { get; set; }
 
         public List<VehicleInventoryReceiptRequest>? Vehicles { get; set; }

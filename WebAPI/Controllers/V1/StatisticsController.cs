@@ -5,11 +5,13 @@ using Application.Features.Statistical.Queries.GetAdminProductReport;
 using Application.Features.Statistical.Queries.GetAdminRevenueAnalysis;
 using Application.Features.Statistical.Queries.GetAdminWarehouseReport;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
+using Application.Features.Statistical.Queries.GetDailyRevenueDetail;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
 using Application.Features.Statistical.Queries.GetOrderStatusCounts;
 using Application.Features.Statistical.Queries.GetProductReportLastMonth;
 using Application.Features.Statistical.Queries.GetProductStockAndPrice;
+using Application.Interfaces.Repositories.Statistical;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
@@ -21,19 +23,20 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Th?ng k� v� b�o c�o.
+/// Thống kê và báo cáo.
 /// </summary>
-/// <param name="mediator"></param>
+/// <param name="mediator">The mediator.</param>
+/// <param name="repository">The read repository for statistics.</param>
 [ApiVersion("1.0")]
-[SwaggerTag("Th?ng k� v� b�o c�o")]
+[SwaggerTag("Thống kê và báo cáo")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class StatisticsController(IMediator mediator) : ApiController
+public class StatisticsController(IMediator mediator, IStatisticalReadRepository repository) : ApiController
 {
     /// <summary>
-    /// L?y doanh thu theo ng�y trong kho?ng th?i gian x�c d?nh.
+    /// Lấy doanh thu theo ngày trong khoảng thời gian xác định.
     /// </summary>
-    /// <param name="days">S? ng�y t�nh t? hi?n t?i tr? v? tru?c</param>
+    /// <param name="days">Số ngày tính từ hiện tại trở về trước</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("daily-revenue")]
     [HasPermission(Statistical.View)]
@@ -48,7 +51,26 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y c�c ch? s? t?ng h?p cho Dashboard.
+    /// Lấy chi tiết sản phẩm và nhân viên bán trong một ngày cụ thể.
+    /// </summary>
+    /// <param name="reportDay">Ngày cần xem chi tiết (yyyy-MM-dd)</param>
+    /// <param name="days">Số ngày look-back để xác định phạm vi đơn hàng (mặc định 7)</param>
+    /// <param name="cancellationToken"></param>
+    [HttpGet("daily-revenue/detail")]
+    [HasPermission(Statistical.View)]
+    [ProducesResponseType(typeof(IEnumerable<DailyRevenueDetailResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDailyRevenueDetailAsync(
+        [FromQuery] string reportDay,
+        [FromQuery] int days = 7,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetDailyRevenueDetailQuery { ReportDay = reportDay, Days = days };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy các chỉ số tổng hợp cho Dashboard.
     /// </summary>
     [HttpGet("dashboard-stats")]
     [HasPermission(Statistical.View)]
@@ -61,9 +83,9 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y doanh thu v� l?i nhu?n theo th�ng.
+    /// Lấy doanh thu và lợi nhuận theo tháng.
     /// </summary>
-    /// <param name="months">S? th�ng t�nh t? hi?n t?i tr? v? tru?c</param>
+    /// <param name="months">Số tháng tính từ hiện tại trở về trước</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("monthly-revenue-profit")]
     [HasPermission(Statistical.View)]
@@ -78,7 +100,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y s? lu?ng don h�ng theo t?ng tr?ng th�i.
+    /// Lấy số lượng đơn hàng theo từng trạng thái
     /// </summary>
     [HttpGet("order-status-counts")]
     [HasPermission(Statistical.View)]
@@ -91,7 +113,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y b�o c�o s?n ph?m c?a th�ng tru?c.
+    /// Lấy báo cáo sản phẩm của tháng trước.
     /// </summary>
     [HttpGet("product-report-last-month")]
     [HasPermission(Statistical.View)]
@@ -104,7 +126,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y gi� v� t?n kho c?a m?t s?n ph?m c? th?.
+    /// Lấy giá và tồn kho của một sản phẩm cụ thể.
     /// </summary>
     [HttpGet("product-stock-price/{variantId:int}")]
     [HasPermission(Statistical.View)]
@@ -118,7 +140,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y to�n b? d? li?u g?p cho Admin Dashboard.
+    /// Lấy toàn bộ dữ liệu gộp cho Admin Dashboard.
     /// </summary>
     [HttpGet("dashboard-overview")]
     [HasPermission(Statistical.View)]
@@ -131,7 +153,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y to�n b? ph�n t�ch doanh thu cho Admin (g?p).
+    /// Lấy toàn bộ phân tích doanh thu cho Admin (gộp).
     /// </summary>
     [HttpGet("revenue-analysis")]
     [HasPermission(Statistical.View)]
@@ -144,7 +166,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y b�o c�o hi?u su?t s?n ph?m cho Admin (g?p).
+    /// Lấy báo cáo hiệu suất sản phẩm cho Admin (gộp).
     /// </summary>
     [HttpGet("product-report")]
     [HasPermission(Statistical.View)]
@@ -157,7 +179,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y b�o c�o t?n kho cho Admin (g?p).
+    /// Lấy báo cáo tồn kho cho Admin (gộp).
     /// </summary>
     [HttpGet("warehouse-report")]
     [HasPermission(Statistical.View)]
@@ -167,5 +189,53 @@ public class StatisticsController(IMediator mediator) : ApiController
         var query = new GetAdminWarehouseReportQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy báo cáo xưởng dịch vụ.
+    /// </summary>
+    [HttpGet("workshop-overview")]
+    [HasPermission(Statistical.View)]
+    [ProducesResponseType(typeof(WorkshopOverviewResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetWorkshopOverviewAsync(CancellationToken cancellationToken)
+    {
+        var result = await repository.GetWorkshopOverviewAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy báo cáo trả góp.
+    /// </summary>
+    [HttpGet("financing-overview")]
+    [HasPermission(Statistical.View)]
+    [ProducesResponseType(typeof(FinancingOverviewResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetFinancingOverviewAsync(CancellationToken cancellationToken)
+    {
+        var result = await repository.GetFinancingOverviewAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy báo cáo phân tích khách hàng.
+    /// </summary>
+    [HttpGet("customer-analytics")]
+    [HasPermission(Statistical.View)]
+    [ProducesResponseType(typeof(CustomerAnalyticsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCustomerAnalyticsAsync(CancellationToken cancellationToken)
+    {
+        var result = await repository.GetCustomerAnalyticsAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy báo cáo chăm sóc khách hàng.
+    /// </summary>
+    [HttpGet("customer-service-analytics")]
+    [HasPermission(Statistical.View)]
+    [ProducesResponseType(typeof(CustomerServiceAnalyticsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCustomerServiceAnalyticsAsync(CancellationToken cancellationToken)
+    {
+        var result = await repository.GetCustomerServiceAnalyticsAsync(cancellationToken);
+        return Ok(result);
     }
 }

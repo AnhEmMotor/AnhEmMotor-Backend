@@ -2,6 +2,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Services;
+using Domain.Entities;
 using MediatR;
 using System;
 
@@ -30,8 +31,7 @@ namespace Application.Features.PurchaseRequests.Commands.SendPurchaseRequest
             pr.Status = "sent";
             pr.SentBy = currentUserContext?.GetUserId();
             updateRepository.Update(pr);
-
-            var auditLog = new Domain.Entities.PurchaseRequestAuditLog
+            var auditLog = new PurchaseRequestAuditLog
             {
                 PurchaseRequest = pr,
                 Action = "UpdateStatus",
@@ -43,7 +43,6 @@ namespace Application.Features.PurchaseRequests.Commands.SendPurchaseRequest
                 NewNotes = pr.Note
             };
             await insertRepository.InsertAuditLogsAsync([auditLog], cancellationToken).ConfigureAwait(false);
-
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();
         }

@@ -18,30 +18,24 @@ public class GetRelatedNewsPublicQueryHandler(INewsReadRepository repository) : 
         {
             return new List<NewsSummaryResponse>();
         }
-
-        var variantIds = targetNews.LinkedProducts
-            .Select(lp => lp.ProductVariantId)
-            .Distinct()
-            .ToList();
-
+        var variantIds = targetNews.LinkedProducts.Select(lp => lp.ProductVariantId).Distinct().ToList();
         var colorIds = targetNews.LinkedProducts
             .Where(lp => lp.ProductVariantColorId.HasValue)
             .Select(lp => lp.ProductVariantColorId!.Value)
             .Distinct()
             .ToList();
-
-        Expression<Func<Domain.Entities.News, bool>> filter = x => 
-            x.IsPublished && 
-            x.Id != targetNews.Id && 
-            x.LinkedProducts.Any(lp => variantIds.Contains(lp.ProductVariantId) || (lp.ProductVariantColorId.HasValue && colorIds.Contains(lp.ProductVariantColorId.Value)));
-
+        Expression<Func<Domain.Entities.News, bool>> filter = x => x.IsPublished &&
+            x.Id != targetNews.Id &&
+            x.LinkedProducts
+                .Any(
+                    lp => variantIds.Contains(lp.ProductVariantId) ||
+                            (lp.ProductVariantColorId.HasValue && colorIds.Contains(lp.ProductVariantColorId.Value)));
         var sieveModel = new SieveModel { Page = 1, PageSize = 5, Sorts = "-PublishedDate" };
         var result = await repository.GetPagedAsync<NewsSummaryResponse>(
             sieveModel,
             filter: filter,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         return result.Items?.ToList() ?? [];
     }
 }

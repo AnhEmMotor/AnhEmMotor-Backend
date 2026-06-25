@@ -8,21 +8,12 @@ using MediatR;
 
 namespace Application.Features.Services.Commands;
 
-/// <summary>
-/// Xử lý yêu cầu cập nhật thông tin dịch vụ.
-/// </summary>
 public class UpdateServiceCommandHandler(
     IUnitOfWork unitOfWork,
     IServiceReadRepository serviceReadRepository,
     IServiceUpdateRepository serviceUpdateRepository,
     IServiceCategoryReadRepository categoryRepository) : IRequestHandler<UpdateServiceCommand, Result<ServiceResponse>>
 {
-    /// <summary>
-    /// Cập nhật thông tin dịch vụ hiện có sau khi kiểm tra các ràng buộc nghiệp vụ.
-    /// </summary>
-    /// <param name="request">Dữ liệu cập nhật.</param>
-    /// <param name="cancellationToken">Token hủy bỏ.</param>
-    /// <returns>Thông tin dịch vụ sau cập nhật.</returns>
     public async Task<Result<ServiceResponse>> Handle(UpdateServiceCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);

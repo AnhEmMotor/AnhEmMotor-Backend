@@ -17,37 +17,27 @@ namespace Application.Features.DebtPayments.Commands.PaySupplierDebt
         public async Task<Result<bool>> Handle(PaySupplierDebtCommand request, CancellationToken cancellationToken)
         {
             var debts = await supplierDebtReadRepository.GetBySupplierIdAsync(request.SupplierId, cancellationToken);
-            
-            // Filter out unpaid debts and sort from oldest to newest
             var unpaidDebts = debts
                 .Where(d => d.PaidAmount < d.TotalAmount && d.InventoryReceipt?.StatusId == "approve")
                 .OrderBy(d => d.CreatedAt)
                 .ToList();
-
             decimal remainingAmountToPay = request.Amount;
             var currentUserId = currentUserContext.GetUserId();
-
             foreach (var debt in unpaidDebts)
             {
                 if (remainingAmountToPay <= 0)
                 {
                     break;
                 }
-
                 decimal debtRemaining = debt.TotalAmount - debt.PaidAmount;
                 decimal amountToPayForThisDebt = Math.Min(remainingAmountToPay, debtRemaining);
-
                 debt.PaidAmount += amountToPayForThisDebt;
                 supplierDebtUpdateRepository.Update(debt);
-
                 remainingAmountToPay -= amountToPayForThisDebt;
             }
-
-            // Calculate remaining debt for the supplier after payment
             decimal totalSupplierRemainingDebt = debts
                 .Where(d => d.InventoryReceipt?.StatusId == "approve")
                 .Sum(d => d.TotalAmount - d.PaidAmount);
-
             var paymentLog = new SupplierDebtLog
             {
                 SupplierId = request.SupplierId,
@@ -57,9 +47,7 @@ namespace Application.Features.DebtPayments.Commands.PaySupplierDebt
                 CreatedById = currentUserId
             };
             await supplierDebtInsertRepository.InsertSupplierDebtLogAsync(paymentLog, cancellationToken);
-
             await unitOfWork.SaveChangesAsync(cancellationToken);
-
             return Result<bool>.Success(true);
         }
     }

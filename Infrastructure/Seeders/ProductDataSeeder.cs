@@ -13,13 +13,185 @@ public static class ProductDataSeeder
             .ConfigureAwait(false);
         if (bikeCategory == null)
             return;
-        await context.Brands
+        var hondaBrand = await context.Brands
             .FirstOrDefaultAsync(b => string.Compare(b.Name, "Honda") == 0, cancellationToken)
             .ConfigureAwait(false);
-        await context.Brands
+        var yamahaBrand = await context.Brands
             .FirstOrDefaultAsync(b => string.Compare(b.Name, "Yamaha") == 0, cancellationToken)
             .ConfigureAwait(false);
-        var productsToSeed = new List<Product>();
+        var suzukiBrand = await context.Brands
+            .FirstOrDefaultAsync(b => string.Compare(b.Name, "Suzuki") == 0, cancellationToken)
+            .ConfigureAwait(false);
+        var productsToSeed = new List<Product>
+        {
+            new Product
+            {
+                Name = "Honda Vision 2024",
+                ShortDescription = "Dòng xe tay ga quốc dân Honda Vision 2024",
+                CategoryId = bikeCategory.Id,
+                BrandId = hondaBrand?.Id,
+                StatusId = Domain.Constants.Product.ProductStatus.ForSale,
+                ProductVariants =
+                    new List<ProductVariant>
+                    {
+                        new ProductVariant
+                        {
+                            VariantName = "Tiêu chuẩn",
+                            UrlSlug = "honda-vision-2024-standard-red",
+                            Price = 31100000m,
+                            SKU = "HO-VIS-2024-RED",
+                            ProductVariantColors =
+                                new List<ProductVariantColor>
+                                    {
+                                        new ProductVariantColor
+                                        {
+                                            ColorName = "Đỏ",
+                                            ColorCode = "#FF0000",
+                                            CoverImageUrl = null
+                                        }
+                                    }
+                        },
+                        new ProductVariant
+                        {
+                            VariantName = "Đặc biệt",
+                            UrlSlug = "honda-vision-2024-special-blue",
+                            Price = 34500000m,
+                            SKU = "HO-VIS-2024-BLUE",
+                            ProductVariantColors =
+                                new List<ProductVariantColor>
+                                    {
+                                        new ProductVariantColor
+                                        {
+                                            ColorName = "Xanh",
+                                            ColorCode = "#0000FF",
+                                            CoverImageUrl = null
+                                        }
+                                    }
+                        }
+                    }
+            },
+            new Product
+            {
+                Name = "Honda SH 150i 2024",
+                ShortDescription = "Dòng xe tay ga cao cấp Honda SH 150i 2024",
+                CategoryId = bikeCategory.Id,
+                BrandId = hondaBrand?.Id,
+                StatusId = Domain.Constants.Product.ProductStatus.ForSale,
+                ProductVariants =
+                    new List<ProductVariant>
+                    {
+                        new ProductVariant
+                        {
+                            VariantName = "Cao cấp",
+                            UrlSlug = "honda-sh-150i-premium-white",
+                            Price = 96000000m,
+                            SKU = "HO-SH150-2024-WHITE",
+                            ProductVariantColors =
+                                new List<ProductVariantColor>
+                                    {
+                                        new ProductVariantColor
+                                        {
+                                            ColorName = "Trắng",
+                                            ColorCode = "#FFFFFF",
+                                            CoverImageUrl = null
+                                        }
+                                    }
+                        },
+                        new ProductVariant
+                        {
+                            VariantName = "Thể thao",
+                            UrlSlug = "honda-sh-150i-sport-black",
+                            Price = 102000000m,
+                            SKU = "HO-SH150-2024-BLACK",
+                            ProductVariantColors =
+                                new List<ProductVariantColor>
+                                    {
+                                        new ProductVariantColor
+                                        {
+                                            ColorName = "Đen",
+                                            ColorCode = "#000000",
+                                            CoverImageUrl = null
+                                        }
+                                    }
+                        }
+                    }
+            },
+            new Product
+            {
+                Name = "Yamaha Exciter 155 VVA",
+                ShortDescription = "Vua đường phố Exciter 155 VVA",
+                CategoryId = bikeCategory.Id,
+                BrandId = yamahaBrand?.Id,
+                StatusId = Domain.Constants.Product.ProductStatus.ForSale,
+                ProductVariants =
+                    new List<ProductVariant>
+                    {
+                        new ProductVariant
+                        {
+                            VariantName = "Tiêu chuẩn",
+                            UrlSlug = "yamaha-exciter-155-standard-white",
+                            Price = 48000000m,
+                            SKU = "YM-EX155-2024-WHITE",
+                            ProductVariantColors =
+                                new List<ProductVariantColor>
+                                    {
+                                        new ProductVariantColor
+                                        {
+                                            ColorName = "Trắng",
+                                            ColorCode = "#FFFFFF",
+                                            CoverImageUrl = null
+                                        }
+                                    }
+                        },
+                        new ProductVariant
+                        {
+                            VariantName = "Cao cấp",
+                            UrlSlug = "yamaha-exciter-155-premium-black",
+                            Price = 52000000m,
+                            SKU = "YM-EX155-2024-BLACK",
+                            ProductVariantColors =
+                                new List<ProductVariantColor>
+                                    {
+                                        new ProductVariantColor
+                                        {
+                                            ColorName = "Đen",
+                                            ColorCode = "#000000",
+                                            CoverImageUrl = null
+                                        }
+                                    }
+                        }
+                    }
+            },
+            new Product
+            {
+                Name = "Suzuki Raider R150",
+                ShortDescription = "Xe côn tay Suzuki Raider R150",
+                CategoryId = bikeCategory.Id,
+                BrandId = suzukiBrand?.Id,
+                StatusId = Domain.Constants.Product.ProductStatus.ForSale,
+                ProductVariants =
+                    new List<ProductVariant>
+                    {
+                        new ProductVariant
+                        {
+                            VariantName = "Tiêu chuẩn",
+                            UrlSlug = "suzuki-raider-150-standard-blue",
+                            Price = 50000000m,
+                            SKU = "SZ-RAI150-2024-BLUE",
+                            ProductVariantColors =
+                                new List<ProductVariantColor>
+                                    {
+                                        new ProductVariantColor
+                                        {
+                                            ColorName = "Xanh",
+                                            ColorCode = "#0000FF",
+                                            CoverImageUrl = null
+                                        }
+                                    }
+                        }
+                    }
+            }
+        };
         await context.Set<OptionValue>().Include(v => v.Option).ToListAsync(cancellationToken).ConfigureAwait(false);
         var colorOption = await context.Set<Option>()
             .FirstOrDefaultAsync(

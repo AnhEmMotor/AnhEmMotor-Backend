@@ -59,7 +59,7 @@ public class ServiceWorkshopEvaluationsController(IMediator mediator) : Controll
         CancellationToken cancellationToken = default)
     {
         var query = new GetServiceWorkshopEvaluationDetailQuery { EvaluationId = evaluationId };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -82,7 +82,7 @@ public class ServiceWorkshopEvaluationsController(IMediator mediator) : Controll
             Message = request.Message,
             MarkAsProcessed = request.MarkAsProcessed,
         };
-        var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -99,7 +99,7 @@ public class ServiceWorkshopEvaluationsController(IMediator mediator) : Controll
         CancellationToken cancellationToken = default)
     {
         var cmd = new MarkServiceEvaluationProcessedCommand { EvaluationId = request.EvaluationId };
-        var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -120,7 +120,7 @@ public class ServiceWorkshopEvaluationsController(IMediator mediator) : Controll
             EvaluationId = request.EvaluationId,
             InternalNotes = request.InternalNotes,
         };
-        var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 }

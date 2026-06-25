@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Services;
+using Domain.Entities;
 using MediatR;
 using System;
 
@@ -39,7 +40,7 @@ namespace Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest
                 }
             }
             var currentUserId = currentUserContext.GetUserId();
-            var auditLog = new Domain.Entities.PurchaseRequestAuditLog
+            var auditLog = new PurchaseRequestAuditLog
             {
                 PurchaseRequest = pr,
                 Action = "Delete",
@@ -51,7 +52,6 @@ namespace Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest
                 NewNotes = pr.Note
             };
             await insertRepository.InsertAuditLogsAsync([auditLog], cancellationToken).ConfigureAwait(false);
-
             deleteRepository.Delete(pr);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();

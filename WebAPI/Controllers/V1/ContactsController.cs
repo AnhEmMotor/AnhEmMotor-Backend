@@ -6,6 +6,7 @@ using Application.Features.Contacts.Commands.CreateJobApplication;
 using Application.Features.Contacts.Commands.CreateSupportRequest;
 using Application.Features.Contacts.Commands.UpdateContactStatus;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
+using Application.Features.Contacts.Commands.UploadCv;
 using Application.Features.Contacts.Queries.GetContacts;
 using Application.Features.Contacts.Queries.GetPaginatedContacts;
 using Asp.Versioning;
@@ -38,17 +39,6 @@ public class ContactsController(ISender sender) : ApiController
     }
 
     /// <summary>
-    /// Lấy toàn bộ danh sách liên hệ.
-    /// </summary>
-    [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new GetContactsQuery(), cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
     /// Tạo yêu cầu hỗ trợ (Support Request).
     /// </summary>
     [HttpPost("support-request")]
@@ -62,6 +52,17 @@ public class ContactsController(ISender sender) : ApiController
     }
 
     /// <summary>
+    /// Lấy toàn bộ danh sách liên hệ.
+    /// </summary>
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetContactsQuery(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Tạo đóng góp ý kiến (Customer Feedback).
     /// </summary>
     [HttpPost("feedback")]
@@ -70,7 +71,7 @@ public class ContactsController(ISender sender) : ApiController
         CreateFeedbackCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -83,7 +84,23 @@ public class ContactsController(ISender sender) : ApiController
         CreateJobApplicationCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tải lên tệp CV ứng viên (PDF, DOCX, hình ảnh).
+    /// </summary>
+    [HttpPost("upload-cv")]
+    [AllowAnonymous]
+    public async Task<IActionResult> UploadCvAsync(IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest("File is empty.");
+        }
+        var command = new UploadCvCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -100,7 +117,7 @@ public class ContactsController(ISender sender) : ApiController
         CancellationToken cancellationToken = default)
     {
         var query = new GetPaginatedContactsQuery(contactType, status, page, pageSize);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -116,7 +133,7 @@ public class ContactsController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var command = new UpdateContactStatusCommand(contactType, id, request);
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

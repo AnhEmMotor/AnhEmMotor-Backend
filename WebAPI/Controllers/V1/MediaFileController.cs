@@ -212,6 +212,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     public async Task<IActionResult> ViewImageWithResizeAsync(
         string storagePath,
         [FromQuery] int? width,
+        [FromQuery] bool download,
         CancellationToken cancellationToken)
     {
         var query = new ViewImageQuery { StoragePath = storagePath, Width = width };

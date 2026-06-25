@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.ServiceBooking;
-using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -18,12 +17,9 @@ public class ServiceBookingUpdateRepository(ApplicationDBContext context) : ISer
         var booking = await context.ServiceBookings.FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         if (booking == null)
             return false;
-        if (Enum.TryParse<BookingStatus>(status, out var parsedStatus))
-        {
-            booking.Status = parsedStatus;
-        }
-        booking.CancellationReason = reason ?? string.Empty;
-        booking.CancelledAt = cancelledAt;
+        booking.Status = status;
+        booking.CancelledReason = reason ?? string.Empty;
+        booking.CancelledDate = cancelledAt;
         await context.SaveChangesAsync(cancellationToken);
         return true;
     }

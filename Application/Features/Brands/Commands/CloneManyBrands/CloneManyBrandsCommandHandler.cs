@@ -13,15 +13,15 @@ public class CloneManyBrandsCommandHandler(
     IBrandInsertRepository repository,
     IUnitOfWork unitOfWork) : IRequestHandler<CloneManyBrandsCommand, Result<List<BrandResponse>>>
 {
-    public async Task<Result<List<BrandResponse>>> Handle(CloneManyBrandsCommand request, CancellationToken cancellationToken)
+    public async Task<Result<List<BrandResponse>>> Handle(
+        CloneManyBrandsCommand request,
+        CancellationToken cancellationToken)
     {
         if (request.Ids == null || request.Ids.Count == 0)
         {
             return Result<List<BrandResponse>>.Failure(Error.BadRequest("No brands selected to clone."));
         }
-
         var clonedBrands = new List<BrandEntity>();
-
         foreach (var id in request.Ids)
         {
             var existingBrand = await brandReadRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
@@ -34,14 +34,11 @@ public class CloneManyBrandsCommandHandler(
                     LogoUrl = existingBrand.LogoUrl,
                     Description = existingBrand.Description
                 };
-                
                 clonedBrands.Add(newBrand);
                 repository.Add(newBrand);
             }
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return clonedBrands.Adapt<List<BrandResponse>>();
     }
 }

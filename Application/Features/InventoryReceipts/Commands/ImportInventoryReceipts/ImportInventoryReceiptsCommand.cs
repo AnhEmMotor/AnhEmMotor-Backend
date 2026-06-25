@@ -7,8 +7,11 @@ namespace Application.Features.InventoryReceipts.Commands.ImportInventoryReceipt
 public sealed class ImportInventoryReceiptsResult
 {
     public int SuccessCount { get; set; }
+
     public int FailedCount { get; set; }
+
     public string? ErrorFileUrl { get; set; }
+
     public string? ErrorFileWithReasonUrl { get; set; }
 }
 

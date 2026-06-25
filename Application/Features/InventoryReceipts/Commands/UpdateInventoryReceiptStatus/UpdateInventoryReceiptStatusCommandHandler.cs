@@ -4,7 +4,6 @@ using Application.Features.InventoryOnHand.Notifications;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.InventoryReceipt;
-using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.SupplierDebt;
 using Application.Interfaces.Services;
 using Domain.Entities;
@@ -105,10 +104,17 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                     await ledgerRepository.AddAsync(ledger, cancellationToken).ConfigureAwait(false);
                 }
                 var debtsToCreate = receipt.InventoryReceiptInfos
-                    .Where(info => info.PurchaseRequestItem?.SupplierId != null && info.Count.HasValue && info.Count.Value > 0)
+                    .Where(
+                        info => info.PurchaseRequestItem?.SupplierId != null &&
+                            info.Count.HasValue &&
+                            info.Count.Value > 0)
                     .GroupBy(info => info.PurchaseRequestItem!.SupplierId!.Value)
                     .Select(
-                        g => new { SupplierId = g.Key, TotalAmount = g.Sum(i => (i.Count ?? 0) * (i.PurchaseRequestItem?.UnitPrice ?? 0)) })
+                        g => new
+                        {
+                            SupplierId = g.Key,
+                            TotalAmount = g.Sum(i => (i.Count ?? 0) * (i.PurchaseRequestItem?.UnitPrice ?? 0))
+                        })
                     .Where(x => x.TotalAmount > 0)
                     .ToList();
                 foreach (var debtInfo in debtsToCreate)
@@ -136,10 +142,9 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                 return Error.BadRequest("Trạng thái phê duyệt không hợp lệ.", "StatusId");
             }
             updateRepository.Update(receipt);
-
-            var receiptAuditLogs = new List<Domain.Entities.InventoryReceiptAuditLog>
+            var receiptAuditLogs = new List<InventoryReceiptAuditLog>
             {
-                new Domain.Entities.InventoryReceiptAuditLog
+                new InventoryReceiptAuditLog
                 {
                     InventoryReceipt = receipt,
                     Action = "Update",
@@ -151,10 +156,8 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                     NewNotes = receipt.Notes
                 }
             };
-            
             await insertRepository.InsertAuditLogsAsync(receiptAuditLogs, cancellationToken).ConfigureAwait(false);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             var combos = new HashSet<(int VariantId, int? ColorId)>();
             foreach (var info in receipt.InventoryReceiptInfos)
             {

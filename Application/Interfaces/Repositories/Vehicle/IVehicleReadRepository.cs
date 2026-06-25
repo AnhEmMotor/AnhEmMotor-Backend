@@ -37,19 +37,21 @@ namespace Application.Interfaces.Repositories.Vehicle
             int? productVariantColorId,
             CancellationToken cancellationToken = default);
 
-    public Task<bool> ExistsByEngineNumberAsync(
-        string engineNumber,
-        int productVariantId,
-        int? productVariantColorId,
-        CancellationToken cancellationToken = default);
+        public Task<bool> ExistsByEngineNumberAsync(
+            string engineNumber,
+            int productVariantId,
+            int? productVariantColorId,
+            CancellationToken cancellationToken = default);
 
-    public Task<List<Domain.Entities.Vehicle>> GetVehiclesByReceiptInfoIdAsync(
-        int receiptInfoId,
-        CancellationToken cancellationToken = default);
+        public Task<List<Domain.Entities.Vehicle>> GetVehiclesByReceiptInfoIdAsync(
+            int receiptInfoId,
+            CancellationToken cancellationToken = default);
 
-    public Task<Domain.Entities.Vehicle?> GetByVinAsync(string vin, CancellationToken cancellationToken = default);
+        public Task<Domain.Entities.Vehicle?> GetByVinAsync(string vin, CancellationToken cancellationToken = default);
 
-    public Task<List<Domain.Entities.Vehicle>> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default);
+        public Task<List<Domain.Entities.Vehicle>> GetByUserIdAsync(
+            string userId,
+            CancellationToken cancellationToken = default);
     }
 }
 

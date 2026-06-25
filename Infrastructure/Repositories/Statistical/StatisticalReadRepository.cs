@@ -1,9 +1,12 @@
 using Application.ApiContracts.Statistical.Responses;
+using Application.Features.FinanceContracts;
 using Application.Interfaces.Repositories.Statistical;
 using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
+using System.Data.Common;
 
 namespace Infrastructure.Repositories.Statistical;
 
@@ -168,6 +171,64 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 });
         }
         return result.OrderByDescending(r => r.ReportDay);
+    }
+
+    public async Task<IEnumerable<DailyRevenueDetailResponse>> GetDailyRevenueDetailAsync(
+        DateOnly reportDay,
+        int days,
+        CancellationToken cancellationToken)
+    {
+        var dayStart = new DateTimeOffset(reportDay.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+        var dayEnd = dayStart.AddDays(1).AddTicks(-1);
+        var rawData = await context.OutputInfos
+            .IgnoreQueryFilters()
+            .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+            .Where(
+                x => x.o.CreatedAt >= dayStart &&
+                    x.o.CreatedAt <= dayEnd &&
+                    (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
+                        string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
+                        string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
+            .Select(x => new { x.oi.ProductVariantId, x.o.CreatedBy, Price = x.oi.Price ?? 0, Count = x.oi.Count ?? 0 })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var variantIds = rawData.Select(x => x.ProductVariantId).Distinct().ToList();
+        var userIds = rawData.Select(x => x.CreatedBy)
+            .Where(id => id.HasValue)
+            .Select(id => id!.Value)
+            .Distinct()
+            .ToList();
+        var variants = await context.ProductVariants
+            .IgnoreQueryFilters()
+            .Include(pv => pv.Product)
+            .Where(pv => variantIds.Contains(pv.Id))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var users = await context.Users
+            .IgnoreQueryFilters()
+            .Where(u => userIds.Contains(u.Id))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        return rawData
+        .GroupBy(x => new { x.ProductVariantId, CreatedBy = x.CreatedBy ?? Guid.Empty })
+            .Select(
+                g =>
+                {
+                    var variant = variants.FirstOrDefault(v => v.Id == g.Key.ProductVariantId);
+                    var user = users.FirstOrDefault(u => u.Id == g.Key.CreatedBy);
+                    return new DailyRevenueDetailResponse
+                    {
+                        ProductName =
+                            variant != null
+                                    ? $"{variant.Product?.Name} - {variant.VariantName}".Trim(' ', '-')
+                                    : "Sản phẩm không xác định",
+                        EmployeeName = user?.FullName ?? "Không rõ",
+                        Quantity = g.Sum(x => x.Count),
+                        Revenue = g.Sum(x => x.Price * x.Count)
+                    };
+                })
+            .OrderByDescending(x => x.Revenue)
+            .ToList();
     }
 
     public async Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(
@@ -363,8 +424,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
             .Select(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
             .Distinct()
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+            .ToListAsync(cancellationToken);
         int overstockCount = 0;
         foreach (var vId in oldInventoryReceiptVariants)
         {
@@ -740,8 +800,9 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     VariantId = g.Key,
                     TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)),
                     AvgInventoryReceiptPrice = g.Sum(
-                                x => x.ii.PurchaseRequestItem != null ? (x.ii.PurchaseRequestItem.UnitPrice ?? 0) : 0 *
-                                    (x.ii.Count ?? 0)) /
+                                x => x.ii.PurchaseRequestItem != null
+                                    ? (x.ii.PurchaseRequestItem.UnitPrice ?? 0)
+                                    : 0 * (x.ii.Count ?? 0)) /
                         (g.Sum(x => (long)(x.ii.Count ?? 0)) == 0 ? 1M : (decimal)(g.Sum(x => (long)(x.ii.Count ?? 0))))
                 })
             .ToListAsync(cancellationToken)
@@ -831,6 +892,407 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         {
             UnitPrice = variant.Price ?? 0,
             StockQuantity = (int)totalInventoryReceipt - (int)totalOutput
+        };
+    }
+
+    private async Task<List<ConfirmedInputSummary>> GetConfirmedInputSummariesAsync(
+        bool includeDeleted,
+        CancellationToken cancellationToken)
+    {
+        if (string.Compare(context.Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0)
+        {
+            var query = includeDeleted
+                ? context.InventoryReceiptInfos
+                    .IgnoreQueryFilters()
+                    .Join(
+                        context.InventoryReceipts.IgnoreQueryFilters(),
+                        ii => ii.InventoryReceiptId,
+                        i => i.Id,
+                        (ii, i) => new { ii, i })
+                : context.InventoryReceiptInfos
+                    .Join(context.InventoryReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i });
+            return await query
+                .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
+                .GroupBy(x => x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null)
+                .Select(
+                    g => new ConfirmedInputSummary(
+                        g.Key,
+                        g.Sum(x => (long)(x.ii.Count ?? 0)),
+                        g.Sum(
+                            x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.UnitPrice ?? 0m : 0m) *
+                                (x.ii.Count ?? 0)),
+                        g.Min(x => x.i.CreatedAt)))
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+        if (await TableExistsAsync("InventoryReceiptInfo", cancellationToken).ConfigureAwait(false) &&
+            await TableExistsAsync("InventoryReceipt", cancellationToken).ConfigureAwait(false))
+        {
+            return await ReadConfirmedInputSummariesAsync(
+                """
+                    SELECT
+                        [Info].[ProductVariantId] AS [VariantId],
+                        SUM(CAST(ISNULL([Info].[Count], 0) AS bigint)) AS [TotalIn],
+                        CAST(0 AS decimal(18, 2)) AS [WeightedInputTotal],
+                        MIN([Receipt].[CreatedAt]) AS [FirstCreatedAt]
+                    FROM [dbo].[InventoryReceiptInfo] AS [Info]
+                    INNER JOIN [dbo].[InventoryReceipt] AS [Receipt]
+                        ON [Info].[InventoryReceiptId] = [Receipt].[Id]
+                    WHERE [Info].[ProductVariantId] IS NOT NULL
+                      AND [Receipt].[StatusId] = @FinishedStatus
+                      AND (@IncludeDeleted = 1 OR ([Info].[DeletedAt] IS NULL AND [Receipt].[DeletedAt] IS NULL))
+                    GROUP BY [Info].[ProductVariantId]
+                    """,
+                includeDeleted,
+                cancellationToken)
+                .ConfigureAwait(false);
+        }
+        if (await TableExistsAsync("InputInfo", cancellationToken).ConfigureAwait(false) &&
+            await TableExistsAsync("Input", cancellationToken).ConfigureAwait(false))
+        {
+            return await ReadConfirmedInputSummariesAsync(
+                """
+                    SELECT
+                        [Info].[ProductId] AS [VariantId],
+                        SUM(CAST(ISNULL([Info].[Count], 0) AS bigint)) AS [TotalIn],
+                        SUM(CAST(ISNULL([Info].[InputPrice], 0) AS decimal(18, 2)) * CAST(ISNULL([Info].[Count], 0) AS decimal(18, 2))) AS [WeightedInputTotal],
+                        MIN([Receipt].[CreatedAt]) AS [FirstCreatedAt]
+                    FROM [dbo].[InputInfo] AS [Info]
+                    INNER JOIN [dbo].[Input] AS [Receipt]
+                        ON [Info].[InputId] = [Receipt].[Id]
+                    WHERE [Info].[ProductId] IS NOT NULL
+                      AND [Receipt].[StatusId] = @FinishedStatus
+                      AND (@IncludeDeleted = 1 OR ([Info].[DeletedAt] IS NULL AND [Receipt].[DeletedAt] IS NULL))
+                    GROUP BY [Info].[ProductId]
+                    """,
+                includeDeleted,
+                cancellationToken)
+                .ConfigureAwait(false);
+        }
+        return [];
+    }
+
+    private async Task<bool> TableExistsAsync(string tableName, CancellationToken cancellationToken)
+    {
+        var connection = context.Database.GetDbConnection();
+        var shouldCloseConnection = connection.State is not ConnectionState.Open;
+        if (shouldCloseConnection)
+        {
+            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        }
+        try
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT CASE WHEN OBJECT_ID(@TableName, N'U') IS NULL THEN 0 ELSE 1 END";
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = "@TableName";
+            parameter.Value = $"[dbo].[{tableName}]";
+            command.Parameters.Add(parameter);
+            var result = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+            return result is int value && value == 1;
+        } finally
+        {
+            if (shouldCloseConnection)
+            {
+                await connection.CloseAsync().ConfigureAwait(false);
+            }
+        }
+    }
+
+    private async Task<List<ConfirmedInputSummary>> ReadConfirmedInputSummariesAsync(
+        string commandText,
+        bool includeDeleted,
+        CancellationToken cancellationToken)
+    {
+        var results = new List<ConfirmedInputSummary>();
+        var connection = context.Database.GetDbConnection();
+        var shouldCloseConnection = connection.State is not ConnectionState.Open;
+        if (shouldCloseConnection)
+        {
+            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        }
+        try
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = commandText;
+            command.Parameters.Add(CreateParameter(command, "@FinishedStatus", InventoryReceiptStatus.Approve));
+            command.Parameters.Add(CreateParameter(command, "@IncludeDeleted", includeDeleted ? 1 : 0));
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            {
+                results.Add(
+                    new ConfirmedInputSummary(
+                        reader.IsDBNull(0) ? null : reader.GetInt32(0),
+                        reader.IsDBNull(1) ? 0 : reader.GetInt64(1),
+                        reader.IsDBNull(2) ? 0 : reader.GetDecimal(2),
+                        reader.IsDBNull(3) ? null : reader.GetFieldValue<DateTimeOffset>(3)));
+            }
+        } finally
+        {
+            if (shouldCloseConnection)
+            {
+                await connection.CloseAsync().ConfigureAwait(false);
+            }
+        }
+        return results;
+    }
+
+    private static DbParameter CreateParameter(DbCommand command, string name, object value)
+    {
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = name;
+        parameter.Value = value;
+        return parameter;
+    }
+
+    private sealed record ConfirmedInputSummary(
+        int? VariantId,
+        long TotalIn,
+        decimal WeightedInputTotal,
+        DateTimeOffset? FirstCreatedAt)
+    {
+        public decimal AverageInputPrice => TotalIn == 0 ? 0 : WeightedInputTotal / TotalIn;
+    }
+
+    public async Task<WorkshopOverviewResponse> GetWorkshopOverviewAsync(CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var startOfMonth = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
+        var allOrders = await context.RepairOrders
+            .IgnoreQueryFilters()
+            .Include(ro => ro.Technician)
+            .ThenInclude(t => t!.User)
+            .Include(ro => ro.Vehicle)
+            .ThenInclude(v => v!.Product)
+            .ToListAsync(cancellationToken);
+        var inProgressCount = allOrders.Count(ro => ro.Status == "InProgress");
+        var completedOrders = allOrders.Where(
+            ro => ro.Status == "Completed" && ro.StartTime != null && ro.CompletedDate != null)
+            .ToList();
+        double avgCompletionHours = 0;
+        if (completedOrders.Count > 0)
+        {
+            avgCompletionHours = completedOrders.Average(
+                ro => (ro.CompletedDate.GetValueOrDefault() - ro.StartTime.GetValueOrDefault()).TotalHours);
+        }
+        var monthlyRevenue = allOrders
+            .Where(ro => ro.Status == "Completed" && ro.CompletedDate >= startOfMonth)
+            .Sum(ro => ro.TotalAmount);
+        var overdueCount = allOrders.Count(ro => ro.Status != "Completed" && ro.ExpectedCompletionTime < now);
+        var activeRepairOrders = allOrders
+            .Where(ro => ro.Status == "InProgress" || ro.Status == "Pending")
+            .OrderByDescending(ro => ro.CreatedAt)
+            .Select(
+                ro =>
+                {
+                    string statusVN = ro.Status == "InProgress" ? "Đang sửa" : "Chờ phụ tùng";
+                    string techName = ro.Technician?.User?.FullName ?? "Chưa phân công";
+                    string vehicleName = ro.Vehicle?.Product?.Name ?? "Xe máy khách hàng";
+                    if (ro.Vehicle != null && !string.IsNullOrEmpty(ro.Vehicle.LicensePlate))
+                    {
+                        vehicleName += $" ({ro.Vehicle.LicensePlate})";
+                    }
+                    return new WorkshopRepairOrderDto
+                    {
+                        Id = ro.Id,
+                        OrderCode = $"SC{ro.Id}",
+                        CustomerName = ro.CustomerName,
+                        VehicleInfo = vehicleName,
+                        TechnicianName = techName,
+                        Status = statusVN,
+                        StartedAt = ro.StartTime,
+                        LaborFee = ro.LaborCost
+                    };
+                })
+            .ToList();
+        return new WorkshopOverviewResponse
+        {
+            Kpi =
+                new WorkshopKpi
+                {
+                    InProgressCount = inProgressCount,
+                    AvgCompletionHours = Math.Round(avgCompletionHours, 1),
+                    MonthlyRevenue = monthlyRevenue,
+                    OverdueCount = overdueCount
+                },
+            RepairOrders = activeRepairOrders
+        };
+    }
+
+    public async Task<FinancingOverviewResponse> GetFinancingOverviewAsync(CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var contracts = await context.FinanceContracts
+            .IgnoreQueryFilters()
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync(cancellationToken);
+        var totalApplications = contracts.Count;
+        var disbursedCount = contracts.Count(c => c.DisbursementStatus == "Disbursed");
+        var pendingCount = contracts.Count(c => c.DisbursementStatus == "Pending");
+        var overdueCount = contracts.Count(c => c.DisbursementStatus == "Pending" && c.SignedDate < now);
+        var list = contracts.Select(
+            c =>
+            {
+                string statusVN = c.DisbursementStatus == "Disbursed"
+                    ? "Đã giải ngân"
+                    : (c.SignedDate < now ? "Chờ giải ngân" : "Chờ duyệt");
+                string cavetVN = c.CavetLocation switch
+                {
+                    "Bank" => "Công ty tài chính giữ",
+                    "Store" => "Cửa hàng giữ hộ",
+                    "Customer" => "Đã giao khách",
+                    _ => "Chưa xác định"
+                };
+                var cust360 = FinanceContractCustomer360Catalog.GetCustomer360(c.ContractNumber);
+                string customerName = cust360?.FullName ?? "Khách hàng trả góp";
+                string vehicleName = c.ContractNumber switch
+                {
+                    string s when s.Contains("HDSAISON") => "Honda Vision 110cc",
+                    string s when s.Contains("FECREDIT") => "Honda SH 150i",
+                    string s when s.Contains("HOMECREDIT") => "Yamaha Exciter 155",
+                    string s when s.Contains("MBANK") => "Suzuki Raider R150",
+                    _ => "Honda Vision 110cc"
+                };
+                return new FinancingInstallmentDto
+                {
+                    ApplicationCode = c.ContractNumber,
+                    CustomerName = customerName,
+                    PartnerName = c.BankName,
+                    VehicleName = vehicleName,
+                    Amount = c.LoanAmount,
+                    Status = statusVN,
+                    CavetStatus = cavetVN,
+                    CreatedAt = c.CreatedAt
+                };
+            })
+            .ToList();
+        for (int i = 0; i < list.Count; i++)
+        {
+            list[i].Id = i + 1;
+        }
+        return new FinancingOverviewResponse
+        {
+            Kpi =
+                new FinancingKpi
+                {
+                    TotalApplications = totalApplications,
+                    DisbursedCount = disbursedCount,
+                    PendingCount = pendingCount,
+                    OverdueCount = overdueCount
+                },
+            Installments = list
+        };
+    }
+
+    public async Task<CustomerAnalyticsResponse> GetCustomerAnalyticsAsync(CancellationToken cancellationToken)
+    {
+        var leads = await context.Leads.IgnoreQueryFilters().ToListAsync(cancellationToken);
+        var orders = await context.OutputOrders.IgnoreQueryFilters().ToListAsync(cancellationToken);
+        var totalLeads = leads.Count;
+        var hotLeads = leads.Count(l => l.Score >= 80);
+        var newCustomers = orders.Select(o => o.CustomerPhone).Distinct().Count();
+        var leadList = leads
+            .OrderByDescending(l => l.CreatedAt)
+            .Select(
+                l => new CustomerLeadDto
+                {
+                    Id = l.Id,
+                    CustomerName = l.FullName,
+                    Source =
+                        l.Source switch
+                            {
+                                "WebStore" => "Website",
+                                "Facebook" => "Facebook",
+                                "Shop" => "Showroom",
+                                _ => l.Source
+                            },
+                    LeadScore = l.Score,
+                    Status =
+                        l.Status switch
+                            {
+                                "New" => "Mới",
+                                "Consulting" => "Đang theo dõi",
+                                "Converted" => "Đã chuyển đổi",
+                                "Lost" => "Không quan tâm",
+                                "TestDriving" => "Đang theo dõi",
+                                _ => l.Status
+                            },
+                    LastContact = l.UpdatedAt ?? l.CreatedAt
+                })
+            .ToList();
+        return new CustomerAnalyticsResponse
+        {
+            Kpi = new CustomerKpi { TotalLeads = totalLeads, NewCustomers = newCustomers, HotLeads = hotLeads },
+            Leads = leadList
+        };
+    }
+
+    public async Task<CustomerServiceAnalyticsResponse> GetCustomerServiceAnalyticsAsync(
+        CancellationToken cancellationToken)
+    {
+        var contacts = await context.Contacts
+            .IgnoreQueryFilters()
+            .Include(c => c.Replies)
+            .ToListAsync(cancellationToken);
+        var totalWithRating = contacts.Where(c => c.Rating != null).ToList();
+        double avgRating = totalWithRating.Count > 0 ? totalWithRating.Average(c => c.Rating.GetValueOrDefault()) : 5.0;
+        var newComplaints = contacts.Count(c => c.Status == "Pending");
+        var resolvedCount = contacts.Count(c => c.Status == "Closed");
+        double avgResponseHours = 0;
+        var repliedContacts = contacts.Where(
+            c => c.Replies != null && c.Replies.Any(r => r.CreatedAt != null) && c.CreatedAt != null)
+            .ToList();
+        if (repliedContacts.Count > 0)
+        {
+            avgResponseHours = repliedContacts.Average(
+                c =>
+                {
+                    var firstReply = c.Replies.Where(r => r.CreatedAt != null).OrderBy(r => r.CreatedAt).First();
+                    return (firstReply.CreatedAt!.Value - c.CreatedAt!.Value).TotalHours;
+                });
+        }
+        var complaintList = contacts
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(
+                c =>
+                {
+                    double? respHours = null;
+                    if (c.Replies != null && c.Replies.Any(r => r.CreatedAt != null) && c.CreatedAt != null)
+                    {
+                        var firstReply = c.Replies.Where(r => r.CreatedAt != null).OrderBy(r => r.CreatedAt).First();
+                        respHours = Math.Round((firstReply.CreatedAt!.Value - c.CreatedAt!.Value).TotalHours, 1);
+                    }
+                    string statusVN = c.Status switch
+                    {
+                        "Pending" => "Mới",
+                        "Replied" => "Đã phản hồi",
+                        "Closed" => "Đã đóng",
+                        _ => c.Status
+                    };
+                    return new CustomerComplaintDto
+                    {
+                        Id = c.Id,
+                        TicketCode = $"LH{c.Id}",
+                        CustomerName = c.FullName,
+                        Subject = c.Subject,
+                        Rating = c.Rating ?? 0,
+                        Status = statusVN,
+                        CreatedAt = c.CreatedAt,
+                        ResponseHours = respHours
+                    };
+                })
+            .ToList();
+        return new CustomerServiceAnalyticsResponse
+        {
+            Kpi =
+                new CustomerServiceKpi
+                {
+                    AvgRating = Math.Round(avgRating, 1),
+                    NewComplaints = newComplaints,
+                    AvgResponseHours = Math.Round(avgResponseHours, 1),
+                    ResolvedCount = resolvedCount
+                },
+            Complaints = complaintList
         };
     }
 }
