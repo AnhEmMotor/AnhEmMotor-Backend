@@ -43,7 +43,7 @@ public class ContactsController(ISender sender) : ApiController
     [AllowAnonymous]
     public async Task<IActionResult> CreateSupportRequestAsync(CreateSupportRequestCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -123,6 +123,78 @@ public class ContactsController(ISender sender) : ApiController
     {
         var command = new UpdateContactStatusCommand(contactType, id, request);
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tạo yêu cầu hỗ trợ (Support Request).
+    /// </summary>
+    [HttpPost("support-request")]
+    [AllowAnonymous]
+    public async Task<IActionResult> CreateSupportRequestAsync(
+        CreateSupportRequestCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tạo đóng góp ý kiến (Customer Feedback).
+    /// </summary>
+    [HttpPost("feedback")]
+    [AllowAnonymous]
+    public async Task<IActionResult> CreateFeedbackAsync(
+        CreateFeedbackCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tạo hồ sơ ứng viên tuyển dụng (Job Application).
+    /// </summary>
+    [HttpPost("job-application")]
+    [AllowAnonymous]
+    public async Task<IActionResult> CreateJobApplicationAsync(
+        CreateJobApplicationCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách liên hệ phân trang (hỗ trợ lọc theo loại và trạng thái).
+    /// </summary>
+    [HttpGet("paginated")]
+    [Authorize]
+    public async Task<IActionResult> GetPaginatedAsync(
+        [FromQuery] string? contactType,
+        [FromQuery] string? status,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetPaginatedContactsQuery(contactType, status, page, pageSize);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Cập nhật trạng thái liên hệ ( hỗ trợ chuyển trạng thái hồ sơ).
+    /// </summary>
+    [HttpPatch("{id:int}/status")]
+    [Authorize]
+    public async Task<IActionResult> UpdateStatusAsync(
+        int id,
+        [FromQuery] string contactType,
+        UpdateContactStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new UpdateContactStatusCommand(contactType, id, request);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

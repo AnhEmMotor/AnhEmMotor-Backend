@@ -18,7 +18,11 @@ namespace Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
 <<<<<<< HEAD
+<<<<<<< HEAD
                 .HasAnnotation("ProductVersion", "10.0.8")
+=======
+                .HasAnnotation("ProductVersion", "10.0.9")
+>>>>>>> main
 =======
                 .HasAnnotation("ProductVersion", "10.0.9")
 >>>>>>> main
@@ -26,6 +30,7 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
             modelBuilder.Entity("AnhEmMotor.Domain.Entities.Expense", b =>
                 {
@@ -87,6 +92,31 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+=======
+            modelBuilder.Entity("Domain.Entities.ApplicationRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+>>>>>>> main
 =======
             modelBuilder.Entity("Domain.Entities.ApplicationRole", b =>
                 {
@@ -226,6 +256,7 @@ namespace Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Property<int>("ClickCount")
                         .HasColumnType("int")
                         .HasColumnName("ClickCount");
@@ -237,6 +268,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("CtaText");
 =======
+=======
+>>>>>>> main
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -247,11 +280,15 @@ namespace Infrastructure.Migrations
                     b.Property<string>("CtaLink")
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("CtaLink");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int")
@@ -274,6 +311,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("LinkUrl");
 =======
+=======
+>>>>>>> main
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("Description");
@@ -286,12 +325,16 @@ namespace Infrastructure.Migrations
                     b.Property<string>("MobileImageUrl")
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("MobileImageUrl");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<string>("Placement")
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Placement");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<string>("Position")
                         .HasColumnType("nvarchar(50)")
@@ -307,6 +350,8 @@ namespace Infrastructure.Migrations
 
 =======
 >>>>>>> main
+=======
+>>>>>>> main
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(255)")
@@ -316,10 +361,13 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Property<int>("ViewCount")
                         .HasColumnType("int")
                         .HasColumnName("ViewCount");
 
+=======
+>>>>>>> main
 =======
 >>>>>>> main
                     b.HasKey("Id");
@@ -439,7 +487,11 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.Brand", b =>
+=======
+            modelBuilder.Entity("Domain.Entities.BookingAppointment", b =>
+>>>>>>> main
 =======
             modelBuilder.Entity("Domain.Entities.BookingAppointment", b =>
 >>>>>>> main
@@ -452,7 +504,10 @@ namespace Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
                     b.Property<DateTimeOffset?>("AppointmentAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("AppointmentAt");
@@ -537,6 +592,9 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -947,7 +1005,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.CustomerContact", b =>
                 {
                     b.Property<int>("Id")
@@ -1076,6 +1137,9 @@ namespace Infrastructure.Migrations
                     b.ToTable("CustomerContactReply");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.CustomerFeedback", b =>
                 {
@@ -1188,6 +1252,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("EmployeeProfile");
                 });
 
+<<<<<<< HEAD
 <<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.FinanceContract", b =>
                 {
@@ -1409,12 +1474,112 @@ namespace Infrastructure.Migrations
 
 =======
 >>>>>>> main
+=======
+            modelBuilder.Entity("Domain.Entities.Expense", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpenseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Expenses");
+                });
+
+            modelBuilder.Entity("Domain.Entities.FinanceContract", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CavetLocation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContractNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DisbursementStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("InterestRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("LoanAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("SignedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TermMonths")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FinanceContracts");
+                });
+
+            modelBuilder.Entity("Domain.Entities.InventoryLedger", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+>>>>>>> main
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<int>("InputId")
                         .HasColumnType("int")
@@ -1432,6 +1597,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("ProductId");
 =======
+=======
+>>>>>>> main
                     b.Property<string>("DocumentCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)")
@@ -1448,6 +1615,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("PartnerName")
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("PartnerName");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<int?>("ProductVariantColorId")
@@ -1455,10 +1625,13 @@ namespace Infrastructure.Migrations
                         .HasColumnName("ProductVariantColorId");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Property<int?>("RemainingCount")
                         .HasColumnType("int")
                         .HasColumnName("RemainingCount");
 =======
+=======
+>>>>>>> main
                     b.Property<int>("ProductVariantId")
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
@@ -1483,6 +1656,9 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("UnitPrice");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
@@ -1490,6 +1666,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.HasIndex("InputId");
 
@@ -1535,6 +1712,17 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.InventoryOnHand", b =>
                 {
 >>>>>>> main
+=======
+                    b.HasIndex("ProductVariantColorId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("InventoryLedger");
+                });
+
+            modelBuilder.Entity("Domain.Entities.InventoryOnHand", b =>
+                {
+>>>>>>> main
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -1542,6 +1730,7 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<string>("AppliedPosition")
                         .IsRequired()
@@ -1560,10 +1749,16 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("BeginningQty");
 >>>>>>> main
+=======
+                    b.Property<int>("BeginningQty")
+                        .HasColumnType("int")
+                        .HasColumnName("BeginningQty");
+>>>>>>> main
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<string>("CvFileUrl")
                         .IsRequired()
@@ -1593,6 +1788,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("Status");
 =======
+=======
+>>>>>>> main
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -1623,11 +1820,15 @@ namespace Infrastructure.Migrations
                     b.Property<int>("StockQty")
                         .HasColumnType("int")
                         .HasColumnName("StockQty");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.HasKey("Id");
 
@@ -1638,6 +1839,14 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+=======
+                    b.Property<int>("Year")
+                        .HasColumnType("int")
+                        .HasColumnName("Year");
+
+                    b.HasKey("Id");
+
+>>>>>>> main
                     b.HasIndex("ProductVariantColorId");
 
                     b.HasIndex("ProductVariantId");
@@ -2016,6 +2225,9 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.HasIndex("ContactId");
 
@@ -2132,12 +2344,18 @@ namespace Infrastructure.Migrations
                         .HasColumnName("InterestedVehicle");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("nvarchar(MAX)")
                         .HasColumnName("Notes");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -2149,12 +2367,18 @@ namespace Infrastructure.Migrations
                         .HasColumnName("Points");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
                     b.Property<string>("Priority")
                         .IsRequired()
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("Priority");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<string>("Province")
                         .IsRequired()
@@ -2235,6 +2459,7 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.MaintenanceHistory", b =>
                 {
                     b.Property<int>("Id")
@@ -2253,6 +2478,16 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+=======
+            modelBuilder.Entity("Domain.Entities.Logistics.CarrierPartner", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+>>>>>>> main
                     b.Property<bool>("AllowLiquidCargo")
                         .HasColumnType("bit");
 
@@ -2463,6 +2698,9 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -2621,7 +2859,11 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.NewsCategory", b =>
+=======
+            modelBuilder.Entity("Domain.Entities.NewsArticle", b =>
+>>>>>>> main
 =======
             modelBuilder.Entity("Domain.Entities.NewsArticle", b =>
 >>>>>>> main
@@ -2634,7 +2876,10 @@ namespace Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
                     b.Property<Guid?>("AuthorId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("AuthorId");
@@ -2647,6 +2892,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("CoverImageUrl");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -2654,6 +2902,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit")
@@ -2782,6 +3031,72 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.NewsComment", b =>
 >>>>>>> main
+=======
+                    b.Property<string>("Excerpt")
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("Excerpt");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsFeatured");
+
+                    b.Property<DateTimeOffset?>("PublishedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("PublishedAt");
+
+                    b.Property<Guid?>("PublishedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("PublishedBy");
+
+                    b.Property<string>("SeoDescription")
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("SeoDescription");
+
+                    b.Property<string>("SeoKeywords")
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("SeoKeywords");
+
+                    b.Property<string>("SeoTitle")
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("SeoTitle");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("Slug");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("Status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("Title");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("int")
+                        .HasColumnName("ViewCount");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("PublishedBy");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "PublishedAt");
+
+                    b.ToTable("NewsArticle");
+                });
+
+            modelBuilder.Entity("Domain.Entities.NewsCategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -2790,6 +3105,45 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("Name");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("Slug");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NewsCategory");
+                });
+
+            modelBuilder.Entity("Domain.Entities.NewsComment", b =>
+>>>>>>> main
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -2911,15 +3265,32 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
+=======
+                    b.Property<string>("AuthorEmail")
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("AuthorEmail");
+
+                    b.Property<string>("AuthorName")
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("AuthorName");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+>>>>>>> main
                         .HasColumnName("Content");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<int?>("DepositRatio")
                         .HasColumnType("int")
@@ -2973,6 +3344,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("TransactionId");
 =======
+=======
+>>>>>>> main
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit")
                         .HasColumnName("IsApproved");
@@ -2980,11 +3353,15 @@ namespace Infrastructure.Migrations
                     b.Property<int>("NewsId")
                         .HasColumnType("int")
                         .HasColumnName("NewsId");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.HasKey("Id");
 
@@ -3016,10 +3393,27 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.NewsProduct", b =>
 >>>>>>> main
+=======
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NewsId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("NewsComments");
+                });
+
+            modelBuilder.Entity("Domain.Entities.NewsProduct", b =>
+>>>>>>> main
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
+<<<<<<< HEAD
 <<<<<<< HEAD
                         .HasColumnName("id");
 
@@ -3039,12 +3433,19 @@ namespace Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
 >>>>>>> main
+=======
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+>>>>>>> main
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<int>("OutputId")
                         .HasColumnType("int")
@@ -3058,13 +3459,22 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("NewsId");
 >>>>>>> main
+=======
+                    b.Property<int>("NewsId")
+                        .HasColumnType("int")
+                        .HasColumnName("NewsId");
+>>>>>>> main
 
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Property<int?>("ProductVarientId")
+=======
+                    b.Property<int>("ProductVariantId")
+>>>>>>> main
 =======
                     b.Property<int>("ProductVariantId")
 >>>>>>> main
@@ -3077,6 +3487,7 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.HasIndex("OutputId");
 
                     b.HasIndex("ProductVariantColorId");
@@ -3087,6 +3498,12 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantColorId");
 
+=======
+                    b.HasIndex("NewsId");
+
+                    b.HasIndex("ProductVariantColorId");
+
+>>>>>>> main
                     b.HasIndex("ProductVariantId");
 
                     b.ToTable("NewsProduct");
@@ -3438,6 +3855,9 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ProductVariantColorId");
 
                     b.HasIndex("ProductVariantId");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.ToTable("OutputInfo");
@@ -3750,10 +4170,13 @@ namespace Infrastructure.Migrations
                         .HasColumnName("GroundClearance");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Property<string>("Highlights")
                         .HasColumnType("nvarchar(MAX)")
                         .HasColumnName("Highlights");
 
+=======
+>>>>>>> main
 =======
 >>>>>>> main
                     b.Property<string>("LightingSystem")
@@ -3769,6 +4192,12 @@ namespace Infrastructure.Migrations
                         .HasColumnName("MaxPower");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+                    b.Property<int?>("MaxPurchaseQuantity")
+                        .HasColumnType("int");
+
+>>>>>>> main
 =======
                     b.Property<int?>("MaxPurchaseQuantity")
                         .HasColumnType("int");
@@ -4017,7 +4446,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.ProductQuotation", b =>
                 {
                     b.Property<int>("Id")
@@ -4058,6 +4490,9 @@ namespace Infrastructure.Migrations
                     b.ToTable("ProductQuotations");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.ProductStatus", b =>
                 {
@@ -4184,6 +4619,12 @@ namespace Infrastructure.Migrations
                         .HasColumnName("GroundClearance");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+                    b.Property<int?>("MaxPurchaseQuantity")
+                        .HasColumnType("int");
+
+>>>>>>> main
 =======
                     b.Property<int?>("MaxPurchaseQuantity")
                         .HasColumnType("int");
@@ -4271,6 +4712,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+                    b.Property<int?>("MaxPurchaseQuantity")
+                        .HasColumnType("int");
+
+>>>>>>> main
 =======
                     b.Property<int?>("MaxPurchaseQuantity")
                         .HasColumnType("int");
@@ -4291,7 +4738,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.PromotionBanner", b =>
                 {
                     b.Property<int>("Id")
@@ -4591,6 +5041,9 @@ namespace Infrastructure.Migrations
                     b.ToTable("PurchaseRequestItemAuditLog");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.RepairOrder", b =>
                 {
@@ -4926,6 +5379,7 @@ namespace Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Property<DateTimeOffset?>("CancelledDate")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("CancelledDate");
@@ -4938,6 +5392,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("CompletedDate");
 =======
+=======
+>>>>>>> main
                     b.Property<string>("AdminNote")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -4957,11 +5413,15 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTime?>("CancelledAt")
                         .HasColumnType("datetime2");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<Guid?>("CustomerId")
                         .HasColumnType("uniqueidentifier")
@@ -4975,10 +5435,16 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 >>>>>>> main
+=======
+                    b.Property<string>("CustomerNote")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+>>>>>>> main
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<decimal?>("DepositAmount")
                         .HasColumnType("decimal(18,2)")
@@ -5030,6 +5496,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("TotalAmount");
 =======
+=======
+>>>>>>> main
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -5041,11 +5509,15 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.Property<int?>("VehicleId")
                         .HasColumnType("int")
@@ -5063,6 +5535,8 @@ namespace Infrastructure.Migrations
 
                     b.ToTable("ServiceBooking");
 =======
+=======
+>>>>>>> main
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
 
@@ -5073,6 +5547,9 @@ namespace Infrastructure.Migrations
                     b.HasIndex("VehicleId");
 
                     b.ToTable("ServiceBookings");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                 });
 
@@ -5468,6 +5945,7 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.SupplierDebtSettlement", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5477,6 +5955,8 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.SupplierDebt", b =>
                 {
                     b.Property<int>("Id")
@@ -5485,6 +5965,9 @@ namespace Infrastructure.Migrations
                         .HasColumnName("Id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<DateTimeOffset?>("CreatedAt")
@@ -5494,6 +5977,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Property<string>("EvidenceUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -5501,6 +5985,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 =======
+=======
+>>>>>>> main
                     b.Property<int>("InventoryReceiptId")
                         .HasColumnType("int")
                         .HasColumnName("InventoryReceiptId");
@@ -5549,17 +6035,26 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<DateTimeOffset>("PaymentDate")
                         .HasColumnType("datetimeoffset");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
                     b.Property<decimal>("RemainingDebt")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
@@ -5570,15 +6065,21 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.HasIndex("SupplierId");
 
                     b.ToTable("SupplierDebtSettlements");
 =======
+=======
+>>>>>>> main
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("SupplierId");
 
                     b.ToTable("SupplierDebtLog");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                 });
 
@@ -5688,7 +6189,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.SupportTicket", b =>
                 {
                     b.Property<int>("Id")
@@ -5743,6 +6247,9 @@ namespace Infrastructure.Migrations
                     b.ToTable("SupportTicket");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.Technology", b =>
                 {
@@ -5905,10 +6412,13 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
 =======
+=======
+>>>>>>> main
                     b.Property<double>("CurrentOdo")
                         .HasColumnType("float")
                         .HasColumnName("CurrentOdo");
@@ -5921,6 +6431,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("ElectronicWarrantyQrCode");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<string>("EngineNumber")
                         .IsRequired()
@@ -5928,10 +6441,13 @@ namespace Infrastructure.Migrations
                         .HasColumnName("EngineNumber");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Property<int?>("InputInfoId")
                         .HasColumnType("int")
                         .HasColumnName("InputInfoId");
 =======
+=======
+>>>>>>> main
                     b.Property<decimal>("ImportPrice")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("ImportPrice");
@@ -5939,6 +6455,9 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("InventoryReceiptInfoId")
                         .HasColumnType("int")
                         .HasColumnName("InventoryReceiptInfoId");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Property<bool>("IsActive")
@@ -5946,11 +6465,17 @@ namespace Infrastructure.Migrations
                         .HasColumnName("IsActive");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
                     b.Property<DateTime?>("LastMaintenanceDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("LastMaintenanceDate");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<int?>("LeadId")
                         .HasColumnType("int")
@@ -5962,7 +6487,10 @@ namespace Infrastructure.Migrations
                         .HasColumnName("LicensePlate");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
                     b.Property<DateTime?>("NextMaintenanceDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("NextMaintenanceDate");
@@ -5971,6 +6499,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("float")
                         .HasColumnName("NextMaintenanceOdo");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<int?>("OutputInfoId")
                         .HasColumnType("int")
@@ -5981,7 +6512,10 @@ namespace Infrastructure.Migrations
                         .HasColumnName("ProductId");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantColorId");
@@ -5990,16 +6524,22 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<DateTimeOffset>("PurchaseDate")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("PurchaseDate");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
 =======
+=======
+>>>>>>> main
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)")
@@ -6012,6 +6552,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("UserId");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<string>("VinNumber")
                         .IsRequired()
@@ -6021,7 +6564,11 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.HasIndex("InputInfoId");
+=======
+                    b.HasIndex("InventoryReceiptInfoId");
+>>>>>>> main
 =======
                     b.HasIndex("InventoryReceiptInfoId");
 >>>>>>> main
@@ -6032,6 +6579,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
                     b.ToTable("Vehicle");
                 });
@@ -6063,6 +6611,25 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+=======
+                    b.HasIndex("ProductVariantColorId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Vehicle");
+                });
+
+            modelBuilder.Entity("Domain.Entities.VehicleAuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+>>>>>>> main
                     b.Property<string>("Action")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -6115,6 +6682,9 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -6280,11 +6850,16 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.CommissionPolicy", b =>
                 {
 =======
             modelBuilder.Entity("Domain.Entities.BookingAppointment", b =>
                 {
+=======
+            modelBuilder.Entity("Domain.Entities.BookingAppointment", b =>
+                {
+>>>>>>> main
                     b.HasOne("Domain.Entities.ApplicationUser", "ConfirmedByUser")
                         .WithMany("ConfirmedBookings")
                         .HasForeignKey("ConfirmedBy")
@@ -6302,6 +6877,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.CommissionPolicy", b =>
                 {
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.HasOne("Domain.Entities.ProductCategory", "Category")
                         .WithMany()
@@ -6375,7 +6953,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.CustomerContact", b =>
                 {
                     b.HasOne("Domain.Entities.ApplicationUser", "ProcessedByUser")
@@ -6408,6 +6989,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("RepliedByUser");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.CustomerFeedback", b =>
                 {
@@ -6431,6 +7015,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+<<<<<<< HEAD
 <<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.Input", b =>
                 {
@@ -6485,21 +7070,31 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.InventoryLedger", b =>
                 {
 >>>>>>> main
+=======
+            modelBuilder.Entity("Domain.Entities.InventoryLedger", b =>
+                {
+>>>>>>> main
                     b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
                         .WithMany()
                         .HasForeignKey("ProductVariantColorId")
                         .OnDelete(DeleteBehavior.Restrict);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Navigation("InputReceipt");
 
                     b.Navigation("ParentOutputInfo");
 =======
+=======
+>>>>>>> main
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany()
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Navigation("ProductVariant");
@@ -6508,7 +7103,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.InventoryOnHand", b =>
                 {
                     b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
@@ -6653,6 +7251,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("ProductVariant");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.JobApplication", b =>
                 {
@@ -6697,7 +7298,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.Logistics.ParcelDeliveryOrderItem", b =>
                 {
                     b.HasOne("Domain.Entities.Logistics.ParcelDeliveryOrder", "ParcelDeliveryOrder")
@@ -6709,6 +7313,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("ParcelDeliveryOrder");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.MaintenanceHistory", b =>
                 {
@@ -6739,7 +7346,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.NewsArticle", b =>
                 {
                     b.HasOne("Domain.Entities.ApplicationUser", "Author")
@@ -6800,6 +7410,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("ProductVariantColor");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.Option", b =>
                 {
@@ -6820,11 +7433,16 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.Output", b =>
                 {
 =======
             modelBuilder.Entity("Domain.Entities.OrderStatusHistory", b =>
                 {
+=======
+            modelBuilder.Entity("Domain.Entities.OrderStatusHistory", b =>
+                {
+>>>>>>> main
                     b.HasOne("Domain.Entities.ApplicationUser", "ChangedByUser")
                         .WithMany("OrderStatusHistories")
                         .HasForeignKey("ChangedBy")
@@ -6843,6 +7461,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Output", b =>
                 {
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.HasOne("Domain.Entities.ApplicationUser", "Buyer")
                         .WithMany()
@@ -6885,7 +7506,11 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany("OutputInfos")
 <<<<<<< HEAD
+<<<<<<< HEAD
                         .HasForeignKey("ProductVarientId");
+=======
+                        .HasForeignKey("ProductVariantId");
+>>>>>>> main
 =======
                         .HasForeignKey("ProductVariantId");
 >>>>>>> main
@@ -6980,7 +7605,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.ProductQuotation", b =>
                 {
                     b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
@@ -7004,6 +7632,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Supplier");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.ProductTechnology", b =>
                 {
@@ -7047,7 +7678,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.PromotionBanner", b =>
                 {
                     b.HasOne("Domain.Entities.ApplicationUser", "CreatedByUser")
@@ -7156,6 +7790,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("PurchaseRequestItem");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.RepairOrder", b =>
                 {
@@ -7243,6 +7880,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.ServiceBooking", b =>
                 {
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.HasOne("Domain.Entities.ApplicationUser", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId");
@@ -7267,6 +7905,8 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("Technician");
 =======
+=======
+>>>>>>> main
                     b.HasOne("Domain.Entities.ApplicationUser", "AssignedSale")
                         .WithMany()
                         .HasForeignKey("AssignedSaleId")
@@ -7279,6 +7919,9 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("AssignedSale");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Navigation("Vehicle");
@@ -7373,9 +8016,12 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.SupplierDebtSettlement", b =>
                 {
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.SupplierDebt", b =>
                 {
                     b.HasOne("Domain.Entities.InventoryReceipt", "InventoryReceipt")
@@ -7401,6 +8047,9 @@ namespace Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("CreatedById");
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
                     b.HasOne("Domain.Entities.Supplier", "Supplier")
                         .WithMany()
@@ -7409,6 +8058,11 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+                    b.Navigation("CreatedBy");
+
+>>>>>>> main
 =======
                     b.Navigation("CreatedBy");
 
@@ -7439,7 +8093,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.SupportTicket", b =>
                 {
                     b.HasOne("Domain.Entities.ApplicationUser", "AssignedAdmin")
@@ -7457,6 +8114,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.Technology", b =>
                 {
@@ -7520,10 +8180,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Product", "Product")
                         .WithMany()
 <<<<<<< HEAD
+<<<<<<< HEAD
                         .HasForeignKey("ProductId");
 
                     b.Navigation("InputInfo");
 =======
+=======
+>>>>>>> main
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -7543,6 +8206,9 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("InventoryReceiptInfo");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Navigation("Lead");
@@ -7559,7 +8225,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.VehicleAuditLog", b =>
                 {
                     b.HasOne("Domain.Entities.ApplicationUser", "ChangedBy")
@@ -7577,6 +8246,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Vehicle");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.VehicleDocument", b =>
                 {
@@ -7683,12 +8355,18 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.CustomerContact", b =>
                 {
                     b.Navigation("Replies");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.EmployeeProfile", b =>
                 {
@@ -7698,7 +8376,11 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.Input", b =>
+=======
+            modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
+>>>>>>> main
 =======
             modelBuilder.Entity("Domain.Entities.InventoryReceipt", b =>
 >>>>>>> main
@@ -7709,7 +8391,11 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.InputInfo", b =>
+=======
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
+>>>>>>> main
 =======
             modelBuilder.Entity("Domain.Entities.InventoryReceiptInfo", b =>
 >>>>>>> main
@@ -7718,7 +8404,11 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.InputStatus", b =>
+=======
+            modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
+>>>>>>> main
 =======
             modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
 >>>>>>> main
@@ -7732,7 +8422,10 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.Logistics.ParcelDeliveryOrder", b =>
                 {
                     b.Navigation("Items");
@@ -7745,6 +8438,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("LinkedProducts");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.NewsCategory", b =>
                 {
@@ -7818,13 +8514,19 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
                 {
 <<<<<<< HEAD
+<<<<<<< HEAD
                     b.Navigation("InputInfos");
 =======
+=======
+>>>>>>> main
                     b.Navigation("BookingAppointments");
 
                     b.Navigation("InventoryReceiptInfos");
 
                     b.Navigation("InventoryTransactions");
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
 
                     b.Navigation("OutputInfos");
@@ -7836,6 +8538,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("VariantOptionValues");
                 });
 
+<<<<<<< HEAD
 <<<<<<< HEAD
             modelBuilder.Entity("Domain.Entities.RepairOrder", b =>
                 {
@@ -7860,6 +8563,13 @@ namespace Infrastructure.Migrations
                     b.Navigation("PurchaseRequestItems");
                 });
 
+=======
+            modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
+                {
+                    b.Navigation("PurchaseRequestItems");
+                });
+
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.PurchaseRequestItem", b =>
                 {
                     b.Navigation("InventoryReceiptInfos");
@@ -7882,6 +8592,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("SupplierDebts");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.SupplierContract", b =>
                 {
@@ -7898,12 +8611,18 @@ namespace Infrastructure.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> main
             modelBuilder.Entity("Domain.Entities.SupportTicket", b =>
                 {
                     b.Navigation("Replies");
                 });
 
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
             modelBuilder.Entity("Domain.Entities.Technology", b =>
                 {

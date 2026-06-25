@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.SupplierContracts.Commands.RestoreSupplierContract;
 
-public sealed class RestoreSupplierContractCommandHandler(
+public class RestoreSupplierContractCommandHandler(
     ISupplierContractReadRepository readRepo,
     ISupplierContractUpdateRepository updateRepo,
     IUnitOfWork unitOfWork
@@ -14,10 +14,10 @@ public sealed class RestoreSupplierContractCommandHandler(
 {
     public async Task<Result> Handle(RestoreSupplierContractCommand request, CancellationToken cancellationToken)
     {
-        var entity = await readRepo.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
+        var entity = await readRepo.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
+            .ConfigureAwait(false);
         if (entity == null)
             return Result.Failure("Supplier contract not found.");
-
         updateRepo.Restore(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result.Success();

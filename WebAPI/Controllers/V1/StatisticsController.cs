@@ -26,7 +26,7 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 /// <param name="mediator"></param>
 [ApiVersion("1.0")]
-[SwaggerTag("Thống kê và báo cáo")]
+[SwaggerTag("Th?ng k� v� b�o c�o")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class StatisticsController(IMediator mediator, IStatisticalReadRepository repository) : ApiController
@@ -68,7 +68,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// Lấy các chỉ số tổng hợp cho Dashboard.
+    /// L?y c�c ch? s? t?ng h?p cho Dashboard.
     /// </summary>
     [HttpGet("dashboard-stats")]
     [HasPermission(Statistical.View)]
@@ -98,7 +98,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// L?y s? lu?ng don h�ng theo t?ng tr?ng th�i.
+    /// Lấy số lượng đơn hàng theo từng trạng thái
     /// </summary>
     [HttpGet("order-status-counts")]
     [HasPermission(Statistical.View)]

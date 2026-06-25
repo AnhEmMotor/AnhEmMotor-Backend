@@ -54,7 +54,7 @@ namespace Infrastructure.Repositories.PlateDossier
         private IQueryable<Domain.Entities.PlateDossier> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return context.GetQuery<Domain.Entities.PlateDossier>(mode)
-                .Include(p s=> p.Output)
+                .Include(p => p.Output)
                 .ThenInclude(o => o.OutputInfos)
                 .ThenInclude(oi => oi.ProductVariant);
         }

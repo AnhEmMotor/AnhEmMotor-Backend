@@ -96,7 +96,7 @@ namespace WebAPI.Controllers
         /// Streams transaction logs in real-time using Server-Sent Events (SSE).
         /// </summary>
         [HttpGet("stream/transactions")]
-        public async Task GetTransactionStream()
+        public async Task GetTransactionStream(CancellationToken cancellationToken)
         {
             Response.Headers.Append("Content-Type", "text/event-stream");
             Response.Headers.Append("Cache-Control", "no-cache");

@@ -10,27 +10,12 @@ public class GetServiceWorkshopEvaluationsQueryHandler(
     IServiceEvaluationReadRepository serviceEvaluationReadRepository
 ) : IRequestHandler<GetServiceWorkshopEvaluationsQuery, Result<PagedResult<ServiceEvaluationListRowResponse>>>
 {
-    public async Task<Result<PagedResult<ServiceEvaluationListRowResponse>>> Handle(
+    public Task<Result<PagedResult<ServiceEvaluationListRowResponse>>> Handle(
         GetServiceWorkshopEvaluationsQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await serviceEvaluationReadRepository.GetPagedEvaluationsAsync(
-            new GetServiceWorkshopEvaluationsFilter(
-                request.Status,
-                request.Criteria,
-                request.Search,
-                request.Page,
-                request.PageSize),
-            cancellationToken);
-
-        return result;
+        var sieveModel = request.SieveModel ?? new();
+        return serviceEvaluationReadRepository.GetPagedEvaluationsAsync(sieveModel, cancellationToken);
     }
 }
-
-public record GetServiceWorkshopEvaluationsFilter(
-    string? Status,
-    string? Criteria,
-    string? Search,
-    int Page,
-    int PageSize);
 

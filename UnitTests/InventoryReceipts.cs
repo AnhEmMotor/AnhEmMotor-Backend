@@ -114,6 +114,7 @@ public class InventoryReceipts
     public async Task IR_002_CreateInventoryReceipt_PurchaseRequestNotFound()
     {
 <<<<<<< HEAD
+<<<<<<< HEAD
         var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputInfoRequest { ProductVarientId = null, Count = 10, InputPrice = 100000 };
         var result = validator.TestValidate(command);
@@ -159,6 +160,8 @@ public class InventoryReceipts
             Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
         };
 =======
+=======
+>>>>>>> main
         var handler = new CreateInventoryReceiptCommandHandler(
             _insertRepoMock.Object,
             _readRepoMock.Object,
@@ -171,6 +174,9 @@ public class InventoryReceipts
         var command = new CreateInventoryReceiptCommand { PurchaseRequestId = 99, Products = [] };
         _prReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(99, It.IsAny<CancellationToken>()))
             .ReturnsAsync((PurchaseRequest?)null);
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -395,6 +401,7 @@ public class InventoryReceipts
             InventoryReceiptInfos = []
         };
 <<<<<<< HEAD
+<<<<<<< HEAD
         var response = input.Adapt<InputDetailResponse>(config);
         response.TotalPayable.Should().Be((2 * 150000) + (3 * 50000) + 0 + 0);
     }
@@ -441,10 +448,15 @@ public class InventoryReceipts
         };
 
 =======
+=======
+>>>>>>> main
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingReceipt);
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingReceipt);
+<<<<<<< HEAD
+>>>>>>> main
+=======
 >>>>>>> main
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -474,6 +486,7 @@ public class InventoryReceipts
             Notes = "Updated notes",
             Products = [new UpdateInventoryReceiptInfoRequest { Count = 5 }]
         };
+<<<<<<< HEAD
 <<<<<<< HEAD
 
         mockVariantRepo.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -506,6 +519,11 @@ public class InventoryReceipts
             ]
         };
 
+=======
+        var existingReceipt = new InventoryReceiptEntity { Id = 1, StatusId = status, Notes = "Old notes" };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingReceipt);
+>>>>>>> main
 =======
         var existingReceipt = new InventoryReceiptEntity { Id = 1, StatusId = status, Notes = "Old notes" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))

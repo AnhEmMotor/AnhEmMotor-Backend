@@ -1,4 +1,3 @@
-using Application.ApiContracts.SupplierContracts.Requests;
 using Application.ApiContracts.SupplierContracts.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
@@ -9,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.SupplierContracts.Commands.CreateSupplierContract;
 
-public sealed class CreateSupplierContractCommandHandler(
+public class CreateSupplierContractCommandHandler(
     ISupplierContractReadRepository readRepo,
     ISupplierContractInsertRepository insertRepo,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateSupplierContractCommand, Result<SupplierContractResponse>>
@@ -19,7 +18,7 @@ public sealed class CreateSupplierContractCommandHandler(
         CancellationToken cancellationToken)
     {
         var isDuplicate = await readRepo.IsContractNumberExistsAsync(request.ContractNumber, null, cancellationToken)
-        .ConfigureAwait(false);
+            .ConfigureAwait(false);
         if (isDuplicate)
         {
             return Result<SupplierContractResponse>.Failure("Contract number already exists.");

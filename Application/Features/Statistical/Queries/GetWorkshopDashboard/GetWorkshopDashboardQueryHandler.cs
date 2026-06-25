@@ -1,94 +1,86 @@
-using Application.Api.Contracts.Statistical.Responses;
-using Application.Common.Interfaces;
-using Domain.Entities;
+using Application.ApiContracts.Statistical.Responses;
+using Application.Interfaces.Repositories.HR.Employee;
+using Application.Interfaces.Repositories.InventoryReceiptInfo;
+using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.RepairOrder;
+using Domain.Constants;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Statistical.Queries.GetWorkshopDashboard;
 
-public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashboardQuery, WorkshopDashboardResponse>
+public class GetWorkshopDashboardQueryHandler(
+    IRepairOrderReadRepository repairOrderReadRepository,
+    IOutputReadRepository outputReadRepository,
+    IEmployeeReadRepository employeeReadRepository,
+    IInventoryReceiptInfoReadRepository inventoryReceiptInfoReadRepository) : IRequestHandler<GetWorkshopDashboardQuery, WorkshopDashboardResponse>
 {
-    private readonly IApplicationDbContext _context;
-
-    public GetWorkshopDashboardQueryHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
-
-    public async Task<WorkshopDashboardResponse> Handle(GetWorkshopDashboardQuery request, CancellationToken cancellationToken)
+    public async Task<WorkshopDashboardResponse> Handle(
+        GetWorkshopDashboardQuery request,
+        CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
         var response = new WorkshopDashboardResponse();
-
-        // 1. KPI Cards
-        var inProgressOrders = await _context.RepairOrders
-            .Where(ro => ro.Status == "InProgress")
-            .ToListAsync(cancellationToken);
-
-        var completedOrders = await _context.RepairOrders
-            .Where(ro => ro.Status == "Completed" && ro.StartTime != null && ro.CompletedDate != null)
-            .ToListAsync(cancellationToken);
-
-        var revenueOrders = await _context.RepairOrders
-            .Where(ro => ro.CreatedAt >= request.FromDate && ro.CreatedAt <= request.ToDate)
-            .ToListAsync(cancellationToken);
-
+        var allOrders = await repairOrderReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var inProgressOrders = allOrders.Where(ro => string.Compare(ro.Status, RepairOrderStatus.InProgress) == 0)
+            .ToList();
+        var completedOrders = allOrders.Where(
+            ro => string.Compare(ro.Status, RepairOrderStatus.Completed) == 0 &&
+                ro.StartTime != null &&
+                ro.CompletedDate != null)
+            .ToList();
+        var revenueOrders = allOrders.Where(ro => ro.CreatedAt >= request.FromDate && ro.CreatedAt <= request.ToDate)
+            .ToList();
         response.KpiCards.InProgressCount = inProgressOrders.Count;
         response.KpiCards.CumulativeRevenue = revenueOrders.Sum(ro => ro.TotalAmount);
-
-        if (completedOrders.Any())
+        if (completedOrders.Count != 0)
         {
             var totalHours = completedOrders.Sum(ro => (ro.CompletedDate!.Value - ro.StartTime!.Value).TotalHours);
             response.KpiCards.AvgCompletionHours = totalHours / completedOrders.Count;
         }
-
-        // 2. Urgent Alerts
-        response.Alerts.OverdueTickets = await _context.RepairOrders
-            .Where(ro => ro.Status != "Completed" && ro.ExpectedCompletionTime < now)
-            .Select(ro => new OverdueTicketDto
-            {
-                TicketId = ro.Id,
-                CustomerName = ro.CustomerName,
-                ExpectedCompletionTime = ro.ExpectedCompletionTime ?? now,
-                Status = ro.Status
-            }).ToListAsync(cancellationToken);
-
-        // Part Shortage: Check RepairOrderDetails of InProgress tickets
-        var activeItems = await _context.RepairOrderDetails
-            .Where(rod => rod.RepairOrder.Status == "InProgress" && rod.Type == "Part" && rod.ProductVariantId != null)
-            .ToListAsync(cancellationToken);
-
+        response.Alerts.OverdueTickets = [.. allOrders
+            .Where(ro => string.Compare(ro.Status, RepairOrderStatus.Completed) != 0 && ro.ExpectedCompletionTime < now)
+            .Select(
+                ro => new OverdueTicketResponse
+                {
+                    TicketId = ro.Id,
+                    CustomerName = ro.CustomerName,
+                    ExpectedCompletionTime = ro.ExpectedCompletionTime ?? now,
+                    Status = ro.Status
+                })];
+        var activeItems = allOrders
+            .SelectMany(ro => ro.Details)
+            .Where(
+                rod => string.Compare(rod.RepairOrder.Status, RepairOrderStatus.InProgress) == 0 &&
+                    string.Compare(rod.Type, RepairOrderDetailType.Part) == 0 &&
+                    rod.ProductVariantId != null)
+            .ToList();
         foreach (var item in activeItems)
         {
-            // Mock logic: In real world, you'd check a real Inventory/Stock table.
-            // Here we simulate check against InputInfos (assuming InputInfo represents stock)
-            var stock = await _context.InputInfos
-                .Where(ii => ii.ProductVariantColorId != null && ii.Count > 0)
-                .SumAsync(ii => ii.Count ?? 0, cancellationToken);
-
+            var stock = (await inventoryReceiptInfoReadRepository.GetFinishedInventoryReceiptInfosByVariantIdAsync(
+                item.ProductVariantId!.Value,
+                cancellationToken)
+                .ConfigureAwait(false))
+                .Where(ii => ii.Count > 0)
+                .Sum(ii => ii.Count ?? 0);
             if (stock < item.Count)
             {
-                response.Alerts.PartShortages.Add(new PartShortageDto
-                {
-                    TicketId = item.RepairOrderId,
-                    PartName = item.ProductVariant?.ProductVariantColor?.ColorName ?? "Unknown Part",
-                    RequiredQuantity = item.Count,
-                    AvailableQuantity = stock
-                });
+                response.Alerts.PartShortages
+                    .Add(
+                        new PartShortageResponse
+                        {
+                            TicketId = item.RepairOrderId,
+                            PartName = item.ProductVariant?.Product?.Name ?? "Unknown Part",
+                            RequiredQuantity = item.Count,
+                            AvailableQuantity = stock
+                        });
             }
         }
-
-        // 3. Analytics
         var workshopRev = revenueOrders.Sum(ro => ro.TotalAmount);
-        var retailRev = await _context.OutputOrders
+        var retailRev = (await outputReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false))
             .Where(o => o.CreatedAt >= request.FromDate && o.CreatedAt <= request.ToDate)
-            .SumAsync(o => o.Total, cancellationToken);
-
+            .Sum(o => o.Total);
         response.Analytics.RevenueComparison = new RevenueComparison
         {
             WorkshopRevenue = workshopRev,
