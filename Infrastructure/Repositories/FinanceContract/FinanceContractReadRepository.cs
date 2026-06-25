@@ -1,8 +1,7 @@
+using Application.Features.FinanceContracts.Queries.GetFinanceContractsList;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.FinanceContract;
-using Application.Features.FinanceContracts.Queries.GetFinanceContractsList;
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -10,9 +9,7 @@ using Sieve.Models;
 
 namespace Infrastructure.Repositories.FinanceContract;
 
-public class FinanceContractReadRepository(
-        ApplicationDBContext context,
-        ISievePaginator paginator) : IFinanceContractReadRepository
+public class FinanceContractReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IFinanceContractReadRepository
 {
     public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
@@ -34,7 +31,6 @@ public class FinanceContractReadRepository(
         CancellationToken cancellationToken = default,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.FinanceContracts
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        return context.FinanceContracts.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 }

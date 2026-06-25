@@ -1,13 +1,10 @@
-using Application.Features.Statistical.Queries.GetDashboardSummary;
-using Application.Features.Statistical.Queries.GetPnlReport;
 using Application.Features.Statistical.Queries.GetRecentTransactions;
-using Application.Features.Statistical.Queries.GetStaffPerformance;
+using Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Text.Json;
-using Infrastructure.Repositories;
 
 namespace WebAPI.Controllers
 {
@@ -23,7 +20,7 @@ namespace WebAPI.Controllers
         private readonly IMediator mediator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AnalyticsController"/> class.
+        /// Initializes a new instance of the <see cref="AnalyticsController" /> class.
         /// </summary>
         /// <param name="analyticsRepository">The analytics repository.</param>
         /// <param name="mediator">The mediator.</param>
@@ -44,10 +41,7 @@ namespace WebAPI.Controllers
         {
             var startDate = start ?? DateTime.Today;
             var endDate = end ?? DateTime.Today.AddDays(1).AddTicks(-1);
-
             var summary = await _analyticsRepository.GetDashboardSummaryAsync(startDate, endDate);
-
-            // Logic rào chắn màu sắc cho UI
             var now = DateTime.Now;
             if (now.Hour >= 15 && summary.MonthAchieved < (summary.MonthTarget * 0.5m))
             {
@@ -80,7 +74,6 @@ namespace WebAPI.Controllers
         {
             var startDate = start ?? DateTime.Today.AddDays(-30);
             var endDate = end ?? DateTime.Today;
-
             var performance = await _analyticsRepository.GetStaffPerformanceAsync(startDate, endDate);
             return Ok(performance);
         }

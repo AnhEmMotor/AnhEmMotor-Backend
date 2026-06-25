@@ -24,7 +24,6 @@ public class GetSupplierContractAuditLogsQueryHandler(ISupplierContractReadRepos
         var result = auditLogs
             .OrderByDescending(al => al.CreatedAt)
             .Adapt<List<SupplierContractAuditLogResponse>>();
-            
         return Result<List<SupplierContractAuditLogResponse>>.Success(result);
     }
 }

@@ -18,7 +18,6 @@ public class CloneManySuppliersCommandHandler(
         {
             return Result.Success();
         }
-
         foreach (var id in request.Ids)
         {
             var existingSupplier = await readRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
@@ -26,17 +25,15 @@ public class CloneManySuppliersCommandHandler(
             {
                 continue;
             }
-
             string baseName = existingSupplier.Name ?? "No Name";
             var match = Regex.Match(baseName, @"^(.*?)(?:\s*\(Copy(?: (\d+))?\))?$");
             string cleanName = match.Groups[1].Value;
-            
             string newName = $"{cleanName} (Copy)";
             int counter = 1;
-
             while (true)
             {
-                var nameExists = await readRepository.IsNameExistsAsync(newName, null, cancellationToken).ConfigureAwait(false);
+                var nameExists = await readRepository.IsNameExistsAsync(newName, null, cancellationToken)
+                    .ConfigureAwait(false);
                 if (!nameExists)
                 {
                     break;
@@ -44,7 +41,6 @@ public class CloneManySuppliersCommandHandler(
                 counter++;
                 newName = $"{cleanName} (Copy {counter})";
             }
-
             var clonedSupplier = new SupplierEntity
             {
                 Name = newName,
@@ -56,10 +52,8 @@ public class CloneManySuppliersCommandHandler(
                 TaxIdentificationNumber = existingSupplier.TaxIdentificationNumber,
                 PartnerTypeId = existingSupplier.PartnerTypeId
             };
-
             insertRepository.Add(clonedSupplier);
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result.Success();
     }

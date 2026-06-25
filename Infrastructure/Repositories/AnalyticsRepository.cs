@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Infrastructure.DBContexts;
 using Application.DTOs.Analytics;
-using Domain.Entities;
 using Domain.Enums;
+using Infrastructure.DBContexts;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
 namespace Infrastructure.Repositories
 {
@@ -21,37 +18,28 @@ namespace Infrastructure.Repositories
 
         public async Task<DashboardSummaryDto> GetDashboardSummaryAsync(DateTime start, DateTime end)
         {
-            // 1. Doanh thu thực tế (Completed)
             var totalRevenue = await _context.OutputOrders
                 .Where(o => o.CreatedAt >= start && o.CreatedAt <= end && o.StatusId == "Completed")
                 .SelectMany(o => o.OutputInfos)
                 .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0));
-
-            // 2. Chi phí vận hành trong kỳ
             var totalExpenses = await _context.Expenses
                 .Where(e => e.ExpenseDate >= start && e.ExpenseDate <= end)
                 .SumAsync(e => e.Amount);
-
-            // 3. Giá vốn hàng bán (COGS) - Giả định lấy từ giá nhập của sản phẩm trong đơn hàng
-            // Ở đây tôi tạm tính COGS = 70% Doanh thu nếu chưa có bảng giá vốn chi tiết
             var cogs = totalRevenue * 0.7m;
-
-            // 4. Tiền đang treo (Pending)
             var pendingAmount = await _context.OutputOrders
                 .Where(o => o.StatusId == "Pending" || o.StatusId == "WaitingForPayment")
                 .SelectMany(o => o.OutputInfos)
                 .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0));
-
             return new DashboardSummaryDto
             {
                 TotalRevenue = totalRevenue,
                 NetProfit = totalRevenue - cogs - totalExpenses,
                 PendingAmount = pendingAmount,
-                AlertsCount = 0, // Sẽ tính toán dựa trên logic rào chắn
+                AlertsCount = 0,
                 MonthAchieved = totalRevenue,
-                MonthTarget = 1000000000m, // Ví dụ 1 tỷ
+                MonthTarget = 1000000000m,
                 MonthRemaining = 1000000000m - totalRevenue,
-                MonthForecast = totalRevenue * 1.2m // Giả định dự báo
+                MonthForecast = totalRevenue * 1.2m
             };
         }
 
@@ -59,19 +47,15 @@ namespace Infrastructure.Repositories
         {
             var start = new DateTime(year, month, 1);
             var end = start.AddMonths(1).AddDays(-1);
-
             var revenue = await _context.OutputOrders
                 .Where(o => o.CreatedAt >= start && o.CreatedAt <= end && o.StatusId == "Completed")
                 .SelectMany(o => o.OutputInfos)
                 .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0));
-
             var expenses = await _context.Expenses
                 .Where(e => e.ExpenseDate >= start && e.ExpenseDate <= end)
                 .ToListAsync();
-
             var totalExpenses = expenses.Sum(e => e.Amount);
             var cogs = revenue * 0.7m;
-
             return new PnlReportDto
             {
                 Period = $"Tháng {month}/{year}",
@@ -80,11 +64,14 @@ namespace Infrastructure.Repositories
                 TotalOperatingExpenses = totalExpenses,
                 GrossProfit = revenue - cogs,
                 NetProfit = revenue - cogs - totalExpenses,
-                ExpenseDetails = expenses.Select(e => new ExpenseDetailDto
-                {
-                    Category = e.Category == ExpenseCategory.Fixed ? "Cố định" : "Biến đổi",
-                    Amount = e.Amount
-                }).ToList()
+                ExpenseDetails =
+                    expenses.Select(
+                        e => new ExpenseDetailDto
+                        {
+                            Category = e.Category == ExpenseCategory.Fixed ? "Cố định" : "Biến đổi",
+                            Amount = e.Amount
+                        })
+                        .ToList()
             };
         }
 
@@ -92,56 +79,70 @@ namespace Infrastructure.Repositories
         {
             var staffSales = await _context.EmployeeProfiles
                 .Include(e => e.User)
-                .Select(e => new
-                {
-                    FullName = e.User.FullName ?? e.User.UserName,
-                    Role = e.JobTitle,
-                    Sales = _context.OutputOrders
-                        .Where(o => o.FinishedBy == e.User.Id && o.CreatedAt >= start && o.CreatedAt <= end && o.StatusId == "Completed")
-                        .SelectMany(o => o.OutputInfos)
-                        .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0))
-                })
+                .Select(
+                    e => new
+                    {
+                        FullName = e.User.FullName ?? e.User.UserName,
+                        Role = e.JobTitle,
+                        Sales = _context.OutputOrders
+                            .Where(
+                                o => o.FinishedBy == e.User.Id &&
+                                        o.CreatedAt >= start &&
+                                        o.CreatedAt <= end &&
+                                        o.StatusId == "Completed")
+                            .SelectMany(o => o.OutputInfos)
+                            .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0))
+                    })
                 .ToListAsync();
-
-            return staffSales.Select(s => new StaffPerformanceDto
-            {
-                EmployeeName = s.FullName ?? string.Empty,
-                Role = s.Role ?? string.Empty,
-                TotalSales = s.Sales,
-                CommissionPaid = s.Sales * 0.02m, // Giả định 2% hoa hồng
-                KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện")
-            }).ToList();
+            return staffSales.Select(
+                s => new StaffPerformanceDto
+                {
+                    EmployeeName = s.FullName ?? string.Empty,
+                    Role = s.Role ?? string.Empty,
+                    TotalSales = s.Sales,
+                    CommissionPaid = s.Sales * 0.02m,
+                    KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện")
+                })
+                .ToList();
         }
 
         public async Task<List<TransactionLogDto>> GetRecentTransactionsAsync(int limit = 50)
         {
-            // Gộp đơn hàng và chi phí vào một luồng timeline
             var orders = await _context.OutputOrders
                 .OrderByDescending(o => o.CreatedAt)
                 .Take(limit)
-                .Select(o => new TransactionLogDto
-                {
-                    Timestamp = o.CreatedAt.HasValue ? o.CreatedAt.Value.DateTime : DateTime.MinValue,
-                    CustomerName = o.CustomerName ?? string.Empty,
-                    ProductName = o.OutputInfos.Select(oi => oi.ProductVariant != null && oi.ProductVariant.Product != null ? oi.ProductVariant.Product.Name : "N/A").FirstOrDefault() ?? "N/A",
-                    Amount = o.OutputInfos.Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
-                    IsRevenue = true,
-                    StaffName = "N/A"
-                }).ToListAsync();
-
+                .Select(
+                    o => new TransactionLogDto
+                    {
+                        Timestamp = o.CreatedAt.HasValue ? o.CreatedAt.Value.DateTime : DateTime.MinValue,
+                        CustomerName = o.CustomerName ?? string.Empty,
+                        ProductName =
+                            o.OutputInfos
+                                        .Select(
+                                            oi => oi.ProductVariant != null && oi.ProductVariant.Product != null
+                                                            ? oi.ProductVariant.Product.Name
+                                                            : "N/A")
+                                        .FirstOrDefault() ??
+                                    "N/A",
+                        Amount = o.OutputInfos.Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
+                        IsRevenue = true,
+                        StaffName = "N/A"
+                    })
+                .ToListAsync();
             var expenses = await _context.Expenses
                 .OrderByDescending(e => e.ExpenseDate)
                 .Take(limit)
-                .Select(e => new TransactionLogDto
-                {
-                    Timestamp = e.ExpenseDate,
-                    CustomerName = "Hệ thống",
-                    ProductName = e.Name,
-                    Amount = e.Amount,
-                    IsRevenue = false,
-                    StaffName = "Admin"
-                }).ToListAsync();
-
+                .Select(
+                    e => new TransactionLogDto
+                    {
+                        Timestamp = e.ExpenseDate,
+                        CustomerName = "Hệ thống",
+                        ProductName = e.Name,
+                        Amount = e.Amount,
+                        IsRevenue = false,
+                        StaffName = "Admin"
+                    })
+                .ToListAsync();
             return orders.Concat(expenses).OrderByDescending(t => t.Timestamp).ToList();
         }
     }

@@ -1,5 +1,6 @@
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Domain.Constants;
+using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
 using System.Linq.Expressions;
@@ -58,8 +59,16 @@ public interface IInventoryReceiptReadRepository
         int? colorId,
         CancellationToken cancellationToken);
 
-    public Task<List<Domain.Entities.InventoryReceiptAuditLog>> GetAuditLogsAsync(int inventoryReceiptId, CancellationToken cancellationToken);
-    public Task<List<Domain.Entities.InventoryReceiptInfoAuditLog>> GetInfoAuditLogsAsync(int inventoryReceiptId, CancellationToken cancellationToken);
-    public Task<List<Domain.Entities.VehicleAuditLog>> GetVehicleAuditLogsAsync(int inventoryReceiptId, CancellationToken cancellationToken);
+    public Task<List<InventoryReceiptAuditLog>> GetAuditLogsAsync(
+        int inventoryReceiptId,
+        CancellationToken cancellationToken);
+
+    public Task<List<InventoryReceiptInfoAuditLog>> GetInfoAuditLogsAsync(
+        int inventoryReceiptId,
+        CancellationToken cancellationToken);
+
+    public Task<List<VehicleAuditLog>> GetVehicleAuditLogsAsync(
+        int inventoryReceiptId,
+        CancellationToken cancellationToken);
 }
 

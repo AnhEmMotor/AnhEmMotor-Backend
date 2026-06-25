@@ -8,9 +8,9 @@ using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using Sieve.Models;
 
 namespace WebAPI.Controllers.V1;
 
@@ -29,7 +29,9 @@ public class FinanceContractsController(ISender sender) : ApiController
     /// </summary>
     [HttpGet]
     [SwaggerOperation(Summary = "Get Finance Contracts List")]
-    public async Task<IActionResult> GetFinanceContractsList([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetFinanceContractsList(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetFinanceContractsListQuery { SieveModel = sieveModel };
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
@@ -41,9 +43,13 @@ public class FinanceContractsController(ISender sender) : ApiController
     /// </summary>
     [HttpGet("{financeContractId:guid}")]
     [SwaggerOperation(Summary = "Get Finance Contract Detail")]
-    public async Task<IActionResult> GetFinanceContractDetail([FromRoute] Guid financeContractId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetFinanceContractDetail(
+        [FromRoute] Guid financeContractId,
+        CancellationToken cancellationToken)
     {
-        var query = new GetFinanceContractDetailQuery(new GetFinanceContractDetailRequest(financeContractId), Guid.Empty);
+        var query = new GetFinanceContractDetailQuery(
+            new GetFinanceContractDetailRequest(financeContractId),
+            Guid.Empty);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
@@ -58,14 +64,9 @@ public class FinanceContractsController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         await sender.Send(
-            new UpdateDisbursementPaymentCommand(
-                financeContractId,
-                request,
-                Guid.Empty
-            ),
-            cancellationToken
-        ).ConfigureAwait(false);
-
+            new UpdateDisbursementPaymentCommand(financeContractId, request, Guid.Empty),
+            cancellationToken)
+            .ConfigureAwait(false);
         return Ok(new { success = true });
     }
 
@@ -78,15 +79,8 @@ public class FinanceContractsController(ISender sender) : ApiController
         [FromBody] UpdateCavetStateRequest request,
         CancellationToken cancellationToken)
     {
-        await sender.Send(
-            new UpdateCavetStateCommand(
-                financeContractId,
-                request,
-                Guid.Empty
-            ),
-            cancellationToken
-        ).ConfigureAwait(false);
-
+        await sender.Send(new UpdateCavetStateCommand(financeContractId, request, Guid.Empty), cancellationToken)
+            .ConfigureAwait(false);
         return Ok(new { success = true });
     }
 
@@ -99,8 +93,8 @@ public class FinanceContractsController(ISender sender) : ApiController
         [FromForm] IFormFile file,
         CancellationToken cancellationToken)
     {
-        if (file == null) return BadRequest(new { success = false, message = "File is required" });
-
+        if (file == null)
+            return BadRequest(new { success = false, message = "File is required" });
         using var stream = file.OpenReadStream();
         await sender.Send(
             new UploadDisbursementEvidenceCommand(

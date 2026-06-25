@@ -18,7 +18,6 @@ public class UploadNewsContentImageCommandHandler(
         {
             return new UploadNewsContentImageResponse { Errno = 1, Message = "File không hợp lệ." };
         }
-
         using var stream = request.File.OpenReadStream();
         var result = await fileInsertService.SaveFileAsync(stream, cancellationToken, "articles/content")
             .ConfigureAwait(false);
@@ -27,13 +26,11 @@ public class UploadNewsContentImageCommandHandler(
             return new UploadNewsContentImageResponse { Errno = 1, Message = result.Error?.Message ?? "Upload failed" };
         }
         var publicPath = $"/{result.Value.StoragePath}";
-        
         var requestObj = httpContextAccessor.HttpContext?.Request;
-        var baseUrl = requestObj != null 
-            ? $"{requestObj.Scheme}://{requestObj.Host}{requestObj.PathBase}" 
+        var baseUrl = requestObj != null
+            ? $"{requestObj.Scheme}://{requestObj.Host}{requestObj.PathBase}"
             : string.Empty;
         var fullUrl = string.IsNullOrWhiteSpace(baseUrl) ? publicPath : $"{baseUrl}{publicPath}";
-
         return new UploadNewsContentImageResponse
         {
             Errno = 0,

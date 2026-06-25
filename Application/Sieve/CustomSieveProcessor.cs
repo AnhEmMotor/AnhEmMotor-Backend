@@ -103,19 +103,17 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Vehicle>(v => v.LicensePlate).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.PurchaseDate).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.Lead!.FullName).CanSort().CanFilter().HasName("FullName");
-mapper.Property<Vehicle>(v => v.Lead!.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
-mapper.Property<FinanceContract>(p => p.ContractNumber).CanSort().CanFilter();
-mapper.Property<FinanceContract>(p => p.DisbursementStatus).CanSort().CanFilter();
-mapper.Property<FinanceContract>(p => p.BankName).CanSort().CanFilter();
-mapper.Property<FinanceContract>(p => p.CavetLocation).CanSort().CanFilter();
-
+        mapper.Property<Vehicle>(v => v.Lead!.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
+        mapper.Property<FinanceContract>(p => p.ContractNumber).CanSort().CanFilter();
+        mapper.Property<FinanceContract>(p => p.DisbursementStatus).CanSort().CanFilter();
+        mapper.Property<FinanceContract>(p => p.BankName).CanSort().CanFilter();
+        mapper.Property<FinanceContract>(p => p.CavetLocation).CanSort().CanFilter();
         mapper.Property<SupplierContract>(p => p.ContractNumber).CanSort().CanFilter();
         mapper.Property<SupplierContract>(p => p.Status).CanSort().CanFilter();
         mapper.Property<SupplierContract>(p => p.Supplier!.Name).CanFilter().HasName("Supplier.Name");
         mapper.Property<SupplierContract>(p => p.EffectiveDate).CanSort().CanFilter();
         mapper.Property<SupplierContract>(p => p.ExpirationDate).CanSort().CanFilter();
         mapper.Property<SupplierContract>(p => p.ContractValue).CanSort().CanFilter();
-
         mapper.Property<SalesContract>(p => p.ContractNumber).CanSort().CanFilter();
         mapper.Property<SalesContract>(p => p.Status).CanSort().CanFilter();
         mapper.Property<SalesContract>(p => p.VehicleModel).CanSort().CanFilter();
@@ -124,7 +122,6 @@ mapper.Property<FinanceContract>(p => p.CavetLocation).CanSort().CanFilter();
         mapper.Property<SalesContract>(p => p.CustomerPhone).CanFilter();
         mapper.Property<SalesContract>(p => p.FrameNumber).CanFilter();
         mapper.Property<SalesContract>(p => p.EngineNumber).CanFilter();
-
         mapper.Property<Vehicle>(v => v.Lead!.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
         mapper.Property<Lead>(l => l.Id).CanSort().CanFilter();
         mapper.Property<Lead>(l => l.FullName).CanSort().CanFilter();

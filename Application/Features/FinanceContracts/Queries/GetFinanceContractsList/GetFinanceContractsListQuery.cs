@@ -1,6 +1,5 @@
 using Application.ApiContracts.FinanceContract.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.FinanceContract;
 using Domain.Primitives;
 using MediatR;
 using Sieve.Models;

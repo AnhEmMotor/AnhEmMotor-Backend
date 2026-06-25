@@ -11,7 +11,9 @@ namespace Application.Features.DebtPayments.Queries.GetSupplierDebtLogs
             GetSupplierDebtLogsQuery request,
             CancellationToken cancellationToken)
         {
-            var logs = await supplierDebtRepository.GetSupplierDebtLogsBySupplierIdAsync(request.SupplierId, cancellationToken);
+            var logs = await supplierDebtRepository.GetSupplierDebtLogsBySupplierIdAsync(
+                request.SupplierId,
+                cancellationToken);
             return Result<List<SupplierDebtLog>>.Success(logs);
         }
     }

@@ -3,7 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.FinanceContract;
 using Domain.Primitives;
 using MediatR;
-using Sieve.Models;
 
 namespace Application.Features.FinanceContracts.Queries.GetFinanceContractsList;
 
@@ -19,7 +18,6 @@ public sealed class GetFinanceContractsListQueryHandler(
             .GetPagedAsync<FinanceContractDetailResponse>(
                 request.SieveModel ?? new(),
                 cancellationToken: cancellationToken);
-
         return Result<PagedResult<FinanceContractDetailResponse>>.Success(result);
     }
 }

@@ -6,6 +6,7 @@ using Application.Features.Contacts.Commands.CreateJobApplication;
 using Application.Features.Contacts.Commands.CreateSupportRequest;
 using Application.Features.Contacts.Commands.UpdateContactStatus;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
+using Application.Features.Contacts.Commands.UploadCv;
 using Application.Features.Contacts.Queries.GetContacts;
 using Application.Features.Contacts.Queries.GetPaginatedContacts;
 using Asp.Versioning;
@@ -14,8 +15,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using Microsoft.AspNetCore.Http;
+
 namespace WebAPI.Controllers.V1;
+
 /// <summary>
 /// Controller quản lý liên hệ khách hàng (Support, Feedback, JobApplication).
 /// </summary>
@@ -30,7 +32,7 @@ public class ContactsController(ISender sender) : ApiController
     /// </summary>
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> CreateAsync(Application.Features.Contacts.Commands.CreateContact.CreateContactCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateAsync(CreateContactCommand command, CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
@@ -41,7 +43,9 @@ public class ContactsController(ISender sender) : ApiController
     /// </summary>
     [HttpPost("support-request")]
     [AllowAnonymous]
-    public async Task<IActionResult> CreateSupportRequestAsync(CreateSupportRequestCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateSupportRequestAsync(
+        CreateSupportRequestCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
@@ -54,7 +58,7 @@ public class ContactsController(ISender sender) : ApiController
     [Authorize]
     public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new Application.Features.Contacts.Queries.GetContacts.GetContactsQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetContactsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -63,7 +67,9 @@ public class ContactsController(ISender sender) : ApiController
     /// </summary>
     [HttpPost("feedback")]
     [AllowAnonymous]
-    public async Task<IActionResult> CreateFeedbackAsync(CreateFeedbackCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateFeedbackAsync(
+        CreateFeedbackCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -74,7 +80,9 @@ public class ContactsController(ISender sender) : ApiController
     /// </summary>
     [HttpPost("job-application")]
     [AllowAnonymous]
-    public async Task<IActionResult> CreateJobApplicationAsync(CreateJobApplicationCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateJobApplicationAsync(
+        CreateJobApplicationCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -91,13 +99,7 @@ public class ContactsController(ISender sender) : ApiController
         {
             return BadRequest("File is empty.");
         }
-
-        var command = new Application.Features.Contacts.Commands.UploadCv.UploadCvCommand
-        {
-            FileContent = file.OpenReadStream(),
-            FileName = file.FileName
-        };
-
+        var command = new UploadCvCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -107,7 +109,12 @@ public class ContactsController(ISender sender) : ApiController
     /// </summary>
     [HttpGet("paginated")]
     [Authorize]
-    public async Task<IActionResult> GetPaginatedAsync([FromQuery] string? contactType, [FromQuery] string? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetPaginatedAsync(
+        [FromQuery] string? contactType,
+        [FromQuery] string? status,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
         var query = new GetPaginatedContactsQuery(contactType, status, page, pageSize);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
@@ -119,20 +126,23 @@ public class ContactsController(ISender sender) : ApiController
     /// </summary>
     [HttpPatch("{id:int}/status")]
     [Authorize]
-    public async Task<IActionResult> UpdateStatusAsync(int id, [FromQuery] string contactType, UpdateContactStatusRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateStatusAsync(
+        int id,
+        [FromQuery] string contactType,
+        UpdateContactStatusRequest request,
+        CancellationToken cancellationToken)
     {
         var command = new UpdateContactStatusCommand(contactType, id, request);
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
-
     /// <summary>
     /// Phản hồi yêu cầu liên hệ.
     /// </summary>
     [HttpPost("reply")]
     [Authorize]
-    public async Task<IActionResult> ReplyAsync(Application.Features.Contacts.Commands.CreateContactReply.CreateContactReplyCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> ReplyAsync(CreateContactReplyCommand command, CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
@@ -143,7 +153,9 @@ public class ContactsController(ISender sender) : ApiController
     /// </summary>
     [HttpPatch("internal-note")]
     [Authorize]
-    public async Task<IActionResult> UpdateInternalNoteAsync(Application.Features.Contacts.Commands.UpdateInternalNote.UpdateInternalNoteCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateInternalNoteAsync(
+        UpdateInternalNoteCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);

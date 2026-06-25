@@ -1,10 +1,9 @@
 using Application.Features.Statistical.Queries.GetWorkshopDashboard;
-using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Threading.Tasks;
 
-namespace WebAPI.Controllers;
+namespace WebAPI.Controllers.V1;
 
 [ApiController]
 [Route("api/workshop/dashboard")]

@@ -39,15 +39,17 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
             var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
             var variantDict = variants.ToDictionary(v => v.Id);
-
             var supplierIds = request.Items
                 .Where(x => x.SupplierId.HasValue)
                 .Select(x => x.SupplierId!.Value)
                 .Distinct()
                 .ToList();
-            var suppliers = await supplierReadRepository.GetByIdAsync(supplierIds, cancellationToken, DataFetchMode.ActiveOnly).ConfigureAwait(false);
+            var suppliers = await supplierReadRepository.GetByIdAsync(
+                supplierIds,
+                cancellationToken,
+                DataFetchMode.ActiveOnly)
+                .ConfigureAwait(false);
             var supplierDict = suppliers.ToDictionary(s => s.Id, s => s.Name);
-
             foreach (var item in request.Items)
             {
                 if (!item.ProductVariantId.HasValue)
@@ -109,10 +111,9 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
                         })]
             };
             insertRepository.Add(purchaseRequest);
-
-            var auditLogs = new List<Domain.Entities.PurchaseRequestAuditLog>
+            var auditLogs = new List<PurchaseRequestAuditLog>
             {
-                new Domain.Entities.PurchaseRequestAuditLog
+                new PurchaseRequestAuditLog
                 {
                     PurchaseRequest = purchaseRequest,
                     Action = "Add",
@@ -123,19 +124,24 @@ namespace Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest
                 }
             };
             await insertRepository.InsertAuditLogsAsync(auditLogs, cancellationToken).ConfigureAwait(false);
-
-            var itemAuditLogs = purchaseRequest.PurchaseRequestItems.Select(item => new Domain.Entities.PurchaseRequestItemAuditLog
-            {
-                PurchaseRequestItem = item,
-                Action = "Add",
-                NewQuantity = item.Quantity,
-                NewProductVariantId = item.ProductVariantId,
-                NewProductVariantColorId = item.ProductVariantColorId,
-                NewSupplierName = item.SupplierId.HasValue && supplierDict.TryGetValue(item.SupplierId.Value, out var supplierName) ? supplierName : null,
-                NewUnitPrice = item.UnitPrice
-            }).ToList();
+            var itemAuditLogs = purchaseRequest.PurchaseRequestItems
+                .Select(
+                    item => new PurchaseRequestItemAuditLog
+                    {
+                        PurchaseRequestItem = item,
+                        Action = "Add",
+                        NewQuantity = item.Quantity,
+                        NewProductVariantId = item.ProductVariantId,
+                        NewProductVariantColorId = item.ProductVariantColorId,
+                        NewSupplierName =
+                            item.SupplierId.HasValue &&
+                                        supplierDict.TryGetValue(item.SupplierId.Value, out var supplierName)
+                                    ? supplierName
+                                    : null,
+                        NewUnitPrice = item.UnitPrice
+                    })
+                .ToList();
             await insertRepository.InsertItemAuditLogsAsync(itemAuditLogs, cancellationToken).ConfigureAwait(false);
-
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             var created = await readRepository.GetByIdWithDetailsAsync(purchaseRequest.Id, cancellationToken)
                 .ConfigureAwait(false);

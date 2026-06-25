@@ -70,9 +70,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     [HasPermission(SupplierContracts.View)]
     [ProducesResponseType(typeof(SupplierContractDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetSupplierContractByIdAsync(
-        Guid id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetSupplierContractByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetSupplierContractByIdQuery(id);
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -85,9 +83,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     [HttpGet("{id:guid}/audit-logs")]
     [HasPermission(SupplierContracts.View)]
     [ProducesResponseType(typeof(List<SupplierContractAuditLogResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetSupplierContractAuditLogsAsync(
-        Guid id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetSupplierContractAuditLogsAsync(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetSupplierContractAuditLogsQuery { SupplierContractId = id };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -135,9 +131,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     [HasPermission(SupplierContracts.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteSupplierContractAsync(
-        Guid id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteSupplierContractAsync(Guid id, CancellationToken cancellationToken)
     {
         var command = new DeleteSupplierContractCommand(id);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
@@ -150,9 +144,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     [HttpPost("restore/{id:guid}")]
     [HasPermission(SupplierContracts.Delete)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RestoreSupplierContractAsync(
-        Guid id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> RestoreSupplierContractAsync(Guid id, CancellationToken cancellationToken)
     {
         var command = new RestoreSupplierContractCommand(id);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
@@ -165,8 +157,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     [HttpGet("statistics")]
     [RequiresAnyPermissions(Suppliers.View, SupplierContracts.View)]
     [ProducesResponseType(typeof(SupplierContractStatisticsResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetSupplierContractStatisticsAsync(
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetSupplierContractStatisticsAsync(CancellationToken cancellationToken)
     {
         var query = new GetSupplierContractStatisticsQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -181,14 +172,10 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<object>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersForSelectAsync(CancellationToken cancellationToken)
     {
-        var query = new Application.Features.Suppliers.Queries.GetSuppliersList.GetSuppliersListQuery
-        {
-            SieveModel = new SieveModel { PageSize = 1000, Page = 1 }
-        };
+        var query = new GetSuppliersListQuery { SieveModel = new SieveModel { PageSize = 1000, Page = 1 } };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         if (!result.IsSuccess || result.Value?.Items == null)
             return Ok(new List<object>());
-
         var selectList = result.Value.Items.Select(s => new { id = s.Id, name = s.Name }).Cast<object>().ToList();
         return Ok(selectList);
     }

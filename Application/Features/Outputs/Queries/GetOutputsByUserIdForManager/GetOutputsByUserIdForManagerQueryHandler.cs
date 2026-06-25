@@ -19,7 +19,6 @@ public sealed class GetOutputsByUserIdForManagerQueryHandler(IOutputReadReposito
             x => x.BuyerId == request.BuyerId,
             cancellationToken)
             .ConfigureAwait(false);
-
         return result;
     }
 }

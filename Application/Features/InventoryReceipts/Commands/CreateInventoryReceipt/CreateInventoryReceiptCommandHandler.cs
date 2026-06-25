@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
-using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
@@ -85,7 +84,8 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                 ? prItem2.ProductVariantColorId
                 : (int?)null;
             var resolvedSupplierId = product.PurchaseRequestItemId.HasValue &&
-                    prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItm) && prItm.SupplierId.HasValue
+                    prItemsDict.TryGetValue(product.PurchaseRequestItemId.Value, out var prItm) &&
+                    prItm.SupplierId.HasValue
                 ? prItm.SupplierId
                 : (int?)null;
             if (resolvedVariantId.HasValue)
@@ -238,7 +238,6 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                 : (int?)null;
             var inventoryReceiptInfo = p.Adapt<InventoryReceiptInfoEntity>();
             inventoryReceiptInfo.RemainingCount = p.Count ?? 0;
-
             if (resolvedVariantId.HasValue && variantMap.TryGetValue(resolvedVariantId.Value, out var variant))
             {
                 var managementType = variant.Product?.ProductCategory?.ManagementType;
@@ -294,11 +293,10 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
         }
         inventoryReceipt.InventoryReceiptInfos = inventoryReceiptInfos;
         insertRepository.Add(inventoryReceipt);
-
         var currentUserId = currentUserContext?.GetUserId();
-        var receiptAuditLogs = new List<Domain.Entities.InventoryReceiptAuditLog>
+        var receiptAuditLogs = new List<InventoryReceiptAuditLog>
         {
-            new Domain.Entities.InventoryReceiptAuditLog
+            new InventoryReceiptAuditLog
             {
                 InventoryReceipt = inventoryReceipt,
                 Action = "Add",
@@ -308,42 +306,41 @@ public sealed partial class CreateInventoryReceiptCommandHandler(
                 NewNotes = inventoryReceipt.Notes
             }
         };
-
-        var infoAuditLogs = new List<Domain.Entities.InventoryReceiptInfoAuditLog>();
-        var vehicleAuditLogs = new List<Domain.Entities.VehicleAuditLog>();
+        var infoAuditLogs = new List<InventoryReceiptInfoAuditLog>();
+        var vehicleAuditLogs = new List<VehicleAuditLog>();
         foreach (var info in inventoryReceiptInfos)
         {
-            infoAuditLogs.Add(new Domain.Entities.InventoryReceiptInfoAuditLog
-            {
-                InventoryReceiptInfo = info,
-                Action = "Add",
-                NewQuantity = info.Count
-            });
-
+            infoAuditLogs.Add(
+                new InventoryReceiptInfoAuditLog
+                {
+                    InventoryReceiptInfo = info,
+                    Action = "Add",
+                    NewQuantity = info.Count
+                });
             if (info.Vehicles != null)
             {
                 foreach (var v in info.Vehicles)
                 {
-                    vehicleAuditLogs.Add(new Domain.Entities.VehicleAuditLog
-                    {
-                        Vehicle = v,
-                        Action = "Add",
-                        ChangedById = currentUserId,
-                        ChangedAt = DateTimeOffset.UtcNow,
-                        NewVinNumber = v.VinNumber,
-                        NewEngineNumber = v.EngineNumber
-                    });
+                    vehicleAuditLogs.Add(
+                        new VehicleAuditLog
+                        {
+                            Vehicle = v,
+                            Action = "Add",
+                            ChangedById = currentUserId,
+                            ChangedAt = DateTimeOffset.UtcNow,
+                            NewVinNumber = v.VinNumber,
+                            NewEngineNumber = v.EngineNumber
+                        });
                 }
             }
         }
-
         await insertRepository.InsertAuditLogsAsync(receiptAuditLogs, cancellationToken).ConfigureAwait(false);
         await insertRepository.InsertInfoAuditLogsAsync(infoAuditLogs, cancellationToken).ConfigureAwait(false);
         if (vehicleAuditLogs.Any())
         {
-            await vehicleUpdateRepository.InsertAuditLogsAsync(vehicleAuditLogs, cancellationToken).ConfigureAwait(false);
+            await vehicleUpdateRepository.InsertAuditLogsAsync(vehicleAuditLogs, cancellationToken)
+                .ConfigureAwait(false);
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var created = await readRepository.GetByIdWithDetailsAsync(inventoryReceipt.Id, cancellationToken)
             .ConfigureAwait(false);

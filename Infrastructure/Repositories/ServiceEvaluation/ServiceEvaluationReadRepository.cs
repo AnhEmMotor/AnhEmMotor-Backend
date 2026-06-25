@@ -46,7 +46,9 @@ public class ServiceEvaluationReadRepository(ApplicationDBContext dbContext, ISi
                     Criteria = e.Criteria,
                     ProcessingStatus = e.ProcessingStatus,
                     TechnicianName =
-                        e.ServiceBooking.Technician != null && e.ServiceBooking.Technician.User != null ? e.ServiceBooking.Technician.User.UserName : null,
+                        e.ServiceBooking.Technician != null && e.ServiceBooking.Technician.User != null
+                                ? e.ServiceBooking.Technician.User.UserName
+                                : null,
                     RepairOrderCode = null,
                 })
             .ToListAsync(cancellationToken)

@@ -49,8 +49,7 @@ public class FileReadService : IFileReadService
         if (!System.IO.File.Exists(fullPath))
             return null;
         var fileBytes = await System.IO.File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);
-
-        var extension = System.IO.Path.GetExtension(storagePath).ToLower();
+        var extension = Path.GetExtension(storagePath).ToLower();
         var contentType = extension switch
         {
             ".pdf" => "application/pdf",
@@ -62,7 +61,6 @@ public class FileReadService : IFileReadService
             ".gif" => "image/gif",
             _ => "application/octet-stream"
         };
-
         return (fileBytes, contentType);
     }
 

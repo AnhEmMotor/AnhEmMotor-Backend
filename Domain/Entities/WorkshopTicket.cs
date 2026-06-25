@@ -1,6 +1,6 @@
+using Domain.Constants.Workshop;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Constants.Workshop;
 
 namespace Domain.Entities;
 
@@ -14,11 +14,13 @@ public class WorkshopTicket : BaseEntity
     [Column("VehicleId")]
     [ForeignKey("Vehicle")]
     public int VehicleId { get; set; }
+
     public Vehicle Vehicle { get; set; } = null!;
 
     [Column("TechnicianId")]
     [ForeignKey("Technician")]
     public Guid? TechnicianId { get; set; }
+
     public ApplicationUser? Technician { get; set; }
 
     [Column("Status")]
@@ -42,6 +44,7 @@ public class WorkshopTicket : BaseEntity
     [Column("OutputId")]
     [ForeignKey("OutputOrder")]
     public int? OutputId { get; set; }
+
     public Output? OutputOrder { get; set; }
 
     public ICollection<WorkshopTicketItem> TicketItems { get; set; } = [];

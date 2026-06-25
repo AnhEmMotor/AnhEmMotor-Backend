@@ -1,8 +1,8 @@
 using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Common.Models;
+using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
-using Domain.Primitives;
 
 namespace Application.Features.PurchaseRequests.Queries.GetDeletedPurchaseRequestsList;
 

@@ -96,12 +96,8 @@ public class CreateOutputCommandHandler(
             {
                 continue;
             }
-            var nameParts = new[]
-            {
-                variant.Product?.Name,
-                variant.VariantName,
-                color?.ColorName ?? color?.ColorCode
-            }.Where(part => !string.IsNullOrWhiteSpace(part));
+            var nameParts = new[] { variant.Product?.Name, variant.VariantName, color?.ColorName ?? color?.ColorCode }.Where(
+                part => !string.IsNullOrWhiteSpace(part));
             errors.Add(
                 Error.BadRequest(
                     $"Số lượng mua tối đa cho sản phẩm '{string.Join(" - ", nameParts)}' là {effectiveMax.Value} sản phẩm.",
@@ -138,8 +134,7 @@ public class CreateOutputCommandHandler(
         if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
         {
             output.DepositRatio = parsedRatio;
-        }
-        else
+        } else
         {
             output.DepositRatio = 50;
         }
@@ -179,9 +174,7 @@ public class CreateOutputCommandHandler(
 
     private static int? NormalizeColorId(int? productVariantColorId)
     {
-        return productVariantColorId.HasValue && productVariantColorId.Value > 0
-            ? productVariantColorId.Value
-            : null;
+        return productVariantColorId.HasValue && productVariantColorId.Value > 0 ? productVariantColorId.Value : null;
     }
 
     private static int? GetEffectiveMaxPurchaseQuantity(ProductVariant variant, ProductVariantColor? color)

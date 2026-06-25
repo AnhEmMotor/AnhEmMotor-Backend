@@ -20,14 +20,12 @@ public sealed class GetOutputsForCurrentUserQueryHandler(
         CancellationToken cancellationToken)
     {
         var buyerId = currentUserContext.GetUserId();
-
         var pagedResult = await outputReadRepository.GetPagedAsync<MyOrderResponse>(
             request.SieveModel!,
             DataFetchMode.ActiveOnly,
             o => o.BuyerId == buyerId,
             cancellationToken)
             .ConfigureAwait(false);
-
         if (pagedResult.Items?.Any(i => i.DepositRatio == null) == true)
         {
             var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
@@ -45,7 +43,6 @@ public sealed class GetOutputsForCurrentUserQueryHandler(
                 item.RemainingAmount ??= item.Total - (item.DepositAmount ?? 0);
             }
         }
-
         return pagedResult;
     }
 }

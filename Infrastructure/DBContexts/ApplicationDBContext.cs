@@ -201,6 +201,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<SupplierFinance> SupplierFinances { get; set; }
 
     public virtual DbSet<SupplierDebtSettlement> SupplierDebtSettlements { get; set; }
+
     public virtual DbSet<SupplierDebtLog> SupplierDebtLogs { get; set; }
 
     public virtual DbSet<InventoryReceiptAuditLog> InventoryReceiptAuditLogs { get; set; }
@@ -556,8 +557,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<InventoryOnHand>()
             .HasIndex(i => new { i.ProductVariantId, i.ProductVariantColorId, i.Month, i.Year })
             .IsUnique();
-        modelBuilder.Entity<InventoryOnHand>()
-            .HasIndex(i => i.ProductVariantId);
+        modelBuilder.Entity<InventoryOnHand>().HasIndex(i => i.ProductVariantId);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
         if (isNotSqlServer)

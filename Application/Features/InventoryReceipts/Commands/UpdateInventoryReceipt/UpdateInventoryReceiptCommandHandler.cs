@@ -6,7 +6,6 @@ using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
-using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -259,7 +258,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         }
         var config = new TypeAdapterConfig();
         config.NewConfig<UpdateInventoryReceiptInfoRequest, InventoryReceiptInfo>().Ignore(dest => dest.Vehicles);
-        var vehicleAuditLogs = new List<Domain.Entities.VehicleAuditLog>();
+        var vehicleAuditLogs = new List<VehicleAuditLog>();
         foreach (var productRequest in request.Products)
         {
             InventoryReceiptInfo? existingInfo = null;
@@ -324,7 +323,8 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         updateRepository.Update(inventoryReceipt);
         if (vehicleAuditLogs.Any())
         {
-            await vehicleUpdateRepository.InsertAuditLogsAsync(vehicleAuditLogs, cancellationToken).ConfigureAwait(false);
+            await vehicleUpdateRepository.InsertAuditLogsAsync(vehicleAuditLogs, cancellationToken)
+                .ConfigureAwait(false);
         }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var updated = await readRepository.GetByIdWithDetailsAsync(inventoryReceipt.Id, cancellationToken)
@@ -402,7 +402,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         IVehicleUpdateRepository vehicleUpdateRepository,
         IVehicleReadRepository vehicleReadRepository,
         Guid? currentUserId,
-        List<Domain.Entities.VehicleAuditLog> vehicleAuditLogs,
+        List<VehicleAuditLog> vehicleAuditLogs,
         CancellationToken cancellationToken)
     {
         var managementType = variant?.Product?.ProductCategory?.ManagementType;
@@ -410,15 +410,16 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         {
             foreach (var vehicle in inventoryReceiptInfo.Vehicles.ToList())
             {
-                vehicleAuditLogs.Add(new Domain.Entities.VehicleAuditLog
-                {
-                    Vehicle = vehicle,
-                    Action = "Delete",
-                    ChangedById = currentUserId,
-                    ChangedAt = DateTimeOffset.UtcNow,
-                    OldVinNumber = vehicle.VinNumber,
-                    OldEngineNumber = vehicle.EngineNumber
-                });
+                vehicleAuditLogs.Add(
+                    new VehicleAuditLog
+                    {
+                        Vehicle = vehicle,
+                        Action = "Delete",
+                        ChangedById = currentUserId,
+                        ChangedAt = DateTimeOffset.UtcNow,
+                        OldVinNumber = vehicle.VinNumber,
+                        OldEngineNumber = vehicle.EngineNumber
+                    });
                 vehicleUpdateRepository.Remove(vehicle);
                 inventoryReceiptInfo.Vehicles.Remove(vehicle);
             }
@@ -431,15 +432,16 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         {
             if (!requestedIds.Contains(existingVehicle.Id))
             {
-                vehicleAuditLogs.Add(new Domain.Entities.VehicleAuditLog
-                {
-                    Vehicle = existingVehicle,
-                    Action = "Delete",
-                    ChangedById = currentUserId,
-                    ChangedAt = DateTimeOffset.UtcNow,
-                    OldVinNumber = existingVehicle.VinNumber,
-                    OldEngineNumber = existingVehicle.EngineNumber
-                });
+                vehicleAuditLogs.Add(
+                    new VehicleAuditLog
+                    {
+                        Vehicle = existingVehicle,
+                        Action = "Delete",
+                        ChangedById = currentUserId,
+                        ChangedAt = DateTimeOffset.UtcNow,
+                        OldVinNumber = existingVehicle.VinNumber,
+                        OldEngineNumber = existingVehicle.EngineNumber
+                    });
                 vehicleUpdateRepository.Remove(existingVehicle);
                 inventoryReceiptInfo.Vehicles.Remove(existingVehicle);
             }
@@ -471,31 +473,33 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     IsActive = true,
                     Status = VehicleStatus.Available
                 };
-                vehicleAuditLogs.Add(new Domain.Entities.VehicleAuditLog
-                {
-                    Vehicle = vehicle,
-                    Action = "Add",
-                    ChangedById = currentUserId,
-                    ChangedAt = DateTimeOffset.UtcNow,
-                    NewVinNumber = vehicleRequest.VinNumber.Trim(),
-                    NewEngineNumber = vehicleRequest.EngineNumber.Trim()
-                });
-            }
-            else
-            {
-                if (vehicle.VinNumber != vehicleRequest.VinNumber.Trim() || vehicle.EngineNumber != vehicleRequest.EngineNumber.Trim())
-                {
-                    vehicleAuditLogs.Add(new Domain.Entities.VehicleAuditLog
+                vehicleAuditLogs.Add(
+                    new VehicleAuditLog
                     {
                         Vehicle = vehicle,
-                        Action = "Update",
+                        Action = "Add",
                         ChangedById = currentUserId,
                         ChangedAt = DateTimeOffset.UtcNow,
-                        OldVinNumber = vehicle.VinNumber,
-                        OldEngineNumber = vehicle.EngineNumber,
                         NewVinNumber = vehicleRequest.VinNumber.Trim(),
                         NewEngineNumber = vehicleRequest.EngineNumber.Trim()
                     });
+            } else
+            {
+                if (vehicle.VinNumber != vehicleRequest.VinNumber.Trim() ||
+                    vehicle.EngineNumber != vehicleRequest.EngineNumber.Trim())
+                {
+                    vehicleAuditLogs.Add(
+                        new VehicleAuditLog
+                        {
+                            Vehicle = vehicle,
+                            Action = "Update",
+                            ChangedById = currentUserId,
+                            ChangedAt = DateTimeOffset.UtcNow,
+                            OldVinNumber = vehicle.VinNumber,
+                            OldEngineNumber = vehicle.EngineNumber,
+                            NewVinNumber = vehicleRequest.VinNumber.Trim(),
+                            NewEngineNumber = vehicleRequest.EngineNumber.Trim()
+                        });
                 }
             }
             vehicle.VinNumber = vehicleRequest.VinNumber.Trim();

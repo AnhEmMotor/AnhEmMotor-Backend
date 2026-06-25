@@ -7,6 +7,7 @@ namespace Application.Features.Statistical.Queries.GetWorkshopDashboard;
 public class GetWorkshopDashboardQuery : IRequest<WorkshopDashboardResponse>
 {
     public DateTimeOffset FromDate { get; set; }
+
     public DateTimeOffset ToDate { get; set; }
 
     public GetWorkshopDashboardQuery(DateTimeOffset fromDate, DateTimeOffset toDate)

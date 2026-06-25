@@ -31,5 +31,4 @@ public class ContactReadRepository(ApplicationDBContext context) : IContactReadR
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync(cancellationToken);
     }
-
 }

@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.ServiceBooking;
-using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -18,7 +17,6 @@ public class ServiceBookingUpdateRepository(ApplicationDBContext context) : ISer
         var booking = await context.ServiceBookings.FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         if (booking == null)
             return false;
-        // Always allow assignment or add validation here
         booking.Status = status;
         booking.CancelledReason = reason ?? string.Empty;
         booking.CancelledDate = cancelledAt;

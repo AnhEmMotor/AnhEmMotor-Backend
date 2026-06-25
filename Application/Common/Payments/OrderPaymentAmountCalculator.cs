@@ -12,11 +12,12 @@ public static class OrderPaymentAmountCalculator
         return subtotal + shippingFee;
     }
 
-    public static decimal GetDepositAmount(Output order)
-        => GetTotal(order) * (order.DepositRatio ?? 0) / 100m;
+    public static decimal GetDepositAmount(Output order) => GetTotal(order) * (order.DepositRatio ?? 0) / 100m;
 
-    public static decimal GetAmountToPay(Output order)
-        => string.Equals(order.StatusId, OrderStatus.WaitingDeposit, StringComparison.OrdinalIgnoreCase)
-            ? GetDepositAmount(order)
-            : GetTotal(order);
+    public static decimal GetAmountToPay(Output order) => string.Equals(
+            order.StatusId,
+            OrderStatus.WaitingDeposit,
+            StringComparison.OrdinalIgnoreCase)
+        ? GetDepositAmount(order)
+        : GetTotal(order);
 }

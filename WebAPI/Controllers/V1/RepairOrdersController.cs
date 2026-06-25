@@ -39,9 +39,12 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách phiếu sửa chữa có phân trang và bộ lọc.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetListAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetListAsync(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new GetRepairOrdersListQuery { SieveModel = sieveModel }, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(new GetRepairOrdersListQuery { SieveModel = sieveModel }, cancellationToken)
+                .ConfigureAwait(true);
             return HandleResult(result);
         }
 
@@ -51,7 +54,8 @@ namespace WebAPI.Controllers.V1
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetDetailAsync(int id, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new GetRepairOrderDetailQuery { Id = id }, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(new GetRepairOrderDetailQuery { Id = id }, cancellationToken)
+                .ConfigureAwait(true);
             return HandleResult(result);
         }
 
@@ -59,7 +63,9 @@ namespace WebAPI.Controllers.V1
         /// Phân công kỹ thuật viên đảm nhận.
         /// </summary>
         [HttpPost("assign-technician")]
-        public async Task<IActionResult> AssignTechnicianAsync(AssignTechnicianCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> AssignTechnicianAsync(
+            AssignTechnicianCommand command,
+            CancellationToken cancellationToken)
         {
             var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
@@ -79,7 +85,9 @@ namespace WebAPI.Controllers.V1
         /// Hoàn thành phiếu sửa chữa và lập hóa đơn dịch vụ.
         /// </summary>
         [HttpPost("complete")]
-        public async Task<IActionResult> CompleteAsync(CompleteRepairOrderCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CompleteAsync(
+            CompleteRepairOrderCommand command,
+            CancellationToken cancellationToken)
         {
             var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);

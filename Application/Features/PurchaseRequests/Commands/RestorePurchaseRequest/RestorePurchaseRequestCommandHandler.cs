@@ -13,17 +13,17 @@ public class RestorePurchaseRequestCommandHandler(
 {
     public async Task<Result<int>> Handle(RestorePurchaseRequestCommand request, CancellationToken cancellationToken)
     {
-        var purchaseRequest = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
-
+        var purchaseRequest = await readRepository.GetByIdAsync(
+            request.Id,
+            cancellationToken,
+            DataFetchMode.DeletedOnly)
+            .ConfigureAwait(false);
         if (purchaseRequest == null)
         {
             return Result<int>.Failure(Error.NotFound("Không tìm thấy yêu cầu mua hàng đã xóa."));
         }
-
         restoreRepository.Restore(purchaseRequest);
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result<int>.Success(purchaseRequest.Id);
     }
 }

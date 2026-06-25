@@ -1,5 +1,4 @@
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
 

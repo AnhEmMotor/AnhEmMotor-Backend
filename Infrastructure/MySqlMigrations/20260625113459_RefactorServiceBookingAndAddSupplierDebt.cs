@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -11,70 +11,29 @@ namespace Infrastructure.MySqlMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ServiceBookings_Users_AssignedSaleId",
-                table: "ServiceBookings");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ServiceBookings_Vehicle_VehicleId",
-                table: "ServiceBookings");
-
+            migrationBuilder.DropForeignKey(name: "FK_ServiceBookings_Users_AssignedSaleId", table: "ServiceBookings");
+            migrationBuilder.DropForeignKey(name: "FK_ServiceBookings_Vehicle_VehicleId", table: "ServiceBookings");
             migrationBuilder.DropForeignKey(
                 name: "FK_ServiceEvaluation_ServiceBookings_ServiceBookingId",
                 table: "ServiceEvaluation");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_ServiceBookings",
-                table: "ServiceBookings");
-
-            migrationBuilder.DropColumn(
-                name: "AdminNote",
-                table: "ServiceBookings");
-
-            migrationBuilder.DropColumn(
-                name: "AppointmentDate",
-                table: "ServiceBookings");
-
-            migrationBuilder.DropColumn(
-                name: "AppointmentTime",
-                table: "ServiceBookings");
-
-            migrationBuilder.DropColumn(
-                name: "CancellationReason",
-                table: "ServiceBookings");
-
-            migrationBuilder.DropColumn(
-                name: "CancelledAt",
-                table: "ServiceBookings");
-
-            migrationBuilder.DropColumn(
-                name: "CustomerNote",
-                table: "ServiceBookings");
-
-            migrationBuilder.RenameTable(
-                name: "ServiceBookings",
-                newName: "ServiceBooking");
-
-            migrationBuilder.RenameColumn(
-                name: "ServiceType",
-                table: "ServiceBooking",
-                newName: "PaymentStatus");
-
-            migrationBuilder.RenameColumn(
-                name: "AssignedSaleId",
-                table: "ServiceBooking",
-                newName: "CustomerId");
-
+            migrationBuilder.DropPrimaryKey(name: "PK_ServiceBookings", table: "ServiceBookings");
+            migrationBuilder.DropColumn(name: "AdminNote", table: "ServiceBookings");
+            migrationBuilder.DropColumn(name: "AppointmentDate", table: "ServiceBookings");
+            migrationBuilder.DropColumn(name: "AppointmentTime", table: "ServiceBookings");
+            migrationBuilder.DropColumn(name: "CancellationReason", table: "ServiceBookings");
+            migrationBuilder.DropColumn(name: "CancelledAt", table: "ServiceBookings");
+            migrationBuilder.DropColumn(name: "CustomerNote", table: "ServiceBookings");
+            migrationBuilder.RenameTable(name: "ServiceBookings", newName: "ServiceBooking");
+            migrationBuilder.RenameColumn(name: "ServiceType", table: "ServiceBooking", newName: "PaymentStatus");
+            migrationBuilder.RenameColumn(name: "AssignedSaleId", table: "ServiceBooking", newName: "CustomerId");
             migrationBuilder.RenameIndex(
                 name: "IX_ServiceBookings_VehicleId",
                 table: "ServiceBooking",
                 newName: "IX_ServiceBooking_VehicleId");
-
             migrationBuilder.RenameIndex(
                 name: "IX_ServiceBookings_AssignedSaleId",
                 table: "ServiceBooking",
                 newName: "IX_ServiceBooking_CustomerId");
-
             migrationBuilder.AlterColumn<int>(
                 name: "VehicleId",
                 table: "ServiceBooking",
@@ -82,7 +41,6 @@ namespace Infrastructure.MySqlMigrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
-
             migrationBuilder.AlterColumn<string>(
                 name: "Notes",
                 table: "ServiceBooking",
@@ -92,97 +50,71 @@ namespace Infrastructure.MySqlMigrations
                 oldType: "longtext")
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<long>(
                 name: "CancelledDate",
                 table: "ServiceBooking",
                 type: "bigint",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "CancelledReason",
                 table: "ServiceBooking",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<long>(
                 name: "CompletedDate",
                 table: "ServiceBooking",
                 type: "bigint",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "CustomerNotes",
                 table: "ServiceBooking",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<decimal>(
                 name: "DepositAmount",
                 table: "ServiceBooking",
                 type: "decimal(18,2)",
                 nullable: true);
-
             migrationBuilder.AddColumn<int>(
                 name: "EstimatedDurationMinutes",
                 table: "ServiceBooking",
                 type: "int",
                 nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "Rating",
-                table: "ServiceBooking",
-                type: "int",
-                nullable: true);
-
+            migrationBuilder.AddColumn<int>(name: "Rating", table: "ServiceBooking", type: "int", nullable: true);
             migrationBuilder.AddColumn<string>(
                 name: "Review",
                 table: "ServiceBooking",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<long>(
                 name: "ScheduledDate",
                 table: "ServiceBooking",
                 type: "bigint",
                 nullable: false,
                 defaultValue: 0L);
-
             migrationBuilder.AddColumn<int>(
                 name: "ServiceId",
                 table: "ServiceBooking",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
-                name: "TechnicianId",
-                table: "ServiceBooking",
-                type: "int",
-                nullable: true);
-
+            migrationBuilder.AddColumn<int>(name: "TechnicianId", table: "ServiceBooking", type: "int", nullable: true);
             migrationBuilder.AddColumn<string>(
                 name: "TechnicianNotes",
                 table: "ServiceBooking",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<decimal>(
                 name: "TotalAmount",
                 table: "ServiceBooking",
                 type: "decimal(18,2)",
                 nullable: false,
                 defaultValue: 0m);
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_ServiceBooking",
-                table: "ServiceBooking",
-                column: "Id");
-
+            migrationBuilder.AddPrimaryKey(name: "PK_ServiceBooking", table: "ServiceBooking", column: "Id");
             migrationBuilder.CreateTable(
                 name: "SupplierDebtSettlements",
                 columns: table => new
@@ -210,22 +142,18 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_ServiceId",
                 table: "ServiceBooking",
                 column: "ServiceId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceBooking_TechnicianId",
                 table: "ServiceBooking",
                 column: "TechnicianId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierDebtSettlements_SupplierId",
                 table: "SupplierDebtSettlements",
                 column: "SupplierId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ServiceBooking_EmployeeProfile_TechnicianId",
                 table: "ServiceBooking",
@@ -233,7 +161,6 @@ namespace Infrastructure.MySqlMigrations
                 principalTable: "EmployeeProfile",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.SetNull);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ServiceBooking_Services_ServiceId",
                 table: "ServiceBooking",
@@ -241,14 +168,12 @@ namespace Infrastructure.MySqlMigrations
                 principalTable: "Services",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ServiceBooking_Users_CustomerId",
                 table: "ServiceBooking",
                 column: "CustomerId",
                 principalTable: "Users",
                 principalColumn: "Id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ServiceBooking_Vehicle_VehicleId",
                 table: "ServiceBooking",
@@ -256,7 +181,6 @@ namespace Infrastructure.MySqlMigrations
                 principalTable: "Vehicle",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ServiceEvaluation_ServiceBooking_ServiceBookingId",
                 table: "ServiceEvaluation",
@@ -272,114 +196,40 @@ namespace Infrastructure.MySqlMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_ServiceBooking_EmployeeProfile_TechnicianId",
                 table: "ServiceBooking");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ServiceBooking_Services_ServiceId",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ServiceBooking_Users_CustomerId",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ServiceBooking_Vehicle_VehicleId",
-                table: "ServiceBooking");
-
+            migrationBuilder.DropForeignKey(name: "FK_ServiceBooking_Services_ServiceId", table: "ServiceBooking");
+            migrationBuilder.DropForeignKey(name: "FK_ServiceBooking_Users_CustomerId", table: "ServiceBooking");
+            migrationBuilder.DropForeignKey(name: "FK_ServiceBooking_Vehicle_VehicleId", table: "ServiceBooking");
             migrationBuilder.DropForeignKey(
                 name: "FK_ServiceEvaluation_ServiceBooking_ServiceBookingId",
                 table: "ServiceEvaluation");
-
-            migrationBuilder.DropTable(
-                name: "SupplierDebtSettlements");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_ServiceBooking",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ServiceBooking_ServiceId",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ServiceBooking_TechnicianId",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "CancelledDate",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "CancelledReason",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "CompletedDate",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "CustomerNotes",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "DepositAmount",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "EstimatedDurationMinutes",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "Rating",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "Review",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "ScheduledDate",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "ServiceId",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "TechnicianId",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "TechnicianNotes",
-                table: "ServiceBooking");
-
-            migrationBuilder.DropColumn(
-                name: "TotalAmount",
-                table: "ServiceBooking");
-
-            migrationBuilder.RenameTable(
-                name: "ServiceBooking",
-                newName: "ServiceBookings");
-
-            migrationBuilder.RenameColumn(
-                name: "PaymentStatus",
-                table: "ServiceBookings",
-                newName: "ServiceType");
-
-            migrationBuilder.RenameColumn(
-                name: "CustomerId",
-                table: "ServiceBookings",
-                newName: "AssignedSaleId");
-
+            migrationBuilder.DropTable(name: "SupplierDebtSettlements");
+            migrationBuilder.DropPrimaryKey(name: "PK_ServiceBooking", table: "ServiceBooking");
+            migrationBuilder.DropIndex(name: "IX_ServiceBooking_ServiceId", table: "ServiceBooking");
+            migrationBuilder.DropIndex(name: "IX_ServiceBooking_TechnicianId", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "CancelledDate", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "CancelledReason", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "CompletedDate", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "CustomerNotes", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "DepositAmount", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "EstimatedDurationMinutes", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "Rating", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "Review", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "ScheduledDate", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "ServiceId", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "TechnicianId", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "TechnicianNotes", table: "ServiceBooking");
+            migrationBuilder.DropColumn(name: "TotalAmount", table: "ServiceBooking");
+            migrationBuilder.RenameTable(name: "ServiceBooking", newName: "ServiceBookings");
+            migrationBuilder.RenameColumn(name: "PaymentStatus", table: "ServiceBookings", newName: "ServiceType");
+            migrationBuilder.RenameColumn(name: "CustomerId", table: "ServiceBookings", newName: "AssignedSaleId");
             migrationBuilder.RenameIndex(
                 name: "IX_ServiceBooking_VehicleId",
                 table: "ServiceBookings",
                 newName: "IX_ServiceBookings_VehicleId");
-
             migrationBuilder.RenameIndex(
                 name: "IX_ServiceBooking_CustomerId",
                 table: "ServiceBookings",
                 newName: "IX_ServiceBookings_AssignedSaleId");
-
             migrationBuilder.AlterColumn<int>(
                 name: "VehicleId",
                 table: "ServiceBookings",
@@ -389,14 +239,12 @@ namespace Infrastructure.MySqlMigrations
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
-
             migrationBuilder.UpdateData(
                 table: "ServiceBookings",
                 keyColumn: "Notes",
                 keyValue: null,
                 column: "Notes",
-                value: "");
-
+                value: string.Empty);
             migrationBuilder.AlterColumn<string>(
                 name: "Notes",
                 table: "ServiceBookings",
@@ -407,53 +255,42 @@ namespace Infrastructure.MySqlMigrations
                 oldNullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "AdminNote",
                 table: "ServiceBookings",
                 type: "longtext",
                 nullable: false)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<DateTime>(
                 name: "AppointmentDate",
                 table: "ServiceBookings",
                 type: "datetime(6)",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
             migrationBuilder.AddColumn<TimeSpan>(
                 name: "AppointmentTime",
                 table: "ServiceBookings",
                 type: "time(6)",
                 nullable: false,
                 defaultValue: new TimeSpan(0, 0, 0, 0, 0));
-
             migrationBuilder.AddColumn<string>(
                 name: "CancellationReason",
                 table: "ServiceBookings",
                 type: "longtext",
                 nullable: false)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<DateTime>(
                 name: "CancelledAt",
                 table: "ServiceBookings",
                 type: "datetime(6)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "CustomerNote",
                 table: "ServiceBookings",
                 type: "longtext",
                 nullable: false)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_ServiceBookings",
-                table: "ServiceBookings",
-                column: "Id");
-
+            migrationBuilder.AddPrimaryKey(name: "PK_ServiceBookings", table: "ServiceBookings", column: "Id");
             migrationBuilder.AddForeignKey(
                 name: "FK_ServiceBookings_Users_AssignedSaleId",
                 table: "ServiceBookings",
@@ -461,7 +298,6 @@ namespace Infrastructure.MySqlMigrations
                 principalTable: "Users",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.SetNull);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ServiceBookings_Vehicle_VehicleId",
                 table: "ServiceBookings",
@@ -469,7 +305,6 @@ namespace Infrastructure.MySqlMigrations
                 principalTable: "Vehicle",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ServiceEvaluation_ServiceBookings_ServiceBookingId",
                 table: "ServiceEvaluation",

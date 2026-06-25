@@ -13,6 +13,7 @@ public class WorkshopTicketItem : BaseEntity
     [Column("WorkshopTicketId")]
     [ForeignKey("WorkshopTicket")]
     public int WorkshopTicketId { get; set; }
+
     public WorkshopTicket WorkshopTicket { get; set; } = null!;
 
     [Column("Description", TypeName = "nvarchar(MAX)")]
@@ -30,5 +31,6 @@ public class WorkshopTicketItem : BaseEntity
     [Column("ProductVariantId")]
     [ForeignKey("ProductVariant")]
     public int? ProductVariantId { get; set; }
+
     public ProductVariant? ProductVariant { get; set; }
 }

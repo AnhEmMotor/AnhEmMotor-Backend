@@ -1,7 +1,6 @@
 using System;
 using System.Text.Json.Serialization;
 
-
 namespace Application.ApiContracts.PurchaseRequest.Responses
 {
     public class PurchaseRequestListResponse

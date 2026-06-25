@@ -1,7 +1,6 @@
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Common.Models;
 using MediatR;
-using System.Collections.Generic;
 
 namespace Application.Features.InventoryReceipts.Queries.GetInventoryReceiptAuditLogs;
 

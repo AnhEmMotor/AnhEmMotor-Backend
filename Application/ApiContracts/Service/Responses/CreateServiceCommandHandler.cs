@@ -1,9 +1,7 @@
-using Application.ApiContracts.Service.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Service;
 using Application.Interfaces.Repositories.ServiceCategory;
-using Domain.Entities;
 using Mapster;
 using MediatR;
 using ServiceEntity = Domain.Entities.Service;

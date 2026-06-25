@@ -1,40 +1,38 @@
 using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using ClosedXML.Excel;
+using Domain.Constants;
+using Domain.Entities;
 using MediatR;
-using System.IO;
 
 namespace Application.Features.InventoryReceipts.Queries.ExportInventoryReceipts;
 
-public class ExportInventoryReceiptsQueryHandler(
-    IInventoryReceiptReadRepository readRepository) : IRequestHandler<ExportInventoryReceiptsQuery, byte[]>
+public class ExportInventoryReceiptsQueryHandler(IInventoryReceiptReadRepository readRepository) : IRequestHandler<ExportInventoryReceiptsQuery, byte[]>
 {
     public async Task<byte[]> Handle(ExportInventoryReceiptsQuery request, CancellationToken cancellationToken)
     {
         request.SieveModel.PageSize = 100000;
         request.SieveModel.Page = 1;
-
         var pagedResult = await readRepository.GetPagedAsync<InventoryReceiptListResponse>(
-            request.SieveModel, 
-            Domain.Constants.DataFetchMode.ActiveOnly,
+            request.SieveModel,
+            DataFetchMode.ActiveOnly,
             null,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken)
+            .ConfigureAwait(false);
         var receipts = pagedResult.Items ?? [];
         var receiptIds = receipts.Where(r => r.Id != null).Select(r => r.Id!.Value).ToList();
-        var items = new List<Domain.Entities.InventoryReceiptInfo>();
+        var items = new List<InventoryReceiptInfo>();
         if (receiptIds.Any())
         {
-            items = await readRepository.GetInfosByInventoryReceiptIdsAsync(receiptIds, cancellationToken).ConfigureAwait(false);
+            items = await readRepository.GetInfosByInventoryReceiptIdsAsync(receiptIds, cancellationToken)
+                .ConfigureAwait(false);
         }
-
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Phiếu nhập");
-
         worksheet.Row(1).Height = 40;
         worksheet.Row(2).Height = 20;
         worksheet.Row(3).Height = 15;
         worksheet.Row(4).Height = 30;
-
         worksheet.Cell("A1").Value = "DANH SÁCH PHIẾU NHẬP KHO";
         var titleRange = worksheet.Range("A1:J1");
         titleRange.Merge();
@@ -43,8 +41,19 @@ public class ExportInventoryReceiptsQueryHandler(
         titleRange.Style.Font.FontColor = XLColor.FromHtml("#1A365D");
         titleRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
         titleRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
-
-        string[] headers = { "Mã phiếu", "Ghi chú", "ID Yêu cầu mua hàng", "Tên sản phẩm", "Tên biến thể sản phẩm", "Tên biến thể màu sắc của sản phẩm", "Số lượng", "Số khung", "Số máy", "Trạng thái" };
+        string[] headers =
+        {
+            "Mã phiếu",
+            "Ghi chú",
+            "ID Yêu cầu mua hàng",
+            "Tên sản phẩm",
+            "Tên biến thể sản phẩm",
+            "Tên biến thể màu sắc của sản phẩm",
+            "Số lượng",
+            "Số khung",
+            "Số máy",
+            "Trạng thái"
+        };
         for (int i = 0; i < headers.Length; i++)
         {
             var cell = worksheet.Cell(4, i + 1);
@@ -56,7 +65,6 @@ public class ExportInventoryReceiptsQueryHandler(
             cell.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
             cell.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
         }
-
         int rowIndex = 5;
         foreach (var r in receipts)
         {
@@ -68,7 +76,6 @@ public class ExportInventoryReceiptsQueryHandler(
                 Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Reject => "Đã từ chối",
                 _ => r.StatusId ?? string.Empty
             };
-
             var rItems = items.Where(x => x.InventoryReceiptId == r.Id).ToList();
             if (rItems.Count == 0)
             {
@@ -76,8 +83,7 @@ public class ExportInventoryReceiptsQueryHandler(
                 worksheet.Cell(rowIndex, 2).Value = r.Notes ?? string.Empty;
                 worksheet.Cell(rowIndex, 10).Value = statusName;
                 rowIndex++;
-            }
-            else
+            } else
             {
                 foreach (var item in rItems)
                 {
@@ -85,7 +91,6 @@ public class ExportInventoryReceiptsQueryHandler(
                     var productName = item.PurchaseRequestItem?.ProductVariant?.Product?.Name ?? string.Empty;
                     var variantName = item.PurchaseRequestItem?.ProductVariant?.VariantName ?? string.Empty;
                     var colorName = item.PurchaseRequestItem?.ProductVariantColor?.ColorName ?? string.Empty;
-
                     if (item.Vehicles != null && item.Vehicles.Any())
                     {
                         foreach (var v in item.Vehicles)
@@ -102,8 +107,7 @@ public class ExportInventoryReceiptsQueryHandler(
                             worksheet.Cell(rowIndex, 10).Value = statusName;
                             rowIndex++;
                         }
-                    }
-                    else
+                    } else
                     {
                         worksheet.Cell(rowIndex, 1).Value = r.Id.ToString();
                         worksheet.Cell(rowIndex, 2).Value = r.Notes ?? string.Empty;
@@ -120,9 +124,7 @@ public class ExportInventoryReceiptsQueryHandler(
                 }
             }
         }
-
         worksheet.Columns().AdjustToContents();
-
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
         return stream.ToArray();

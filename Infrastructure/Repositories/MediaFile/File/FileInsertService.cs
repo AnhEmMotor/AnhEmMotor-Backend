@@ -87,12 +87,9 @@ public class FileInsertService : IFileInsertService
 
     private static string SanitizeFileName(string fileName)
     {
-        // Remove invalid characters for Windows filenames
         var invalid = Path.GetInvalidFileNameChars();
         var sanitized = new string(fileName.Where(c => !invalid.Contains(c)).ToArray());
-        // Replace spaces with underscores for cleaner URLs
         sanitized = sanitized.Replace(' ', '_');
-        // Ensure we have a valid filename
         if (string.IsNullOrWhiteSpace(sanitized))
         {
             sanitized = "file";
@@ -131,15 +128,13 @@ public class FileInsertService : IFileInsertService
                 ? storageFileName
                 : Path.Combine(subFolder, storageFileName).Replace("\\", "/");
             var fullPath = Path.Combine(_uploadFolder, relativePath);
-
             using (var fileStream = new FileStream(fullPath, FileMode.Create))
             {
                 await file.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
             }
             var size = file.Length;
             return new FileUpload(relativePath, extension, size);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Result<FileUpload>.Failure(ex.Message);
         }

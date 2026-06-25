@@ -3,10 +3,7 @@ using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Seeders
 {
@@ -14,62 +11,52 @@ namespace Infrastructure.Seeders
     {
         public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
         {
-            // 1. Fetch product variants and colors
             var variants = await context.ProductVariants
                 .Include(v => v.ProductVariantColors)
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             if (variants.Count == 0)
                 return;
-
-            // 2. Check if we already have outputs or inputs
             if (await context.OutputOrders.AnyAsync(cancellationToken).ConfigureAwait(false))
             {
                 return;
             }
-
             var now = DateTimeOffset.UtcNow;
             var today = now.Date;
-
-            // Fetch first active supplier
             var supplier = await context.Suppliers.FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
             var supplierId = supplier?.Id;
-
-            // ==== A. SEED INVENTORY RECEIPTS (INPUTS) ====
-            // Commented out due to schema changes
-            // ...
-
-            // ==== B. SEED SALES ORDERS (OUTPUTS) ====
             var random = new Random(42);
-            var statuses = new[] {
-                OrderStatus.Completed, OrderStatus.Completed, OrderStatus.Completed,
-                OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Pending,
-                OrderStatus.Cancelled, OrderStatus.WaitingDeposit
+            var statuses = new[]
+            {
+                OrderStatus.Completed,
+                OrderStatus.Completed,
+                OrderStatus.Completed,
+                OrderStatus.Delivering,
+                OrderStatus.WaitingPickup,
+                OrderStatus.Pending,
+                OrderStatus.Cancelled,
+                OrderStatus.WaitingDeposit
             };
-
             var salesUsers = await context.Users
-                .Where(u => u.Email == "nguyen.van.a@anhemmotor.com" || u.Email == "tran.thi.b@anhemmotor.com" || u.Email == "pham.thi.d@anhemmotor.com")
+                .Where(
+                    u => u.Email == "nguyen.van.a@anhemmotor.com" ||
+                        u.Email == "tran.thi.b@anhemmotor.com" ||
+                        u.Email == "pham.thi.d@anhemmotor.com")
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             var seededOutputs = new List<Output>();
-
-            // 1. Seed monthly orders for the past 12 months to build historical charts
             for (int i = 11; i >= 0; i--)
             {
                 var monthStart = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero).AddMonths(-i);
-                int ordersInMonth = random.Next(10, 25); // 10 to 25 orders per month for nice charts
-
+                int ordersInMonth = random.Next(10, 25);
                 for (int o = 0; o < ordersInMonth; o++)
                 {
                     var orderDate = monthStart.AddDays(random.Next(1, 28)).AddHours(random.Next(8, 20));
                     var status = OrderStatus.Completed;
-                    if (i == 0) // current month can have active/pending/cancelled orders
+                    if (i == 0)
                     {
                         status = statuses[random.Next(statuses.Length)];
                     }
-
                     var output = new Output
                     {
                         CustomerName = $"Khách hàng {random.Next(100, 999)}",
@@ -83,28 +70,23 @@ namespace Infrastructure.Seeders
                         DepositRatio = 10,
                         LastStatusChangedAt = orderDate
                     };
-
                     if (salesUsers.Count > 0 && status == OrderStatus.Completed)
                     {
                         output.FinishedBy = salesUsers[random.Next(salesUsers.Count)].Id;
                     }
-
                     context.OutputOrders.Add(output);
                     seededOutputs.Add(output);
                 }
             }
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            // Add details (OutputInfo) for the orders
             foreach (var output in seededOutputs)
             {
                 var orderDate = output.CreatedAt ?? now;
                 var variant = variants[random.Next(variants.Count)];
                 var color = variant.ProductVariantColors.FirstOrDefault();
-                var qty = random.Next(1, 3); // 1 or 2 bikes per sale
+                var qty = random.Next(1, 3);
                 var price = variant.Price ?? 30000000;
                 var costPrice = price * 0.8m;
-
                 var outputInfo = new OutputInfo
                 {
                     OutputId = output.Id,
@@ -119,13 +101,9 @@ namespace Infrastructure.Seeders
                 context.OutputInfos.Add(outputInfo);
             }
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            // ==== C. SEED REPAIR ORDERS (WORKSHOP TICKETS) ====
             if (!await context.RepairOrders.AnyAsync(cancellationToken).ConfigureAwait(false))
             {
                 var technicians = await context.EmployeeProfiles.ToListAsync(cancellationToken).ConfigureAwait(false);
-
-                // 1. InProgress tickets
                 for (int i = 0; i < 4; i++)
                 {
                     var ticketDate = now.AddHours(-random.Next(1, 12));
@@ -148,15 +126,12 @@ namespace Infrastructure.Seeders
                     };
                     context.RepairOrders.Add(ro);
                 }
-
-                // 2. Completed tickets in the past 30 days
                 for (int i = 0; i < 20; i++)
                 {
                     var ticketDate = now.AddDays(-random.Next(1, 30)).AddHours(random.Next(8, 18));
                     var durationHours = random.Next(1, 4);
                     var completionDate = ticketDate.AddHours(durationHours);
                     var tech = technicians.Count > 0 ? technicians[random.Next(technicians.Count)] : null;
-
                     var ro = new RepairOrder
                     {
                         CustomerName = $"Trần Thanh Sơn {i + 1}",
@@ -177,8 +152,6 @@ namespace Infrastructure.Seeders
                     };
                     context.RepairOrders.Add(ro);
                 }
-
-                // 3. Overdue tickets
                 for (int i = 0; i < 3; i++)
                 {
                     var ticketDate = now.AddHours(-15);
@@ -190,7 +163,7 @@ namespace Infrastructure.Seeders
                         Description = "Khắc phục lỗi xước xát nhựa sườn, căn chỉnh phuộc nhún trước",
                         Status = "Pending",
                         StartTime = ticketDate,
-                        ExpectedCompletionTime = now.AddHours(-2), // overdue
+                        ExpectedCompletionTime = now.AddHours(-2),
                         LaborCost = 400000,
                         PartsCost = 1500000,
                         TotalAmount = 1900000,
@@ -201,16 +174,14 @@ namespace Infrastructure.Seeders
                     };
                     context.RepairOrders.Add(ro);
                 }
-
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-
-            // ==== D. SEED CONTACTS & REPLIES (CUSTOMER CARE) ====
             if (!await context.Contacts.AnyAsync(cancellationToken).ConfigureAwait(false))
             {
-                var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "admin@anhem.com", cancellationToken).ConfigureAwait(false);
+                var adminUser = await context.Users
+                    .FirstOrDefaultAsync(u => u.Email == "admin@anhem.com", cancellationToken)
+                    .ConfigureAwait(false);
                 var adminId = adminUser?.Id;
-
                 var contacts = new List<Contact>
                 {
                     new Contact
@@ -219,7 +190,8 @@ namespace Infrastructure.Seeders
                         Email = "nam.nguyen12@gmail.com",
                         PhoneNumber = "0948123456",
                         Subject = "Hỏi về chế độ bảo hành xe Honda SH",
-                        Message = "Tôi mới mua xe SH ở showroom tuần trước, cho hỏi chế độ bảo hành xe định kỳ như thế nào?",
+                        Message =
+                            "Tôi mới mua xe SH ở showroom tuần trước, cho hỏi chế độ bảo hành xe định kỳ như thế nào?",
                         Status = "Replied",
                         Rating = 5,
                         InternalNote = "Khách hàng thân thiết, cần hỗ trợ chu đáo.",
@@ -232,7 +204,8 @@ namespace Infrastructure.Seeders
                         Email = "tri.pham@yahoo.com",
                         PhoneNumber = "0918765432",
                         Subject = "Khiếu nại về thái độ phục vụ của nhân viên kỹ thuật",
-                        Message = "Nhân viên kỹ thuật lúc bảo dưỡng xe Winner X của tôi thái độ rất không hợp tác, không chịu kiểm tra kỹ xích tải.",
+                        Message =
+                            "Nhân viên kỹ thuật lúc bảo dưỡng xe Winner X của tôi thái độ rất không hợp tác, không chịu kiểm tra kỹ xích tải.",
                         Status = "Closed",
                         Rating = 2,
                         InternalNote = "Đã xin lỗi khách hàng và nhắc nhở thợ kỹ thuật.",
@@ -245,7 +218,8 @@ namespace Infrastructure.Seeders
                         Email = "hong.le@gmail.com",
                         PhoneNumber = "0987111222",
                         Subject = "Đăng ký mua trả góp xe Vision",
-                        Message = "Tôi muốn mua trả góp xe Vision bản đặc biệt, cần làm những thủ tục gì và trả trước bao nhiêu?",
+                        Message =
+                            "Tôi muốn mua trả góp xe Vision bản đặc biệt, cần làm những thủ tục gì và trả trước bao nhiêu?",
                         Status = "Pending",
                         Rating = null,
                         InternalNote = "Đã giao cho bộ phận Sales gọi điện tư vấn.",
@@ -279,17 +253,15 @@ namespace Infrastructure.Seeders
                         UpdatedAt = now.AddDays(-14)
                     }
                 };
-
                 context.Contacts.AddRange(contacts);
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                // Add replies for Replied/Closed contacts
                 foreach (var c in contacts.Where(x => x.Status == "Replied" || x.Status == "Closed"))
                 {
                     var reply = new ContactReply
                     {
                         ContactId = c.Id,
-                        Message = $"Chào anh/chị {c.FullName}, chúng tôi đã nhận được thông tin và xin phản hồi như sau: [Nội dung phản hồi từ Admin/CSKH]. Cảm ơn anh/chị đã đóng góp ý kiến để hoàn thiện dịch vụ.",
+                        Message =
+                            $"Chào anh/chị {c.FullName}, chúng tôi đã nhận được thông tin và xin phản hồi như sau: [Nội dung phản hồi từ Admin/CSKH]. Cảm ơn anh/chị đã đóng góp ý kiến để hoàn thiện dịch vụ.",
                         RepliedById = adminId,
                         IsInternal = false,
                         CreatedAt = c.CreatedAt.GetValueOrDefault(DateTimeOffset.UtcNow).AddHours(random.Next(1, 10)),

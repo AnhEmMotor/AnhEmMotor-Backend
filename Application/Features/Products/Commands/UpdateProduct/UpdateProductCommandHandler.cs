@@ -745,11 +745,8 @@ public class UpdateProductCommandHandler(
             .ToList();
         if (requestedIds.Count != requestedIds.Distinct().Count())
         {
-            return Error.BadRequest(
-                "Danh sách màu sắc chứa ID trùng lặp.",
-                "Variants.Colors");
+            return Error.BadRequest("Danh sách màu sắc chứa ID trùng lặp.", "Variants.Colors");
         }
-
         var existingColorsById = variant.ProductVariantColors
             .Where(color => color.Id > 0)
             .ToDictionary(color => color.Id);
@@ -760,15 +757,13 @@ public class UpdateProductCommandHandler(
                 $"Các màu sắc với ID {string.Join(", ", unknownIds)} không thuộc biến thể này.",
                 "Variants.Colors");
         }
-
         var requestedIdSet = requestedIds.ToHashSet();
         foreach (var existingColor in variant.ProductVariantColors
-                     .Where(color => color.Id > 0 && !requestedIdSet.Contains(color.Id))
-                     .ToList())
+            .Where(color => color.Id > 0 && !requestedIdSet.Contains(color.Id))
+            .ToList())
         {
             variant.ProductVariantColors.Remove(existingColor);
         }
-
         foreach (var colorRequest in colorRequests)
         {
             if (colorRequest.Id is > 0)
@@ -779,17 +774,16 @@ public class UpdateProductCommandHandler(
                 existingColor.CoverImageUrl = colorRequest.CoverImageUrl?.Trim();
                 continue;
             }
-
-            variant.ProductVariantColors.Add(
-                new ProductVariantColor
-                {
-                    ProductVariantId = variant.Id,
-                    ColorName = colorRequest.ColorName?.Trim(),
-                    ColorCode = colorRequest.ColorCode?.Trim(),
-                    CoverImageUrl = colorRequest.CoverImageUrl?.Trim()
-                });
+            variant.ProductVariantColors
+                .Add(
+                    new ProductVariantColor
+                    {
+                        ProductVariantId = variant.Id,
+                        ColorName = colorRequest.ColorName?.Trim(),
+                        ColorCode = colorRequest.ColorCode?.Trim(),
+                        CoverImageUrl = colorRequest.CoverImageUrl?.Trim()
+                    });
         }
-
         return null;
     }
 

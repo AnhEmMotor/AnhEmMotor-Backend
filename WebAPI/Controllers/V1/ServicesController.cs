@@ -4,7 +4,6 @@ using Application.Features.Services.Commands;
 using Application.Features.Services.Queries;
 using Domain.Primitives;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using WebAPI.Controllers.Base;
@@ -14,7 +13,7 @@ namespace WebAPI.Controllers.V1;
 /// <summary>
 /// Controller quản lý các dịch vụ bảo trì và sửa chữa của cửa hàng.
 /// </summary>
-public sealed class ServicesController (IMediator mediator) : ApiController
+public sealed class ServicesController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Tạo mới một dịch vụ trong hệ thống.
@@ -29,7 +28,7 @@ public sealed class ServicesController (IMediator mediator) : ApiController
     [HttpPost]
     [ProducesResponseType(typeof(ServiceResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateServiceAsync (
+    public async Task<IActionResult> CreateServiceAsync(
         [FromBody] CreateServiceCommand command,
         CancellationToken cancellationToken)
     {
