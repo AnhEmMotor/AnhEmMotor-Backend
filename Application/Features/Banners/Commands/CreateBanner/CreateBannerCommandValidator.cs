@@ -1,0 +1,18 @@
+using FluentValidation;
+
+namespace Application.Features.Banners.Commands.CreateBanner;
+
+public class CreateBannerCommandValidator : AbstractValidator<CreateBannerCommand>
+{
+    public CreateBannerCommandValidator()
+    {
+        RuleFor(v => v.Title).NotEmpty().WithMessage("Tiêu đề banner là bắt buộc.");
+        RuleFor(v => v.Placement).NotEmpty().WithMessage("Vị trí hiển thị là bắt buộc.");
+        RuleFor(v => v.Description).NotEmpty().WithMessage("Mô tả banner là bắt buộc.");
+        RuleFor(v => v.CtaLabel).NotEmpty().WithMessage("Nhãn nút bấm là bắt buộc.");
+        RuleFor(v => v.CtaLink).NotEmpty().WithMessage("Đường dẫn đích là bắt buộc.");
+        RuleFor(v => v)
+            .Must(v => !string.IsNullOrEmpty(v.DesktopImageUrl) || !string.IsNullOrEmpty(v.MobileImageUrl))
+            .WithMessage("Phải có ít nhất 1 ảnh (Desktop hoặc Mobile).");
+    }
+}

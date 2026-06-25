@@ -7,6 +7,7 @@ using Application.Features.Technologies.Queries.GetAllTechnologies;
 using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
 using Application.Features.Technologies.Queries.GetTechnologiesList;
 using Asp.Versioning;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +33,7 @@ public class TechnologiesController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetTechnologiesAsync(CancellationToken cancellationToken)
     {
         var query = new GetTechnologiesListQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -51,7 +52,7 @@ public class TechnologiesController(IMediator mediator) : ApiController
     {
         return HandleResult(
             await mediator.Send(new GetAllTechnologiesQuery(category_id, brand_id), cancellationToken)
-                .ConfigureAwait(true));
+                .ConfigureAwait(false));
     }
 
     /// <summary>
@@ -63,7 +64,7 @@ public class TechnologiesController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetCategoriesAsync(CancellationToken cancellationToken)
     {
         return HandleResult(
-            await mediator.Send(new GetAllTechnologyCategoriesQuery(), cancellationToken).ConfigureAwait(true));
+            await mediator.Send(new GetAllTechnologyCategoriesQuery(), cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>
@@ -78,28 +79,25 @@ public class TechnologiesController(IMediator mediator) : ApiController
         [FromBody] CreateTechnologyCommand command,
         CancellationToken cancellationToken)
     {
-        return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(true));
+        return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>
     /// Cập nhật thông tin công nghệ.
     /// </summary>
     /// <param name="id">ID công nghệ.</param>
-    /// <param name="command">Lệnh cập nhật công nghệ.</param>
+    /// <param name="request">Lệnh cập nhật công nghệ.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả cập nhật.</returns>
     [HttpPut("{id:int}")]
     [Authorize]
     public async Task<IActionResult> UpdateAsync(
         int id,
-        [FromBody] UpdateTechnologyCommand command,
+        [FromBody] UpdateTechnologyCommand request,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
-        {
-            return BadRequest("ID không khớp.");
-        }
-        return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(true));
+        var command = request.Adapt<UpdateTechnologyCommand>() with { Id = id };
+        return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>
@@ -113,7 +111,7 @@ public class TechnologiesController(IMediator mediator) : ApiController
     public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
         return HandleResult(
-            await mediator.Send(new DeleteTechnologyCommand(id), cancellationToken).ConfigureAwait(true));
+            await mediator.Send(new DeleteTechnologyCommand(id), cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>
@@ -128,6 +126,6 @@ public class TechnologiesController(IMediator mediator) : ApiController
         [FromBody] CreateTechnologyCategoryCommand command,
         CancellationToken cancellationToken)
     {
-        return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(true));
+        return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(false));
     }
 }

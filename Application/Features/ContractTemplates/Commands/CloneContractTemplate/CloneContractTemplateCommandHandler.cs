@@ -1,31 +1,26 @@
 using Application.Common.Models;
-using Application.Common.Interfaces;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.ContractTemplate;
 using Domain.Entities;
-using Domain.Primitives;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.ContractTemplates.Commands.CloneContractTemplate;
 
-internal sealed class CloneContractTemplateCommandHandler(IApplicationDbContext context)
-    : IRequestHandler<CloneContractTemplateCommand, Result<Guid>>
+public class CloneContractTemplateCommandHandler(
+    IContractTemplateReadRepository contractTemplateReadRepository,
+    IContractTemplateInsertRepository contractTemplateInsertRepository,
+    IContractTemplateUpdateRepository contractTemplateUpdateRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<CloneContractTemplateCommand, Result<Guid>>
 {
-    public async Task<Result<Guid>> Handle(
-        CloneContractTemplateCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CloneContractTemplateCommand request, CancellationToken cancellationToken)
     {
-        var original = await context.ContractTemplates
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
+        var original = await contractTemplateReadRepository.GetByIdAsync(request.Id, cancellationToken)
+            .ConfigureAwait(false);
         if (original is null)
         {
             return Result<Guid>.Failure(Error.NotFound("Mẫu hợp đồng không tồn tại."));
         }
-
         original.IsActive = false;
-
         var clone = new ContractTemplate
         {
             Id = Guid.NewGuid(),
@@ -37,10 +32,9 @@ internal sealed class CloneContractTemplateCommandHandler(IApplicationDbContext 
             DynamicFields = original.DynamicFields,
             IsActive = true
         };
-
-        await context.ContractTemplates.AddAsync(clone, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-
+        contractTemplateUpdateRepository.Update(original);
+        contractTemplateInsertRepository.Add(clone);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<Guid>.Success(clone.Id);
     }
 }

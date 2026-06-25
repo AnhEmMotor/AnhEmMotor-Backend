@@ -5,8 +5,11 @@ using Application.Features.Suppliers.Commands.RestoreSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.SupplierDebt;
 using Domain.Constants;
+using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Moq;
@@ -21,6 +24,7 @@ public class Supplier
     private readonly Mock<ISupplierUpdateRepository> _updateRepoMock;
     private readonly Mock<ISupplierDeleteRepository> _deleteRepoMock;
     private readonly Mock<ISupplierReadRepository> _readRepoMock;
+    private readonly Mock<ISupplierDebtReadRepository> _supplierDebtRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
     public Supplier()
@@ -29,6 +33,7 @@ public class Supplier
         _updateRepoMock = new Mock<ISupplierUpdateRepository>();
         _deleteRepoMock = new Mock<ISupplierDeleteRepository>();
         _readRepoMock = new Mock<ISupplierReadRepository>();
+        _supplierDebtRepoMock = new Mock<ISupplierDebtReadRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
@@ -563,59 +568,39 @@ public class Supplier
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "SUP_025 - Xóa Supplier thành công khi không có Input Receipt nào")]
-    public async Task DeleteSupplier_NoInputReceipts_Success()
+    [Fact(DisplayName = "SUP_025 - Xóa Supplier thành công khi không có InventoryReceipt Receipt nào")]
+    public async Task DeleteSupplier_NoInventoryReceiptReceipts_Success()
     {
         var handler = new DeleteSupplierCommandHandler(
             _readRepoMock.Object,
             _deleteRepoMock.Object,
+            _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
-        var existingSupplier = new SupplierEntity { Id = 1, Name = "Supplier", StatusId = "active", InputReceipts = [] };
+        var existingSupplier = new SupplierEntity { Id = 1, Name = "Supplier", StatusId = "active" };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
+        _supplierDebtRepoMock.Setup(x => x.GetBySupplierIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<SupplierDebt>());
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "SUP_026 - Xóa Supplier thất bại khi còn Input Receipt ở trạng thái Working")]
-    public async Task DeleteSupplier_HasWorkingInputReceipt_ThrowsException()
+    [Fact(
+        DisplayName = "SUP_027 - Xóa Supplier thành công khi có InventoryReceipt Receipt nhưng không ở trạng thái Working")]
+    public async Task DeleteSupplier_HasCompletedInventoryReceiptReceipt_Success()
     {
         var handler = new DeleteSupplierCommandHandler(
             _readRepoMock.Object,
             _deleteRepoMock.Object,
+            _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
-        var existingSupplier = new SupplierEntity
-        {
-            Id = 1,
-            Name = "Supplier",
-            StatusId = "active",
-            InputReceipts = [new() { StatusId = "working" }]
-        };
+        var existingSupplier = new SupplierEntity { Id = 1, Name = "Supplier", StatusId = "active" };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
-    }
-
-    [Fact(DisplayName = "SUP_027 - Xóa Supplier thành công khi có Input Receipt nhưng không ở trạng thái Working")]
-    public async Task DeleteSupplier_HasCompletedInputReceipt_Success()
-    {
-        var handler = new DeleteSupplierCommandHandler(
-            _readRepoMock.Object,
-            _deleteRepoMock.Object,
-            _unitOfWorkMock.Object);
-        var command = new DeleteSupplierCommand { Id = 1 };
-        var existingSupplier = new SupplierEntity
-        {
-            Id = 1,
-            Name = "Supplier",
-            StatusId = "active",
-            InputReceipts = [new() { StatusId = "completed" }]
-        };
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(existingSupplier);
+        _supplierDebtRepoMock.Setup(x => x.GetBySupplierIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<SupplierDebt> { new() { InventoryReceipt = new() { StatusId = "completed" } } });
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -626,6 +611,7 @@ public class Supplier
         var handler = new DeleteSupplierCommandHandler(
             _readRepoMock.Object,
             _deleteRepoMock.Object,
+            _supplierDebtRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))

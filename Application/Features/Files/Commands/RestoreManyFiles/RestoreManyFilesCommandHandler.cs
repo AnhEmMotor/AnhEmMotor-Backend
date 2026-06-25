@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Features.Files.Commands.RestoreManyFiles;
 
-public sealed class RestoreManyFilesCommandHandler(
+public class RestoreManyFilesCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileUpdateRepository updateRepository,
     IFileReadService fileReadService,

@@ -5,15 +5,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+      <NoWarn>$(NoWarn);IDE0040</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="libphonenumber-csharp" Version="9.0.29" />
-    <PackageReference Include="Mapster" Version="10.0.7" />
-    <PackageReference Include="Mapster.DependencyInjection" Version="10.0.7" />
+    <PackageReference Include="libphonenumber-csharp" Version="9.0.32" />
+    <PackageReference Include="Mapster" Version="10.0.8" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="10.0.8" />
     <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Sieve" Version="2.5.5" />
@@ -26,10 +27,5 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\Auth\Commands\Register\" />
-    <Folder Include="Features\Auth\Queries\" />
-  </ItemGroup>
-
+  
 </Project>

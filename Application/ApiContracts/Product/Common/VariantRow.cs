@@ -1,6 +1,8 @@
+using Application.ApiContracts.Product.Responses;
+
 namespace Application.ApiContracts.Product.Common
 {
-    public sealed class VariantRow
+    public class VariantRow
     {
         public int Id { get; set; }
 
@@ -22,9 +24,7 @@ namespace Application.ApiContracts.Product.Common
 
         public string? VariantName { get; set; }
 
-        public string? ColorName { get; set; }
-
-        public string? ColorCode { get; set; }
+        public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
 
         public string? SKU { get; set; }
 

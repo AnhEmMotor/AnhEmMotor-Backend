@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Queries.GetPartnerTypesList;
 
-public sealed class GetPartnerTypesListQueryHandler : IRequestHandler<GetPartnerTypesListQuery, Result<List<PartnerTypeResponse>>>
+public class GetPartnerTypesListQueryHandler : IRequestHandler<GetPartnerTypesListQuery, Result<List<PartnerTypeResponse>>>
 {
     public Task<Result<List<PartnerTypeResponse>>> Handle(
         GetPartnerTypesListQuery request,

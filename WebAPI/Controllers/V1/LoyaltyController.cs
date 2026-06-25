@@ -3,6 +3,7 @@ using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
@@ -19,16 +20,18 @@ public class LoyaltyController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy danh sách hội viên và điểm thưởng
     /// </summary>
-    /// <param name="search">Từ khóa tìm kiếm theo tên hoặc SĐT</param>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp của Sieve.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Danh sách hội viên</returns>
     [HttpGet("members")]
     [Authorize]
     [SwaggerOperation(Summary = "Lấy danh sách hội viên và điểm thưởng")]
-    public async Task<IActionResult> GetMembersAsync([FromQuery] string? search, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetMembersAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetLoyaltyMembersQuery { Search = search }, cancellationToken)
-            .ConfigureAwait(true);
+        var result = await mediator.Send(new GetLoyaltyMembersQuery { SieveModel = sieveModel }, cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 }

@@ -3,11 +3,13 @@ using Application.Features.Outputs.Queries.GetPaymentLink;
 using Application.Features.Payments.Commands.ProcessPayOSCallback;
 using Application.Features.Payments.Commands.ProcessPayOSWebhook;
 using Application.Features.Payments.Commands.ProcessVNPayIPN;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
@@ -16,8 +18,9 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 [ApiController]
 [SwaggerTag("Quản lý các hoạt động thanh toán")]
-[Route("api/[controller]")]
-public class PaymentController(IMediator mediator) : ControllerBase
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
+public class PaymentController(ISender sender) : ApiController
 {
     /// <summary>
     /// Webhook từ PayOS để thông báo trạng thái thanh toán.
@@ -29,8 +32,8 @@ public class PaymentController(IMediator mediator) : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> PayOSWebhook([FromBody] PayOSWebhookData data, CancellationToken cancellationToken)
     {
-        await mediator.Send(new ProcessPayOSWebhookCommand(data), cancellationToken).ConfigureAwait(true);
-        return Ok(new { success = true });
+        var result = await sender.Send(new ProcessPayOSWebhookCommand(data), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -39,18 +42,14 @@ public class PaymentController(IMediator mediator) : ControllerBase
     /// <param name="orderId">ID của đơn hàng.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Dữ liệu link thanh toán.</returns>
-    [HttpGet("link/{orderId}")]
+    [HttpGet("{orderId}/link")]
     [Authorize]
     public async Task<IActionResult> GetPaymentLink(int orderId, CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new GetPaymentLinkQuery(orderId, currentUserId), cancellationToken)
-            .ConfigureAwait(true);
-        if (result.IsSuccess)
-            return Ok(result.Value);
-        var firstError = result.Errors?.FirstOrDefault() ?? result.Error;
-        return BadRequest(
-            new { success = false, message = firstError?.Message ?? "Lỗi không xác định", code = firstError?.Code });
+        var result = await sender.Send(new GetPaymentLinkQuery(orderId, currentUserId), cancellationToken)
+            .ConfigureAwait(false);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -61,33 +60,31 @@ public class PaymentController(IMediator mediator) : ControllerBase
     [HttpGet("vnpay-callback")]
     public async Task<IActionResult> VNPayCallback(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ProcessVNPayIPNCommand(Request.Query), cancellationToken)
-            .ConfigureAwait(true);
-        var orderId = result.Value?.OrderId;
-        var status = result.IsSuccess && string.Compare(result.Value?.VnPayResponseCode, "00") == 0
-            ? "success"
-            : "failed";
-        return Redirect($"http://localhost:3000/payment-processing?id={orderId}&status={status}&method=VNPay");
+        var result = await sender.Send(new ProcessVNPayIPNCommand(Request.Query), cancellationToken)
+            .ConfigureAwait(false);
+        return HandlePaymentRedirect(
+            result,
+            method: "VNPay",
+            getOrderId: val => val?.OrderId,
+            fallbackOrderId: null,
+            checkCustomSuccess: val => string.Compare(val?.VnPayResponseCode, "00") == 0);
     }
 
     /// <summary>
     /// Callback từ PayOS sau khi hoàn tất thanh toán.
     /// </summary>
+    /// <param name="orderCode">Mã đơn hàng.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Chuyển hướng về trang xử lý của Frontend.</returns>
     [HttpGet("payos-callback")]
-    public async Task<IActionResult> PayOSCallback(CancellationToken cancellationToken)
+    public async Task<IActionResult> PayOSCallback([FromQuery] long? orderCode, CancellationToken cancellationToken)
     {
-        if (!long.TryParse(Request.Query["orderCode"], out var orderCode))
-        {
-            return Redirect("http://localhost:3000/orders?payment=failed");
-        }
-        var result = await mediator.Send(new ProcessPayOSCallbackCommand(orderCode), cancellationToken)
-            .ConfigureAwait(true);
-        var status = result.IsSuccess ? "success" : "failed";
-        var orderId = (int)(orderCode / 100000);
-        if (orderId == 0)
-            orderId = (int)orderCode;
-        return Redirect($"http://localhost:3000/payment-processing?id={orderId}&status={status}&method=PayOS");
+        var command = new ProcessPayOSCallbackCommand(orderCode);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandlePaymentRedirect(
+            result,
+            method: "PayOS",
+            getOrderId: val => val.ToString(),
+            fallbackOrderId: command.OrderId.ToString());
     }
 }

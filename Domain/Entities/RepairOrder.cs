@@ -46,7 +46,7 @@ namespace Domain.Entities
 
         [Required]
         [Column("Status", TypeName = "nvarchar(20)")]
-        public string Status { get; set; } = "Pending";
+        public string Status { get; set; } = RepairOrderStatus.Pending;
 
         [Column("LaborCost", TypeName = "decimal(18,2)")]
         public decimal LaborCost { get; set; }

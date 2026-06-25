@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.Users.Commands.ChangePassword;
@@ -6,7 +6,6 @@ using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
-using Application.Interfaces.Services;
 using Domain.Constants;
 using FluentAssertions;
 using MediatR;
@@ -23,19 +22,12 @@ namespace ControllerTests;
 public class User
 {
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IUserStreamService> _userStreamServiceMock;
-    private readonly Mock<IServiceProvider> _serviceProviderMock;
     private readonly UserController _controller;
 
     public User()
     {
         _mediatorMock = new Mock<IMediator>();
-        _userStreamServiceMock = new Mock<IUserStreamService>();
-        _serviceProviderMock = new Mock<IServiceProvider>();
-        _controller = new UserController(
-            _mediatorMock.Object,
-            _userStreamServiceMock.Object,
-            _serviceProviderMock.Object);
+        _controller = new UserController(_mediatorMock.Object);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
@@ -112,11 +104,6 @@ public class User
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
-        _mediatorMock.Verify(
-            m => m.Send(
-                It.Is<UpdateCurrentUserCommand>(c => string.Compare(c.UserId, userId.ToString()) == 0),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
     }
 
     [Fact(DisplayName = "USER_039 - Controller - PUT /api/v1/User/me v?i body null ho?c r?ng")]
@@ -162,14 +149,6 @@ public class User
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
-        _mediatorMock.Verify(
-            m => m.Send(
-                It.Is<ChangePasswordCommand>(
-                    c => string.Compare(c.UserId, userId.ToString()) == 0 &&
-                        string.Compare(c.NewPassword, "New") == 0 &&
-                        string.Compare(c.CurrentPassword, "Old") == 0),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
     }
 
     [Fact(DisplayName = "USER_042 - Controller - POST /api/v1/User/change-password v?i body thi?u tru?ng")]

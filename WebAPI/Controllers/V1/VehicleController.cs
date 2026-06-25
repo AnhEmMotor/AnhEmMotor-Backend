@@ -50,7 +50,7 @@ public class VehicleController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetVehiclesQuery { SieveModel = sieveModel }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -66,7 +66,7 @@ public class VehicleController(IMediator mediator) : ApiController
         [FromBody] CreateVehicleCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleCreated(result);
     }
 
@@ -84,7 +84,7 @@ public class VehicleController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         command.Id = id;
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -102,7 +102,7 @@ public class VehicleController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         command.Id = id;
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

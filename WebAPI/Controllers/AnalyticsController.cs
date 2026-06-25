@@ -1,9 +1,12 @@
+using Application.Features.Statistical.Queries.GetDashboardSummary;
+using Application.Features.Statistical.Queries.GetPnlReport;
+using Application.Features.Statistical.Queries.GetRecentTransactions;
+using Application.Features.Statistical.Queries.GetStaffPerformance;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Threading.Tasks;
-using Infrastructure.Repositories;
-using AnhEmMotor.Application.DTOs.Analytics;
-using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 
 namespace WebAPI.Controllers
 {
@@ -46,7 +49,6 @@ namespace WebAPI.Controllers
             {
                 summary.IsRevenueAlert = true;
             }
-
             return Ok(summary);
         }
 
@@ -99,14 +101,13 @@ namespace WebAPI.Controllers
             Response.Headers.Append("Content-Type", "text/event-stream");
             Response.Headers.Append("Cache-Control", "no-cache");
             Response.Headers.Append("Connection", "keep-alive");
-
-            var logs = await _analyticsRepository.GetRecentTransactionsAsync();
+            var logs = await mediator.Send(new GetRecentTransactionsQuery(), cancellationToken).ConfigureAwait(false);
             foreach (var log in logs)
             {
-                var data = System.Text.Json.JsonSerializer.Serialize(log);
-                await Response.WriteAsync($"data: {data}\n\n");
+                var data = JsonSerializer.Serialize(log);
+                await Response.WriteAsync($"data: {data}\n\n", cancellationToken).ConfigureAwait(false);
             }
-            await Response.Body.FlushAsync();
+            await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -1,6 +1,5 @@
-using Application.Common.Models;
 using Application.ApiContracts.ContractTemplate.Responses;
-using Domain.Primitives;
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.ContractTemplates.Queries.GetContractTemplateById;

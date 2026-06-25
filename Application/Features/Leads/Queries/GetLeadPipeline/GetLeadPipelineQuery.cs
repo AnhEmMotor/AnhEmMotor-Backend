@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.Leads.Queries.GetLeadPipeline;
 
-public sealed class GetLeadPipelineQuery : IRequest<Result<List<LeadPipelineGroupResponse>>>
+public class GetLeadPipelineQuery : IRequest<Result<List<LeadPipelineGroupResponse>>>
 {
 }
 

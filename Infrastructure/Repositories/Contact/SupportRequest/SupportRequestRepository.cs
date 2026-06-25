@@ -1,7 +1,7 @@
 using Application.Interfaces.Repositories.Contact;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
-using DomainEntities = global::Domain.Entities;
+using DomainEntities = Domain.Entities;
 
 namespace Infrastructure.Repositories.Contact.SupportRequest;
 
@@ -9,9 +9,7 @@ public class SupportRequestRepository(ApplicationDBContext context) : ISupportRe
 {
     public Task<DomainEntities.SupportRequest?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return context.SupportRequests
-            .Include(s => s.Contact)
-            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+        return context.SupportRequests.Include(s => s.Contact).FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
     public Task<List<DomainEntities.SupportRequest>> GetAllAsync(CancellationToken cancellationToken)
@@ -24,12 +22,14 @@ public class SupportRequestRepository(ApplicationDBContext context) : ISupportRe
 
     public Task AddAsync(DomainEntities.SupportRequest entity, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         context.SupportRequests.Add(entity);
         return Task.CompletedTask;
     }
 
     public Task UpdateAsync(DomainEntities.SupportRequest entity, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         context.SupportRequests.Update(entity);
         return Task.CompletedTask;
     }

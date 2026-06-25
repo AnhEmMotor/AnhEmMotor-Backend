@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.Products.Commands.UpdateProduct
 {
-    public sealed class UpdateProductVariantRequestValidator : AbstractValidator<UpdateProductVariantRequest>
+    public class UpdateProductVariantRequestValidator : AbstractValidator<UpdateProductVariantRequest>
     {
         public UpdateProductVariantRequestValidator()
         {

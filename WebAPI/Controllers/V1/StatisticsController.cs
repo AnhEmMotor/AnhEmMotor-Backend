@@ -1,5 +1,4 @@
 using Application.ApiContracts.Statistical.Responses;
-using Application.Interfaces.Repositories.Statistical;
 using Application.Common.Models;
 using Application.Features.Statistical.Queries.GetAdminDashboardOverview;
 using Application.Features.Statistical.Queries.GetAdminProductReport;
@@ -23,7 +22,7 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Thống kê và báo cáo.
+/// Th?ng k� v� b�o c�o.
 /// </summary>
 /// <param name="mediator"></param>
 [ApiVersion("1.0")]
@@ -33,9 +32,9 @@ namespace WebAPI.Controllers.V1;
 public class StatisticsController(IMediator mediator, IStatisticalReadRepository repository) : ApiController
 {
     /// <summary>
-    /// Lấy doanh thu theo ngày trong khoảng thời gian xác định.
+    /// L?y doanh thu theo ng�y trong kho?ng th?i gian x�c d?nh.
     /// </summary>
-    /// <param name="days">Số ngày tính từ hiện tại trở về trước</param>
+    /// <param name="days">S? ng�y t�nh t? hi?n t?i tr? v? tru?c</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("daily-revenue")]
     [HasPermission(Statistical.View)]
@@ -45,7 +44,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
         CancellationToken cancellationToken = default)
     {
         var query = new GetDailyRevenueQuery() { Days = days };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -77,14 +76,14 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     public async Task<IActionResult> GetDashboardStatsAsync(CancellationToken cancellationToken)
     {
         var query = new GetDashboardStatsQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy doanh thu và lợi nhuận theo tháng.
+    /// L?y doanh thu v� l?i nhu?n theo th�ng.
     /// </summary>
-    /// <param name="months">Số tháng tính từ hiện tại trở về trước</param>
+    /// <param name="months">S? th�ng t�nh t? hi?n t?i tr? v? tru?c</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("monthly-revenue-profit")]
     [HasPermission(Statistical.View)]
@@ -94,12 +93,12 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
         CancellationToken cancellationToken = default)
     {
         var query = new GetMonthlyRevenueProfitQuery() { Months = months };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy số lượng đơn hàng theo từng trạng thái.
+    /// L?y s? lu?ng don h�ng theo t?ng tr?ng th�i.
     /// </summary>
     [HttpGet("order-status-counts")]
     [HasPermission(Statistical.View)]
@@ -107,12 +106,12 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     public async Task<IActionResult> GetOrderStatusCountsAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderStatusCountsQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy báo cáo sản phẩm của tháng trước.
+    /// L?y b�o c�o s?n ph?m c?a th�ng tru?c.
     /// </summary>
     [HttpGet("product-report-last-month")]
     [HasPermission(Statistical.View)]
@@ -120,12 +119,12 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     public async Task<IActionResult> GetProductReportLastMonthAsync(CancellationToken cancellationToken)
     {
         var query = new GetProductReportLastMonthQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy giá và tồn kho của một sản phẩm cụ thể.
+    /// L?y gi� v� t?n kho c?a m?t s?n ph?m c? th?.
     /// </summary>
     [HttpGet("product-stock-price/{variantId:int}")]
     [HasPermission(Statistical.View)]
@@ -134,12 +133,12 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     public async Task<IActionResult> GetProductStockAndPriceAsync(int variantId, CancellationToken cancellationToken)
     {
         var query = new GetProductStockAndPriceQuery() { VariantId = variantId };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy toàn bộ dữ liệu gộp cho Admin Dashboard.
+    /// L?y to�n b? d? li?u g?p cho Admin Dashboard.
     /// </summary>
     [HttpGet("dashboard-overview")]
     [HasPermission(Statistical.View)]
@@ -147,12 +146,12 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     public async Task<IActionResult> GetAdminDashboardOverviewAsync(CancellationToken cancellationToken)
     {
         var query = new GetAdminDashboardOverviewQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy toàn bộ phân tích doanh thu cho Admin (gộp).
+    /// L?y to�n b? ph�n t�ch doanh thu cho Admin (g?p).
     /// </summary>
     [HttpGet("revenue-analysis")]
     [HasPermission(Statistical.View)]
@@ -160,12 +159,12 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     public async Task<IActionResult> GetAdminRevenueAnalysisAsync(CancellationToken cancellationToken)
     {
         var query = new GetAdminRevenueAnalysisQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy báo cáo hiệu suất sản phẩm cho Admin (gộp).
+    /// L?y b�o c�o hi?u su?t s?n ph?m cho Admin (g?p).
     /// </summary>
     [HttpGet("product-report")]
     [HasPermission(Statistical.View)]
@@ -173,12 +172,12 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     public async Task<IActionResult> GetAdminProductReportAsync(CancellationToken cancellationToken)
     {
         var query = new GetAdminProductReportQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy báo cáo tồn kho cho Admin (gộp).
+    /// L?y b�o c�o t?n kho cho Admin (g?p).
     /// </summary>
     [HttpGet("warehouse-report")]
     [HasPermission(Statistical.View)]
@@ -186,7 +185,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     public async Task<IActionResult> GetAdminWarehouseReportAsync(CancellationToken cancellationToken)
     {
         var query = new GetAdminWarehouseReportQuery();
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

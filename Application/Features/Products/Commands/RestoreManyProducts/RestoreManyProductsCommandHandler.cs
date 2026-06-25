@@ -10,7 +10,7 @@ using MediatR;
 
 namespace Application.Features.Products.Commands.RestoreManyProducts;
 
-public sealed class RestoreManyProductsCommandHandler(
+public class RestoreManyProductsCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductsCommand, Result<List<ProductDetailForManagerResponse>?>>

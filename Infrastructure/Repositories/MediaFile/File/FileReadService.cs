@@ -66,8 +66,8 @@ public class FileReadService : IFileReadService
         return (fileBytes, contentType);
     }
 
-    public Task<Stream> ReadImageAsync(Stream inputStream, int? width, CancellationToken cancellationToken)
+    public Task<Stream> ReadImageAsync(Stream InventoryReceiptStream, int? width, CancellationToken cancellationToken)
     {
-        return _fileUpdateService.CompressImageAsync(inputStream, 75, width, cancellationToken);
+        return _fileUpdateService.CompressImageAsync(InventoryReceiptStream, 75, width, cancellationToken);
     }
 }

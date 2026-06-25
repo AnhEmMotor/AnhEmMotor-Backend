@@ -1,18 +1,19 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Output;
-using Application.Interfaces.Services.HR;
 using Domain.Constants.Order;
+using Domain.Constants.Product;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 
-public sealed class UpdateManyOutputStatusCommandHandler(
+public class UpdateManyOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    ICommissionService commissionService,
+    ICommissionUpdateRepository commissionUpdateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, Result<List<OutputItemResponse>?>>
 {
     public async Task<Result<List<OutputItemResponse>?>> Handle(
@@ -39,14 +40,14 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                         $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}",
                         "StatusId"));
             }
-            if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
+            if (OrderVehicleAssignmentStatus.RequiresVehicleAssignment(request.StatusId))
             {
                 var containsVehicleManagedProduct = output.OutputInfos
                     .Any(
                         oi => oi.ProductVariant?.Product?.ProductCategory != null &&
                             string.Equals(
                                 oi.ProductVariant.Product.ProductCategory.ManagementType,
-                                "vin_number",
+                                ProductManagementType.VinNumber,
                                 StringComparison.OrdinalIgnoreCase));
                 if (containsVehicleManagedProduct)
                 {
@@ -67,9 +68,9 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                     continue;
                 foreach (var info in output.OutputInfos)
                 {
-                    if (info.ProductVarientId.HasValue && info.Count.HasValue)
+                    if (info.ProductVariantId.HasValue && info.Count.HasValue)
                     {
-                        var key = (info.ProductVarientId.Value, info.ProductVariantColorId);
+                        var key = (info.ProductVariantId.Value, info.ProductVariantColorId);
                         if (productDemands.ContainsKey(key))
                         {
                             productDemands[key] += info.Count.Value;
@@ -127,7 +128,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
         {
             foreach (var output in outputsList)
             {
-                await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
+                await commissionUpdateRepository.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
                     .ConfigureAwait(false);
             }
         } else if (string.Compare(request.StatusId, OrderStatus.Cancelled) == 0 ||
@@ -135,7 +136,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
         {
             foreach (var output in outputsList)
             {
-                await commissionService.VoidCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
+                await commissionUpdateRepository.VoidCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
             }
         }
         return outputsList.Adapt<List<OutputItemResponse>>();

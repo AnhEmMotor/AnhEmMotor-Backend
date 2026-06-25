@@ -2,6 +2,7 @@ using Application.ApiContracts.Evaluation.Responses;
 using Application.Common.Models;
 using Domain.Primitives;
 using MediatR;
+using Sieve.Models;
 
 namespace Application.Features.ServiceWorkshopEvaluations.Queries.GetServiceWorkshopEvaluations;
 

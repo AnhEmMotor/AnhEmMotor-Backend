@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.DeleteOutput;
 
-public sealed class DeleteOutputCommandHandler(
+public class DeleteOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteOutputCommand, Result>

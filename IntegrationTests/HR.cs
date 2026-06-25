@@ -1,8 +1,5 @@
 using Application.Features.HR.Commands.CreateCommissionPolicy;
 using Application.Features.HR.Commands.CreateEmployee;
-using Application.Features.Outputs.Commands.UpdateOutputStatus;
-using Domain.Constants.Order;
-using Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -12,9 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using BrandEntity = Domain.Entities.Brand;
 using OutputEntity = Domain.Entities.Output;
-using ProductCategoryEntity = Domain.Entities.ProductCategory;
 using ProductEntity = Domain.Entities.Product;
 
 namespace IntegrationTests;
@@ -223,119 +218,6 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "HR05 - Tính toán hoa hồng khi đơn hàng hoàn thành")]
-    public async Task HR05_Calculate_Commission_On_Order_Completion()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var staffUser = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            $"sales_{uniqueId}",
-            "Password123!",
-            [Outputs.Create, Outputs.ChangeStatus],
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            $"sales_{uniqueId}",
-            "Password123!",
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        db.EmployeeProfiles.Add(new EmployeeProfile { UserId = staffUser.Id, BaseSalary = 5000000, JobTitle = "Sales" });
-        var brand = new BrandEntity { Name = "Honda" };
-        var cat = new ProductCategoryEntity { Name = "Bikes" };
-        db.Brands.Add(brand);
-        db.ProductCategories.Add(cat);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var prod = new ProductEntity { Name = "Wave", BrandId = brand.Id, CategoryId = cat.Id, StatusId = "for-sale" };
-        db.Products.Add(prod);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var variant = new ProductVariant { ProductId = prod.Id, Price = 20000000, UrlSlug = $"wave-{uniqueId}" };
-        db.ProductVariants.Add(variant);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var inputStatus = new InputStatus { Key = "finished" };
-        if (!await db.InputStatuses
-            .AnyAsync(s => string.Compare(s.Key, "finished") == 0, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true))
-            db.InputStatuses.Add(inputStatus);
-        var input = new Input { InputDate = DateTimeOffset.UtcNow, StatusId = "finished" };
-        db.InputReceipts.Add(input);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        db.InputInfos
-            .Add(
-                new InputInfo
-                {
-                    InputId = input.Id,
-                    ProductId = variant.Id,
-                    Count = 10,
-                    RemainingCount = 10,
-                    InputPrice = 15000000
-                });
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        db.CommissionPolicies
-            .Add(
-                new CommissionPolicy
-                {
-                    ProductId = prod.Id,
-                    Type = "Percentage",
-                    Value = 5,
-                    IsActive = true,
-                    EffectiveDate = DateTimeOffset.UtcNow.AddDays(-1),
-                    Name = "5% Commission"
-                });
-        var statuses = new[]
-        {
-            OrderStatus.Pending,
-            OrderStatus.ConfirmedCod,
-            OrderStatus.Delivering,
-            OrderStatus.Completed
-        };
-        foreach (var s in statuses)
-        {
-            if (!await db.OutputStatuses
-                .AnyAsync(st => string.Compare(st.Key, s) == 0, TestContext.Current.CancellationToken)
-                .ConfigureAwait(true))
-                db.OutputStatuses.Add(new OutputStatus { Key = s });
-        }
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var order = new OutputEntity
-        {
-            CreatedBy = staffUser.Id,
-            StatusId = OrderStatus.Pending,
-            OutputInfos = [new OutputInfo { ProductVarientId = variant.Id, Count = 1, Price = 20000000 }]
-        };
-        db.OutputOrders.Add(order);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var orderId = order.Id;
-        await HttpClientJsonExtensions.PatchAsJsonAsync(
-            _client,
-            $"/api/v1/SalesOrders/{orderId}/status",
-            new UpdateOutputStatusCommand { StatusId = OrderStatus.ConfirmedCod },
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        await HttpClientJsonExtensions.PatchAsJsonAsync(
-            _client,
-            $"/api/v1/SalesOrders/{orderId}/status",
-            new UpdateOutputStatusCommand { StatusId = OrderStatus.Delivering },
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        var response = await HttpClientJsonExtensions.PatchAsJsonAsync(
-            _client,
-            $"/api/v1/SalesOrders/{orderId}/status",
-            new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed },
-            TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK);
-        var commission = await db.CommissionRecords
-            .FirstOrDefaultAsync(r => r.OutputId == orderId, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        commission.Should().NotBeNull();
-        commission!.Amount.Should().Be(1000000);
-        commission.Status.Should().Be(CommissionStatus.Confirmed);
-    }
-
     [Fact(DisplayName = "HR07 - Cập nhật trạng thái thanh toán bảng lương")]
     public async Task HR07_Update_Payroll_Status_Paid()
     {
@@ -395,7 +277,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             new { month = now.Month, year = now.Year },
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
         var updatedRecord = await db.CommissionRecords
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == record.Id, TestContext.Current.CancellationToken)

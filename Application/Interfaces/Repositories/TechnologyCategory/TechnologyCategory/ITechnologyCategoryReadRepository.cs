@@ -15,3 +15,4 @@ public interface ITechnologyCategoryReadRepository
 
     public Task<List<Domain.Entities.TechnologyCategory>> GetAllAsync(CancellationToken cancellationToken = default);
 }
+

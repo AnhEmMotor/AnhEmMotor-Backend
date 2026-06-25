@@ -3,16 +3,16 @@ using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.UpdateOutput;
 
-public sealed class UpdateOutputCommandValidator : AbstractValidator<UpdateOutputCommand>
+public class UpdateOutputCommandValidator : AbstractValidator<UpdateOutputCommand>
 {
     public UpdateOutputCommandValidator()
     {
-        RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Tên ngu?i nh?n không du?c d? tr?ng.");
-        RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("Ð?a ch? giao hàng không du?c d? tr?ng.");
+        RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Tï¿½n ngu?i nh?n khï¿½ng du?c d? tr?ng.");
+        RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("ï¿½?a ch? giao hï¿½ng khï¿½ng du?c d? tr?ng.");
         RuleFor(x => x.CustomerPhone)
             .NotEmpty()
-            .WithMessage("S? di?n tho?i không du?c d? tr?ng.")
+            .WithMessage("S? di?n tho?i khï¿½ng du?c d? tr?ng.")
             .MustBeValidPhoneNumber()
-            .WithMessage("Ð?nh d?ng s? di?n tho?i Vi?t Nam không h?p l?.");
+            .WithMessage("ï¿½?nh d?ng s? di?n tho?i Vi?t Nam khï¿½ng h?p l?.");
     }
 }

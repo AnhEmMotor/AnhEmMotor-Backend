@@ -3,8 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PlateDossier;
 using Domain.Entities;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.PlateDossiers.Commands.CreatePlateDossier
 {
@@ -21,7 +19,6 @@ namespace Application.Features.PlateDossiers.Commands.CreatePlateDossier
             {
                 return Result<int>.Failure(Error.BadRequest("Hồ sơ biển số cho đơn hàng này đã tồn tại."));
             }
-
             var plateDossier = new PlateDossier
             {
                 OutputId = request.OutputId,
@@ -32,10 +29,8 @@ namespace Application.Features.PlateDossiers.Commands.CreatePlateDossier
                 LicensePlate = request.LicensePlate ?? string.Empty,
                 Status = "Prepare"
             };
-
             plateDossierUpdateRepository.Add(plateDossier);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return Result<int>.Success(plateDossier.Id);
         }
     }

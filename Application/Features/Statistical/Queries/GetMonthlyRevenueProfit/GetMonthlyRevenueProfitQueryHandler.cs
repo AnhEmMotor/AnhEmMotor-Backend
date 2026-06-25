@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
 
-public sealed class GetMonthlyRevenueProfitQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetMonthlyRevenueProfitQuery, Result<IEnumerable<MonthlyRevenueProfitResponse>>>
+public class GetMonthlyRevenueProfitQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetMonthlyRevenueProfitQuery, Result<IEnumerable<MonthlyRevenueProfitResponse>>>
 {
     public async Task<Result<IEnumerable<MonthlyRevenueProfitResponse>>> Handle(
         GetMonthlyRevenueProfitQuery request,

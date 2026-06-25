@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Files.Queries.GetFileById;
 
-public sealed class GetFileByIdQueryHandler(IMediaFileReadRepository repository, IFileReadService fileReadService) : IRequestHandler<GetFileByIdQuery, Result<MediaFileResponse?>>
+public class GetFileByIdQueryHandler(IMediaFileReadRepository repository, IFileReadService fileReadService) : IRequestHandler<GetFileByIdQuery, Result<MediaFileResponse?>>
 {
     public async Task<Result<MediaFileResponse?>> Handle(GetFileByIdQuery request, CancellationToken cancellationToken)
     {

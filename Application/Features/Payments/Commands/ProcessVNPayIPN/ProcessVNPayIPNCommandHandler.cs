@@ -1,5 +1,6 @@
 using Application.ApiContracts.Payment.Responses;
 using Application.Common.Models;
+using Application.Common.Payments;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Services;
@@ -9,7 +10,7 @@ using System;
 
 namespace Application.Features.Payments.Commands.ProcessVNPayIPN
 {
-    public sealed class ProcessVNPayIPNCommandHandler(
+    public class ProcessVNPayIPNCommandHandler(
         IOutputReadRepository readRepository,
         IOutputUpdateRepository updateRepository,
         IUnitOfWork unitOfWork,
@@ -33,9 +34,7 @@ namespace Application.Features.Payments.Commands.ProcessVNPayIPN
             {
                 return response;
             }
-            decimal expectedAmount = string.Compare(order.StatusId, OrderStatus.WaitingDeposit) == 0
-                ? order.DepositAmount
-                : order.Total;
+            decimal expectedAmount = OrderPaymentAmountCalculator.GetAmountToPay(order);
             if (response.Amount != expectedAmount)
             {
                 return Error.BadRequest(
@@ -59,6 +58,9 @@ namespace Application.Features.Payments.Commands.ProcessVNPayIPN
             } else
             {
                 order.PaymentStatus = OrderPaymentStatus.Failed;
+                order.PaymentUrl = null;
+                order.PaymentCode = null;
+                order.PaymentExpiredAt = null;
                 updateRepository.Update(order);
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }

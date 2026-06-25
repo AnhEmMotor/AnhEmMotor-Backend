@@ -12,7 +12,6 @@ namespace Domain.Entities
         [Required]
         public decimal CurrentDebt { get; set; }
 
-        // Navigation
         [ForeignKey(nameof(SupplierId))]
         public Supplier? Supplier { get; set; }
     }

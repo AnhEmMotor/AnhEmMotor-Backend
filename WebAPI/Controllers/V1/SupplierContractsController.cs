@@ -8,15 +8,15 @@ using Application.Features.SupplierContracts.Commands.UpdateSupplierContract;
 using Application.Features.SupplierContracts.Queries.GetDeletedSupplierContractsList;
 using Application.Features.SupplierContracts.Queries.GetSupplierContractAuditLogs;
 using Application.Features.SupplierContracts.Queries.GetSupplierContractById;
-using Application.Features.SupplierContracts.Queries.GetSupplierContractStatistics;
 using Application.Features.SupplierContracts.Queries.GetSupplierContractsList;
+using Application.Features.SupplierContracts.Queries.GetSupplierContractStatistics;
+using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
@@ -105,7 +105,10 @@ public class SupplierContractsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(request, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, SupplierContract.GetById, new { id = result.IsSuccess ? result.Value?.Id : Guid.Empty });
+        return HandleCreated(
+            result,
+            SupplierContract.GetById,
+            new { id = result.IsSuccess ? result.Value?.Id : Guid.Empty });
     }
 
     /// <summary>

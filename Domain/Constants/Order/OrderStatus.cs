@@ -18,6 +18,10 @@ namespace Domain.Constants.Order
 
         public static readonly HashSet<string> All = [Completed, ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, Cancelled, WaitingInstallment, InstallmentApproved];
 
+        public static readonly HashSet<string> ConfirmedOrderStatuses = [Completed, ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Refunded, Refunding, WaitingPickup, Cancelled, InstallmentApproved];
+
+        public static readonly HashSet<string> UnconfirmedOrderStatuses = [Pending, WaitingDeposit, WaitingInstallment];
+
         public static readonly HashSet<string> BookingPhases = [ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, WaitingInstallment, InstallmentApproved];
 
         public static readonly HashSet<string> NotDeletedPhases = [Completed, Refunded, Cancelled];
@@ -36,6 +40,20 @@ namespace Domain.Constants.Order
             return BookingPhases.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
+        public static bool IsConfirmedOrderStatus(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+            return ConfirmedOrderStatuses.Contains(value, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public static bool IsUnconfirmedOrderStatus(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+            return UnconfirmedOrderStatuses.Contains(value, StringComparer.OrdinalIgnoreCase);
+        }
+
         public static bool IsCannotDelete(string? value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -46,14 +64,14 @@ namespace Domain.Constants.Order
         public static string GetDisplayName(string status) => status.ToLower() switch
         {
             "pending" => "Chờ xác nhận",
-            "confirmedcod" => "Đã xác nhận (Chờ thanh toán COD)",
-            "paidprocessing" => "Đã thanh toán (Chờ xử lý)",
-            "waitingdeposit" => "Chờ đặt cọc",
-            "depositpaid" => "Đã đặt cọc (Chờ xử lý)",
-            "waitinginstallment" => "Chờ duyệt trả góp",
-            "installmentapproved" => "Đã duyệt trả góp (Chờ xử lý)",
+            "confirmed_cod" => "Đã xác nhận (COD)",
+            "paid_processing" => "Đang xử lý",
+            "waiting_deposit" => "Chờ đặt cọc",
+            "deposit_paid" => "Đã đặt cọc",
+            "waiting_installment" => "Chờ duyệt trả góp",
+            "installment_approved" => "Đã duyệt trả góp (Chờ xử lý)",
             "delivering" => "Đang giao hàng",
-            "waitingpickup" => "Chờ lấy hàng tại cửa hàng",
+            "waiting_pickup" => "Chờ lấy hàng",
             "completed" => "Đã hoàn thành",
             "cancelled" => "Đã hủy",
             "refunding" => "Đang hoàn tiền",

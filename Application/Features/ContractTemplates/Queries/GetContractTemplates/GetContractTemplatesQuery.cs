@@ -9,9 +9,13 @@ namespace Application.Features.ContractTemplates.Queries.GetContractTemplates;
 public sealed record GetContractTemplatesQuery : IRequest<Result<PagedResult<ContractTemplateResponse>>>
 {
     public int Page { get; init; } = 1;
+
     public int PageSize { get; init; } = 10;
+
     public string? Search { get; init; }
+
     public string? Sorts { get; init; }
+
     public string? Filters { get; init; }
 
     public static GetContractTemplatesQuery FromRequest(SieveModel request)
@@ -20,7 +24,7 @@ public sealed record GetContractTemplatesQuery : IRequest<Result<PagedResult<Con
         {
             Page = request.Page ?? 1,
             PageSize = request.PageSize ?? 10,
-            Search = request.Filters, // Simplification for now
+            Search = request.Filters,
             Sorts = request.Sorts,
             Filters = request.Filters
         };

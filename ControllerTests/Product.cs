@@ -1,6 +1,5 @@
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
-using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -14,13 +13,12 @@ using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Queries.CheckSlugAvailability;
-using Application.Features.Products.Queries.GetActiveVariantLiteListForInput;
+using Application.Features.Products.Queries.GetActiveVariantLiteListForInventoryReceipt;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
-using Application.Features.Technologies.Commands.CreateTechnology;
 using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -210,13 +208,17 @@ public class Product
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PRODUCT_097 - API variants-lite/for-input trả về 403 khi user không có quyền input")]
-    public async Task GetActiveVariantLiteProductsForInput_UserNoPermission_ReturnsForbidden()
+    [Fact(
+        DisplayName = "PRODUCT_097 - API variants-lite/for-InventoryReceipt trả về 403 khi user không có quyền InventoryReceipt")]
+    public async Task GetActiveVariantLiteProductsForInventoryReceipt_UserNoPermission_ReturnsForbidden()
     {
-        _senderMock.Setup(m => m.Send(It.IsAny<GetActiveVariantLiteListForInputQuery>(), It.IsAny<CancellationToken>()))
+        _senderMock.Setup(
+            m => m.Send(It.IsAny<GetActiveVariantLiteListForInventoryReceiptQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetActiveVariantLiteProductsForInputAsync(new SieveModel(), CancellationToken.None))
+            () => _controller.GetActiveVariantLiteProductsForInventoryReceiptAsync(
+                new SieveModel(),
+                CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -264,17 +266,6 @@ public class Product
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetProductsForPriceManagementAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
-    }
-
-    [Fact(DisplayName = "PRODUCT_187 - API tạo Công nghệ mới trả về 201 Created")]
-    public async Task CreateTechnology_ValidData_ReturnsCreated()
-    {
-        var command = new CreateTechnologyCommand("Công nghệ ABS", 1, null, "ABS", "Hệ thống chống bó cứng phanh", null);
-        _senderMock.Setup(m => m.Send(It.IsAny<CreateTechnologyCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<TechnologyResponse>.Success(new TechnologyResponse { Id = 1, Name = "ABS" }));
-        var result = await _controller.CreateTechnologyAsync(command, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        Assert.IsType<OkObjectResult>(result);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

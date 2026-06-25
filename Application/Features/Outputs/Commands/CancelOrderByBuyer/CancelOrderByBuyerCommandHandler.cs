@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.CancelOrderByBuyer;
 
-public sealed class CancelOrderByBuyerCommandHandler(
+public class CancelOrderByBuyerCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CancelOrderByBuyerCommand, Result<OrderDetailResponse>>

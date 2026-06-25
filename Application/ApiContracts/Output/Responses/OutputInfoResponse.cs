@@ -5,9 +5,9 @@ public class OutputInfoResponse
 {
     public int? Id { get; set; }
 
-    public int? ProductVarientId { get; set; }
+    public int? ProductVariantId { get; set; }
 
-    public int? ProductVarientColorId { get; set; }
+    public int? ProductVariantColorId { get; set; }
 
     public string? ProductName { get; set; }
 
@@ -18,4 +18,6 @@ public class OutputInfoResponse
     public decimal? CostPrice { get; set; }
 
     public string? CoverImageUrl { get; set; }
+
+    public List<VehicleAssignmentOptionResponse> AssignedVehicles { get; set; } = [];
 }

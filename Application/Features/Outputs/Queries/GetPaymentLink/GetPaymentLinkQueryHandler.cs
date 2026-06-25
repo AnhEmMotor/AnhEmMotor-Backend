@@ -1,5 +1,7 @@
 using Application.ApiContracts.Payment.Requests;
+using Application.ApiContracts.Payment.Responses;
 using Application.Common.Models;
+using Application.Common.Payments;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Role;
@@ -9,128 +11,109 @@ using Domain.Constants.Order;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Features.Outputs.Queries.GetPaymentLink
+namespace Application.Features.Outputs.Queries.GetPaymentLink;
+
+public sealed class GetPaymentLinkQueryHandler(
+    IOutputReadRepository readRepository,
+    IOutputUpdateRepository updateRepository,
+    IUnitOfWork unitOfWork,
+    IVNPayService vnpayService,
+    IPayOSService payosService,
+    IUserReadRepository userReadRepository,
+    IRoleReadRepository roleReadRepository,
+    IHttpContextAccessor httpContextAccessor) : IRequestHandler<GetPaymentLinkQuery, Result<PaymentLinkResponse>>
 {
-    public sealed class GetPaymentLinkQueryHandler(
-        IOutputReadRepository readRepository,
-        IOutputUpdateRepository updateRepository,
-        IUnitOfWork unitOfWork,
-        IVNPayService vnpayService,
-        IPayOSService payosService,
-        IUserReadRepository userReadRepository,
-        IRoleReadRepository roleReadRepository,
-        IHttpContextAccessor httpContextAccessor) : IRequestHandler<GetPaymentLinkQuery, Result<string>>
+    public async Task<Result<PaymentLinkResponse>> Handle(GetPaymentLinkQuery request, CancellationToken cancellationToken)
     {
-        public async Task<Result<string>> Handle(GetPaymentLinkQuery request, CancellationToken cancellationToken)
+        if (string.IsNullOrEmpty(request.CurrentUserId) || !Guid.TryParse(request.CurrentUserId, out var currentUserId))
         {
-            if (string.IsNullOrEmpty(request.CurrentUserId) ||
-                !Guid.TryParse(request.CurrentUserId, out var currentUserId))
+            return Error.Unauthorized("Bạn cần đăng nhập để thực hiện thao tác này.");
+        }
+        var order = await readRepository.GetByIdWithDetailsAsync(request.OrderId, cancellationToken).ConfigureAwait(false);
+        if (order is null)
+        {
+            return Error.NotFound("Không tìm thấy đơn hàng", "Order");
+        }
+        bool isOwner = order.BuyerId == currentUserId;
+        bool hasEditPermission = false;
+        if (!isOwner)
+        {
+            var user = await userReadRepository.FindUserByIdAsync(currentUserId, cancellationToken).ConfigureAwait(false);
+            if (user != null)
             {
-                return Error.Unauthorized("Bạn cần đăng nhập để thực hiện thao tác này.");
-            }
-            var order = await readRepository.GetByIdWithDetailsAsync(request.OrderId, cancellationToken)
-                .ConfigureAwait(false);
-            if (order is null)
-            {
-                return Error.NotFound("Không tìm thấy đơn hàng", "Order");
-            }
-            bool isOwner = order.BuyerId == currentUserId;
-            bool hasEditPermission = false;
-            if (!isOwner)
-            {
-                var user = await userReadRepository.FindUserByIdAsync(currentUserId, cancellationToken)
-                    .ConfigureAwait(false);
-                if (user != null)
+                var userRoles = await userReadRepository.GetRolesOfUserAsync(user, cancellationToken).ConfigureAwait(false);
+                var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken).ConfigureAwait(false);
+                var roleIds = roleEntities.Select(r => r.Id).ToList();
+                var userPermissions = await roleReadRepository.GetPermissionsNameByRoleIdAsync(roleIds, cancellationToken);
+                if (userPermissions != null && userPermissions.Contains(Domain.Constants.Permission.Permissions.Outputs.Edit))
                 {
-                    var userRoles = await userReadRepository.GetRolesOfUserAsync(user, cancellationToken)
-                        .ConfigureAwait(false);
-                    var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken)
-                        .ConfigureAwait(false);
-                    var roleIds = roleEntities.Select(r => r.Id).ToList();
-                    var userPermissions = await roleReadRepository.GetPermissionsNameByRoleIdAsync(
-                        roleIds,
-                        cancellationToken)
-                        .ConfigureAwait(false);
-                    if (userPermissions != null &&
-                        userPermissions.Contains(Domain.Constants.Permission.Permissions.Outputs.Edit))
-                    {
-                        hasEditPermission = true;
-                    }
+                    hasEditPermission = true;
                 }
             }
-            if (!isOwner && !hasEditPermission)
+        }
+        if (!isOwner && !hasEditPermission)
+        {
+            return Error.Forbidden("Bạn không có quyền lấy link thanh toán cho đơn hàng này.");
+        }
+        if (string.Compare(order.StatusId, OrderStatus.WaitingDeposit) != 0 && string.Compare(order.StatusId, OrderStatus.Pending) != 0)
+        {
+            return Error.BadRequest("Đơn hàng này không ở trạng thái cần thanh toán", "Order");
+        }
+        var context = httpContextAccessor.HttpContext;
+        if (context is null)
+        {
+            return Error.Failure("Lỗi hệ thống: Không tìm thấy HttpContext", "System");
+        }
+        var paymentMethod = order.PaymentMethod;
+        if (string.IsNullOrWhiteSpace(paymentMethod) || string.Compare(paymentMethod, PaymentMethod.COD) == 0)
+        {
+            return Result<PaymentLinkResponse>.Success(new PaymentLinkResponse(string.Empty));
+        }
+        if (!string.IsNullOrEmpty(order.PaymentUrl) && order.PaymentExpiredAt.HasValue && order.PaymentExpiredAt.Value > DateTimeOffset.UtcNow)
+        {
+            return Result<PaymentLinkResponse>.Success(new PaymentLinkResponse(order.PaymentUrl!));
+        }
+        var amountToPay = string.Compare(order.StatusId, OrderStatus.WaitingDeposit) == 0 ? order.DepositAmount : order.Total;
+        if (string.Compare(paymentMethod, PaymentMethod.VNPay) == 0)
+        {
+            var vnpayRequest = new VNPayPaymentRequest
             {
-                return Error.Forbidden("Bạn không có quyền lấy link thanh toán cho đơn hàng này.");
-            }
-            if (string.Compare(order.StatusId, OrderStatus.WaitingDeposit) != 0 &&
-                string.Compare(order.StatusId, OrderStatus.Pending) != 0)
+                OrderId = order.Id,
+                OrderCode = order.Id.ToString(),
+                Amount = amountToPay,
+                Description = $"Thanh toan don hang {order.Id}",
+                CreatedDate = DateTime.UtcNow
+            };
+            var paymentUrl = vnpayService.CreatePaymentUrl(context, vnpayRequest);
+            order.PaymentUrl = paymentUrl;
+            order.PaymentCode = order.Id.ToString();
+            order.PaymentExpiredAt = DateTimeOffset.UtcNow.AddMinutes(15);
+            updateRepository.Update(order);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return Result<PaymentLinkResponse>.Success(new PaymentLinkResponse(paymentUrl));
+        }
+        if (string.Compare(paymentMethod, PaymentMethod.PayOS) == 0)
+        {
+            long orderCode = (long)order.Id * 100000 + (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % 100000);
+            var payosRequest = new PayOSPaymentRequest
             {
-                return Error.BadRequest("Đơn hàng này không ở trạng thái cần thanh toán", "Order");
-            }
-            var context = httpContextAccessor.HttpContext;
-            if (context is null)
+                OrderId = order.Id,
+                OrderCode = orderCode,
+                Amount = amountToPay,
+                Description = $"ANHEMMOTOR {order.Id}"
+            };
+            var response = await payosService.CreatePaymentAsync(payosRequest, cancellationToken).ConfigureAwait(false);
+            if (response.ErrorCode == 0)
             {
-                return Error.Failure("Lỗi hệ thống: Không tìm thấy HttpContext", "System");
-            }
-            var amountToPay = string.Compare(order.StatusId, OrderStatus.WaitingDeposit) == 0
-                ? (order.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0)) * (order.DepositRatio ?? 0) / 100)
-                : order.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
-            var paymentMethod = order.PaymentMethod;
-            if (string.IsNullOrWhiteSpace(paymentMethod) || string.Compare(paymentMethod, PaymentMethod.COD) == 0)
-            {
-                paymentMethod = PaymentMethod.PayOS;
-                order.PaymentMethod = paymentMethod;
-            }
-            if (!string.IsNullOrEmpty(order.PaymentUrl) &&
-                order.PaymentExpiredAt.HasValue &&
-                order.PaymentExpiredAt.Value > DateTimeOffset.UtcNow &&
-                string.Compare(order.PaymentMethod, paymentMethod) == 0)
-            {
-                return order.PaymentUrl;
-            }
-            if (string.Compare(paymentMethod, PaymentMethod.VNPay) == 0)
-            {
-                var vnpayRequest = new VNPayPaymentRequest
-                {
-                    OrderId = order.Id,
-                    OrderCode = order.Id.ToString(),
-                    Amount = amountToPay,
-                    Description = $"Thanh toan don hang {order.Id}",
-                    CreatedDate = DateTime.UtcNow
-                };
-                var paymentUrl = vnpayService.CreatePaymentUrl(context, vnpayRequest);
-                order.PaymentUrl = paymentUrl;
-                order.PaymentCode = order.Id.ToString();
-                order.PaymentExpiredAt = DateTimeOffset.UtcNow.AddMinutes(15);
+                order.PaymentUrl = response.CheckoutUrl;
+                order.PaymentCode = orderCode.ToString();
+                order.PaymentExpiredAt = DateTimeOffset.UtcNow.AddDays(1);
                 updateRepository.Update(order);
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                return paymentUrl;
+                return Result<PaymentLinkResponse>.Success(new PaymentLinkResponse(response.CheckoutUrl));
             }
-            if (string.Compare(paymentMethod, PaymentMethod.PayOS) == 0)
-            {
-                long orderCode = (long)order.Id * 100000 + (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % 100000);
-                var payosRequest = new PayOSPaymentRequest
-                {
-                    OrderId = order.Id,
-                    OrderCode = orderCode,
-                    Amount = amountToPay,
-                    Description = $"ANHEMMOTOR {order.Id}"
-                };
-                var response = await payosService.CreatePaymentAsync(payosRequest, cancellationToken)
-                    .ConfigureAwait(false);
-                if (response.ErrorCode == 0)
-                {
-                    order.PaymentUrl = response.CheckoutUrl;
-                    order.PaymentCode = orderCode.ToString();
-                    order.PaymentExpiredAt = DateTimeOffset.UtcNow.AddDays(1);
-                    updateRepository.Update(order);
-                    await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    return response.CheckoutUrl;
-                }
-                return Error.Failure($"Lỗi PayOS: {response.Message}", "PayOS");
-            }
-            return Error.BadRequest("Phương thức thanh toán không hỗ trợ thanh toán online", "PaymentMethod");
+            return Error.Failure($"Lỗi PayOS: {response.Message}", "PayOS");
         }
+        return Error.BadRequest("Phương thức thanh toán không hỗ trợ thanh toán online", "PaymentMethod");
     }
 }
-

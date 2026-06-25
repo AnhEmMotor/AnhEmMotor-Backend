@@ -103,13 +103,7 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         db.Products.Add(product);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var vin = "VIN123456";
-        var existingVehicle = new VehicleEntity
-        {
-            LeadId = lead.Id,
-            ProductId = product.Id,
-            VinNumber = vin,
-            EngineNumber = "ENG1"
-        };
+        var existingVehicle = new VehicleEntity { LeadId = lead.Id, VinNumber = vin, EngineNumber = "ENG1" };
         db.Vehicles.Add(existingVehicle);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var payload = new { lead_id = lead.Id, product_id = product.Id, vin_number = vin, engine_number = "ENG2" };
@@ -136,13 +130,7 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         db.Products.Add(product);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var vin = "VIN_WS_123";
-        var existingVehicle = new VehicleEntity
-        {
-            LeadId = lead.Id,
-            ProductId = product.Id,
-            VinNumber = vin,
-            EngineNumber = "ENG1"
-        };
+        var existingVehicle = new VehicleEntity { LeadId = lead.Id, VinNumber = vin, EngineNumber = "ENG1" };
         db.Vehicles.Add(existingVehicle);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var payload = new
@@ -225,7 +213,10 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var payload = new { new_lead_id = lead2.Id };
         var response = await _client.PostAsJsonAsync($"/api/v1/vehicle/{vehicle.Id}/transfer", payload)
             .ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var errContent = await response.Content
+            .ReadAsStringAsync(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK, $"Error 500 content: {errContent}");
         var updatedAsset = await response!.Content
             .ReadFromJsonAsync<VehicleResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);

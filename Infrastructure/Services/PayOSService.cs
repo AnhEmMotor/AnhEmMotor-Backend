@@ -27,6 +27,25 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
         var baseUrl = _configuration["PayOS:BaseUrl"]?.TrimEnd('/');
         var returnUrl = _configuration["PayOS:ReturnUrl"];
         var cancelUrl = _configuration["PayOS:CancelUrl"];
+        var missingSettings = new Dictionary<string, string?>
+        {
+            ["ClientId"] = clientId,
+            ["ApiKey"] = apiKey,
+            ["ChecksumKey"] = checksumKey,
+            ["BaseUrl"] = baseUrl,
+            ["ReturnUrl"] = returnUrl,
+            ["CancelUrl"] = cancelUrl
+        }.Where(setting => string.IsNullOrWhiteSpace(setting.Value))
+            .Select(setting => setting.Key)
+            .ToList();
+        if (missingSettings.Count > 0)
+        {
+            return new PayOSPaymentResponse
+            {
+                ErrorCode = 1,
+                Message = $"PayOS chưa được cấu hình: {string.Join(", ", missingSettings)}."
+            };
+        }
         var payload = new
         {
             orderCode = request.OrderCode,

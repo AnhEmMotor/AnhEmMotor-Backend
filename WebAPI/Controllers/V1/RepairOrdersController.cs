@@ -1,18 +1,16 @@
 using Application.Features.RepairOrders.Commands.AssignTechnician;
+using Application.Features.RepairOrders.Commands.CompleteRepairOrder;
 using Application.Features.RepairOrders.Commands.CreateRepairOrder;
 using Application.Features.RepairOrders.Commands.IssueParts;
-using Application.Features.RepairOrders.Commands.CompleteRepairOrder;
 using Application.Features.RepairOrders.Queries.GetRepairOrderDetail;
 using Application.Features.RepairOrders.Queries.GetRepairOrdersList;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 using Sieve.Models;
+using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace WebAPI.Controllers.V1
 {
@@ -29,9 +27,11 @@ namespace WebAPI.Controllers.V1
         /// Tạo phiếu sửa chữa xe (Check-in xe).
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(CreateRepairOrderCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateAsync(
+            CreateRepairOrderCommand command,
+            CancellationToken cancellationToken)
         {
-            var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 

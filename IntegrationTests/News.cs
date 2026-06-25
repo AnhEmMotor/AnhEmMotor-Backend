@@ -50,11 +50,11 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                     new Domain.Entities.News { Title = "D2", Slug = "d2", IsPublished = false, Content = "C" });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-        var response = await _client.GetAsync("/api/v1/news", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync("/api/v1/news/public", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var pagedResult = await response!.Content
-            .ReadFromJsonAsync<PagedResult<NewsResponse>>(TestContext.Current.CancellationToken)
+            .ReadFromJsonAsync<PagedResult<NewsSummaryResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         pagedResult.Should().NotBeNull();
         var content = pagedResult!.Items;
@@ -80,15 +80,14 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                     });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-        var response = await _client.GetAsync("/api/v1/news/tin-abc", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync("/api/v1/news/public/tin-abc", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
-            .ReadFromJsonAsync<NewsResponse>(TestContext.Current.CancellationToken)
+            .ReadFromJsonAsync<NewsForStoreResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.Title.Should().Be("Target");
-        content.Slug.Should().Be("tin-abc");
     }
 
     [Fact(DisplayName = "NEWS_011 - Kiểm tra tính đúng đắn của phân trang tin tức")]
@@ -123,7 +122,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             throw new Exception($"NEWS_011 failed with {response!.StatusCode}: {error}");
         }
         var pagedResult = await response!.Content
-            .ReadFromJsonAsync<PagedResult<NewsResponse>>(TestContext.Current.CancellationToken)
+            .ReadFromJsonAsync<PagedResult<NewsSummaryResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         pagedResult.Should().NotBeNull();
         pagedResult.Items.Should().HaveCount(2);
@@ -132,10 +131,22 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     [Fact(DisplayName = "NEWS_012 - Đảm bảo tính toàn vẹn của thông tin Metadata SEO")]
     public async Task CreateNews_WithSEO_SavesMetadataCorrectly()
     {
+        int categoryId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var cat = new NewsCategory { Name = "Tech", Slug = $"tech-{Guid.NewGuid()}" };
+            db.NewsCategories.Add(cat);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            categoryId = cat.Id;
+        }
         var payload = new
         {
             title = "SEO News",
+            slug = "seo-news",
+            category_id = categoryId,
             content = "C",
+            cover_image_url = "http://img.com",
             meta_title = "Meta T",
             metaTitle = "Meta T",
             meta_description = "Meta D",
@@ -150,7 +161,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Domain.Constants.Permission.Permissions.News.Create"],
+            [Domain.Constants.Permission.Permissions.News.Create],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -162,15 +173,19 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.PostAsJsonAsync("/api/v1/news", payload).ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var news = await db.News
-            .FirstOrDefaultAsync(n => string.Compare(n.Title, "SEO News") == 0, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true);
-        news.Should().NotBeNull();
-        news!.MetaTitle.Should().Be("Meta T");
-        news.MetaDescription.Should().Be("Meta D");
-        news.MetaKeywords.Should().Be("K1, K2");
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var news = await db.News
+                .FirstOrDefaultAsync(
+                    n => string.Compare(n.Title, "SEO News") == 0,
+                    TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
+            news.Should().NotBeNull();
+            news!.MetaTitle.Should().Be("Meta T");
+            news.MetaDescription.Should().Be("Meta D");
+            news.MetaKeywords.Should().Be("K1, K2");
+        }
     }
 
     [Fact(DisplayName = "NEWS_013 - Tạo bài viết với đầy đủ thông tin SEO và Danh mục")]
@@ -189,6 +204,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         {
             title = "SEO News 2",
             content = "Full content",
+            cover_image_url = "http://img.com",
             meta_title = "SEO Meta Title",
             meta_description = "SEO Meta Description",
             slug = "seo-news-slug",
@@ -200,7 +216,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Domain.Constants.Permission.Permissions.News.Create"],
+            [Domain.Constants.Permission.Permissions.News.Create],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -244,7 +260,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Domain.Constants.Permission.Permissions.News.Update"],
+            [Domain.Constants.Permission.Permissions.News.Edit],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -274,29 +290,49 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         int newsId;
         Guid authorId;
+        int categoryId;
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var news = new Domain.Entities.News { Title = "News", Slug = "news-auth", Content = "C" };
+            var cat = new NewsCategory { Name = "Cat 17", Slug = $"cat-17-{uniqueId}" };
+            db.NewsCategories.Add(cat);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            categoryId = cat.Id;
+            var news = new Domain.Entities.News
+            {
+                Title = "News",
+                Slug = $"news-auth-{uniqueId}",
+                Content = "C",
+                CategoryId = categoryId
+            };
             db.News.Add(news);
             var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
                 _factory.Services,
                 $"author_{uniqueId}",
                 "Password123!",
-                ["Domain.Constants.Permission.Permissions.News.Create"],
+                [Domain.Constants.Permission.Permissions.News.Create],
                 TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             authorId = user.Id;
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             newsId = news.Id;
         }
-        var payload = new { id = newsId, title = "Updated Title", author_id = authorId, content = "New content" };
+        var payload = new
+        {
+            id = newsId,
+            title = "Updated Title",
+            slug = $"updated-title-{uniqueId}",
+            category_id = categoryId,
+            author_id = authorId,
+            content = "New content",
+            cover_image_url = "http://img.com"
+        };
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             $"admin_{uniqueId}",
             "Password123!",
-            ["Domain.Constants.Permission.Permissions.News.Update"],
+            [Domain.Constants.Permission.Permissions.News.Edit],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -333,7 +369,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            ["Domain.Constants.Permission.Permissions.News.Delete"],
+            [Domain.Constants.Permission.Permissions.News.Delete],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -403,7 +439,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var pagedResult = await response!.Content
-            .ReadFromJsonAsync<PagedResult<NewsResponse>>(TestContext.Current.CancellationToken)
+            .ReadFromJsonAsync<PagedResult<NewsSummaryResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         pagedResult!.Items.Should().HaveCount(2);
         pagedResult.Items

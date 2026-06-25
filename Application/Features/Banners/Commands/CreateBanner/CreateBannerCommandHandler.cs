@@ -7,9 +7,9 @@ using MediatR;
 
 namespace Application.Features.Banners.Commands.CreateBanner;
 
-public sealed class CreateBannerCommandHandler(
+public class CreateBannerCommandHandler(
     IBannerInsertRepository bannerInsertRepository,
-    IHttpTokenAccessorService tokenAccessorService,
+    ICurrentUserContext currentUserContext,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateBannerCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(CreateBannerCommand request, CancellationToken cancellationToken)
@@ -17,16 +17,12 @@ public sealed class CreateBannerCommandHandler(
         var banner = new Banner
         {
             Title = request.Title.Trim(),
-            ImageUrl = request.ImageUrl.Trim(),
-            LinkUrl = request.LinkUrl?.Trim(),
-            CtaText = request.CtaText?.Trim(),
-            Position = request.Position?.Trim(),
-            Placement = request.Placement?.Trim(),
-            StartDate = request.StartDate,
-            EndDate = request.EndDate,
-            IsActive = request.IsActive,
-            Priority = request.Priority,
-            DisplayOrder = request.DisplayOrder
+            DesktopImageUrl = request.DesktopImageUrl.Trim(),
+            MobileImageUrl = request.MobileImageUrl?.Trim(),
+            Description = request.Description?.Trim(),
+            CtaLink = request.CtaLink?.Trim(),
+            CtaLabel = request.CtaLabel?.Trim(),
+            Placement = request.Placement?.Trim()
         };
         bannerInsertRepository.Add(banner);
         bannerInsertRepository.AddLog(
@@ -34,7 +30,7 @@ public sealed class CreateBannerCommandHandler(
             {
                 Banner = banner,
                 Action = "Create",
-                ChangedBy = tokenAccessorService.GetUserId() ?? "Unknown",
+                ChangedBy = currentUserContext.GetUserId().ToString(),
                 Details = $"Created banner '{banner.Title}'"
             });
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

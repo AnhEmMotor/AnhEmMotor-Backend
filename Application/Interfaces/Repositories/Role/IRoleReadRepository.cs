@@ -45,3 +45,4 @@ namespace Application.Interfaces.Repositories.Role
             CancellationToken cancellationToken = default);
     }
 }
+

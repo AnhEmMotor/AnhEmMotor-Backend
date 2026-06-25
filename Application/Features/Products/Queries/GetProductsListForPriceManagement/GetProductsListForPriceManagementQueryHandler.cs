@@ -7,7 +7,7 @@ using Sieve.Models;
 
 namespace Application.Features.Products.Queries.GetProductsListForPriceManagement;
 
-public sealed class GetProductsListForPriceManagementQueryHandler(IProductReadRepository repository) : IRequestHandler<GetProductsListForPriceManagementQuery, Result<PagedResult<ProductPriceLiteResponse>>>
+public class GetProductsListForPriceManagementQueryHandler(IProductReadRepository repository) : IRequestHandler<GetProductsListForPriceManagementQuery, Result<PagedResult<ProductPriceLiteResponse>>>
 {
     public async Task<Result<PagedResult<ProductPriceLiteResponse>>> Handle(
         GetProductsListForPriceManagementQuery request,

@@ -6,7 +6,6 @@ public class CreateServiceEvaluationReplyRequest
 
     public string Message { get; set; } = string.Empty;
 
-    // optional - để UI có thể map giống Backup.md
     public bool MarkAsProcessed { get; set; } = true;
 }
 

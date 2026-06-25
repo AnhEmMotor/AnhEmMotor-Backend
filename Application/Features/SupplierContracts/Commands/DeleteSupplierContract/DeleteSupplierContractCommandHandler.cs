@@ -16,7 +16,6 @@ public sealed class DeleteSupplierContractCommandHandler(
         var entity = await readRepo.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (entity == null)
             return Result.Failure("Supplier contract not found.");
-
         deleteRepo.Delete(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result.Success();

@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Commands.RestoreSupplier;
 
-public sealed class RestoreSupplierCommandHandler(
+public class RestoreSupplierCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreSupplierCommand, Result<SupplierResponse?>>

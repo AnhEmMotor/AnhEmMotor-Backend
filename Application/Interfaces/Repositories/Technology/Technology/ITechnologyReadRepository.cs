@@ -30,3 +30,4 @@ public interface ITechnologyReadRepository
 
     public Task<List<TechnologyEntity>> GetAllWithCategoryAsync(CancellationToken cancellationToken = default);
 }
+

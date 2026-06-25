@@ -33,7 +33,18 @@ namespace UnitTests;
 
 public class PermissionAndRole
 {
-    #pragma warning disable IDE0079 
+    private readonly Mock<IUserReadRepository> _userReadRepositoryMock;
+    private readonly Mock<IRoleReadRepository> _roleReadRepositoryMock;
+    private readonly Mock<ICurrentUserContext> _currentUserContextMock;
+
+    public PermissionAndRole()
+    {
+        _userReadRepositoryMock = new Mock<IUserReadRepository>();
+        _roleReadRepositoryMock = new Mock<IRoleReadRepository>();
+        _currentUserContextMock = new Mock<ICurrentUserContext>();
+    }
+
+    #pragma warning disable IDE0079
     #pragma warning disable CRR0035
     [Fact(DisplayName = "PERM_001 - Lấy tất cả permissions thành công")]
     public async Task GetAllPermissions_NoParams_ReturnsGroupedPermissions()
@@ -65,8 +76,12 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
-        var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object);
-        var query = new GetMyPermissionsQuery { UserId = userId.ToString() };
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
+        var handler = new GetMyPermissionsQueryHandler(
+            roleReadRepoMock.Object,
+            userReadRepoMock.Object,
+            _currentUserContextMock.Object);
+        var query = new GetMyPermissionsQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.Value.Permissions.Should().HaveCount(5);
@@ -88,8 +103,12 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object);
-        var query = new GetMyPermissionsQuery { UserId = userId.ToString() };
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
+        var handler = new GetMyPermissionsQueryHandler(
+            roleReadRepoMock.Object,
+            userReadRepoMock.Object,
+            _currentUserContextMock.Object);
+        var query = new GetMyPermissionsQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.Value.Permissions.Should().BeEmpty();
@@ -623,7 +642,7 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_041 - Unit - Quyền tối thượng của tài khoản Admin (Bypass check)")]
     public async Task PermissionHandler_AdminRole_BypassesPermissionCheck()
     {
-        var dbContextMock = new Mock<ApplicationDBContext>(new DbContextOptions<ApplicationDBContext>());
+        var dbContextMock = new Mock<ApplicationDBContext>(new DbContextOptions<ApplicationDBContext>(), null!);
         var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
         var userManagerMock = new Mock<UserManager<ApplicationUser>>(
             userStoreMock.Object,
@@ -642,7 +661,7 @@ public class PermissionAndRole
         var requirement = new PermissionRequirement("Some.Permission");
         var claims = new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) };
         var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
-        var authContext = new AuthorizationHandlerContext([requirement], userPrincipal, null);
+        var authContext = new AuthorizationHandlerContext([requirement], userPrincipal, null!);
         userManagerMock.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(user);
         userManagerMock.Setup(x => x.GetRolesAsync(user)).ReturnsAsync(["Admin"]);
         var configuration = new ConfigurationBuilder()
@@ -666,6 +685,65 @@ public class PermissionAndRole
         var command = new UpdateRoleCommand { RoleId = Guid.NewGuid(), Permissions = ["Invalid_Permission_Name"] };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Permissions);
+    }
+
+    [Fact(DisplayName = "USR_PERM_001 - L?y quy?n c?a ngu?i dùng theo ID tr? v? danh sách chu?i ID")]
+    public async Task GetUserPermissionsById_ReturnsListOfStringIds()
+    {
+        var handler = new GetUserPermissionsByIdQueryHandler(
+            _userReadRepositoryMock.Object,
+            _roleReadRepositoryMock.Object);
+        var userId = Guid.NewGuid();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
+        var roles = new List<string> { "Manager" };
+        var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
+        var permissionNames = new List<string> { Brands.View, Products.View };
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roles);
+        _roleReadRepositoryMock.Setup(x => x.GetRolesByNameAsync(roles, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roleEntities);
+        _roleReadRepositoryMock.Setup(
+            x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(permissionNames);
+        var query = new GetUserPermissionsByIdQuery { UserId = userId };
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Permissions.Should().BeAssignableTo<IList<string>>();
+        result.Value.Permissions.Should().Contain(Brands.View);
+        result.Value.Permissions.Should().Contain(Products.View);
+        result.Value.Permissions.Should().NotContainNulls();
+    }
+
+    [Fact(DisplayName = "USR_PERM_002 - L?y quy?n c?a ngu?i dùng hi?n t?i (GetMyPermissions) tr? v? danh sách chu?i ID")]
+    public async Task GetMyPermissions_ReturnsListOfStringIds()
+    {
+        var handler = new GetMyPermissionsQueryHandler(
+            _roleReadRepositoryMock.Object,
+            _userReadRepositoryMock.Object,
+            _currentUserContextMock.Object);
+        var userId = Guid.NewGuid();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
+        var roles = new List<string> { "Manager" };
+        var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
+        var permissionNames = new List<string> { Suppliers.View, Files.Upload };
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roles);
+        _roleReadRepositoryMock.Setup(x => x.GetRolesByNameAsync(roles, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roleEntities);
+        _roleReadRepositoryMock.Setup(
+            x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(permissionNames);
+        _currentUserContextMock.Setup(x => x.GetUserId()).Returns(userId);
+        var query = new GetMyPermissionsQuery();
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Permissions.Should().BeAssignableTo<IList<string>>();
+        result.Value.Permissions.Should().Contain(Suppliers.View);
+        result.Value.Permissions.Should().Contain(Files.Upload);
     }
 
 #pragma warning restore CRR0035

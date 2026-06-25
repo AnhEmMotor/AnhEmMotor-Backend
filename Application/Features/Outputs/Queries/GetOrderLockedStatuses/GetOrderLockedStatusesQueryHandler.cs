@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOrderLockedStatuses;
 
-public sealed class GetOrderLockedStatusesQueryHandler : IRequestHandler<GetOrderLockedStatusesQuery, Result<OrderLockStatusResponse>>
+public class GetOrderLockedStatusesQueryHandler : IRequestHandler<GetOrderLockedStatusesQuery, Result<OrderLockStatusResponse>>
 {
     public Task<Result<OrderLockStatusResponse>> Handle(
         GetOrderLockedStatusesQuery request,

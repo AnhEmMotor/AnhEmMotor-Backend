@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetOrderStatusCounts;
 
-public sealed class GetOrderStatusCountsQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetOrderStatusCountsQuery, Result<IEnumerable<OrderStatusCountResponse>>>
+public class GetOrderStatusCountsQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetOrderStatusCountsQuery, Result<IEnumerable<OrderStatusCountResponse>>>
 {
     public async Task<Result<IEnumerable<OrderStatusCountResponse>>> Handle(
         GetOrderStatusCountsQuery request,

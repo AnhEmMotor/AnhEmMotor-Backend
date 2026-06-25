@@ -2,7 +2,6 @@ using Application.ApiContracts.Supplier.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Constants.Input;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -22,33 +21,26 @@ public class SupplierReadRepository(
         return context.GetQuery<SupplierEntity>(mode);
     }
 
-    internal IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
+    internal IQueryable<SupplierWithTotalInventoryReceiptResponse> GetQueryableWithTotalInventoryReceipt(
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<SupplierEntity>(mode)
-            .GroupJoin(
-                context.GetQuery<Domain.Entities.Input>(DataFetchMode.ActiveOnly)
-                    .Where(i => i.StatusId == InputStatus.Finish),
-                supplier => supplier.Id,
-                input => input.SupplierId,
-                (supplier, inputs) => new { supplier, inputs })
             .Select(
-                x => new SupplierWithTotalInputResponse
+                x => new SupplierWithTotalInventoryReceiptResponse
                 {
-                    Id = x.supplier.Id,
-                    Name = x.supplier.Name!,
-                    Phone = x.supplier.Phone,
-                    Email = x.supplier.Email,
-                    Address = x.supplier.Address,
-                    StatusId = x.supplier.StatusId!,
-                    CreatedAt = x.supplier.CreatedAt,
-                    UpdatedAt = x.supplier.UpdatedAt,
-                    DeletedAt = x.supplier.DeletedAt,
-                    Notes = x.supplier.Notes,
-                    TaxIdentificationNumber = x.supplier.TaxIdentificationNumber,
-                    PartnerTypeId = x.supplier.PartnerTypeId ?? "supplier",
-                    TotalInput =
-                        x.inputs.SelectMany(i => i.InputInfos).Sum(ii => (ii.Count ?? 0) * (ii.InputPrice ?? 0))
+                    Id = x.Id,
+                    Name = x.Name!,
+                    Phone = x.Phone,
+                    Email = x.Email,
+                    Address = x.Address,
+                    StatusId = x.StatusId!,
+                    CreatedAt = x.CreatedAt,
+                    UpdatedAt = x.UpdatedAt,
+                    DeletedAt = x.DeletedAt,
+                    Notes = x.Notes,
+                    TaxIdentificationNumber = x.TaxIdentificationNumber,
+                    PartnerTypeId = x.PartnerTypeId ?? "supplier",
+                    TotalInventoryReceipt = 0
                 });
     }
 
@@ -61,25 +53,25 @@ public class SupplierReadRepository(
         return paginator.ApplyAsync<SupplierEntity, TResponse>(query, sieveModel, mode, cancellationToken);
     }
 
-    public Task<PagedResult<TResponse>> GetPagedWithTotalInputAsync<TResponse>(
+    public Task<PagedResult<TResponse>> GetPagedWithTotalInventoryReceiptAsync<TResponse>(
         SieveModel sieveModel,
         DataFetchMode mode = DataFetchMode.ActiveOnly,
         CancellationToken cancellationToken = default)
     {
-        var query = GetQueryableWithTotalInput(mode);
-        return paginator.ApplyAsync<SupplierWithTotalInputResponse, TResponse>(
+        var query = GetQueryableWithTotalInventoryReceipt(mode);
+        return paginator.ApplyAsync<SupplierWithTotalInventoryReceiptResponse, TResponse>(
             query,
             sieveModel,
             mode,
             cancellationToken);
     }
 
-    public Task<SupplierWithTotalInputResponse?> GetByIdWithTotalInputAsync(
+    public Task<SupplierWithTotalInventoryReceiptResponse?> GetByIdWithTotalInventoryReceiptAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return GetQueryableWithTotalInput(mode).FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        return GetQueryableWithTotalInventoryReceipt(mode).FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
     public Task<List<SupplierEntity>> GetAllAsync(

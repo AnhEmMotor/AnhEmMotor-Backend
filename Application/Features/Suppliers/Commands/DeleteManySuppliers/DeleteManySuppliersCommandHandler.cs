@@ -1,59 +1,44 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.Supplier;
-using Domain.Constants;
-using Domain.Constants.Input;
+using Application.Interfaces.Repositories.SupplierDebt;
+using Domain.Constants.InventoryReceipt;
 using MediatR;
+using System.Linq;
 
-namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
-
-public sealed class DeleteManySuppliersCommandHandler(
-    ISupplierReadRepository readRepository,
-    ISupplierDeleteRepository deleteRepository,
-    IInputReadRepository inputReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManySuppliersCommand, Result>
+namespace Application.Features.Suppliers.Commands.DeleteManySuppliers
 {
-    public async Task<Result> Handle(DeleteManySuppliersCommand request, CancellationToken cancellationToken)
+    public class DeleteManySuppliersCommandHandler(
+        ISupplierReadRepository readRepository,
+        ISupplierDeleteRepository deleteRepository,
+        ISupplierDebtReadRepository supplierDebtReadRepository,
+        IUnitOfWork unitOfWork) : IRequestHandler<DeleteManySuppliersCommand, Result>
     {
-        var uniqueIds = request.Ids.Distinct().ToList();
-        var errorDetails = new List<Error>();
-        var allSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
-            .ConfigureAwait(false);
-        var activeSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
-        var allSupplierMap = allSuppliers.ToDictionary(s => s.Id);
-        var activeSupplierSet = activeSuppliers.Select(s => s.Id).ToHashSet();
-        var relevantInputs = await inputReadRepository.GetBySupplierIdsAsync(uniqueIds, cancellationToken)
-            .ConfigureAwait(false);
-        var suppliersWithWorkingInputsSet = relevantInputs
-            .Where(x => string.Compare(x.StatusId, InputStatus.Working) == 0 && x.SupplierId.HasValue)
-            .Select(x => x.SupplierId!.Value)
-            .ToHashSet();
-        foreach (var id in uniqueIds)
+        public async Task<Result> Handle(DeleteManySuppliersCommand request, CancellationToken cancellationToken)
         {
-            if (!allSupplierMap.ContainsKey(id))
+            if (request.Ids == null || request.Ids.Count == 0)
             {
-                errorDetails.Add(Error.NotFound($"Supplier with Id {id} not found.", "Id"));
-            } else if (!activeSupplierSet.Contains(id))
-            {
-                errorDetails.Add(Error.BadRequest($"Supplier with Id {id} has already been deleted.", "Id"));
-            } else if (suppliersWithWorkingInputsSet.Contains(id))
-            {
-                errorDetails.Add(
-                    Error.BadRequest(
-                        $"Supplier with Id {id} cannot be deleted because it has working input receipts.",
-                        "Id"));
+                return Result.Success();
             }
-        }
-        if (errorDetails.Count > 0)
-        {
-            return Result.Failure(errorDetails);
-        }
-        if (activeSuppliers.ToList().Count > 0)
-        {
-            deleteRepository.Delete(activeSuppliers);
+            foreach (var id in request.Ids)
+            {
+                var supplier = await readRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+                if (supplier == null)
+                {
+                    return Result.Failure(Error.NotFound($"Supplier with Id {id} not found."));
+                }
+                var supplierDebts = await supplierDebtReadRepository.GetBySupplierIdAsync(id, cancellationToken)
+                    .ConfigureAwait(false);
+                if (supplierDebts.Any(
+                    sd => sd.InventoryReceipt != null && InventoryReceiptStatus.IsCanEdit(sd.InventoryReceipt.StatusId)))
+                {
+                    return Result.Failure(
+                        Error.Conflict($"Cannot delete supplier with Id {id} due to working InventoryReceipt receipts."));
+                }
+                deleteRepository.Delete(supplier);
+            }
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return Result.Success();
         }
-        return Result.Success();
     }
 }

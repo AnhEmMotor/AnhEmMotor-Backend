@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetAdminWarehouseReport;
 
-public sealed class GetAdminWarehouseReportQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetAdminWarehouseReportQuery, Result<AdminWarehouseReportResponse>>
+public class GetAdminWarehouseReportQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetAdminWarehouseReportQuery, Result<AdminWarehouseReportResponse>>
 {
     public async Task<Result<AdminWarehouseReportResponse>> Handle(
         GetAdminWarehouseReportQuery request,

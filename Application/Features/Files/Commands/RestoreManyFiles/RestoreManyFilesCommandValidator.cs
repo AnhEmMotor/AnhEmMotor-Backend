@@ -3,7 +3,7 @@ using System;
 
 namespace Application.Features.Files.Commands.RestoreManyFiles;
 
-public sealed class RestoreManyFilesCommandValidator : AbstractValidator<RestoreManyFilesCommand>
+public class RestoreManyFilesCommandValidator : AbstractValidator<RestoreManyFilesCommand>
 {
     public RestoreManyFilesCommandValidator()
     {

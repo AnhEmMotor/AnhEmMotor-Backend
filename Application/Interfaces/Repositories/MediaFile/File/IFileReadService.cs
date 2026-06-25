@@ -9,5 +9,6 @@ public interface IFileReadService
         string storagePath,
         CancellationToken cancellationToken);
 
-    public Task<Stream> ReadImageAsync(Stream inputStream, int? width, CancellationToken cancellationToken);
+    public Task<Stream> ReadImageAsync(Stream InventoryReceiptStream, int? width, CancellationToken cancellationToken);
 }
+

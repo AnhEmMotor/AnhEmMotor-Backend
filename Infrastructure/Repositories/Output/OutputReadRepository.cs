@@ -1,7 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
-using Domain.Constants.Input;
+using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
@@ -101,6 +101,10 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option)
             .Include(o => o.OutputInfos)
+            .ThenInclude(oi => oi.ProductVariantColor)
+            .Include(o => o.OutputInfos)
+            .ThenInclude(oi => oi.Vehicles)
+            .Include(o => o.OutputInfos)
             .ThenInclude(oi => oi.ProductVariant)
             .ThenInclude(pv => pv!.ProductCollectionPhotos)
             .Include(o => o.OutputStatus)
@@ -116,11 +120,15 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         int? colorId,
         CancellationToken cancellationToken)
     {
-        var validStatusIds = InputStatus.FinishInputValues;
-        var currentStock = await context.InputInfos
+        var validStatusIds = InventoryReceiptStatus.FinishInventoryReceiptValues;
+        var currentStock = await context.InventoryReceiptInfos
             .AsNoTracking()
-            .Where(ii => ii.ProductId == variantId && ii.ProductVariantColorId == colorId && ii.DeletedAt == null)
-            .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
+            .Where(
+                ii => ii.PurchaseRequestItem != null &&
+                    ii.PurchaseRequestItem.ProductVariantId == variantId &&
+                    ii.PurchaseRequestItem.ProductVariantColorId == colorId &&
+                    ii.DeletedAt == null)
+            .Join(context.InventoryReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => x.i.DeletedAt == null && validStatusIds.Contains(x.i.StatusId))
             .SumAsync(x => x.ii.RemainingCount ?? 0, cancellationToken)
             .ConfigureAwait(false);

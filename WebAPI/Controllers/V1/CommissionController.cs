@@ -1,9 +1,9 @@
-﻿using Application.ApiContracts.HR.Responses;
+using Application.ApiContracts.HR.Responses;
 using Application.Features.HR.Commands.ApprovePayroll;
 using Application.Features.HR.Queries.GetCommissionRecords;
 using Application.Features.HR.Queries.GetPayrollSummary;
 using Asp.Versioning;
-using Domain.Entities;
+using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -28,10 +28,10 @@ public class CommissionController(ISender mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách các bản ghi hoa hồng.</returns>
     [HttpGet]
-    public async Task<ActionResult<List<CommissionRecord>>> GetRecordsAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetRecordsAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetCommissionRecordsQuery(), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        var result = await mediator.Send(new GetCommissionRecordsQuery(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -41,15 +41,15 @@ public class CommissionController(ISender mediator) : ApiController
     /// <param name="year">Năm.</param>
     /// <param name="ct">Token hủy bỏ.</param>
     [HttpGet("payroll-summary")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Payroll.View)]
+    [HasPermission(Payroll.View)]
     [ProducesResponseType(typeof(List<PayrollResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPayrollSummaryAsync(
         [FromQuery] int month,
         [FromQuery] int year,
         CancellationToken ct)
     {
-        var result = await mediator.Send(new GetPayrollSummaryQuery(month, year), ct).ConfigureAwait(true);
-        return Ok(result.Value);
+        var result = await mediator.Send(new GetPayrollSummaryQuery(month, year), ct).ConfigureAwait(false);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -58,12 +58,10 @@ public class CommissionController(ISender mediator) : ApiController
     /// <param name="command">Lệnh phê duyệt payroll.</param>
     /// <param name="ct">Token hủy bỏ.</param>
     [HttpPost("approve-payroll")]
-    [HasPermission(Domain.Constants.Permission.Permissions.Payroll.Approve)]
+    [HasPermission(Payroll.Approve)]
     public async Task<IActionResult> ApprovePayrollAsync([FromBody] ApprovePayrollCommand command, CancellationToken ct)
     {
-        var result = await mediator.Send(command, ct).ConfigureAwait(true);
-        if (!result.IsSuccess)
-            return BadRequest(result.Error);
-        return Ok();
+        var result = await mediator.Send(command, ct).ConfigureAwait(false);
+        return HandleResult(result);
     }
 }

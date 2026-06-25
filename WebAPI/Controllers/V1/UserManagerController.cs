@@ -6,10 +6,10 @@ using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.UserManager.Commands.UpdateUser;
+using Application.Features.UserManager.Commands.UploadAvatarForAdmin;
 using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Application.Features.UserManager.Queries.GetUsersListForOutput;
-using Application.Features.Users.Commands.UploadAvatar;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
@@ -51,7 +51,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         [FromBody] CreateUserByManagerCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(model, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(model, cancellationToken).ConfigureAwait(false);
         return HandleCreated(result);
     }
 
@@ -69,7 +69,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetUsersListQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -87,7 +87,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetUsersListForOutputQuery() { SieveModel = sieveModel };
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -101,7 +101,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetUserByIdQuery() { UserId = userId }, cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -119,7 +119,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var modelToSend = model with { UserId = userId };
-        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -139,7 +139,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var modelToSend = model with { UserId = userId };
-        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -159,7 +159,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var modelToSend = model with { UserId = userId };
-        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -177,7 +177,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var modelToSend = model with { UserId = userId };
-        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -201,7 +201,7 @@ public class UserManagerController(IMediator mediator) : ApiController
                 CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
             },
             cancellationToken)
-            .ConfigureAwait(true);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -219,9 +219,9 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
-        var command = new UploadAvatarCommand
+        var command = new UploadAvatarForAdminCommand
         {
-            UserId = userId.ToString(),
+            UserId = userId,
             FileContent = file.OpenReadStream(),
             FileName = file.FileName
         };

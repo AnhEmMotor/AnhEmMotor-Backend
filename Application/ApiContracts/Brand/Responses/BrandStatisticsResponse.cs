@@ -13,5 +13,7 @@ namespace Application.ApiContracts.Brand.Responses
         public string? LatestUpdatedBrandName { get; set; }
 
         public DateTimeOffset? LatestUpdatedAt { get; set; }
+
+        public int DeletedBrandsCount { get; set; }
     }
 }

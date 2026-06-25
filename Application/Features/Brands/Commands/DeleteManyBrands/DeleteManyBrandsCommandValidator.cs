@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.Brands.Commands.DeleteManyBrands;
 
-public sealed class DeleteManyBrandsCommandValidator : AbstractValidator<DeleteManyBrandsCommand>
+public class DeleteManyBrandsCommandValidator : AbstractValidator<DeleteManyBrandsCommand>
 {
     public DeleteManyBrandsCommandValidator()
     {

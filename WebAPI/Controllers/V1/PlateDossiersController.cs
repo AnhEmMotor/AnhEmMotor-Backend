@@ -5,11 +5,9 @@ using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 using Sieve.Models;
+using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace WebAPI.Controllers.V1
 {
@@ -26,9 +24,11 @@ namespace WebAPI.Controllers.V1
         /// Tạo hồ sơ làm biển số xe mới cho đơn hàng bán xe.
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(CreatePlateDossierCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateAsync(
+            CreatePlateDossierCommand command,
+            CancellationToken cancellationToken)
         {
-            var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
 
@@ -36,9 +36,12 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách hồ sơ làm biển số xe có phân trang và bộ lọc.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetListAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetListAsync(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new GetPlateDossiersListQuery { SieveModel = sieveModel }, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(new GetPlateDossiersListQuery { SieveModel = sieveModel }, cancellationToken)
+                .ConfigureAwait(true);
             return HandleResult(result);
         }
 
@@ -46,9 +49,11 @@ namespace WebAPI.Controllers.V1
         /// Cập nhật trạng thái tiến độ làm biển số xe.
         /// </summary>
         [HttpPut("status")]
-        public async Task<IActionResult> UpdateStatusAsync(UpdatePlateDossierStatusCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateStatusAsync(
+            UpdatePlateDossierStatusCommand command,
+            CancellationToken cancellationToken)
         {
-            var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+            var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
     }

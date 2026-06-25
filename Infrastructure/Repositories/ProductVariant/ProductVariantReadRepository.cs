@@ -35,17 +35,29 @@ namespace Infrastructure.Repositories.ProductVariant
             return context.GetQuery<ProductVariantEntity>(mode);
         }
 
-        public Task<ProductVariantEntity?> GetByIdWithDetailsAsync(
+        public async Task<ProductVariantEntity?> GetByIdWithDetailsAsync(
             int id,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
-            return context.GetQuery<ProductVariantEntity>(mode)
+            return await context.ProductVariants
+                .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
-                .Include(v => v.ProductVariantColors)
+                .ThenInclude(ov => ov!.Option)
                 .FirstOrDefaultAsync(v => v.Id == id, cancellationToken)
-                .ContinueWith(t => t.Result, cancellationToken);
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IEnumerable<ProductVariantEntity>> GetAllAsync(
+            CancellationToken cancellationToken,
+            DataFetchMode mode = DataFetchMode.ActiveOnly)
+        {
+            var query = context.ProductVariants.AsQueryable();
+            return await query
+                .Include(v => v.ProductVariantColors)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
 
         public Task<ProductVariantEntity?> GetBySlugAsync(
@@ -68,7 +80,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Where(v => v.ProductId == productId && (mode != DataFetchMode.ActiveOnly || v.DeletedAt == null))
                 .Include(v => v.Product)
                 .Include(v => v.ProductCollectionPhotos)
-                .Include(v => v.InputInfos)
+                .Include(v => v.InventoryReceiptInfos)
                 .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
@@ -87,6 +99,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Where(v => ids.Contains(v.Id))
                 .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
+                .ThenInclude(c => c!.Parent)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.ProductVariantColors)
                 .Include(v => v.VariantOptionValues)
@@ -119,6 +132,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 query = query.Where(
                     v => v.Product != null &&
                         (EF.Functions.Like(v.Product.Name!, searchPattern) ||
+                            (v.VariantName != null && EF.Functions.Like(v.VariantName, searchPattern)) ||
                             v.VariantOptionValues
                                 .Any(
                                     vov => vov.OptionValue != null &&
@@ -147,8 +161,10 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
                 .ThenInclude(ov => ov!.Option)
-                .Include(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
-                .ThenInclude(ii => ii.InputReceipt)
+                .Include(
+                    v => v.InventoryReceiptInfos
+                        .Where(ii => ii.DeletedAt == null && ii.InventoryReceipt!.DeletedAt == null))
+                .ThenInclude(ii => ii.InventoryReceipt)
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
                 .ThenInclude(oi => oi.OutputOrder);
             if (string.IsNullOrWhiteSpace(sorts))

@@ -50,3 +50,4 @@ public interface IStatisticalReadRepository
 
     public Task<CustomerServiceAnalyticsResponse> GetCustomerServiceAnalyticsAsync(CancellationToken cancellationToken);
 }
+

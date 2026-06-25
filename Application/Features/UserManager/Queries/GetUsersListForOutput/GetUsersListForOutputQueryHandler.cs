@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.UserManager.Queries.GetUsersListForOutput;
 
-public sealed class GetUsersListForOutputQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetUsersListForOutputQuery, Result<PagedResult<UserDTOForOutputResponse>>>
+public class GetUsersListForOutputQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetUsersListForOutputQuery, Result<PagedResult<UserDTOForOutputResponse>>>
 {
     public async Task<Result<PagedResult<UserDTOForOutputResponse>>> Handle(
         GetUsersListForOutputQuery request,

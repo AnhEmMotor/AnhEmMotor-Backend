@@ -9,7 +9,7 @@ using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace Application.Features.Files.Commands.UploadManyProductImages;
 
-public sealed class UploadManyProductImagesCommandHandler(
+public class UploadManyProductImagesCommandHandler(
     IFileReadService fileReadService,
     IFileInsertService fileInsertService,
     IMediaFileInsertRepository insertRepository,
@@ -28,7 +28,7 @@ public sealed class UploadManyProductImagesCommandHandler(
         var allowedExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" };
         foreach (var fileDto in request.Files)
         {
-            if (fileDto.FileContent.Length > MaxFileSize)
+            if (fileDto.Content.Length > MaxFileSize)
             {
                 return Result<List<MediaFileResponse>>.Failure($"File {fileDto.FileName} exceeds 10MB limit");
             }
@@ -42,11 +42,11 @@ public sealed class UploadManyProductImagesCommandHandler(
         var mediaFiles = new List<MediaFileEntity>();
         foreach (var fileDto in request.Files)
         {
-            if (fileDto.FileContent.Length > MaxFileSize)
+            if (fileDto.Content.Length > MaxFileSize)
             {
                 return Result<List<MediaFileResponse>>.Failure($"File {fileDto.FileName} exceeds 10MB limit");
             }
-            var saveResult = await fileInsertService.SaveFileAsync(fileDto.FileContent, cancellationToken, "products")
+            var saveResult = await fileInsertService.SaveFileAsync(fileDto.Content, cancellationToken, "products")
                 .ConfigureAwait(false);
             if (saveResult.IsFailure)
             {

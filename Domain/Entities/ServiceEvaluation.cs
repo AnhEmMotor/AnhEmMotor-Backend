@@ -23,16 +23,16 @@ public class ServiceEvaluation : BaseEntity
     public Contact Contact { get; set; } = null!;
 
     [Column("Criteria", TypeName = "nvarchar(30)")]
-    public string Criteria { get; set; } = ""; // QualityOfCar | AttitudeOfService
+    public string Criteria { get; set; } = string.Empty;
 
     [Column("Rating")]
     public int Rating { get; set; }
 
     [Column("Review", TypeName = "nvarchar(MAX)")]
-    public string Review { get; set; } = "";
+    public string Review { get; set; } = string.Empty;
 
     [Column("ProcessingStatus", TypeName = "nvarchar(30)")]
-    public string ProcessingStatus { get; set; } = "Unprocessed"; // Unprocessed | Processed
+    public string ProcessingStatus { get; set; } = "Unprocessed";
 
     [Column("InternalNotes", TypeName = "nvarchar(MAX)")]
     public string? InternalNotes { get; set; }

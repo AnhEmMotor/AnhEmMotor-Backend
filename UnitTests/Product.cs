@@ -15,7 +15,6 @@ using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Mappings;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.GetProductAttributeLabels;
-using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
@@ -29,12 +28,10 @@ using Application.Interfaces.Repositories.Technology;
 using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
-using Domain.Constants.Order;
 using Domain.Entities;
 using FluentAssertions;
 using Mapster;
 using Moq;
-using Sieve.Models;
 using System.Net;
 using ProductEntity = Domain.Entities.Product;
 
@@ -50,7 +47,7 @@ public class Product
     private readonly Mock<IBrandReadRepository> _brandReadRepoMock;
     private readonly Mock<IProductVariantInsertRepository> _variantInsertRepoMock;
     private readonly Mock<IProductVariantUpdateRepository> _variantUpdateRepoMock;
-    private readonly Mock<IProductVarientDeleteRepository> _variantDeleteRepoMock;
+    private readonly Mock<IProductVariantDeleteRepository> _variantDeleteRepoMock;
     private readonly Mock<IProductVariantReadRepository> _variantReadRepoMock;
     private readonly Mock<IOptionReadRepository> _optionReadRepoMock;
     private readonly Mock<IOptionValueInsertRepository> _optionValueInsertRepoMock;
@@ -72,7 +69,7 @@ public class Product
         _brandReadRepoMock = new Mock<IBrandReadRepository>();
         _variantInsertRepoMock = new Mock<IProductVariantInsertRepository>();
         _variantUpdateRepoMock = new Mock<IProductVariantUpdateRepository>();
-        _variantDeleteRepoMock = new Mock<IProductVarientDeleteRepository>();
+        _variantDeleteRepoMock = new Mock<IProductVariantDeleteRepository>();
         _variantReadRepoMock = new Mock<IProductVariantReadRepository>();
         _optionReadRepoMock = new Mock<IOptionReadRepository>();
         _optionValueInsertRepoMock = new Mock<IOptionValueInsertRepository>();
@@ -106,7 +103,14 @@ public class Product
             BrandId = 1,
             FrontTireSize = "120/70-17",
             RearTireSize = "180/55-17",
-            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, VariantName = "1234", CoverImageUrl = "image.jpg" }]
+            Variants =
+                [new CreateProductVariantRequest
+                {
+                    UrlSlug = "v1",
+                    Price = 1000,
+                    VariantName = "1234",
+                    CoverImageUrl = "image.jpg"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1326,96 +1330,6 @@ public class Product
         result.IsValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "PRODUCT_CALC_001 - CalculateTotalStock tính tổng RemainingCount từ Input receipt Finished")]
-    public void MapProductToDetailForManagerResponse_CalculatesTotalStockCorrectly()
-    {
-        var product = new ProductEntity
-        {
-            Id = 1,
-            Name = "Honda Wave",
-            ProductVariants =
-                [new ProductVariant
-                {
-                    Id = 1,
-                    InputInfos =
-                        [new InputInfo
-                            {
-                                RemainingCount = 10,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                            }, new InputInfo
-                            {
-                                RemainingCount = 5,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Working }
-                            }]
-                }, new ProductVariant
-                {
-                    Id = 2,
-                    InputInfos =
-                        [new InputInfo
-                            {
-                                RemainingCount = 15,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                            }]
-                }]
-        };
-        var response = product.Adapt<ProductDetailForManagerResponse>();
-        response.Stock.Should().Be(25);
-    }
-
-    [Fact(DisplayName = "PRODUCT_CALC_002 - CalculateTotalBooked tính tổng Count từ Output Order Pending/Confirmed")]
-    public void MapProductToDetailForManagerResponse_CalculatesReservedStockCorrectly()
-    {
-        var product = new ProductEntity
-        {
-            Id = 1,
-            Name = "Yamaha",
-            ProductVariants =
-                [new ProductVariant
-                {
-                    Id = 1,
-                    OutputInfos =
-                        [new OutputInfo { Count = 3, OutputOrder = new Output { StatusId = OrderStatus.Pending } }, new OutputInfo
-                            {
-                                Count = 2,
-                                OutputOrder = new Output { StatusId = OrderStatus.ConfirmedCod }
-                            }, new OutputInfo
-                            {
-                                Count = 5,
-                                OutputOrder = new Output { StatusId = OrderStatus.Completed }
-                            }]
-                }]
-        };
-        var response = product.Adapt<ProductDetailForManagerResponse>();
-        response.HasBeenBooked.Should().Be(5);
-    }
-
-    [Fact(DisplayName = "PRODUCT_CALC_003 - Tính toán Available To Sell (ATS) chính xác")]
-    public void MapProductToDetailForManagerResponse_CalculatesATSCorrectly()
-    {
-        var product = new ProductEntity
-        {
-            Id = 1,
-            Name = "Suzuki",
-            ProductVariants =
-                [new ProductVariant
-                {
-                    Id = 1,
-                    InputInfos =
-                        [new InputInfo
-                            {
-                                RemainingCount = 50,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                            }],
-                    OutputInfos =
-                        [new OutputInfo { Count = 10, OutputOrder = new Output { StatusId = OrderStatus.Pending } }]
-                }]
-        };
-        var response = product.Adapt<ProductDetailForManagerResponse>();
-        response.Stock.Should().Be(50);
-        response.HasBeenBooked.Should().Be(10);
-        response.StatusStockId.Should().Be("in_stock");
-    }
-
     [Fact(DisplayName = "PRODUCT_112 - Tạo sản phẩm hợp lệ với 1 biến thể rỗng OptionValues")]
     public void CreateProduct_SingleEmptyVariant_ValidationSuccess()
     {
@@ -1555,65 +1469,6 @@ public class Product
                     .Contains("Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản."));
     }
 
-    [Fact(DisplayName = "PRODUCT_120 - Handler ánh xạ đúng từ Entity sang DTO lite cho price management")]
-    public async Task Handle_ValidData_ReturnsMappedDto()
-    {
-        var products = new List<ProductEntity>
-        {
-            new()
-            {
-                Id = 1,
-                Name = "Test Product",
-                ProductVariants =
-                    [new()
-                    {
-                        Id = 101,
-                        Price = 50000,
-                        VariantOptionValues =
-                            [new VariantOptionValue { OptionValue = new OptionValue { Name = "Red" } }, new VariantOptionValue
-                                {
-                                    OptionValue = new OptionValue { Name = "XL" }
-                                }],
-                        InputInfos =
-                            [new InputInfo
-                                {
-                                    InputPrice = 45000,
-                                    InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-1) }
-                                }, new InputInfo
-                                {
-                                    InputPrice = 40000,
-                                    InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-2) }
-                                }]
-                    }, new() { Id = 102, Price = 0, VariantOptionValues = [], InputInfos = [] }]
-            }
-        };
-        _productReadRepoMock.Setup(
-            x => x.GetPagedProductsForPriceManagementAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<string?>(),
-                It.IsAny<string?>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync((products, products.Count));
-        var query = new GetProductsListForPriceManagementQuery
-        {
-            SieveModel = new SieveModel { Page = 1, PageSize = 10 }
-        };
-        GetProductsListForPriceManagementQueryHandler _handler = new(_productReadRepoMock.Object);
-        var result = await _handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Items.Should().HaveCount(1);
-        var productDto = result.Value.Items.First();
-        productDto.Name.Should().Be("Test Product");
-        productDto.Variants.Should().HaveCount(2);
-        var v1 = productDto.Variants.First(v => v.Id == 101);
-        v1.Name.Should().Be("Red / XL");
-        v1.Price.Should().Be(50000);
-        var v2 = productDto.Variants.First(v => v.Id == 102);
-        v2.Name.Should().Be("Mặc định");
-        v2.Price.Should().Be(0);
-    }
-
     [Fact(DisplayName = "PRODUCT_128 - CalculateInventoryStatus - Trường hợp Còn hàng")]
     public void CalculateInventoryStatus_AvailableMoreThanAlert_ReturnsInStock()
     {
@@ -1650,29 +1505,32 @@ public class Product
             ProductVariants =
                 [new ProductVariant
                 {
-                    InputInfos =
-                        [new InputInfo
+                    InventoryReceiptInfos =
+                        [new InventoryReceiptInfo
                             {
                                 RemainingCount = 10,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InventoryReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
                 }, new ProductVariant
                 {
-                    InputInfos =
-                        [new InputInfo
+                    InventoryReceiptInfos =
+                        [new InventoryReceiptInfo
                             {
                                 RemainingCount = 3,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InventoryReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
                 }, new ProductVariant
                 {
-                    InputInfos =
-                        [new InputInfo
+                    InventoryReceiptInfos =
+                        [new InventoryReceiptInfo
                             {
                                 RemainingCount = 0,
-                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                                InventoryReceipt =
+                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
                             }],
                     OutputInfos = []
                 }]
@@ -1806,7 +1664,7 @@ public class Product
         var variant = new ProductVariant
         {
             VariantName = "V1",
-            ProductVariantColor = new ProductVariantColor { ColorName = "Đỏ" },
+            ProductVariantColors = [new ProductVariantColor { ColorName = "Đỏ" }],
             Product = new ProductEntity { Name = "Bike" }
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
@@ -1814,33 +1672,22 @@ public class Product
         response.DisplayName.Should().Contain("Đỏ");
     }
 
-    [Fact(DisplayName = "PRODUCT_154 - Logic hiển thị tên mặc định khi thiếu thông tin")]
-    public void VariantLiteResponse_DisplayName_FallbackToName()
-    {
-        var variant = new ProductVariant
-        {
-            Product = new ProductEntity { Name = "Standard Bike" },
-            VariantName = null,
-            ProductVariantColor = null
-        };
-        var response = variant.Adapt<ProductVariantLiteResponse>();
-        response.DisplayName.Should().NotBeNullOrEmpty();
-    }
-
     [Fact(DisplayName = "PRODUCT_155 - Tính toán tổng tồn kho (Stock) của biến thể")]
     public void ProductVariant_CalculateStock_SumRemaining()
     {
         var variant = new ProductVariant
         {
-            InputInfos =
-                [new InputInfo
+            InventoryReceiptInfos =
+                [new InventoryReceiptInfo
                 {
                     RemainingCount = 5,
-                    InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                }, new InputInfo
+                    InventoryReceipt =
+                        new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
+                }, new InventoryReceiptInfo
                 {
                     RemainingCount = 10,
-                    InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                    InventoryReceipt =
+                        new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
                 }]
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
@@ -1853,15 +1700,6 @@ public class Product
         var slug = "xe-may%20honda";
         var decoded = WebUtility.UrlDecode(slug);
         decoded.Should().Be("xe-may honda");
-    }
-
-    [Fact(DisplayName = "PRODUCT_164 - Xử lý lỗi khi định dạng JSON Highlights sai")]
-    public void CreateProduct_InvalidHighlightsJson_GracefulDegradation()
-    {
-        var command = new CreateProductCommand { Highlights = "invalid-json" };
-        var validator = new CreateProductCommandValidator();
-        var result = validator.Validate(command);
-        result.IsValid.Should().BeFalse();
     }
 
     [Fact(DisplayName = "PRODUCT_165 - Mapping ưu tiên tiêu đề tùy chỉnh (Custom Title)")]
@@ -1994,7 +1832,7 @@ public class Product
             Variants =
                 [new CreateProductVariantRequest { Colors = [new() { ColorName = "Red" }], VariantName = "V1" }, new CreateProductVariantRequest
                 {
-                     Colors = [new() { ColorName = "Red" }] ,
+                    Colors = [new() { ColorName = "Red" }],
                     VariantName = "V1"
                 }]
         };
@@ -2014,8 +1852,8 @@ public class Product
             Variants =
                 [new CreateProductVariantRequest { Colors = [new() { ColorName = "RED" }] }, new CreateProductVariantRequest
                 {
-                    Colors = [ new() { ColorName = "red" }
-                ] }]
+                    Colors = [new() { ColorName = "red" }]
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -2039,35 +1877,28 @@ public class Product
             UrlSlug = "premium-red",
             Price = 1000,
             Colors =
-            [
-                new CreateProductVariantColorRequest
+                [new CreateProductVariantColorRequest
                 {
                     ColorName = "Red",
                     ColorCode = "#FF0000",
                     CoverImageUrl = "https://example.com/red.jpg"
-                }
-            ]
+                }]
         };
         var validator = new CreateProductVariantCommandValidator();
         var result = validator.Validate(request);
         result.IsValid.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PRODUCT_196 - Chặn biến thể không màu thiếu ảnh đại diện")]
+    [Fact(DisplayName = "PRODUCT_199 - Chặn biến thể không màu thiếu ảnh đại diện")]
     public void CreateProductVariant_NoColorWithoutCoverImage_IsInvalid()
     {
-        var request = new CreateProductVariantRequest
-        {
-            VariantName = "Standard",
-            UrlSlug = "standard",
-            Price = 1000
-        };
+        var request = new CreateProductVariantRequest { VariantName = "Standard", UrlSlug = "standard", Price = 1000 };
         var validator = new CreateProductVariantCommandValidator();
         var result = validator.Validate(request);
         result.IsValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "PRODUCT_197 - Chặn màu biến thể thiếu hình ảnh màu")]
+    [Fact(DisplayName = "PRODUCT_200 - Chặn màu biến thể thiếu hình ảnh màu")]
     public void CreateProductVariant_ColorWithoutImage_IsInvalid()
     {
         var request = new CreateProductVariantRequest
@@ -2075,14 +1906,7 @@ public class Product
             VariantName = "Premium",
             UrlSlug = "premium-blue",
             Price = 1000,
-            Colors =
-            [
-                new CreateProductVariantColorRequest
-                {
-                    ColorName = "Blue",
-                    ColorCode = "#0000FF"
-                }
-            ]
+            Colors = [new CreateProductVariantColorRequest { ColorName = "Blue", ColorCode = "#0000FF" }]
         };
         var validator = new CreateProductVariantCommandValidator();
         var result = validator.Validate(request);

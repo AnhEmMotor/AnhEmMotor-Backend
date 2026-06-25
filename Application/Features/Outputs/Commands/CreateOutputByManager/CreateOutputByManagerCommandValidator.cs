@@ -4,11 +4,11 @@ using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.CreateOutputByManager
 {
-    public sealed class CreateOutputByManagerCommandValidator : AbstractValidator<CreateOutputByManagerCommand>
+    public class CreateOutputByManagerCommandValidator : AbstractValidator<CreateOutputByManagerCommand>
     {
         public CreateOutputByManagerCommandValidator()
         {
-            RuleFor(x => x.OutputInfos).NotEmpty().WithMessage("Input must contain at least one product.");
+            RuleFor(x => x.OutputInfos).NotEmpty().WithMessage("InventoryReceipt must contain at least one product.");
             RuleFor(x => x.OutputInfos)
                 .Must(HaveUniqueProducts)
                 .WithMessage("Product ID cannot be duplicated in a single output.");
@@ -29,9 +29,9 @@ namespace Application.Features.Outputs.Commands.CreateOutputByManager
             var productIds = new HashSet<int>();
             foreach (var item in products)
             {
-                if (item.ProductVarientId.HasValue)
+                if (item.ProductVariantId.HasValue)
                 {
-                    if (!productIds.Add(item.ProductVarientId.Value))
+                    if (!productIds.Add(item.ProductVariantId.Value))
                     {
                         return false;
                     }

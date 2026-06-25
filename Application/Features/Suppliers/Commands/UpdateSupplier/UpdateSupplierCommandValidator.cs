@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplier;
 
-public sealed class UpdateSupplierCommandValidator : AbstractValidator<UpdateSupplierCommand>
+public class UpdateSupplierCommandValidator : AbstractValidator<UpdateSupplierCommand>
 {
     public UpdateSupplierCommandValidator()
     {

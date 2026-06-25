@@ -117,26 +117,27 @@ public sealed class UpdateSupplierContractCommandHandler(
             entity.ContractItems.Clear();
             foreach (var item in request.Request.ContractItems)
             {
-                entity.ContractItems.Add(new SupplierContractItem
-                {
-                    ProductVariantId = item.ProductVariantId,
-                    WholesalePrice = item.WholesalePrice
-                });
+                entity.ContractItems
+                    .Add(
+                        new SupplierContractItem
+                        {
+                            ProductVariantId = item.ProductVariantId,
+                            WholesalePrice = item.WholesalePrice
+                        });
             }
-            auditLogs.Add(new SupplierContractAuditLog
-            {
-                Action = "Update",
-                Details = $"Updated SKU price list ({request.Request.ContractItems.Count} items)",
-                ChangedBy = "system"
-            });
+            auditLogs.Add(
+                new SupplierContractAuditLog
+                {
+                    Action = "Update",
+                    Details = $"Updated SKU price list ({request.Request.ContractItems.Count} items)",
+                    ChangedBy = "system"
+                });
         }
-
         foreach (var log in auditLogs)
         {
             log.SupplierContractId = entity.Id;
             entity.AuditLogs.Add(log);
         }
-
         updateRepo.Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return entity.Adapt<SupplierContractResponse>();

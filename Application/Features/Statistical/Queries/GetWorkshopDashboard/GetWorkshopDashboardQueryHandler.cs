@@ -94,42 +94,47 @@ public class GetWorkshopDashboardQueryHandler : IRequestHandler<GetWorkshopDashb
             WorkshopRevenue = workshopRev,
             RetailRevenue = retailRev
         };
-
-        response.Analytics.RevenueSources.Add(new RevenueSourceDto
-        {
-            Source = "Labor",
-            Amount = revenueOrders.Sum(ro => ro.LaborCost)
-        });
-        response.Analytics.RevenueSources.Add(new RevenueSourceDto
-        {
-            Source = "Parts",
-            Amount = revenueOrders.Sum(ro => ro.PartsCost)
-        });
-
-        // 4. Productivity
-        var employees = await _context.EmployeeProfiles.Include(e => e.User).ToListAsync(cancellationToken);
+        response.Analytics.RevenueSources
+            .Add(
+                new RevenueSourceResponse
+                {
+                    Source = WorkshopDashboardConstants.RevenueSource.Labor,
+                    Amount = revenueOrders.Sum(ro => ro.LaborCost)
+                });
+        response.Analytics.RevenueSources
+            .Add(
+                new RevenueSourceResponse
+                {
+                    Source = WorkshopDashboardConstants.RevenueSource.Parts,
+                    Amount = revenueOrders.Sum(ro => ro.PartsCost)
+                });
+        var employees = await employeeReadRepository.GetAllWithUsersAsync(cancellationToken).ConfigureAwait(false);
         foreach (var emp in employees)
         {
             var currentOrder = inProgressOrders.FirstOrDefault(ro => ro.TechnicianId == emp.Id);
-            response.Productivity.TechnicianStatuses.Add(new TechnicianStatusDto
-            {
-                TechnicianName = emp.User?.FullName ?? "Unknown",
-                Status = currentOrder != null ? "Busy" : "Idle",
-                CurrentTicketId = currentOrder?.Id
-            });
-
+            response.Productivity.TechnicianStatuses
+                .Add(
+                    new TechnicianStatusResponse
+                    {
+                        TechnicianName = emp.User?.FullName ?? "Unknown",
+                        Status =
+                            currentOrder != null
+                                    ? WorkshopDashboardConstants.TechnicianStatus.Busy
+                                    : WorkshopDashboardConstants.TechnicianStatus.Idle,
+                        CurrentTicketId = currentOrder?.Id
+                    });
             var completedCount = completedOrders.Count(ro => ro.TechnicianId == emp.Id);
             var empRev = completedOrders.Where(ro => ro.TechnicianId == emp.Id).Sum(ro => ro.TotalAmount);
-
-            response.Productivity.TechnicianRankings.Add(new TechnicianRankingDto
-            {
-                TechnicianName = emp.User?.FullName ?? "Unknown",
-                CompletedTickets = completedCount,
-                TotalRevenue = empRev,
-                ComplaintRate = 0.0 // Mocked: would normally come from a feedback table
-            });
+            response.Productivity.TechnicianRankings
+                .Add(
+                    new TechnicianRankingResponse
+                    {
+                        TechnicianName = emp.User?.FullName ?? "Unknown",
+                        CompletedTickets = completedCount,
+                        TotalRevenue = empRev,
+                        ComplaintRate = 0.0
+                    });
         }
-
         return response;
     }
 }

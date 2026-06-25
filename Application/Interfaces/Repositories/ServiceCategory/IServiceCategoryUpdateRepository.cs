@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.ServiceCategory
 {
     public interface IServiceCategoryUpdateRepository
     {
-        void Update(ServiceCategoryEntity serviceCategory);
+        public void Update(ServiceCategoryEntity serviceCategory);
     }
 }

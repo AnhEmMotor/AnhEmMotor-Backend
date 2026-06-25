@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.UserManager.Commands.ChangeUserStatus;
 
-public sealed class ChangeUserStatusCommandValidator : AbstractValidator<ChangeUserStatusCommand>
+public class ChangeUserStatusCommandValidator : AbstractValidator<ChangeUserStatusCommand>
 {
     public ChangeUserStatusCommandValidator()
     {

@@ -1,72 +1,66 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
-public class SupplierContract : BaseEntity
-{
-	[Key]
-	public Guid Id { get; set; } = Guid.NewGuid();
+    public class SupplierContract : BaseEntity
+    {
+        [Key]
+        public Guid Id { get; set; } = Guid.NewGuid();
 
-	public int? SupplierId { get; set; }
-	[ForeignKey("SupplierId")]
-	public Supplier? Supplier { get; set; }
+        public int? SupplierId { get; set; }
 
-	[MaxLength(100)]
-	public string ContractNumber { get; set; } = string.Empty;
+        [ForeignKey("SupplierId")]
+        public Supplier? Supplier { get; set; }
 
-	[MaxLength(500)]
-	public string? ContractFilePath { get; set; }
+        [MaxLength(100)]
+        public string ContractNumber { get; set; } = string.Empty;
 
-	public DateTime EffectiveDate { get; set; }
+        [MaxLength(500)]
+        public string? ContractFilePath { get; set; }
 
-	public DateTime? ExpirationDate { get; set; }
+        public DateTime EffectiveDate { get; set; }
 
-	[Column(TypeName = "decimal(18, 2)")]
-	public decimal ContractValue { get; set; }
+        public DateTime? ExpirationDate { get; set; }
 
-	// Draft, Active, Expired, Terminated, Completed
-	[MaxLength(50)]
-	public string Status { get; set; } = "Draft";
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal ContractValue { get; set; }
 
-	[MaxLength(500)]
-	public string? Terms { get; set; }
+        [MaxLength(50)]
+        public string Status { get; set; } = "Draft";
 
-	[MaxLength(1000)]
-	public string? Note { get; set; }
+        [MaxLength(500)]
+        public string? Terms { get; set; }
 
-	// --- NEW FIELDS ADDED ACCORDING TO BACKUP1.MD ---
+        [MaxLength(1000)]
+        public string? Note { get; set; }
 
-	// Credit & Payment Terms
-	[Column(TypeName = "decimal(18, 2)")]
-	public decimal? CreditLimit { get; set; } // Han muc cong no toi da
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? CreditLimit { get; set; }
 
-	public int? PaymentWindowDays { get; set; } // Thoi han thanh toan (ngay)
+        public int? PaymentWindowDays { get; set; }
 
-	[MaxLength(50)]
-	public string? BankAccountNumber { get; set; } // Tai khoan thu huong
+        [MaxLength(50)]
+        public string? BankAccountNumber { get; set; }
 
-	[MaxLength(200)]
-	public string? BankName { get; set; }
+        [MaxLength(200)]
+        public string? BankName { get; set; }
 
-	// Price Matrix & Volume Commitments
-	public int? MinimumVolumePerMonth { get; set; } // San luong toi thieu/Thang
+        public int? MinimumVolumePerMonth { get; set; }
 
-	[Column(TypeName = "decimal(5, 2)")]
-	public decimal? DiscountRate { get; set; } // Ty le chiet khau thuong mai (%)
+        [Column(TypeName = "decimal(5, 2)")]
+        public decimal? DiscountRate { get; set; }
 
-	// Phu luc hop dong
-	public Guid? ParentContractId { get; set; }
-	[ForeignKey("ParentContractId")]
-	public SupplierContract? ParentContract { get; set; }
+        public Guid? ParentContractId { get; set; }
 
-	public ICollection<SupplierContract> Addendums { get; set; } = [];
+        [ForeignKey("ParentContractId")]
+        public SupplierContract? ParentContract { get; set; }
 
-	// Bang lien ket SKU gia nhap si
-	public ICollection<SupplierContractItem> ContractItems { get; set; } = [];
+        public ICollection<SupplierContract> Addendums { get; set; } = [];
 
-	public ICollection<SupplierContractAuditLog> AuditLogs { get; set; } = [];
-}
+        public ICollection<SupplierContractItem> ContractItems { get; set; } = [];
+
+        public ICollection<SupplierContractAuditLog> AuditLogs { get; set; } = [];
+    }
 }

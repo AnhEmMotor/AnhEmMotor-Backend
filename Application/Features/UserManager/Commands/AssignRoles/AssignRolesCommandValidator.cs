@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.UserManager.Commands.AssignRoles;
 
-public sealed class AssignRolesCommandValidator : AbstractValidator<AssignRolesCommand>
+public class AssignRolesCommandValidator : AbstractValidator<AssignRolesCommand>
 {
     public AssignRolesCommandValidator()
     {

@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Auth.Commands.LoginForManager;
 
-public sealed class LoginForManagerCommandHandler(
+public class LoginForManagerCommandHandler(
     IIdentityService identityService,
     ITokenManagerService tokenManagerService,
-    IHttpTokenAccessorService httpTokenAccessorService,
+    ICookieTokenManager cookieTokenManager,
     IUserUpdateRepository userUpdateRepository,
     UserManager<ApplicationUser> userManager,
     RoleManager<ApplicationRole> roleManager,
@@ -58,7 +58,7 @@ public sealed class LoginForManagerCommandHandler(
             expiryRefreshTokenDate,
             cancellationToken)
             .ConfigureAwait(false);
-        httpTokenAccessorService.SetRefreshTokenToCookie(refreshToken, expiryRefreshTokenDate);
+        cookieTokenManager.SetRefreshToken(refreshToken, expiryRefreshTokenDate);
         return new LoginResponse { AccessToken = accessToken, ExpiresAt = expiryAccessTokenDate };
     }
 }

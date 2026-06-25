@@ -18,11 +18,11 @@ using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.User;
-using Application.Interfaces.Services.HR;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -50,7 +50,7 @@ public class SalesOrder
     private readonly Mock<ISettingRepository> _settingRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ISievePaginator> _paginatorMock;
-    private readonly Mock<ICommissionService> _commissionServiceMock;
+    private readonly Mock<ICommissionUpdateRepository> _commissionUpdateRepositoryMock;
 
     public SalesOrder()
     {
@@ -63,7 +63,7 @@ public class SalesOrder
         _settingRepoMock = new Mock<ISettingRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _paginatorMock = new Mock<ISievePaginator>();
-        _commissionServiceMock = new Mock<ICommissionService>();
+        _commissionUpdateRepositoryMock = new Mock<ICommissionUpdateRepository>();
         _readRepoMock.Setup(
             x => x.GetPagedAsync<OutputItemResponse>(
                 It.IsAny<SieveModel>(),
@@ -90,7 +90,7 @@ public class SalesOrder
     public async Task CreateOutput_ValidRequest_ShouldCallInsertRepository()
     {
         var productId = 1;
-        var command = new CreateOutputCommand { OutputInfos = [new() { ProductId = productId, Count = 5 }] };
+        var command = new CreateOutputCommand { OutputInfos = [new() { ProductVariantId = productId, Count = 5 }] };
         var mockVariant = new ProductVariant
         {
             Id = productId,
@@ -139,7 +139,7 @@ public class SalesOrder
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
-            OutputInfos = [new() { ProductId = productId, Count = 1 }],
+            OutputInfos = [new() { ProductVariantId = productId, Count = 1 }],
             BuyerId = null
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -178,15 +178,15 @@ public class SalesOrder
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
-            OutputInfos = [new() { ProductId = 1, Count = 2 }, new() { ProductId = 2, Count = 3 }]
+            OutputInfos = [new() { ProductVariantId = 1, Count = 2 }, new() { ProductVariantId = 2, Count = 3 }]
         };
         Output? capturedOutput = null;
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>())).Callback<Output>((output) => capturedOutput = output);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeFalse();
         capturedOutput.Should().NotBeNull();
-        var info1 = capturedOutput!.OutputInfos.FirstOrDefault(x => x.ProductVarientId == 1);
-        var info2 = capturedOutput!.OutputInfos.FirstOrDefault(x => x.ProductVarientId == 2);
+        var info1 = capturedOutput!.OutputInfos.FirstOrDefault(x => x.ProductVariantId == 1);
+        var info2 = capturedOutput!.OutputInfos.FirstOrDefault(x => x.ProductVariantId == 2);
         info1.Should().NotBeNull();
         info1!.Price.Should().Be(50);
         info2.Should().NotBeNull();
@@ -217,9 +217,9 @@ public class SalesOrder
         var command = new CreateOutputCommand
         {
             OutputInfos =
-                [new() { ProductId = 1, Count = 1 }, new() { ProductId = 2, Count = 1 }, new()
+                [new() { ProductVariantId = 1, Count = 1 }, new() { ProductVariantId = 2, Count = 1 }, new()
                 {
-                    ProductId = 3,
+                    ProductVariantId = 3,
                     Count = 1
                 }]
         };
@@ -262,7 +262,7 @@ public class SalesOrder
         var command = new CreateOutputCommand
         {
             BuyerId = Guid.NewGuid(),
-            OutputInfos = [new() { ProductId = productId, Count = 1 }]
+            OutputInfos = [new() { ProductVariantId = productId, Count = 1 }]
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -277,7 +277,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand
         {
@@ -300,7 +300,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand
         {
@@ -322,7 +322,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "delivering", CurrentUserId = Guid.NewGuid() };
         var existingOutput = new Output { Id = 1, StatusId = "confirmed_cod" };
@@ -339,7 +339,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "completed", CurrentUserId = Guid.NewGuid() };
         var existingOutput = new Output { Id = 1, StatusId = "delivering" };
@@ -356,7 +356,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand
         {
@@ -378,7 +378,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand
         {
@@ -400,7 +400,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "delivering", CurrentUserId = Guid.NewGuid() };
         var existingOutput = new Output { Id = 1, StatusId = "deposit_paid" };
@@ -417,7 +417,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "cancelled", CurrentUserId = Guid.NewGuid() };
         var existingOutput = new Output { Id = 1, StatusId = "pending" };
@@ -434,7 +434,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "completed", CurrentUserId = Guid.NewGuid() };
         var existingOutput = new Output { Id = 1, StatusId = "pending" };
@@ -457,7 +457,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand
         {
@@ -485,7 +485,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand
         {
@@ -525,7 +525,7 @@ public class SalesOrder
         {
             BuyerId = Guid.NewGuid(),
             StatusId = "pending",
-            OutputInfos = [new() { ProductId = productId, Count = 1 }]
+            OutputInfos = [new() { ProductVariantId = productId, Count = 1 }]
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -562,7 +562,7 @@ public class SalesOrder
         {
             BuyerId = customBuyerId,
             StatusId = "pending",
-            OutputInfos = [new() { ProductId = productId, Count = 1 }]
+            OutputInfos = [new() { ProductVariantId = productId, Count = 1 }]
         };
         Output? capturedOutput = null;
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>())).Callback<Output>((output) => capturedOutput = output);
@@ -571,7 +571,7 @@ public class SalesOrder
         capturedOutput.Should().NotBeNull();
         capturedOutput!.BuyerId.Should().Be(customBuyerId);
         capturedOutput.OutputInfos.Should().NotBeEmpty();
-        capturedOutput.OutputInfos.First().ProductVarientId.Should().Be(productId);
+        capturedOutput.OutputInfos.First().ProductVariantId.Should().Be(productId);
         capturedOutput.OutputInfos.First().Price.Should().Be(100);
         result.Value!.BuyerId.Should().Be(customBuyerId);
     }
@@ -585,7 +585,7 @@ public class SalesOrder
         {
             Id = 1,
             CurrentUserId = currentUserId,
-            OutputInfos = [new() { ProductId = productId, Count = 2 }]
+            OutputInfos = [new() { ProductVariantId = productId, Count = 2 }]
         };
         var existingOutput = new Output
         {
@@ -596,7 +596,7 @@ public class SalesOrder
                 [new OutputInfo
                 {
                     Id = 10,
-                    ProductVarientId = productId,
+                    ProductVariantId = productId,
                     Count = 1,
                     ProductVariant =
                         new ProductVariant
@@ -628,7 +628,7 @@ public class SalesOrder
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -650,13 +650,13 @@ public class SalesOrder
             Id = 1,
             BuyerId = newBuyerId,
             CurrentUserId = managerId,
-            OutputInfos = [new() { Id = 10, ProductId = productId, Count = 1 }]
+            OutputInfos = [new() { Id = 10, ProductVariantId = productId, Count = 1 }]
         };
         var existingOutput = new Output
         {
             Id = 1,
             BuyerId = oldBuyerId,
-            OutputInfos = [new OutputInfo { Id = 10, ProductVarientId = productId, Count = 1 }]
+            OutputInfos = [new OutputInfo { Id = 10, ProductVariantId = productId, Count = 1 }]
         };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
@@ -675,7 +675,7 @@ public class SalesOrder
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -834,7 +834,7 @@ public class SalesOrder
         var handler = new UpdateManyOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateManyOutputStatusCommand { Ids = [1, 2, 3], StatusId = "confirmed_cod" };
         var existingOutputs = new List<Output>
@@ -915,6 +915,52 @@ public class SalesOrder
             Times.Once);
     }
 
+    [Fact(DisplayName = "SO_115 - GetOutputsList lọc theo nhóm trạng thái xác nhận")]
+    public async Task GetOutputsList_WithStatusIds_ShouldApplyRepositoryFilter()
+    {
+        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _settingRepoMock.Object);
+        var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Page = 1, PageSize = 10 } };
+        var statusIdsProperty = typeof(GetOutputsListQuery).GetProperty("StatusIds");
+        statusIdsProperty.Should()
+            .NotBeNull("GetOutputsListQuery cần nhận nhóm trạng thái để tách phiếu tạm và phiếu bán hàng");
+        statusIdsProperty!.SetValue(query, new[] { OrderStatus.Pending, OrderStatus.WaitingDeposit });
+        Expression<Func<Output, bool>>? capturedFilter = null;
+        _readRepoMock.Setup(
+            x => x.GetPagedAsync<OutputItemResponse>(
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode>(),
+                It.IsAny<Expression<Func<Output, bool>>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<SieveModel, DataFetchMode, Expression<Func<Output, bool>>?, CancellationToken>(
+                (_, _, filter, _) => capturedFilter = filter)
+            .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 10));
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.Should().NotBeNull();
+        capturedFilter.Should().NotBeNull();
+        var predicate = capturedFilter!.Compile();
+        predicate(new Output { StatusId = OrderStatus.Pending }).Should().BeTrue();
+        predicate(new Output { StatusId = OrderStatus.ConfirmedCod }).Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "SO_116 - OrderStatus khai báo nhóm đã/chưa xác nhận")]
+    public void OrderStatus_ShouldExposeConfirmedAndUnconfirmedStatusGroups()
+    {
+        var confirmedStatuses = typeof(OrderStatus)
+            .GetField("ConfirmedOrderStatuses")
+            ?.GetValue(null) as IEnumerable<string>;
+        var unconfirmedStatuses = typeof(OrderStatus)
+            .GetField("UnconfirmedOrderStatuses")
+            ?.GetValue(null) as IEnumerable<string>;
+        confirmedStatuses.Should().NotBeNull();
+        unconfirmedStatuses.Should().NotBeNull();
+        confirmedStatuses!.Should().Contain(OrderStatus.ConfirmedCod);
+        confirmedStatuses.Should().Contain(OrderStatus.Completed);
+        confirmedStatuses.Should().NotContain(OrderStatus.Pending);
+        unconfirmedStatuses!.Should().Contain(OrderStatus.Pending);
+        unconfirmedStatuses.Should().Contain(OrderStatus.WaitingDeposit);
+        unconfirmedStatuses.Should().NotContain(OrderStatus.ConfirmedCod);
+    }
+
     [Fact(DisplayName = "SO_031 - GetOutputsList sort theo CreatedAt")]
     public async Task GetOutputsList_ShouldSortByCreatedAt()
     {
@@ -958,11 +1004,12 @@ public class SalesOrder
         {
             BuyerId = Guid.NewGuid(),
             OutputInfos =
-                [new() { ProductId = productId1, Count = 5 }, new() { ProductId = productId2, Count = 3 }, new()
+                [new() { ProductVariantId = productId1, Count = 5 }, new() { ProductVariantId = productId2, Count = 3 }, new(
+                    )
                 {
-                    ProductId = productId3,
+                    ProductVariantId = productId3,
                     Count = 2
-                }, new() { ProductId = productId4, Count = 1 }]
+                }, new() { ProductVariantId = productId4, Count = 1 }]
         };
         var variants = new List<ProductVariant>
         {
@@ -1000,9 +1047,9 @@ public class SalesOrder
         {
             BuyerId = Guid.NewGuid(),
             OutputInfos =
-                [new() { ProductId = product1.Id, Count = product1.Count }, new()
+                [new() { ProductVariantId = product1.Id, Count = product1.Count }, new()
                 {
-                    ProductId = product2.Id,
+                    ProductVariantId = product2.Id,
                     Count = product2.Count
                 }]
         };
@@ -1053,7 +1100,7 @@ public class SalesOrder
         var command = new CreateOutputCommand
         {
             BuyerId = Guid.NewGuid(),
-            OutputInfos = { new() { ProductId = 1, Count = 0 } }
+            OutputInfos = { new() { ProductVariantId = 1, Count = 0 } }
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -1071,7 +1118,7 @@ public class SalesOrder
         var command = new CreateOutputCommand
         {
             BuyerId = Guid.NewGuid(),
-            OutputInfos = [new() { ProductId = 999, Count = 1 }]
+            OutputInfos = [new() { ProductVariantId = 999, Count = 1 }]
         };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -1146,7 +1193,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var finishedBy = Guid.NewGuid();
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "completed", CurrentUserId = finishedBy };
@@ -1169,7 +1216,7 @@ public class SalesOrder
         var command = new CreateOutputCommand
         {
             BuyerId = expectedId,
-            OutputInfos = [new() { ProductId = productId, Count = 1 }]
+            OutputInfos = [new() { ProductVariantId = productId, Count = 1 }]
         };
         var variants = new List<ProductVariant>
         {
@@ -1236,7 +1283,7 @@ public class SalesOrder
         var command = new CreateOutputCommand
         {
             BuyerId = Guid.Empty,
-            OutputInfos = { new() { ProductId = 1, Count = 1 } }
+            OutputInfos = { new() { ProductVariantId = 1, Count = 1 } }
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -1258,7 +1305,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = string.Empty, CurrentUserId = Guid.NewGuid() };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -1271,7 +1318,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand
         {
@@ -1362,9 +1409,13 @@ public class SalesOrder
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
-        var command = new UpdateOutputForManagerCommand { Id = 1, OutputInfos = [new() { ProductId = 999, Count = 1 }] };
+        var command = new UpdateOutputForManagerCommand
+        {
+            Id = 1,
+            OutputInfos = [new() { ProductVariantId = 999, Count = 1 }]
+        };
         var existingOutput = new Output { Id = 1, StatusId = "pending", OutputInfos = [] };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
@@ -1387,7 +1438,7 @@ public class SalesOrder
         var command = new CreateOutputCommand
         {
             BuyerId = Guid.NewGuid(),
-            OutputInfos = [new() { ProductId = 1, Count = 1 }]
+            OutputInfos = [new() { ProductVariantId = 1, Count = 1 }]
         };
         var deletedVariant = new ProductVariant { Id = 1, DeletedAt = DateTime.UtcNow };
         _variantRepoMock.Setup(
@@ -1397,21 +1448,21 @@ public class SalesOrder
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "SO_057 - UpdateOutputStatus from PaidProcessing to Refunding succeeds")]
+    [Fact(DisplayName = "SO_056 - UpdateOutputStatus from PaidProcessing to Refunding succeeds")]
     public async Task UpdateOutputStatus_PaidProcessingToRefunding_ShouldSucceed()
     {
         var outputId = 1;
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _commissionServiceMock.Object,
+            _commissionUpdateRepositoryMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "refunding", CurrentUserId = Guid.NewGuid() };
         var existingOutput = new Output
         {
             Id = 1,
             StatusId = "paid_processing",
-            OutputInfos = [new OutputInfo { ProductVarientId = 100, Count = 5 }]
+            OutputInfos = [new OutputInfo { ProductVariantId = 100, Count = 5 }]
         };
         _readRepoMock.Setup(
             x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -1436,7 +1487,7 @@ public class SalesOrder
         {
             BuyerId = buyerId,
             Notes = notes,
-            OutputInfos = [new() { ProductId = productId, Count = 1 }]
+            OutputInfos = [new() { ProductVariantId = productId, Count = 1 }]
         };
         var variants = new List<ProductVariant>
         {
@@ -1567,7 +1618,7 @@ public class SalesOrder
     public async Task CreateOutput_TotalPriceBelowThreshold_ShouldSetStatusToPending()
     {
         var productId = 1;
-        var command = new CreateOutputCommand { OutputInfos = [new() { ProductId = productId, Count = 1 }] };
+        var command = new CreateOutputCommand { OutputInfos = [new() { ProductVariantId = productId, Count = 1 }] };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
@@ -1598,7 +1649,7 @@ public class SalesOrder
     public async Task CreateOutput_TotalPriceAboveThreshold_ShouldSetStatusToWaitingDeposit()
     {
         var productId = 1;
-        var command = new CreateOutputCommand { OutputInfos = [new() { ProductId = productId, Count = 1 }] };
+        var command = new CreateOutputCommand { OutputInfos = [new() { ProductVariantId = productId, Count = 1 }] };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
@@ -1629,7 +1680,7 @@ public class SalesOrder
     public async Task CreateOutput_NoThresholdConfig_ShouldUseDefault100M()
     {
         var productId = 1;
-        var command = new CreateOutputCommand { OutputInfos = [new() { ProductId = productId, Count = 1 }] };
+        var command = new CreateOutputCommand { OutputInfos = [new() { ProductVariantId = productId, Count = 1 }] };
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
@@ -1663,7 +1714,7 @@ public class SalesOrder
         var command = new CreateOutputByManagerCommand
         {
             BuyerId = buyerId,
-            OutputInfos = [new() { ProductId = productId, Count = 1 }]
+            OutputInfos = [new() { ProductVariantId = productId, Count = 1 }]
         };
         _userRepoMock.Setup(x => x.GetUserByIDAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new UserAuth());

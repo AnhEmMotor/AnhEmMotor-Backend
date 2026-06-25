@@ -1,11 +1,13 @@
 using Application.ApiContracts.Loyalty.Responses;
 using Application.Common.Models;
+using Domain.Primitives;
 using MediatR;
+using Sieve.Models;
 
 namespace Application.Features.Loyalty.Queries.GetLoyaltyMembers;
 
-public sealed class GetLoyaltyMembersQuery : IRequest<Result<List<LoyaltyMemberResponse>>>
+public class GetLoyaltyMembersQuery : IRequest<Result<PagedResult<LoyaltyMemberResponse>>>
 {
-    public string? Search { get; set; }
+    public SieveModel? SieveModel { get; set; }
 }
 

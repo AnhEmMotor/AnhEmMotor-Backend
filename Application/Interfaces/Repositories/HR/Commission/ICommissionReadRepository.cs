@@ -15,3 +15,4 @@ public interface ICommissionReadRepository
         int employeeId,
         CancellationToken cancellationToken = default);
 }
+

@@ -1,3 +1,4 @@
+using Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -39,7 +40,7 @@ namespace Domain.Entities
 
         [Required]
         [Column("Type", TypeName = "nvarchar(20)")]
-        public string Type { get; set; } = "Service"; // "Service" or "Part"
+        public string Type { get; set; } = RepairOrderDetailType.Service;
 
         [Column("Notes", TypeName = "nvarchar(500)")]
         public string? Notes { get; set; }

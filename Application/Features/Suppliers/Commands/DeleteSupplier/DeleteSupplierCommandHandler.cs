@@ -1,29 +1,37 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
-using Domain.Constants.Input;
+using Application.Interfaces.Repositories.SupplierDebt;
+using Domain.Constants.InventoryReceipt;
 using MediatR;
+using System;
+using System.Linq;
 
-namespace Application.Features.Suppliers.Commands.DeleteSupplier;
-
-public sealed class DeleteSupplierCommandHandler(
-    ISupplierReadRepository readRepository,
-    ISupplierDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteSupplierCommand, Result>
+namespace Application.Features.Suppliers.Commands.DeleteSupplier
 {
-    public async Task<Result> Handle(DeleteSupplierCommand request, CancellationToken cancellationToken)
+    public class DeleteSupplierCommandHandler(
+        ISupplierReadRepository readRepository,
+        ISupplierDeleteRepository deleteRepository,
+        ISupplierDebtReadRepository supplierDebtReadRepository,
+        IUnitOfWork unitOfWork) : IRequestHandler<DeleteSupplierCommand, Result>
     {
-        var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-        if (supplier == null)
+        public async Task<Result> Handle(DeleteSupplierCommand request, CancellationToken cancellationToken)
         {
-            return Result.Failure(Error.NotFound($"Supplier with Id {request.Id} not found."));
+            var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+            if (supplier == null)
+            {
+                return Result.Failure(Error.NotFound($"Supplier with Id {request.Id} not found."));
+            }
+            var supplierDebts = await supplierDebtReadRepository.GetBySupplierIdAsync(request.Id, cancellationToken)
+                .ConfigureAwait(false);
+            if (supplierDebts.Any(
+                sd => sd.InventoryReceipt != null && InventoryReceiptStatus.IsCanEdit(sd.InventoryReceipt.StatusId)))
+            {
+                return Result.Failure(Error.Conflict("Cannot delete supplier with working InventoryReceipt receipts."));
+            }
+            deleteRepository.Delete(supplier);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return Result.Success();
         }
-        if (supplier.InputReceipts.Any(ir => string.Compare(ir.StatusId, InputStatus.Working) == 0))
-        {
-            return Result.Failure(Error.Conflict("Cannot delete supplier with working input receipts."));
-        }
-        deleteRepository.Delete(supplier);
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return Result.Success();
     }
 }

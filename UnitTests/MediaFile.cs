@@ -1,3 +1,4 @@
+using Application.ApiContracts.File.Requests;
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
@@ -119,11 +120,11 @@ public class MediaFile
             _fileInsertServiceMock.Object,
             _insertRepositoryMock.Object,
             _unitOfWorkMock.Object);
-        var files = new List<(Stream FileContent, string FileName)>
+        var files = new List<FileParameter>
         {
-            new(new MemoryStream(new byte[51200]), "valid1.webp"),
-            new(new MemoryStream(new byte[102400]), "invalid.pdf"),
-            new(new MemoryStream(new byte[61440]), "valid2.jpg")
+            new FileParameter { Content = new MemoryStream(new byte[51200]), FileName = "valid1.webp" },
+            new FileParameter { Content = new MemoryStream(new byte[102400]), FileName = "invalid.pdf" },
+            new FileParameter { Content = new MemoryStream(new byte[61440]), FileName = "valid2.jpg" }
         };
         var command = new UploadManyProductImagesCommand { Files = files };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -450,7 +451,12 @@ public class MediaFile
         var stream2 = new MemoryStream();
         var command = new UploadManyProductImagesCommand
         {
-            Files = [new(stream1, "test1.jpg"), new(stream2, "test2.png")]
+            Files =
+                [new FileParameter { Content = stream1, FileName = "test1.jpg" }, new FileParameter
+                {
+                    Content = stream2,
+                    FileName = "test2.png"
+                }]
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Value.Should().HaveCount(2);

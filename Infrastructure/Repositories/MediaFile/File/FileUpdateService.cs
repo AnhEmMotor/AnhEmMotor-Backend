@@ -10,14 +10,14 @@ public class FileUpdateService : IFileUpdateService
     private const int DefaultMaxWidth = 1200;
 
     public async Task<Stream> CompressImageAsync(
-        Stream inputStream,
+        Stream InventoryReceiptStream,
         int quality,
         int? maxWidth,
         CancellationToken cancellationToken)
     {
-        if (inputStream.CanSeek)
-            inputStream.Position = 0;
-        using var image = await Image.LoadAsync(inputStream, cancellationToken).ConfigureAwait(false);
+        if (InventoryReceiptStream.CanSeek)
+            InventoryReceiptStream.Position = 0;
+        using var image = await Image.LoadAsync(InventoryReceiptStream, cancellationToken).ConfigureAwait(false);
         var targetWidth = maxWidth ?? DefaultMaxWidth;
         if (image.Width > targetWidth)
         {

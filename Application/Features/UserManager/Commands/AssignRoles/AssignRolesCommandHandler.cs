@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.UserManager.Commands.AssignRoles;
 
-public sealed class AssignRolesCommandHandler(
+public class AssignRolesCommandHandler(
     IUserReadRepository userReadRepository,
     IRoleReadRepository roleReadRepository,
     IUserUpdateRepository userUpdateRepository,

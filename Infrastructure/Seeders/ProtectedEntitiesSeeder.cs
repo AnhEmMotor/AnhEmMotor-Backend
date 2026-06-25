@@ -74,7 +74,13 @@ public static class ProtectedEntitiesSeeder
             var user = await userManager.FindByEmailAsync(email).ConfigureAwait(false);
             if (user is null)
             {
-                var newUser = new ApplicationUser { UserName = email, Email = email, Status = UserStatus.Active, };
+                var newUser = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email,
+                    FullName = email,
+                    Status = UserStatus.Active,
+                };
                 var result = await userManager.CreateAsync(newUser, password).ConfigureAwait(false);
                 if (result.Succeeded)
                 {

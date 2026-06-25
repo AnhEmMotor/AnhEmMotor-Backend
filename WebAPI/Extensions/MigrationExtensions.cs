@@ -41,26 +41,22 @@ public static class MigrationExtensions
             var dbContext = services.GetRequiredService<ApplicationDBContext>();
             await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
             var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
-            var shouldSeedDemoData =
-                configuration.GetValue<bool>("SeedingOptions:RunDemoDataSeedingOnStartup");
             if (shouldSeed)
             {
                 var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
                 var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
                 await ProductCategorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
-                await InputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await InventoryReceiptStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await BrandSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await ProductDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await VehicleTypeAssignmentSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await NewsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await NewsCategorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await TechnologyDataMigrationSeeder.MigrateExistingHighlightsAsync(dbContext, cancellationToken)
-                    .ConfigureAwait(false);
                 await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
                     dbContext,
@@ -69,8 +65,6 @@ public static class MigrationExtensions
                     configuration,
                     cancellationToken)
                     .ConfigureAwait(false);
-                if (shouldSeedDemoData)
-                {
                     await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
                     await LeadSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
                     await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
@@ -78,7 +72,7 @@ public static class MigrationExtensions
                     await FinanceContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                     await ContractTemplateSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                     await SalesAndInventorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                }
+                await CarrierPartnerSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
             }
         } catch (Exception ex)
         {

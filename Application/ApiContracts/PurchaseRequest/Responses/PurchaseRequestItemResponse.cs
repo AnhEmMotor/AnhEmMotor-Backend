@@ -1,0 +1,31 @@
+namespace Application.ApiContracts.PurchaseRequest.Responses
+{
+    public class PurchaseRequestItemResponse
+    {
+        public int Id { get; set; }
+
+        public int ProductVariantId { get; set; }
+
+        public string? ProductName { get; set; }
+
+        public int? ProductVariantColorId { get; set; }
+
+        public string? ProductVariantColorName { get; set; }
+
+        public int Quantity { get; set; }
+
+        public int? ImportedQuantity { get; set; }
+
+        public int? PendingQuantity { get; set; }
+
+        public int? UnimportedQuantity { get; set; }
+
+        public int? SupplierId { get; set; }
+
+        public string? SupplierName { get; set; }
+
+        public int? ProductQuotationId { get; set; }
+
+        public decimal? UnitPrice { get; set; }
+    }
+}

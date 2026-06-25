@@ -1,6 +1,6 @@
 using Application.Interfaces.Repositories.RepairOrder;
+using Domain.Entities;
 using Infrastructure.DBContexts;
-using System.Collections.Generic;
 
 namespace Infrastructure.Repositories.RepairOrder
 {
@@ -21,17 +21,17 @@ namespace Infrastructure.Repositories.RepairOrder
             context.RepairOrders.Remove(repairOrder);
         }
 
-        public void AddDetail(Domain.Entities.RepairOrderDetail detail)
+        public void AddDetail(RepairOrderDetail detail)
         {
             context.RepairOrderDetails.Add(detail);
         }
 
-        public void RemoveDetail(Domain.Entities.RepairOrderDetail detail)
+        public void RemoveDetail(RepairOrderDetail detail)
         {
             context.RepairOrderDetails.Remove(detail);
         }
 
-        public void RemoveDetailsRange(IEnumerable<Domain.Entities.RepairOrderDetail> details)
+        public void RemoveDetailsRange(IEnumerable<RepairOrderDetail> details)
         {
             context.RepairOrderDetails.RemoveRange(details);
         }

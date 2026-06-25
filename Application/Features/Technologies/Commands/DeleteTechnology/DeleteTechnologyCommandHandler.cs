@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Technologies.Commands.DeleteTechnology
 {
-    public sealed class DeleteTechnologyCommandHandler(
+    public class DeleteTechnologyCommandHandler(
         ITechnologyReadRepository readRepository,
         ITechnologyDeleteRepository deleteRepository,
         IUnitOfWork unitOfWork) : IRequestHandler<DeleteTechnologyCommand, Result>

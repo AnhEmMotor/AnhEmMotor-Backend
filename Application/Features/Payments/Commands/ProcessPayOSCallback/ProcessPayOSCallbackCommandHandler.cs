@@ -1,4 +1,5 @@
 using Application.Common.Models;
+using Application.Common.Payments;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Services;
@@ -8,7 +9,7 @@ using System;
 
 namespace Application.Features.Payments.Commands.ProcessPayOSCallback
 {
-    public sealed class ProcessPayOSCallbackCommandHandler(
+    public class ProcessPayOSCallbackCommandHandler(
         IOutputReadRepository readRepository,
         IOutputUpdateRepository updateRepository,
         IUnitOfWork unitOfWork,
@@ -16,16 +17,18 @@ namespace Application.Features.Payments.Commands.ProcessPayOSCallback
     {
         public async Task<Result<int>> Handle(ProcessPayOSCallbackCommand request, CancellationToken cancellationToken)
         {
-            var payosData = await payosService.GetPaymentDetailsAsync(request.OrderCode, cancellationToken)
+            if (request.OrderCode is null)
+            {
+                return Result<int>.Failure(Error.BadRequest("Mã đơn hàng không hợp lệ", "InvalidOrderCode"));
+            }
+            var payosData = await payosService.GetPaymentDetailsAsync(request.OrderCode.Value, cancellationToken)
                 .ConfigureAwait(false);
             if (payosData == null)
             {
                 return Result<int>.Failure(Error.NotFound("Không tìm thấy thông tin thanh toán từ PayOS", "Payment"));
             }
-            var orderId = (int)(request.OrderCode / 100000);
-            if (orderId == 0)
-                orderId = (int)request.OrderCode;
-            var order = await readRepository.GetByIdWithDetailsAsync(orderId, cancellationToken).ConfigureAwait(false);
+            var order = await readRepository.GetByIdWithDetailsAsync(request.OrderId, cancellationToken)
+                .ConfigureAwait(false);
             if (order is null)
             {
                 return Result<int>.Failure(Error.NotFound("Không tìm thấy đơn hàng", "Order"));
@@ -33,11 +36,13 @@ namespace Application.Features.Payments.Commands.ProcessPayOSCallback
             if (string.Compare(payosData.Status, PayOSStatus.Paid) == 0 &&
                 string.Compare(order.PaymentStatus, OrderPaymentStatus.Paid) != 0)
             {
-                if (payosData.Amount >= order.Total)
+                var total = OrderPaymentAmountCalculator.GetTotal(order);
+                var depositAmount = OrderPaymentAmountCalculator.GetDepositAmount(order);
+                if (payosData.Amount >= total)
                 {
                     order.StatusId = OrderStatus.PaidProcessing;
                     order.PaymentStatus = OrderPaymentStatus.Paid;
-                } else if (payosData.Amount >= order.DepositAmount)
+                } else if (payosData.Amount >= depositAmount)
                 {
                     order.StatusId = OrderStatus.DepositPaid;
                     order.PaymentStatus = OrderPaymentStatus.Partial;
@@ -50,8 +55,10 @@ namespace Application.Features.Payments.Commands.ProcessPayOSCallback
             }
             if (string.Compare(payosData.Status, PayOSStatus.Cancelled) == 0)
             {
-                order.StatusId = OrderStatus.Cancelled;
                 order.PaymentStatus = OrderPaymentStatus.Failed;
+                order.PaymentUrl = null;
+                order.PaymentCode = null;
+                order.PaymentExpiredAt = null;
                 updateRepository.Update(order);
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return Result<int>.Failure(Error.BadRequest("Giao dịch đã bị hủy", "Payment"));

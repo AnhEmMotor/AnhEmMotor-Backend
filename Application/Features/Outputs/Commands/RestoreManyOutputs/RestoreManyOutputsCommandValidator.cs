@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.RestoreManyOutputs;
 
-public sealed class RestoreManyOutputsCommandValidator : AbstractValidator<RestoreManyOutputsCommand>
+public class RestoreManyOutputsCommandValidator : AbstractValidator<RestoreManyOutputsCommand>
 {
     public RestoreManyOutputsCommandValidator()
     {

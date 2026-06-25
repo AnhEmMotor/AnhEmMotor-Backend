@@ -12,7 +12,7 @@ namespace Domain.Entities
 
         [Column("ProductVariantId")]
         [ForeignKey("ProductVariant")]
-        public int? ProductVarientId { get; set; }
+        public int? ProductVariantId { get; set; }
 
         [Column("Count")]
         public int? Count { get; set; }
@@ -37,7 +37,7 @@ namespace Domain.Entities
 
         public ProductVariantColor? ProductVariantColor { get; set; }
 
-        public ICollection<InputInfo> Returns { get; set; } = [];
+        public ICollection<InventoryReceiptInfo> Returns { get; set; } = [];
 
         public ICollection<Vehicle> Vehicles { get; set; } = [];
     }

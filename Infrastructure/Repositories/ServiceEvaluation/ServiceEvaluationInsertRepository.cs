@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.ServiceEvaluation;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.ServiceEvaluation;

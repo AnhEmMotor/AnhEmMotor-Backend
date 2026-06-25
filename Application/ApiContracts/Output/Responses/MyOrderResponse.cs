@@ -18,6 +18,10 @@ public class MyOrderResponse
 
     public string? PaymentMethod { get; set; }
 
+    public string? PaymentStatus { get; set; }
+
+    public string? PaymentUrl { get; set; }
+
     public string? Notes { get; init; }
 
     public decimal Total { get; init; }

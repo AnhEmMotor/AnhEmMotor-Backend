@@ -29,7 +29,7 @@ public class BookingsController(ISender sender) : ApiController
     [AllowAnonymous]
     public async Task<IActionResult> CreateAsync(CreateBookingCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -42,7 +42,7 @@ public class BookingsController(ISender sender) : ApiController
     [Authorize]
     public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetBookingsQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetBookingsQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -56,7 +56,7 @@ public class BookingsController(ISender sender) : ApiController
     [Authorize]
     public async Task<IActionResult> ConfirmAsync(ConfirmBookingCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

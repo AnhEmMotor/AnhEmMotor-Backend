@@ -20,7 +20,9 @@ namespace Application.ApiContracts.Vehicle.Responses
 
         public int LeadId { get; set; }
 
-        public int? ProductId { get; set; }
+        public int? ProductVariantId { get; set; }
+
+        public int? ProductVariantColorId { get; set; }
 
         public bool IsActive { get; set; }
 

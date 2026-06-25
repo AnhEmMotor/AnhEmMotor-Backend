@@ -1,7 +1,5 @@
-using Application.Common.Models;
 using Application.ApiContracts.ContractTemplate.Requests;
-using Application.Common.Interfaces;
-using Domain.Entities;
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.ContractTemplates.Commands.UpdateContractTemplate;

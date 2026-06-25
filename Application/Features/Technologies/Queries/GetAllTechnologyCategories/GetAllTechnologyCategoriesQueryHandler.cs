@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.Technologies.Queries.GetAllTechnologyCategories;
 
-public sealed class GetAllTechnologyCategoriesQueryHandler(ITechnologyCategoryReadRepository categoryRepository) : IRequestHandler<GetAllTechnologyCategoriesQuery, Result<List<TechnologyCategoryResponse>>>
+public class GetAllTechnologyCategoriesQueryHandler(ITechnologyCategoryReadRepository categoryRepository) : IRequestHandler<GetAllTechnologyCategoriesQuery, Result<List<TechnologyCategoryResponse>>>
 {
     public async Task<Result<List<TechnologyCategoryResponse>>> Handle(
         GetAllTechnologyCategoriesQuery request,

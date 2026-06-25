@@ -148,8 +148,8 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("meta_description")]
     public string? MetaDescription { get; init; }
 
-    [JsonPropertyName("highlights")]
-    public string? Highlights { get; init; }
+    [JsonPropertyName("product_technologies")]
+    public List<TechnologyJsonRequest> ProductTechnologies { get; init; } = [];
 
     [JsonPropertyName("compatible_vehicle_model_ids")]
     public List<int> CompatibleVehicleModelIds { get; init; } = [];

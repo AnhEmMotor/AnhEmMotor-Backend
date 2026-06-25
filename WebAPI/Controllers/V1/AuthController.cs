@@ -8,7 +8,6 @@ using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
 using Application.Features.Auth.Queries.GetExternalAuthConfig;
-using Application.Interfaces.Services;
 using Asp.Versioning;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -16,7 +15,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -28,7 +26,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Controller xử lý xác thực và đăng nhập")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTokenAccessorService) : ApiController
+public class AuthController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Đăng ký tài khoản mới
@@ -56,7 +54,7 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -71,12 +69,7 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> RefreshTokenAsync(CancellationToken cancellationToken)
     {
-        var refreshToken = httpTokenAccessorService.GetRefreshTokenFromCookie();
-        var accessToken = Request.Headers.Authorization.ToString().Replace("Bearer ", string.Empty);
-        var result = await mediator.Send(
-            new RefreshTokenCommand() { RefreshToken = refreshToken, AccessToken = accessToken },
-            cancellationToken)
-            .ConfigureAwait(true);
+        var result = await mediator.Send(new RefreshTokenCommand(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -88,13 +81,8 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     [Authorize]
     public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new LogoutCommand() { UserId = userId }, cancellationToken)
-            .ConfigureAwait(true);
-        if (result.IsFailure)
-            return HandleResult(result);
-        httpTokenAccessorService.DeleteRefreshTokenFromCookie();
-        return Ok(new LogoutResponse());
+        var result = await mediator.Send(new LogoutCommand(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -108,7 +96,7 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
         [FromBody] GoogleLoginCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -123,7 +111,7 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
         [FromBody] FacebookLoginCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -142,7 +130,7 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
         [FromBody] LoginForManagerCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -155,7 +143,7 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     [ProducesResponseType(typeof(ExternalAuthConfigResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetExternalAuthConfigAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetExternalAuthConfigQuery(), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetExternalAuthConfigQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

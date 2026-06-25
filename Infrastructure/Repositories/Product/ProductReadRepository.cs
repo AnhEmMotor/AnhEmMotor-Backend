@@ -68,6 +68,7 @@ public class ProductReadRepository(
         }
         return query
             .Include(p => p.ProductCategory)
+            .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
             .Include(p => p.ProductTechnologies)
             .ThenInclude(pt => pt.Technology)
@@ -81,8 +82,8 @@ public class ProductReadRepository(
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductVariantColors)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.InputInfos)
-            .ThenInclude(ii => ii.InputReceipt)
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.InventoryReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
@@ -132,8 +133,8 @@ public class ProductReadRepository(
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductVariantColors)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.InputInfos)
-            .ThenInclude(ii => ii.InputReceipt)
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.InventoryReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
@@ -174,6 +175,7 @@ public class ProductReadRepository(
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         IQueryable<ProductEntity> dbQuery = query
             .Include(p => p.ProductCategory)
+            .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
@@ -184,8 +186,8 @@ public class ProductReadRepository(
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductVariantColors)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.InputInfos)
-            .ThenInclude(ii => ii.InputReceipt)
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.InventoryReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder);
@@ -218,14 +220,57 @@ public class ProductReadRepository(
     {
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Max(pageSize, 1);
-        var searchPattern = string.IsNullOrWhiteSpace(search) ? null : $"%{search.Trim()}%";
+        var normalizedSearch = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+        var searchPattern = normalizedSearch == null ? null : $"%{normalizedSearch}%";
+        var isExactVariantSearch = normalizedSearch != null &&
+            await context.ProductVariants
+                .AnyAsync(
+                    v => v.DeletedAt == null &&
+                            ((v.VariantName != null && v.VariantName == normalizedSearch) ||
+                                v.VariantOptionValues
+                                    .Any(vov => vov.OptionValue != null && vov.OptionValue.Name == normalizedSearch)),
+                    cancellationToken)
+                .ConfigureAwait(false);
         var query = context.Products.AsNoTracking();
         if (searchPattern != null)
         {
-            query = query.Where(
-                p => EF.Functions.Like(p.Name, searchPattern) ||
-                    (p.ProductCategory != null && EF.Functions.Like(p.ProductCategory.Name, searchPattern)) ||
-                    (p.Brand != null && EF.Functions.Like(p.Brand.Name, searchPattern)));
+            query = isExactVariantSearch
+                ? query.Where(
+                    p => p.ProductVariants
+                        .Any(
+                            v => v.DeletedAt == null &&
+                                        ((v.VariantName != null && v.VariantName == normalizedSearch) ||
+                                            v.VariantOptionValues
+                                                .Any(
+                                                    vov => vov.OptionValue != null &&
+                                                                            vov.OptionValue.Name == normalizedSearch))))
+                : query.Where(
+                    p => EF.Functions.Like(p.Name, searchPattern) ||
+                        (p.ProductCategory != null && EF.Functions.Like(p.ProductCategory.Name, searchPattern)) ||
+                        (p.Brand != null && EF.Functions.Like(p.Brand.Name, searchPattern)) ||
+                        p.ProductVariants
+                            .Any(
+                                v => v.DeletedAt == null &&
+                                                ((v.VariantName != null &&
+                                                        EF.Functions.Like(v.VariantName, searchPattern)) ||
+                                                    (v.SKU != null && EF.Functions.Like(v.SKU, searchPattern)) ||
+                                                    (v.UrlSlug != null && EF.Functions.Like(v.UrlSlug, searchPattern)) ||
+                                                    v.ProductVariantColors
+                                                        .Any(
+                                                            c => c.DeletedAt == null &&
+                                                                                        c.ColorName != null &&
+                                                                                        EF.Functions
+                                                                                            .Like(
+                                                                                                c.ColorName,
+                                                                                                searchPattern)) ||
+                                                    v.VariantOptionValues
+                                                        .Any(
+                                                            vov => vov.OptionValue != null &&
+                                                                                        vov.OptionValue.Name != null &&
+                                                                                        EF.Functions
+                                                                                            .Like(
+                                                                                                vov.OptionValue.Name,
+                                                                                                searchPattern)))));
         }
         if (statusIds != null && statusIds.Count > 0)
         {
@@ -285,8 +330,8 @@ public class ProductReadRepository(
                         v => v.VariantOptionValues
                                 .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
                             v.ProductVariantColors
-                                .Any(c => c.ColorName != null && names.Any(n => c.ColorName.ToLower().Contains(n))) ||
-                            (v.VariantName != null && names.Any(n => v.VariantName.ToLower().Contains(n))));
+                                .Any(c => c.ColorName != null && names.Contains(c.ColorName.ToLower())) ||
+                            (v.VariantName != null && names.Contains(v.VariantName.ToLower())));
                 }
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));
@@ -311,6 +356,7 @@ public class ProductReadRepository(
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         IQueryable<ProductEntity> dbQuery = query
             .Include(p => p.ProductCategory)
+            .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductCollectionPhotos)
@@ -321,8 +367,8 @@ public class ProductReadRepository(
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.InputInfos)
-            .ThenInclude(ii => ii.InputReceipt)
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.InventoryReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder);
@@ -388,6 +434,7 @@ public class ProductReadRepository(
         return query
             .Include(v => v.Product)
             .ThenInclude(p => p!.ProductCategory)
+            .ThenInclude(c => c!.Parent)
             .Include(v => v.Product)
             .ThenInclude(p => p!.Brand)
             .Include(v => v.Product)
@@ -402,8 +449,8 @@ public class ProductReadRepository(
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option)
             .Include(v => v.ProductCollectionPhotos)
-            .Include(v => v.InputInfos.Where(ii => ii.DeletedAt == null))
-            .ThenInclude(ii => ii.InputReceipt)
+            .Include(v => v.InventoryReceiptInfos.Where(ii => ii.DeletedAt == null))
+            .ThenInclude(ii => ii.InventoryReceipt)
             .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null))
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
@@ -413,5 +460,46 @@ public class ProductReadRepository(
     public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
     {
         return context.Products.AnyAsync(p => p.Id == id, cancellationToken);
+    }
+
+    public Task<List<ProductEntity>> GetAllProductsWithInventoryDetailsAsync(CancellationToken cancellationToken)
+    {
+        return context.Products
+            .Where(p => p.DeletedAt == null)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.ProductVariantColors)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.InventoryReceipt)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.PurchaseRequestItem)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<Domain.Entities.ProductVariant?> GetVariantByIdWithDetailsAsync(
+        int variantId,
+        CancellationToken cancellationToken)
+    {
+        return context.ProductVariants
+            .Where(v => v.Id == variantId && v.DeletedAt == null)
+            .Include(v => v.Product)
+            .Include(v => v.ProductVariantColors)
+            .Include(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.InventoryReceipt)
+            .Include(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.PurchaseRequestItem)
+            .ThenInclude(pri => pri!.PurchaseRequest)
+            .Include(v => v.InventoryReceiptInfos)
+            .ThenInclude(ii => ii.PurchaseRequestItem)
+            .ThenInclude(pri => pri!.Supplier)
+            .Include(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

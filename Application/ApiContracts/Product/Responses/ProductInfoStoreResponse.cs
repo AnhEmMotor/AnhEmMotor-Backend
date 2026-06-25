@@ -14,6 +14,9 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("product_limit")]
         public int? ProductLimit { get; set; }
 
+        [JsonPropertyName("effectiveMax")]
+        public int? EffectiveMax { get; set; }
+
         public string? Description { get; set; }
 
         [JsonPropertyName("short_description")]
@@ -25,8 +28,8 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("meta_description")]
         public string? MetaDescription { get; set; }
 
-        [JsonPropertyName("highlights")]
-        public string? Highlights { get; set; }
+        [JsonPropertyName("product_technologies")]
+        public List<ProductTechnologyResponse> ProductTechnologies { get; set; } = [];
 
         [JsonPropertyName("specifications")]
         public Dictionary<string, object?> Specifications { get; set; } = [];

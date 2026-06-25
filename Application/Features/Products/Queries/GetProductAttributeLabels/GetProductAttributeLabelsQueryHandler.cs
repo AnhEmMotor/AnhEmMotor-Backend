@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductAttributeLabels;
 
-public sealed class GetProductAttributeLabelsQueryHandler : IRequestHandler<GetProductAttributeLabelsQuery, Result<Dictionary<string, string>>>
+public class GetProductAttributeLabelsQueryHandler : IRequestHandler<GetProductAttributeLabelsQuery, Result<Dictionary<string, string>>>
 {
     public Task<Result<Dictionary<string, string>>> Handle(
         GetProductAttributeLabelsQuery request,

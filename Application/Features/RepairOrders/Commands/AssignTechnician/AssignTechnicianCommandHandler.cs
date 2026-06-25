@@ -1,10 +1,8 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.RepairOrder;
 using Application.Interfaces.Repositories.HR.Employee;
+using Application.Interfaces.Repositories.RepairOrder;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.RepairOrders.Commands.AssignTechnician
 {
@@ -22,20 +20,16 @@ namespace Application.Features.RepairOrders.Commands.AssignTechnician
             {
                 return Result<bool>.Failure(Error.NotFound("Phiếu sửa chữa không tồn tại."));
             }
-
             var technician = await employeeReadRepository.GetByIdAsync(request.TechnicianId, cancellationToken)
                 .ConfigureAwait(false);
             if (technician == null)
             {
                 return Result<bool>.Failure(Error.NotFound("Kỹ thuật viên không tồn tại."));
             }
-
             repairOrder.TechnicianId = request.TechnicianId;
             repairOrder.Status = "InProgress";
-
             repairOrderUpdateRepository.Update(repairOrder);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return Result<bool>.Success(true);
         }
     }

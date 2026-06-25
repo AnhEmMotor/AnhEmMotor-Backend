@@ -16,3 +16,4 @@ public interface IOutputUpdateRepository
         bool commitDeduction,
         CancellationToken cancellationToken);
 }
+

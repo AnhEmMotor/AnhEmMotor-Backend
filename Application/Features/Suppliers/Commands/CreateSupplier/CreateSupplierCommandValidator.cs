@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.Suppliers.Commands.CreateSupplier;
 
-public sealed class CreateSupplierCommandValidator : AbstractValidator<CreateSupplierCommand>
+public class CreateSupplierCommandValidator : AbstractValidator<CreateSupplierCommand>
 {
     public CreateSupplierCommandValidator()
     {

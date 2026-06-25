@@ -12,3 +12,4 @@ namespace Application.Interfaces.Repositories.Role
         public void RemovePermissionsFromRole(IEnumerable<RolePermission> rolePermissions);
     }
 }
+

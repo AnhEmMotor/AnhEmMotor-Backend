@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetSitemapSlugs;
 
-public sealed class GetSitemapSlugsQueryHandler(IProductVariantReadRepository productVariantReadRepository) : IRequestHandler<GetSitemapSlugsQuery, Result<SitemapSlugsResponse>>
+public class GetSitemapSlugsQueryHandler(IProductVariantReadRepository productVariantReadRepository) : IRequestHandler<GetSitemapSlugsQuery, Result<SitemapSlugsResponse>>
 {
     public async Task<Result<SitemapSlugsResponse>> Handle(
         GetSitemapSlugsQuery request,

@@ -19,7 +19,7 @@ public class WorkshopTicketItem : BaseEntity
     public string Description { get; set; } = string.Empty;
 
     [Column("IsPart")]
-    public bool IsPart { get; set; } // true if it's a part, false if it's labor
+    public bool IsPart { get; set; }
 
     [Column("Quantity")]
     public int Quantity { get; set; } = 1;

@@ -9,10 +9,8 @@ public class SalesContractMapsterRegister : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<Domain.Entities.SalesContract, SalesContractResponse>()
-            .Map(dest => dest.OrderId, src => src.OutputId ?? 0);
-
-        config.NewConfig<CreateSalesContractRequest, Domain.Entities.SalesContract>()
+        config.NewConfig<SalesContract, SalesContractResponse>().Map(dest => dest.OrderId, src => src.OutputId ?? 0);
+        config.NewConfig<CreateSalesContractRequest, SalesContract>()
             .Map(dest => dest.OutputId, src => src.OrderId)
             .Ignore(dest => dest.Id)
             .Ignore(dest => dest.ContractNumber)

@@ -1,8 +1,8 @@
+using Domain.Enums;
 using System;
 using System.ComponentModel.DataAnnotations;
-using AnhEmMotor.Domain.Enums;
 
-namespace AnhEmMotor.Domain.Entities
+namespace Domain.Entities
 {
     public class Expense
     {
@@ -25,6 +25,7 @@ namespace AnhEmMotor.Domain.Entities
         public string? Note { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
         public DateTime? UpdatedAt { get; set; }
     }
 }

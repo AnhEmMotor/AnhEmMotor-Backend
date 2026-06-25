@@ -1,4 +1,5 @@
 using Application.Common.Models;
+using Application.Common.Payments;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Services;
@@ -8,7 +9,7 @@ using System;
 
 namespace Application.Features.Payments.Commands.ProcessPayOSWebhook
 {
-    public sealed class ProcessPayOSWebhookCommandHandler(
+    public class ProcessPayOSWebhookCommandHandler(
         IOutputReadRepository readRepository,
         IOutputUpdateRepository updateRepository,
         IUnitOfWork unitOfWork,
@@ -36,11 +37,13 @@ namespace Application.Features.Payments.Commands.ProcessPayOSWebhook
             {
                 return Result.Success();
             }
-            if (request.Data.Amount >= order.Total)
+            var total = OrderPaymentAmountCalculator.GetTotal(order);
+            var depositAmount = OrderPaymentAmountCalculator.GetDepositAmount(order);
+            if (request.Data.Amount >= total)
             {
                 order.StatusId = OrderStatus.PaidProcessing;
                 order.PaymentStatus = OrderPaymentStatus.Paid;
-            } else if (request.Data.Amount >= order.DepositAmount)
+            } else if (request.Data.Amount >= depositAmount)
             {
                 order.StatusId = OrderStatus.DepositPaid;
                 order.PaymentStatus = OrderPaymentStatus.Partial;

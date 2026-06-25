@@ -17,5 +17,14 @@ namespace Application.ApiContracts.Product.Responses
 
         [JsonPropertyName("propertyName")]
         public string? OptionValuesText { get; set; }
+
+        [JsonPropertyName("colors")]
+        public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
+
+        [JsonPropertyName("product_limit")]
+        public int? ProductLimit { get; set; }
+
+        [JsonPropertyName("effectiveMax")]
+        public int? EffectiveMax { get; set; }
     }
 }

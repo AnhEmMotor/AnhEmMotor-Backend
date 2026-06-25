@@ -7,7 +7,7 @@ using System;
 
 namespace Application.Features.Brands.Queries.ExportBrands;
 
-public sealed class ExportBrandsQueryHandler(IBrandReadRepository repository) : IRequestHandler<ExportBrandsQuery, Result<FileStreamResult>>
+public class ExportBrandsQueryHandler(IBrandReadRepository repository) : IRequestHandler<ExportBrandsQuery, Result<FileStreamResult>>
 {
     public async Task<Result<FileStreamResult>> Handle(ExportBrandsQuery request, CancellationToken cancellationToken)
     {

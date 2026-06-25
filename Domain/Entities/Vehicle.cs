@@ -1,3 +1,4 @@
+using Domain.Constants.Order;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,11 +17,17 @@ public class Vehicle : BaseEntity
 
     public Lead? Lead { get; set; }
 
-    [Column("InputInfoId")]
-    [ForeignKey("InputInfo")]
-    public int? InputInfoId { get; set; }
+    [Column("UserId")]
+    [ForeignKey("User")]
+    public Guid? UserId { get; set; }
 
-    public InputInfo? InputInfo { get; set; }
+    public ApplicationUser? User { get; set; }
+
+    [Column("InventoryReceiptInfoId")]
+    [ForeignKey("InventoryReceiptInfo")]
+    public int? InventoryReceiptInfoId { get; set; }
+
+    public InventoryReceiptInfo? InventoryReceiptInfo { get; set; }
 
     [Column("OutputInfoId")]
     [ForeignKey("OutputInfo")]
@@ -34,6 +41,18 @@ public class Vehicle : BaseEntity
 
     public Product? Product { get; set; }
 
+    [Column("ProductVariantId")]
+    [ForeignKey("ProductVariant")]
+    public int? ProductVariantId { get; set; }
+
+    public ProductVariant? ProductVariant { get; set; }
+
+    [Column("ProductVariantColorId")]
+    [ForeignKey("ProductVariantColor")]
+    public int? ProductVariantColorId { get; set; }
+
+    public ProductVariantColor? ProductVariantColor { get; set; }
+
     [Column("VinNumber", TypeName = "nvarchar(100)")]
     public string VinNumber { get; set; } = string.Empty;
 
@@ -43,11 +62,32 @@ public class Vehicle : BaseEntity
     [Column("LicensePlate", TypeName = "nvarchar(50)")]
     public string LicensePlate { get; set; } = string.Empty;
 
+    [Column("CurrentOdo")]
+    public double CurrentOdo { get; set; }
+
+    [Column("LastMaintenanceDate")]
+    public DateTime? LastMaintenanceDate { get; set; }
+
+    [Column("NextMaintenanceDate")]
+    public DateTime? NextMaintenanceDate { get; set; }
+
+    [Column("NextMaintenanceOdo")]
+    public double? NextMaintenanceOdo { get; set; }
+
+    [Column("ElectronicWarrantyQrCode", TypeName = "nvarchar(255)")]
+    public string ElectronicWarrantyQrCode { get; set; } = string.Empty;
+
     [Column("IsActive")]
     public bool IsActive { get; set; } = true;
 
+    [Column("Status", TypeName = "nvarchar(50)")]
+    public string Status { get; set; } = VehicleStatus.Available;
+
     [Column("PurchaseDate")]
     public DateTimeOffset PurchaseDate { get; set; }
+
+    [Column("ImportPrice", TypeName = "decimal(18, 2)")]
+    public decimal ImportPrice { get; set; } = 0;
 
     public ICollection<VehicleDocument> Documents { get; set; } = new List<VehicleDocument>();
 

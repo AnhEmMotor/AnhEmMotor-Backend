@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Brands.Commands.UpdateBrand;
 
-public sealed class UpdateBrandCommandHandler(
+public class UpdateBrandCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateBrandCommand, Result<BrandResponse?>>

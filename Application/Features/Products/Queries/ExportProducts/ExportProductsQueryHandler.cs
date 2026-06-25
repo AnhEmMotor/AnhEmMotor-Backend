@@ -2,9 +2,7 @@ using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Features.Products.Mappings;
 using Application.Interfaces.Repositories.Product;
-using Application.Interfaces.Repositories.Setting;
 using ClosedXML.Excel;
-using Domain.Constants;
 using MediatR;
 using Sieve.Models;
 using System;
@@ -13,21 +11,17 @@ using System.Text;
 
 namespace Application.Features.Products.Queries.ExportProducts;
 
-public sealed class ExportProductsQueryHandler(IProductReadRepository repository, ISettingRepository settingRepository) : IRequestHandler<ExportProductsQuery, Result<FileStreamResult>>
+public class ExportProductsQueryHandler(IProductReadRepository repository) : IRequestHandler<ExportProductsQuery, Result<FileStreamResult>>
 {
     public async Task<Result<FileStreamResult>> Handle(ExportProductsQuery request, CancellationToken cancellationToken)
     {
-        var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        var alertLevelStr = settings.FirstOrDefault(
-            s => string.Equals(s.Key, SettingKeys.InventoryAlertLevel, StringComparison.OrdinalIgnoreCase))?.Value;
-        long.TryParse(alertLevelStr, out var alertLevel);
         var sieveModel = request.SieveModel ?? new SieveModel();
         var page = sieveModel.Page ?? 1;
         var pageSize = sieveModel.PageSize ?? 1000;
         var filters = sieveModel.Filters;
         var sorts = sieveModel.Sorts;
         var search = ExtractFilterValue(filters, "search");
-        var result = await repository.GetPagedProductsAsync(
+        var (Items, _, _) = await repository.GetPagedProductsAsync(
             search,
             [],
             [],
@@ -41,8 +35,8 @@ public sealed class ExportProductsQueryHandler(IProductReadRepository repository
             sorts,
             cancellationToken)
             .ConfigureAwait(false);
-        var products = result.Items
-            .Select(e => ProductMappingConfig.MapProductToDetailForManagerResponseWithAlertLevel(e, alertLevel))
+        var products = Items
+            .Select(ProductMappingConfig.MapProductToDetailForManagerResponseWithAlertLevel)
             .ToList();
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("San pham");
@@ -65,45 +59,7 @@ public sealed class ExportProductsQueryHandler(IProductReadRepository repository
         subtitleRange.Style.Font.FontSize = 10;
         subtitleRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
         subtitleRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
-        string[] headers =
-        {
-            "STT",
-            "Hình Ảnh",
-            "San Pham",
-            "The Loai",
-            "Thuong Hieu",
-            "Dong Xe",
-            "Kich Thuoc DxDxS",
-            "Van Do Cuc Dai",
-            "Mo Men Cuc Dai",
-            "Dung Tich Dong Co",
-            "Trong Luong",
-            "Chieu Cao Phu Toc",
-            "Khoang Sa Dua",
-            "Dung Tich Thang Xang",
-            "He Thong Phanh Trruc Toc",
-            "He Thong Tre Nhon",
-            "Lo Xe",
-            "Kieu Dang Truyen Dong",
-            "He Thong Khoi Dong",
-            "SKU",
-            "Bien The",
-            "Gia Ban",
-            "Ton Kho",
-            "Trang Thai Ton Kho",
-            "Hinh Anh Bien The",
-            "Trong Luong BL",
-            "Kich Thuoc BL",
-            "Chieu Cao Phu Toc BL",
-            "Lo Xe BL",
-            "Phanh Truoc BL",
-            "Phanh Sau BL",
-            "Tre Truoc BL",
-            "Tre Sau BL",
-            "Kieu Dong Co BL",
-            "Cong Suat",
-            "Mo Men"
-        };
+        string[] headers = ["STT", "Hình Ảnh", "San Pham", "The Loai", "Thuong Hieu", "Dong Xe", "Kich Thuoc DxDxS", "Van Do Cuc Dai", "Mo Men Cuc Dai", "Dung Tich Dong Co", "Trong Luong", "Chieu Cao Phu Toc", "Khoang Sa Dua", "Dung Tich Thang Xang", "He Thong Phanh Trruc Toc", "He Thong Tre Nhon", "Lo Xe", "Kieu Dang Truyen Dong", "He Thong Khoi Dong", "SKU", "Bien The", "Gia Ban", "Ton Kho", "Trang Thai Ton Kho", "Hinh Anh Bien The", "Trong Luong BL", "Kich Thuoc BL", "Chieu Cao Phu Toc BL", "Lo Xe BL", "Phanh Truoc BL", "Phanh Sau BL", "Tre Truoc BL", "Tre Sau BL", "Kieu Dong Co BL", "Cong Suat", "Mo Men"];
         for (int i = 0; i < headers.Length; i++)
         {
             var cell = worksheet.Cell(4, i + 1);
@@ -182,8 +138,8 @@ public sealed class ExportProductsQueryHandler(IProductReadRepository repository
                     worksheet.Cell(rowIndex, 20).Value = variant.SKU ?? string.Empty;
                     worksheet.Cell(rowIndex, 21).Value = FormatVariantName(variant);
                     worksheet.Cell(rowIndex, 22).Value = variant.Price?.ToString("N0") ?? "0";
-                    worksheet.Cell(rowIndex, 23).Value = variant.Stock;
-                    worksheet.Cell(rowIndex, 24).Value = variant.InventoryStatus ?? string.Empty;
+                    worksheet.Cell(rowIndex, 23).Value = 0;
+                    worksheet.Cell(rowIndex, 24).Value = string.Empty;
                     var variantImages = string.Join(", ", variant.PhotoCollection.Take(5));
                     worksheet.Cell(rowIndex, 25).Value = variantImages;
                     worksheet.Cell(rowIndex, 26).Value = variant.Weight?.ToString("N0") ?? "0";
@@ -222,11 +178,11 @@ public sealed class ExportProductsQueryHandler(IProductReadRepository repository
                 worksheet.Cell(rowIndex, 17).Value = product.TireSize ?? string.Empty;
                 worksheet.Cell(rowIndex, 18).Value = product.TransmissionType ?? string.Empty;
                 worksheet.Cell(rowIndex, 19).Value = product.StarterSystem ?? string.Empty;
-                worksheet.Cell(rowIndex, 20).Value = product.Stock > 0 ? "Co hang" : "Khong co";
+                worksheet.Cell(rowIndex, 20).Value = "N/A";
                 worksheet.Cell(rowIndex, 21).Value = "N/A";
                 worksheet.Cell(rowIndex, 22).Value = "N/A";
-                worksheet.Cell(rowIndex, 23).Value = product.Stock;
-                worksheet.Cell(rowIndex, 24).Value = product.InventoryStatus ?? string.Empty;
+                worksheet.Cell(rowIndex, 23).Value = 0;
+                worksheet.Cell(rowIndex, 24).Value = string.Empty;
                 worksheet.Cell(rowIndex, 25).Value = string.Empty;
                 for (int col = 26; col <= 36; col++)
                 {
@@ -251,11 +207,15 @@ public sealed class ExportProductsQueryHandler(IProductReadRepository repository
         var parts = new StringBuilder();
         if (!string.IsNullOrWhiteSpace(variant.VariantName))
             parts.Append(variant.VariantName);
-        if (!string.IsNullOrWhiteSpace(variant.ColorName))
+        var colorNames = variant.Colors
+            .Select(color => color.ColorName)
+            .Where(colorName => !string.IsNullOrWhiteSpace(colorName))
+            .ToList();
+        if (colorNames.Count > 0)
         {
             if (parts.Length > 0)
                 parts.Append(" - ");
-            parts.Append(variant.ColorName);
+            parts.Append(string.Join(", ", colorNames));
         }
         return parts.Length > 0 ? parts.ToString() : "Co ban";
     }

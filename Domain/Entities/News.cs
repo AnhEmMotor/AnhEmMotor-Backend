@@ -53,5 +53,9 @@ namespace Domain.Entities
 
         [ForeignKey("AuthorId")]
         public ApplicationUser? Author { get; set; }
+
+        public ICollection<NewsComment> Comments { get; set; } = [];
+
+        public ICollection<NewsProduct> LinkedProducts { get; set; } = [];
     }
 }

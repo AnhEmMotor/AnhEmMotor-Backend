@@ -1,6 +1,7 @@
 using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using MediatR;
 
@@ -8,16 +9,14 @@ namespace Application.Features.Users.Commands.ChangePassword;
 
 public class ChangePasswordCommandHandler(
     IUserReadRepository userReadRepository,
+    ICurrentUserContext currentUserContext,
     IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordCommand, Result<ChangePasswordByUserResponse>>
 {
     public async Task<Result<ChangePasswordByUserResponse>> Handle(
         ChangePasswordCommand request,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
-        {
-            return Error.BadRequest("Invalid user ID.");
-        }
+        var userId = currentUserContext.GetUserId();
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {

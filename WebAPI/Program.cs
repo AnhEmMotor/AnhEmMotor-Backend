@@ -1,6 +1,7 @@
 using Application;
 using Asp.Versioning.ApiExplorer;
 using Infrastructure;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -15,9 +16,18 @@ var environment = builder.Environment;
 var customUploadPath = configuration["LocalFileStorage:UploadPath"];
 if (!string.IsNullOrWhiteSpace(customUploadPath))
 {
-    environment.WebRootPath = customUploadPath;
+    var absolutePath = Path.IsPathRooted(customUploadPath)
+        ? customUploadPath
+        : Path.Combine(environment.ContentRootPath, customUploadPath);
+    if (!Directory.Exists(absolutePath))
+    {
+        Directory.CreateDirectory(absolutePath);
+    }
+    environment.WebRootPath = absolutePath;
+    environment.WebRootFileProvider = new PhysicalFileProvider(absolutePath);
 }
 builder.Services.AddApplicationServices();
+builder.Services.AddMemoryCache();
 if (!environment.IsEnvironment("Test"))
 {
     builder.Services.AddInfrastructureServices(configuration);
@@ -32,18 +42,7 @@ builder.Services
                 "CorsPolicy",
                 policy =>
                 {
-                    var rawOrigins = configuration["Cors:AllowedOrigins"];
-                    if (string.IsNullOrWhiteSpace(rawOrigins))
-                    {
-                        throw new InvalidOperationException("CORS AllowedOrigins is missing in appsettings.json.");
-                    }
-                    var allowedOrigins = rawOrigins.Split(';', StringSplitOptions.RemoveEmptyEntries);
-                    if (allowedOrigins.Any(origin => string.Compare(origin, "*") == 0))
-                    {
-                        throw new InvalidOperationException(
-                            "Wildcard '*' is not allowed when using AllowCredentials. Please specify exact origins.");
-                    }
-                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                    policy.SetIsOriginAllowed(origin => true).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
                 });
         })
     .AddJwtAuthentication(configuration)
@@ -55,6 +54,7 @@ if (!builder.Environment.IsEnvironment("Test"))
     builder.Services.AddRateLimitingServices();
 }
 builder.Services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 var app = builder.Build();
@@ -94,6 +94,7 @@ if (app.Environment.IsDevelopment())
     Console.WriteLine("=======================================================\n");
     Console.ForegroundColor = originalColor;
 }
+app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("CorsPolicy");
 if (!app.Environment.IsEnvironment("Test"))
@@ -106,6 +107,6 @@ app.UseAuthorization();
 app.MapControllers();
 if (!app.Environment.IsEnvironment("Test"))
 {
-    await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
+    await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
 }
 app.Run();

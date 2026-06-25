@@ -66,8 +66,39 @@ public abstract class ApiController : ControllerBase
     protected IActionResult HandleResult<T>(Result<T> result)
     {
         if (result.IsSuccess)
+        {
+            if (result.Value is IStreamFileResult streamFile)
+            {
+                return File(streamFile.FileStream, streamFile.ContentType);
+            }
+            if (result.Value is Application.Common.Models.FileStreamResult byteFile)
+            {
+                return File(byteFile.FileContents, byteFile.ContentType, byteFile.FileName);
+            }
             return Ok(result.Value);
+        }
         return MapErrorsToResponse(result);
+    }
+
+    /// <summary>
+    /// Handles SSE stream results.
+    /// </summary>
+    protected IActionResult HandleSseResult<T>(IAsyncEnumerable<Result<T>> stream)
+    {
+        return new SseResult<T>(stream);
+    }
+
+    /// <summary>
+    /// Handles redirection after payment callback based on result status.
+    /// </summary>
+    protected IActionResult HandlePaymentRedirect<T>(
+        Result<T> result,
+        string method,
+        Func<T?, string?> getOrderId,
+        string? fallbackOrderId = null,
+        Func<T?, bool>? checkCustomSuccess = null)
+    {
+        return new PaymentRedirectResult<T>(result, method, getOrderId, fallbackOrderId, checkCustomSuccess);
     }
 
     private IActionResult MapErrorsToResponse(Result result)

@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.RestoreOutput;
 
-public sealed class RestoreOutputCommandHandler(
+public class RestoreOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreOutputCommand, Result<OrderDetailResponse>>

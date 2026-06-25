@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
-using Application.Interfaces.Services.HR;
 using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
@@ -14,6 +13,7 @@ using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -28,21 +28,39 @@ public static class DependencyInjection
     {
         services.Configure<LocalFileStorageOptions>(configuration.GetSection(LocalFileStorageOptions.SectionName));
         var provider = configuration.GetValue("Provider", "SqlServer");
-        if (string.Compare(provider, "MySql") == 0)
+        if (string.Compare(provider, "MySql", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
             services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
-            options =>
-            {
-                options.UseMySql(connectionString, serverVersion);
-            });
-            services.AddScoped<Application.Common.Interfaces.IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDBContext>());
-        }
-        else if (string.Compare(provider, "PostgreSql") == 0)
+                options =>
+                {
+                    options.UseMySql(connectionString, serverVersion);
+                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+                });
+        } else if (string.Compare(provider, "PostgreSql", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
+                options =>
+                {
+                    options.UseNpgsql(connectionString);
+                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+                });
+        } else
+        {
+            services.AddDbContextPool<ApplicationDBContext>(
+                options =>
+                {
+                    options.UseSqlServer(
+                        configuration.GetConnectionString("StringConnection"),
+                        b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
+                                .CommandTimeout(30)
+                                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+                });
+        }
+        services.AddIdentity<ApplicationUser, ApplicationRole>(
             options =>
             {
                 options.UseNpgsql(connectionString);
@@ -81,7 +99,8 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
         services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
         services.AddScoped<ITokenManagerService, TokenManagerService>();
-        services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
+        services.AddScoped<ICookieTokenManager, CookieTokenManager>();
+        services.AddScoped<ICurrentUserContext, CurrentUserContext>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
@@ -95,17 +114,14 @@ public static class DependencyInjection
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<ICommissionService, CommissionService>();
-        services.AddScoped<ILeadAssignmentService, LeadAssignmentService>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient();
         services.Scan(
-        scan => scan
-        .FromAssemblies(Assembly.GetExecutingAssembly())
-        .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
-        .AsImplementedInterfaces()
-        .WithScopedLifetime());
-        services.AddHostedService<BannerExpiryWorker>();
+            scan => scan
+            .FromAssemblies(Assembly.GetExecutingAssembly())
+                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
         services.AddHostedService<SupplierContractExpiryWorker>();
         return services;
     }

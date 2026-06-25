@@ -1,3 +1,4 @@
+using Application.ApiContracts.Product.Requests;
 using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Responses;
@@ -23,11 +24,11 @@ public class ProductVariantDetailForManagerResponse
     [JsonPropertyName("variant_name")]
     public string? VariantName { get; set; }
 
-    [JsonPropertyName("color_name")]
-    public string? ColorName { get; set; }
+    [JsonPropertyName("colors")]
+    public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
 
-    [JsonPropertyName("color_code")]
-    public string? ColorCode { get; set; }
+    [JsonPropertyName("supplier_prices")]
+    public List<VariantSupplierPriceRequest> SupplierPrices { get; set; } = [];
 
     [JsonPropertyName("sku")]
     public string? SKU { get; set; }
@@ -67,16 +68,5 @@ public class ProductVariantDetailForManagerResponse
 
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
-
-    public int Stock { get; set; }
-
-    [JsonPropertyName("has_been_booked")]
-    public int HasBeenBooked { get; set; }
-
-    [JsonPropertyName("status_stock_id")]
-    public string StatusStockId { get; set; } = string.Empty;
-
-    [JsonPropertyName("inventory_status")]
-    public string InventoryStatus { get; set; } = Domain.Constants.InventoryStatus.InStock;
 }
 

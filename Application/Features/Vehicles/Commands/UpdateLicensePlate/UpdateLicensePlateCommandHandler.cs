@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Application.Features.Vehicles.Commands.UpdateLicensePlate;
 
-public sealed class UpdateLicensePlateCommandHandler(
+public class UpdateLicensePlateCommandHandler(
     IVehicleReadRepository readRepository,
     IVehicleUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateLicensePlateCommand, Result<VehicleResponse?>>

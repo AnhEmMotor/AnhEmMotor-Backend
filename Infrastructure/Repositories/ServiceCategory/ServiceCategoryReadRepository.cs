@@ -6,10 +6,7 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using ServiceCategoryEntity = Domain.Entities.ServiceCategory;
 
 namespace Infrastructure.Repositories.ServiceCategory;
@@ -38,34 +35,32 @@ public class ServiceCategoryReadRepository(
         return filteredQuery.ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<ServiceCategoryEntity>> GetAllAsync(
+    public Task<IEnumerable<ServiceCategoryEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return await context.GetQuery<ServiceCategoryEntity>(mode)
+        return context.GetQuery<ServiceCategoryEntity>(mode)
             .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+            .ContinueWith(t => (IEnumerable<ServiceCategoryEntity>)t.Result, cancellationToken);
     }
 
-    public async Task<ServiceCategoryEntity?> GetByIdAsync(
+    public Task<ServiceCategoryEntity?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return await context.GetQuery<ServiceCategoryEntity>(mode)
-            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken)
-            .ConfigureAwait(false);
+        return context.GetQuery<ServiceCategoryEntity>(mode).FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
-    public async Task<IEnumerable<ServiceCategoryEntity>> GetByIdAsync(
+    public Task<IEnumerable<ServiceCategoryEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return await context.GetQuery<ServiceCategoryEntity>(mode)
+        return context.GetQuery<ServiceCategoryEntity>(mode)
             .Where(s => ids.Contains(s.Id))
             .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+            .ContinueWith(t => (IEnumerable<ServiceCategoryEntity>)t.Result, cancellationToken);
     }
 
     public Task<ServiceCategoryEntity?> GetBySlugAsync(
@@ -73,16 +68,15 @@ public class ServiceCategoryReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        // ServiceCategory does not have a Slug field in this schema.
+        cancellationToken.ThrowIfCancellationRequested();
         return Task.FromResult<ServiceCategoryEntity?>(null);
     }
 
-    public async Task<IEnumerable<ServiceCategoryEntity>> GetRootCategoriesAsync(
+    public Task<IEnumerable<ServiceCategoryEntity>> GetRootCategoriesAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        // ServiceCategory does not have a hierarchy (no ParentId). All are root.
-        return await GetAllAsync(cancellationToken, mode).ConfigureAwait(false);
+        return GetAllAsync(cancellationToken, mode);
     }
 
     public Task<IEnumerable<ServiceCategoryEntity>> GetSubCategoriesAsync(
@@ -90,8 +84,8 @@ public class ServiceCategoryReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        // ServiceCategory does not have a hierarchy (no subcategories).
-        return Task.FromResult<IEnumerable<ServiceCategoryEntity>>(new List<ServiceCategoryEntity>());
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult<IEnumerable<ServiceCategoryEntity>>([]);
     }
 
     internal IQueryable<ServiceCategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)

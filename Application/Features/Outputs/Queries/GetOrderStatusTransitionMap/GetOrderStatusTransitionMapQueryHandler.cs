@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOrderStatusTransitionMap;
 
-public sealed class GetOrderStatusTransitionMapQueryHandler : IRequestHandler<GetOrderStatusTransitionMapQuery, Result<Dictionary<string, HashSet<string>>>>
+public class GetOrderStatusTransitionMapQueryHandler : IRequestHandler<GetOrderStatusTransitionMapQuery, Result<Dictionary<string, HashSet<string>>>>
 {
     public Task<Result<Dictionary<string, HashSet<string>>>> Handle(
         GetOrderStatusTransitionMapQuery request,

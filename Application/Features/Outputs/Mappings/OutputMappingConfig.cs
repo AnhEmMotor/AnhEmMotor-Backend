@@ -7,7 +7,7 @@ using Mapster;
 
 namespace Application.Features.Outputs.Mappings;
 
-public sealed class OutputMappingConfig : IRegister
+public class OutputMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
@@ -44,17 +44,18 @@ public sealed class OutputMappingConfig : IRegister
             .Map(dest => dest.Price, src => src.Price)
             .Map(dest => dest.CoverImageUrl, src => MapCoverImageUrl(src.ProductVariant));
         config.NewConfig<OutputInfo, OutputInfoResponse>()
-            .Map(dest => dest.ProductVarientId, src => src.ProductVarientId)
-            .Map(dest => dest.ProductVarientColorId, src => src.ProductVariantColorId)
+            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId)
             .Map(dest => dest.ProductName, src => MapProductName(src))
-            .Map(dest => dest.CoverImageUrl, src => MapCoverImageUrl(src.ProductVariant));
+            .Map(dest => dest.CoverImageUrl, src => MapCoverImageUrl(src.ProductVariant))
+            .Map(dest => dest.AssignedVehicles, src => MapAssignedVehicles(src));
         config.NewConfig<CreateOutputInfoRequest, OutputInfo>()
-            .Map(dest => dest.ProductVarientId, src => src.ProductVarientId)
-            .Map(dest => dest.ProductVariantColorId, src => src.ProductVarientColorId)
+            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId)
             .IgnoreNullValues(true);
         config.NewConfig<UpdateOutputInfoRequest, OutputInfo>()
-            .Map(dest => dest.ProductVarientId, src => src.ProductVarientId)
-            .Map(dest => dest.ProductVariantColorId, src => src.ProductVarientColorId)
+            .Map(dest => dest.ProductVariantId, src => src.ProductVariantId)
+            .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId)
             .Map(dest => dest.Count, src => src.Count)
             .Ignore(dest => dest.Id)
             .IgnoreNullValues(true);
@@ -113,11 +114,27 @@ public sealed class OutputMappingConfig : IRegister
     {
         if (variant == null)
             return null;
-        if (variant.ProductVariantColor != null && !string.IsNullOrEmpty(variant.ProductVariantColor.CoverImageUrl))
-            return variant.ProductVariantColor.CoverImageUrl;
+        if (variant.ProductVariantColors != null &&
+            !string.IsNullOrEmpty(variant.ProductVariantColors.FirstOrDefault()?.CoverImageUrl))
+            return variant.ProductVariantColors.FirstOrDefault()?.CoverImageUrl;
         if (!string.IsNullOrEmpty(variant.CoverImageUrl))
             return variant.CoverImageUrl;
         return variant.ProductCollectionPhotos?
             .OrderBy(p => p.Id).Select(p => p.ImageUrl).FirstOrDefault();
+    }
+
+    private static List<VehicleAssignmentOptionResponse> MapAssignedVehicles(OutputInfo src)
+    {
+        return src.Vehicles?
+            .Select(
+                v => new VehicleAssignmentOptionResponse
+                {
+                    Id = v.Id,
+                    VinNumber = v.VinNumber,
+                    EngineNumber = v.EngineNumber,
+                    Status = v.Status
+                })
+                .ToList() ??
+            [];
     }
 }

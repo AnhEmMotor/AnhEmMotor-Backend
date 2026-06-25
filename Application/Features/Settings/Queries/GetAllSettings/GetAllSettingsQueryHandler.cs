@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Settings.Queries.GetAllSettings;
 
-public sealed class GetAllSettingsQueryHandler(ISettingRepository settingRepository) : IRequestHandler<GetAllSettingsQuery, Result<Dictionary<string, string?>>>
+public class GetAllSettingsQueryHandler(ISettingRepository settingRepository) : IRequestHandler<GetAllSettingsQuery, Result<Dictionary<string, string?>>>
 {
     public async Task<Result<Dictionary<string, string?>>> Handle(
         GetAllSettingsQuery request,

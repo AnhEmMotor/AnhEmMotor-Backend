@@ -41,20 +41,17 @@ jobs:
           - 1433:1433
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
-
       - name: Install dotnet-ef
         run: |
           dotnet tool install --global dotnet-ef
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-
       - name: Check Migration Count
         shell: bash
         run: |
@@ -81,35 +78,28 @@ jobs:
               echo "  - $DIR: $COUNT migration(s) [OK] ($UNIQUE_NAMES)"
             fi
           done
-
           if [ "$FAILED" -eq 1 ]; then
             exit 1
           fi
-
       - name: Restore dependencies
         run: dotnet restore
-
       - name: Build
         run: dotnet build --no-restore
-
       - name: Run Unit Tests
         run: dotnet test UnitTests/UnitTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
         env:
           Logging__LogLevel__Default: "Warning"
           Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
-
       - name: Run Controller Tests
         run: dotnet test ControllerTests/ControllerTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
         env:
           Logging__LogLevel__Default: "Warning"
           Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
-
       - name: Run Integration Tests
         run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
         env:
           Logging__LogLevel__Default: "Warning"
           Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
-
       - name: Verify Migrations (SQL Server, MySQL, PostgreSql)
         shell: bash
         run: |

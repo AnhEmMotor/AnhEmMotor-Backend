@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetDailyRevenue;
 
-public sealed class GetDailyRevenueQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetDailyRevenueQuery, Result<IEnumerable<DailyRevenueResponse>>>
+public class GetDailyRevenueQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetDailyRevenueQuery, Result<IEnumerable<DailyRevenueResponse>>>
 {
     public async Task<Result<IEnumerable<DailyRevenueResponse>>> Handle(
         GetDailyRevenueQuery request,

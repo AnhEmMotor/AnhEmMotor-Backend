@@ -19,6 +19,10 @@ namespace Application.Interfaces.Repositories.ProductVariant
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
+        public Task<IEnumerable<ProductVariantEntity>> GetAllAsync(
+            CancellationToken cancellationToken,
+            DataFetchMode mode = DataFetchMode.ActiveOnly);
+
         public Task<ProductVariantEntity?> GetBySlugAsync(
             string slug,
             CancellationToken cancellationToken,
@@ -46,3 +50,4 @@ namespace Application.Interfaces.Repositories.ProductVariant
         public Task<List<string>> GetUrlSlugsAsync(CancellationToken cancellationToken);
     }
 }
+
