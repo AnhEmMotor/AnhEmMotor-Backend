@@ -22,19 +22,19 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Th?ng k� v� b�o c�o.
+/// Thống kê và báo cáo.
 /// </summary>
 /// <param name="mediator"></param>
 [ApiVersion("1.0")]
-[SwaggerTag("Th?ng k� v� b�o c�o")]
+[SwaggerTag("Thống kê và báo cáo")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class StatisticsController(IMediator mediator, IStatisticalReadRepository repository) : ApiController
 {
     /// <summary>
-    /// L?y doanh thu theo ng�y trong kho?ng th?i gian x�c d?nh.
+    /// Lấy doanh thu theo ngày trong khoảng thời gian xác định.
     /// </summary>
-    /// <param name="days">S? ng�y t�nh t? hi?n t?i tr? v? tru?c</param>
+    /// <param name="days">Số ngày tính từ hiện tại trở về trước</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("daily-revenue")]
     [HasPermission(Statistical.View)]
@@ -68,7 +68,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// L?y c�c ch? s? t?ng h?p cho Dashboard.
+    /// Lấy các chỉ số tổng hợp cho Dashboard.
     /// </summary>
     [HttpGet("dashboard-stats")]
     [HasPermission(Statistical.View)]
@@ -81,9 +81,9 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// L?y doanh thu v� l?i nhu?n theo th�ng.
+    /// Lấy doanh thu và lợi nhuận theo tháng.
     /// </summary>
-    /// <param name="months">S? th�ng t�nh t? hi?n t?i tr? v? tru?c</param>
+    /// <param name="months">Số tháng tính từ hiện tại trở về trước</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("monthly-revenue-profit")]
     [HasPermission(Statistical.View)]
@@ -111,7 +111,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// L?y b�o c�o s?n ph?m c?a th�ng tru?c.
+    /// Lấy báo cáo sản phẩm của tháng trước.
     /// </summary>
     [HttpGet("product-report-last-month")]
     [HasPermission(Statistical.View)]
@@ -124,7 +124,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// L?y gi� v� t?n kho c?a m?t s?n ph?m c? th?.
+    /// Lấy giá và tồn kho của một sản phẩm cụ thể.
     /// </summary>
     [HttpGet("product-stock-price/{variantId:int}")]
     [HasPermission(Statistical.View)]
@@ -138,7 +138,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// L?y to�n b? d? li?u g?p cho Admin Dashboard.
+    /// Lấy toàn bộ dữ liệu gộp cho Admin Dashboard.
     /// </summary>
     [HttpGet("dashboard-overview")]
     [HasPermission(Statistical.View)]
@@ -151,7 +151,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// L?y to�n b? ph�n t�ch doanh thu cho Admin (g?p).
+    /// Lấy toàn bộ phân tích doanh thu cho Admin (gộp).
     /// </summary>
     [HttpGet("revenue-analysis")]
     [HasPermission(Statistical.View)]
@@ -164,7 +164,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// L?y b�o c�o hi?u su?t s?n ph?m cho Admin (g?p).
+    /// Lấy báo cáo hiệu suất sản phẩm cho Admin (gộp).
     /// </summary>
     [HttpGet("product-report")]
     [HasPermission(Statistical.View)]
@@ -177,7 +177,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// L?y b�o c�o t?n kho cho Admin (g?p).
+    /// Lấy báo cáo tồn kho cho Admin (gộp).
     /// </summary>
     [HttpGet("warehouse-report")]
     [HasPermission(Statistical.View)]
