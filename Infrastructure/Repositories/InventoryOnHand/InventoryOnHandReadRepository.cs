@@ -68,7 +68,6 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                 ImportedQty = x.ImportedQty,
                 ExportedQty = x.ExportedQty,
                 StockQty = x.StockQty,
-                OrderedQty = x.OrderedQty,
                 BeginningQty = x.BeginningQty
             })
             .ToListAsync(cancellationToken);
@@ -103,8 +102,6 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                     ImportedQty = gp.Sum(x => x.ImportedQty),
                     ExportedQty = gp.Sum(x => x.ExportedQty),
                     InventoryQty = gp.Sum(x => x.StockQty),
-                    OrderedQty = gp.Sum(x => x.OrderedQty),
-                    RemainingQty = gp.Sum(x => x.StockQty) - gp.Sum(x => x.OrderedQty),
                     Variants =
                         [.. gp.GroupBy(x => new { x.VariantId, x.VariantName })
                                 .Select(
@@ -116,8 +113,6 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                                     ImportedQty = gv.Sum(x => x.ImportedQty),
                                     ExportedQty = gv.Sum(x => x.ExportedQty),
                                     InventoryQty = gv.Sum(x => x.StockQty),
-                                    OrderedQty = gv.Sum(x => x.OrderedQty),
-                                    RemainingQty = gv.Sum(x => x.StockQty) - gv.Sum(x => x.OrderedQty),
                                     VariantColors =
                                         [.. gv.Where(x => x.ColorId != null)
                                                         .Select(
@@ -128,9 +123,7 @@ public class InventoryOnHandReadRepository(ApplicationDBContext context) : IInve
                                                             BeginningQty = gc.BeginningQty,
                                                             ImportedQty = gc.ImportedQty,
                                                             ExportedQty = gc.ExportedQty,
-                                                            InventoryQty = gc.StockQty,
-                                                            OrderedQty = gc.OrderedQty,
-                                                            RemainingQty = gc.StockQty - gc.OrderedQty
+                                                            InventoryQty = gc.StockQty
                                                         })]
                                 })]
                 })
