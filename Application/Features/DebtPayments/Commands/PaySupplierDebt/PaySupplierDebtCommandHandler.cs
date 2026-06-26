@@ -46,6 +46,16 @@ namespace Application.Features.DebtPayments.Commands.PaySupplierDebt
                 PaymentDate = DateTimeOffset.UtcNow,
                 CreatedById = currentUserId
             };
+            if (request.ProofImageUrls != null && request.ProofImageUrls.Any())
+            {
+                foreach (var url in request.ProofImageUrls)
+                {
+                    paymentLog.ProofImages.Add(new SupplierDebtLogImage
+                    {
+                        ImageUrl = url
+                    });
+                }
+            }
             await supplierDebtInsertRepository.InsertSupplierDebtLogAsync(paymentLog, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return Result<bool>.Success(true);

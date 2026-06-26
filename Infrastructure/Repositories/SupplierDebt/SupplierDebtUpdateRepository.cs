@@ -9,5 +9,10 @@ namespace Infrastructure.Repositories.SupplierDebt
         {
             context.SupplierDebts.Update(supplierDebt);
         }
+
+        public void UpdateSupplierDebtLog(Domain.Entities.SupplierDebtLog supplierDebtLog)
+        {
+            context.SupplierDebtLogs.Update(supplierDebtLog);
+        }
     }
 }

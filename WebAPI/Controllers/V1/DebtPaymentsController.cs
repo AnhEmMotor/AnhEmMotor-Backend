@@ -68,7 +68,7 @@ namespace WebAPI.Controllers.V1
             [FromBody] PaySupplierDebtRequest request,
             CancellationToken cancellationToken)
         {
-            var command = new PaySupplierDebtCommand { SupplierId = supplierId, Amount = request.Amount };
+            var command = new PaySupplierDebtCommand { SupplierId = supplierId, Amount = request.Amount, ProofImageUrls = request.ProofImageUrls };
             var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
@@ -78,13 +78,96 @@ namespace WebAPI.Controllers.V1
         /// </summary>
         [HttpGet("suppliers/{supplierId:int}/debt-logs")]
         [HasPermission(DebtPayments.View)]
-        [ProducesResponseType(typeof(List<SupplierDebtLog>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<Application.ApiContracts.DebtPayment.Responses.SupplierDebtLogResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSupplierDebtLogsAsync(
             [FromRoute] int supplierId,
             CancellationToken cancellationToken)
         {
             var query = new GetSupplierDebtLogsQuery { SupplierId = supplierId };
             var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Tải lên ảnh chứng minh thanh toán
+        /// </summary>
+        [HttpPost("proof-image")]
+        [HasPermission(DebtPayments.Create)]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(Application.ApiContracts.DebtPayment.Responses.UploadDebtProofImageResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UploadDebtProofImageAsync(
+            IFormFile file,
+            CancellationToken cancellationToken)
+        {
+            var command = new Application.Features.DebtPayments.Commands.UploadDebtProofImage.UploadDebtProofImageCommand
+            {
+                FileContent = file.OpenReadStream(),
+                FileName = file.FileName
+            };
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Xem ảnh chứng minh thanh toán
+        /// </summary>
+        [HttpGet("proof-image/{mediaFileId:int}")]
+        [HasPermission(DebtPayments.View)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> ViewDebtProofImageAsync(
+            [FromRoute] int mediaFileId,
+            CancellationToken cancellationToken)
+        {
+            var query = new Application.Features.DebtPayments.Queries.ViewDebtProofImage.ViewDebtProofImageQuery { MediaFileId = mediaFileId };
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+
+            if (result.IsFailure)
+            {
+                return HandleResult(result);
+            }
+
+            return File(result.Value.Content, result.Value.ContentType);
+        }
+
+        /// <summary>
+        /// Lấy danh sách các lần thanh toán thiếu ảnh chứng minh
+        /// </summary>
+        [HttpGet("missing-proofs")]
+        [HasPermission(DebtPayments.View)]
+        [ProducesResponseType(typeof(PagedResult<Application.ApiContracts.DebtPayment.Responses.SupplierDebtLogResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDebtLogsMissingProofsAsync(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
+        {
+            var query = new Application.Features.DebtPayments.Queries.GetDebtLogsMissingProofs.GetDebtLogsMissingProofsQuery { SieveModel = sieveModel };
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+        [HttpGet("debt-logs/{id}/proof-images")]
+        [HasPermission(DebtPayments.View)]
+        [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDebtLogProofImagesAsync(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(new Application.Features.DebtPayments.Queries.GetDebtLogProofImages.GetDebtLogProofImagesQuery { DebtLogId = id }, cancellationToken);
+            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        }
+
+        [HttpPut("debt-logs/{id}/proof-images")]
+        [HasPermission(DebtPayments.Update)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateDebtProofImagesAsync(
+            int id,
+            [FromBody] Application.ApiContracts.DebtPayment.Requests.UpdateDebtProofImagesRequest request,
+            CancellationToken cancellationToken)
+        {
+            var command = new Application.Features.DebtPayments.Commands.UpdateDebtProofImages.UpdateDebtProofImagesCommand 
+            { 
+                DebtLogId = id, 
+                ProofImageUrls = request.ProofImageUrls 
+            };
+            var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
             return HandleResult(result);
         }
     }
