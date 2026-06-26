@@ -50,10 +50,7 @@ namespace Application.Features.DebtPayments.Commands.PaySupplierDebt
             {
                 foreach (var url in request.ProofImageUrls)
                 {
-                    paymentLog.ProofImages.Add(new SupplierDebtLogImage
-                    {
-                        ImageUrl = url
-                    });
+                    paymentLog.ProofImages.Add(new SupplierDebtLogImage { ImageUrl = url });
                 }
             }
             await supplierDebtInsertRepository.InsertSupplierDebtLogAsync(paymentLog, cancellationToken);

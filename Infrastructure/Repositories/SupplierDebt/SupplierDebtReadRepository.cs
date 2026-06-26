@@ -88,7 +88,9 @@ namespace Infrastructure.Repositories.SupplierDebt
                 .FirstOrDefaultAsync(x => x.Id == logId, cancellationToken);
         }
 
-        public async Task<List<SupplierDebtLogImage>> GetDebtLogProofImagesAsync(int debtLogId, CancellationToken cancellationToken)
+        public async Task<List<SupplierDebtLogImage>> GetDebtLogProofImagesAsync(
+            int debtLogId,
+            CancellationToken cancellationToken)
         {
             return await context.SupplierDebtLogImages
                 .Where(x => x.SupplierDebtLogId == debtLogId)

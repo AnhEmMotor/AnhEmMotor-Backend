@@ -15,14 +15,14 @@ namespace Application.Features.DebtPayments.Queries.GetSupplierDebtLogs
             var logs = await supplierDebtRepository.GetSupplierDebtLogsBySupplierIdAsync(
                 request.SupplierId,
                 cancellationToken);
-                
-            var result = logs.Select(log =>
-            {
-                var response = log.Adapt<SupplierDebtLogResponse>();
-                response.HasProofImage = log.ProofImages != null && log.ProofImages.Any();
-                return response;
-            }).ToList();
-            
+            var result = logs.Select(
+                log =>
+                {
+                    var response = log.Adapt<SupplierDebtLogResponse>();
+                    response.HasProofImage = log.ProofImages != null && log.ProofImages.Any();
+                    return response;
+                })
+                .ToList();
             return Result<List<SupplierDebtLogResponse>>.Success(result);
         }
     }

@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.SupplierDebt;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.SupplierDebt
@@ -10,7 +11,7 @@ namespace Infrastructure.Repositories.SupplierDebt
             context.SupplierDebts.Update(supplierDebt);
         }
 
-        public void UpdateSupplierDebtLog(Domain.Entities.SupplierDebtLog supplierDebtLog)
+        public void UpdateSupplierDebtLog(SupplierDebtLog supplierDebtLog)
         {
             context.SupplierDebtLogs.Update(supplierDebtLog);
         }

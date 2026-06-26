@@ -32,15 +32,13 @@ public class UploadDebtProofImageCommandHandler(
         {
             return Result<UploadDebtProofImageResponse>.Failure("File size exceeds 10MB limit");
         }
-
         var saveResult = await fileInsertService.SaveFileAsync(request.FileContent, cancellationToken, "debt-proofs")
             .ConfigureAwait(false);
-            
         if (saveResult.IsFailure)
         {
-            return Result<UploadDebtProofImageResponse>.Failure(saveResult.Error ?? Error.Failure("Unknown upload error"));
+            return Result<UploadDebtProofImageResponse>.Failure(
+                saveResult.Error ?? Error.Failure("Unknown upload error"));
         }
-        
         var savedFile = saveResult.Value;
         var mediaFile = new MediaFileEntity
         {
@@ -51,16 +49,10 @@ public class UploadDebtProofImageCommandHandler(
             FileExtension = savedFile.Extension,
             FileSize = savedFile.Size
         };
-        
         insertRepository.Add(mediaFile);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
         var url = fileReadService.GetPublicUrl(savedFile.StoragePath);
-
-        return Result<UploadDebtProofImageResponse>.Success(new UploadDebtProofImageResponse
-        {
-            MediaFileId = mediaFile.Id,
-            Url = url
-        });
+        return Result<UploadDebtProofImageResponse>.Success(
+            new UploadDebtProofImageResponse { MediaFileId = mediaFile.Id, Url = url });
     }
 }

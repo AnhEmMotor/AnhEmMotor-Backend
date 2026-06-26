@@ -25,7 +25,9 @@ namespace Application.Interfaces.Repositories.SupplierDebt
 
         public Task<SupplierDebtLog?> GetDebtLogByIdAsync(int logId, CancellationToken cancellationToken);
 
-        public Task<List<SupplierDebtLogImage>> GetDebtLogProofImagesAsync(int debtLogId, CancellationToken cancellationToken);
+        public Task<List<SupplierDebtLogImage>> GetDebtLogProofImagesAsync(
+            int debtLogId,
+            CancellationToken cancellationToken);
 
         public Task<bool> IsDebtProofImageAsync(int mediaFileId, CancellationToken cancellationToken);
     }
