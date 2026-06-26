@@ -25,6 +25,10 @@ public class ViewDebtProofImageQueryHandler(
         {
             return Result<(Stream Content, string ContentType)>.Failure("Ảnh không hợp lệ hoặc bạn không có quyền xem.");
         }
+        if (string.IsNullOrEmpty(mediaFile.StoragePath))
+        {
+            return Result<(Stream Content, string ContentType)>.Failure("Đường dẫn file không hợp lệ.");
+        }
         var fileResult = await fileReadService.GetFileAsync(mediaFile.StoragePath, cancellationToken);
         if (fileResult == null)
         {
