@@ -70,8 +70,7 @@ public static class MigrationExtensions
                 await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await SupplierContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await FinanceContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await ContractTemplateSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await SalesAndInventorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                                await SalesAndInventorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await CarrierPartnerSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
             }
         } catch (Exception ex)

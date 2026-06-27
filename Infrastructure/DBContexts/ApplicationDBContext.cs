@@ -184,8 +184,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<InventoryOnHand> InventoryOnHands { get; set; }
 
-    public virtual DbSet<ContractTemplate> ContractTemplates { get; set; }
-
+    
     public virtual DbSet<SalesContract> SalesContracts { get; set; }
 
     public virtual DbSet<FinanceContract> FinanceContracts { get; set; }
@@ -196,8 +195,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<SupplierContractAuditLog> SupplierContractAuditLogs { get; set; }
 
-    public virtual DbSet<ContractTemplateAuditLog> ContractTemplateAuditLogs { get; set; }
-
+    
     public virtual DbSet<SupplierFinance> SupplierFinances { get; set; }
 
     public virtual DbSet<SupplierDebtSettlement> SupplierDebtSettlements { get; set; }
@@ -221,15 +219,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<CurrentUnreconciledCod> CurrentUnreconciledCods { get; set; }
 
     public virtual DbSet<CarrierPartner> CarrierPartners { get; set; }
+    public virtual DbSet<Invoice> Invoices { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Expense>().Property(e => e.Amount).HasPrecision(18, 2);
-        modelBuilder.Entity<ContractTemplate>().Property(e => e.Version).HasPrecision(18, 2);
-        modelBuilder.Entity<SupplierFinance>().Property(e => e.CurrentDebt).HasPrecision(18, 2);
-        modelBuilder.Entity<ContractTemplate>().Property(ct => ct.Version).HasPrecision(18, 2);
-        modelBuilder.Entity<SupplierFinance>().Property(sf => sf.CurrentDebt).HasPrecision(18, 2);
+                modelBuilder.Entity<SupplierFinance>().Property(e => e.CurrentDebt).HasPrecision(18, 2);
+                modelBuilder.Entity<SupplierFinance>().Property(sf => sf.CurrentDebt).HasPrecision(18, 2);
         modelBuilder.Entity<CurrentUnreconciledCod>().Property(e => e.Value).HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.CodAmount).HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.ShippingCost).HasPrecision(18, 2);
