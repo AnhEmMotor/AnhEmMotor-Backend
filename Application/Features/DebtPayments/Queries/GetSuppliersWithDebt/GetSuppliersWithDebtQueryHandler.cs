@@ -44,7 +44,7 @@ namespace Application.Features.DebtPayments.Queries.GetSuppliersWithDebt
                         Phone = kvp.Value.Phone,
                         TotalDebt = kvp.Value.TotalDebt
                     })
-                .OrderByDescending(x => x.TotalDebt)
+                .OrderBy(x => x.Name)
                 .ToList();
             var page = request.SieveModel?.Page ?? 1;
             var pageSize = request.SieveModel?.PageSize ?? 10;
