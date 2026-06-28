@@ -13,6 +13,7 @@ using Application.Features.Logistics.Queries.GetLogisticsDashboard;
 using Application.Features.Logistics.Queries.GetShipmentTracking;
 using Application.Features.Logistics.Returns;
 using Application.Features.Logistics.Returns.Commands.InspectReturn;
+using Application.Features.Logistics.Returns.Commands.RejectReturn;
 using Application.Features.Logistics.Returns.Queries.GetReturnDetail;
 using Application.Features.Logistics.Returns.Queries.GetReturns;
 using Asp.Versioning;
@@ -173,5 +174,17 @@ public class LogisticsController(IMediator mediator) : ControllerBase
         if (!result)
             return NotFound();
         return NoContent();
-    }
+}
+
+[HttpPost("returns/{id}/reject")]
+public async Task<IActionResult> RejectReturn(
+    int id,
+    [FromBody] RejectReturnCommand command,
+    CancellationToken cancellationToken = default)
+{
+    command.Id = id;
+    var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+    if (!result) return NotFound();
+    return NoContent();
+}
 }

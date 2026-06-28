@@ -43,6 +43,8 @@ public class ParcelDeliveryOrder
 
     public string? ReturnAction { get; set; }
 
+    public string? RejectionReason { get; set; }
+
     [Required]
     public string CustomerPhone { get; set; } = string.Empty;
 
