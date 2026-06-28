@@ -4,6 +4,7 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260627141114_IncreaseFeedbackAreaLength")]
+    partial class IncreaseFeedbackAreaLength
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -5007,8 +5010,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AssignedUserId");
-
                     b.HasIndex("ContactId");
 
                     b.ToTable("SupportRequest");
@@ -6618,18 +6619,11 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.SupportRequest", b =>
                 {
-                    b.HasOne("Domain.Entities.ApplicationUser", "AssignedUser")
-                        .WithMany()
-                        .HasForeignKey("AssignedUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("Domain.Entities.Contact", "Contact")
                         .WithMany()
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("AssignedUser");
 
                     b.Navigation("Contact");
                 });

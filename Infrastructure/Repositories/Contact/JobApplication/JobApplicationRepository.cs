@@ -9,13 +9,19 @@ public class JobApplicationRepository(ApplicationDBContext context) : IJobApplic
 {
     public Task<DomainEntities.JobApplication?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return context.JobApplications.Include(j => j.Contact).FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
+        return context.JobApplications
+            .Include(j => j.Contact)
+                .ThenInclude(c => c.Replies)
+                    .ThenInclude(r => r.RepliedBy)
+            .FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
     }
 
     public Task<List<DomainEntities.JobApplication>> GetAllAsync(CancellationToken cancellationToken)
     {
         return context.JobApplications
             .Include(j => j.Contact)
+                .ThenInclude(c => c.Replies)
+                    .ThenInclude(r => r.RepliedBy)
             .OrderByDescending(j => j.CreatedAt)
             .ToListAsync(cancellationToken);
     }
