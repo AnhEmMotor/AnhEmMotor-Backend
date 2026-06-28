@@ -278,7 +278,26 @@ public class ProductReadRepository(
         }
         if (categoryIds != null && categoryIds.Count > 0)
         {
-            query = query.Where(p => p.CategoryId != null && categoryIds.Contains(p.CategoryId.Value));
+            var allCategoryIds = new List<int>(categoryIds);
+            var queue = new Queue<int>(categoryIds);
+            var allDbCategories = await context.ProductCategories
+                .Select(c => new { c.Id, c.ParentId })
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+            while (queue.Count > 0)
+            {
+                var currentId = queue.Dequeue();
+                var children = allDbCategories.Where(c => c.ParentId == currentId).Select(c => c.Id).ToList();
+                foreach (var childId in children)
+                {
+                    if (!allCategoryIds.Contains(childId))
+                    {
+                        allCategoryIds.Add(childId);
+                        queue.Enqueue(childId);
+                    }
+                }
+            }
+            query = query.Where(p => p.CategoryId != null && allCategoryIds.Contains(p.CategoryId.Value));
         }
         if (brandIds != null && brandIds.Count > 0)
         {
@@ -365,13 +384,7 @@ public class ProductReadRepository(
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
-            .ThenInclude(ov => ov!.Option)
-            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.InventoryReceiptInfos)
-            .ThenInclude(ii => ii.InventoryReceipt)
-            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.OutputInfos)
-            .ThenInclude(oi => oi.OutputOrder);
+            .ThenInclude(ov => ov!.Option);
         if (string.IsNullOrWhiteSpace(sorts))
         {
             dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt);

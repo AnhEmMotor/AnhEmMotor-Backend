@@ -52,6 +52,7 @@ public class ProductCategoryReadRepository(
         string? searchKeyword,
         CancellationToken cancellationToken)
     {
+        PagedResult<ProductCategoryResponse> result;
         if (!string.IsNullOrWhiteSpace(searchKeyword))
         {
             var allCategories = await GetAllAsync(cancellationToken).ConfigureAwait(false);
@@ -85,14 +86,77 @@ public class ProductCategoryReadRepository(
             var pagedQuery = sieveProcessor.Apply(sieveModel, query, applyFiltering: false);
             var paginatedCategories = pagedQuery.ToList();
             var responseItems = paginatedCategories.Select(c => c.Adapt<ProductCategoryResponse>()).ToList();
-            return new PagedResult<ProductCategoryResponse>(
+            result = new PagedResult<ProductCategoryResponse>(
                 responseItems,
                 totalCount,
                 sieveModel.Page ?? 1,
                 sieveModel.PageSize ?? 10);
         }
-        return await GetPagedAsync<ProductCategoryResponse>(sieveModel, cancellationToken: cancellationToken)
+        else
+        {
+            result = await GetPagedAsync<ProductCategoryResponse>(sieveModel, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        if (result.Items != null)
+        {
+            await PopulateInventoryQtyAsync(result.Items, cancellationToken).ConfigureAwait(false);
+        }
+        return result;
+    }
+
+    private async Task PopulateInventoryQtyAsync(List<ProductCategoryResponse> items, CancellationToken cancellationToken)
+    {
+        if (items.Count == 0) return;
+        
+        var targetMonth = DateTimeOffset.UtcNow.Month;
+        var targetYear = DateTimeOffset.UtcNow.Year;
+
+        Console.WriteLine($"PopulateInventoryQtyAsync target: Month={targetMonth}, Year={targetYear}");
+        var totalOnHandRecords = await context.InventoryOnHands.CountAsync(cancellationToken);
+        var totalProducts = await context.Products.CountAsync(cancellationToken);
+        var totalVariants = await context.ProductVariants.CountAsync(cancellationToken);
+        var totalReceipts = await context.InventoryReceipts.CountAsync(cancellationToken);
+        var totalTransactions = await context.InventoryTransactions.CountAsync(cancellationToken);
+
+        Console.WriteLine($"DB Diagnostic Stats:");
+        Console.WriteLine($"  - Total InventoryOnHand: {totalOnHandRecords}");
+        Console.WriteLine($"  - Total Products: {totalProducts}");
+        Console.WriteLine($"  - Total ProductVariants: {totalVariants}");
+        Console.WriteLine($"  - Total InventoryReceipts: {totalReceipts}");
+        Console.WriteLine($"  - Total InventoryTransactions: {totalTransactions}");
+
+        var distinctDates = await context.InventoryOnHands
+            .Select(x => new { x.Month, x.Year })
+            .Distinct()
+            .ToListAsync(cancellationToken);
+        
+        Console.WriteLine("Distinct Month/Year in DB:");
+        foreach (var d in distinctDates)
+        {
+            Console.WriteLine($"  - Month: {d.Month}, Year: {d.Year}");
+        }
+
+        var categoryInventory = await context.InventoryOnHands
+            .Where(x => x.Month == targetMonth && x.Year == targetYear && x.ProductVariant != null && x.ProductVariant.Product != null && x.ProductVariant.Product.CategoryId != null)
+            .GroupBy(x => x.ProductVariant.Product.CategoryId)
+            .Select(g => new { CategoryId = g.Key.Value, TotalStock = g.Sum(x => x.StockQty) })
+            .ToDictionaryAsync(x => x.CategoryId, x => x.TotalStock, cancellationToken)
             .ConfigureAwait(false);
+
+        Console.WriteLine($"categoryInventory dict count: {categoryInventory.Count}");
+        foreach (var kvp in categoryInventory)
+        {
+            Console.WriteLine($"  - CategoryId: {kvp.Key}, TotalStock: {kvp.Value}");
+        }
+
+        foreach (var item in items)
+        {
+            if (item.Id.HasValue)
+            {
+                item.InventoryQty = categoryInventory.GetValueOrDefault(item.Id.Value, 0);
+            }
+        }
     }
 
     public Task<bool> ExistsByNameAsync(
