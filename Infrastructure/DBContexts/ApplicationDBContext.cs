@@ -388,11 +388,18 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     .HasForeignKey(t => t.AssignedAdminId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
-        modelBuilder.Entity<ProductVariantColor>()
-            .HasOne(pvc => pvc.ProductVariant)
-            .WithMany(pv => pv.ProductVariantColors)
-            .HasForeignKey(pvc => pvc.ProductVariantId)
-            .OnDelete(DeleteBehavior.Cascade);
+modelBuilder.Entity<SupportRequest>(entity =>
+{
+    entity.HasOne(sr => sr.AssignedUser)
+        .WithMany()
+        .HasForeignKey(sr => sr.AssignedUserId)
+        .OnDelete(DeleteBehavior.SetNull);
+});
+modelBuilder.Entity<ProductVariantColor>()
+    .HasOne(pvc => pvc.ProductVariant)
+    .WithMany(pv => pv.ProductVariantColors)
+    .HasForeignKey(pvc => pvc.ProductVariantId)
+    .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => new { pt.ProductId, pt.TechnologyId });
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => pt.Id);
         modelBuilder.Entity<ProductStatus>().HasKey(ps => ps.Key);
@@ -406,6 +413,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                 new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Financial },
                 new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Insurance });
         modelBuilder.Entity<OutputStatus>().HasKey(ous => ous.Key);
+modelBuilder.Entity<Output>()
+    .HasOne(o => o.Lead)
+    .WithMany()
+    .HasForeignKey(o => o.LeadId)
+    .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)
             .WithMany(p => p.ProductTechnologies)

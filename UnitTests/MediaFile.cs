@@ -303,6 +303,45 @@ public class MediaFile
         result.IsFailure.Should().BeTrue();
     }
 
+    [Fact(DisplayName = "MF_026_NonImage - Xem tệp không phải là ảnh (PDF) trả về trực tiếp luồng dữ liệu thô")]
+    public async Task ViewImage_NonImageFile_ReturnsRawStream()
+    {
+        var rawBytes = new byte[] { 1, 2, 3, 4 };
+        _fileReadServiceMock.Setup(x => x.GetFileAsync("doc.pdf", It.IsAny<CancellationToken>()))
+            .ReturnsAsync((rawBytes, "application/pdf"));
+        var handler = new ViewImageQueryHandler(_fileReadServiceMock.Object);
+        var query = new ViewImageQuery { StoragePath = "doc.pdf" };
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.ContentType.Should().Be("application/pdf");
+        var outputStream = result.Value.FileStream;
+        var outputBytes = new byte[4];
+        await outputStream.ReadExactlyAsync(outputBytes, CancellationToken.None);
+        outputBytes.Should().Equal(rawBytes);
+        _fileReadServiceMock.Verify(x => x.ReadImageAsync(It.IsAny<Stream>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact(DisplayName = "MF_026_Fallback - Xem ảnh lỗi định dạng trả về trực tiếp luồng dữ liệu thô của file")]
+    public async Task ViewImage_UnknownImageFormat_ReturnsRawStreamFallback()
+    {
+        var rawBytes = new byte[] { 5, 6, 7, 8 };
+        _fileReadServiceMock.Setup(x => x.GetFileAsync("fake_image.png", It.IsAny<CancellationToken>()))
+            .ReturnsAsync((rawBytes, "image/png"));
+        _fileReadServiceMock.Setup(x => x.ReadImageAsync(It.IsAny<Stream>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new SixLabors.ImageSharp.UnknownImageFormatException("Unknown format"));
+        var handler = new ViewImageQueryHandler(_fileReadServiceMock.Object);
+        var query = new ViewImageQuery { StoragePath = "fake_image.png", Width = 300 };
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.ContentType.Should().Be("image/png");
+        var outputStream = result.Value.FileStream;
+        var outputBytes = new byte[4];
+        await outputStream.ReadExactlyAsync(outputBytes, CancellationToken.None);
+        outputBytes.Should().Equal(rawBytes);
+    }
+
     [Fact(DisplayName = "MF_027 - Validate: Tên file gốc chứa ký tự đặc biệt")]
     public async Task UploadImage_FileNameWithSpecialChars_Success()
     {

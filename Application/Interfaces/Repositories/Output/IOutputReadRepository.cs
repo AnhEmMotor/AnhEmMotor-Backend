@@ -35,8 +35,12 @@ public interface IOutputReadRepository
 
     public Task<long> GetStockQuantityByVariantIdAsync(int variantId, int? colorId, CancellationToken cancellationToken);
 
-    public Task<List<OutputEntity>> GetExpiredOrdersAsync(
-        DateTimeOffset expirationThreshold,
-        CancellationToken cancellationToken);
+public Task<List<OutputEntity>> GetExpiredOrdersAsync(
+  DateTimeOffset expirationThreshold,
+  CancellationToken cancellationToken);
+
+public Task<List<OutputEntity>> GetByLeadIdAsync(
+  int leadId,
+  CancellationToken cancellationToken = default);
 }
 

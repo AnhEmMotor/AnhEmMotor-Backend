@@ -34,6 +34,8 @@ public class SupportRequest : BaseEntity
     [Column("Status", TypeName = "nvarchar(20)")]
     public string Status { get; set; } = SupportRequestStatus.New;
 
-    [Column("AssignedUserId")]
-    public Guid? AssignedUserId { get; set; }
+[Column("AssignedUserId")]
+public Guid? AssignedUserId { get; set; }
+
+public ApplicationUser? AssignedUser { get; set; }
 }
