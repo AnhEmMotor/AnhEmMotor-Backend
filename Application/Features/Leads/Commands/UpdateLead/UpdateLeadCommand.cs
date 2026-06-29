@@ -36,5 +36,7 @@ public record UpdateLeadCommand : IRequest<Result<int>>
     public string InterestedVehicle { get; set; } = string.Empty;
 
     public int Score { get; set; }
+
+public bool IsVerified { get; set; }
 }
 

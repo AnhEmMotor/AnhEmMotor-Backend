@@ -13,6 +13,7 @@ public class SupportRequestRepository(ApplicationDBContext context) : ISupportRe
             .Include(s => s.Contact)
                 .ThenInclude(c => c.Replies)
                     .ThenInclude(r => r.RepliedBy)
+            .Include(s => s.AssignedUser)
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
@@ -22,6 +23,7 @@ public class SupportRequestRepository(ApplicationDBContext context) : ISupportRe
             .Include(s => s.Contact)
                 .ThenInclude(c => c.Replies)
                     .ThenInclude(r => r.RepliedBy)
+            .Include(s => s.AssignedUser)
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync(cancellationToken);
     }

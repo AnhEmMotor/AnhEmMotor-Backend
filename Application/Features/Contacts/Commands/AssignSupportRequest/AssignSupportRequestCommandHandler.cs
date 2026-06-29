@@ -19,8 +19,8 @@ public class AssignSupportRequestCommandHandler(
         if (supportRequest == null)
             return Result<int>.Failure("Không tìm thấy yêu cầu hỗ trợ.");
 
-        supportRequest.AssignedUserId = request.UserId;
-        supportRequest.Status = request.UserId == null ? SupportRequestStatus.New : SupportRequestStatus.Assigned;
+        supportRequest.AssignedUserId = request.AssignedUserId;
+        supportRequest.Status = request.AssignedUserId == null ? SupportRequestStatus.New : SupportRequestStatus.Assigned;
 
         await supportRequestRepository.UpdateAsync(supportRequest, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

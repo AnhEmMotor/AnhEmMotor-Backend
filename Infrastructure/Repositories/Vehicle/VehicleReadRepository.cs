@@ -126,14 +126,25 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
         return context.Vehicles.FirstOrDefaultAsync(v => string.Compare(v.VinNumber, vin) == 0, cancellationToken);
     }
 
-    public Task<List<Domain.Entities.Vehicle>> GetByUserIdAsync(
-        string userId,
-        CancellationToken cancellationToken = default)
-    {
-        if (Guid.TryParse(userId, out var parsedUserId))
-        {
-            return context.Vehicles.Where(v => v.UserId == parsedUserId).ToListAsync(cancellationToken);
-        }
-        return Task.FromResult(new List<Domain.Entities.Vehicle>());
-    }
+public Task<List<Domain.Entities.Vehicle>> GetByUserIdAsync(
+  string userId,
+  CancellationToken cancellationToken = default)
+{
+  if (Guid.TryParse(userId, out var parsedUserId))
+  {
+    return context.Vehicles.Where(v => v.UserId == parsedUserId).ToListAsync(cancellationToken);
+  }
+  return Task.FromResult(new List<Domain.Entities.Vehicle>());
+}
+
+public Task<List<Domain.Entities.Vehicle>> GetByLeadIdAsync(
+  int leadId,
+  CancellationToken cancellationToken = default)
+{
+  return context.Vehicles
+    .Include(v => v.Lead)
+    .Where(v => v.LeadId == leadId)
+    .OrderByDescending(v => v.PurchaseDate)
+    .ToListAsync(cancellationToken);
+}
 }

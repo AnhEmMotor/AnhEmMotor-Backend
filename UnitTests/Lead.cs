@@ -1,18 +1,29 @@
+using Application.ApiContracts.PlateDossier.Responses;
 using Application.Common.Helper;
 using Application.Features.Bookings.Commands.ConfirmBooking;
 using Application.Features.Bookings.Commands.CreateBooking;
+using Application.Features.Customer.Queries.GetCustomerProfile360;
 using Application.Features.Leads.Commands.AddLeadActivity;
 using Application.Features.Leads.Queries.GetLeads;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Booking;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Lead.LeadActivity;
+using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.PlateDossier;
+using Application.Interfaces.Repositories.RepairOrder;
+using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
+using Domain.Constants;
+using Domain.Constants.Order;
 using Domain.Entities;
+using Domain.Primitives;
 using FluentAssertions;
 using Moq;
+using Sieve.Models;
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using BookingEntity = Domain.Entities.Booking;
 using LeadEntity = Domain.Entities.Lead;
 
@@ -29,6 +40,10 @@ public class Lead
     private readonly Mock<ILeadUpdateRepository> _leadUpdateRepoMock;
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IOutputReadRepository> _outputReadRepoMock;
+    private readonly Mock<IPlateDossierReadRepository> _plateDossierReadRepoMock;
+    private readonly Mock<IRepairOrderReadRepository> _repairOrderReadRepoMock;
+    private readonly Mock<IVehicleReadRepository> _vehicleReadRepoMock;
 
     public Lead()
     {
@@ -41,6 +56,10 @@ public class Lead
         _leadUpdateRepoMock = new Mock<ILeadUpdateRepository>();
         _emailServiceMock = new Mock<IEmailService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _outputReadRepoMock = new Mock<IOutputReadRepository>();
+        _plateDossierReadRepoMock = new Mock<IPlateDossierReadRepository>();
+        _repairOrderReadRepoMock = new Mock<IRepairOrderReadRepository>();
+        _vehicleReadRepoMock = new Mock<IVehicleReadRepository>();
     }
 
     #pragma warning disable IDE0079 
@@ -247,6 +266,106 @@ public class Lead
         response.FullName.Should().Be(lead.FullName);
         response.CreatedAt.Should().Be(lead.CreatedAt.Value);
         response.Activities.Should().NotBeEmpty();
+    }
+
+    [Fact(DisplayName = "LEAD_016 - Mapping day du thong tin ho so khach hang khi lay danh sach Lead")]
+    public async Task GetLeads_ShouldMapCustomerProfileFields()
+    {
+        var assignedToId = Guid.NewGuid();
+        var lead = new LeadEntity
+        {
+            Id = 1,
+            FullName = "Nguyen Van A",
+            Email = "a@gmail.com",
+            PhoneNumber = "0909123456",
+            Score = 50,
+            Status = "Consulting",
+            Source = "WebStore",
+            InterestedVehicle = "Honda SH 160i",
+            AddressDetail = "12 Nguyen Trai",
+            Ward = "Ward 1",
+            District = "District 5",
+            Province = "Ho Chi Minh",
+            Gender = "Male",
+            Birthday = new DateTime(1995, 6, 20),
+            IdentificationNumber = "079095000001",
+            CreatedAt = new DateTimeOffset(2026, 5, 5, 0, 0, 0, TimeSpan.Zero),
+            IsVerified = true,
+            Tier = "Gold",
+            Points = 120,
+            AssignedToId = assignedToId,
+            AssignedTo = new ApplicationUser
+            {
+                Id = assignedToId,
+                FullName = "Tran Thi B"
+            }
+        };
+
+        _leadReadRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([lead]);
+        var handler = new GetLeadsQueryHandler(_leadReadRepoMock.Object);
+
+        var result = await handler.Handle(new GetLeadsQuery(), CancellationToken.None).ConfigureAwait(true);
+
+        result.Should().HaveCount(1);
+        var response = result[0];
+        response.InterestedVehicle.Should().Be(lead.InterestedVehicle);
+        response.AddressDetail.Should().Be(lead.AddressDetail);
+        response.Ward.Should().Be(lead.Ward);
+        response.District.Should().Be(lead.District);
+        response.Province.Should().Be(lead.Province);
+        response.Gender.Should().Be(lead.Gender);
+        response.Birthday.Should().Be(lead.Birthday);
+        response.IdentificationNumber.Should().Be(lead.IdentificationNumber);
+        response.IsVerified.Should().Be(lead.IsVerified);
+        response.Tier.Should().Be(lead.Tier);
+        response.Points.Should().Be(lead.Points);
+        response.AssignedToId.Should().Be(lead.AssignedToId);
+        response.AssignedToName.Should().Be(lead.AssignedTo.FullName);
+    }
+
+    [Fact(DisplayName = "LEAD_017 - Khong tao nhac nho don hang ket trang thai cho dau ra da hoan tat")]
+    public async Task GetCustomerProfile360_ShouldNotCreateStalledReminderForTerminalOutputs()
+    {
+        var lead = new LeadEntity
+        {
+            Id = 1,
+            FullName = "Nguyen Van A",
+            PhoneNumber = "0909123456"
+        };
+        var output = new Domain.Entities.Output
+        {
+            Id = 10,
+            LeadId = lead.Id,
+            StatusId = OrderStatus.Completed,
+            CreatedAt = DateTimeOffset.UtcNow.AddDays(-45),
+            LastStatusChangedAt = DateTimeOffset.UtcNow.AddDays(-40)
+        };
+
+        _leadReadRepoMock.Setup(x => x.GetByIdAsync(lead.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(lead);
+        _outputReadRepoMock.Setup(x => x.GetByLeadIdAsync(lead.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([output]);
+        _plateDossierReadRepoMock.Setup(x => x.GetPagedAsync<PlateDossierResponse>(
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode>(),
+                It.IsAny<Expression<Func<PlateDossier, bool>>?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<PlateDossierResponse>([], 0, 1, int.MaxValue));
+        _repairOrderReadRepoMock.Setup(x => x.GetByCustomerPhoneAsync(lead.PhoneNumber, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _vehicleReadRepoMock.Setup(x => x.GetByLeadIdAsync(lead.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        var handler = new GetCustomerProfile360QueryHandler(
+            _leadReadRepoMock.Object,
+            _outputReadRepoMock.Object,
+            _plateDossierReadRepoMock.Object,
+            _repairOrderReadRepoMock.Object,
+            _vehicleReadRepoMock.Object);
+
+        var result = await handler.Handle(new GetCustomerProfile360Query(lead.Id), CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.CareReminders.Should().NotContain(r => r.Type == "stalled_order");
     }
 
     [Fact(DisplayName = "LEAD_021 - Logic xử lý mô tả khi loại đặt lịch là Lái thử")]

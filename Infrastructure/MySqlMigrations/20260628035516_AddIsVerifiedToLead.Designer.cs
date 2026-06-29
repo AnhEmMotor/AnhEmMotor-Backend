@@ -4,6 +4,7 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.MySqlMigrations
 {
     [DbContext(typeof(MySqlDbContext))]
-    partial class MySqlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260628035516_AddIsVerifiedToLead")]
+    partial class AddIsVerifiedToLead
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2696,10 +2699,6 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("bigint")
                         .HasColumnName("LastStatusChangedAt");
 
-                    b.Property<int?>("LeadId")
-                        .HasColumnType("int")
-                        .HasColumnName("LeadId");
-
                     b.Property<string>("Notes")
                         .HasColumnType("longtext")
                         .HasColumnName("Notes");
@@ -2750,8 +2749,6 @@ namespace Infrastructure.MySqlMigrations
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("FinishedBy");
-
-                    b.HasIndex("LeadId");
 
                     b.HasIndex("StatusId");
 
@@ -6061,11 +6058,6 @@ namespace Infrastructure.MySqlMigrations
                         .WithMany()
                         .HasForeignKey("FinishedBy");
 
-                    b.HasOne("Domain.Entities.Lead", "Lead")
-                        .WithMany()
-                        .HasForeignKey("LeadId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Domain.Entities.OutputStatus", "OutputStatus")
                         .WithMany("OutputOrders")
                         .HasForeignKey("StatusId");
@@ -6075,8 +6067,6 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("FinishedByUser");
-
-                    b.Navigation("Lead");
 
                     b.Navigation("OutputStatus");
                 });

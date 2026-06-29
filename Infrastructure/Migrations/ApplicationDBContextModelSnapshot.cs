@@ -1762,6 +1762,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("InterestedVehicle");
 
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsVerified");
+
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("nvarchar(MAX)")
@@ -2695,6 +2699,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("LastStatusChangedAt");
 
+                    b.Property<int?>("LeadId")
+                        .HasColumnType("int")
+                        .HasColumnName("LeadId");
+
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(MAX)")
                         .HasColumnName("Notes");
@@ -2745,6 +2753,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("FinishedBy");
+
+                    b.HasIndex("LeadId");
 
                     b.HasIndex("StatusId");
 
@@ -6054,6 +6064,11 @@ namespace Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("FinishedBy");
 
+                    b.HasOne("Domain.Entities.Lead", "Lead")
+                        .WithMany()
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Domain.Entities.OutputStatus", "OutputStatus")
                         .WithMany("OutputOrders")
                         .HasForeignKey("StatusId");
@@ -6063,6 +6078,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("FinishedByUser");
+
+                    b.Navigation("Lead");
 
                     b.Navigation("OutputStatus");
                 });

@@ -1759,6 +1759,10 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("text")
                         .HasColumnName("InterestedVehicle");
 
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean")
+                        .HasColumnName("IsVerified");
+
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("text")
@@ -2692,6 +2696,10 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("LastStatusChangedAt");
 
+                    b.Property<int?>("LeadId")
+                        .HasColumnType("integer")
+                        .HasColumnName("LeadId");
+
                     b.Property<string>("Notes")
                         .HasColumnType("text")
                         .HasColumnName("Notes");
@@ -2742,6 +2750,8 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("FinishedBy");
+
+                    b.HasIndex("LeadId");
 
                     b.HasIndex("StatusId");
 
@@ -6049,6 +6059,11 @@ namespace Infrastructure.PostgreSqlMigrations
                         .WithMany()
                         .HasForeignKey("FinishedBy");
 
+                    b.HasOne("Domain.Entities.Lead", "Lead")
+                        .WithMany()
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Domain.Entities.OutputStatus", "OutputStatus")
                         .WithMany("OutputOrders")
                         .HasForeignKey("StatusId");
@@ -6058,6 +6073,8 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("FinishedByUser");
+
+                    b.Navigation("Lead");
 
                     b.Navigation("OutputStatus");
                 });

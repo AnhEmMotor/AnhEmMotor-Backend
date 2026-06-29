@@ -416,6 +416,11 @@ modelBuilder.Entity<ProductVariantColor>()
                 new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Financial },
                 new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Insurance });
         modelBuilder.Entity<OutputStatus>().HasKey(ous => ous.Key);
+modelBuilder.Entity<Output>()
+    .HasOne(o => o.Lead)
+    .WithMany()
+    .HasForeignKey(o => o.LeadId)
+    .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)
             .WithMany(p => p.ProductTechnologies)
