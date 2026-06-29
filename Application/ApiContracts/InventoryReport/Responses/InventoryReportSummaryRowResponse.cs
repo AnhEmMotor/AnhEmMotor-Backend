@@ -21,7 +21,5 @@ namespace Application.ApiContracts.InventoryReport.Responses
         public int ExportedQty { get; set; }
 
         public int StockQty { get; set; }
-
-        public int OrderedQty { get; set; }
     }
 }

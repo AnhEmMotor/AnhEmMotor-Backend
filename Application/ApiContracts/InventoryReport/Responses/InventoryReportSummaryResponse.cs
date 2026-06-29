@@ -14,10 +14,6 @@ namespace Application.ApiContracts.InventoryReport.Responses
 
         public int InventoryQty { get; set; }
 
-        public int OrderedQty { get; set; }
-
-        public int RemainingQty { get; set; }
-
         public List<InventoryReportVariantResponse> Variants { get; set; } = [];
     }
 }

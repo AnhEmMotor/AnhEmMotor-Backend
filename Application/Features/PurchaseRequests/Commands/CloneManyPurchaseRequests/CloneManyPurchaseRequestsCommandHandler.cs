@@ -17,6 +17,10 @@ public class CloneManyPurchaseRequestsCommandHandler(
         {
             return Result<int>.Failure(Error.BadRequest("Danh sách ID trống."));
         }
+        if (request.Ids.Count > 1)
+        {
+            return Result<int>.Failure(Error.BadRequest("Chỉ được phép nhân bản 1 phiếu duy nhất mỗi lần."));
+        }
         var sourceRequests = new List<PurchaseRequest>();
         foreach (var id in request.Ids)
         {

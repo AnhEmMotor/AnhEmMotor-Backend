@@ -19,6 +19,8 @@ namespace Application.ApiContracts.ProductCategory.Responses
         public string? CategoryGroup { get; set; }
 
         public int ProductCount { get; set; }
+        
+        public int InventoryQty { get; set; }
 
         public string? ManagementType { get; set; }
 

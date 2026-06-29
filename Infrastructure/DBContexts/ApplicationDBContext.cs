@@ -202,6 +202,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<SupplierDebtLog> SupplierDebtLogs { get; set; }
 
+    public virtual DbSet<SupplierDebtLogImage> SupplierDebtLogImages { get; set; }
+
     public virtual DbSet<InventoryReceiptAuditLog> InventoryReceiptAuditLogs { get; set; }
 
     public virtual DbSet<InventoryReceiptInfoAuditLog> InventoryReceiptInfoAuditLogs { get; set; }

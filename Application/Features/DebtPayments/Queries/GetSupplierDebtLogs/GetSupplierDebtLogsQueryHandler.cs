@@ -1,20 +1,29 @@
+using Application.ApiContracts.DebtPayment.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.SupplierDebt;
-using Domain.Entities;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.DebtPayments.Queries.GetSupplierDebtLogs
 {
-    public class GetSupplierDebtLogsQueryHandler(ISupplierDebtReadRepository supplierDebtRepository) : IRequestHandler<GetSupplierDebtLogsQuery, Result<List<SupplierDebtLog>>>
+    public class GetSupplierDebtLogsQueryHandler(ISupplierDebtReadRepository supplierDebtRepository) : IRequestHandler<GetSupplierDebtLogsQuery, Result<List<SupplierDebtLogResponse>>>
     {
-        public async Task<Result<List<SupplierDebtLog>>> Handle(
+        public async Task<Result<List<SupplierDebtLogResponse>>> Handle(
             GetSupplierDebtLogsQuery request,
             CancellationToken cancellationToken)
         {
             var logs = await supplierDebtRepository.GetSupplierDebtLogsBySupplierIdAsync(
                 request.SupplierId,
                 cancellationToken);
-            return Result<List<SupplierDebtLog>>.Success(logs);
+            var result = logs.Select(
+                log =>
+                {
+                    var response = log.Adapt<SupplierDebtLogResponse>();
+                    response.HasProofImage = log.ProofImages != null && log.ProofImages.Any();
+                    return response;
+                })
+                .ToList();
+            return Result<List<SupplierDebtLogResponse>>.Success(result);
         }
     }
 }
