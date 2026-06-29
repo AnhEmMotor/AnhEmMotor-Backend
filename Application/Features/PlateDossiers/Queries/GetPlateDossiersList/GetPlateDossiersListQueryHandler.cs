@@ -24,8 +24,10 @@ namespace Application.Features.PlateDossiers.Queries.GetPlateDossiersList
             if (!string.IsNullOrWhiteSpace(search))
             {
                 filter = p => p.LicensePlate.Contains(search) ||
-                    (p.Output != null && p.Output.CustomerName != null && p.Output.CustomerName.Contains(search)) ||
-                    (p.Output != null && p.Output.CustomerPhone != null && p.Output.CustomerPhone.Contains(search));
+                    p.CustomerName.Contains(search) ||
+                    p.CustomerPhone.Contains(search) ||
+                    p.DossierNumber.Contains(search) ||
+                    p.VinNumber.Contains(search);
                 sieveModel.Filters = RemoveFilter(sieveModel.Filters, "search");
             }
             if (string.IsNullOrWhiteSpace(sieveModel.Sorts))

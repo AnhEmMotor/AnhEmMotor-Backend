@@ -140,6 +140,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<PlateDossier> PlateDossiers { get; set; }
 
+    public DbSet<WarrantyClaim> WarrantyClaims => Set<WarrantyClaim>();
+
+    public DbSet<WarrantyClaimPart> WarrantyClaimParts => Set<WarrantyClaimPart>();
+
     public virtual DbSet<RepairOrder> RepairOrders { get; set; }
 
     public virtual DbSet<RepairOrderDetail> RepairOrderDetails { get; set; }
@@ -228,6 +232,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Expense>().Property(e => e.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.LaborCost).HasPrecision(18, 2);
+        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.PartsCost).HasPrecision(18, 2);
+        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.TotalCost).HasPrecision(18, 2);
         modelBuilder.Entity<ContractTemplate>().Property(e => e.Version).HasPrecision(18, 2);
         modelBuilder.Entity<SupplierFinance>().Property(e => e.CurrentDebt).HasPrecision(18, 2);
         modelBuilder.Entity<ContractTemplate>().Property(ct => ct.Version).HasPrecision(18, 2);

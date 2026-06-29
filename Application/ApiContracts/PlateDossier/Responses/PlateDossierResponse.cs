@@ -6,13 +6,15 @@ namespace Application.ApiContracts.PlateDossier.Responses
     {
         public int Id { get; set; }
 
-        public int OutputId { get; set; }
+        public int? OutputId { get; set; }
 
-        public string? CustomerName { get; set; }
+        public string DossierNumber { get; set; } = string.Empty;
 
-        public string? CustomerPhone { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
 
-        public string? VehicleName { get; set; }
+        public string CustomerPhone { get; set; } = string.Empty;
+
+        public string VinNumber { get; set; } = string.Empty;
 
         public string Status { get; set; } = "Prepare";
 
@@ -26,6 +28,8 @@ namespace Application.ApiContracts.PlateDossier.Responses
 
         public string? Notes { get; set; }
 
-        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset? CreatedAt { get; set; }
+
+        public DateTimeOffset? CompletedDate { get; set; }
     }
 }

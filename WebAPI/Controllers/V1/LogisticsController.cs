@@ -9,6 +9,9 @@ using Application.Features.Logistics.Commands.UpdateTrackingNumberCommand;
 using Application.Features.Logistics.Queries.GetActiveShipments;
 using Application.Features.Logistics.Queries.GetCarriers;
 using Application.Features.Logistics.Queries.GetFulfillmentDetail;
+using Application.Features.Logistics.Queries.GetFulfillmentOrders;
+using Application.ApiContracts.Logistics.Responses;
+using Domain.Enums;
 using Application.Features.Logistics.Queries.GetLogisticsDashboard;
 using Application.Features.Logistics.Queries.GetShipmentTracking;
 using Application.Features.Logistics.Returns;
@@ -85,6 +88,25 @@ public class LogisticsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetActiveShipments(CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new GetActiveShipmentsQuery(), cancellationToken).ConfigureAwait(false);
+        return Ok(result);
+    }
+
+    [HttpGet("fulfillment")]
+    public async Task<ActionResult<List<FulfillmentOrderResponse>>> GetFulfillmentOrders(
+        [FromQuery] ParcelDeliveryStatus? status,
+        [FromQuery] string? carrier,
+        [FromQuery] DateTime? fromDate,
+        [FromQuery] DateTime? toDate,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetFulfillmentOrdersQuery
+        {
+            Status = status,
+            Carrier = carrier,
+            FromDate = fromDate,
+            ToDate = toDate
+        };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
 
