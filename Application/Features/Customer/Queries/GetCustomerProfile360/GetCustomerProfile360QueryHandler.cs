@@ -87,7 +87,7 @@ public class GetCustomerProfile360QueryHandler(
     var vehicles = await vehicleReadRepository.GetByLeadIdAsync(request.LeadId, cancellationToken).ConfigureAwait(false);
 
     // Map outputs
-    var plateMap = plateDossiers.Items?.Where(pd => pd.OutputId.HasValue).ToDictionary(pd => pd.OutputId!.Value) ?? new Dictionary<int, PlateDossierResponse>();
+    var plateMap = plateDossiers.Items?.Where(pd => pd.OutputId.HasValue).ToDictionary(pd => (int)pd.OutputId!.Value) ?? new Dictionary<int, PlateDossierResponse>();
 
     response.Outputs = outputs.Select(o =>
     {
@@ -222,7 +222,7 @@ public class GetCustomerProfile360QueryHandler(
     {
       timelineEvents.Add(new CustomerTimelineEvent
       {
-        Date = pd.CreatedAt ?? DateTimeOffset.MinValue,
+        Date = pd.CreatedAt.HasValue ? pd.CreatedAt.Value : DateTimeOffset.MinValue,
         Type = "plate_dossier",
         Title = $"Hồ sơ đăng ký xe #{pd.Id}",
         Description = pd.LicensePlate != null ? $"Biển số: {pd.LicensePlate}" : null,

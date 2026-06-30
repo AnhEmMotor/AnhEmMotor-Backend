@@ -32,9 +32,9 @@ public class UpdateAdminInvoiceHandler(IInvoiceWriteRepository writeRepo, IInvoi
         invoice.InsuranceFee = req.InsuranceFee;
         invoice.TotalAmount = req.VehiclePrice + req.RegistrationFee + req.InsuranceFee;
         invoice.PaymentMethod = req.PaymentMethod;
-        invoice.BankName = req.BankName;
+        invoice.BankName = req.BankName ?? string.Empty;
         invoice.Status = req.Status;
-        invoice.SalesPerson = req.SalesPerson;
+        invoice.SalesPerson = req.SalesPerson ?? string.Empty;
         invoice.DeliveryDate = req.DeliveryDate;
         invoice.UpdatedAt = DateTimeOffset.Now;
 

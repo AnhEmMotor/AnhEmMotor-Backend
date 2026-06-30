@@ -231,6 +231,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Expense>().Property(e => e.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.VehiclePrice).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.RegistrationFee).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.InsuranceFee).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.TotalAmount).HasPrecision(18, 2);
         modelBuilder.Entity<MaintenanceHistory>().Property(e => e.LaborCost).HasPrecision(18, 2);
         modelBuilder.Entity<MaintenanceHistory>().Property(e => e.PartsCost).HasPrecision(18, 2);
         modelBuilder.Entity<MaintenanceHistory>().Property(e => e.TotalCost).HasPrecision(18, 2);

@@ -34,9 +34,9 @@ public class CreateAdminInvoiceHandler(IInvoiceWriteRepository writeRepo, IInvoi
             InsuranceFee = req.InsuranceFee,
             TotalAmount = req.VehiclePrice + req.RegistrationFee + req.InsuranceFee,
             PaymentMethod = req.PaymentMethod,
-            BankName = req.BankName,
+            BankName = req.BankName ?? string.Empty,
             Status = "pending",
-            SalesPerson = req.SalesPerson,
+            SalesPerson = req.SalesPerson ?? string.Empty,
             DeliveryDate = req.DeliveryDate,
             CreatedAt = DateTimeOffset.Now
         };

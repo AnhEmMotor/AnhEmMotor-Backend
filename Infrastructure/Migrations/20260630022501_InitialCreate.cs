@@ -105,30 +105,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ContractTemplates",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Version = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DynamicFields = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsUsed = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ContractTemplates", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CurrentUnreconciledCods",
                 columns: table => new
                 {
@@ -298,6 +274,7 @@ namespace Infrastructure.Migrations
                     ReturnProofImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ReturnInternalNote = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ReturnAction = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OriginalOrderCode = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -538,7 +515,7 @@ namespace Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ContactId = table.Column<int>(type: "int", nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
-                    FeedbackArea = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    FeedbackArea = table.Column<string>(type: "nvarchar(250)", nullable: false),
                     CustomerName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(20)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
@@ -583,62 +560,6 @@ namespace Infrastructure.Migrations
                         name: "FK_JobApplication_Contact_ContactId",
                         column: x => x.ContactId,
                         principalTable: "Contact",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SupportRequest",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ContactId = table.Column<int>(type: "int", nullable: false),
-                    Subject = table.Column<string>(type: "nvarchar(200)", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(100)", nullable: false),
-                    OrderCode = table.Column<string>(type: "nvarchar(50)", nullable: true),
-                    Content = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(20)", nullable: false),
-                    AssignedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SupportRequest", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SupportRequest_Contact_ContactId",
-                        column: x => x.ContactId,
-                        principalTable: "Contact",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ContractTemplateAuditLog",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ContractTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Action = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Details = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    ChangedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    IpAddress = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    OldValue = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    NewValue = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ContractTemplateAuditLog", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ContractTemplateAuditLog_ContractTemplates_ContractTemplateId",
-                        column: x => x.ContractTemplateId,
-                        principalTable: "ContractTemplates",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -997,6 +918,50 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Invoice",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InvoiceNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IssueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerIdCard = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VehicleModel = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VehicleColor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ChassisNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EngineNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VehiclePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    RegistrationFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    InsuranceFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BankName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProcessedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProcessedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SalesPerson = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DeliveryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Invoice", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Invoice_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Lead",
                 columns: table => new
                 {
@@ -1021,6 +986,7 @@ namespace Infrastructure.Migrations
                     IdentificationNumber = table.Column<string>(type: "nvarchar(20)", nullable: false),
                     Tier = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     Points = table.Column<int>(type: "int", nullable: false),
+                    IsVerified = table.Column<bool>(type: "bit", nullable: false),
                     AssignedToId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -1117,59 +1083,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Output",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CustomerAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastStatusChangedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    BuyerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    FinishedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    StatusId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    PaymentMethod = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TransactionId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PaymentStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PaidAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    PaidAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    Notes = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    DepositRatio = table.Column<int>(type: "int", nullable: true),
-                    PaymentUrl = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    PaymentCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PaymentExpiredAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Output", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_Output_OutputStatus_StatusId",
-                        column: x => x.StatusId,
-                        principalTable: "OutputStatus",
-                        principalColumn: "Key");
-                    table.ForeignKey(
-                        name: "FK_Output_Users_BuyerId",
-                        column: x => x.BuyerId,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Output_Users_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Output_Users_FinishedBy",
-                        column: x => x.FinishedBy,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PromotionBanner",
                 columns: table => new
                 {
@@ -1245,6 +1158,41 @@ namespace Infrastructure.Migrations
                         column: x => x.SentBy,
                         principalTable: "Users",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SupportRequest",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ContactId = table.Column<int>(type: "int", nullable: false),
+                    Subject = table.Column<string>(type: "nvarchar(200)", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(100)", nullable: false),
+                    OrderCode = table.Column<string>(type: "nvarchar(50)", nullable: true),
+                    Content = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", nullable: false),
+                    AssignedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SupportRequest", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SupportRequest_Contact_ContactId",
+                        column: x => x.ContactId,
+                        principalTable: "Contact",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SupportRequest_Users_AssignedUserId",
+                        column: x => x.AssignedUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -1791,6 +1739,66 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Output",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CustomerAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastStatusChangedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    BuyerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    FinishedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    StatusId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TransactionId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PaymentStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PaidAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    PaidAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    DepositRatio = table.Column<int>(type: "int", nullable: true),
+                    PaymentUrl = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    PaymentCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PaymentExpiredAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LeadId = table.Column<int>(type: "int", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Output", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_Output_Lead_LeadId",
+                        column: x => x.LeadId,
+                        principalTable: "Lead",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Output_OutputStatus_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "OutputStatus",
+                        principalColumn: "Key");
+                    table.ForeignKey(
+                        name: "FK_Output_Users_BuyerId",
+                        column: x => x.BuyerId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Output_Users_CreatedBy",
+                        column: x => x.CreatedBy,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Output_Users_FinishedBy",
+                        column: x => x.FinishedBy,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "NewsComments",
                 columns: table => new
                 {
@@ -1821,219 +1829,6 @@ namespace Infrastructure.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CommissionRecord",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    EmployeeProfileId = table.Column<int>(type: "int", nullable: false),
-                    OutputId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    DateEarned = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    PolicySnapshot = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(255)", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CommissionRecord", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CommissionRecord_EmployeeProfile_EmployeeProfileId",
-                        column: x => x.EmployeeProfileId,
-                        principalTable: "EmployeeProfile",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CommissionRecord_Output_OutputId",
-                        column: x => x.OutputId,
-                        principalTable: "Output",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "OrderStatusHistory",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    OutputId = table.Column<int>(type: "int", nullable: false),
-                    FromStatus = table.Column<string>(type: "nvarchar(50)", nullable: true),
-                    ToStatus = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    ChangedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ChangedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(500)", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OrderStatusHistory", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_OrderStatusHistory_Output_OutputId",
-                        column: x => x.OutputId,
-                        principalTable: "Output",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_OrderStatusHistory_Users_ChangedBy",
-                        column: x => x.ChangedBy,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PlateDossier",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    OutputId = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(20)", nullable: false),
-                    LicensePlate = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    RegistrationFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    ActualCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    ServiceFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PlateDossier", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PlateDossier_Output_OutputId",
-                        column: x => x.OutputId,
-                        principalTable: "Output",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SalesContracts",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ContractNumber = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    OutputId = table.Column<int>(type: "int", nullable: true),
-                    CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ShowroomName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ShowroomTaxCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ShowroomAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ShowroomRepresentative = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CustomerFullName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CustomerCCCD = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CustomerAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    VehicleModel = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    VehicleVersion = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    VehicleColor = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FrameNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EngineNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ActualSalePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    DepositAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    RemainingAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    FinalPaymentDeadline = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    WarrantyPeriod = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    WarrantyScope = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SpecialTerms = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SignedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    ScannedFileUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SalesContracts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SalesContracts_Output_OutputId",
-                        column: x => x.OutputId,
-                        principalTable: "Output",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "FK_SalesContracts_Users_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "InventoryReceipt",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    InventoryReceiptDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    Notes = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    StatusId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    PurchaseRequestId = table.Column<int>(type: "int", nullable: true),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ConfirmedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SentBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ApprovedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    RejectedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SourceOrderId = table.Column<int>(type: "int", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_InventoryReceipt", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_InventoryReceipt_InventoryReceiptStatus_StatusId",
-                        column: x => x.StatusId,
-                        principalTable: "InventoryReceiptStatus",
-                        principalColumn: "Key");
-                    table.ForeignKey(
-                        name: "FK_InventoryReceipt_Output_SourceOrderId",
-                        column: x => x.SourceOrderId,
-                        principalTable: "Output",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "FK_InventoryReceipt_PurchaseRequest_PurchaseRequestId",
-                        column: x => x.PurchaseRequestId,
-                        principalTable: "PurchaseRequest",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_InventoryReceipt_Users_ApprovedBy",
-                        column: x => x.ApprovedBy,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_InventoryReceipt_Users_ConfirmedBy",
-                        column: x => x.ConfirmedBy,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_InventoryReceipt_Users_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_InventoryReceipt_Users_RejectedBy",
-                        column: x => x.RejectedBy,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_InventoryReceipt_Users_SentBy",
-                        column: x => x.SentBy,
-                        principalTable: "Users",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -2400,68 +2195,220 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "InventoryReceiptAuditLog",
+                name: "CommissionRecord",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    InventoryReceiptId = table.Column<int>(type: "int", nullable: false),
-                    Action = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ChangedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ChangedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    OldStatusId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NewStatusId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OldNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NewNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmployeeProfileId = table.Column<int>(type: "int", nullable: false),
+                    OutputId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    DateEarned = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PolicySnapshot = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(255)", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InventoryReceiptAuditLog", x => x.Id);
+                    table.PrimaryKey("PK_CommissionRecord", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_InventoryReceiptAuditLog_InventoryReceipt_InventoryReceiptId",
-                        column: x => x.InventoryReceiptId,
-                        principalTable: "InventoryReceipt",
+                        name: "FK_CommissionRecord_EmployeeProfile_EmployeeProfileId",
+                        column: x => x.EmployeeProfileId,
+                        principalTable: "EmployeeProfile",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_InventoryReceiptAuditLog_Users_ChangedById",
-                        column: x => x.ChangedById,
+                        name: "FK_CommissionRecord_Output_OutputId",
+                        column: x => x.OutputId,
+                        principalTable: "Output",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "InventoryReceipt",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InventoryReceiptDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    StatusId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    PurchaseRequestId = table.Column<int>(type: "int", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ConfirmedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    SentBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ApprovedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RejectedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    SourceOrderId = table.Column<int>(type: "int", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InventoryReceipt", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_InventoryReceipt_InventoryReceiptStatus_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "InventoryReceiptStatus",
+                        principalColumn: "Key");
+                    table.ForeignKey(
+                        name: "FK_InventoryReceipt_Output_SourceOrderId",
+                        column: x => x.SourceOrderId,
+                        principalTable: "Output",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_InventoryReceipt_PurchaseRequest_PurchaseRequestId",
+                        column: x => x.PurchaseRequestId,
+                        principalTable: "PurchaseRequest",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_InventoryReceipt_Users_ApprovedBy",
+                        column: x => x.ApprovedBy,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_InventoryReceipt_Users_ConfirmedBy",
+                        column: x => x.ConfirmedBy,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_InventoryReceipt_Users_CreatedBy",
+                        column: x => x.CreatedBy,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_InventoryReceipt_Users_RejectedBy",
+                        column: x => x.RejectedBy,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_InventoryReceipt_Users_SentBy",
+                        column: x => x.SentBy,
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "SupplierDebt",
+                name: "OrderStatusHistory",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    InventoryReceiptId = table.Column<int>(type: "int", nullable: false),
-                    SupplierId = table.Column<int>(type: "int", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PaidAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    OutputId = table.Column<int>(type: "int", nullable: false),
+                    FromStatus = table.Column<string>(type: "nvarchar(50)", nullable: true),
+                    ToStatus = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    ChangedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ChangedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(500)", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SupplierDebt", x => x.Id);
+                    table.PrimaryKey("PK_OrderStatusHistory", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SupplierDebt_InventoryReceipt_InventoryReceiptId",
-                        column: x => x.InventoryReceiptId,
-                        principalTable: "InventoryReceipt",
-                        principalColumn: "Id",
+                        name: "FK_OrderStatusHistory_Output_OutputId",
+                        column: x => x.OutputId,
+                        principalTable: "Output",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_SupplierDebt_Supplier_SupplierId",
-                        column: x => x.SupplierId,
-                        principalTable: "Supplier",
+                        name: "FK_OrderStatusHistory_Users_ChangedBy",
+                        column: x => x.ChangedBy,
+                        principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlateDossier",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OutputId = table.Column<int>(type: "int", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    LicensePlate = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    RegistrationFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ActualCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ServiceFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    DossierNumber = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(100)", nullable: false),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(20)", nullable: false),
+                    VinNumber = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    CompletedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlateDossier", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlateDossier_Output_OutputId",
+                        column: x => x.OutputId,
+                        principalTable: "Output",
+                        principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SalesContracts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ContractNumber = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    OutputId = table.Column<int>(type: "int", nullable: true),
+                    CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ShowroomName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShowroomTaxCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShowroomAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShowroomRepresentative = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CustomerFullName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CustomerCCCD = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CustomerAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    VehicleModel = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    VehicleVersion = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    VehicleColor = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FrameNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EngineNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ActualSalePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DepositAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    RemainingAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    FinalPaymentDeadline = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    WarrantyPeriod = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    WarrantyScope = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SpecialTerms = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SignedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    ScannedFileUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SalesContracts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SalesContracts_Output_OutputId",
+                        column: x => x.OutputId,
+                        principalTable: "Output",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_SalesContracts_Users_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -2643,6 +2590,71 @@ namespace Infrastructure.Migrations
                         column: x => x.SupplierId,
                         principalTable: "Supplier",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "InventoryReceiptAuditLog",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InventoryReceiptId = table.Column<int>(type: "int", nullable: false),
+                    Action = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ChangedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ChangedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    OldStatusId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NewStatusId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OldNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NewNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InventoryReceiptAuditLog", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_InventoryReceiptAuditLog_InventoryReceipt_InventoryReceiptId",
+                        column: x => x.InventoryReceiptId,
+                        principalTable: "InventoryReceipt",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_InventoryReceiptAuditLog_Users_ChangedById",
+                        column: x => x.ChangedById,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SupplierDebt",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InventoryReceiptId = table.Column<int>(type: "int", nullable: false),
+                    SupplierId = table.Column<int>(type: "int", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PaidAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SupplierDebt", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SupplierDebt_InventoryReceipt_InventoryReceiptId",
+                        column: x => x.InventoryReceiptId,
+                        principalTable: "InventoryReceipt",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SupplierDebt_Supplier_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "Supplier",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -2878,9 +2890,17 @@ namespace Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     VehicleId = table.Column<int>(type: "int", nullable: false),
+                    MaintenanceNumber = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     MaintenanceDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Mileage = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
+                    TechnicianId = table.Column<int>(type: "int", nullable: true),
+                    LaborCost = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    PartsCost = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    TotalCost = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    NextMaintenanceDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    NextMaintenanceOdo = table.Column<int>(type: "int", nullable: true),
+                    PartsJson = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
@@ -2888,6 +2908,11 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MaintenanceHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
+                        column: x => x.TechnicianId,
+                        principalTable: "EmployeeProfile",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MaintenanceHistory_Vehicle_VehicleId",
                         column: x => x.VehicleId,
@@ -3053,6 +3078,38 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "WarrantyClaim",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClaimNumber = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    VehicleId = table.Column<int>(type: "int", nullable: false),
+                    IssueDescription = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
+                    MediaUrls = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    ServiceCenterName = table.Column<string>(type: "nvarchar(200)", nullable: true),
+                    ManufacturerClaimNumber = table.Column<string>(type: "nvarchar(100)", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    ManufacturerDecision = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    IsRecall = table.Column<bool>(type: "bit", nullable: false),
+                    TotalPartsCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalLaborCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WarrantyClaim", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_WarrantyClaim_Vehicle_VehicleId",
+                        column: x => x.VehicleId,
+                        principalTable: "Vehicle",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RepairOrderDetail",
                 columns: table => new
                 {
@@ -3124,6 +3181,32 @@ namespace Infrastructure.Migrations
                         name: "FK_ServiceEvaluation_ServiceBooking_ServiceBookingId",
                         column: x => x.ServiceBookingId,
                         principalTable: "ServiceBooking",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WarrantyClaimPart",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    WarrantyClaimId = table.Column<int>(type: "int", nullable: false),
+                    PartName = table.Column<string>(type: "nvarchar(200)", nullable: false),
+                    PartCode = table.Column<string>(type: "nvarchar(100)", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WarrantyClaimPart", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_WarrantyClaimPart_WarrantyClaim_WarrantyClaimId",
+                        column: x => x.WarrantyClaimId,
+                        principalTable: "WarrantyClaim",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -3206,11 +3289,6 @@ namespace Infrastructure.Migrations
                 name: "IX_ContactReply_RepliedById",
                 table: "ContactReply",
                 column: "RepliedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ContractTemplateAuditLog_ContractTemplateId",
-                table: "ContractTemplateAuditLog",
-                column: "ContractTemplateId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CustomerContact_ProcessedBy",
@@ -3360,6 +3438,11 @@ namespace Infrastructure.Migrations
                 columns: new[] { "ProductVariantId", "PerformedAt" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Invoice_UserId",
+                table: "Invoice",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_JobApplication_ContactId",
                 table: "JobApplication",
                 column: "ContactId");
@@ -3378,6 +3461,11 @@ namespace Infrastructure.Migrations
                 name: "IX_LeadActivity_LeadId",
                 table: "LeadActivity",
                 column: "LeadId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MaintenanceHistory_TechnicianId",
+                table: "MaintenanceHistory",
+                column: "TechnicianId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MaintenanceHistory_VehicleId",
@@ -3474,6 +3562,11 @@ namespace Infrastructure.Migrations
                 name: "IX_Output_FinishedBy",
                 table: "Output",
                 column: "FinishedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Output_LeadId",
+                table: "Output",
+                column: "LeadId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Output_StatusId",
@@ -3819,6 +3912,11 @@ namespace Infrastructure.Migrations
                 column: "SupplierId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SupportRequest_AssignedUserId",
+                table: "SupportRequest",
+                column: "AssignedUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SupportRequest_ContactId",
                 table: "SupportRequest",
                 column: "ContactId");
@@ -3939,6 +4037,16 @@ namespace Infrastructure.Migrations
                 name: "IX_VehicleDocument_VehicleId",
                 table: "VehicleDocument",
                 column: "VehicleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WarrantyClaim_VehicleId",
+                table: "WarrantyClaim",
+                column: "VehicleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WarrantyClaimPart_WarrantyClaimId",
+                table: "WarrantyClaimPart",
+                column: "WarrantyClaimId");
         }
 
         /// <inheritdoc />
@@ -3964,9 +4072,6 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "ContactReply");
-
-            migrationBuilder.DropTable(
-                name: "ContractTemplateAuditLog");
 
             migrationBuilder.DropTable(
                 name: "CurrentUnreconciledCods");
@@ -3997,6 +4102,9 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "InventoryTransaction");
+
+            migrationBuilder.DropTable(
+                name: "Invoice");
 
             migrationBuilder.DropTable(
                 name: "JobApplication");
@@ -4122,13 +4230,13 @@ namespace Infrastructure.Migrations
                 name: "VehicleDocument");
 
             migrationBuilder.DropTable(
+                name: "WarrantyClaimPart");
+
+            migrationBuilder.DropTable(
                 name: "Banner");
 
             migrationBuilder.DropTable(
                 name: "CommissionPolicy");
-
-            migrationBuilder.DropTable(
-                name: "ContractTemplates");
 
             migrationBuilder.DropTable(
                 name: "CustomerContact");
@@ -4170,6 +4278,9 @@ namespace Infrastructure.Migrations
                 name: "OptionValue");
 
             migrationBuilder.DropTable(
+                name: "WarrantyClaim");
+
+            migrationBuilder.DropTable(
                 name: "NewsCategory");
 
             migrationBuilder.DropTable(
@@ -4179,25 +4290,22 @@ namespace Infrastructure.Migrations
                 name: "Services");
 
             migrationBuilder.DropTable(
-                name: "Vehicle");
-
-            migrationBuilder.DropTable(
                 name: "TechnologyCategories");
 
             migrationBuilder.DropTable(
                 name: "Option");
 
             migrationBuilder.DropTable(
+                name: "Vehicle");
+
+            migrationBuilder.DropTable(
                 name: "ServiceCategories");
 
             migrationBuilder.DropTable(
-                name: "InventoryReceiptInfo");
-
-            migrationBuilder.DropTable(
-                name: "Lead");
-
-            migrationBuilder.DropTable(
                 name: "PredefinedOption");
+
+            migrationBuilder.DropTable(
+                name: "InventoryReceiptInfo");
 
             migrationBuilder.DropTable(
                 name: "InventoryReceipt");
@@ -4219,6 +4327,9 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "PurchaseRequest");
+
+            migrationBuilder.DropTable(
+                name: "Lead");
 
             migrationBuilder.DropTable(
                 name: "OutputStatus");
