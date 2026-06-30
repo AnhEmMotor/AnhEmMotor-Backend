@@ -5,20 +5,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories.ConversionTool;
 
-public class ConversionToolReadRepository(MySqlDbContext context) : IConversionToolReadRepository
+public class ConversionToolReadRepository(ApplicationDBContext context) : IConversionToolReadRepository
 {
-    private readonly MySqlDbContext _context = context;
+    private readonly ApplicationDBContext _context = context;
 
-    public Task<List<ConversionTool>> GetAllAsync(CancellationToken cancellationToken = default)
+    public Task<List<Domain.Entities.ConversionTool>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return _context.Set<ConversionTool>()
+        return _context.Set<Domain.Entities.ConversionTool>()
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync(cancellationToken);
     }
 
-    public Task<ConversionTool?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public Task<Domain.Entities.ConversionTool?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return _context.Set<ConversionTool>()
+        return _context.Set<Domain.Entities.ConversionTool>()
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 }

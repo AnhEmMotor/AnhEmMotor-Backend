@@ -4,9 +4,9 @@ namespace Application.Interfaces.Repositories.ConversionTool;
 
 public interface IConversionToolWriteRepository
 {
-    Task<ConversionTool> AddAsync(ConversionTool entity, CancellationToken cancellationToken = default);
-    Task UpdateAsync(ConversionTool entity, CancellationToken cancellationToken = default);
-    Task DeleteAsync(ConversionTool entity, CancellationToken cancellationToken = default);
-    Task DeleteRangeAsync(IEnumerable<ConversionTool> entities, CancellationToken cancellationToken = default);
+    Task<Domain.Entities.ConversionTool> AddAsync(Domain.Entities.ConversionTool entity, CancellationToken cancellationToken = default);
+    Task UpdateAsync(Domain.Entities.ConversionTool entity, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Domain.Entities.ConversionTool entity, CancellationToken cancellationToken = default);
+    Task DeleteRangeAsync(IEnumerable<Domain.Entities.ConversionTool> entities, CancellationToken cancellationToken = default);
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

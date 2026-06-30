@@ -1,8 +1,7 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.HR.Employee;
 using Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.HR.Queries.GetEmployeeKPIs;
 

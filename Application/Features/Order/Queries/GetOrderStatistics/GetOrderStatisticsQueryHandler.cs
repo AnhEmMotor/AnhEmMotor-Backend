@@ -3,7 +3,6 @@ using Application.Features.Order.Queries.GetOrderStatistics;
 using Application.Interfaces.Repositories.Booking;
 using Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Order.Queries.GetOrderStatistics;
 
@@ -25,7 +24,7 @@ public class GetOrderStatisticsQueryHandler(IBookingReadRepository bookingReposi
 
         var hourlyData = bookings
             .Where(b => b.CreatedAt >= today)
-            .GroupBy(b => b.CreatedAt.Hour)
+            .GroupBy(b => b.CreatedAt.Value.Hour)
             .OrderBy(g => g.Key)
             .Select(g => new HourlyOrderData
             {

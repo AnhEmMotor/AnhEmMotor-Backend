@@ -1,8 +1,8 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.NewsComment;
+using Application.Interfaces.Repositories.News;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.NewsComments.Queries.GetNewsComments;
 
@@ -18,14 +18,18 @@ public class GetNewsCommentsQueryHandler(INewsCommentReadRepository newsCommentR
         if (request.NewsId.HasValue)
             query = query.Where(c => c.NewsId == request.NewsId.Value);
 
-        var comments = await query
+        var comments = query
             .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         var newsIds = comments.Select(c => c.NewsId).Distinct().ToList();
-        var newsList = await newsReadRepository.GetQueryable()
-            .Where(n => newsIds.Contains(n.Id))
-            .ToListAsync(cancellationToken);
+        var newsList = new List<Domain.Entities.News>();
+        foreach (var id in newsIds)
+        {
+            var news = await newsReadRepository.GetByIdAsync(id, cancellationToken);
+            if (news != null)
+                newsList.Add(news);
+        }
 
         var newsDict = newsList.ToDictionary(n => n.Id);
 
@@ -39,7 +43,7 @@ public class GetNewsCommentsQueryHandler(INewsCommentReadRepository newsCommentR
             AuthorEmail = c.AuthorEmail,
             Content = c.Content,
             IsApproved = c.IsApproved,
-            CreatedAt = c.CreatedAt
+            CreatedAt = c.CreatedAt ?? DateTimeOffset.UtcNow
         }).ToList();
 
         return Result<List<NewsCommentResponse>>.Success(response);

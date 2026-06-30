@@ -21,7 +21,7 @@ namespace WebAPI.Controllers.V1;
 public class ConversionToolController(IMediator mediator) : ApiController
 {
     [HttpGet]
-    [HasPermission(Marketing.View)]
+    [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(List<ConversionToolResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
@@ -30,7 +30,7 @@ public class ConversionToolController(IMediator mediator) : ApiController
     }
 
     [HttpPost]
-    [HasPermission(Marketing.Edit)]
+    [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(ConversionToolResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Create([FromBody] CreateConversionToolCommand command, CancellationToken cancellationToken)
     {
@@ -39,7 +39,7 @@ public class ConversionToolController(IMediator mediator) : ApiController
     }
 
     [HttpPut("{id:int}")]
-    [HasPermission(Marketing.Edit)]
+    [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(ConversionToolResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateConversionToolCommand command, CancellationToken cancellationToken)
     {
@@ -49,7 +49,7 @@ public class ConversionToolController(IMediator mediator) : ApiController
     }
 
     [HttpDelete("{id:int}")]
-    [HasPermission(Marketing.Edit)]
+    [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {

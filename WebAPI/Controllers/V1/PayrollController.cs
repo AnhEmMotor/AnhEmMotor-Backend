@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
+using Infrastructure.Authorization.Attribute;
 
 namespace WebAPI.Controllers.V1;
 
@@ -32,7 +33,7 @@ public class PayrollController(ISender mediator) : ApiController
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     public async Task<IActionResult> Approve(int id, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ApprovePayrollCommand(id), cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new ApprovePayrollCommand(id, DateTime.UtcNow.Month, DateTime.UtcNow.Year), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

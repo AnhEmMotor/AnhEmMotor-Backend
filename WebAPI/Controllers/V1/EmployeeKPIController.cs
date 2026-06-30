@@ -1,4 +1,4 @@
-﻿using Application.Features.HR.Queries.GetEmployeeKPIs;
+using Application.Features.HR.Queries.GetEmployeeKPIs;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
 using Infrastructure.Authorization.Attribute;
@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
+using Application.Common.Models;
 
 namespace WebAPI.Controllers.V1;
 

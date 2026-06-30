@@ -1,5 +1,6 @@
 using Application.ApiContracts.ConversionTools.Responses;
 using MediatR;
+using Application.Common.Models;
 
 namespace Application.Features.ConversionTools.Commands.UpdateConversionTool;
 

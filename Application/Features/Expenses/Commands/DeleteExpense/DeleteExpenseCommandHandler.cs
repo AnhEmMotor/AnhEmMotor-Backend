@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Expense;
 using MediatR;
+using Application.Interfaces.Repositories;
 
 namespace Application.Features.Expenses.Commands.DeleteExpense;
 

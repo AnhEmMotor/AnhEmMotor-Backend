@@ -1,4 +1,4 @@
-﻿using Application.Features.Expenses.Commands.CreateExpense;
+using Application.Features.Expenses.Commands.CreateExpense;
 using Application.Features.Expenses.Commands.DeleteExpense;
 using Application.Features.Expenses.Queries.GetExpenses;
 using Asp.Versioning;
@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
+using Application.Common.Models;
 
 namespace WebAPI.Controllers.V1;
 
@@ -20,7 +21,7 @@ public class ExpenseController(IMediator mediator) : ApiController
 {
     [HttpGet]
     [HasPermission(Statistical.View)]
-    [ProducesResponseType(typeof(List<ExpenseResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<Application.Features.Expenses.Queries.GetExpenses.ExpenseResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetExpensesQuery(), cancellationToken).ConfigureAwait(false);
@@ -29,7 +30,7 @@ public class ExpenseController(IMediator mediator) : ApiController
 
     [HttpPost]
     [HasPermission(Statistical.View)]
-    [ProducesResponseType(typeof(ExpenseResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.Features.Expenses.Commands.CreateExpense.ExpenseResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Create([FromBody] CreateExpenseCommand command, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);

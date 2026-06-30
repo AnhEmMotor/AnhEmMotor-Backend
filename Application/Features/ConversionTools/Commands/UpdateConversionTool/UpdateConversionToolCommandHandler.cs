@@ -29,7 +29,7 @@ public class UpdateConversionToolCommandHandler(IConversionToolReadRepository re
         entity.Url = request.Url;
         entity.Status = request.Status;
 
-        writeRepo.UpdateAsync(entity, cancellationToken);
+        await writeRepo.UpdateAsync(entity, cancellationToken);
         await writeRepo.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var response = entity.Adapt<ConversionToolResponse>();

@@ -1,12 +1,11 @@
-﻿using Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+using Domain.Entities;
 
 namespace Application.Interfaces.Repositories.NewsComment;
 
 public interface INewsCommentReadRepository
 {
-    IQueryable<NewsComment> GetQueryable();
-    Task<List<NewsComment>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<NewsComment?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
-    Task<List<NewsComment>> GetByNewsIdAsync(int newsId, CancellationToken cancellationToken = default);
+    IQueryable<Domain.Entities.NewsComment> GetQueryable();
+    Task<List<Domain.Entities.NewsComment>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Domain.Entities.NewsComment?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<List<Domain.Entities.NewsComment>> GetByNewsIdAsync(int newsId, CancellationToken cancellationToken = default);
 }

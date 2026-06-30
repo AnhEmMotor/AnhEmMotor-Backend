@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.ConversionTool;
 
 public interface IConversionToolReadRepository
 {
-    Task<List<ConversionTool>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<ConversionTool?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<List<Domain.Entities.ConversionTool>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Domain.Entities.ConversionTool?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 }

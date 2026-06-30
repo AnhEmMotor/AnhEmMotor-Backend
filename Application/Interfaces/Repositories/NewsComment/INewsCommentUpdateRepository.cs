@@ -4,5 +4,5 @@ namespace Application.Interfaces.Repositories.NewsComment;
 
 public interface INewsCommentUpdateRepository
 {
-    void Update(NewsComment comment);
+    void Update(Domain.Entities.NewsComment comment);
 }

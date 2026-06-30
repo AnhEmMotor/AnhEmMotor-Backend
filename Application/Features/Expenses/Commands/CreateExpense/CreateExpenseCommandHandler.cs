@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories.Expense;
 using Domain.Entities;
 using Domain.Enums;
 using MediatR;
+using Application.Interfaces.Repositories;
 
 namespace Application.Features.Expenses.Commands.CreateExpense;
 
