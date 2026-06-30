@@ -1,7 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Interfaces.Repositories.HR.Employee;
 using Application.Interfaces.Repositories.InventoryReceiptInfo;
-using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.RepairOrder;
 using Domain.Constants;
 using MediatR;
@@ -12,7 +11,6 @@ namespace Application.Features.Statistical.Queries.GetWorkshopDashboard;
 
 public class GetWorkshopDashboardQueryHandler(
     IRepairOrderReadRepository repairOrderReadRepository,
-    IOutputReadRepository outputReadRepository,
     IEmployeeReadRepository employeeReadRepository,
     IInventoryReceiptInfoReadRepository inventoryReceiptInfoReadRepository) : IRequestHandler<GetWorkshopDashboardQuery, WorkshopDashboardResponse>
 {
@@ -78,13 +76,10 @@ public class GetWorkshopDashboardQueryHandler(
             }
         }
         var workshopRev = revenueOrders.Sum(ro => ro.TotalAmount);
-        var retailRev = (await outputReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false))
-            .Where(o => o.CreatedAt >= request.FromDate && o.CreatedAt <= request.ToDate)
-            .Sum(o => o.Total);
         response.Analytics.RevenueComparison = new RevenueComparison
         {
             WorkshopRevenue = workshopRev,
-            RetailRevenue = retailRev
+            RetailRevenue = 0 // Bỏ qua doanh thu từ hợp đồng bán lẻ vì không thuộc thống kê xưởng
         };
         response.Analytics.RevenueSources
             .Add(
