@@ -23,6 +23,8 @@ namespace Application.Features.Logistics.Returns.Commands.InspectReturn
             order.ReturnProofImage = request.ReturnProofImage;
             order.ReturnInternalNote = request.ReturnInternalNote;
             order.ReturnAction = request.Action;
+            order.RefundAmount = request.RefundAmount;
+            order.ReturnShippingCost = request.ReturnShippingCost;
             parcelDeliveryOrderUpdateRepository.Update(order);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return true;

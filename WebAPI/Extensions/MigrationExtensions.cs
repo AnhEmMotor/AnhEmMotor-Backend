@@ -73,6 +73,7 @@ public static class MigrationExtensions
                 await ContractTemplateSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await SalesAndInventorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await CarrierPartnerSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await LogisticsDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await WorkshopAndServiceSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
             }
         } catch (Exception ex)
