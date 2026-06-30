@@ -74,7 +74,7 @@ public class GetCustomerProfile360QueryHandler(
     var plateDossiers = outputIds.Length > 0
       ? await plateDossierReadRepository.GetPagedAsync<PlateDossierResponse>(
           new SieveModel { PageSize = int.MaxValue },
-          filter: pd => outputIds.Contains(pd.OutputId),
+          filter: pd => pd.OutputId.HasValue && outputIds.Contains(pd.OutputId.Value),
           cancellationToken: cancellationToken).ConfigureAwait(false)
       : new PagedResult<PlateDossierResponse>(null!, 0, 0, 0);
 
