@@ -16,6 +16,10 @@ public class MaintenanceHistory : BaseEntity
 
     public Vehicle Vehicle { get; set; } = null!;
 
+    [Required]
+    [Column("MaintenanceNumber", TypeName = "nvarchar(50)")]
+    public string MaintenanceNumber { get; set; } = string.Empty;
+
     [Column("MaintenanceDate")]
     public DateTimeOffset MaintenanceDate { get; set; }
 
@@ -24,4 +28,28 @@ public class MaintenanceHistory : BaseEntity
 
     [Column("Description", TypeName = "nvarchar(MAX)")]
     public string Description { get; set; } = string.Empty;
+
+    [Column("TechnicianId")]
+    public int? TechnicianId { get; set; }
+
+    [ForeignKey("TechnicianId")]
+    public EmployeeProfile? Technician { get; set; }
+
+    [Column("LaborCost", TypeName = "decimal(18, 2)")]
+    public decimal LaborCost { get; set; } = 0;
+
+    [Column("PartsCost", TypeName = "decimal(18, 2)")]
+    public decimal PartsCost { get; set; } = 0;
+
+    [Column("TotalCost", TypeName = "decimal(18, 2)")]
+    public decimal TotalCost { get; set; } = 0;
+
+    [Column("NextMaintenanceDate")]
+    public DateTimeOffset? NextMaintenanceDate { get; set; }
+
+    [Column("NextMaintenanceOdo")]
+    public int? NextMaintenanceOdo { get; set; }
+
+    [Column("PartsJson", TypeName = "nvarchar(MAX)")]
+    public string? PartsJson { get; set; }
 }

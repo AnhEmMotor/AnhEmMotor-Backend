@@ -104,6 +104,9 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Vehicle>(v => v.PurchaseDate).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.Lead!.FullName).CanSort().CanFilter().HasName("FullName");
         mapper.Property<Vehicle>(v => v.Lead!.PhoneNumber).CanSort().CanFilter().HasName("PhoneNumber");
+        mapper.Property<WarrantyClaim>(w => w.Id).CanSort().CanFilter();
+        mapper.Property<WarrantyClaim>(w => w.ClaimNumber).CanSort().CanFilter();
+        mapper.Property<WarrantyClaim>(w => w.Status).CanSort().CanFilter();
         mapper.Property<FinanceContract>(p => p.ContractNumber).CanSort().CanFilter();
         mapper.Property<FinanceContract>(p => p.DisbursementStatus).CanSort().CanFilter();
         mapper.Property<FinanceContract>(p => p.BankName).CanSort().CanFilter();
