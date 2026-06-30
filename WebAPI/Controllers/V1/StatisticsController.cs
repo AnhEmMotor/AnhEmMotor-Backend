@@ -1,5 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Common.Models;
+using Application.Features.Order.Queries.GetOrderStatistics;
 using Application.Features.Statistical.Queries.GetAdminDashboardOverview;
 using Application.Features.Statistical.Queries.GetAdminProductReport;
 using Application.Features.Statistical.Queries.GetAdminRevenueAnalysis;
@@ -11,6 +12,7 @@ using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
 using Application.Features.Statistical.Queries.GetOrderStatusCounts;
 using Application.Features.Statistical.Queries.GetProductReportLastMonth;
 using Application.Features.Statistical.Queries.GetProductStockAndPrice;
+using Application.Interfaces.Repositories.Booking;
 using Application.Interfaces.Repositories.Statistical;
 using Asp.Versioning;
 using Domain.Constants.Permission.Permissions;
@@ -31,7 +33,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Thống kê và báo cáo")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class StatisticsController(IMediator mediator, IStatisticalReadRepository repository) : ApiController
+public class StatisticsController(IMediator mediator, IStatisticalReadRepository repository, IBookingReadRepository bookingRepository) : ApiController
 {
     /// <summary>
     /// Lấy doanh thu theo ngày trong khoảng thời gian xác định.
@@ -237,5 +239,18 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     {
         var result = await repository.GetCustomerServiceAnalyticsAsync(cancellationToken);
         return Ok(result);
+    }
+
+    /// <summary>
+    /// L?y th?ng k� t?ng quan v? don h�ng (h�ng d?i, SLA, l?i, ngo?i l?).
+    /// </summary>
+    [HttpGet("order-statistics")]
+    [HasPermission(Statistical.View)]
+    [ProducesResponseType(typeof(OrderStatisticsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOrderStatisticsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetOrderStatisticsQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 }

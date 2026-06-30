@@ -1,4 +1,4 @@
-using Domain.Constants;
+﻿using Domain.Constants;
 using Domain.Entities;
 using Domain.Entities.Logistics;
 using Microsoft.AspNetCore.Identity;
@@ -226,6 +226,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<CarrierPartner> CarrierPartners { get; set; }
     public virtual DbSet<Invoice> Invoices { get; set; }
+        public virtual DbSet<ConversionTool> ConversionTools { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
