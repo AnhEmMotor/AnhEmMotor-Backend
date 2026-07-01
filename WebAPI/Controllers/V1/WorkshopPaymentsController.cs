@@ -40,5 +40,13 @@ namespace WebAPI.Controllers.V1
             var result = await sender.Send(command, cancellationToken);
             return HandleResult(result);
         }
+
+        [HttpGet("stats")]
+        [SwaggerOperation(Summary = "Thống kê thu ngân xưởng")]
+        public async Task<IActionResult> GetStatsAsync(CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new Application.Features.WorkshopPayments.Queries.GetWorkshopPaymentStats.GetWorkshopPaymentStatsQuery(), cancellationToken);
+            return HandleResult(result);
+        }
     }
 }

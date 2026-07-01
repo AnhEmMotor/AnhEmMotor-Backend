@@ -37,4 +37,36 @@ public class WorkshopPaymentReadRepository : IWorkshopPaymentReadRepository
     {
         return await _context.WorkshopPayments.FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt == null, cancellationToken);
     }
+
+    public async Task<object> GetStatsAsync(CancellationToken cancellationToken)
+    {
+        var today = System.DateTimeOffset.UtcNow.Date;
+        var startOfMonth = new System.DateTimeOffset(today.Year, today.Month, 1, 0, 0, 0, System.TimeSpan.Zero);
+        
+        var query = _context.WorkshopPayments.AsNoTracking().Where(x => x.DeletedAt == null);
+
+        var unpaid = await query.Where(x => x.PaymentStatus == "Unpaid").CountAsync(cancellationToken);
+        var unpaidAmount = await query.Where(x => x.PaymentStatus == "Unpaid").SumAsync(x => (double?)x.TotalAmount ?? 0, cancellationToken);
+
+        var partial = await query.Where(x => x.PaymentStatus == "Partial").CountAsync(cancellationToken);
+        var partialAmount = await query.Where(x => x.PaymentStatus == "Partial").SumAsync(x => (double?)x.TotalAmount ?? 0, cancellationToken);
+
+        var paidTodayQuery = query.Where(x => x.PaymentStatus == "Paid" && x.PaidAt != null && x.PaidAt >= today);
+        var paidToday = await paidTodayQuery.CountAsync(cancellationToken);
+        var paidTodayAmount = await paidTodayQuery.SumAsync(x => (double?)x.TotalAmount ?? 0, cancellationToken);
+
+        var monthRevenue = await query.Where(x => x.PaymentStatus == "Paid" && x.PaidAt != null && x.PaidAt >= startOfMonth)
+                                      .SumAsync(x => (double?)x.TotalAmount ?? 0, cancellationToken);
+
+        return new
+        {
+            unpaid,
+            unpaidAmount,
+            partial,
+            partialAmount,
+            paidToday,
+            paidTodayAmount,
+            monthRevenue
+        };
+    }
 }
