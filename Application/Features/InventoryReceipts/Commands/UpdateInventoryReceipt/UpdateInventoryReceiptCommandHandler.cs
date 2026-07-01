@@ -23,6 +23,7 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
 public sealed partial class UpdateInventoryReceiptCommandHandler(
     IInventoryReceiptReadRepository readRepository,
     IInventoryReceiptUpdateRepository updateRepository,
+    IInventoryReceiptInsertRepository insertRepository,
     IInventoryReceiptDeleteRepository deleteRepository,
     IPurchaseRequestReadRepository prReadRepository,
     IProductVariantReadRepository variantRepository,
@@ -321,6 +322,33 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             }
         }
         updateRepository.Update(inventoryReceipt);
+
+        var receiptAuditLogs = new List<InventoryReceiptAuditLog>
+        {
+            new InventoryReceiptAuditLog
+            {
+                InventoryReceipt = inventoryReceipt,
+                Action = "Update",
+                ChangedById = userId,
+                ChangedAt = DateTimeOffset.UtcNow,
+                NewStatusId = inventoryReceipt.StatusId,
+                NewNotes = inventoryReceipt.Notes
+            }
+        };
+        var infoAuditLogs = new List<InventoryReceiptInfoAuditLog>();
+        foreach (var info in inventoryReceipt.InventoryReceiptInfos)
+        {
+            infoAuditLogs.Add(
+                new InventoryReceiptInfoAuditLog
+                {
+                    InventoryReceiptInfo = info,
+                    Action = "Update",
+                    NewQuantity = info.Count
+                });
+        }
+        await insertRepository.InsertAuditLogsAsync(receiptAuditLogs, cancellationToken).ConfigureAwait(false);
+        await insertRepository.InsertInfoAuditLogsAsync(infoAuditLogs, cancellationToken).ConfigureAwait(false);
+
         if (vehicleAuditLogs.Any())
         {
             await vehicleUpdateRepository.InsertAuditLogsAsync(vehicleAuditLogs, cancellationToken)
