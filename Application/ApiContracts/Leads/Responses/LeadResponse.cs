@@ -36,6 +36,8 @@ public class LeadResponse
 
     public string IdentificationNumber { get; set; } = string.Empty;
 
+    public Guid? AssignedToId { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; }
 
     public List<LeadActivityResponse> Activities { get; set; } = [];

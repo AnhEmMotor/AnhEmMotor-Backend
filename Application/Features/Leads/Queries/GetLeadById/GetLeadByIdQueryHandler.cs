@@ -1,4 +1,4 @@
-using Application.ApiContracts.Leads.Responses;
+ï»¿using Application.ApiContracts.Leads.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Lead.Lead;
 using MediatR;
@@ -12,7 +12,7 @@ namespace Application.Features.Leads.Queries.GetLeadById
         {
             var lead = await leadReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
             if (lead == null)
-                return Result<LeadResponse>.Failure("Không tìm th?y khách hàng.");
+                return Result<LeadResponse>.Failure("Khï¿½ng tï¿½m th?y khï¿½ch hï¿½ng.");
             return Result<LeadResponse>.Success(
                 new LeadResponse
                 {
@@ -32,6 +32,7 @@ namespace Application.Features.Leads.Queries.GetLeadById
                     Gender = lead.Gender,
                     Birthday = lead.Birthday,
                     IdentificationNumber = lead.IdentificationNumber,
+                    AssignedToId = lead.AssignedToId,
                     CreatedAt = lead.CreatedAt ?? DateTimeOffset.MinValue,
                     Activities =
                         lead.Activities?.Select(
@@ -48,3 +49,4 @@ namespace Application.Features.Leads.Queries.GetLeadById
         }
     }
 }
+
