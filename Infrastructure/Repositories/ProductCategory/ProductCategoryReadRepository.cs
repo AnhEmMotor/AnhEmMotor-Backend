@@ -112,30 +112,6 @@ public class ProductCategoryReadRepository(
         var targetMonth = DateTimeOffset.UtcNow.Month;
         var targetYear = DateTimeOffset.UtcNow.Year;
 
-        Console.WriteLine($"PopulateInventoryQtyAsync target: Month={targetMonth}, Year={targetYear}");
-        var totalOnHandRecords = await context.InventoryOnHands.CountAsync(cancellationToken);
-        var totalProducts = await context.Products.CountAsync(cancellationToken);
-        var totalVariants = await context.ProductVariants.CountAsync(cancellationToken);
-        var totalReceipts = await context.InventoryReceipts.CountAsync(cancellationToken);
-        var totalTransactions = await context.InventoryTransactions.CountAsync(cancellationToken);
-
-        Console.WriteLine($"DB Diagnostic Stats:");
-        Console.WriteLine($"  - Total InventoryOnHand: {totalOnHandRecords}");
-        Console.WriteLine($"  - Total Products: {totalProducts}");
-        Console.WriteLine($"  - Total ProductVariants: {totalVariants}");
-        Console.WriteLine($"  - Total InventoryReceipts: {totalReceipts}");
-        Console.WriteLine($"  - Total InventoryTransactions: {totalTransactions}");
-
-        var distinctDates = await context.InventoryOnHands
-            .Select(x => new { x.Month, x.Year })
-            .Distinct()
-            .ToListAsync(cancellationToken);
-        
-        Console.WriteLine("Distinct Month/Year in DB:");
-        foreach (var d in distinctDates)
-        {
-            Console.WriteLine($"  - Month: {d.Month}, Year: {d.Year}");
-        }
 
         var categoryInventory = await context.InventoryOnHands
             .Where(x => x.Month == targetMonth && x.Year == targetYear && x.ProductVariant != null && x.ProductVariant.Product != null && x.ProductVariant.Product.CategoryId != null)
@@ -144,11 +120,6 @@ public class ProductCategoryReadRepository(
             .ToDictionaryAsync(x => x.CategoryId, x => x.TotalStock, cancellationToken)
             .ConfigureAwait(false);
 
-        Console.WriteLine($"categoryInventory dict count: {categoryInventory.Count}");
-        foreach (var kvp in categoryInventory)
-        {
-            Console.WriteLine($"  - CategoryId: {kvp.Key}, TotalStock: {kvp.Value}");
-        }
 
         foreach (var item in items)
         {
