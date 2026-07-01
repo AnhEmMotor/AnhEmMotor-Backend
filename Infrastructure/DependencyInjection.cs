@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.WorkshopDashboard;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Infrastructure.Authorization;
@@ -9,10 +10,7 @@ using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.MediaFile.File;
-using Infrastructure.Repositories.Sales;
-using Infrastructure.Repositories.Settings;
 using Infrastructure.Repositories.Supplier;
-using Infrastructure.Repositories.Technologies;
 using Infrastructure.Repositories.User;
 using Infrastructure.Repositories.Vehicle;
 using Infrastructure.Repositories.WarrantyClaim;
@@ -95,7 +93,6 @@ public static class DependencyInjection
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
         services.AddScoped<IFileReadService, FileReadService>();
         services.AddScoped<IFileInsertService, FileInsertService>();
-        services.AddScoped<IVehicleAuditLogWriteRepository, VehicleAuditLogWriteRepository>();
         services.AddScoped<IWorkshopDashboardRepository, WorkshopDashboardRepository>();
         services.AddScoped<IFileUpdateService, FileUpdateService>();
         services.AddScoped<IFileDeleteService, FileDeleteService>();
