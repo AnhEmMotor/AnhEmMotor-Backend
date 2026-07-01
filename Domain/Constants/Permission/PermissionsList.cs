@@ -314,7 +314,9 @@ public static class PermissionsList
 
     public static List<string> GetAllPermissions()
     {
-        return ModulesTree.SelectMany(m => m.Features.SelectMany(f => f.Permissions.Select(a => a.Id))).ToList();
+        var modules = ModulesTree.Select(m => m.Id);
+        var actions = ModulesTree.SelectMany(m => m.Features.SelectMany(f => f.Permissions.Select(a => a.Id)));
+        return modules.Concat(actions).ToList();
     }
 
     public static (bool IsValid, string ErrorMessage) ValidateRules(List<string> permissions)
@@ -358,5 +360,27 @@ public static class PermissionsList
     }
 
     public static readonly Dictionary<string, List<string>> Conflicts = [];
-    public static readonly Dictionary<string, List<string>> Dependencies = [];
+    public static readonly Dictionary<string, List<string>> Dependencies = GenerateDependencies();
+
+    private static Dictionary<string, List<string>> GenerateDependencies()
+    {
+        var dict = new Dictionary<string, List<string>>();
+        var validPermissions = GetMetadataList().Select(m => m.Id).ToHashSet();
+        foreach (var p in validPermissions)
+        {
+            if (!p.EndsWith(".View"))
+            {
+                var lastDotIndex = p.LastIndexOf('.');
+                if (lastDotIndex > 0)
+                {
+                    var viewPerm = string.Concat(p.AsSpan(0, lastDotIndex), ".View");
+                    if (validPermissions.Contains(viewPerm))
+                    {
+                        dict[p] = [viewPerm];
+                    }
+                }
+            }
+        }
+        return dict;
+    }
 }
