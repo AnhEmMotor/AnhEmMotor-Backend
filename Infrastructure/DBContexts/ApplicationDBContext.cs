@@ -1,4 +1,4 @@
-﻿using Domain.Constants;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Entities.Logistics;
 using Microsoft.AspNetCore.Identity;
@@ -152,7 +152,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<Service> Services { get; set; }
 
-    public virtual DbSet<ServiceEvaluation> ServiceEvaluations { get; set; }
 
     public virtual DbSet<Lead> Leads { get; set; }
 
@@ -163,6 +162,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<VehicleDocument> VehicleDocuments { get; set; }
 
     public virtual DbSet<MaintenanceHistory> MaintenanceHistories { get; set; }
+
+
+        public virtual DbSet<WorkshopPayment> WorkshopPayments { get; set; }
 
     public virtual DbSet<EmployeeProfile> EmployeeProfiles { get; set; }
 
@@ -225,6 +227,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<CurrentUnreconciledCod> CurrentUnreconciledCods { get; set; }
 
     public virtual DbSet<CarrierPartner> CarrierPartners { get; set; }
+    public virtual DbSet<ReturnRequest> ReturnRequests { get; set; }
+    public virtual DbSet<ReturnRequestItem> ReturnRequestItems { get; set; }
     public virtual DbSet<Invoice> Invoices { get; set; }
         public virtual DbSet<ConversionTool> ConversionTools { get; set; }
 

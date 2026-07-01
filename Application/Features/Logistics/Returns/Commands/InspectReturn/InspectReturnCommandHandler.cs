@@ -22,7 +22,7 @@ namespace Application.Features.Logistics.Returns.Commands.InspectReturn
             order.ProductCondition = request.ProductCondition;
             order.ReturnProofImage = request.ReturnProofImage;
             order.ReturnInternalNote = request.ReturnInternalNote;
-            order.ReturnAction = request.Action;
+            order.ReturnAction = string.IsNullOrWhiteSpace(request.Action) ? null : request.Action;
             parcelDeliveryOrderUpdateRepository.Update(order);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return true;

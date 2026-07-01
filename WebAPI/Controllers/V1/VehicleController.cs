@@ -63,9 +63,9 @@ public class VehicleController(IMediator mediator) : ApiController
     [HttpGet("portfolio")]
     [Authorize]
     [SwaggerOperation(Summary = "Tra cứu portfolio xe")]
-    public async Task<IActionResult> GetPortfolioAsync([FromQuery] GetVehiclePortfolioQuery query, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetPortfolioAsync([FromQuery] GetVehiclePortfolioQuery request, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
