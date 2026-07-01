@@ -80,7 +80,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("for-output")]
-    [RequiresAnyPermissions(Permissions.Warehouse.OutputManagement.Edit, Permissions.Warehouse.OutputManagement.Create, Permissions.Admin.UserManagement.View)]
+    [RequiresAnyPermissions(Permissions.Order.OrderManagement.Edit, Permissions.Order.OrderManagement.Create, Permissions.Admin.UserManagement.View)]
     [ProducesResponseType(typeof(PagedResult<UserDTOForOutputResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsersForOutputAsync(
         [FromQuery] SieveModel sieveModel,

@@ -34,7 +34,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
     /// Lấy danh sách hợp đồng bán hàng (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
-    [HasPermission(Permissions.Warehouse.OutputManagement.View)]
+    [HasPermission(Permissions.Order.OrderManagement.View)]
     [ProducesResponseType(typeof(PagedResult<SalesContractResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetSalesContractsAsync(
@@ -50,7 +50,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
     /// Lấy thống kê hợp đồng bán hàng (số lượng theo trạng thái).
     /// </summary>
     [HttpGet("statistics")]
-    [HasPermission(Permissions.Warehouse.OutputManagement.View)]
+    [HasPermission(Permissions.Order.OrderManagement.View)]
     [ProducesResponseType(typeof(SalesContractStatisticsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetStatisticsAsync(CancellationToken cancellationToken)
@@ -64,7 +64,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
     /// Lấy chi tiết một hợp đồng bán hàng.
     /// </summary>
     [HttpGet("{id:guid}")]
-    [HasPermission(Permissions.Warehouse.OutputManagement.View)]
+    [HasPermission(Permissions.Order.OrderManagement.View)]
     [ProducesResponseType(typeof(SalesContractResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSalesContractByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -78,7 +78,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
     /// Tạo hợp đồng bán hàng mới từ một đơn hàng.
     /// </summary>
     [HttpPost]
-    [HasPermission(Permissions.Warehouse.OutputManagement.Create)]
+    [HasPermission(Permissions.Order.OrderManagement.Create)]
     [ProducesResponseType(typeof(SalesContractResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateSalesContractAsync(
@@ -94,7 +94,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
     /// Cập nhật hợp đồng bán hàng (điều khoản, bảo hành, ghi chú).
     /// </summary>
     [HttpPut("{id:guid}")]
-    [HasPermission(Permissions.Warehouse.OutputManagement.Edit)]
+    [HasPermission(Permissions.Order.OrderManagement.Edit)]
     [ProducesResponseType(typeof(SalesContractResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -112,7 +112,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
     /// Cập nhật trạng thái hợp đồng bán hàng.
     /// </summary>
     [HttpPatch("{id:guid}/status")]
-    [HasPermission(Permissions.Warehouse.OutputManagement.ChangeStatus)]
+    [HasPermission(Permissions.Order.OrderManagement.ChangeStatus)]
     [ProducesResponseType(typeof(SalesContractResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -130,7 +130,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
     /// Xóa hợp đồng bán hàng (soft delete).
     /// </summary>
     [HttpDelete("{id:guid}")]
-    [HasPermission(Permissions.Warehouse.OutputManagement.Delete)]
+    [HasPermission(Permissions.Order.OrderManagement.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteSalesContractAsync(Guid id, CancellationToken cancellationToken)

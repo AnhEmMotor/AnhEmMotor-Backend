@@ -846,7 +846,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             _factory.Services,
             adminName,
             "Pass@123",
-            [Permissions.Warehouse.OutputManagement.Create],
+            [Permissions.Order.OrderManagement.Create],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -896,7 +896,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             _factory.Services,
             adminName,
             "Pass@123",
-            [Permissions.Warehouse.OutputManagement.Edit],
+            [Permissions.Order.OrderManagement.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(

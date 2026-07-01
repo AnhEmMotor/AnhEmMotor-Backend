@@ -317,7 +317,7 @@ public class SalesOrder
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(
                 new UnauthorizedAccessException(
-                    "User does not have permission Domain.Constants.Permission.Permissions.Warehouse.OutputManagement.View"));
+                    "User does not have permission Domain.Constants.Permission.Permissions.Order.OrderManagement.View"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetOutputStatusesAsync(CancellationToken.None))
             .ConfigureAwait(true);
@@ -351,10 +351,8 @@ public class SalesOrder
     [Fact(DisplayName = "SO_117 - SalesOrders exposes split confirmed and unconfirmed list endpoints")]
     public void SalesOrdersController_ShouldExposeSplitListEndpointsWithNewPermissions()
     {
-        var viewConfirmedPermission = typeof(Warehouse.OutputManagement).GetField("ViewConfirmed")?.GetRawConstantValue() as string;
-        var viewUnconfirmedPermission = typeof(Warehouse.OutputManagement).GetField("ViewUnconfirmed")?.GetRawConstantValue() as string;
-        viewConfirmedPermission.Should().Be("Permissions.Warehouse.OutputManagement.ViewConfirmed");
-        viewUnconfirmedPermission.Should().Be("Permissions.Warehouse.OutputManagement.ViewUnconfirmed");
+        var ViewPermission = typeof(Order.OrderManagement).GetField("View")?.GetRawConstantValue() as string;
+        ViewPermission.Should().Be("Permissions.Order.OrderManagement.View");
         var confirmedMethod = typeof(SalesOrdersController).GetMethod(
             nameof(SalesOrdersController.GetConfirmedOutputsAsync));
         var unconfirmedMethod = typeof(SalesOrdersController).GetMethod(
@@ -365,10 +363,10 @@ public class SalesOrder
         unconfirmedMethod!.GetCustomAttribute<HttpGetAttribute>()?.Template.Should().Be("unconfirmed");
         confirmedMethod.GetCustomAttribute<HasPermissionAttribute>()?.Policy
             .Should()
-        .Be($"HasPermission{viewConfirmedPermission}");
+        .Be($"HasPermission{ViewPermission}");
         unconfirmedMethod.GetCustomAttribute<HasPermissionAttribute>()?.Policy
             .Should()
-        .Be($"HasPermission{viewUnconfirmedPermission}");
+        .Be($"HasPermission{ViewPermission}");
     }
 
     [Fact(DisplayName = "SO_118 - GetConfirmedOutputs returns confirmed sales orders")]

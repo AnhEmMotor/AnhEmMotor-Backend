@@ -103,32 +103,6 @@ public static class PermissionsList
             Name = "Quản lý Kho & Hậu Cần",
             Features =
             [
-                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.DebtPaymentManagement", Name = "Quản lý công nợ", Permissions = new() {
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.DebtPaymentManagement.View, Name = "Xem", Description = "Xem quản lý công nợ" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.DebtPaymentManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý công nợ" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.DebtPaymentManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý công nợ" },
-                }},
-                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.BrandManagement", Name = "Quản lý thương hiệu", Permissions = new() {
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.BrandManagement.View, Name = "Xem", Description = "Xem quản lý thương hiệu" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.BrandManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý thương hiệu" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.BrandManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý thương hiệu" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.BrandManagement.Delete, Name = "Xóa", Description = "Xóa quản lý thương hiệu" },
-                }},
-                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.CategoryManagement", Name = "Quản lý danh mục", Permissions = new() {
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.CategoryManagement.View, Name = "Xem", Description = "Xem quản lý danh mục" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.CategoryManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý danh mục" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.CategoryManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý danh mục" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.CategoryManagement.Delete, Name = "Xóa", Description = "Xóa quản lý danh mục" },
-                }},
-                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.OutputManagement", Name = "Quản lý phiếu xuất", Permissions = new() {
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.OutputManagement.View, Name = "Xem", Description = "Xem quản lý phiếu xuất" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.OutputManagement.ViewConfirmed, Name = "Xem (đã duyệt)", Description = "Xem (đã duyệt) quản lý phiếu xuất" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.OutputManagement.ViewUnconfirmed, Name = "Xem (chưa duyệt)", Description = "Xem (chưa duyệt) quản lý phiếu xuất" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.OutputManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý phiếu xuất" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.OutputManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý phiếu xuất" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.OutputManagement.Delete, Name = "Xóa", Description = "Xóa quản lý phiếu xuất" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.OutputManagement.ChangeStatus, Name = "Đổi trạng thái", Description = "Đổi trạng thái quản lý phiếu xuất" },
-                }},
                 new PermissionFeatureMetadata { Id = "Permissions.Warehouse.ProductManagement", Name = "Quản lý sản phẩm", Permissions = new() {
                     new PermissionActionMetadata { Id = Permissions.Warehouse.ProductManagement.View, Name = "Xem", Description = "Xem quản lý sản phẩm" },
                     new PermissionActionMetadata { Id = Permissions.Warehouse.ProductManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý sản phẩm" },
@@ -137,13 +111,11 @@ public static class PermissionsList
                     new PermissionActionMetadata { Id = Permissions.Warehouse.ProductManagement.EditPrice, Name = "Chỉnh giá", Description = "Chỉnh giá quản lý sản phẩm" },
                     new PermissionActionMetadata { Id = Permissions.Warehouse.ProductManagement.ChangeStatus, Name = "Đổi trạng thái", Description = "Đổi trạng thái quản lý sản phẩm" },
                 }},
-                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.PurchaseOrderManagement", Name = "Quản lý phiếu mua hàng (PO)", Permissions = new() {
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseOrderManagement.View, Name = "Xem", Description = "Xem quản lý phiếu mua hàng (po)" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseOrderManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý phiếu mua hàng (po)" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseOrderManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý phiếu mua hàng (po)" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseOrderManagement.Delete, Name = "Xóa", Description = "Xóa quản lý phiếu mua hàng (po)" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseOrderManagement.Send, Name = "Gửi", Description = "Gửi quản lý phiếu mua hàng (po)" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseOrderManagement.ApproveReject, Name = "Duyệt/Từ chối", Description = "Duyệt/Từ chối quản lý phiếu mua hàng (po)" },
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.SupplierManagement", Name = "Quản lý đối tác", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.View, Name = "Xem", Description = "Xem quản lý đối tác" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý đối tác" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý đối tác" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.Delete, Name = "Xóa", Description = "Xóa quản lý đối tác" },
                 }},
                 new PermissionFeatureMetadata { Id = "Permissions.Warehouse.PurchaseRequestManagement", Name = "Quản lý yêu cầu mua hàng (PR)", Permissions = new() {
                     new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseRequestManagement.View, Name = "Xem", Description = "Xem quản lý yêu cầu mua hàng (pr)" },
@@ -161,17 +133,20 @@ public static class PermissionsList
                     new PermissionActionMetadata { Id = Permissions.Warehouse.ReceiptManagement.Send, Name = "Gửi", Description = "Gửi quản lý phiếu nhập kho" },
                     new PermissionActionMetadata { Id = Permissions.Warehouse.ReceiptManagement.ApproveReject, Name = "Duyệt/Từ chối", Description = "Duyệt/Từ chối quản lý phiếu nhập kho" },
                 }},
-                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.SupplierContractManagement", Name = "Quản lý hợp đồng NCC", Permissions = new() {
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierContractManagement.View, Name = "Xem", Description = "Xem quản lý hợp đồng ncc" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierContractManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý hợp đồng ncc" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierContractManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý hợp đồng ncc" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierContractManagement.Delete, Name = "Xóa", Description = "Xóa quản lý hợp đồng ncc" },
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.DebtPaymentManagement", Name = "Quản lý công nợ", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.DebtPaymentManagement.View, Name = "Xem", Description = "Xem quản lý công nợ" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.DebtPaymentManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý công nợ" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.DebtPaymentManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý công nợ" },
                 }},
-                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.SupplierManagement", Name = "Quản lý nhà cung cấp", Permissions = new() {
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.View, Name = "Xem", Description = "Xem quản lý nhà cung cấp" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý nhà cung cấp" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý nhà cung cấp" },
-                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.Delete, Name = "Xóa", Description = "Xóa quản lý nhà cung cấp" },
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.InventoryReportManagement", Name = "Quản lý báo cáo xuất nhập tồn", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.InventoryReportManagement.View, Name = "Xem", Description = "Xem báo cáo xuất nhập tồn" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.LedgerManagement", Name = "Quản lý sổ cái tồn kho", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.LedgerManagement.View, Name = "Xem", Description = "Xem sổ cái tồn kho" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.InventorySettingManagement", Name = "Quản lý cài đặt tồn kho", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.InventorySettingManagement.View, Name = "Xem", Description = "Xem cài đặt tồn kho" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.InventorySettingManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa cài đặt tồn kho" },
                 }}
             ]
         },

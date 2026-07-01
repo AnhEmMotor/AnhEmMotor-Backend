@@ -75,7 +75,8 @@ namespace Application.Features.InventoryReceipts.Mappings
                 .Map(
                     dest => dest.RejectedByName,
                     src => src.RejectedByUser != null ? src.RejectedByUser.FullName : null)
-                .Map(dest => dest.Products, src => src.InventoryReceiptInfos);
+                .Map(dest => dest.Products, src => src.InventoryReceiptInfos)
+                .Map(dest => dest.PurchaseRequestId, src => src.PurchaseRequestId);
             config.NewConfig<InventoryReceiptInfo, InventoryReceiptInfoResponse>()
                 .Map(
                     dest => dest.ProductVariantId,

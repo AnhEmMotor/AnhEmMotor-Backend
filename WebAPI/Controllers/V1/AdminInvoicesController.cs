@@ -31,7 +31,7 @@ public class AdminInvoicesController(IMediator mediator) : ApiController
   /// Lấy danh sách hóa đơn bán hàng (có phân trang, lọc, sắp xếp).
   /// </summary>
   [HttpGet]
-  [HasPermission(Permissions.Warehouse.OutputManagement.View)]
+  [HasPermission(Permissions.Order.OrderManagement.View)]
   [ProducesResponseType(typeof(PagedResult<AdminInvoiceSummaryResponse>), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
   public async Task<IActionResult> GetInvoicesAsync(
@@ -46,7 +46,7 @@ public class AdminInvoicesController(IMediator mediator) : ApiController
   /// Lấy chi tiết một hóa đơn bán hàng.
   /// </summary>
   [HttpGet("{id:int}")]
-  [HasPermission(Permissions.Warehouse.OutputManagement.View)]
+  [HasPermission(Permissions.Order.OrderManagement.View)]
   [ProducesResponseType(typeof(AdminInvoiceDetailResponse), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
   public async Task<IActionResult> GetInvoiceDetailAsync(int id, CancellationToken cancellationToken)
@@ -60,7 +60,7 @@ public class AdminInvoicesController(IMediator mediator) : ApiController
   /// Tạo hóa đơn bán hàng mới.
   /// </summary>
   [HttpPost]
-  [HasPermission(Permissions.Warehouse.OutputManagement.Create)]
+  [HasPermission(Permissions.Order.OrderManagement.Create)]
   [ProducesResponseType(typeof(AdminInvoiceDetailResponse), StatusCodes.Status201Created)]
   [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
   public async Task<IActionResult> CreateInvoiceAsync(
@@ -75,7 +75,7 @@ public class AdminInvoicesController(IMediator mediator) : ApiController
   /// Cập nhật thông tin hóa đơn bán hàng.
   /// </summary>
   [HttpPut("{id:int}")]
-  [HasPermission(Permissions.Warehouse.OutputManagement.Edit)]
+  [HasPermission(Permissions.Order.OrderManagement.Edit)]
   [ProducesResponseType(typeof(AdminInvoiceDetailResponse), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
   [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -91,7 +91,7 @@ public class AdminInvoicesController(IMediator mediator) : ApiController
   /// Cập nhật trạng thái hóa đơn (ví dụ: xác nhận thanh toán).
   /// </summary>
   [HttpPatch("{id:int}/status")]
-  [HasPermission(Permissions.Warehouse.OutputManagement.ChangeStatus)]
+  [HasPermission(Permissions.Order.OrderManagement.ChangeStatus)]
   [ProducesResponseType(typeof(AdminInvoiceDetailResponse), StatusCodes.Status200OK)]
   [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
   [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]

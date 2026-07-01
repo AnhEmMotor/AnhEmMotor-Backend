@@ -1,5 +1,6 @@
 using Application.ApiContracts.InventoryLedger.Responses;
 using Application.Common.Models;
+using Application.Features.InventoryLedgers.Queries.ExportInventoryLedger;
 using Application.Features.InventoryLedgers.Queries.GetInventoryLedger;
 using Asp.Versioning;
 using Domain.Constants.Permission;
@@ -28,6 +29,20 @@ namespace WebAPI.Controllers.V1
         [ProducesResponseType(typeof(List<InventoryLedgerResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetInventoryLedgerAsync(
             [FromQuery] GetInventoryLedgerQuery query,
+            CancellationToken cancellationToken)
+        {
+            var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Xuất sổ cái tồn kho ra tệp Excel
+        /// </summary>
+        [HttpGet("export")]
+        [HasPermission(Permissions.Warehouse.ReceiptManagement.View)]
+        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ExportInventoryLedgerAsync(
+            [FromQuery] ExportInventoryLedgerQuery query,
             CancellationToken cancellationToken)
         {
             var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

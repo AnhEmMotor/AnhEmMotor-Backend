@@ -171,7 +171,7 @@ public class ProductController(ISender sender) : ApiController
     /// khi có quyền thêm hoặc sửa phiếu bán hàng).
     /// </summary>
     [HttpGet("variants-lite/for-output")]
-    [RequiresAnyPermissions(Permissions.Warehouse.OutputManagement.Edit, Permissions.Warehouse.OutputManagement.Create)]
+    [RequiresAnyPermissions(Permissions.Order.OrderManagement.Edit, Permissions.Order.OrderManagement.Create)]
     [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponseForOutput>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActiveVariantLiteProductsForOutputAsync(
         [FromQuery] SieveModel request,

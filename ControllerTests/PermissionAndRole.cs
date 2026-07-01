@@ -69,7 +69,7 @@ public class PermissionAndRole
             UserName = "testuser",
             Email = "test@test.com",
             Roles = ["Manager"],
-            Permissions = [Warehouse.BrandManagement.View, Warehouse.BrandManagement.Create, Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create]
+            Permissions = [Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMyPermissionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
@@ -100,7 +100,7 @@ public class PermissionAndRole
             UserName = "targetuser",
             Email = "target@test.com",
             Roles = ["Staff"],
-            Permissions = [Warehouse.ProductManagement.View, Warehouse.BrandManagement.View, Admin.FileManagement.View, Admin.FileManagement.Upload, Warehouse.SupplierManagement.View]
+            Permissions = [Warehouse.ProductManagement.View, Warehouse.ProductManagement.View, Admin.FileManagement.View, Admin.FileManagement.Upload, Warehouse.SupplierManagement.View]
         };
         _mediatorMock.Setup(
             m => m.Send(It.Is<GetUserPermissionsByIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
@@ -132,8 +132,8 @@ public class PermissionAndRole
         var roleId = Guid.NewGuid();
         var expectedPermissions = new List<string>
         {
-            Warehouse.BrandManagement.View,
-            Warehouse.BrandManagement.Create,
+            Warehouse.ProductManagement.View,
+            Warehouse.ProductManagement.Create,
             Warehouse.ProductManagement.View,
             Warehouse.ProductManagement.Create,
             Admin.FileManagement.View,
@@ -191,7 +191,7 @@ public class PermissionAndRole
         {
             RoleName = "NewRole",
             Description = "Test Role",
-            Permissions = [Warehouse.BrandManagement.View, Warehouse.ProductManagement.View]
+            Permissions = [Warehouse.ProductManagement.View, Warehouse.ProductManagement.View]
         };
         var expectedResponse = new RoleCreateResponse
         {
@@ -219,7 +219,7 @@ public class PermissionAndRole
         {
             RoleName = "Admin",
             Description = "Duplicate",
-            Permissions = [Warehouse.BrandManagement.View]
+            Permissions = [Warehouse.ProductManagement.View]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("Role name already exists"));

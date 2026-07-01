@@ -331,6 +331,7 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _prReadRepoMock.Object,
             _variantRepoMock.Object,
@@ -365,6 +366,7 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _prReadRepoMock.Object,
             _variantRepoMock.Object,
@@ -519,6 +521,7 @@ public class InventoryReceipts
         var handler = new SendInventoryReceiptCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new SendInventoryReceiptCommand { Id = 1 };

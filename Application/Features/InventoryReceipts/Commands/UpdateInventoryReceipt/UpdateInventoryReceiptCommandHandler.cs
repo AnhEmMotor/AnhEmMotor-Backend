@@ -252,8 +252,16 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         }
         var requestInfoDict = request.Products.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
         var toDelete = inventoryReceipt.InventoryReceiptInfos.Where(ii => !requestInfoDict.ContainsKey(ii.Id)).ToList();
+        var infoAuditLogs = new List<InventoryReceiptInfoAuditLog>();
         foreach (var info in toDelete)
         {
+            infoAuditLogs.Add(
+                new InventoryReceiptInfoAuditLog
+                {
+                    InventoryReceiptInfo = info,
+                    Action = "Delete",
+                    OldQuantity = info.Count
+                });
             deleteRepository.DeleteInventoryReceiptInfo(info);
             inventoryReceipt.InventoryReceiptInfos.Remove(info);
         }
@@ -281,6 +289,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             if (existingInfo != null)
             {
                 var oldPurchaseRequestItemId = existingInfo.PurchaseRequestItemId;
+                var oldQuantity = existingInfo.Count;
                 productRequest.Adapt(existingInfo, config);
                 if (!productRequest.PurchaseRequestItemId.HasValue)
                 {
@@ -302,6 +311,18 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     vehicleAuditLogs,
                     cancellationToken)
                     .ConfigureAwait(false);
+                
+                if (oldQuantity != existingInfo.Count)
+                {
+                    infoAuditLogs.Add(
+                        new InventoryReceiptInfoAuditLog
+                        {
+                            InventoryReceiptInfo = existingInfo,
+                            Action = "Update",
+                            OldQuantity = oldQuantity,
+                            NewQuantity = existingInfo.Count
+                        });
+                }
             } else
             {
                 var newInfo = productRequest.Adapt<InventoryReceiptInfo>(config);
@@ -319,6 +340,14 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     cancellationToken)
                     .ConfigureAwait(false);
                 inventoryReceipt.InventoryReceiptInfos.Add(newInfo);
+                
+                infoAuditLogs.Add(
+                    new InventoryReceiptInfoAuditLog
+                    {
+                        InventoryReceiptInfo = newInfo,
+                        Action = "Add",
+                        NewQuantity = newInfo.Count
+                    });
             }
         }
         updateRepository.Update(inventoryReceipt);
@@ -335,17 +364,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                 NewNotes = inventoryReceipt.Notes
             }
         };
-        var infoAuditLogs = new List<InventoryReceiptInfoAuditLog>();
-        foreach (var info in inventoryReceipt.InventoryReceiptInfos)
-        {
-            infoAuditLogs.Add(
-                new InventoryReceiptInfoAuditLog
-                {
-                    InventoryReceiptInfo = info,
-                    Action = "Update",
-                    NewQuantity = info.Count
-                });
-        }
+        
         await insertRepository.InsertAuditLogsAsync(receiptAuditLogs, cancellationToken).ConfigureAwait(false);
         await insertRepository.InsertInfoAuditLogsAsync(infoAuditLogs, cancellationToken).ConfigureAwait(false);
 

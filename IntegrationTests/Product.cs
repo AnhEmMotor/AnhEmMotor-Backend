@@ -549,7 +549,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [Permissions.Warehouse.OutputManagement.Create],
+            [Permissions.Order.OrderManagement.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);

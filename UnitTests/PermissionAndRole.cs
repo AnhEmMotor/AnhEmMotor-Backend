@@ -72,7 +72,7 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(
             x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(roles);
-        var permissions = new List<string> { Warehouse.BrandManagement.View, Warehouse.BrandManagement.Create, Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Admin.RoleManagement.View };
+        var permissions = new List<string> { Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Admin.RoleManagement.View };
         roleReadRepoMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
@@ -128,7 +128,7 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(
             x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(roles);
-        var permissions = new List<string> { Warehouse.ProductManagement.View, Warehouse.BrandManagement.View, Admin.FileManagement.View };
+        var permissions = new List<string> { Warehouse.ProductManagement.View, Warehouse.ProductManagement.View, Admin.FileManagement.View };
         roleReadRepoMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
@@ -163,7 +163,7 @@ public class PermissionAndRole
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
         roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([role]);
-        var permissions = new List<string> { Warehouse.BrandManagement.View, Warehouse.BrandManagement.Create, Warehouse.BrandManagement.Edit, Warehouse.BrandManagement.Delete };
+        var permissions = new List<string> { Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Warehouse.ProductManagement.Edit, Warehouse.ProductManagement.Delete };
         roleReadRepoMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
         var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
@@ -193,7 +193,7 @@ public class PermissionAndRole
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
         roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([role]);
-        var permissions = new List<string> { Warehouse.BrandManagement.View, Warehouse.BrandManagement.Create };
+        var permissions = new List<string> { Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create };
         roleReadRepoMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
         var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
@@ -213,7 +213,7 @@ public class PermissionAndRole
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         var permissions = new List<PermissionEntity>
         {
-            new() { Id = 1, Name = Warehouse.BrandManagement.View },
+            new() { Id = 1, Name = Warehouse.ProductManagement.View },
             new() { Id = 2, Name = Warehouse.ProductManagement.View }
         };
         permissionRepoMock.Setup(
@@ -238,7 +238,7 @@ public class PermissionAndRole
         {
             RoleName = "NewRole",
             Description = "Test role",
-            Permissions = [Warehouse.BrandManagement.View, Warehouse.ProductManagement.View]
+            Permissions = [Warehouse.ProductManagement.View, Warehouse.ProductManagement.View]
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -267,7 +267,7 @@ public class PermissionAndRole
         {
             RoleName = "Manager",
             Description = "Duplicate",
-            Permissions = [Warehouse.BrandManagement.View]
+            Permissions = [Warehouse.ProductManagement.View]
         };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -592,17 +592,17 @@ public class PermissionAndRole
     public void CreateRoleCommand_MissingDependency_ShouldHaveValidationError()
     {
         CreateRoleCommandValidator validator = new();
-        var command = new CreateRoleCommand { RoleName = "ValidRole", Permissions = [Warehouse.BrandManagement.Create] };
+        var command = new CreateRoleCommand { RoleName = "ValidRole", Permissions = [Warehouse.ProductManagement.Create] };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Permissions)
-            .WithErrorMessage($"Permission '{Warehouse.BrandManagement.Create}' requires: {Warehouse.BrandManagement.View}");
+            .WithErrorMessage($"Permission '{Warehouse.ProductManagement.Create}' requires: {Warehouse.ProductManagement.View}");
     }
 
     [Fact(DisplayName = "PERM_027 - Unit - Chặn tên vai trò chứa ký tự đặc biệt cấm")]
     public void RoleName_BannedSpecialChars_ShouldHaveError()
     {
         CreateRoleCommandValidator validator = new();
-        var command = new CreateRoleCommand { RoleName = "Admin@123", Permissions = [Warehouse.BrandManagement.View] };
+        var command = new CreateRoleCommand { RoleName = "Admin@123", Permissions = [Warehouse.ProductManagement.View] };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.RoleName);
     }
@@ -699,7 +699,7 @@ public class PermissionAndRole
         var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
         var roles = new List<string> { "Manager" };
         var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
-        var permissionNames = new List<string> { Warehouse.BrandManagement.View, Warehouse.ProductManagement.View };
+        var permissionNames = new List<string> { Warehouse.ProductManagement.View, Warehouse.ProductManagement.View };
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
@@ -713,7 +713,7 @@ public class PermissionAndRole
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.Permissions.Should().BeAssignableTo<IList<string>>();
-        result.Value.Permissions.Should().Contain(Warehouse.BrandManagement.View);
+        result.Value.Permissions.Should().Contain(Warehouse.ProductManagement.View);
         result.Value.Permissions.Should().Contain(Warehouse.ProductManagement.View);
         result.Value.Permissions.Should().NotContainNulls();
     }
