@@ -25,19 +25,19 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Qu?n l� quy?n h?n v� vai tr� trong h? th?ng.
+/// Quản lý quyền hạn và vai trò trong hệ thống.
 /// </summary>
 [ApiVersion("1.0")]
-[SwaggerTag("Qu?n l� quy?n h?n v� vai tr�")]
+[SwaggerTag("Quản lý quyền hạn và vai trò")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class PermissionController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// L?y t?t c? c�c quy?n (permissions) c� trong h? th?ng k�m m� t?.
+    /// Lấy tất cả các quyền (permissions) có trong hệ thống kèm mô tả.
     /// </summary>
-    /// <param name="cancellationToken">Token h?y b?.</param>
-    /// <returns>Danh s�ch t?t c? c�c quy?n.</returns>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách tất cả các quyền.</returns>
     [HttpGet("permissions")]
     [HasPermission(Permissions.Admin.RoleManagement.View)]
     [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
@@ -48,10 +48,10 @@ public class PermissionController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y c?u tr�c quy?n h?n (Nh�m, Xung d?t, Ph? thu?c).
+    /// Lấy cấu trúc quyền hạn (Nhóm, Xung đột, Phụ thuộc).
     /// </summary>
-    /// <param name="cancellationToken">Token h?y b?.</param>
-    /// <returns>C?u tr�c quy?n h?n c?a h? th?ng.</returns>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Cấu trúc quyền hạn của hệ thống.</returns>
     [HttpGet("structure")]
     [HasPermission(Permissions.Admin.RoleManagement.View)]
     [ProducesResponseType(typeof(PermissionStructureResponse), StatusCodes.Status200OK)]
@@ -62,10 +62,10 @@ public class PermissionController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch c�c quy?n c?a ngu?i d�ng hi?n t?i.
+    /// Lấy danh sách các quyền của người dùng hiện tại.
     /// </summary>
-    /// <param name="cancellationToken">Token h?y b?.</param>
-    /// <returns>Danh s�ch quy?n v� vai tr� c?a b?n th�n.</returns>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách quyền và vai trò của bản thân.</returns>
     [HttpGet("my-permissions")]
     [Authorize]
     [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
@@ -78,11 +78,11 @@ public class PermissionController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch c�c quy?n c?a m?t ngu?i d�ng c? th? theo ID.
+    /// Lấy danh sách các quyền của một người dùng cụ thể theo ID.
     /// </summary>
-    /// <param name="userId">ID ngu?i d�ng c?n tra c?u.</param>
-    /// <param name="cancellationToken">Token h?y b?.</param>
-    /// <returns>Danh s�ch quy?n v� vai tr� c?a ngu?i d�ng.</returns>
+    /// <param name="userId">ID người dùng cần tra cứu.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách quyền và vai trò của người dùng.</returns>
     [HttpGet("users/{userId:guid}/permissions")]
     [HasPermission(Permissions.Admin.UserManagement.View)]
     [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
@@ -95,11 +95,11 @@ public class PermissionController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y danh s�ch c�c quy?n c?a m?t vai tr� c? th?.
+    /// Lấy danh sách các quyền của một vai trò cụ thể.
     /// </summary>
-    /// <param name="roleId">ID vai tr�.</param>
-    /// <param name="cancellationToken">Token h?y b?.</param>
-    /// <returns>Danh s�ch t�n c�c quy?n du?c g�n cho vai tr�.</returns>
+    /// <param name="roleId">ID vai trò.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách tên các quyền được gán cho vai trò.</returns>
     [HttpGet("roles/{roleId:guid}/permissions", Name = Permission.GetRolePermissions)]
     [HasPermission(Permissions.Admin.RoleManagement.View)]
     [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
@@ -112,12 +112,12 @@ public class PermissionController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// C?p nh?t th�ng tin v� danh s�ch quy?n cho m?t vai tr�.
+    /// Cập nhật thông tin và danh sách quyền cho một vai trò.
     /// </summary>
-    /// <param name="roleId">ID vai tr� c?n c?p nh?t.</param>
-    /// <param name="model">Th�ng tin c?p nh?t (T�n, M� t?, Danh s�ch quy?n).</param>
-    /// <param name="cancellationToken">Token h?y b?.</param>
-    /// <returns>K?t qu? c?p nh?t vai tr�.</returns>
+    /// <param name="roleId">ID vai trò cần cập nhật.</param>
+    /// <param name="model">Thông tin cập nhật (Tên, Mô tả, Danh sách quyền).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả cập nhật vai trò.</returns>
     [HttpPut("roles/{roleId:guid}")]
     [HasPermission(Permissions.Admin.RoleManagement.Edit)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -142,11 +142,11 @@ public class PermissionController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// L?y t?t c? c�c vai tr� c� trong h? th?ng (c� ph�n trang, l?c, s?p x?p).
+    /// Lấy tất cả các vai trò có trong hệ thống (có phân trang, lọc, sắp xếp).
     /// </summary>
-    /// <param name="sieveModel">C�c th�ng tin ph�n trang, l?c, s?p x?p.</param>
-    /// <param name="cancellationToken">Token h?y b?.</param>
-    /// <returns>Danh s�ch vai tr�.</returns>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách vai trò.</returns>
     [HttpGet("roles")]
     [HasPermission(Permissions.Admin.RoleManagement.View)]
     [ProducesResponseType(typeof(PagedResult<RoleSelectResponse>), StatusCodes.Status200OK)]
@@ -168,11 +168,11 @@ public class PermissionController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// T?o vai tr� m?i k�m c�c quy?n du?c g�n.
+    /// Tạo vai trò mới kèm các quyền được gán.
     /// </summary>
-    /// <param name="model">Th�ng tin vai tr� m?i (T�n, M� t?, Danh s�ch quy?n).</param>
-    /// <param name="cancellationToken">Token h?y b?.</param>
-    /// <returns>Th�ng tin vai tr� v?a du?c t?o.</returns>
+    /// <param name="model">Thông tin vai trò mới (Tên, Mô tả, Danh sách quyền).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin vai trò vừa được tạo.</returns>
     [HttpPost("roles")]
     [HasPermission(Permissions.Admin.RoleManagement.Create)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -197,11 +197,11 @@ public class PermissionController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// X�a m?t vai tr� kh?i h? th?ng.
+    /// Xóa một vai trò khỏi hệ thống.
     /// </summary>
-    /// <param name="roleId">ID vai tr� c?n x�a.</param>
-    /// <param name="cancellationToken">Token h?y b?.</param>
-    /// <returns>K?t qu? x�a vai tr�.</returns>
+    /// <param name="roleId">ID vai trò cần xóa.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả xóa vai trò.</returns>
     [HttpDelete("roles/{roleId:guid}")]
     [HasPermission(Permissions.Admin.RoleManagement.Delete)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -215,11 +215,11 @@ public class PermissionController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// X�a nhi?u vai tr� c�ng l�c theo t�n.
+    /// Xóa nhiều vai trò cùng lúc theo tên.
     /// </summary>
-    /// <param name="roleNames">Danh s�ch t�n c�c vai tr� c?n x�a.</param>
-    /// <param name="cancellationToken">Token h?y b?.</param>
-    /// <returns>K?t qu? x�a nhi?u vai tr�.</returns>
+    /// <param name="roleNames">Danh sách tên các vai trò cần xóa.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả xóa nhiều vai trò.</returns>
     [HttpPost("roles/delete-multiple")]
     [HasPermission(Permissions.Admin.RoleManagement.Delete)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]

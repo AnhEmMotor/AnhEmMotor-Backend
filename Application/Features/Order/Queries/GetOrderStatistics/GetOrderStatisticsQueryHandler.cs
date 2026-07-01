@@ -24,7 +24,7 @@ public class GetOrderStatisticsQueryHandler(IBookingReadRepository bookingReposi
 
         var hourlyData = bookings
             .Where(b => b.CreatedAt >= today)
-            .GroupBy(b => b.CreatedAt.Value.Hour)
+            .GroupBy(b => b.CreatedAt!.Value.Hour)
             .OrderBy(g => g.Key)
             .Select(g => new HourlyOrderData
             {

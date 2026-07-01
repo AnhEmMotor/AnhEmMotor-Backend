@@ -42,7 +42,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
 
     #pragma warning disable IDE0079
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "SUP_031 - L?y danh s�ch Supplier v?i ph�n trang m?c d?nh")]
+    [Fact(DisplayName = "SUP_031 - Lấy danh sách Supplier với phân trang mặc định")]
     public async Task GetSuppliers_DefaultPagination_ReturnsPagedResult()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -106,7 +106,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         content.Items.Should().OnlyContain(s => s.Name!.Contains(uniqueId));
     }
 
-    [Fact(DisplayName = "SUP_032 - L?y danh s�ch Supplier v?i ph�n trang t�y ch?nh")]
+    [Fact(DisplayName = "SUP_032 - Lấy danh sách Supplier với phân trang tùy chỉnh")]
     public async Task GetSuppliers_CustomPagination_ReturnsPagedResult()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -161,7 +161,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         content.PageNumber.Should().Be(2);
     }
 
-    [Fact(DisplayName = "SUP_033 - L?y danh s�ch Supplier v?i l?c theo Name")]
+    [Fact(DisplayName = "SUP_033 - Lấy danh sách Supplier với lọc theo Name")]
     public async Task GetSuppliers_FilterByName_ReturnsFilteredResult()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -228,7 +228,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         content.Items.Should().OnlyContain(s => s.Name!.Contains($"Test_{uniqueId}"));
     }
 
-    [Fact(DisplayName = "SUP_034 - L?y danh s�ch Supplier v?i s?p x?p theo Name tang d?n")]
+    [Fact(DisplayName = "SUP_034 - Lấy danh sách Supplier với sắp xếp theo Name tăng dần")]
     public async Task GetSuppliers_SortByNameAscending_ReturnsSortedResult()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -299,7 +299,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         content.Items[2].Name.Should().Be($"Zebra_{uniqueId}");
     }
 
-    [Fact(DisplayName = "SUP_035 - L?y danh s�ch Supplier ch? bao g?m tr?ng th�i active v� inactive")]
+    [Fact(DisplayName = "SUP_035 - Lấy danh sách Supplier chỉ bao gồm trạng thái active và inactive")]
     public async Task GetSuppliers_OnlyActiveAndInactive_ExcludesDeleted()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -376,7 +376,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         content.Items.Should().NotContain(s => string.Compare(s.Name, $"Deleted_{uniqueId}") == 0);
     }
 
-    [Fact(DisplayName = "SUP_036 - L?y danh s�ch Supplier d� x�a v?i ph�n trang")]
+    [Fact(DisplayName = "SUP_036 - Lấy danh sách Supplier đã xóa với phân trang")]
     public async Task GetDeletedSuppliers_WithPagination_ReturnsDeletedOnly()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -440,7 +440,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         content.Items.Should().NotContain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
     }
 
-    [Fact(DisplayName = "SUP_037 - L?y chi ti?t Supplier th�nh c�ng v?i d?y d? th�ng tin")]
+    [Fact(DisplayName = "SUP_037 - Lấy chi tiết Supplier thành công với đầy đủ thông tin")]
     public async Task GetSupplierById_WithFullInfo_ReturnsCompleteSupplier()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -496,7 +496,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         content.Email.Should().Be($"test_{uniqueId}@test.com");
     }
 
-    [Fact(DisplayName = "SUP_038 - L?y chi ti?t Supplier th?t b?i khi Supplier d� b? x�a")]
+    [Fact(DisplayName = "SUP_038 - Lấy chi tiết Supplier thất bại khi Supplier đã bị xóa")]
     public async Task GetSupplierById_DeletedSupplier_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -543,7 +543,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "SUP_039 - L?y chi ti?t Supplier th?t b?i khi Id kh�ng t?n t?i")]
+    [Fact(DisplayName = "SUP_039 - Lấy chi tiết Supplier thất bại khi Id không tồn tại")]
     public async Task GetSupplierById_NonExistentId_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -567,7 +567,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "SUP_040 - X�a nhi?u Supplier th�nh c�ng")]
+    [Fact(DisplayName = "SUP_040 - Xóa nhiều Supplier thành công")]
     public async Task DeleteManySuppliers_AllValid_SuccessfullyDeletes()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -633,7 +633,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
     }
 
-    [Fact(DisplayName = "SUP_042 - Kh�i ph?c nhi?u Supplier th�nh c�ng")]
+    [Fact(DisplayName = "SUP_042 - Khôi phục nhiều Supplier thành công")]
     public async Task RestoreManySuppliers_AllDeleted_SuccessfullyRestores()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -697,7 +697,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         }
     }
 
-    [Fact(DisplayName = "SUP_043 - C?p nh?t tr?ng th�i nhi?u Supplier th�nh c�ng")]
+    [Fact(DisplayName = "SUP_043 - Cập nhật trạng thái nhiều Supplier thành công")]
     public async Task UpdateManySupplierStatus_ValidStatus_SuccessfullyUpdates()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];

@@ -45,7 +45,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 
     #pragma warning disable IDE0079
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "USER_021 - Khôi ph?c tài kho?n thành công")]
+    [Fact(DisplayName = "USER_021 - Khôi phục tài khoản thành công")]
     public async Task RestoreAccount_Success_DeletedAtSetToNull()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -109,7 +109,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
     }
 
-    [Fact(DisplayName = "USER_022 - Khôi ph?c tài kho?n khi chua b? xóa (DeletedAt = null)")]
+    [Fact(DisplayName = "USER_022 - Khôi phục tài khoản khi chưa bị xóa (DeletedAt = null)")]
     public async Task RestoreAccount_NotDeleted_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -143,7 +143,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content!.Should().Contain("User account is not deleted.");
     }
 
-    [Fact(DisplayName = "USER_023 - Khôi ph?c tài kho?n khi b? Ban (không cho phép)")]
+    [Fact(DisplayName = "USER_023 - Khôi phục tài khoản khi bị Ban (không cho phép)")]
     public async Task RestoreAccount_BannedAccount_ReturnsForbidden()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -187,7 +187,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content!.Should().Contain($"Cannot restore user with status '{UserStatus.Banned}'. User status must be Active.");
     }
 
-    [Fact(DisplayName = "USER_024 - Khôi ph?c tài kho?n v?i UserId không t?n t?i")]
+    [Fact(DisplayName = "USER_024 - Khôi phục tài khoản với UserId không tồn tại")]
     public async Task RestoreAccount_NonExistentUser_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -216,7 +216,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "USER_025 - L?y thông tin ngu?i dùng hi?n t?i - Integration Test")]
+    [Fact(DisplayName = "USER_025 - Lấy thông tin người dùng hiện tại - Integration Test")]
     public async Task GetCurrentUser_IntegrationTest_ReturnsUserInfo()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -247,7 +247,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content.Email.Should().Be(email);
     }
 
-    [Fact(DisplayName = "USER_026 - L?y thông tin ngu?i dùng khi JWT không có trong header")]
+    [Fact(DisplayName = "USER_026 - Lấy thông tin người dùng khi JWT không có trong header")]
     public async Task GetCurrentUser_NoJWT_ReturnsUnauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
@@ -255,7 +255,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_027 - C?p nh?t thông tin ngu?i dùng - Integration Test")]
+    [Fact(DisplayName = "USER_027 - Cập nhật thông tin người dùng - Integration Test")]
     public async Task UpdateCurrentUser_IntegrationTest_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -288,7 +288,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         user.PhoneNumber.Should().Be("0999888777");
     }
 
-    [Fact(DisplayName = "USER_028 - C?p nh?t thông tin v?i validation error - s? di?n tho?i không h?p l?")]
+    [Fact(DisplayName = "USER_028 - Cập nhật thông tin với validation error - số điện thoại không hợp lệ")]
     public async Task UpdateCurrentUser_InvalidPhoneNumber_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -315,7 +315,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content!.Should().Contain("Invalid phone number format");
     }
 
-    [Fact(DisplayName = "USER_029 - Ð?i m?t kh?u - Integration Test")]
+    [Fact(DisplayName = "USER_029 - Đổi mật khẩu - Integration Test")]
     public async Task ChangePassword_IntegrationTest_PasswordChangedAndTokenInvalidated()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -354,7 +354,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         oldTokenResponse!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_030 - Ð?i m?t kh?u v?i CurrentPassword sai - Integration Test")]
+    [Fact(DisplayName = "USER_030 - Đổi mật khẩu với CurrentPassword sai - Integration Test")]
     public async Task ChangePassword_WrongCurrentPassword_ReturnsUnauthorized()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -385,7 +385,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         errorContent!.Should().Contain("Incorrect password.");
     }
 
-    [Fact(DisplayName = "USER_031 - Xóa tài kho?n - Integration Test")]
+    [Fact(DisplayName = "USER_031 - Xóa tài khoản - Integration Test")]
     public async Task DeleteAccount_IntegrationTest_AccountDeletedAndTokenInvalidated()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -415,7 +415,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         tokenTestResponse!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_032 - Xóa tài kho?n khi dã b? Ban - Integration Test")]
+    [Fact(DisplayName = "USER_032 - Xóa tài khoản khi đã bị Ban - Integration Test")]
     public async Task DeleteAccount_BannedAccount_ReturnsForbidden()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -446,7 +446,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact(DisplayName = "USER_033 - Ki?m tra SecurityStamp invalidation sau khi d?i m?t kh?u")]
+    [Fact(DisplayName = "USER_033 - Kiểm tra SecurityStamp invalidation sau khi đổi mật khẩu")]
     public async Task SecurityStampInvalidation_AfterPasswordChange_OldTokenInvalid()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -474,7 +474,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         testResponse!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_034 - Ki?m tra middleware ch?n request khi tài kho?n b? xóa m?m")]
+    [Fact(DisplayName = "USER_034 - Kiểm tra middleware chặn request khi tài khoản bị xóa mềm")]
     public async Task Middleware_BlocksDeletedAccount_ReturnsUnauthorized()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -504,7 +504,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_035 - Ki?m tra middleware ch?n request khi tài kho?n b? Ban")]
+    [Fact(DisplayName = "USER_035 - Kiểm tra middleware chặn request khi tài khoản bị Ban")]
     public async Task Middleware_BlocksBannedAccount_ReturnsBannedStatus()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -544,7 +544,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content!.Status.Should().Be(UserStatus.Banned);
     }
 
-    [Fact(DisplayName = "USER_053 - Verify structure c?a Permissions trong JSON response")]
+    [Fact(DisplayName = "USER_053 - Verify structure của Permissions trong JSON response")]
     public async Task GetCurrentUser_ReturnsPermissionsStructure()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -645,7 +645,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.Content.Headers.ContentType?.MediaType.Should().Be("text/event-stream");
     }
 
-    [Fact(DisplayName = "USER_058 - SSE: Nh?n d? li?u init ngay khi k?t n?i")]
+    [Fact(DisplayName = "USER_058 - SSE: Nhận dữ liệu init ngay khi kết nối")]
     public async Task GetCurrentUser_SseConnection_ReceivesInitData()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1222,7 +1222,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         data2.Should().Contain("MultiTab Update");
     }
 
-    [Fact(DisplayName = "USER_071 - Ngu?i dùng t? t?i lên ?nh d?i di?n thành công")]
+    [Fact(DisplayName = "USER_071 - Người dùng tự tải lên ảnh đại diện thành công")]
     public async Task UploadAvatar_Self_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1265,7 +1265,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         user!.AvatarUrl.Should().Be(avatarUrl.Trim('\"'));
     }
 
-    [Fact(DisplayName = "USER_072 - Admin t?i lên ?nh d?i di?n cho ngu?i dùng khác thành công")]
+    [Fact(DisplayName = "USER_072 - Admin tải lên ảnh đại diện cho người dùng khác thành công")]
     public async Task UploadAvatar_AdminForUser_Success()
     {
         var adminUniqueId = Guid.NewGuid().ToString("N")[..8];

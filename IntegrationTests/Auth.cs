@@ -64,7 +64,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         userFromDb!.Status.Should().Be(UserStatus.Active);
     }
 
-    [Fact(DisplayName = "AUTH_REG_003 - �ang k� tr�ng l?p")]
+    [Fact(DisplayName = "AUTH_REG_003 - Đăng ký trùng lặp")]
     public async Task AUTH_REG_003_Register_Duplicate_Fail()
     {
         var request1 = new RegisterCommand
@@ -117,7 +117,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
     }
 
-    [Fact(DisplayName = "AUTH_REG_006 - �ang k� Email d� X�a m?m")]
+    [Fact(DisplayName = "AUTH_REG_006 - Đăng ký Email đã Xóa mềm")]
     public async Task AUTH_REG_006_Register_SoftDeleted_Email_Fail()
     {
         var email = "deleted@example.com";
@@ -143,7 +143,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "AUTH_LOG_001 - �ang nh?p th�nh c�ng v?i Cookie b?o m?t")]
+    [Fact(DisplayName = "AUTH_LOG_001 - Đăng nhập thành công với Cookie bảo mật")]
     public async Task AUTH_LOG_001_Login_Success_With_Secure_Cookies()
     {
         var email = "login_success@example.com";
@@ -162,12 +162,12 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var setCookieHeaders = response.Headers.GetValues("Set-Cookie").ToList();
         var refreshTokenCookie = setCookieHeaders.FirstOrDefault(c => c.Contains("refreshToken"));
         refreshTokenCookie.Should().NotBeNull();
-        refreshTokenCookie.Should().Contain("httponly", "V� Refresh Token kh�ng du?c ph�p d? Javascript truy c?p");
-        refreshTokenCookie.Should().Contain("secure", "V� Refresh Token ch? du?c g?i qua HTTPS");
+        refreshTokenCookie.Should().Contain("httponly", "V� Refresh Token không được phép để Javascript truy cập");
+        refreshTokenCookie.Should().Contain("secure", "Vì Refresh Token chỉ được gửi qua HTTPS");
         refreshTokenCookie.Should().Contain("samesite=none", "Using SameSite=None for cross-origin support");
     }
 
-    [Fact(DisplayName = "AUTH_LOG_003 - �ang nh?p User b? c?m")]
+    [Fact(DisplayName = "AUTH_LOG_003 - Đăng nhập User bị cấm")]
     public async Task AUTH_LOG_003_Login_Banned_Fail()
     {
         var username = "banned_user";
@@ -186,7 +186,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact(DisplayName = "AUTH_MGR_001 - �ang nh?p Manager")]
+    [Fact(DisplayName = "AUTH_MGR_001 - Đăng nhập Manager")]
     public async Task AUTH_MGR_001_Login_Manager_Success()
     {
         var username = "manager_user";
@@ -205,7 +205,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "AUTH_REF_001 - Refresh Token th�nh c�ng")]
+    [Fact(DisplayName = "AUTH_REF_001 - Refresh Token thành công")]
     public async Task AUTH_REF_001_RefreshToken_Success()
     {
         var username = "refresh_user";
@@ -245,7 +245,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
     }
 
-    [Fact(DisplayName = "AUTH_REF_003 - Refresh Token User b? c?m")]
+    [Fact(DisplayName = "AUTH_REF_003 - Refresh Token User bị cấm")]
     public async Task AUTH_REF_003_RefreshToken_Banned_Fail()
     {
         var username = "refresh_banned";

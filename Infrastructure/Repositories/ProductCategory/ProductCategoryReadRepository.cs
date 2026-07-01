@@ -139,8 +139,8 @@ public class ProductCategoryReadRepository(
 
         var categoryInventory = await context.InventoryOnHands
             .Where(x => x.Month == targetMonth && x.Year == targetYear && x.ProductVariant != null && x.ProductVariant.Product != null && x.ProductVariant.Product.CategoryId != null)
-            .GroupBy(x => x.ProductVariant.Product.CategoryId)
-            .Select(g => new { CategoryId = g.Key.Value, TotalStock = g.Sum(x => x.StockQty) })
+            .GroupBy(x => x.ProductVariant!.Product!.CategoryId)
+            .Select(g => new { CategoryId = g.Key!.Value, TotalStock = g.Sum(x => x.StockQty) })
             .ToDictionaryAsync(x => x.CategoryId, x => x.TotalStock, cancellationToken)
             .ConfigureAwait(false);
 

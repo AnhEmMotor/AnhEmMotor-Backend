@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Domain.Constants.Permission;
 
@@ -100,7 +100,7 @@ public static class PermissionsList
         new PermissionModuleMetadata
         {
             Id = "Permissions.Warehouse",
-            Name = "Quản Lý Kho & Hậu Cần",
+            Name = "Quản lý Kho & Hậu Cần",
             Features =
             [
                 new PermissionFeatureMetadata { Id = "Permissions.Warehouse.DebtPaymentManagement", Name = "Quản lý công nợ", Permissions = new() {
@@ -227,7 +227,7 @@ public static class PermissionsList
             Features =
             [
                 new PermissionFeatureMetadata { Id = "Permissions.Accountant.ContractVerification", Name = "Duyệt hợp đồng", Permissions = new() {
-                    new PermissionActionMetadata { Id = Permissions.Accountant.ContractVerification.View, Name = "Xem", Description = "Xem duyệt hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.ContractVerification.View, Name = "Xem", Description = "Xem duy?t hợp đồng" },
                 }},
                 new PermissionFeatureMetadata { Id = "Permissions.Accountant.DebtPaymentManagement", Name = "Quản lý công nợ", Permissions = new() {
                     new PermissionActionMetadata { Id = Permissions.Accountant.DebtPaymentManagement.View, Name = "Xem", Description = "Xem quản lý công nợ" },
@@ -321,8 +321,24 @@ public static class PermissionsList
     {
         var validPermissions = GetAllPermissions();
         var invalidPermissions = permissions.Where(p => !validPermissions.Contains(p)).ToList();
-        if (invalidPermissions.Any())
+        if (invalidPermissions.Count != 0)
             return (false, $"Invalid permissions: {string.Join(", ", invalidPermissions)}");
+
+        foreach (var p in permissions)
+        {
+            if (!p.EndsWith(".View"))
+            {
+                var lastDotIndex = p.LastIndexOf('.');
+                if (lastDotIndex > 0)
+                {
+                    var viewPerm = string.Concat(p.AsSpan(0, lastDotIndex), ".View");
+                    if (validPermissions.Contains(viewPerm) && !permissions.Contains(viewPerm))
+                    {
+                        return (false, $"Permission '{p}' requires: {viewPerm}");
+                    }
+                }
+            }
+        }
         return (true, string.Empty);
     }
 
@@ -331,16 +347,16 @@ public static class PermissionsList
         return ModulesTree.SelectMany(m => m.Features.SelectMany(f => f.Permissions)).ToList();
     }
     
-    public static List<PermissionActionMetadata> GetMetadataList(System.Collections.Generic.IEnumerable<string> permissions)
+    public static List<PermissionActionMetadata> GetMetadataList(IEnumerable<string> permissions)
     {
         return ModulesTree.SelectMany(m => m.Features.SelectMany(f => f.Permissions)).Where(p => permissions.Contains(p.Id)).ToList();
     }
 
-    public static PermissionActionMetadata GetMetadata(string id)
+    public static PermissionActionMetadata? GetMetadata(string id)
     {
         return ModulesTree.SelectMany(m => m.Features.SelectMany(f => f.Permissions)).FirstOrDefault(p => p.Id == id);
     }
 
-    public static readonly System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>> Conflicts = new();
-    public static readonly System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>> Dependencies = new();
+    public static readonly Dictionary<string, List<string>> Conflicts = [];
+    public static readonly Dictionary<string, List<string>> Dependencies = [];
 }

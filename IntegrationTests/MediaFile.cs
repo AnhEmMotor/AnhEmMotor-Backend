@@ -38,7 +38,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "MF_002 - T?i l�n ?nh th�nh c�ng v?i d?nh d?ng JPG h?p l?")]
+    [Fact(DisplayName = "MF_002 - Tải lên ảnh thành công với định dạng JPG hợp lệ")]
     public async Task UploadImage_ValidJpg_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -81,7 +81,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         result.FileSize.Should().BeGreaterThan(0);
     }
 
-    [Fact(DisplayName = "MF_007 - T?i l�n nhi?u ?nh c�ng l�c th�nh c�ng")]
+    [Fact(DisplayName = "MF_007 - Tải lên nhiều ảnh cùng lúc thành công")]
     public async Task UploadManyImages_ValidFiles_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -123,7 +123,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         results.All(r => string.Compare(r.ContentType, "image/webp") == 0).Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_009 - Xo� file th�nh c�ng (Soft Delete)")]
+    [Fact(DisplayName = "MF_009 - Xóa file thành công (Soft Delete)")]
     public async Task DeleteFile_ExistingFile_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -174,7 +174,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         deletedFile!.DeletedAt.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "MF_013 - Xo� nhi?u file c�ng l�c th�nh c�ng")]
+    [Fact(DisplayName = "MF_013 - Xóa nhiều file cùng lúc thành công")]
     public async Task DeleteManyFiles_ExistingFiles_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -230,7 +230,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         }
     }
 
-    [Fact(DisplayName = "MF_015 - Kh�i ph?c file d� xo� th�nh c�ng")]
+    [Fact(DisplayName = "MF_015 - Khôi phục file đã xóa thành công")]
     public async Task RestoreFile_DeletedFile_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -281,7 +281,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         restoredFile!.DeletedAt.Should().BeNull();
     }
 
-    [Fact(DisplayName = "MF_019 - Kh�i ph?c nhi?u file c�ng l�c th�nh c�ng")]
+    [Fact(DisplayName = "MF_019 - Khôi phục nhiều file cùng lúc thành công")]
     public async Task RestoreManyFiles_DeletedFiles_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -339,7 +339,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         }
     }
 
-    [Fact(DisplayName = "MF_021 - Xem ?nh th�nh c�ng v?i k�ch thu?c g?c")]
+    [Fact(DisplayName = "MF_021 - Xem ảnh thành công với kích thước gốc")]
     public async Task ViewImage_OriginalSize_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -376,7 +376,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         response!.Content.Headers.ContentType?.MediaType.Should().Be("image/webp");
     }
 
-    [Fact(DisplayName = "MF_022 - Xem ?nh th�nh c�ng v?i resize theo width")]
+    [Fact(DisplayName = "MF_022 - Xem ảnh thành công với resize theo width")]
     public async Task ViewImage_WithResize_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -413,7 +413,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         response!.Content.Headers.ContentType?.MediaType.Should().Be("image/webp");
     }
 
-    [Fact(DisplayName = "MF_031 - L?y th�ng tin file theo ID th�nh c�ng")]
+    [Fact(DisplayName = "MF_031 - Lấy thông tin file theo ID thành công")]
     public async Task GetFileById_ExistingFile_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -463,7 +463,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         result.FileSize.Should().Be(150000);
     }
 
-    [Fact(DisplayName = "MF_035 - L?y danh s�ch file th�nh c�ng v?i ph�n trang")]
+    [Fact(DisplayName = "MF_035 - Lấy danh sách file thành công với phân trang")]
     public async Task GetFilesList_WithPagination_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -507,7 +507,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "MF_036 - L?y danh s�ch file v?i filter theo ContentType")]
+    [Fact(DisplayName = "MF_036 - Lấy danh sách file với filter theo ContentType")]
     public async Task GetFilesList_FilterByContentType_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -567,7 +567,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "MF_037 - L?y danh s�ch file v?i sorting theo FileSize gi?m d?n")]
+    [Fact(DisplayName = "MF_037 - Lấy danh sách file với sorting theo FileSize giảm dần")]
     public async Task GetFilesList_SortByFileSizeDesc_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -641,7 +641,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "MF_038 - L?y danh s�ch file d� xo� th�nh c�ng")]
+    [Fact(DisplayName = "MF_038 - Lấy danh sách file đã xóa thành công")]
     public async Task GetDeletedFilesList_WithPagination_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];

@@ -45,7 +45,7 @@ public static class SupplierContractSeeder
                     ContractValue = 15000000000,
                     Status = SupplierContractStatus.Active,
                     Terms =
-                        "Cong ty Honda Viet Nam cung cap cac dong xe may chinh hang voi chat luong dam bao. Hop dong co hieu luc trong 2 nam voi cac dieu khoan ve gia ca, chat luong va chinh sach bao hanh theo quy dinh cua nha san xuat.",
+                        "Cong ty Honda Viet Nam cung cap cac dong xe may chinh hang voi chat lương dam bao. Hop dong co hieu luc trong 2 nam voi cac dieu khoan ve gia ca, chat lương va chinh sach bao hanh theo quy dinh cua nha san xuat.",
                     Note = "Hop dong mua ban chinh thuc nam 2024. Da ky ket va co hieu luc.",
                     CreditLimit = 5000000000,
                     PaymentWindowDays = 30,

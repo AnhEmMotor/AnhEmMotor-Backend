@@ -33,7 +33,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Thống kê và báo cáo")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class StatisticsController(IMediator mediator, IStatisticalReadRepository repository, IBookingReadRepository bookingRepository) : ApiController
+public class StatisticsController(IMediator mediator, IStatisticalReadRepository repository) : ApiController
 {
     /// <summary>
     /// Lấy doanh thu theo ngày trong khoảng thời gian xác định.
@@ -242,7 +242,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// L?y th?ng k� t?ng quan v? don h�ng (h�ng d?i, SLA, l?i, ngo?i l?).
+    /// Lấy thống kê tổng quan về đơn hàng (hàng đợi, SLA, lỗi, ngoại lệ).
     /// </summary>
     [HttpGet("order-statistics")]
     [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]

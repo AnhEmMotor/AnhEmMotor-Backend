@@ -19,7 +19,7 @@ using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Domain.Constants.Order;
-using Domain.Constants.Permission.Permissions;
+using static Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.Authorization.Attribute;
@@ -51,7 +51,7 @@ public class SalesOrder
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "SO_081 - GetMyPurchases - L?y don hng c?a chnh mnh")]
+    [Fact(DisplayName = "SO_081 - GetMyPurchases - Lấy đơn hàng của chnh mnh")]
     public async Task GetMyPurchases_UserAuthenticated_ReturnsOrders()
     {
         var buyerId = Guid.NewGuid();
@@ -73,7 +73,7 @@ public class SalesOrder
             m => m.Send(It.IsAny<GetOutputsForCurrentUserQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "SO_082 - GetPurchasesByID - L?y don h?ng theo BuyerId (c? quy?n)")]
+    [Fact(DisplayName = "SO_082 - GetPurchasesByID - Lấy đơn hàng theo BuyerId (có quyền)")]
     public async Task GetPurchasesByID_WithPermission_ReturnsOrders()
     {
         var buyerId = Guid.NewGuid();
@@ -88,7 +88,7 @@ public class SalesOrder
             m => m.Send(It.IsAny<GetOutputsByUserIdForManagerQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "SO_084 - GetDeletedOutputs - L?y danh s?ch don h?ng d? x?a")]
+    [Fact(DisplayName = "SO_084 - GetDeletedOutputs - Lấy danh sách đơn hàng đã xóa")]
     public async Task GetDeletedOutputs_WithSieveModel_ReturnsDeletedOrders()
     {
         var sieveModel = new SieveModel();
@@ -102,7 +102,7 @@ public class SalesOrder
             Times.Once);
     }
 
-    [Fact(DisplayName = "SO_085 - GetOutputById - L?y chi ti?t don h?ng")]
+    [Fact(DisplayName = "SO_085 - GetOutputById - Lấy chi tiết đơn hàng")]
     public async Task GetOutputById_ValidId_ReturnsOrderDetail()
     {
         int orderId = 1;
@@ -114,7 +114,7 @@ public class SalesOrder
         _mediatorMock.Verify(m => m.Send(It.IsAny<GetOutputByIdQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "SO_086 - CreateOutput - T?o don hng (user thu?ng)")]
+    [Fact(DisplayName = "SO_086 - CreateOutput - Tạo đơn hàng (user thường)")]
     public async Task CreateOutput_ValidRequest_CreatesOrder()
     {
         var request = new CreateOutputCommand { BuyerId = Guid.NewGuid(), Notes = "Test order" };
@@ -126,7 +126,7 @@ public class SalesOrder
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateOutputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "SO_087 - CreateOutputForAdmin - T?o don hng (manager)")]
+    [Fact(DisplayName = "SO_087 - CreateOutputForAdmin - Tạo đơn hàng (manager)")]
     public async Task CreateOutputForAdmin_WithManagerPermission_CreatesOrder()
     {
         var managerId = Guid.NewGuid();
@@ -147,7 +147,7 @@ public class SalesOrder
             Times.Once);
     }
 
-    [Fact(DisplayName = "SO_088 - UpdateOutputForManager - S?a don hng (do chnh mnh t?o)")]
+    [Fact(DisplayName = "SO_088 - UpdateOutputForManager - S?a đơn hàng (do chính mình tạo)")]
     public async Task UpdateOutputForManager_OwnOrder_UpdatesOrder()
     {
         int orderId = 1;
@@ -160,7 +160,7 @@ public class SalesOrder
         _mediatorMock.Verify(m => m.Send(It.IsAny<UpdateOutputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "SO_089 - UpdateOutput - S?a don hng (manager)")]
+    [Fact(DisplayName = "SO_089 - UpdateOutput - S?a đơn hàng (manager)")]
     public async Task UpdateOutput_WithManagerPermission_UpdatesOrder()
     {
         var managerId = Guid.NewGuid();
@@ -182,7 +182,7 @@ public class SalesOrder
             Times.Once);
     }
 
-    [Fact(DisplayName = "SO_090 - UpdateOutputStatus - C?p nh?t tr?ng thi don hng")]
+    [Fact(DisplayName = "SO_090 - UpdateOutputStatus - Cập nhật trắng thi đơn hàng")]
     public async Task UpdateOutputStatus_ValidTransition_UpdatesStatus()
     {
         int orderId = 1;
@@ -197,7 +197,7 @@ public class SalesOrder
             Times.Once);
     }
 
-    [Fact(DisplayName = "SO_091 - UpdateManyOutputStatus - C?p nh?t tr?ng thi nhi?u don")]
+    [Fact(DisplayName = "SO_091 - UpdateManyOutputStatus - Cập nhật trạng thái nhiều đơn")]
     public async Task UpdateManyOutputStatus_ValidRequest_UpdatesMultipleOrders()
     {
         var request = new UpdateManyOutputStatusCommand { Ids = [1, 2, 3], StatusId = "confirmed_cod" };
@@ -210,7 +210,7 @@ public class SalesOrder
             Times.Once);
     }
 
-    [Fact(DisplayName = "SO_092 - DeleteOutput - X�a don h�ng")]
+    [Fact(DisplayName = "SO_092 - DeleteOutput - Xóa đơn hàng")]
     public async Task DeleteOutput_ValidId_DeletesOrder()
     {
         int orderId = 1;
@@ -221,7 +221,7 @@ public class SalesOrder
         _mediatorMock.Verify(m => m.Send(It.IsAny<DeleteOutputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "SO_110 - GetLockedStatuses - L?y danh s�ch tr?ng th�i b? kh�a")]
+    [Fact(DisplayName = "SO_110 - GetLockedStatuses - Lấy danh sách trạng thái bị khóa")]
     public async Task GetLockedStatuses_ReturnsValidList()
     {
         var expectedResponse = new OrderLockStatusResponse
@@ -244,7 +244,7 @@ public class SalesOrder
         value.Notes.Should().Contain(OrderStatus.Completed);
     }
 
-    [Fact(DisplayName = "SO_093 - DeleteManyOutputs - Xo� nhi?u don h�ng")]
+    [Fact(DisplayName = "SO_093 - DeleteManyOutputs - Xóa nhiều đơn hàng")]
     public async Task DeleteManyOutputs_ValidRequest_DeletesMultipleOrders()
     {
         var request = new DeleteManyOutputsCommand { Ids = [1, 2, 3] };
@@ -257,7 +257,7 @@ public class SalesOrder
             Times.Once);
     }
 
-    [Fact(DisplayName = "SO_094 - RestoreOutput - Khi ph?c don hng")]
+    [Fact(DisplayName = "SO_094 - RestoreOutput - Khôi phục đơn hàng")]
     public async Task RestoreOutput_DeletedOrder_RestoresOrder()
     {
         int orderId = 1;
@@ -268,7 +268,7 @@ public class SalesOrder
         _mediatorMock.Verify(m => m.Send(It.IsAny<RestoreOutputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "SO_095 - RestoreManyOutputs - Kh?i ph?c nhi?u don h?ng")]
+    [Fact(DisplayName = "SO_095 - RestoreManyOutputs - Khôi phục nhiều đơn hàng")]
     public async Task RestoreManyOutputs_DeletedOrders_RestoresMultipleOrders()
     {
         var request = new RestoreManyOutputsCommand { Ids = [1, 2, 3] };
@@ -281,7 +281,7 @@ public class SalesOrder
             Times.Once);
     }
 
-    [Fact(DisplayName = "SO_096 - Controller x? l? UnauthorizedAccessException")]
+    [Fact(DisplayName = "SO_096 - Controller xử lý UnauthorizedAccessException")]
     public async Task CreateOutput_UnauthorizedAccess_ThrowsUnauthorizedException()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateOutputCommand>(), It.IsAny<CancellationToken>()))
@@ -291,7 +291,7 @@ public class SalesOrder
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SO_097 - Controller x? l? NotFoundException")]
+    [Fact(DisplayName = "SO_097 - Controller xử lý NotFoundException")]
     public async Task GetOutputById_NotFound_ThrowsKeyNotFoundException()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputByIdQuery>(), It.IsAny<CancellationToken>()))
@@ -301,7 +301,7 @@ public class SalesOrder
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SO_098 - Controller x? l? ValidationException")]
+    [Fact(DisplayName = "SO_098 - Controller xử lý ValidationException")]
     public async Task CreateOutput_InvalidData_ThrowsInvalidOperationException()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateOutputCommand>(), It.IsAny<CancellationToken>()))
@@ -311,22 +311,22 @@ public class SalesOrder
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SO_102 - L?y danh s?ch tr?ng th?i don h?ng khi thi?u quy?n tr? 403")]
+    [Fact(DisplayName = "SO_102 - Lấy danh sách trạng thái đơn hàng khi thiếu quyền trả 403")]
     public async Task GetOutputStatuses_MissingPermission_ThrowsUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(
                 new UnauthorizedAccessException(
-                    "User does not have permission Domain.Constants.Permission.Permissions.Outputs.View"));
+                    "User does not have permission Domain.Constants.Permission.Permissions.Warehouse.OutputManagement.View"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetOutputStatusesAsync(CancellationToken.None))
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "SO_103 - Controller g?i MediatR d?ng 1 l?n khi l?y danh s?ch tr?ng th?i don h?ng")]
+    [Fact(DisplayName = "SO_103 - Controller gọi MediatR đúng 1 lần khi lấy danh sách trạng thái đơn hàng")]
     public async Task GetOutputStatuses_ValidRequest_CallsMediatorOnce()
     {
-        var expectedStatuses = new Dictionary<string, string> { { OrderStatus.Pending, "Ch? x?c nh?n" } };
+        var expectedStatuses = new Dictionary<string, string> { { OrderStatus.Pending, "Chờ xác nhận" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
         var result = await _controller.GetOutputStatusesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -336,10 +336,10 @@ public class SalesOrder
             Times.Once);
     }
 
-    [Fact(DisplayName = "SO_104 - Controller tr? d?ng d? li?u t? Handler khi l?y tr?ng th?i don h?ng")]
+    [Fact(DisplayName = "SO_104 - Controller trả đúng dữ liệu từ Handler khi lấy trạng thái đơn hàng")]
     public async Task GetOutputStatuses_ValidRequest_ReturnsExpectedData()
     {
-        var expectedStatuses = new Dictionary<string, string> { { OrderStatus.Pending, "Ch? x?c nh?n" } };
+        var expectedStatuses = new Dictionary<string, string> { { OrderStatus.Pending, "Chờ xác nhận" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
         var result = await _controller.GetOutputStatusesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -351,10 +351,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_117 - SalesOrders exposes split confirmed and unconfirmed list endpoints")]
     public void SalesOrdersController_ShouldExposeSplitListEndpointsWithNewPermissions()
     {
-        var viewConfirmedPermission = typeof(Outputs).GetField("ViewConfirmed")?.GetRawConstantValue() as string;
-        var viewUnconfirmedPermission = typeof(Outputs).GetField("ViewUnconfirmed")?.GetRawConstantValue() as string;
-        viewConfirmedPermission.Should().Be("Permissions.Outputs.ViewConfirmed");
-        viewUnconfirmedPermission.Should().Be("Permissions.Outputs.ViewUnconfirmed");
+        var viewConfirmedPermission = typeof(Warehouse.OutputManagement).GetField("ViewConfirmed")?.GetRawConstantValue() as string;
+        var viewUnconfirmedPermission = typeof(Warehouse.OutputManagement).GetField("ViewUnconfirmed")?.GetRawConstantValue() as string;
+        viewConfirmedPermission.Should().Be("Permissions.Warehouse.OutputManagement.ViewConfirmed");
+        viewUnconfirmedPermission.Should().Be("Permissions.Warehouse.OutputManagement.ViewUnconfirmed");
         var confirmedMethod = typeof(SalesOrdersController).GetMethod(
             nameof(SalesOrdersController.GetConfirmedOutputsAsync));
         var unconfirmedMethod = typeof(SalesOrdersController).GetMethod(

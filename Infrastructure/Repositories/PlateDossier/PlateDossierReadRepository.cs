@@ -35,7 +35,7 @@ namespace Infrastructure.Repositories.PlateDossier
         {
             return context.PlateDossiers
                 .Include(p => p.Output)
-                .ThenInclude(o => o.OutputInfos)
+                .ThenInclude(o => o!.OutputInfos)
                 .ThenInclude(oi => oi.ProductVariantColor)
                 .ThenInclude(pvc => pvc!.ProductVariant)
                 .ThenInclude(pv => pv!.Product)
@@ -55,7 +55,7 @@ namespace Infrastructure.Repositories.PlateDossier
         {
             return context.GetQuery<Domain.Entities.PlateDossier>(mode)
                 .Include(p => p.Output)
-                .ThenInclude(o => o.OutputInfos)
+                .ThenInclude(o => o!.OutputInfos)
                 .ThenInclude(oi => oi.ProductVariant);
         }
     }

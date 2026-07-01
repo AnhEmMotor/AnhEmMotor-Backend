@@ -27,7 +27,7 @@ public class Setting
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
 
-    [Fact(DisplayName = "SETTING_030 - Controller GetAllSettings - G?i d�ng Query v� tr? v? OkResult")]
+    [Fact(DisplayName = "SETTING_030 - Controller GetAllSettings - Gọi đúng Query v� trả về OkResult")]
     public async Task SETTING_030_Controller_GetAllSettings_CallsQueryAndReturnsOk()
     {
         var expectedSettings = new Dictionary<string, string?>
@@ -42,7 +42,7 @@ public class Setting
         returnedSettings["Deposit_ratio"].Should().Be("50.5");
     }
 
-    [Fact(DisplayName = "SETTING_031 - Controller SetSettings - G?i d�ng Command v� tr? v? OkResult")]
+    [Fact(DisplayName = "SETTING_031 - Controller SetSettings - Gọi đúng Command v� trả về OkResult")]
     public async Task SETTING_031_Controller_SetSettings_CallsCommandAndReturnsOk()
     {
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "50" }, { "Inventory_alert_level", "10" } };
@@ -64,7 +64,7 @@ public class Setting
         returnedDict["Deposit_ratio"].Should().Be("50");
     }
 
-    [Fact(DisplayName = "SETTING_032 - Controller SetSettings - Tr? v? BadRequest khi validation fail")]
+    [Fact(DisplayName = "SETTING_032 - Controller SetSettings - Trả về BadRequest khi validation fail")]
     public async Task SETTING_032_Controller_SetSettings_ValidationFail_ReturnsBadRequest()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
@@ -77,7 +77,7 @@ public class Setting
         returnedError.Errors.Should().ContainSingle().Which.Message.Should().Be("Validation failed");
     }
 
-    [Fact(DisplayName = "SETTING_037 - SetSettings - Value null cho m?t key")]
+    [Fact(DisplayName = "SETTING_037 - SetSettings - Value null cho một key")]
     public async Task SETTING_037_SetSettings_NullValue_KeepsOriginal()
     {
         var expectedResponse = new Dictionary<string, string?> { { "Deposit_ratio", "50" } };
@@ -90,7 +90,7 @@ public class Setting
         returnedDict["Deposit_ratio"].Should().Be("50");
     }
 
-    [Fact(DisplayName = "SETTING_039 - SetSettings - Integer field v?i gi� tr? r?t l?n")]
+    [Fact(DisplayName = "SETTING_039 - SetSettings - Integer field với giá trị rất lớn")]
     public async Task SETTING_039_SetSettings_LargeIntegerValue_Success()
     {
         var expectedResponse = new Dictionary<string, string?> { { "Inventory_alert_level", "2147483647" } };

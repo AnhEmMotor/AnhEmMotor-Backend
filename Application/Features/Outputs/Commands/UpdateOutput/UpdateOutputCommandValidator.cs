@@ -7,12 +7,12 @@ public class UpdateOutputCommandValidator : AbstractValidator<UpdateOutputComman
 {
     public UpdateOutputCommandValidator()
     {
-        RuleFor(x => x.CustomerName).NotEmpty().WithMessage("T�n ngu?i nh?n kh�ng du?c d? tr?ng.");
-        RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("�?a ch? giao h�ng kh�ng du?c d? tr?ng.");
+        RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Tên người nhận không được để trống.");
+        RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("Địa chỉ giao hàng không được để trống.");
         RuleFor(x => x.CustomerPhone)
             .NotEmpty()
-            .WithMessage("S? di?n tho?i kh�ng du?c d? tr?ng.")
+            .WithMessage("Số điện thoại không được để trống.")
             .MustBeValidPhoneNumber()
-            .WithMessage("�?nh d?ng s? di?n tho?i Vi?t Nam kh�ng h?p l?.");
+            .WithMessage("Định dạng số điện thoại Việt Nam không hợp lệ.");
     }
 }
