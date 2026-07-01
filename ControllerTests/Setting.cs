@@ -27,7 +27,7 @@ public class Setting
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
 
-    [Fact(DisplayName = "SETTING_030 - Controller GetAllSettings - G?i dúng Query và tr? v? OkResult")]
+    [Fact(DisplayName = "SETTING_030 - Controller GetAllSettings - G?i dï¿½ng Query vï¿½ tr? v? OkResult")]
     public async Task SETTING_030_Controller_GetAllSettings_CallsQueryAndReturnsOk()
     {
         var expectedSettings = new Dictionary<string, string?>
@@ -42,7 +42,7 @@ public class Setting
         returnedSettings["Deposit_ratio"].Should().Be("50.5");
     }
 
-    [Fact(DisplayName = "SETTING_031 - Controller SetSettings - G?i dúng Command và tr? v? OkResult")]
+    [Fact(DisplayName = "SETTING_031 - Controller SetSettings - G?i dï¿½ng Command vï¿½ tr? v? OkResult")]
     public async Task SETTING_031_Controller_SetSettings_CallsCommandAndReturnsOk()
     {
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "50" }, { "Inventory_alert_level", "10" } };
@@ -90,7 +90,7 @@ public class Setting
         returnedDict["Deposit_ratio"].Should().Be("50");
     }
 
-    [Fact(DisplayName = "SETTING_039 - SetSettings - Integer field v?i giá tr? r?t l?n")]
+    [Fact(DisplayName = "SETTING_039 - SetSettings - Integer field v?i giï¿½ tr? r?t l?n")]
     public async Task SETTING_039_SetSettings_LargeIntegerValue_Success()
     {
         var expectedResponse = new Dictionary<string, string?> { { "Inventory_alert_level", "2147483647" } };

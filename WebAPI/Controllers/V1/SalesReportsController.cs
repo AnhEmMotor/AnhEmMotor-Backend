@@ -1,7 +1,7 @@
 using Application.Common.Models;
 using Application.Features.SalesReports.Queries.GetSalesReport;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -24,7 +24,7 @@ public class SalesReportsController(IMediator mediator) : ApiController
     /// Lấy báo cáo tổng hợp bán hàng (số lượng đơn, doanh thu, tổng sản phẩm đã bán, đơn giá trung bình và chi tiết từng đơn hàng).
     /// </summary>
     [HttpGet("sales-report")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(SalesReportResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetSalesReportAsync(CancellationToken cancellationToken)

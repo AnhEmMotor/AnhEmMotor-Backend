@@ -11,7 +11,7 @@ using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Application.Features.UserManager.Queries.GetUsersListForOutput;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -44,7 +44,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     /// Tạo người dùng mới (Admin)
     /// </summary>
     [HttpPost]
-    [HasPermission(Users.Create)]
+    [HasPermission(Permissions.Admin.UserManagement.Create)]
     [ProducesResponseType(typeof(UserDTOForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateUserAsync(
@@ -62,7 +62,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
     /// <param name="cancellationToken"></param>
     [HttpGet]
-    [RequiresAnyPermissions(Users.View)]
+    [RequiresAnyPermissions(Permissions.Admin.UserManagement.View)]
     [ProducesResponseType(typeof(PagedResult<UserDTOForManagerResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsersAsync(
         [FromQuery] SieveModel sieveModel,
@@ -80,7 +80,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("for-output")]
-    [RequiresAnyPermissions(Outputs.Edit, Outputs.Create, Users.View)]
+    [RequiresAnyPermissions(Permissions.Warehouse.OutputManagement.Edit, Permissions.Warehouse.OutputManagement.Create, Permissions.Admin.UserManagement.View)]
     [ProducesResponseType(typeof(PagedResult<UserDTOForOutputResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsersForOutputAsync(
         [FromQuery] SieveModel sieveModel,
@@ -95,7 +95,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     /// Lấy thông tin người dùng theo ID
     /// </summary>
     [HttpGet("{userId:guid}")]
-    [HasPermission(Users.View)]
+    [HasPermission(Permissions.Admin.UserManagement.View)]
     [ProducesResponseType(typeof(UserDTOForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
@@ -109,7 +109,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     /// Cập nhật thông tin người dùng
     /// </summary>
     [HttpPut("{userId:guid}")]
-    [HasPermission(Users.Edit)]
+    [HasPermission(Permissions.Admin.UserManagement.Edit)]
     [ProducesResponseType(typeof(UserDTOForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -127,7 +127,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     /// Đổi mật khẩu người dùng theo ID (đang đăng nhập)
     /// </summary>
     [HttpPost("{userId:guid}/change-password")]
-    [HasPermission(Users.ChangePassword)]
+    [HasPermission(Permissions.Admin.UserManagement.ChangePassword)]
     [ProducesResponseType(typeof(ChangePasswordByManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
@@ -152,7 +152,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [HasPermission(Users.AssignRoles)]
+    [HasPermission(Permissions.Admin.UserManagement.AssignRoles)]
     public async Task<IActionResult> AssignRolesAsync(
         Guid userId,
         [FromBody] AssignRolesCommand model,
@@ -167,7 +167,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     /// Thay đổi trạng thái của người dùng
     /// </summary>
     [HttpPatch("{userId:guid}/status")]
-    [HasPermission(Users.Edit)]
+    [HasPermission(Permissions.Admin.UserManagement.Edit)]
     [ProducesResponseType(typeof(ChangeStatusUserByManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -188,7 +188,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ChangeStatusMultiUserByManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [HasPermission(Users.Edit)]
+    [HasPermission(Permissions.Admin.UserManagement.Edit)]
     public async Task<IActionResult> ChangeMultipleUsersStatusAsync(
         [FromBody] ChangeMultipleUsersStatusCommand model,
         CancellationToken cancellationToken)
@@ -209,7 +209,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     /// Tải lên ảnh đại diện cho người dùng theo Id (Admin)
     /// </summary>
     [HttpPost("{userId:guid}/avatar")]
-    [HasPermission(Users.Edit)]
+    [HasPermission(Permissions.Admin.UserManagement.Edit)]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

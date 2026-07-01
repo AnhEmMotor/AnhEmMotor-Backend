@@ -2,7 +2,7 @@ using Application.ApiContracts.Auth.Responses;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Register;
 using Domain.Constants;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -64,7 +64,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         userFromDb!.Status.Should().Be(UserStatus.Active);
     }
 
-    [Fact(DisplayName = "AUTH_REG_003 - Ðang ký trùng l?p")]
+    [Fact(DisplayName = "AUTH_REG_003 - ï¿½ang kï¿½ trï¿½ng l?p")]
     public async Task AUTH_REG_003_Register_Duplicate_Fail()
     {
         var request1 = new RegisterCommand
@@ -117,7 +117,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
     }
 
-    [Fact(DisplayName = "AUTH_REG_006 - Ðang ký Email dã Xóa m?m")]
+    [Fact(DisplayName = "AUTH_REG_006 - ï¿½ang kï¿½ Email dï¿½ Xï¿½a m?m")]
     public async Task AUTH_REG_006_Register_SoftDeleted_Email_Fail()
     {
         var email = "deleted@example.com";
@@ -143,7 +143,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "AUTH_LOG_001 - Ðang nh?p thành công v?i Cookie b?o m?t")]
+    [Fact(DisplayName = "AUTH_LOG_001 - ï¿½ang nh?p thï¿½nh cï¿½ng v?i Cookie b?o m?t")]
     public async Task AUTH_LOG_001_Login_Success_With_Secure_Cookies()
     {
         var email = "login_success@example.com";
@@ -162,12 +162,12 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var setCookieHeaders = response.Headers.GetValues("Set-Cookie").ToList();
         var refreshTokenCookie = setCookieHeaders.FirstOrDefault(c => c.Contains("refreshToken"));
         refreshTokenCookie.Should().NotBeNull();
-        refreshTokenCookie.Should().Contain("httponly", "Vì Refresh Token không du?c phép d? Javascript truy c?p");
-        refreshTokenCookie.Should().Contain("secure", "Vì Refresh Token ch? du?c g?i qua HTTPS");
+        refreshTokenCookie.Should().Contain("httponly", "Vï¿½ Refresh Token khï¿½ng du?c phï¿½p d? Javascript truy c?p");
+        refreshTokenCookie.Should().Contain("secure", "Vï¿½ Refresh Token ch? du?c g?i qua HTTPS");
         refreshTokenCookie.Should().Contain("samesite=none", "Using SameSite=None for cross-origin support");
     }
 
-    [Fact(DisplayName = "AUTH_LOG_003 - Ðang nh?p User b? c?m")]
+    [Fact(DisplayName = "AUTH_LOG_003 - ï¿½ang nh?p User b? c?m")]
     public async Task AUTH_LOG_003_Login_Banned_Fail()
     {
         var username = "banned_user";
@@ -186,7 +186,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact(DisplayName = "AUTH_MGR_001 - Ðang nh?p Manager")]
+    [Fact(DisplayName = "AUTH_MGR_001 - ï¿½ang nh?p Manager")]
     public async Task AUTH_MGR_001_Login_Manager_Success()
     {
         var username = "manager_user";
@@ -195,7 +195,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [Users.View],
+            [Permissions.Admin.UserManagement.View],
             CancellationToken.None,
             email: "manager@example.com",
             roleName: "Manager")
@@ -205,7 +205,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "AUTH_REF_001 - Refresh Token thành công")]
+    [Fact(DisplayName = "AUTH_REF_001 - Refresh Token thï¿½nh cï¿½ng")]
     public async Task AUTH_REF_001_RefreshToken_Success()
     {
         var username = "refresh_user";

@@ -12,7 +12,7 @@ using Application.Features.SupplierContracts.Queries.GetSupplierContractsList;
 using Application.Features.SupplierContracts.Queries.GetSupplierContractStatistics;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
@@ -37,7 +37,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     /// Lấy danh sách hợp đồng nhà cung cấp (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
-    [RequiresAnyPermissions(Suppliers.View, SupplierContracts.View)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierManagement.View, Permissions.Warehouse.SupplierContractManagement.View, Permissions.Accountant.SupplierContractManagement.View)]
     [ProducesResponseType(typeof(PagedResult<SupplierContractResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSupplierContractsAsync(
         [FromQuery] SieveModel sieveModel,
@@ -52,7 +52,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     /// Lấy danh sách hợp đồng nhà cung cấp đã bị xóa.
     /// </summary>
     [HttpGet("deleted")]
-    [HasPermission(SupplierContracts.View)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierContractManagement.View, Permissions.Accountant.SupplierContractManagement.View)]
     [ProducesResponseType(typeof(PagedResult<SupplierContractResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedSupplierContractsAsync(
         [FromQuery] SieveModel sieveModel,
@@ -67,7 +67,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     /// Lấy thông tin chi tiết một hợp đồng nhà cung cấp.
     /// </summary>
     [HttpGet("{id:guid}", Name = SupplierContract.GetById)]
-    [HasPermission(SupplierContracts.View)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierContractManagement.View, Permissions.Accountant.SupplierContractManagement.View)]
     [ProducesResponseType(typeof(SupplierContractDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSupplierContractByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -81,7 +81,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     /// Lấy nhật ký audit log của hợp đồng nhà cung cấp.
     /// </summary>
     [HttpGet("{id:guid}/audit-logs")]
-    [HasPermission(SupplierContracts.View)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierContractManagement.View, Permissions.Accountant.SupplierContractManagement.View)]
     [ProducesResponseType(typeof(List<SupplierContractAuditLogResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSupplierContractAuditLogsAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -94,7 +94,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     /// Tạo hợp đồng nhà cung cấp mới.
     /// </summary>
     [HttpPost]
-    [HasPermission(SupplierContracts.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierContractManagement.Create, Permissions.Accountant.SupplierContractManagement.Create)]
     [ProducesResponseType(typeof(SupplierContractResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateSupplierContractAsync(
         [FromBody] CreateSupplierContractCommand request,
@@ -111,7 +111,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     /// Cập nhật hợp đồng nhà cung cấp.
     /// </summary>
     [HttpPut("{id:guid}")]
-    [HasPermission(SupplierContracts.Edit)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierContractManagement.Edit, Permissions.Accountant.SupplierContractManagement.Edit)]
     [ProducesResponseType(typeof(SupplierContractResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSupplierContractAsync(
@@ -128,7 +128,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     /// Xóa mềm hợp đồng nhà cung cấp.
     /// </summary>
     [HttpDelete("{id:guid}")]
-    [HasPermission(SupplierContracts.Delete)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierContractManagement.Delete, Permissions.Accountant.SupplierContractManagement.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteSupplierContractAsync(Guid id, CancellationToken cancellationToken)
@@ -142,7 +142,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     /// Khôi phục hợp đồng nhà cung cấp đã xóa.
     /// </summary>
     [HttpPost("restore/{id:guid}")]
-    [HasPermission(SupplierContracts.Delete)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierContractManagement.Delete, Permissions.Accountant.SupplierContractManagement.Delete)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreSupplierContractAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -155,7 +155,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     /// Lấy thống kê hợp đồng nhà cung cấp.
     /// </summary>
     [HttpGet("statistics")]
-    [RequiresAnyPermissions(Suppliers.View, SupplierContracts.View)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierManagement.View, Permissions.Warehouse.SupplierContractManagement.View, Permissions.Accountant.SupplierContractManagement.View)]
     [ProducesResponseType(typeof(SupplierContractStatisticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSupplierContractStatisticsAsync(CancellationToken cancellationToken)
     {
@@ -168,7 +168,7 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     /// Lấy danh sách nhà cung cấp cho dropdown chọn.
     /// </summary>
     [HttpGet("suppliers-for-select")]
-    [HasPermission(SupplierContracts.View)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierContractManagement.View, Permissions.Accountant.SupplierContractManagement.View)]
     [ProducesResponseType(typeof(List<object>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersForSelectAsync(CancellationToken cancellationToken)
     {

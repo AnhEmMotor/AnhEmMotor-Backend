@@ -60,7 +60,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         {
             var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                 userId,
-                [Domain.Constants.Permission.Permissions.InventoryReceipts.ApproveReject],
+                [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.ApproveReject],
                 cancellationToken)
                 .ConfigureAwait(false);
             if (!hasApprovePermission)
@@ -76,7 +76,7 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
         {
             var hasEditOrApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                 userId,
-                [Domain.Constants.Permission.Permissions.InventoryReceipts.Edit, Domain.Constants.Permission.Permissions.InventoryReceipts.ApproveReject],
+                [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Edit, Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.ApproveReject],
                 cancellationToken)
                 .ConfigureAwait(false);
             if (!hasEditOrApprovePermission)

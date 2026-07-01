@@ -1,6 +1,6 @@
 using Application.Features.NewsComments.Queries.GetNewsComments;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +18,7 @@ namespace WebAPI.Controllers.V1;
 public class NewsCommentsController(IMediator mediator) : ApiController
 {
     [HttpGet]
-    [HasPermission(News.View)]
+    [HasPermission(Permissions.Marketing.NewsManagement.View)]
     [ProducesResponseType(typeof(List<NewsCommentResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
@@ -27,7 +27,7 @@ public class NewsCommentsController(IMediator mediator) : ApiController
     }
 
     [HttpGet("news/{newsId:int}")]
-    [HasPermission(News.View)]
+    [HasPermission(Permissions.Marketing.NewsManagement.View)]
     [ProducesResponseType(typeof(List<NewsCommentResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetByNewsId(int newsId, CancellationToken cancellationToken)
     {

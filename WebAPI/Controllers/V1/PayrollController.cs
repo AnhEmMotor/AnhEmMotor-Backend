@@ -3,7 +3,7 @@ using Application.Common.Models;
 using Application.Features.HR.Commands.ApprovePayroll;
 using Application.Features.HR.Queries.GetPayrollSummary;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,7 @@ namespace WebAPI.Controllers.V1;
 public class PayrollController(ISender mediator) : ApiController
 {
     [HttpGet("summary")]
-    [HasPermission(HR.View)]
+    [RequiresAnyPermissions(Permissions.Admin.PayrollManagement.View, Permissions.Accountant.PayrollManagement.View)]
     [ProducesResponseType(typeof(List<PayrollResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSummary([FromQuery] int month, [FromQuery] int year, CancellationToken cancellationToken)
     {
@@ -29,7 +29,7 @@ public class PayrollController(ISender mediator) : ApiController
     }
 
     [HttpPost("{id:int}/approve")]
-    [HasPermission(HR.Edit)]
+    [RequiresAnyPermissions(Permissions.Admin.PayrollManagement.Configure, Permissions.Accountant.PayrollManagement.Configure)]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     public async Task<IActionResult> Approve(int id, CancellationToken cancellationToken)
     {

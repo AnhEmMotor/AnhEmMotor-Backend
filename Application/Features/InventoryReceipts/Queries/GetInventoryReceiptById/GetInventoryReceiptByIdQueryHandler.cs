@@ -17,7 +17,7 @@ public class GetInventoryReceiptByIdQueryHandler(IInventoryReceiptReadRepository
             .ConfigureAwait(false);
         if (InventoryReceipt is null)
         {
-            return Error.NotFound($"Không tìm th?y phi?u nh?p có ID {request.Id}.");
+            return Error.NotFound($"Khï¿½ng tï¿½m th?y phi?u nh?p cï¿½ ID {request.Id}.");
         }
         return InventoryReceipt.Adapt<InventoryReceiptDetailResponse>();
     }

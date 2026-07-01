@@ -14,7 +14,7 @@ using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
 using Application.Features.Files.Queries.ViewImage;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
@@ -39,7 +39,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Lấy danh sách tệp media (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
-    [HasPermission(Products.View)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.View, Permissions.Order.ProductManagement.View)]
     [ProducesResponseType(typeof(PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetFilesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -54,7 +54,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Lấy danh sách tệp media đã bị xoá (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
-    [HasPermission(Products.View)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.View, Permissions.Order.ProductManagement.View)]
     [ProducesResponseType(typeof(PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedFilesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -69,7 +69,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Lấy thông tin của tệp media được chọn.
     /// </summary>
     [HttpGet("{id:int}", Name = MediaFile.GetById)]
-    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetFileByIdAsync(int id, CancellationToken cancellationToken)
@@ -83,7 +83,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Tải lên một tệp ảnh cho sản phẩm.
     /// </summary>
     [HttpPost("product/upload")]
-    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadProductImageAsync(IFormFile file, CancellationToken cancellationToken)
@@ -98,7 +98,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Tải lên một tệp ảnh cho bài viết/tin tức.
     /// </summary>
     [HttpPost("news/upload")]
-    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadNewsImageAsync(IFormFile file, CancellationToken cancellationToken)
@@ -113,7 +113,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Tải lên một tệp ảnh cho banner.
     /// </summary>
     [HttpPost("banner/upload")]
-    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadBannerImageAsync(IFormFile file, CancellationToken cancellationToken)
@@ -128,7 +128,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Tải lên nhiều ảnh sản phẩm cùng lúc.
     /// </summary>
     [HttpPost("product/upload-many")]
-    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create)]
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadManyProductImagesAsync(
@@ -148,7 +148,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Xoá tệp media sản phẩm theo tên file.
     /// </summary>
     [HttpDelete("product/{**storagePath}")]
-    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProductFileAsync(string storagePath, CancellationToken cancellationToken)
@@ -162,7 +162,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Xoá nhiều tệp media cùng lúc.
     /// </summary>
     [HttpDelete("delete-many")]
-    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteFilesAsync(
@@ -177,7 +177,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Khôi phục lại tệp media đã xoá theo tên file.
     /// </summary>
     [HttpPost("restore/{**storagePath}")]
-    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreFileAsync(string storagePath, CancellationToken cancellationToken)
@@ -191,7 +191,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Khôi phục nhiều tệp media đã xoá cùng lúc.
     /// </summary>
     [HttpPost("restore-many")]
-    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create)]
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreFilesAsync(

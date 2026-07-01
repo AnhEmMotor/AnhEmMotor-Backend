@@ -11,7 +11,7 @@ using Application.Features.DebtPayments.Queries.GetSupplierDebtLogs;
 using Application.Features.DebtPayments.Queries.GetSuppliersWithDebt;
 using Application.Features.DebtPayments.Queries.ViewDebtProofImage;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -35,7 +35,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách các nhà cung cấp đang còn nợ
         /// </summary>
         [HttpGet("suppliers")]
-        [HasPermission(DebtPayments.View)]
+        [RequiresAnyPermissions(Permissions.Warehouse.DebtPaymentManagement.View, Permissions.Accountant.DebtPaymentManagement.View)]
         [ProducesResponseType(typeof(PagedResult<SupplierDebtResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSuppliersWithDebtAsync(
             [FromQuery] SieveModel sieveModel,
@@ -50,7 +50,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách các phiếu nhập hàng còn nợ của nhà cung cấp
         /// </summary>
         [HttpGet("suppliers/{supplierId:int}/receipts")]
-        [HasPermission(DebtPayments.View)]
+        [RequiresAnyPermissions(Permissions.Warehouse.DebtPaymentManagement.View, Permissions.Accountant.DebtPaymentManagement.View)]
         [ProducesResponseType(typeof(List<InventoryReceiptDebtLineResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetReceiptsWithDebtBySupplierIdAsync(
             [FromRoute] int supplierId,
@@ -65,7 +65,7 @@ namespace WebAPI.Controllers.V1
         /// Thanh toán nợ cho nhà cung cấp (tự động cấn trừ từ cũ đến mới)
         /// </summary>
         [HttpPost("suppliers/{supplierId:int}/pay")]
-        [HasPermission(DebtPayments.Create)]
+        [RequiresAnyPermissions(Permissions.Warehouse.DebtPaymentManagement.Create, Permissions.Accountant.DebtPaymentManagement.Create)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> PaySupplierDebtAsync(
             [FromRoute] int supplierId,
@@ -86,7 +86,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy lịch sử thanh toán nợ của nhà cung cấp
         /// </summary>
         [HttpGet("suppliers/{supplierId:int}/debt-logs")]
-        [HasPermission(DebtPayments.View)]
+        [RequiresAnyPermissions(Permissions.Warehouse.DebtPaymentManagement.View, Permissions.Accountant.DebtPaymentManagement.View)]
         [ProducesResponseType(typeof(List<SupplierDebtLogResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSupplierDebtLogsAsync(
             [FromRoute] int supplierId,
@@ -101,7 +101,7 @@ namespace WebAPI.Controllers.V1
         /// Tải lên ảnh chứng minh thanh toán
         /// </summary>
         [HttpPost("proof-image")]
-        [HasPermission(DebtPayments.Create)]
+        [RequiresAnyPermissions(Permissions.Warehouse.DebtPaymentManagement.Create, Permissions.Accountant.DebtPaymentManagement.Create)]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(UploadDebtProofImageResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> UploadDebtProofImageAsync(IFormFile file, CancellationToken cancellationToken)
@@ -119,7 +119,7 @@ namespace WebAPI.Controllers.V1
         /// Xem ảnh chứng minh thanh toán
         /// </summary>
         [HttpGet("proof-image/{mediaFileId:int}")]
-        [HasPermission(DebtPayments.View)]
+        [RequiresAnyPermissions(Permissions.Warehouse.DebtPaymentManagement.View, Permissions.Accountant.DebtPaymentManagement.View)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ViewDebtProofImageAsync(
             [FromRoute] int mediaFileId,
@@ -138,7 +138,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách các lần thanh toán thiếu ảnh chứng minh
         /// </summary>
         [HttpGet("missing-proofs")]
-        [HasPermission(DebtPayments.View)]
+        [RequiresAnyPermissions(Permissions.Warehouse.DebtPaymentManagement.View, Permissions.Accountant.DebtPaymentManagement.View)]
         [ProducesResponseType(typeof(PagedResult<SupplierDebtLogResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetDebtLogsMissingProofsAsync(
             [FromQuery] SieveModel sieveModel,
@@ -150,7 +150,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpGet("debt-logs/{id}/proof-images")]
-        [HasPermission(DebtPayments.View)]
+        [RequiresAnyPermissions(Permissions.Warehouse.DebtPaymentManagement.View, Permissions.Accountant.DebtPaymentManagement.View)]
         [ProducesResponseType(typeof(List<string>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetDebtLogProofImagesAsync(int id, CancellationToken cancellationToken)
         {
@@ -159,7 +159,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpPut("debt-logs/{id}/proof-images")]
-        [HasPermission(DebtPayments.Update)]
+        [RequiresAnyPermissions(Permissions.Warehouse.DebtPaymentManagement.Create, Permissions.Accountant.DebtPaymentManagement.Create)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateDebtProofImagesAsync(
             int id,

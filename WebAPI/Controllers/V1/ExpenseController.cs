@@ -2,7 +2,7 @@ using Application.Features.Expenses.Commands.CreateExpense;
 using Application.Features.Expenses.Commands.DeleteExpense;
 using Application.Features.Expenses.Queries.GetExpenses;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +20,7 @@ namespace WebAPI.Controllers.V1;
 public class ExpenseController(IMediator mediator) : ApiController
 {
     [HttpGet]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(List<Application.Features.Expenses.Queries.GetExpenses.ExpenseResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
@@ -29,7 +29,7 @@ public class ExpenseController(IMediator mediator) : ApiController
     }
 
     [HttpPost]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(Application.Features.Expenses.Commands.CreateExpense.ExpenseResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Create([FromBody] CreateExpenseCommand command, CancellationToken cancellationToken)
     {
@@ -38,7 +38,7 @@ public class ExpenseController(IMediator mediator) : ApiController
     }
 
     [HttpDelete("{id:int}")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {

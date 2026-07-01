@@ -36,7 +36,7 @@ public class ProductCategory
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "PC_043 - Ki?m tra phân quy?n - T?o danh m?c s?n ph?m không có quy?n")]
+    [Fact(DisplayName = "PC_043 - Ki?m tra phï¿½n quy?n - T?o danh m?c s?n ph?m khï¿½ng cï¿½ quy?n")]
     public async Task CreateProductCategory_WithoutPermission_ShouldThrowUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateProductCategoryCommand>(), It.IsAny<CancellationToken>()))
@@ -46,7 +46,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_044 - Ki?m tra phân quy?n - Xem danh sách cho manager không có quy?n")]
+    [Fact(DisplayName = "PC_044 - Ki?m tra phï¿½n quy?n - Xem danh sï¿½ch cho manager khï¿½ng cï¿½ quy?n")]
     public async Task GetProductCategoriesForManager_WithoutPermission_ShouldThrowUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductCategoriesListQuery>(), It.IsAny<CancellationToken>()))
@@ -56,7 +56,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_045 - Ki?m tra phân quy?n - Xem danh sách dã xóa không có quy?n")]
+    [Fact(DisplayName = "PC_045 - Ki?m tra phï¿½n quy?n - Xem danh sï¿½ch dï¿½ xï¿½a khï¿½ng cï¿½ quy?n")]
     public async Task GetDeletedProductCategories_WithoutPermission_ShouldThrowUnauthorized()
     {
         _mediatorMock.Setup(
@@ -67,7 +67,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_046 - Ki?m tra phân quy?n - C?p nh?t danh m?c s?n ph?m không có quy?n")]
+    [Fact(DisplayName = "PC_046 - Ki?m tra phï¿½n quy?n - C?p nh?t danh m?c s?n ph?m khï¿½ng cï¿½ quy?n")]
     public async Task UpdateProductCategory_WithoutPermission_ShouldThrowUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateProductCategoryCommand>(), It.IsAny<CancellationToken>()))
@@ -77,7 +77,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_047 - Ki?m tra phân quy?n - Xóa danh m?c s?n ph?m không có quy?n")]
+    [Fact(DisplayName = "PC_047 - Ki?m tra phï¿½n quy?n - Xï¿½a danh m?c s?n ph?m khï¿½ng cï¿½ quy?n")]
     public async Task DeleteProductCategory_WithoutPermission_ShouldThrowUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteProductCategoryCommand>(), It.IsAny<CancellationToken>()))
@@ -87,7 +87,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_048 - Ki?m tra phân quy?n - Khôi ph?c danh m?c s?n ph?m không có quy?n")]
+    [Fact(DisplayName = "PC_048 - Ki?m tra phï¿½n quy?n - Khï¿½i ph?c danh m?c s?n ph?m khï¿½ng cï¿½ quy?n")]
     public async Task RestoreProductCategory_WithoutPermission_ShouldThrowUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreProductCategoryCommand>(), It.IsAny<CancellationToken>()))
@@ -97,7 +97,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_049 - Ki?m tra phân quy?n - Xóa nhi?u danh m?c s?n ph?m không có quy?n")]
+    [Fact(DisplayName = "PC_049 - Ki?m tra phï¿½n quy?n - Xï¿½a nhi?u danh m?c s?n ph?m khï¿½ng cï¿½ quy?n")]
     public async Task DeleteManyProductCategories_WithoutPermission_ShouldThrowUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManyProductCategoriesCommand>(), It.IsAny<CancellationToken>()))
@@ -109,7 +109,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_050 - Ki?m tra phân quy?n - Khôi ph?c nhi?u danh m?c s?n ph?m không có quy?n")]
+    [Fact(DisplayName = "PC_050 - Ki?m tra phï¿½n quy?n - Khï¿½i ph?c nhi?u danh m?c s?n ph?m khï¿½ng cï¿½ quy?n")]
     public async Task RestoreManyProductCategories_WithoutPermission_ShouldThrowUnauthorized()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreManyProductCategoriesCommand>(), It.IsAny<CancellationToken>()))
@@ -121,7 +121,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_052 - Xác th?c d? li?u - T?o v?i Name quá dài (vu?t max length)")]
+    [Fact(DisplayName = "PC_052 - Xï¿½c th?c d? li?u - T?o v?i Name quï¿½ dï¿½i (vu?t max length)")]
     public async Task CreateProductCategory_WithTooLongName_ShouldFailValidation()
     {
         var request = new CreateProductCategoryCommand { Name = new string('a', 300), Description = "Test" };
@@ -132,7 +132,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_054 - Xác th?c d? li?u - Xóa v?i Id âm")]
+    [Fact(DisplayName = "PC_054 - Xï¿½c th?c d? li?u - Xï¿½a v?i Id ï¿½m")]
     public async Task DeleteProductCategory_WithNegativeId_ShouldThrowException()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteProductCategoryCommand>(), It.IsAny<CancellationToken>()))
@@ -142,7 +142,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_055 - Xác th?c d? li?u - Xóa nhi?u v?i danh sách Ids r?ng")]
+    [Fact(DisplayName = "PC_055 - Xï¿½c th?c d? li?u - Xï¿½a nhi?u v?i danh sï¿½ch Ids r?ng")]
     public async Task DeleteManyProductCategories_WithEmptyIds_ShouldFailValidation()
     {
         var request = new DeleteManyProductCategoriesCommand { Ids = [] };
@@ -153,7 +153,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_056 - Xác th?c d? li?u - Khôi ph?c nhi?u v?i danh sách Ids null")]
+    [Fact(DisplayName = "PC_056 - Xï¿½c th?c d? li?u - Khï¿½i ph?c nhi?u v?i danh sï¿½ch Ids null")]
     public async Task RestoreManyProductCategories_WithNullIds_ShouldFailValidation()
     {
         var request = new RestoreManyProductCategoriesCommand { Ids = null! };
@@ -164,7 +164,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_057 - Ki?m tra Rate Limiting - G?i quá nhi?u request")]
+    [Fact(DisplayName = "PC_057 - Ki?m tra Rate Limiting - G?i quï¿½ nhi?u request")]
     public async Task CreateProductCategory_RateLimitExceeded_ShouldThrowException()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateProductCategoryCommand>(), It.IsAny<CancellationToken>()))
@@ -174,7 +174,7 @@ public class ProductCategory
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "PC_058 - L?y danh sách danh m?c s?n ph?m khi chua dang nh?p (public endpoint)")]
+    [Fact(DisplayName = "PC_058 - L?y danh sï¿½ch danh m?c s?n ph?m khi chua dang nh?p (public endpoint)")]
     public async Task GetProductCategories_AnonymousUser_ShouldSucceed()
     {
         var expectedResult = new PagedResult<ProductCategoryResponse>(
@@ -210,7 +210,7 @@ public class ProductCategory
             Times.Once);
     }
 
-    [Fact(DisplayName = "PC_060 - Ki?m tra concurrent update - Hai request c?p nh?t cùng lúc")]
+    [Fact(DisplayName = "PC_060 - Ki?m tra concurrent update - Hai request c?p nh?t cï¿½ng lï¿½c")]
     public async Task UpdateProductCategory_ConcurrentUpdate_ShouldHandleCorrectly()
     {
         var request1 = new UpdateProductCategoryCommand { Name = "Update A" };

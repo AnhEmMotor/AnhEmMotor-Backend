@@ -5,29 +5,14 @@ using MediatR;
 
 namespace Application.Features.Permissions.Queries.GetAllPermissions;
 
-public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQuery, Result<Dictionary<string, List<PermissionResponse>>>>
+public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQuery, Result<List<PermissionModuleMetadata>>>
 {
-    public Task<Result<Dictionary<string, List<PermissionResponse>>>> Handle(
+    public Task<Result<List<PermissionModuleMetadata>>> Handle(
         GetAllPermissionsQuery request,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var result = PermissionsList.Groups
-            .ToDictionary(
-                g => g.Key,
-                g => g.Value
-                    .Select(
-                        p =>
-                        {
-                            var metadata = PermissionsList.GetMetadata(p);
-                            return new PermissionResponse()
-                            {
-                                ID = p,
-                                DisplayName = metadata?.DisplayName ?? p.Split('.').Last(),
-                                Description = metadata?.Description,
-                            };
-                        })
-                    .ToList());
-        return Task.FromResult<Result<Dictionary<string, List<PermissionResponse>>>>(result);
+        var result = PermissionsList.ModulesTree;
+        return Task.FromResult<Result<List<PermissionModuleMetadata>>>(result);
     }
 }

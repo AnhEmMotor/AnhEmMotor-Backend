@@ -15,7 +15,7 @@ using Application.Features.Brands.Queries.GetBrandStatistics;
 using Application.Features.Brands.Queries.GetDeletedBrandsList;
 using Application.Features.Brands.Queries.GetImportTemplate;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -60,7 +60,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách thương hiệu dành cho quản lý.</returns>
     [HttpGet("for-manager")]
-    [HasPermission(Brands.View)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.View)]
     [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetBrandsForManagerAsync(
         [FromQuery] SieveModel sieveModel,
@@ -78,7 +78,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách thương hiệu đã xóa.</returns>
     [HttpGet("deleted")]
-    [HasPermission(Brands.Delete)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.Delete)]
     [ProducesResponseType(typeof(PagedResult<BrandRestoreResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedBrandsAsync(
         [FromQuery] SieveModel sieveModel,
@@ -95,7 +95,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thông tin thống kê thương hiệu.</returns>
     [HttpGet("statistics")]
-    [HasPermission(Brands.View)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.View)]
     [ProducesResponseType(typeof(BrandStatisticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetBrandStatisticsAsync(CancellationToken cancellationToken)
     {
@@ -111,7 +111,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>File Excel chứa danh sách thương hiệu.</returns>
     [HttpGet("export")]
-    [HasPermission(Brands.View)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.View)]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> ExportBrandsAsync(
         [FromQuery] SieveModel sieveModel,
@@ -128,7 +128,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>File Excel mẫu.</returns>
     [HttpGet("import-template")]
-    [HasPermission(Brands.View)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.View)]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetImportTemplateAsync(CancellationToken cancellationToken)
     {
@@ -144,7 +144,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thông tin chi tiết thương hiệu.</returns>
     [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.Brands.GetById)]
-    [HasPermission(Brands.View)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.View)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetBrandByIdAsync(int id, CancellationToken cancellationToken)
@@ -161,7 +161,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thương hiệu vừa được tạo.</returns>
     [HttpPost]
-    [HasPermission(Brands.Create)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.Create)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateBrandAsync(
         [FromBody] CreateBrandCommand request,
@@ -183,7 +183,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thông tin thương hiệu sau cập nhật.</returns>
     [HttpPut("{id:int}")]
-    [HasPermission(Brands.Edit)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.Edit)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateBrandAsync(
@@ -203,7 +203,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả xóa.</returns>
     [HttpDelete("{id:int}")]
-    [HasPermission(Brands.Delete)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteBrandAsync(int id, CancellationToken cancellationToken)
@@ -220,7 +220,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thông tin thương hiệu sau khi khôi phục.</returns>
     [HttpPost("restore/{id:int}")]
-    [HasPermission(Brands.Delete)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.Delete)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreBrandAsync(int id, CancellationToken cancellationToken)
@@ -237,7 +237,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả xóa nhiều.</returns>
     [HttpDelete("delete-many")]
-    [HasPermission(Brands.Delete)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteBrandsAsync(
@@ -256,7 +256,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách thương hiệu sau khi khôi phục.</returns>
     [HttpPost("restore-many")]
-    [HasPermission(Brands.Delete)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.Delete)]
     [ProducesResponseType(typeof(List<BrandResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreBrandsAsync(
@@ -275,7 +275,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách thương hiệu sau khi clone.</returns>
     [HttpPost("clone-many")]
-    [HasPermission(Brands.Create)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.Create)]
     [ProducesResponseType(typeof(List<BrandResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CloneBrandsAsync(
@@ -294,7 +294,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả nhập.</returns>
     [HttpPost("import")]
-    [HasPermission(Brands.Create)]
+    [HasPermission(Permissions.Warehouse.BrandManagement.Create)]
     [ProducesResponseType(typeof(ImportBrandsResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ImportBrandsAsync(IFormFile file, CancellationToken cancellationToken)

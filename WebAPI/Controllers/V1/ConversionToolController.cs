@@ -5,7 +5,7 @@ using Application.Features.ConversionTools.Commands.DeleteConversionTool;
 using Application.Features.ConversionTools.Commands.UpdateConversionTool;
 using Application.Features.ConversionTools.Queries.GetConversionTools;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +21,7 @@ namespace WebAPI.Controllers.V1;
 public class ConversionToolController(IMediator mediator) : ApiController
 {
     [HttpGet]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(List<ConversionToolResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
@@ -30,7 +30,7 @@ public class ConversionToolController(IMediator mediator) : ApiController
     }
 
     [HttpPost]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(ConversionToolResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Create([FromBody] CreateConversionToolCommand command, CancellationToken cancellationToken)
     {
@@ -39,7 +39,7 @@ public class ConversionToolController(IMediator mediator) : ApiController
     }
 
     [HttpPut("{id:int}")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(ConversionToolResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateConversionToolCommand command, CancellationToken cancellationToken)
     {
@@ -49,7 +49,7 @@ public class ConversionToolController(IMediator mediator) : ApiController
     }
 
     [HttpDelete("{id:int}")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {

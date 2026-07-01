@@ -21,7 +21,7 @@ using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequests;
 using Application.Features.PurchaseRequests.Queries.GetPurchaseRequestStatusList;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -46,7 +46,7 @@ namespace WebAPI.Controllers.V1
         /// Tạo mới một yêu cầu mua hàng.
         /// </summary>
         [HttpPost]
-        [HasPermission(PurchaseRequests.Create)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.Create)]
         [ProducesResponseType(typeof(PurchaseRequestDetailResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateAsync(
@@ -64,7 +64,7 @@ namespace WebAPI.Controllers.V1
         /// Cập nhật yêu cầu mua hàng.
         /// </summary>
         [HttpPut("{id:int}")]
-        [HasPermission(PurchaseRequests.Edit)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.Edit)]
         [ProducesResponseType(typeof(PurchaseRequestDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -84,7 +84,7 @@ namespace WebAPI.Controllers.V1
         /// Xóa yêu cầu mua hàng.
         /// </summary>
         [HttpDelete("{id:int}")]
-        [HasPermission(PurchaseRequests.Delete)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.Delete)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -99,7 +99,7 @@ namespace WebAPI.Controllers.V1
         /// Gửi yêu cầu mua hàng (Draft -> Sent).
         /// </summary>
         [HttpPost("{id:int}/send")]
-        [HasPermission(PurchaseRequests.Send)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.Send)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -114,7 +114,7 @@ namespace WebAPI.Controllers.V1
         /// Phê duyệt hoặc từ chối yêu cầu mua hàng (Sent -> Approved/Rejected).
         /// </summary>
         [HttpPatch("{id:int}/status")]
-        [HasPermission(PurchaseRequests.ApproveReject)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.ApproveReject)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -134,7 +134,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách các trạng thái của yêu cầu mua hàng.
         /// </summary>
         [HttpGet("status")]
-        [RequiresAnyPermissions(PurchaseRequests.View, PurchaseRequests.Create, PurchaseRequests.Edit)]
+        [RequiresAnyPermissions(Permissions.Warehouse.PurchaseRequestManagement.View, Permissions.Warehouse.PurchaseRequestManagement.Create, Permissions.Warehouse.PurchaseRequestManagement.Edit)]
         [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPurchaseRequestStatusesAsync(CancellationToken cancellationToken)
         {
@@ -147,7 +147,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách yêu cầu mua hàng (có phân trang, tìm kiếm, lọc).
         /// </summary>
         [HttpGet]
-        [HasPermission(PurchaseRequests.View)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.View)]
         [ProducesResponseType(typeof(PagedResult<PurchaseRequestListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllAsync(
             [FromQuery] SieveModel sieveModel,
@@ -164,7 +164,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu nhập).
         /// </summary>
         [HttpGet("approved")]
-        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [RequiresAnyPermissions(Permissions.Warehouse.ReceiptManagement.Create, Permissions.Warehouse.ReceiptManagement.Edit)]
         [ProducesResponseType(typeof(PagedResult<PurchaseRequestListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetApprovedAsync(
             [FromQuery] SieveModel sieveModel,
@@ -181,7 +181,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy chi tiết yêu cầu mua hàng đã duyệt theo ID.
         /// </summary>
         [HttpGet("approved/{id:int}")]
-        [RequiresAnyPermissions(InventoryReceipts.Create, InventoryReceipts.Edit)]
+        [RequiresAnyPermissions(Permissions.Warehouse.ReceiptManagement.Create, Permissions.Warehouse.ReceiptManagement.Edit)]
         [ProducesResponseType(typeof(ApprovedPurchaseRequestDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -201,7 +201,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy chi tiết yêu cầu mua hàng theo ID.
         /// </summary>
         [HttpGet("{id:int}")]
-        [HasPermission(PurchaseRequests.View)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.View)]
         [ProducesResponseType(typeof(PurchaseRequestDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByIdAsync(int id, CancellationToken cancellationToken)
@@ -215,7 +215,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy lịch sử chỉnh sửa yêu cầu mua hàng.
         /// </summary>
         [HttpGet("{id:int}/audit-logs")]
-        [HasPermission(PurchaseRequests.View)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.View)]
         [ProducesResponseType(typeof(List<PurchaseRequestAuditLogResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPurchaseRequestAuditLogsAsync(int id, CancellationToken cancellationToken)
         {
@@ -225,7 +225,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpDelete("delete-many")]
-        [HasPermission(PurchaseRequests.Delete)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.Delete)]
         [ProducesResponseType(typeof(Result<int>), StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteManyPurchaseRequestsAsync(
             [FromBody] DeleteManyPurchaseRequestsCommand command,
@@ -236,7 +236,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpPost("restore/{id:int}")]
-        [HasPermission(PurchaseRequests.Delete)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.Delete)]
         [ProducesResponseType(typeof(Result<int>), StatusCodes.Status200OK)]
         public async Task<IActionResult> RestorePurchaseRequestAsync(int id, CancellationToken cancellationToken)
         {
@@ -246,7 +246,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpPost("restore-many")]
-        [HasPermission(PurchaseRequests.Delete)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.Delete)]
         [ProducesResponseType(typeof(Result<int>), StatusCodes.Status200OK)]
         public async Task<IActionResult> RestoreManyPurchaseRequestsAsync(
             [FromBody] RestoreManyPurchaseRequestsCommand command,
@@ -257,7 +257,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpPost("clone-many")]
-        [HasPermission(PurchaseRequests.Create)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.Create)]
         [ProducesResponseType(typeof(Result<int>), StatusCodes.Status200OK)]
         public async Task<IActionResult> CloneManyPurchaseRequestsAsync(
             [FromBody] CloneManyPurchaseRequestsCommand command,
@@ -268,7 +268,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpPost("import")]
-        [HasPermission(PurchaseRequests.Create)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.Create)]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(Result<ImportPurchaseRequestsResult>), StatusCodes.Status200OK)]
         public async Task<IActionResult> ImportPurchaseRequestsAsync(
@@ -280,7 +280,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpGet("import-template")]
-        [HasPermission(PurchaseRequests.Create)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.Create)]
         [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetImportTemplateAsync(CancellationToken cancellationToken)
         {
@@ -297,7 +297,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpGet("export")]
-        [HasPermission(PurchaseRequests.View)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.View)]
         [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
         public async Task<IActionResult> ExportPurchaseRequestsAsync(
             [FromQuery] SieveModel sieveModel,
@@ -312,7 +312,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpGet("deleted")]
-        [HasPermission(PurchaseRequests.View)]
+        [HasPermission(Permissions.Warehouse.PurchaseRequestManagement.View)]
         [ProducesResponseType(typeof(PagedResult<PurchaseRequestListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetDeletedPurchaseRequestsAsync(
             [FromQuery] SieveModel sieveModel,

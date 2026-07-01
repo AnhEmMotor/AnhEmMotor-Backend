@@ -1,6 +1,6 @@
 using Application.Features.HR.Queries.GetEmployeeKPIs;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +18,7 @@ namespace WebAPI.Controllers.V1;
 public class EmployeeKPIController(IMediator mediator) : ApiController
 {
     [HttpGet]
-    [HasPermission(HR.View)]
+    [RequiresAnyPermissions(Permissions.Admin.EmployeeManagement.View, Permissions.Accountant.EmployeeManagement.View)]
     [ProducesResponseType(typeof(List<KpiResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {

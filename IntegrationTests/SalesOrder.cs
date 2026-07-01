@@ -5,7 +5,7 @@ using Application.Features.Outputs.Commands.RestoreManyOutputs;
 using Application.Features.Outputs.Commands.UpdateOutputForManager;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Domain.Constants.Order;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
@@ -94,7 +94,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Create],
+            [Permissions.Warehouse.OutputManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -154,7 +154,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Create],
+            [Permissions.Warehouse.OutputManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -214,7 +214,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Create],
+            [Permissions.Warehouse.OutputManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -268,7 +268,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.ViewUnconfirmed],
+            [Permissions.Warehouse.OutputManagement.ViewUnconfirmed],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -322,7 +322,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Create],
+            [Permissions.Warehouse.OutputManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -403,7 +403,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.ViewUnconfirmed],
+            [Permissions.Warehouse.OutputManagement.ViewUnconfirmed],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -468,7 +468,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.ViewUnconfirmed],
+            [Permissions.Warehouse.OutputManagement.ViewUnconfirmed],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -517,7 +517,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Delete, Outputs.Create],
+            [Permissions.Warehouse.OutputManagement.Delete, Permissions.Warehouse.OutputManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -580,7 +580,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Delete, Outputs.Create],
+            [Permissions.Warehouse.OutputManagement.Delete, Permissions.Warehouse.OutputManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -644,7 +644,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Permissions.Warehouse.OutputManagement.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -701,7 +701,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Permissions.Warehouse.OutputManagement.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -728,7 +728,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Create, Outputs.ChangeStatus],
+            [Permissions.Warehouse.OutputManagement.Create, Permissions.Warehouse.OutputManagement.ChangeStatus],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -793,7 +793,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Delete, Outputs.Create],
+            [Permissions.Warehouse.OutputManagement.Delete, Permissions.Warehouse.OutputManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -861,7 +861,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Delete, Outputs.Create],
+            [Permissions.Warehouse.OutputManagement.Delete, Permissions.Warehouse.OutputManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -990,7 +990,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             managerName,
             password,
-            [Outputs.View],
+            [Permissions.Warehouse.OutputManagement.View],
             TestContext.Current.CancellationToken,
             managerEmail)
             .ConfigureAwait(true);
@@ -1052,7 +1052,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Permissions.Warehouse.OutputManagement.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1096,7 +1096,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Permissions.Warehouse.OutputManagement.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1129,7 +1129,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Edit],
+            [Permissions.Warehouse.OutputManagement.Edit],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1164,7 +1164,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.View],
+            [Permissions.Warehouse.OutputManagement.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -1193,7 +1193,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             password,
-            [Outputs.Create],
+            [Permissions.Warehouse.OutputManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);

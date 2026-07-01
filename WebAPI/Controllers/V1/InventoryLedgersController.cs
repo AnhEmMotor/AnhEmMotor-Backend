@@ -2,7 +2,7 @@ using Application.ApiContracts.InventoryLedger.Responses;
 using Application.Common.Models;
 using Application.Features.InventoryLedgers.Queries.GetInventoryLedger;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +24,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách sổ cái tồn kho
         /// </summary>
         [HttpGet]
-        [HasPermission(InventoryReceipts.View)]
+        [HasPermission(Permissions.Warehouse.ReceiptManagement.View)]
         [ProducesResponseType(typeof(List<InventoryLedgerResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetInventoryLedgerAsync(
             [FromQuery] GetInventoryLedgerQuery query,

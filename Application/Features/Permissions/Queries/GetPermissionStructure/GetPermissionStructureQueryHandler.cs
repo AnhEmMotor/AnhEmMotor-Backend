@@ -14,7 +14,7 @@ public class GetPermissionStructureQueryHandler : IRequestHandler<GetPermissionS
         cancellationToken.ThrowIfCancellationRequested();
         var response = new PermissionStructureResponse
         {
-            Groups = PermissionsList.Groups,
+            Modules = PermissionsList.ModulesTree,
             Conflicts = PermissionsList.Conflicts,
             Dependencies = PermissionsList.Dependencies,
             Metadata =

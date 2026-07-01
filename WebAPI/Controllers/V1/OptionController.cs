@@ -6,7 +6,7 @@ using Application.Features.OptionValues.Commands.DeleteOptionValue;
 using Application.Features.OptionValues.Commands.UpdateOptionValue;
 using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -39,7 +39,7 @@ public class OptionController(ISender sender) : ApiController
     /// Lấy danh sách toàn bộ các thuộc tính (Options) và các giá trị của chúng (Dành cho Quản trị viên).
     /// </summary>
     [HttpGet("all")]
-    [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.View, Permissions.Order.ProductManagement.View, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create, Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Delete, Permissions.Order.ProductManagement.Delete)]
     [ProducesResponseType(typeof(List<OptionResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllOptionsAsync(CancellationToken cancellationToken)
     {
@@ -52,7 +52,7 @@ public class OptionController(ISender sender) : ApiController
     /// Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value.
     /// </summary>
     [HttpGet("predefined")]
-    [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.View, Permissions.Order.ProductManagement.View, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create, Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Delete, Permissions.Order.ProductManagement.Delete)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetPredefinedOptionsAsync(CancellationToken cancellationToken)
@@ -66,7 +66,7 @@ public class OptionController(ISender sender) : ApiController
     /// Tạo mới giá trị thuộc tính.
     /// </summary>
     [HttpPost("values")]
-    [HasPermission(Products.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create)]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateOptionValueAsync(
         [FromBody] CreateOptionValueCommand request,
@@ -80,7 +80,7 @@ public class OptionController(ISender sender) : ApiController
     /// Cập nhật giá trị thuộc tính.
     /// </summary>
     [HttpPut("values/{id:int}")]
-    [HasPermission(Products.Edit)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> UpdateOptionValueAsync(
         int id,
@@ -96,7 +96,7 @@ public class OptionController(ISender sender) : ApiController
     /// Xoá giá trị thuộc tính.
     /// </summary>
     [HttpDelete("values/{id:int}")]
-    [HasPermission(Products.Delete)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Delete, Permissions.Order.ProductManagement.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteOptionValueAsync(int id, CancellationToken cancellationToken)
     {

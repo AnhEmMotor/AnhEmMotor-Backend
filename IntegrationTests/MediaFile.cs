@@ -1,5 +1,5 @@
 using Application.ApiContracts.File.Responses;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
@@ -38,7 +38,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "MF_002 - T?i lên ?nh thành công v?i d?nh d?ng JPG h?p l?")]
+    [Fact(DisplayName = "MF_002 - T?i lï¿½n ?nh thï¿½nh cï¿½ng v?i d?nh d?ng JPG h?p l?")]
     public async Task UploadImage_ValidJpg_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -49,7 +49,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.Create],
+            [Permissions.Warehouse.ProductManagement.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -81,7 +81,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         result.FileSize.Should().BeGreaterThan(0);
     }
 
-    [Fact(DisplayName = "MF_007 - T?i lên nhi?u ?nh cùng lúc thành công")]
+    [Fact(DisplayName = "MF_007 - T?i lï¿½n nhi?u ?nh cï¿½ng lï¿½c thï¿½nh cï¿½ng")]
     public async Task UploadManyImages_ValidFiles_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -92,7 +92,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.Create],
+            [Permissions.Warehouse.ProductManagement.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -123,7 +123,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         results.All(r => string.Compare(r.ContentType, "image/webp") == 0).Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_009 - Xoá file thành công (Soft Delete)")]
+    [Fact(DisplayName = "MF_009 - Xoï¿½ file thï¿½nh cï¿½ng (Soft Delete)")]
     public async Task DeleteFile_ExistingFile_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -134,7 +134,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.Edit],
+            [Permissions.Warehouse.ProductManagement.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -174,7 +174,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         deletedFile!.DeletedAt.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "MF_013 - Xoá nhi?u file cùng lúc thành công")]
+    [Fact(DisplayName = "MF_013 - Xoï¿½ nhi?u file cï¿½ng lï¿½c thï¿½nh cï¿½ng")]
     public async Task DeleteManyFiles_ExistingFiles_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -185,7 +185,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.Edit, Products.Create],
+            [Permissions.Warehouse.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -230,7 +230,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         }
     }
 
-    [Fact(DisplayName = "MF_015 - Khôi ph?c file dã xoá thành công")]
+    [Fact(DisplayName = "MF_015 - Khï¿½i ph?c file dï¿½ xoï¿½ thï¿½nh cï¿½ng")]
     public async Task RestoreFile_DeletedFile_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -241,7 +241,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.Edit],
+            [Permissions.Warehouse.ProductManagement.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -281,7 +281,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         restoredFile!.DeletedAt.Should().BeNull();
     }
 
-    [Fact(DisplayName = "MF_019 - Khôi ph?c nhi?u file cùng lúc thành công")]
+    [Fact(DisplayName = "MF_019 - Khï¿½i ph?c nhi?u file cï¿½ng lï¿½c thï¿½nh cï¿½ng")]
     public async Task RestoreManyFiles_DeletedFiles_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -292,7 +292,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.Edit, Products.Create],
+            [Permissions.Warehouse.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -339,7 +339,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         }
     }
 
-    [Fact(DisplayName = "MF_021 - Xem ?nh thành công v?i kích thu?c g?c")]
+    [Fact(DisplayName = "MF_021 - Xem ?nh thï¿½nh cï¿½ng v?i kï¿½ch thu?c g?c")]
     public async Task ViewImage_OriginalSize_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -350,7 +350,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.Create, Products.View],
+            [Permissions.Warehouse.ProductManagement.Create, Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -376,7 +376,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         response!.Content.Headers.ContentType?.MediaType.Should().Be("image/webp");
     }
 
-    [Fact(DisplayName = "MF_022 - Xem ?nh thành công v?i resize theo width")]
+    [Fact(DisplayName = "MF_022 - Xem ?nh thï¿½nh cï¿½ng v?i resize theo width")]
     public async Task ViewImage_WithResize_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -387,7 +387,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.Create, Products.View],
+            [Permissions.Warehouse.ProductManagement.Create, Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -413,7 +413,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         response!.Content.Headers.ContentType?.MediaType.Should().Be("image/webp");
     }
 
-    [Fact(DisplayName = "MF_031 - L?y thông tin file theo ID thành công")]
+    [Fact(DisplayName = "MF_031 - L?y thï¿½ng tin file theo ID thï¿½nh cï¿½ng")]
     public async Task GetFileById_ExistingFile_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -424,7 +424,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.Edit],
+            [Permissions.Warehouse.ProductManagement.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -463,7 +463,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         result.FileSize.Should().Be(150000);
     }
 
-    [Fact(DisplayName = "MF_035 - L?y danh sách file thành công v?i phân trang")]
+    [Fact(DisplayName = "MF_035 - L?y danh sï¿½ch file thï¿½nh cï¿½ng v?i phï¿½n trang")]
     public async Task GetFilesList_WithPagination_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -474,7 +474,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -507,7 +507,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "MF_036 - L?y danh sách file v?i filter theo ContentType")]
+    [Fact(DisplayName = "MF_036 - L?y danh sï¿½ch file v?i filter theo ContentType")]
     public async Task GetFilesList_FilterByContentType_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -518,7 +518,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -567,7 +567,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "MF_037 - L?y danh sách file v?i sorting theo FileSize gi?m d?n")]
+    [Fact(DisplayName = "MF_037 - L?y danh sï¿½ch file v?i sorting theo FileSize gi?m d?n")]
     public async Task GetFilesList_SortByFileSizeDesc_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -578,7 +578,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -641,7 +641,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "MF_038 - L?y danh sách file dã xoá thành công")]
+    [Fact(DisplayName = "MF_038 - L?y danh sï¿½ch file dï¿½ xoï¿½ thï¿½nh cï¿½ng")]
     public async Task GetDeletedFilesList_WithPagination_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -652,7 +652,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [Products.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);

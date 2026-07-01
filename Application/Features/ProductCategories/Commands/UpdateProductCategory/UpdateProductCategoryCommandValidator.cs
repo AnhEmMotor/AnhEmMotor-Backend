@@ -9,22 +9,22 @@ public class UpdateProductCategoryCommandValidator : AbstractValidator<UpdatePro
     {
         RuleFor(x => x.Id)
             .NotEmpty()
-            .WithMessage("ID danh m?c là b?t bu?c.")
+            .WithMessage("ID danh m?c lï¿½ b?t bu?c.")
             .GreaterThan(0)
-            .WithMessage("ID danh m?c ph?i là s? duong.");
+            .WithMessage("ID danh m?c ph?i lï¿½ s? duong.");
         RuleFor(x => x.Name)
             .MaximumLength(100)
-            .WithMessage("Tên danh m?c không du?c vu?t quá 100 ký t?.")
+            .WithMessage("Tï¿½n danh m?c khï¿½ng du?c vu?t quï¿½ 100 kï¿½ t?.")
             .Must(name => name == null || !string.IsNullOrWhiteSpace(name))
-            .WithMessage("Tên danh m?c không du?c ch? ch?a kho?ng tr?ng.")
+            .WithMessage("Tï¿½n danh m?c khï¿½ng du?c ch? ch?a kho?ng tr?ng.")
             .When(x => x.Name != null);
         RuleFor(x => x.Description)
             .MaximumLength(500)
-            .WithMessage("Mô t? không du?c vu?t quá 500 ký t?.")
+            .WithMessage("Mï¿½ t? khï¿½ng du?c vu?t quï¿½ 500 kï¿½ t?.")
             .When(x => x.Description != null);
         RuleFor(x => x.ManagementType)
             .Must(ProductManagementType.IsValid)
-            .WithMessage("Lo?i qu?n lý không h?p l?.")
+            .WithMessage("Lo?i qu?n lï¿½ khï¿½ng h?p l?.")
             .When(x => x.ManagementType != null);
         RuleFor(x => x)
             .Must(
@@ -35,6 +35,6 @@ public class UpdateProductCategoryCommandValidator : AbstractValidator<UpdatePro
                     x.ParentId.HasValue ||
                     x.MaxPurchaseQuantity.HasValue ||
                     x.ManagementType != null)
-            .WithMessage("Ph?i cung c?p ít nh?t m?t tru?ng d? c?p nh?t.");
+            .WithMessage("Ph?i cung c?p ï¿½t nh?t m?t tru?ng d? c?p nh?t.");
     }
 }

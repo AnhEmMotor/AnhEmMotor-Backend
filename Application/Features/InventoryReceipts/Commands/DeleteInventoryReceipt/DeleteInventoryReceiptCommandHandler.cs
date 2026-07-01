@@ -33,7 +33,7 @@ public class DeleteInventoryReceiptCommandHandler(
             Guid userId = currentUserContext.GetUserId();
             var hasApprovePermission = await permissionRepository.CheckUserPermissionsAsync(
                 userId,
-                [Domain.Constants.Permission.Permissions.InventoryReceipts.ApproveReject],
+                [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.ApproveReject],
                 cancellationToken)
                 .ConfigureAwait(false);
             if (!hasApprovePermission)
