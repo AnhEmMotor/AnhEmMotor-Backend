@@ -1,4 +1,4 @@
-using Application.Features.Client.Invoices;
+﻿using Application.Features.Client.Invoices;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,10 @@ public class InvoiceController(IMediator mediator) : ApiController
             ?? User.Identity?.Name
             ?? string.Empty;
 
-        var userId = Guid.Parse(userIdStr);
+        if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+        {
+            return BadRequest(new { message = "Invalid user identifier" });
+        }
 
         var result = await mediator.Send(new GetMyInvoicesQuery(userId), cancellationToken);
         return Ok(result);

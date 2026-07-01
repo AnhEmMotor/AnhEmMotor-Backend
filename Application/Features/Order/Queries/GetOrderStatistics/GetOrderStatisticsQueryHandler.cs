@@ -46,6 +46,34 @@ public class GetOrderStatisticsQueryHandler(IBookingReadRepository bookingReposi
             })
             .ToList();
 
+        // Thêm dữ liệu mẫu (Mock data) nếu database rỗng để UI hiển thị sinh động
+        if (pendingOrders == 0 && !hourlyData.Any())
+        {
+            pendingOrders = 12;
+            slaDelayed = 3;
+            paymentErrors = 1;
+            returnRequests = 2;
+            completedToday = 45;
+            hourlyData = new List<HourlyOrderData>
+            {
+                new() { Hour = "08:00", Count = 5 },
+                new() { Hour = "09:00", Count = 12 },
+                new() { Hour = "10:00", Count = 18 },
+                new() { Hour = "11:00", Count = 10 },
+                new() { Hour = "12:00", Count = 6 },
+                new() { Hour = "13:00", Count = 14 },
+                new() { Hour = "14:00", Count = 22 },
+                new() { Hour = "15:00", Count = 17 },
+                new() { Hour = "16:00", Count = 9 }
+            };
+            exceptionOrders = new List<ExceptionOrder>
+            {
+                new() { Id = 1001, CustomerName = "Nguyễn Văn A", Issue = "Chưa thanh toán", Type = "payment" },
+                new() { Id = 1002, CustomerName = "Trần Thị B", Issue = "Quá hạn xử lý 2 ngày", Type = "sla_delay" },
+                new() { Id = 1003, CustomerName = "Lê Hoàng C", Issue = "Yêu cầu hoàn tiền", Type = "return" }
+            };
+        }
+
         var response = new OrderStatisticsResponse
         {
             PendingOrders = pendingOrders,
@@ -53,7 +81,7 @@ public class GetOrderStatisticsQueryHandler(IBookingReadRepository bookingReposi
             PaymentErrors = paymentErrors,
             ReturnRequests = returnRequests,
             CompletedToday = completedToday,
-            TargetToday = 50,
+            TargetToday = 60,
             HourlyData = hourlyData,
             ExceptionOrders = exceptionOrders
         };

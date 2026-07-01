@@ -146,6 +146,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<WarrantyClaimPart> WarrantyClaimParts => Set<WarrantyClaimPart>();
 
     public virtual DbSet<RepairOrder> RepairOrders { get; set; }
+        public virtual DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
 
     public virtual DbSet<RepairOrderDetail> RepairOrderDetails { get; set; }
 
