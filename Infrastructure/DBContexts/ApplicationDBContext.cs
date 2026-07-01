@@ -57,6 +57,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
 
     public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
+    public virtual DbSet<WorkshopPayment> WorkshopPayments { get; set; }
 
     public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
 
@@ -163,13 +164,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<MaintenanceHistory> MaintenanceHistories { get; set; }
 
-
-        public virtual DbSet<WorkshopPayment> WorkshopPayments { get; set; }
-
     public virtual DbSet<EmployeeProfile> EmployeeProfiles { get; set; }
 
     public virtual DbSet<CommissionPolicy> CommissionPolicies { get; set; }
-
     public virtual DbSet<CommissionRecord> CommissionRecords { get; set; }
 
     public virtual DbSet<Payroll> Payrolls { get; set; }
