@@ -63,7 +63,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy chi tiết một hợp đồng bán hàng.
     /// </summary>
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:guid}", Name = nameof(GetSalesContractByIdAsync))]
     [HasPermission(Permissions.Order.OrderManagement.View)]
     [ProducesResponseType(typeof(SalesContractResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

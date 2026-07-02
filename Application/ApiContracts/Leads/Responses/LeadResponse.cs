@@ -36,7 +36,7 @@ public class LeadResponse
 
     public string IdentificationNumber { get; set; } = string.Empty;
 
-public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 
 public bool IsVerified { get; set; }
 

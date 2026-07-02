@@ -1,4 +1,5 @@
-using Application.Common.Models;
+﻿using Application.Common.Models;
+using Application.Features.Expenses.Responses;
 using Application.Interfaces.Repositories.Expense;
 using Domain.Entities;
 using Domain.Enums;

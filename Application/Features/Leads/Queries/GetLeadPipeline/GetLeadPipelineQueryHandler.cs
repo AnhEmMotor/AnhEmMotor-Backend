@@ -1,6 +1,7 @@
 using Application.ApiContracts.Leads.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Lead.Lead;
+using Domain.Constants.Lead;
 using MediatR;
 using System;
 
@@ -15,12 +16,12 @@ namespace Application.Features.Leads.Queries.GetLeadPipeline
             var leads = await leadRepository.GetAllLeadsWithActivitiesAsync(cancellationToken).ConfigureAwait(false);
             var statuses = new[]
             {
-                new { Key = "New", Display = "Mới" },
-                new { Key = "Consulting", Display = "Đang tư vấn" },
-                new { Key = "TestDriving", Display = "Đang lái thử" },
-                new { Key = "Deposited", Display = "Đã đặt cọc" },
-                new { Key = "Paperwork", Display = "Đang chờ giấy tờ" },
-                new { Key = "Delivered", Display = "Đã giao xe" }
+                new { Key = LeadStatus.New, Display = "Mới" },
+                new { Key = LeadStatus.Consulting, Display = "Đang tư vấn" },
+                new { Key = LeadStatus.TestDriving, Display = "Đang lái thử" },
+                new { Key = LeadStatus.Deposited, Display = "Đã đặt cọc" },
+                new { Key = LeadStatus.Paperwork, Display = "Đang chờ giấy tờ" },
+                new { Key = LeadStatus.Delivered, Display = "Đã giao xe" }
             };
             var result = statuses.Select(
                 s => new LeadPipelineGroupResponse
@@ -40,6 +41,7 @@ namespace Application.Features.Leads.Queries.GetLeadPipeline
                                     Score = l.Score,
                                     Status = l.Status,
                                     Source = l.Source,
+                                    InterestedVehicle = l.InterestedVehicle,
                                     Address = l.Address,
                                     AddressDetail = l.AddressDetail,
                                     Ward = l.Ward,

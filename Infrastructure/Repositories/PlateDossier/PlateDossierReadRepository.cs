@@ -1,4 +1,4 @@
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PlateDossier;
 using Domain.Constants;
 using Domain.Primitives;
@@ -55,8 +55,11 @@ namespace Infrastructure.Repositories.PlateDossier
         {
             return context.GetQuery<Domain.Entities.PlateDossier>(mode)
                 .Include(p => p.Output)
-                .ThenInclude(o => o!.OutputInfos)
-                .ThenInclude(oi => oi.ProductVariant);
+                .ThenInclude(o => o.OutputInfos)
+                .ThenInclude(oi => oi.ProductVariant)
+            .ThenInclude(pv => pv.Product);
         }
     }
 }
+
+

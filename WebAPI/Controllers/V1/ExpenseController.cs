@@ -1,6 +1,7 @@
-using Application.Features.Expenses.Commands.CreateExpense;
+﻿using Application.Features.Expenses.Commands.CreateExpense;
 using Application.Features.Expenses.Commands.DeleteExpense;
 using Application.Features.Expenses.Queries.GetExpenses;
+using Application.Features.Expenses.Responses;
 using Asp.Versioning;
 using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
@@ -21,7 +22,7 @@ public class ExpenseController(IMediator mediator) : ApiController
 {
     [HttpGet]
     [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
-    [ProducesResponseType(typeof(List<Application.Features.Expenses.Queries.GetExpenses.ExpenseResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<ExpenseResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetExpensesQuery(), cancellationToken).ConfigureAwait(false);
@@ -30,7 +31,7 @@ public class ExpenseController(IMediator mediator) : ApiController
 
     [HttpPost]
     [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
-    [ProducesResponseType(typeof(Application.Features.Expenses.Commands.CreateExpense.ExpenseResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ExpenseResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Create([FromBody] CreateExpenseCommand command, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);

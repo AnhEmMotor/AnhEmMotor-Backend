@@ -1,18 +1,7 @@
-using Application.ApiContracts.Statistical.Responses;
 using MediatR;
 using System;
+using Application.Features.Statistical.DTOs;
 
 namespace Application.Features.Statistical.Queries.GetWorkshopDashboard;
 
-public class GetWorkshopDashboardQuery : IRequest<WorkshopDashboardResponse>
-{
-    public DateTimeOffset FromDate { get; set; }
-
-    public DateTimeOffset ToDate { get; set; }
-
-    public GetWorkshopDashboardQuery(DateTimeOffset fromDate, DateTimeOffset toDate)
-    {
-        FromDate = fromDate;
-        ToDate = toDate;
-    }
-}
+public record GetWorkshopDashboardQuery(DateTimeOffset FromDate, DateTimeOffset ToDate) : IRequest<WorkshopDashboardDto>;
