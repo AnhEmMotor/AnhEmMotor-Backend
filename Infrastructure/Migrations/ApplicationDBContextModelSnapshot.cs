@@ -2080,11 +2080,11 @@ namespace Infrastructure.Migrations
                     b.Property<string>("ProductCondition")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RejectionReason")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<decimal?>("RefundAmount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ReturnAction")
                         .HasColumnType("nvarchar(max)");
@@ -3865,6 +3865,196 @@ namespace Infrastructure.Migrations
                     b.HasIndex("IsEnabled", "StartDate", "EndDate");
 
                     b.ToTable("PromotionBanner");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseInvoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatedByUserId");
+
+                    b.Property<string>("CustomerAddress")
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("CustomerAddress");
+
+                    b.Property<string>("CustomerIdCard")
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("CustomerIdCard");
+
+                    b.Property<string>("CustomerName")
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("CustomerName");
+
+                    b.Property<string>("CustomerPhone")
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("CustomerPhone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DueDate")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("DueDate");
+
+                    b.Property<DateTimeOffset>("InvoiceDate")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("InvoiceDate");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("InvoiceNumber");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnName("Notes");
+
+                    b.Property<DateTimeOffset?>("PaidAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("PaidAt");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("PaymentMethod");
+
+                    b.Property<string>("PaymentStatus")
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("PaymentStatus");
+
+                    b.Property<int?>("PurchaseRequestId")
+                        .HasColumnType("int")
+                        .HasColumnName("PurchaseRequestId");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("Status");
+
+                    b.Property<decimal>("SubTotal")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("SubTotal");
+
+                    b.Property<string>("SupplierAddress")
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("SupplierAddress");
+
+                    b.Property<int?>("SupplierId")
+                        .HasColumnType("int")
+                        .HasColumnName("SupplierId");
+
+                    b.Property<string>("SupplierName")
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("SupplierName");
+
+                    b.Property<string>("SupplierPhone")
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("SupplierPhone");
+
+                    b.Property<string>("SupplierTaxCode")
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("SupplierTaxCode");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("TaxAmount");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("TotalAmount");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseRequestId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("PurchaseInvoice");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseInvoiceItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ColorName")
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("ColorName");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ProductName")
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("ProductName");
+
+                    b.Property<int?>("ProductVariantColorId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantColorId");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductVariantId");
+
+                    b.Property<int>("PurchaseInvoiceId")
+                        .HasColumnType("int")
+                        .HasColumnName("PurchaseInvoiceId");
+
+                    b.Property<int?>("PurchaseRequestItemId")
+                        .HasColumnType("int")
+                        .HasColumnName("PurchaseRequestItemId");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int")
+                        .HasColumnName("Quantity");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("TaxAmount");
+
+                    b.Property<decimal>("TaxRate")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("TaxRate");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("TotalAmount");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("UnitPrice");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("VariantName")
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("VariantName");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseInvoiceId");
+
+                    b.ToTable("PurchaseInvoiceItem");
                 });
 
             modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
@@ -6702,6 +6892,32 @@ namespace Infrastructure.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
+            modelBuilder.Entity("Domain.Entities.PurchaseInvoice", b =>
+                {
+                    b.HasOne("Domain.Entities.PurchaseRequest", "PurchaseRequest")
+                        .WithMany()
+                        .HasForeignKey("PurchaseRequestId");
+
+                    b.HasOne("Domain.Entities.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId");
+
+                    b.Navigation("PurchaseRequest");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseInvoiceItem", b =>
+                {
+                    b.HasOne("Domain.Entities.PurchaseInvoice", "PurchaseInvoice")
+                        .WithMany("PurchaseInvoiceItems")
+                        .HasForeignKey("PurchaseInvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PurchaseInvoice");
+                });
+
             modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
                 {
                     b.HasOne("Domain.Entities.ApplicationUser", "ApprovedByUser")
@@ -7477,6 +7693,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("ProductVariantColors");
 
                     b.Navigation("VariantOptionValues");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseInvoice", b =>
+                {
+                    b.Navigation("PurchaseInvoiceItems");
                 });
 
             modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>

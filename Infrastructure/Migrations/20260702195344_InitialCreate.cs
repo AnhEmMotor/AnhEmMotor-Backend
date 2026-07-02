@@ -73,6 +73,8 @@ namespace Infrastructure.Migrations
                     MaxParcelWeightKg = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     AllowLiquidCargo = table.Column<bool>(type: "bit", nullable: false),
                     AllowOversizeCargo = table.Column<bool>(type: "bit", nullable: false),
+                    PricingRulesJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SlaJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -102,6 +104,33 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Contact", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ConversionTool",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Type = table.Column<string>(type: "nvarchar(20)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(200)", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    DelaySeconds = table.Column<int>(type: "int", nullable: true),
+                    Pages = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    Views = table.Column<int>(type: "int", nullable: false),
+                    Clicks = table.Column<int>(type: "int", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(500)", nullable: true),
+                    Url = table.Column<string>(type: "nvarchar(500)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", nullable: true),
+                    Leads = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ConversionTool", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -274,6 +303,8 @@ namespace Infrastructure.Migrations
                     ReturnProofImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ReturnInternalNote = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ReturnAction = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RefundAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    ReturnShippingCost = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -480,6 +511,37 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WorkshopPayment",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PaymentNumber = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    SourceType = table.Column<string>(type: "nvarchar(30)", nullable: false),
+                    SourceId = table.Column<int>(type: "int", nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(100)", nullable: false),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(20)", nullable: false),
+                    VehicleInfo = table.Column<string>(type: "nvarchar(200)", nullable: true),
+                    ServiceDescription = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    SubTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(30)", nullable: false),
+                    PaymentStatus = table.Column<string>(type: "nvarchar(30)", nullable: false),
+                    ReceivedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    PaidAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    InvoicePrintedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WorkshopPayment", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -925,7 +987,7 @@ namespace Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     InvoiceNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IssueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -936,9 +998,9 @@ namespace Infrastructure.Migrations
                     VehicleColor = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ChassisNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EngineNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    VehiclePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    RegistrationFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    InsuranceFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    VehiclePrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    RegistrationFee = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    InsuranceFee = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     PaymentMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BankName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -1832,6 +1894,53 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PurchaseInvoice",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InvoiceNumber = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    PurchaseRequestId = table.Column<int>(type: "int", nullable: true),
+                    SupplierId = table.Column<int>(type: "int", nullable: true),
+                    SupplierName = table.Column<string>(type: "nvarchar(200)", nullable: true),
+                    SupplierPhone = table.Column<string>(type: "nvarchar(20)", nullable: true),
+                    SupplierAddress = table.Column<string>(type: "nvarchar(500)", nullable: true),
+                    SupplierTaxCode = table.Column<string>(type: "nvarchar(50)", nullable: true),
+                    CustomerName = table.Column<string>(type: "nvarchar(200)", nullable: true),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(20)", nullable: true),
+                    CustomerAddress = table.Column<string>(type: "nvarchar(500)", nullable: true),
+                    CustomerIdCard = table.Column<string>(type: "nvarchar(30)", nullable: true),
+                    InvoiceDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    DueDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(30)", nullable: false),
+                    SubTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TaxAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(30)", nullable: true),
+                    PaymentStatus = table.Column<string>(type: "nvarchar(30)", nullable: true),
+                    PaidAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    CreatedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PurchaseInvoice", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PurchaseInvoice_PurchaseRequest_PurchaseRequestId",
+                        column: x => x.PurchaseRequestId,
+                        principalTable: "PurchaseRequest",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_PurchaseInvoice_Supplier_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "Supplier",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PurchaseRequestAuditLog",
                 columns: table => new
                 {
@@ -2361,6 +2470,42 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ReturnRequest",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    OrderCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OriginalTrackingNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Carrier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CancelReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReturnAction = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EvidenceImagesJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    InspectedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReturnRequest", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReturnRequest_Output_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Output",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SalesContracts",
                 columns: table => new
                 {
@@ -2409,6 +2554,39 @@ namespace Infrastructure.Migrations
                         column: x => x.CustomerId,
                         principalTable: "Users",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PurchaseInvoiceItem",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PurchaseInvoiceId = table.Column<int>(type: "int", nullable: false),
+                    PurchaseRequestItemId = table.Column<int>(type: "int", nullable: true),
+                    ProductVariantId = table.Column<int>(type: "int", nullable: false),
+                    ProductVariantColorId = table.Column<int>(type: "int", nullable: true),
+                    ProductName = table.Column<string>(type: "nvarchar(200)", nullable: true),
+                    VariantName = table.Column<string>(type: "nvarchar(100)", nullable: true),
+                    ColorName = table.Column<string>(type: "nvarchar(50)", nullable: true),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TaxRate = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    TaxAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PurchaseInvoiceItem", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PurchaseInvoiceItem_PurchaseInvoice_PurchaseInvoiceId",
+                        column: x => x.PurchaseInvoiceId,
+                        principalTable: "PurchaseInvoice",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -2655,6 +2833,41 @@ namespace Infrastructure.Migrations
                         principalTable: "Supplier",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReturnRequestItem",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReturnRequestId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Sku = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ThumbnailUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    ReturnQuantity = table.Column<int>(type: "int", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReturnRequestItem", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReturnRequestItem_Product_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Product",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ReturnRequestItem_ReturnRequest_ReturnRequestId",
+                        column: x => x.ReturnRequestId,
+                        principalTable: "ReturnRequest",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -3146,43 +3359,6 @@ namespace Infrastructure.Migrations
                         column: x => x.ServiceId,
                         principalTable: "Services",
                         principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ServiceEvaluation",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ServiceBookingId = table.Column<int>(type: "int", nullable: false),
-                    ContactId = table.Column<int>(type: "int", nullable: false),
-                    Criteria = table.Column<string>(type: "nvarchar(30)", nullable: false),
-                    Rating = table.Column<int>(type: "int", nullable: false),
-                    Review = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
-                    ProcessingStatus = table.Column<string>(type: "nvarchar(30)", nullable: false),
-                    InternalNotes = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    DirectReplyText = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    AdminRepliedById = table.Column<int>(type: "int", nullable: true),
-                    ProcessedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ServiceEvaluation", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ServiceEvaluation_Contact_ContactId",
-                        column: x => x.ContactId,
-                        principalTable: "Contact",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ServiceEvaluation_ServiceBooking_ServiceBookingId",
-                        column: x => x.ServiceBookingId,
-                        principalTable: "ServiceBooking",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -3695,6 +3871,21 @@ namespace Infrastructure.Migrations
                 column: "UpdatedBy");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PurchaseInvoice_PurchaseRequestId",
+                table: "PurchaseInvoice",
+                column: "PurchaseRequestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PurchaseInvoice_SupplierId",
+                table: "PurchaseInvoice",
+                column: "SupplierId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PurchaseInvoiceItem_PurchaseInvoiceId",
+                table: "PurchaseInvoiceItem",
+                column: "PurchaseInvoiceId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequest_ApprovedBy",
                 table: "PurchaseRequest",
                 column: "ApprovedBy");
@@ -3780,6 +3971,21 @@ namespace Infrastructure.Migrations
                 column: "ServiceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ReturnRequest_OrderId",
+                table: "ReturnRequest",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReturnRequestItem_ProductId",
+                table: "ReturnRequestItem",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReturnRequestItem_ReturnRequestId",
+                table: "ReturnRequestItem",
+                column: "ReturnRequestId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",
                 table: "RoleClaims",
                 column: "RoleId");
@@ -3825,16 +4031,6 @@ namespace Infrastructure.Migrations
                 name: "IX_ServiceBooking_VehicleId",
                 table: "ServiceBooking",
                 column: "VehicleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ServiceEvaluation_ContactId",
-                table: "ServiceEvaluation",
-                column: "ContactId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ServiceEvaluation_ServiceBookingId",
-                table: "ServiceEvaluation",
-                column: "ServiceBookingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Services_CategoryId",
@@ -4074,6 +4270,9 @@ namespace Infrastructure.Migrations
                 name: "ContactReply");
 
             migrationBuilder.DropTable(
+                name: "ConversionTool");
+
+            migrationBuilder.DropTable(
                 name: "CurrentUnreconciledCods");
 
             migrationBuilder.DropTable(
@@ -4158,6 +4357,9 @@ namespace Infrastructure.Migrations
                 name: "PromotionBanner");
 
             migrationBuilder.DropTable(
+                name: "PurchaseInvoiceItem");
+
+            migrationBuilder.DropTable(
                 name: "PurchaseRequestAuditLog");
 
             migrationBuilder.DropTable(
@@ -4165,6 +4367,9 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "RepairOrderDetail");
+
+            migrationBuilder.DropTable(
+                name: "ReturnRequestItem");
 
             migrationBuilder.DropTable(
                 name: "RoleClaims");
@@ -4176,7 +4381,7 @@ namespace Infrastructure.Migrations
                 name: "SalesContracts");
 
             migrationBuilder.DropTable(
-                name: "ServiceEvaluation");
+                name: "ServiceBooking");
 
             migrationBuilder.DropTable(
                 name: "Setting");
@@ -4233,6 +4438,9 @@ namespace Infrastructure.Migrations
                 name: "WarrantyClaimPart");
 
             migrationBuilder.DropTable(
+                name: "WorkshopPayment");
+
+            migrationBuilder.DropTable(
                 name: "Banner");
 
             migrationBuilder.DropTable(
@@ -4251,13 +4459,19 @@ namespace Infrastructure.Migrations
                 name: "ParcelDeliveryOrders");
 
             migrationBuilder.DropTable(
+                name: "PurchaseInvoice");
+
+            migrationBuilder.DropTable(
                 name: "RepairOrder");
+
+            migrationBuilder.DropTable(
+                name: "ReturnRequest");
 
             migrationBuilder.DropTable(
                 name: "Permissions");
 
             migrationBuilder.DropTable(
-                name: "ServiceBooking");
+                name: "Services");
 
             migrationBuilder.DropTable(
                 name: "SupplierContracts");
@@ -4287,7 +4501,7 @@ namespace Infrastructure.Migrations
                 name: "EmployeeProfile");
 
             migrationBuilder.DropTable(
-                name: "Services");
+                name: "ServiceCategories");
 
             migrationBuilder.DropTable(
                 name: "TechnologyCategories");
@@ -4297,9 +4511,6 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Vehicle");
-
-            migrationBuilder.DropTable(
-                name: "ServiceCategories");
 
             migrationBuilder.DropTable(
                 name: "PredefinedOption");
