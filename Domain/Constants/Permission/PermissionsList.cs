@@ -280,6 +280,20 @@ public static class PermissionsList
                     new PermissionActionMetadata { Id = Permissions.Order.OrderManagement.Delete, Name = "Xóa", Description = "Xóa quản lý đơn hàng" },
                     new PermissionActionMetadata { Id = Permissions.Order.OrderManagement.ChangeStatus, Name = "Đổi trạng thái", Description = "Đổi trạng thái quản lý đơn hàng" },
                 }},
+                new PermissionFeatureMetadata { Id = "Permissions.Order.DraftOrderManagement", Name = "Quản lý phiếu tạm", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Order.DraftOrderManagement.View, Name = "Xem", Description = "Xem quản lý phiếu tạm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.DraftOrderManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý phiếu tạm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.DraftOrderManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý phiếu tạm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.DraftOrderManagement.Delete, Name = "Xóa", Description = "Xóa quản lý phiếu tạm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.DraftOrderManagement.ChangeStatus, Name = "Đổi trạng thái", Description = "Đổi trạng thái quản lý phiếu tạm" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Order.SalesInvoiceManagement", Name = "Quản lý phiếu bán hàng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Order.SalesInvoiceManagement.View, Name = "Xem", Description = "Xem quản lý phiếu bán hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.SalesInvoiceManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý phiếu bán hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.SalesInvoiceManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý phiếu bán hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.SalesInvoiceManagement.Delete, Name = "Xóa", Description = "Xóa quản lý phiếu bán hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.SalesInvoiceManagement.ChangeStatus, Name = "Đổi trạng thái", Description = "Đổi trạng thái quản lý phiếu bán hàng" },
+                }},
                 new PermissionFeatureMetadata { Id = "Permissions.Order.ProductSelection", Name = "Chọn sản phẩm", Permissions = new() {
                     new PermissionActionMetadata { Id = Permissions.Order.ProductSelection.View, Name = "Xem", Description = "Xem chọn sản phẩm" },
                 }}
