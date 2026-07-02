@@ -34,6 +34,10 @@ namespace Application.ApiContracts.Return.Responses
 
         public decimal ReturnShippingCost { get; set; }
 
+        public decimal CodAmount { get; set; }
+
+        public decimal ShippingCost { get; set; }
+
         public string? CarrierReturnNote { get; set; }
 
         public List<ReturnDetailItemResponse> Items { get; set; } = [];

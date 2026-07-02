@@ -31,6 +31,8 @@ public class GetCarriersQueryHandler(ICarrierPartnerReadRepository carrierPartne
                     MaxParcelWeightKg = x.MaxParcelWeightKg,
                     AllowLiquidCargo = x.AllowLiquidCargo,
                     AllowOversizeCargo = x.AllowOversizeCargo,
+                    PricingRulesJson = x.PricingRulesJson,
+                    SlaJson = x.SlaJson,
                 })
             .ToList();
         return Result<CarrierPartnerResponse>.Success(new CarrierPartnerResponse { Items = items });

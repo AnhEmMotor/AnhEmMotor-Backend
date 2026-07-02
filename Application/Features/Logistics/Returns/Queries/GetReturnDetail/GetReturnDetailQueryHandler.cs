@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Return.Responses;
+using Application.ApiContracts.Return.Responses;
 using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Entities.Logistics;
 using Domain.Enums;
@@ -32,6 +32,10 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturnDetail
                 ReturnProofImage = order.ReturnProofImage,
                 ReturnInternalNote = order.ReturnInternalNote,
                 ReturnAction = order.ReturnAction,
+                RefundAmount = order.RefundAmount ?? 0,
+                ReturnShippingCost = order.ReturnShippingCost ?? 0,
+                CodAmount = order.CodAmount,
+                ShippingCost = order.ShippingCost,
                 Items =
                     [.. order.Items
                         .Select(
