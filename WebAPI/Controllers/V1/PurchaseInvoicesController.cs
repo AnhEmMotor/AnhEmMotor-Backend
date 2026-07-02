@@ -1,11 +1,10 @@
-﻿using Asp.Versioning;
+using Asp.Versioning;
 using Application.ApiContracts.PurchaseInvoice.Requests;
 using Application.ApiContracts.PurchaseInvoice.Responses;
 using Application.Common.Models;
 using Application.Features.PurchaseInvoices.Commands.CreatePurchaseInvoice;
 using Application.Features.PurchaseInvoices.Queries.GetPurchaseInvoiceById;
 using Application.Features.PurchaseInvoices.Queries.GetPurchaseInvoices;
-using Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -23,7 +22,7 @@ namespace WebAPI.Controllers.V1
     public class PurchaseInvoicesController(IMediator mediator) : ApiController
     {
         [HttpPost]
-        [HasPermission(PurchaseInvoices.Create)]
+        [HasPermission(Domain.Constants.Permission.PurchaseInvoices.Create)]
         [ProducesResponseType(typeof(PurchaseInvoiceDetailResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateAsync(
@@ -56,7 +55,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpGet]
-        [HasPermission(PurchaseInvoices.View)]
+        [HasPermission(Domain.Constants.Permission.PurchaseInvoices.View)]
         [ProducesResponseType(typeof(PagedResult<PurchaseInvoiceListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllAsync(
             [FromQuery] SieveModel sieveModel,
@@ -70,7 +69,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpGet("{id:int}")]
-        [HasPermission(PurchaseInvoices.View)]
+        [HasPermission(Domain.Constants.Permission.PurchaseInvoices.View)]
         [ProducesResponseType(typeof(PurchaseInvoiceDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByIdAsync(
