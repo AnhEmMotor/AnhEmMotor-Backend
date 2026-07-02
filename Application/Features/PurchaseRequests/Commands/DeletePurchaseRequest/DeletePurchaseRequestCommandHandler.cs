@@ -29,7 +29,7 @@ namespace Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest
                 var userId = currentUserContext.GetUserId();
                 if (!await permissionReadRepository.CheckUserPermissionsAsync(
                     userId,
-                    [Domain.Constants.Permission.Permissions.PurchaseRequests.ApproveReject],
+                    [Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.ApproveReject],
                     cancellationToken)
                     .ConfigureAwait(false))
                 {

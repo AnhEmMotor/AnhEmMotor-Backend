@@ -53,7 +53,7 @@ public sealed class GetPaymentLinkQueryHandler(
                     roleIds,
                     cancellationToken);
                 if (userPermissions != null &&
-                    userPermissions.Contains(Domain.Constants.Permission.Permissions.Outputs.Edit))
+                    userPermissions.Contains(Domain.Constants.Permission.Permissions.Order.OrderManagement.Edit))
                 {
                     hasEditPermission = true;
                 }

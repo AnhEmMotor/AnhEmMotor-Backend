@@ -38,5 +38,15 @@ public class LeadResponse
 
     public DateTimeOffset CreatedAt { get; set; }
 
-    public List<LeadActivityResponse> Activities { get; set; } = [];
+public bool IsVerified { get; set; }
+
+public string Tier { get; set; } = string.Empty;
+
+public int Points { get; set; }
+
+public Guid? AssignedToId { get; set; }
+
+public string? AssignedToName { get; set; }
+
+public List<LeadActivityResponse> Activities { get; set; } = [];
 }

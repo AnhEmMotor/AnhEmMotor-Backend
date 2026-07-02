@@ -33,6 +33,8 @@ public class UpdateCarrierPartnerCommandHandler(
         entity.MaxParcelWeightKg = req.MaxParcelWeightKg;
         entity.AllowLiquidCargo = req.AllowLiquidCargo;
         entity.AllowOversizeCargo = req.AllowOversizeCargo;
+        entity.PricingRulesJson = req.PricingRulesJson;
+        entity.SlaJson = req.SlaJson;
         if (!string.IsNullOrWhiteSpace(req.ApiTokenPlain))
             entity.ApiToken = req.ApiTokenPlain!;
         if (!string.IsNullOrWhiteSpace(req.WebhookSecretPlain))

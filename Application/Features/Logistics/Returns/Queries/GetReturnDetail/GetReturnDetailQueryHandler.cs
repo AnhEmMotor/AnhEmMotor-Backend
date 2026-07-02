@@ -24,7 +24,7 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturnDetail
                 OriginalTrackingNumber = order.TrackingNumber ?? string.Empty,
                 CustomerName = order.CustomerName ?? string.Empty,
                 Carrier = order.Carrier ?? string.Empty,
-                Reason = order.ReturnReason ?? "Kh·ch bom h‡ng",
+                Reason = order.ReturnReason ?? "Kh√°ch bom h√†ng",
                 Status = GetReturnStatus(order),
                 CreatedAt = order.CreatedAt,
                 BoxCondition = order.BoxCondition,
@@ -32,6 +32,10 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturnDetail
                 ReturnProofImage = order.ReturnProofImage,
                 ReturnInternalNote = order.ReturnInternalNote,
                 ReturnAction = order.ReturnAction,
+                RefundAmount = order.RefundAmount ?? 0,
+                ReturnShippingCost = order.ReturnShippingCost ?? 0,
+                CodAmount = order.CodAmount,
+                ShippingCost = order.ShippingCost,
                 Items =
                     [.. order.Items
                         .Select(

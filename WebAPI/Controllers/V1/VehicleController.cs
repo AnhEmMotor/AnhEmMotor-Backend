@@ -3,6 +3,7 @@ using Application.Features.Vehicles.Commands.CreateVehicle;
 using Application.Features.Vehicles.Commands.TransferOwnership;
 using Application.Features.Vehicles.Commands.UpdateLicensePlate;
 using Application.Features.Vehicles.Queries.GetVehicles;
+using Application.Features.Vehicles.Queries.GetVehiclePortfolio;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -51,6 +52,20 @@ public class VehicleController(IMediator mediator) : ApiController
     {
         var result = await mediator.Send(new GetVehiclesQuery { SieveModel = sieveModel }, cancellationToken)
             .ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tra cứu portfolio xe
+    /// </summary>
+    /// <param name="query">The portfolio query.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    [HttpGet("portfolio")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Tra cứu portfolio xe")]
+    public async Task<IActionResult> GetPortfolioAsync([FromQuery] GetVehiclePortfolioQuery request, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

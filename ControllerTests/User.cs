@@ -62,7 +62,7 @@ public class User
         _mediatorMock.Verify(m => m.Send(It.IsAny<GetCurrentUserQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "USER_037 - Controller - GET /api/v1/User/me x? lý exception")]
+    [Fact(DisplayName = "USER_037 - Controller - GET /api/v1/User/me xử lý exception")]
     public async Task GetCurrentUser_HandlesException_ThrowsUnauthorizedException()
     {
         var userId = Guid.NewGuid();
@@ -106,7 +106,7 @@ public class User
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
     }
 
-    [Fact(DisplayName = "USER_039 - Controller - PUT /api/v1/User/me v?i body null ho?c r?ng")]
+    [Fact(DisplayName = "USER_039 - Controller - PUT /api/v1/User/me với body null hoặc rỗng")]
     public async Task UpdateCurrentUser_EmptyBody_CallsMediator()
     {
         var request = new UpdateCurrentUserCommand();
@@ -120,7 +120,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_040 - Controller - PUT /api/v1/User/me x? lý ValidationException")]
+    [Fact(DisplayName = "USER_040 - Controller - PUT /api/v1/User/me xử lý ValidationException")]
     public async Task UpdateCurrentUser_ValidationException_ThrowsValidationException()
     {
         var request = new UpdateCurrentUserCommand { PhoneNumber = "invalid" };
@@ -151,7 +151,7 @@ public class User
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
     }
 
-    [Fact(DisplayName = "USER_042 - Controller - POST /api/v1/User/change-password v?i body thi?u tru?ng")]
+    [Fact(DisplayName = "USER_042 - Controller - POST /api/v1/User/change-password với body thiếu trường")]
     public async Task ChangePassword_MissingField_ThrowsValidationException()
     {
         var request = new ChangePasswordCommand { CurrentPassword = "Old", NewPassword = string.Empty };
@@ -162,7 +162,7 @@ public class User
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_043 - Controller - POST /api/v1/User/change-password x? lý UnauthorizedException")]
+    [Fact(DisplayName = "USER_043 - Controller - POST /api/v1/User/change-password xử lý UnauthorizedException")]
     public async Task ChangePassword_UnauthorizedException_ThrowsUnauthorizedException()
     {
         var request = new ChangePasswordCommand { CurrentPassword = "Wrong", NewPassword = "New" };
@@ -188,7 +188,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_045 - Controller - POST /api/v1/User/delete-account x? lý ForbiddenException")]
+    [Fact(DisplayName = "USER_045 - Controller - POST /api/v1/User/delete-account xử lý ForbiddenException")]
     public async Task DeleteAccount_ForbiddenException_ReturnsForbiddenObjectResult()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteCurrentUserAccountCommand>(), It.IsAny<CancellationToken>()))
@@ -214,7 +214,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_047 - Controller - POST /api/v1/User/{userId}/restore v?i userId không h?p l?")]
+    [Fact(DisplayName = "USER_047 - Controller - POST /api/v1/User/{userId}/restore với userId không hợp lệ")]
     public async Task RestoreAccount_InvalidGuid_ModelBindingFail()
     {
         var userId = Guid.Empty;
@@ -224,7 +224,7 @@ public class User
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_048 - Controller - POST /api/v1/User/{userId}/restore x? lý NotFoundException")]
+    [Fact(DisplayName = "USER_048 - Controller - POST /api/v1/User/{userId}/restore xử lý NotFoundException")]
     public async Task RestoreAccount_NotFoundException_ThrowsNotFoundException()
     {
         var userId = Guid.NewGuid();
@@ -234,7 +234,7 @@ public class User
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact(DisplayName = "USER_049 - Controller - POST /api/v1/User/{userId}/restore x? lý BadRequestException")]
+    [Fact(DisplayName = "USER_049 - Controller - POST /api/v1/User/{userId}/restore xử lý BadRequestException")]
     public async Task RestoreAccount_BadRequestException_ThrowsBadRequestException()
     {
         var userId = Guid.NewGuid();

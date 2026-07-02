@@ -29,17 +29,9 @@ public sealed partial class GetProductCategoriesListQueryHandler(IProductCategor
                 }
             }
         }
-        if (!string.IsNullOrWhiteSpace(searchKeyword))
-        {
-            var pagedResult = await repository.GetPagedListAsync(request.SieveModel!, searchKeyword, cancellationToken)
-                .ConfigureAwait(false);
-            return Result<PagedResult<ProductCategoryResponse>>.Success(pagedResult);
-        }
-        var result = await repository.GetPagedAsync<ProductCategoryResponse>(
-            request.SieveModel!,
-            cancellationToken: cancellationToken)
+        var pagedResult = await repository.GetPagedListAsync(request.SieveModel!, searchKeyword, cancellationToken)
             .ConfigureAwait(false);
-        return result;
+        return Result<PagedResult<ProductCategoryResponse>>.Success(pagedResult);
     }
 
     [GeneratedRegex(@"Name@=(.+?)(?:,|$)", RegexOptions.CultureInvariant)]

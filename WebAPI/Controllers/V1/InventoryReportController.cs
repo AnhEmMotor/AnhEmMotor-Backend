@@ -4,7 +4,7 @@ using Application.Features.InventoryReports.Queries.ExportInventoryReport;
 using Application.Features.InventoryReports.Queries.GetInventoryReportDetail;
 using Application.Features.InventoryReports.Queries.GetInventoryReportSummary;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -27,7 +27,7 @@ namespace WebAPI.Controllers.V1
         /// Báo cáo tổng hợp tồn kho
         /// </summary>
         [HttpGet]
-        [HasPermission(InventoryReceipts.View)]
+        [HasPermission(Permissions.Warehouse.ReceiptManagement.View)]
         [ProducesResponseType(typeof(PagedResult<InventoryReportSummaryResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetInventoryReportSummaryAsync(
             [FromQuery] GetInventoryReportSummaryQuery query,
@@ -41,7 +41,7 @@ namespace WebAPI.Controllers.V1
         /// Xuất báo cáo tồn kho ra tệp Excel
         /// </summary>
         [HttpGet("export")]
-        [HasPermission(InventoryReceipts.View)]
+        [HasPermission(Permissions.Warehouse.ReceiptManagement.View)]
         [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
         public async Task<IActionResult> ExportInventoryReportAsync(
             [FromQuery] ExportInventoryReportQuery query,
@@ -55,7 +55,7 @@ namespace WebAPI.Controllers.V1
         /// Báo cáo chi tiết giao dịch kho cho một biến thể sản phẩm và màu sắc
         /// </summary>
         [HttpGet("details")]
-        [HasPermission(InventoryReceipts.View)]
+        [HasPermission(Permissions.Warehouse.ReceiptManagement.View)]
         [ProducesResponseType(typeof(InventoryReportDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

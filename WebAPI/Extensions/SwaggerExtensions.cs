@@ -58,6 +58,7 @@ public static class SwaggerExtensions
                     }
                 }
                 options.EnableAnnotations();
+                options.CustomSchemaIds(type => type.FullName);
             });
         return services;
     }

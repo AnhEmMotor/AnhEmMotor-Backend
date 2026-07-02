@@ -1,306 +1,375 @@
-using Domain.Constants.Permission.Permissions;
-using PurchaseOrder = Domain.Constants.Permission.Permissions.PurchaseOrder;
+using System.Collections.Generic;
+using System.Linq;
+using Domain.Constants.Permission;
 
 namespace Domain.Constants.Permission;
 
 public static class PermissionsList
 {
-    private static readonly Dictionary<string, PermissionMetadata> PermissionMetadataMap = new()
-    {
-        { Brands.View, new PermissionMetadata("View Brands", "Xem danh sách thương hiệu") },
-        { Brands.Create, new PermissionMetadata("Create Brand", "Tạo thương hiệu mới") },
-        { Brands.Edit, new PermissionMetadata("Edit Brand", "Chỉnh sửa thương hiệu") },
-        { Brands.Delete, new PermissionMetadata("Delete Brand", "Xóa thương hiệu") },
-
-        { Products.View, new PermissionMetadata("View Products", "Xem danh sách sản phẩm") },
-        { Products.Create, new PermissionMetadata("Create Product", "Tạo sản phẩm mới") },
-        { Products.Edit, new PermissionMetadata("Edit Product", "Chỉnh sửa sản phẩm") },
-        { Products.Delete, new PermissionMetadata("Delete Product", "Xóa sản phẩm") },
-        { Products.EditPrice, new PermissionMetadata("Edit Price", "Chỉnh giá của sản phẩm") },
+    public static readonly List<PermissionModuleMetadata> ModulesTree =
+    [
+        new PermissionModuleMetadata
         {
-            Products.ChangeStatus,
-            new PermissionMetadata("Change Status", "Chỉnh trạng thái của sản phẩm (đang bán hoặc ngưng bán)")
+            Id = "Permissions.Admin",
+            Name = "Ban Điều Hành & Chủ Showroom",
+            Features =
+            [
+                new PermissionFeatureMetadata { Id = "Permissions.Admin.EmployeeManagement", Name = "Quản lý nhân viên", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Admin.EmployeeManagement.View, Name = "Xem", Description = "Xem quản lý nhân viên" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.EmployeeManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý nhân viên" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.EmployeeManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý nhân viên" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.EmployeeManagement.Delete, Name = "Xóa", Description = "Xóa quản lý nhân viên" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Admin.PayrollManagement", Name = "Quản lý lương", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Admin.PayrollManagement.View, Name = "Xem", Description = "Xem quản lý lương" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.PayrollManagement.Configure, Name = "Cấu hình", Description = "Cấu hình quản lý lương" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.PayrollManagement.Approve, Name = "Phê duyệt", Description = "Phê duyệt quản lý lương" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Admin.DashboardManagement", Name = "Tổng quan (Dashboard)", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Admin.DashboardManagement.View, Name = "Xem", Description = "Xem tổng quan (dashboard)" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.DashboardManagement.Export, Name = "Xuất dữ liệu", Description = "Xuất dữ liệu tổng quan (dashboard)" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Admin.ContractManagement", Name = "Quản lý hợp đồng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Admin.ContractManagement.View, Name = "Xem", Description = "Xem quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.ContractManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.ContractManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.ContractManagement.Delete, Name = "Xóa", Description = "Xóa quản lý hợp đồng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Admin.FileManagement", Name = "Quản lý tệp", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Admin.FileManagement.View, Name = "Xem", Description = "Xem quản lý tệp" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.FileManagement.Upload, Name = "Tải lên", Description = "Tải lên quản lý tệp" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.FileManagement.Delete, Name = "Xóa", Description = "Xóa quản lý tệp" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Admin.RoleManagement", Name = "Quản lý phân quyền", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Admin.RoleManagement.View, Name = "Xem", Description = "Xem quản lý phân quyền" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.RoleManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý phân quyền" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.RoleManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý phân quyền" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.RoleManagement.Delete, Name = "Xóa", Description = "Xóa quản lý phân quyền" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Admin.SettingManagement", Name = "Cài đặt hệ thống", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Admin.SettingManagement.View, Name = "Xem", Description = "Xem cài đặt hệ thống" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.SettingManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa cài đặt hệ thống" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Admin.UserManagement", Name = "Quản lý người dùng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Admin.UserManagement.View, Name = "Xem", Description = "Xem quản lý người dùng" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.UserManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý người dùng" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.UserManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý người dùng" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.UserManagement.Delete, Name = "Xóa", Description = "Xóa quản lý người dùng" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.UserManagement.AssignRoles, Name = "Gán quyền", Description = "Gán quyền quản lý người dùng" },
+                    new PermissionActionMetadata { Id = Permissions.Admin.UserManagement.ChangePassword, Name = "Đổi mật khẩu", Description = "Đổi mật khẩu quản lý người dùng" },
+                }}
+            ]
         },
-
-        { ProductCategories.View, new PermissionMetadata("View Product Categories", "Xem danh mục sản phẩm") },
-        { ProductCategories.Create, new PermissionMetadata("Create Product Category", "Tạo danh mục sản phẩm mới") },
-        { ProductCategories.Edit, new PermissionMetadata("Edit Product Category", "Chỉnh sửa danh mục sản phẩm") },
-        { ProductCategories.Delete, new PermissionMetadata("Delete Product Category", "Xóa danh mục sản phẩm") },
-
-        { Suppliers.View, new PermissionMetadata("View Suppliers", "Xem danh sách nhà cung cấp") },
-        { Suppliers.Create, new PermissionMetadata("Create Supplier", "Tạo nhà cung cấp mới") },
-        { Suppliers.Edit, new PermissionMetadata("Edit Supplier", "Chỉnh sửa nhà cung cấp") },
-        { Suppliers.Delete, new PermissionMetadata("Delete Supplier", "Xóa nhà cung cấp") },
-
-        { Outputs.View, new PermissionMetadata("View Outputs", "Xem danh sách đơn xuất hàng") },
+        new PermissionModuleMetadata
         {
-            Outputs.ViewConfirmed,
-            new PermissionMetadata("View Confirmed Outputs", "Xem danh sách phiếu bán hàng đã xác nhận")
+            Id = "Permissions.Marketing",
+            Name = "Marketing & SEO",
+            Features =
+            [
+                new PermissionFeatureMetadata { Id = "Permissions.Marketing.BannerManagement", Name = "Quản lý Banner", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Marketing.BannerManagement.View, Name = "Xem", Description = "Xem quản lý banner" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.BannerManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý banner" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.BannerManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý banner" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.BannerManagement.Delete, Name = "Xóa", Description = "Xóa quản lý banner" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Marketing.CustomerManagement", Name = "Quản lý khách hàng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Marketing.CustomerManagement.View, Name = "Xem", Description = "Xem quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.CustomerManagement.Reply, Name = "Phản hồi", Description = "Phản hồi quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.CustomerManagement.EditNote, Name = "Sửa ghi chú", Description = "Sửa ghi chú quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.CustomerManagement.Delete, Name = "Xóa", Description = "Xóa quản lý khách hàng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Marketing.LeadManagement", Name = "Quản lý KH tiềm năng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Marketing.LeadManagement.View, Name = "Xem", Description = "Xem quản lý kh tiềm năng" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.LeadManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý kh tiềm năng" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.LeadManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý kh tiềm năng" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.LeadManagement.Delete, Name = "Xóa", Description = "Xóa quản lý kh tiềm năng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Marketing.NewsManagement", Name = "Quản lý tin tức", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Marketing.NewsManagement.View, Name = "Xem", Description = "Xem quản lý tin tức" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.NewsManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý tin tức" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.NewsManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý tin tức" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.NewsManagement.Delete, Name = "Xóa", Description = "Xóa quản lý tin tức" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Marketing.BookingManagement", Name = "Quản lý đặt lịch (Booking)", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Marketing.BookingManagement.View, Name = "Xem", Description = "Xem quản lý đặt lịch (booking)" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.BookingManagement.Confirm, Name = "Xác nhận", Description = "Xác nhận quản lý đặt lịch (booking)" },
+                    new PermissionActionMetadata { Id = Permissions.Marketing.BookingManagement.Delete, Name = "Xóa", Description = "Xóa quản lý đặt lịch (booking)" },
+                }}
+            ]
         },
+        new PermissionModuleMetadata
         {
-            Outputs.ViewUnconfirmed,
-            new PermissionMetadata("View Unconfirmed Outputs", "Xem danh sách phiếu tạm chưa xác nhận")
+            Id = "Permissions.Warehouse",
+            Name = "Quản lý Kho & Hậu Cần",
+            Features =
+            [
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.ProductManagement", Name = "Quản lý sản phẩm", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ProductManagement.View, Name = "Xem", Description = "Xem quản lý sản phẩm" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ProductManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý sản phẩm" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ProductManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý sản phẩm" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ProductManagement.Delete, Name = "Xóa", Description = "Xóa quản lý sản phẩm" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ProductManagement.EditPrice, Name = "Chỉnh giá", Description = "Chỉnh giá quản lý sản phẩm" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ProductManagement.ChangeStatus, Name = "Đổi trạng thái", Description = "Đổi trạng thái quản lý sản phẩm" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.SupplierManagement", Name = "Quản lý đối tác", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.View, Name = "Xem", Description = "Xem quản lý đối tác" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý đối tác" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý đối tác" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.SupplierManagement.Delete, Name = "Xóa", Description = "Xóa quản lý đối tác" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.PurchaseRequestManagement", Name = "Quản lý yêu cầu mua hàng (PR)", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseRequestManagement.View, Name = "Xem", Description = "Xem quản lý yêu cầu mua hàng (pr)" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseRequestManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý yêu cầu mua hàng (pr)" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseRequestManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý yêu cầu mua hàng (pr)" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseRequestManagement.Delete, Name = "Xóa", Description = "Xóa quản lý yêu cầu mua hàng (pr)" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseRequestManagement.Send, Name = "Gửi", Description = "Gửi quản lý yêu cầu mua hàng (pr)" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.PurchaseRequestManagement.ApproveReject, Name = "Duyệt/Từ chối", Description = "Duyệt/Từ chối quản lý yêu cầu mua hàng (pr)" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.ReceiptManagement", Name = "Quản lý phiếu nhập kho", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ReceiptManagement.View, Name = "Xem", Description = "Xem quản lý phiếu nhập kho" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ReceiptManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý phiếu nhập kho" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ReceiptManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý phiếu nhập kho" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ReceiptManagement.Delete, Name = "Xóa", Description = "Xóa quản lý phiếu nhập kho" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ReceiptManagement.Send, Name = "Gửi", Description = "Gửi quản lý phiếu nhập kho" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.ReceiptManagement.ApproveReject, Name = "Duyệt/Từ chối", Description = "Duyệt/Từ chối quản lý phiếu nhập kho" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.DebtPaymentManagement", Name = "Quản lý công nợ", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.DebtPaymentManagement.View, Name = "Xem", Description = "Xem quản lý công nợ" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.DebtPaymentManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý công nợ" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.DebtPaymentManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý công nợ" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.InventoryReportManagement", Name = "Quản lý báo cáo xuất nhập tồn", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.InventoryReportManagement.View, Name = "Xem", Description = "Xem báo cáo xuất nhập tồn" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.LedgerManagement", Name = "Quản lý sổ cái tồn kho", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.LedgerManagement.View, Name = "Xem", Description = "Xem sổ cái tồn kho" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Warehouse.InventorySettingManagement", Name = "Quản lý cài đặt tồn kho", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.InventorySettingManagement.View, Name = "Xem", Description = "Xem cài đặt tồn kho" },
+                    new PermissionActionMetadata { Id = Permissions.Warehouse.InventorySettingManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa cài đặt tồn kho" },
+                }}
+            ]
         },
-        { Outputs.Create, new PermissionMetadata("Create Output", "Tạo đơn xuất hàng mới") },
-        { Outputs.Edit, new PermissionMetadata("Edit Output", "Chỉnh sửa đơn xuất hàng") },
-        { Outputs.Delete, new PermissionMetadata("Delete Output", "Xóa đơn xuất hàng") },
-        { Outputs.ChangeStatus, new PermissionMetadata("Change Status", "Thay đổi trạng thái đơn hàng") },
-
-        { Files.View, new PermissionMetadata("View Files", "Xem danh sách tệp tin") },
-        { Files.Upload, new PermissionMetadata("Upload File", "Tải lên tệp tin") },
-        { Files.Delete, new PermissionMetadata("Delete File", "Xóa tệp tin") },
-
-        { Settings.View, new PermissionMetadata("View Settings", "Xem cài đặt hệ thống") },
-        { Settings.Edit, new PermissionMetadata("Edit Settings", "Chỉnh sửa cài đặt hệ thống") },
-
-        { Statistical.View, new PermissionMetadata("View Statistics", "Xem thống kê") },
-        { Statistical.Export, new PermissionMetadata("Export Statistics", "Xuất báo cáo thống kê") },
-
-        { Roles.View, new PermissionMetadata("View Roles", "Xem danh sách vai trò") },
-        { Roles.Create, new PermissionMetadata("Create Role", "Tạo vai trò mới") },
-        { Roles.Edit, new PermissionMetadata("Edit Role", "Chỉnh sửa vai trò") },
-        { Roles.Delete, new PermissionMetadata("Delete Role", "Xóa vai trò") },
-
-        { Users.View, new PermissionMetadata("View Users", "Xem danh sách người dùng") },
-        { Users.Create, new PermissionMetadata("Create User", "Tạo người dùng mới") },
-        { Users.Edit, new PermissionMetadata("Edit User", "Chỉnh sửa thông tin người dùng") },
-        { Users.Delete, new PermissionMetadata("Delete User", "Xóa người dùng") },
-        { Users.AssignRoles, new PermissionMetadata("Assign Roles", "Gán vai trò cho người dùng") },
-        { Users.ChangePassword, new PermissionMetadata("Change Password", "Đổi mật khẩu người dùng") },
-
-        { News.View, new PermissionMetadata("View News", "Xem danh sách tin tức") },
-        { News.Create, new PermissionMetadata("Create News", "Tạo tin tức mới") },
-        { News.Edit, new PermissionMetadata("Edit News", "Chỉnh sửa tin tức") },
-        { News.Delete, new PermissionMetadata("Delete News", "Xóa tin tức") },
-
-        { Banners.View, new PermissionMetadata("View Banners", "Xem danh sách banner") },
-        { Banners.Create, new PermissionMetadata("Create Banner", "Thêm banner mới") },
-        { Banners.Edit, new PermissionMetadata("Edit Banner", "Chỉnh sửa banner") },
-        { Banners.Delete, new PermissionMetadata("Delete Banner", "Xóa banner") },
-
-        { Contacts.View, new PermissionMetadata("View Contacts", "Xem danh sách liên hệ khách hàng") },
-        { Contacts.Reply, new PermissionMetadata("Reply to Contact", "Phản hồi liên hệ khách hàng") },
-        { Contacts.EditNote, new PermissionMetadata("Edit Internal Note", "Chỉnh sửa ghi chú nội bộ khách hàng") },
-        { Contacts.Delete, new PermissionMetadata("Delete Contact", "Xóa liên hệ khách hàng") },
-
-        { Bookings.View, new PermissionMetadata("View Bookings", "Xem danh sách đặt lịch lái thử") },
-        { Bookings.Confirm, new PermissionMetadata("Confirm Booking", "Xác nhận lịch hẹn lái thử") },
-        { Bookings.Delete, new PermissionMetadata("Delete Booking", "Xóa lịch hẹn lái thử") },
-
-        { Leads.View, new PermissionMetadata("View Leads", "Xem danh sách khách hàng tiềm năng") },
-        { Leads.Create, new PermissionMetadata("Create Lead", "Tạo khách hàng tiềm năng") },
-        { Leads.Edit, new PermissionMetadata("Edit Lead", "Chỉnh sửa khách hàng tiềm năng") },
-        { Leads.Delete, new PermissionMetadata("Delete Lead", "Xóa khách hàng tiềm năng") },
-
-        { Permissions.HR.View, new PermissionMetadata("View HR", "Xem danh sách nhân sự") },
-        { Permissions.HR.Create, new PermissionMetadata("Create Employee", "Thêm nhân viên mới") },
-        { Permissions.HR.Edit, new PermissionMetadata("Edit Employee", "Chỉnh sửa thông tin nhân viên") },
-        { Permissions.HR.Delete, new PermissionMetadata("Delete Employee", "Xóa nhân viên") },
-
-        { Payroll.View, new PermissionMetadata("View Payroll", "Xem Bảng Lương") },
-        { Payroll.Configure, new PermissionMetadata("Configure Payroll", "Cấu hình chính sách hoa hồng") },
-        { Payroll.Approve, new PermissionMetadata("Approve Payroll", "Duyệt chi lương") },
-
-        { PurchaseRequests.View, new PermissionMetadata("View Purchase Requests", "Xem danh sách yêu cầu mua hàng") },
-        { PurchaseRequests.Create, new PermissionMetadata("Create Purchase Request", "Tạo yêu cầu mua hàng mới") },
-        { PurchaseRequests.Edit, new PermissionMetadata("Edit Purchase Request", "Chỉnh sửa yêu cầu mua hàng") },
-        { PurchaseRequests.Delete, new PermissionMetadata("Delete Purchase Request", "Xóa yêu cầu mua hàng") },
-        { PurchaseRequests.Send, new PermissionMetadata("Send Purchase Request", "Gửi yêu cầu mua hàng") },
+        new PermissionModuleMetadata
         {
-            PurchaseRequests.ApproveReject,
-            new PermissionMetadata("Approve/Reject Purchase Request", "Phê duyệt/Từ chối yêu cầu mua hàng")
+            Id = "Permissions.Factory",
+            Name = "Dịch Vụ & Xưởng Sửa Chữa",
+            Features =
+            [
+                new PermissionFeatureMetadata { Id = "Permissions.Factory.CustomerManagement", Name = "Quản lý khách hàng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Factory.CustomerManagement.View, Name = "Xem", Description = "Xem quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.CustomerManagement.Reply, Name = "Phản hồi", Description = "Phản hồi quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.CustomerManagement.EditNote, Name = "Sửa ghi chú", Description = "Sửa ghi chú quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.CustomerManagement.Delete, Name = "Xóa", Description = "Xóa quản lý khách hàng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Factory.DashboardManagement", Name = "Tổng quan (Dashboard)", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Factory.DashboardManagement.View, Name = "Xem", Description = "Xem tổng quan (dashboard)" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.DashboardManagement.Export, Name = "Xuất dữ liệu", Description = "Xuất dữ liệu tổng quan (dashboard)" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Factory.ContractManagement", Name = "Quản lý hợp đồng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Factory.ContractManagement.View, Name = "Xem", Description = "Xem quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.ContractManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.ContractManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.ContractManagement.Delete, Name = "Xóa", Description = "Xóa quản lý hợp đồng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Factory.CustomerSelection", Name = "Chọn khách hàng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Factory.CustomerSelection.View, Name = "Xem", Description = "Xem chọn khách hàng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Factory.BookingManagement", Name = "Quản lý đặt lịch (Booking)", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Factory.BookingManagement.View, Name = "Xem", Description = "Xem quản lý đặt lịch (booking)" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.BookingManagement.Confirm, Name = "Xác nhận", Description = "Xác nhận quản lý đặt lịch (booking)" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.BookingManagement.Delete, Name = "Xóa", Description = "Xóa quản lý đặt lịch (booking)" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Factory.RepairOrderManagement", Name = "Quản lý lệnh sửa chữa", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Factory.RepairOrderManagement.View, Name = "Xem", Description = "Xem quản lý lệnh sửa chữa" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.RepairOrderManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý lệnh sửa chữa" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.RepairOrderManagement.Diagnosis, Name = "Chẩn đoán", Description = "Chẩn đoán quản lý lệnh sửa chữa" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.RepairOrderManagement.AssignTechnician, Name = "Phân công KTV", Description = "Phân công KTV quản lý lệnh sửa chữa" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.RepairOrderManagement.StartRepair, Name = "Bắt đầu sửa chữa", Description = "Bắt đầu sửa chữa quản lý lệnh sửa chữa" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.RepairOrderManagement.SubmitQc, Name = "Gửi kiểm tra (QC)", Description = "Gửi kiểm tra (QC) quản lý lệnh sửa chữa" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.RepairOrderManagement.Complete, Name = "Hoàn thành", Description = "Hoàn thành quản lý lệnh sửa chữa" },
+                    new PermissionActionMetadata { Id = Permissions.Factory.RepairOrderManagement.Cancel, Name = "Hủy", Description = "Hủy quản lý lệnh sửa chữa" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Factory.SparePartSelection", Name = "Chọn phụ tùng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Factory.SparePartSelection.View, Name = "Xem", Description = "Xem chọn phụ tùng" },
+                }}
+            ]
         },
-
+        new PermissionModuleMetadata
         {
-            InventoryReceipts.View,
-            new PermissionMetadata("View Purchase Orders", "Xem danh sách đơn chốt mua và nhập hàng")
+            Id = "Permissions.Accountant",
+            Name = "Kế Toán, Lương & Thuế",
+            Features =
+            [
+                new PermissionFeatureMetadata { Id = "Permissions.Accountant.ContractVerification", Name = "Duyệt hợp đồng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Accountant.ContractVerification.View, Name = "Xem", Description = "Xem duy?t hợp đồng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Accountant.DebtPaymentManagement", Name = "Quản lý công nợ", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Accountant.DebtPaymentManagement.View, Name = "Xem", Description = "Xem quản lý công nợ" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.DebtPaymentManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý công nợ" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.DebtPaymentManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý công nợ" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Accountant.EmployeeManagement", Name = "Quản lý nhân viên", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Accountant.EmployeeManagement.View, Name = "Xem", Description = "Xem quản lý nhân viên" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.EmployeeManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý nhân viên" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.EmployeeManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý nhân viên" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.EmployeeManagement.Delete, Name = "Xóa", Description = "Xóa quản lý nhân viên" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Accountant.PayrollManagement", Name = "Quản lý lương", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Accountant.PayrollManagement.View, Name = "Xem", Description = "Xem quản lý lương" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.PayrollManagement.Configure, Name = "Cấu hình", Description = "Cấu hình quản lý lương" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.PayrollManagement.Approve, Name = "Phê duyệt", Description = "Phê duyệt quản lý lương" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Accountant.SupplierContractManagement", Name = "Quản lý hợp đồng NCC", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Accountant.SupplierContractManagement.View, Name = "Xem", Description = "Xem quản lý hợp đồng ncc" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.SupplierContractManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý hợp đồng ncc" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.SupplierContractManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý hợp đồng ncc" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.SupplierContractManagement.Delete, Name = "Xóa", Description = "Xóa quản lý hợp đồng ncc" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Accountant.CustomerManagement", Name = "Quản lý khách hàng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Accountant.CustomerManagement.View, Name = "Xem", Description = "Xem quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.CustomerManagement.Reply, Name = "Phản hồi", Description = "Phản hồi quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.CustomerManagement.EditNote, Name = "Sửa ghi chú", Description = "Sửa ghi chú quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.CustomerManagement.Delete, Name = "Xóa", Description = "Xóa quản lý khách hàng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Accountant.DashboardManagement", Name = "Tổng quan (Dashboard)", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Accountant.DashboardManagement.View, Name = "Xem", Description = "Xem tổng quan (dashboard)" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.DashboardManagement.Export, Name = "Xuất dữ liệu", Description = "Xuất dữ liệu tổng quan (dashboard)" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Accountant.ContractManagement", Name = "Quản lý hợp đồng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Accountant.ContractManagement.View, Name = "Xem", Description = "Xem quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.ContractManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.ContractManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Accountant.ContractManagement.Delete, Name = "Xóa", Description = "Xóa quản lý hợp đồng" },
+                }}
+            ]
         },
+        new PermissionModuleMetadata
         {
-            InventoryReceipts.Create,
-            new PermissionMetadata("Create Purchase Order", "Tạo đơn chốt mua mới và nhập hàng")
-        },
-        { InventoryReceipts.Edit, new PermissionMetadata("Edit Purchase Order", "Chỉnh sửa đơn chốt mua và nhập hàng") },
-        { InventoryReceipts.Delete, new PermissionMetadata("Delete Purchase Order", "Xóa đơn chốt mua và nhập hàng") },
-        { InventoryReceipts.Send, new PermissionMetadata("Send Purchase Order", "Gửi đơn chốt mua và nhập hàng") },
-        {
-            InventoryReceipts.ApproveReject,
-            new PermissionMetadata("Approve/Reject Purchase Order", "Phê duyệt/Từ chối đơn chốt mua và nhập hàng")
-        },
-        { DebtPayments.View, new PermissionMetadata("View Debt Payments", "Xem quản lý công nợ và danh sách nợ") },
-        { DebtPayments.Create, new PermissionMetadata("Create Debt Payment", "Tạo phiếu trả nợ nhà cung cấp") },
-        { PurchaseOrder.View, new PermissionMetadata("View Purchase Order", "Xem danh sách phiếu mua hàng") },
-        { PurchaseOrder.Create, new PermissionMetadata("Create Purchase Order", "Tạo đơn phiếu mua hàng") },
-        { PurchaseOrder.Edit, new PermissionMetadata("Edit Purchase Order", "Chỉnh sửa phiếu mua hàng") },
-        { PurchaseOrder.Delete, new PermissionMetadata("Delete Purchase Order", "Xóa phiếu mua hàng") },
-        { PurchaseOrder.Send, new PermissionMetadata("Send Purchase Order", "Gửi phiếu mua hàng") },
-        {
-            PurchaseOrder.ApproveReject,
-            new PermissionMetadata(
-            "Approve Order",
-            "Duyệt/Từ chối phiếu mua hàng; và bắt buộc đi kèm quyền Sửa/Xóa đối với phiếu mua hàng đã gửi (Sent)")
+            Id = "Permissions.Order",
+            Name = "Đơn hàng & Vận chuyển",
+            Features =
+            [
+                new PermissionFeatureMetadata { Id = "Permissions.Order.ProductManagement", Name = "Quản lý sản phẩm", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Order.ProductManagement.View, Name = "Xem", Description = "Xem quản lý sản phẩm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.ProductManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý sản phẩm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.ProductManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý sản phẩm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.ProductManagement.Delete, Name = "Xóa", Description = "Xóa quản lý sản phẩm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.ProductManagement.EditPrice, Name = "Chỉnh giá", Description = "Chỉnh giá quản lý sản phẩm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.ProductManagement.ChangeStatus, Name = "Đổi trạng thái", Description = "Đổi trạng thái quản lý sản phẩm" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Order.CustomerManagement", Name = "Quản lý khách hàng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Order.CustomerManagement.View, Name = "Xem", Description = "Xem quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.CustomerManagement.Reply, Name = "Phản hồi", Description = "Phản hồi quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.CustomerManagement.EditNote, Name = "Sửa ghi chú", Description = "Sửa ghi chú quản lý khách hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.CustomerManagement.Delete, Name = "Xóa", Description = "Xóa quản lý khách hàng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Order.ContractManagement", Name = "Quản lý hợp đồng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Order.ContractManagement.View, Name = "Xem", Description = "Xem quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.ContractManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.ContractManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý hợp đồng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.ContractManagement.Delete, Name = "Xóa", Description = "Xóa quản lý hợp đồng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Order.CustomerSelection", Name = "Chọn khách hàng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Order.CustomerSelection.View, Name = "Xem", Description = "Xem chọn khách hàng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Order.OrderManagement", Name = "Quản lý đơn hàng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Order.OrderManagement.View, Name = "Xem", Description = "Xem quản lý đơn hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.OrderManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý đơn hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.OrderManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý đơn hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.OrderManagement.Delete, Name = "Xóa", Description = "Xóa quản lý đơn hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.OrderManagement.ChangeStatus, Name = "Đổi trạng thái", Description = "Đổi trạng thái quản lý đơn hàng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Order.DraftOrderManagement", Name = "Quản lý phiếu tạm", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Order.DraftOrderManagement.View, Name = "Xem", Description = "Xem quản lý phiếu tạm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.DraftOrderManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý phiếu tạm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.DraftOrderManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý phiếu tạm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.DraftOrderManagement.Delete, Name = "Xóa", Description = "Xóa quản lý phiếu tạm" },
+                    new PermissionActionMetadata { Id = Permissions.Order.DraftOrderManagement.ChangeStatus, Name = "Đổi trạng thái", Description = "Đổi trạng thái quản lý phiếu tạm" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Order.SalesInvoiceManagement", Name = "Quản lý phiếu bán hàng", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Order.SalesInvoiceManagement.View, Name = "Xem", Description = "Xem quản lý phiếu bán hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.SalesInvoiceManagement.Create, Name = "Tạo mới", Description = "Tạo mới quản lý phiếu bán hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.SalesInvoiceManagement.Edit, Name = "Chỉnh sửa", Description = "Chỉnh sửa quản lý phiếu bán hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.SalesInvoiceManagement.Delete, Name = "Xóa", Description = "Xóa quản lý phiếu bán hàng" },
+                    new PermissionActionMetadata { Id = Permissions.Order.SalesInvoiceManagement.ChangeStatus, Name = "Đổi trạng thái", Description = "Đổi trạng thái quản lý phiếu bán hàng" },
+                }},
+                new PermissionFeatureMetadata { Id = "Permissions.Order.ProductSelection", Name = "Chọn sản phẩm", Permissions = new() {
+                    new PermissionActionMetadata { Id = Permissions.Order.ProductSelection.View, Name = "Xem", Description = "Xem chọn sản phẩm" },
+                }}
+            ]
         }
-    };
+    ];
 
-    public static PermissionMetadata? GetMetadata(string permissionName)
+    public static List<string> GetAllPermissions()
     {
-        return PermissionMetadataMap.TryGetValue(permissionName, out var metadata) ? metadata : null;
+        var modules = ModulesTree.Select(m => m.Id);
+        var actions = ModulesTree.SelectMany(m => m.Features.SelectMany(f => f.Permissions.Select(a => a.Id)));
+        return modules.Concat(actions).ToList();
     }
 
-    public static IEnumerable<(string Id, string Name, string Description)> GetMetadataList()
+    public static (bool IsValid, string ErrorMessage) ValidateRules(List<string> permissions)
     {
-        return PermissionMetadataMap.Select(
-            kv => (
-            kv.Key,
-            kv.Value.DisplayName,
-            kv.Value.Description
-        ));
+        var validPermissions = GetAllPermissions();
+        var invalidPermissions = permissions.Where(p => !validPermissions.Contains(p)).ToList();
+        if (invalidPermissions.Count != 0)
+            return (false, $"Invalid permissions: {string.Join(", ", invalidPermissions)}");
+
+        foreach (var p in permissions)
+        {
+            if (!p.EndsWith(".View"))
+            {
+                var lastDotIndex = p.LastIndexOf('.');
+                if (lastDotIndex > 0)
+                {
+                    var viewPerm = string.Concat(p.AsSpan(0, lastDotIndex), ".View");
+                    if (validPermissions.Contains(viewPerm) && !permissions.Contains(viewPerm))
+                    {
+                        return (false, $"Permission '{p}' requires: {viewPerm}");
+                    }
+                }
+            }
+        }
+        return (true, string.Empty);
     }
 
-    public static readonly Dictionary<string, List<string>> Groups = new()
+    public static List<PermissionActionMetadata> GetMetadataList()
     {
-        { "Thương hiệu", [Brands.View, Brands.Create, Brands.Edit, Brands.Delete] },
-        {
-            "Sản phẩm",
-            [Products.View, Products.Create, Products.Edit, Products.Delete, Products.EditPrice, Products.ChangeStatus]
-        },
-        {
-            "Danh mục sản phẩm",
-            [ProductCategories.View, ProductCategories.Create, ProductCategories.Edit, ProductCategories.Delete]
-        },
-        { "Nhà cung cấp", [Suppliers.View, Suppliers.Create, Suppliers.Edit, Suppliers.Delete] },
-        {
-            "Xuất hàng",
-            [Outputs.View, Outputs.ViewConfirmed, Outputs.ViewUnconfirmed, Outputs.Create, Outputs.Edit, Outputs.Delete, Outputs.ChangeStatus]
-        },
-        { "Tệp tin", [Files.View, Files.Upload, Files.Delete] },
-        { "Cài đặt", [Settings.View, Settings.Edit] },
-        { "Thống kê", [Statistical.View, Statistical.Export] },
-        { "Vai trò", [Roles.View, Roles.Create, Roles.Edit, Roles.Delete] },
-        { "Người dùng", [Users.View, Users.Create, Users.Edit, Users.Delete, Users.AssignRoles, Users.ChangePassword] },
-        { "Tin tức", [News.View, News.Create, News.Edit, News.Delete] },
-        { "Banner", [Banners.View, Banners.Create, Banners.Edit, Banners.Delete] },
-        {
-            "CRM & Connect",
-            [Contacts.View, Contacts.Reply, Contacts.EditNote, Contacts.Delete, Bookings.View, Bookings.Confirm, Bookings.Delete, Leads.View, Leads.Create, Leads.Edit, Leads.Delete]
-        },
-        { "Nhân sự", [Permissions.HR.View, Permissions.HR.Create, Permissions.HR.Edit, Permissions.HR.Delete] },
-        { "Lương & Hoa hồng", [Payroll.View, Payroll.Configure, Payroll.Approve] },
-        {
-            "Yêu cầu mua hàng (PR)",
-            [PurchaseRequests.View, PurchaseRequests.Create, PurchaseRequests.Edit, PurchaseRequests.Delete, PurchaseRequests.Send, PurchaseRequests.ApproveReject]
-        },
-        { "Quản lý công nợ", [DebtPayments.View, DebtPayments.Create] },
-    };
+        return ModulesTree.SelectMany(m => m.Features.SelectMany(f => f.Permissions)).ToList();
+    }
+    
+    public static List<PermissionActionMetadata> GetMetadataList(IEnumerable<string> permissions)
+    {
+        return ModulesTree.SelectMany(m => m.Features.SelectMany(f => f.Permissions)).Where(p => permissions.Contains(p.Id)).ToList();
+    }
+
+    public static PermissionActionMetadata? GetMetadata(string id)
+    {
+        return ModulesTree.SelectMany(m => m.Features.SelectMany(f => f.Permissions)).FirstOrDefault(p => p.Id == id);
+    }
 
     public static readonly Dictionary<string, List<string>> Conflicts = [];
+    public static readonly Dictionary<string, List<string>> Dependencies = GenerateDependencies();
 
-    public static readonly Dictionary<string, List<string>> Dependencies = new()
+    private static Dictionary<string, List<string>> GenerateDependencies()
     {
-        { Brands.Create, [Brands.View] },
-        { Brands.Edit, [Brands.View] },
-        { Brands.Delete, [Brands.View] },
-
-        { Products.Create, [Products.View] },
-        { Products.Edit, [Products.View] },
-        { Products.Delete, [Products.View] },
-        { Products.EditPrice, [Products.View] },
-        { Products.ChangeStatus, [Products.View] },
-
-        { ProductCategories.Create, [ProductCategories.View] },
-        { ProductCategories.Edit, [ProductCategories.View] },
-        { ProductCategories.Delete, [ProductCategories.View] },
-
-        { Suppliers.Create, [Suppliers.View] },
-        { Suppliers.Edit, [Suppliers.View] },
-        { Suppliers.Delete, [Suppliers.View] },
-
-        { Outputs.Create, [Outputs.View] },
-        { Outputs.Edit, [Outputs.View] },
-        { Outputs.Delete, [Outputs.View] },
-        { Outputs.ChangeStatus, [Outputs.View] },
-
-        { Files.Upload, [Files.View] },
-        { Files.Delete, [Files.View] },
-
-        { Settings.Edit, [Settings.View] },
-
-        { Statistical.Export, [Statistical.View] },
-
-        { Roles.Create, [Roles.View] },
-        { Roles.Edit, [Roles.View] },
-        { Roles.Delete, [Roles.View] },
-
-        { Users.Create, [Users.View] },
-        { Users.Edit, [Users.View] },
-        { Users.Delete, [Users.View] },
-        { Users.AssignRoles, [Users.View, Roles.View] },
-        { Users.ChangePassword, [Users.View] },
-
-        { News.Create, [News.View] },
-        { News.Edit, [News.View] },
-        { News.Delete, [News.View] },
-
-        { Banners.Create, [Banners.View] },
-        { Banners.Edit, [Banners.View] },
-        { Banners.Delete, [Banners.View] },
-
-        { Contacts.Reply, [Contacts.View] },
-        { Contacts.EditNote, [Contacts.View] },
-        { Contacts.Delete, [Contacts.View] },
-
-        { Bookings.Confirm, [Bookings.View] },
-        { Bookings.Delete, [Bookings.View] },
-
-        { Leads.Create, [Leads.View] },
-        { Leads.Edit, [Leads.View] },
-        { Leads.Delete, [Leads.View] },
-
-        { Permissions.HR.Create, [Permissions.HR.View] },
-        { Permissions.HR.Edit, [Permissions.HR.View] },
-        { Permissions.HR.Delete, [Permissions.HR.View] },
-
-        { Payroll.Configure, [Payroll.View] },
-        { Payroll.Approve, [Payroll.View] },
-
-        { PurchaseRequests.Create, [PurchaseRequests.View] },
-        { PurchaseRequests.Edit, [PurchaseRequests.View] },
-        { PurchaseRequests.Delete, [PurchaseRequests.View] },
-        { PurchaseRequests.Send, [PurchaseRequests.View] },
-        { PurchaseRequests.ApproveReject, [PurchaseRequests.View] },
-
-        { InventoryReceipts.Create, [InventoryReceipts.View] },
-        { InventoryReceipts.Edit, [InventoryReceipts.View] },
-        { InventoryReceipts.Delete, [InventoryReceipts.View] },
-        { InventoryReceipts.Send, [InventoryReceipts.View] },
-        { InventoryReceipts.ApproveReject, [InventoryReceipts.View] },
-        { DebtPayments.Create, [DebtPayments.View] },
-    };
-
-    public static (bool IsValid, string? ErrorMessage) ValidateRules(IEnumerable<string> permissions)
-    {
-        if (permissions == null)
-            return (true, null);
-        var permSet = permissions.ToHashSet();
-        foreach (var perm in permSet)
+        var dict = new Dictionary<string, List<string>>();
+        var validPermissions = GetMetadataList().Select(m => m.Id).ToHashSet();
+        foreach (var p in validPermissions)
         {
-            if (Conflicts.TryGetValue(perm, out var conflicts))
+            if (!p.EndsWith(".View"))
             {
-                var intersected = conflicts.Intersect(permSet).ToList();
-                if (intersected.Count != 0)
+                var lastDotIndex = p.LastIndexOf('.');
+                if (lastDotIndex > 0)
                 {
-                    return (false, $"Permission '{perm}' conflicts with: {string.Join(", ", intersected)}");
-                }
-            }
-            if (Dependencies.TryGetValue(perm, out var dependencies))
-            {
-                var missing = dependencies.Where(d => !permSet.Contains(d)).ToList();
-                if (missing.Count != 0)
-                {
-                    return (false, $"Permission '{perm}' requires: {string.Join(", ", missing)}");
+                    var viewPerm = string.Concat(p.AsSpan(0, lastDotIndex), ".View");
+                    if (validPermissions.Contains(viewPerm))
+                    {
+                        dict[p] = [viewPerm];
+                    }
                 }
             }
         }
-        return (true, null);
+        return dict;
     }
 }
-

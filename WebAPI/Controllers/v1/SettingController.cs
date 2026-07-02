@@ -4,7 +4,7 @@ using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
 using Application.Features.Settings.Queries.GetStoreSettings;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +30,7 @@ public class SettingController(IMediator mediator) : ApiController
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPut]
-    [HasPermission(Settings.Edit)]
+    [HasPermission(Permissions.Admin.SettingManagement.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, string?>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetSettingsAsync(
@@ -48,7 +48,7 @@ public class SettingController(IMediator mediator) : ApiController
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet(Name = Domain.Constants.RouteNames.Settings.GetAllSettings)]
-    [HasPermission(Settings.View)]
+    [HasPermission(Permissions.Admin.SettingManagement.View)]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllSettingsAsync(CancellationToken cancellationToken)
     {

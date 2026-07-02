@@ -16,7 +16,7 @@ using Application.Features.News.Queries.GetProductsForNews;
 using Application.Features.News.Queries.GetRelatedNewsPublic;
 using Application.Features.NewsCategories.Queries.GetNewsCategoryList;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -45,7 +45,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
     [HttpPost]
-    [HasPermission(News.Create)]
+    [HasPermission(Permissions.Marketing.NewsManagement.Create)]
     [SwaggerOperation(Summary = "Tạo bài viết mới")]
     public async Task<IActionResult> CreateAsync(
         [FromBody] CreateNewsCommand command,
@@ -164,7 +164,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPut("{id}")]
-    [HasPermission(News.Edit)]
+    [HasPermission(Permissions.Marketing.NewsManagement.Edit)]
     [SwaggerOperation(Summary = "Cập nhật bài viết")]
     public async Task<IActionResult> UpdateAsync(
         int id,
@@ -183,7 +183,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả xóa</returns>
     [HttpDelete("{id}")]
-    [HasPermission(News.Delete)]
+    [HasPermission(Permissions.Marketing.NewsManagement.Delete)]
     [SwaggerOperation(Summary = "Xóa bài viết")]
     public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
@@ -233,7 +233,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPatch("{id}/status")]
-    [HasPermission(News.Edit)]
+    [HasPermission(Permissions.Marketing.NewsManagement.Edit)]
     [SwaggerOperation(Summary = "Cập nhật trạng thái hiển thị bài viết")]
     public async Task<IActionResult> UpdateStatusAsync(
         int id,

@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.WorkshopDashboard;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Infrastructure.Authorization;
@@ -9,6 +10,12 @@ using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.MediaFile.File;
+using Infrastructure.Repositories.Supplier;
+using Infrastructure.Repositories.User;
+using Infrastructure.Repositories.Vehicle;
+using Infrastructure.Repositories.WarrantyClaim;
+using Infrastructure.Repositories.WorkshopPayment;
+using Infrastructure.Repositories.WorkshopDashboard;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -86,6 +93,7 @@ public static class DependencyInjection
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
         services.AddScoped<IFileReadService, FileReadService>();
         services.AddScoped<IFileInsertService, FileInsertService>();
+        services.AddScoped<IWorkshopDashboardRepository, WorkshopDashboardRepository>();
         services.AddScoped<IFileUpdateService, FileUpdateService>();
         services.AddScoped<IFileDeleteService, FileDeleteService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();

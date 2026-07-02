@@ -62,13 +62,16 @@ public class Lead : BaseEntity
     [Column("IdentificationNumber", TypeName = "nvarchar(20)")]
     public string IdentificationNumber { get; set; } = string.Empty;
 
-    [Column("Tier", TypeName = "nvarchar(50)")]
-    public string Tier { get; set; } = LeadTier.NewMember;
+[Column("Tier", TypeName = "nvarchar(50)")]
+public string Tier { get; set; } = LeadTier.NewMember;
 
-    [Column("Points")]
-    public int Points { get; set; } = 0;
+[Column("Points")]
+public int Points { get; set; } = 0;
 
-    [Column("AssignedToId")]
+[Column("IsVerified")]
+public bool IsVerified { get; set; } = false;
+
+[Column("AssignedToId")]
     public Guid? AssignedToId { get; set; }
 
     [ForeignKey("AssignedToId")]

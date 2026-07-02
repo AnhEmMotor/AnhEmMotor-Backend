@@ -63,7 +63,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.InventoryReceipts.Delete],
+            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -107,7 +107,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.InventoryReceipts.Delete],
+            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -158,7 +158,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.InventoryReceipts.Delete],
+            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -217,7 +217,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.InventoryReceipts.Delete],
+            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);

@@ -24,8 +24,8 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                 dto.OrderId = order.Id;
                 dto.OrderCode = order.OriginalOrderCode ?? $"SO-{order.Id:D5}";
                 dto.TrackingNumber = order.TrackingNumber ?? search ?? "GHTK-999999999";
-                dto.Carrier = "Giao Hàng Tiết Kiệm";
-                dto.CustomerName = "Nguyễn Văn Khách Hàng";
+                dto.Carrier = order.Carrier;
+                dto.CustomerName = order.CustomerName;
                 dto.CustomerPhone = order.CustomerPhone ?? search ?? string.Empty;
                 dto.CustomerAddress = order.CustomerAddress ?? "Xã Giang Điền, Huyện Trảng Bom, Đồng Nai";
                 dto.TotalValue = order.CodAmount;
@@ -40,10 +40,10 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                             .Add(
                                 new TrackingItemResponse
                                 {
-                                    Sku = item.ProductId.ToString(),
-                                    ProductName = $"Phụ tùng mã {item.ProductId}",
+                                    Sku = item.Sku,
+                                    ProductName = item.ProductName,
                                     Quantity = item.Quantity,
-                                    ThumbnailUrl = string.Empty
+                                    ThumbnailUrl = item.ThumbnailUrl ?? string.Empty
                                 });
                     }
                 }

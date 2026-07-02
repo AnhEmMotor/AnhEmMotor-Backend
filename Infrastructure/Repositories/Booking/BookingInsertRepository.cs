@@ -14,4 +14,9 @@ public class BookingInsertRepository(ApplicationDBContext context) : IBookingIns
     {
         context.Bookings.Update(booking);
     }
+
+    public void Remove(Domain.Entities.Booking booking)
+    {
+        context.Bookings.Remove(booking);
+    }
 }

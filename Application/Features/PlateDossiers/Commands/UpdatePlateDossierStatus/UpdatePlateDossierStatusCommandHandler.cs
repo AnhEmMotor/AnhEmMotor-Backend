@@ -52,7 +52,7 @@ namespace Application.Features.PlateDossiers.Commands.UpdatePlateDossierStatus
             if (!string.IsNullOrWhiteSpace(request.Status))
             {
                 notificationService.NotifyNewBooking(
-                    $"PlateDossier #{plateDossier.OutputId} updated to '{plateDossier.Status}'. Customer: {plateDossier.Output.CustomerName} ({plateDossier.Output.CustomerPhone}).");
+                    $"PlateDossier #{plateDossier.OutputId} updated to '{plateDossier.Status}'. Customer: {plateDossier.Output?.CustomerName} ({plateDossier.Output?.CustomerPhone}).");
             }
             return Result<bool>.Success(true);
         }

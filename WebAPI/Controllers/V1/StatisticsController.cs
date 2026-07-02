@@ -1,5 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Common.Models;
+using Application.Features.Order.Queries.GetOrderStatistics;
 using Application.Features.Statistical.Queries.GetAdminDashboardOverview;
 using Application.Features.Statistical.Queries.GetAdminProductReport;
 using Application.Features.Statistical.Queries.GetAdminRevenueAnalysis;
@@ -11,9 +12,10 @@ using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
 using Application.Features.Statistical.Queries.GetOrderStatusCounts;
 using Application.Features.Statistical.Queries.GetProductReportLastMonth;
 using Application.Features.Statistical.Queries.GetProductStockAndPrice;
+using Application.Interfaces.Repositories.Booking;
 using Application.Interfaces.Repositories.Statistical;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -39,7 +41,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// <param name="days">Số ngày tính từ hiện tại trở về trước</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("daily-revenue")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(IEnumerable<DailyRevenueResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDailyRevenueAsync(
         [FromQuery] int days = 7,
@@ -57,7 +59,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// <param name="days">Số ngày look-back để xác định phạm vi đơn hàng (mặc định 7)</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("daily-revenue/detail")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(IEnumerable<DailyRevenueDetailResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDailyRevenueDetailAsync(
         [FromQuery] string reportDay,
@@ -73,7 +75,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy các chỉ số tổng hợp cho Dashboard.
     /// </summary>
     [HttpGet("dashboard-stats")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(DashboardStatsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDashboardStatsAsync(CancellationToken cancellationToken)
     {
@@ -88,7 +90,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// <param name="months">Số tháng tính từ hiện tại trở về trước</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("monthly-revenue-profit")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(IEnumerable<MonthlyRevenueProfitResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetMonthlyRevenueProfitAsync(
         [FromQuery] int months = 12,
@@ -103,7 +105,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy số lượng đơn hàng theo từng trạng thái
     /// </summary>
     [HttpGet("order-status-counts")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(IEnumerable<OrderStatusCountResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrderStatusCountsAsync(CancellationToken cancellationToken)
     {
@@ -116,7 +118,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy báo cáo sản phẩm của tháng trước.
     /// </summary>
     [HttpGet("product-report-last-month")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(IEnumerable<ProductReportResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProductReportLastMonthAsync(CancellationToken cancellationToken)
     {
@@ -129,7 +131,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy giá và tồn kho của một sản phẩm cụ thể.
     /// </summary>
     [HttpGet("product-stock-price/{variantId:int}")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(ProductStockPriceResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductStockAndPriceAsync(int variantId, CancellationToken cancellationToken)
@@ -143,7 +145,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy toàn bộ dữ liệu gộp cho Admin Dashboard.
     /// </summary>
     [HttpGet("dashboard-overview")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(AdminDashboardOverviewResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAdminDashboardOverviewAsync(CancellationToken cancellationToken)
     {
@@ -156,7 +158,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy toàn bộ phân tích doanh thu cho Admin (gộp).
     /// </summary>
     [HttpGet("revenue-analysis")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(AdminRevenueAnalysisResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAdminRevenueAnalysisAsync(CancellationToken cancellationToken)
     {
@@ -169,7 +171,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy báo cáo hiệu suất sản phẩm cho Admin (gộp).
     /// </summary>
     [HttpGet("product-report")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(AdminProductReportResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAdminProductReportAsync(CancellationToken cancellationToken)
     {
@@ -182,7 +184,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy báo cáo tồn kho cho Admin (gộp).
     /// </summary>
     [HttpGet("warehouse-report")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(AdminWarehouseReportResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAdminWarehouseReportAsync(CancellationToken cancellationToken)
     {
@@ -195,7 +197,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy báo cáo xưởng dịch vụ.
     /// </summary>
     [HttpGet("workshop-overview")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(WorkshopOverviewResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetWorkshopOverviewAsync(CancellationToken cancellationToken)
     {
@@ -207,7 +209,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy báo cáo trả góp.
     /// </summary>
     [HttpGet("financing-overview")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(FinancingOverviewResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetFinancingOverviewAsync(CancellationToken cancellationToken)
     {
@@ -219,7 +221,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy báo cáo phân tích khách hàng.
     /// </summary>
     [HttpGet("customer-analytics")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(CustomerAnalyticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerAnalyticsAsync(CancellationToken cancellationToken)
     {
@@ -231,11 +233,24 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     /// Lấy báo cáo chăm sóc khách hàng.
     /// </summary>
     [HttpGet("customer-service-analytics")]
-    [HasPermission(Statistical.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(CustomerServiceAnalyticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerServiceAnalyticsAsync(CancellationToken cancellationToken)
     {
         var result = await repository.GetCustomerServiceAnalyticsAsync(cancellationToken);
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy thống kê tổng quan về đơn hàng (hàng đợi, SLA, lỗi, ngoại lệ).
+    /// </summary>
+    [HttpGet("order-statistics")]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
+    [ProducesResponseType(typeof(OrderStatisticsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOrderStatisticsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetOrderStatisticsQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 }

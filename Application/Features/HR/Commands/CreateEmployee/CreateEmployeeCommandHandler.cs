@@ -35,7 +35,7 @@ namespace Application.Features.HR.Commands.CreateEmployee
                     .ConfigureAwait(false);
                 if (!succeeded)
                 {
-                    return Result<int>.Failure($"Kh�ng th? t?o ngu?i d�ng: {string.Join(", ", errors)}");
+                    return Result<int>.Failure($"Không thể tạo người dùng: {string.Join(", ", errors)}");
                 }
                 userId = user.Id;
             } else

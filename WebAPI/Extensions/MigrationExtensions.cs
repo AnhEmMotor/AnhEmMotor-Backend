@@ -52,7 +52,7 @@ public static class MigrationExtensions
                 await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await ProductDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                // await ProductDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await VehicleTypeAssignmentSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await NewsCategorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
@@ -70,9 +70,10 @@ public static class MigrationExtensions
                 await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await SupplierContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await FinanceContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await ContractTemplateSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await SalesAndInventorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                                await SalesAndInventorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await CarrierPartnerSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await LogisticsDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await WorkshopAndServiceSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
             }
         } catch (Exception ex)
         {

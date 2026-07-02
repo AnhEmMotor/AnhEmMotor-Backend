@@ -57,6 +57,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
 
     public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
+    public virtual DbSet<WorkshopPayment> WorkshopPayments { get; set; }
 
     public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
 
@@ -140,7 +141,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<PlateDossier> PlateDossiers { get; set; }
 
+    public DbSet<WarrantyClaim> WarrantyClaims => Set<WarrantyClaim>();
+
+    public DbSet<WarrantyClaimPart> WarrantyClaimParts => Set<WarrantyClaimPart>();
+
     public virtual DbSet<RepairOrder> RepairOrders { get; set; }
+        public virtual DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
 
     public virtual DbSet<RepairOrderDetail> RepairOrderDetails { get; set; }
 
@@ -148,7 +154,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<Service> Services { get; set; }
 
-    public virtual DbSet<ServiceEvaluation> ServiceEvaluations { get; set; }
 
     public virtual DbSet<Lead> Leads { get; set; }
 
@@ -163,7 +168,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<EmployeeProfile> EmployeeProfiles { get; set; }
 
     public virtual DbSet<CommissionPolicy> CommissionPolicies { get; set; }
-
     public virtual DbSet<CommissionRecord> CommissionRecords { get; set; }
 
     public virtual DbSet<Payroll> Payrolls { get; set; }
@@ -184,8 +188,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<InventoryOnHand> InventoryOnHands { get; set; }
 
-    public virtual DbSet<ContractTemplate> ContractTemplates { get; set; }
-
+    
     public virtual DbSet<SalesContract> SalesContracts { get; set; }
 
     public virtual DbSet<FinanceContract> FinanceContracts { get; set; }
@@ -196,13 +199,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<SupplierContractAuditLog> SupplierContractAuditLogs { get; set; }
 
-    public virtual DbSet<ContractTemplateAuditLog> ContractTemplateAuditLogs { get; set; }
-
+    
     public virtual DbSet<SupplierFinance> SupplierFinances { get; set; }
 
     public virtual DbSet<SupplierDebtSettlement> SupplierDebtSettlements { get; set; }
 
     public virtual DbSet<SupplierDebtLog> SupplierDebtLogs { get; set; }
+
+    public virtual DbSet<SupplierDebtLogImage> SupplierDebtLogImages { get; set; }
 
     public virtual DbSet<InventoryReceiptAuditLog> InventoryReceiptAuditLogs { get; set; }
 
@@ -221,14 +225,23 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<CurrentUnreconciledCod> CurrentUnreconciledCods { get; set; }
 
     public virtual DbSet<CarrierPartner> CarrierPartners { get; set; }
+    public virtual DbSet<ReturnRequest> ReturnRequests { get; set; }
+    public virtual DbSet<ReturnRequestItem> ReturnRequestItems { get; set; }
+    public virtual DbSet<Invoice> Invoices { get; set; }
+        public virtual DbSet<ConversionTool> ConversionTools { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Expense>().Property(e => e.Amount).HasPrecision(18, 2);
-        modelBuilder.Entity<ContractTemplate>().Property(e => e.Version).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.VehiclePrice).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.RegistrationFee).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.InsuranceFee).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(i => i.TotalAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.LaborCost).HasPrecision(18, 2);
+        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.PartsCost).HasPrecision(18, 2);
+        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.TotalCost).HasPrecision(18, 2);
         modelBuilder.Entity<SupplierFinance>().Property(e => e.CurrentDebt).HasPrecision(18, 2);
-        modelBuilder.Entity<ContractTemplate>().Property(ct => ct.Version).HasPrecision(18, 2);
         modelBuilder.Entity<SupplierFinance>().Property(sf => sf.CurrentDebt).HasPrecision(18, 2);
         modelBuilder.Entity<CurrentUnreconciledCod>().Property(e => e.Value).HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.CodAmount).HasPrecision(18, 2);
@@ -389,11 +402,18 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     .HasForeignKey(t => t.AssignedAdminId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
-        modelBuilder.Entity<ProductVariantColor>()
-            .HasOne(pvc => pvc.ProductVariant)
-            .WithMany(pv => pv.ProductVariantColors)
-            .HasForeignKey(pvc => pvc.ProductVariantId)
-            .OnDelete(DeleteBehavior.Cascade);
+modelBuilder.Entity<SupportRequest>(entity =>
+{
+    entity.HasOne(sr => sr.AssignedUser)
+        .WithMany()
+        .HasForeignKey(sr => sr.AssignedUserId)
+        .OnDelete(DeleteBehavior.SetNull);
+});
+modelBuilder.Entity<ProductVariantColor>()
+    .HasOne(pvc => pvc.ProductVariant)
+    .WithMany(pv => pv.ProductVariantColors)
+    .HasForeignKey(pvc => pvc.ProductVariantId)
+    .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => new { pt.ProductId, pt.TechnologyId });
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => pt.Id);
         modelBuilder.Entity<ProductStatus>().HasKey(ps => ps.Key);
@@ -407,6 +427,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                 new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Financial },
                 new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Insurance });
         modelBuilder.Entity<OutputStatus>().HasKey(ous => ous.Key);
+modelBuilder.Entity<Output>()
+    .HasOne(o => o.Lead)
+    .WithMany()
+    .HasForeignKey(o => o.LeadId)
+    .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)
             .WithMany(p => p.ProductTechnologies)

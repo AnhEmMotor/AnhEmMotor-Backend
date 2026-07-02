@@ -30,7 +30,7 @@ public class Auth
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "AUTH_REG_002 - Dang ky th?t b?i (Validation) - TH1: Thi?u Password")]
+    [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH1: Thiếu Password")]
     public async Task AUTH_REG_002_1_Register_MissingPassword()
     {
         var request = new RegisterCommand
@@ -46,7 +46,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_REG_002 - Dang ky th?t b?i (Validation) - TH2: Thi?u Email v Username")]
+    [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH2: Thiếu Email và Username")]
     public async Task AUTH_REG_002_2_Register_MissingEmailAndUsername()
     {
         var request = new RegisterCommand
@@ -62,7 +62,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_REG_002 - Dang ky th?t b?i (Validation) - TH3: Thi?u FullName")]
+    [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH3: Thiếu FullName")]
     public async Task AUTH_REG_002_3_Register_MissingFullName()
     {
         var request = new RegisterCommand
@@ -78,7 +78,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_LOG_002 - Dang nh?p sai thng tin")]
+    [Fact(DisplayName = "AUTH_LOG_002 - Đăng nhập sai thông tin")]
     public async Task AUTH_LOG_002_Login_Fail_WrongCreds()
     {
         var request = new LoginCommand { UsernameOrEmail = "user", Password = "wrong" };
@@ -89,7 +89,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_MGR_002 - Manager Login Fail (Quy?n)")]
+    [Fact(DisplayName = "AUTH_MGR_002 - Manager Login Fail (Quyền)")]
     public async Task AUTH_MGR_002_Login_Manager_Fail_Forbidden()
     {
         var request = new LoginForManagerCommand { UsernameOrEmail = "staff", Password = "123" };
@@ -100,7 +100,7 @@ public class Auth
             .ConfigureAwait(true);
     }
 
-    [Fact(DisplayName = "AUTH_OUT_001 - Dang xu?t")]
+    [Fact(DisplayName = "AUTH_OUT_001 - Đăng xuất")]
     public async Task AUTH_OUT_001_Logout_Success()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()))

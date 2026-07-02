@@ -56,5 +56,45 @@ namespace WebAPI.Controllers.V1
             var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
             return HandleResult(result);
         }
+
+        /// <summary>
+        /// Lấy thông tin chi tiết hồ sơ làm biển số xe.
+        /// </summary>
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetDetailAsync(
+            [FromRoute] int id,
+            CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new Application.Features.PlateDossiers.Queries.GetPlateDossierDetail.GetPlateDossierDetailQuery { Id = id }, cancellationToken)
+                .ConfigureAwait(false);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Chỉnh sửa toàn bộ hồ sơ làm biển số xe.
+        /// </summary>
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateAsync(
+            [FromRoute] int id,
+            [FromBody] Application.Features.PlateDossiers.Commands.UpdatePlateDossier.UpdatePlateDossierCommand command,
+            CancellationToken cancellationToken)
+        {
+            command.Id = id;
+            var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+            return HandleResult(result);
+        }
+
+        /// <summary>
+        /// Xóa hồ sơ làm biển số xe.
+        /// </summary>
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteAsync(
+            [FromRoute] int id,
+            CancellationToken cancellationToken)
+        {
+            var result = await sender.Send(new Application.Features.PlateDossiers.Commands.DeletePlateDossier.DeletePlateDossierCommand { Id = id }, cancellationToken)
+                .ConfigureAwait(false);
+            return HandleResult(result);
+        }
     }
 }
