@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.PurchaseInvoice.Requests;
+using Application.ApiContracts.PurchaseInvoice.Requests;
 using Application.ApiContracts.PurchaseInvoice.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
@@ -19,7 +19,6 @@ namespace Application.Features.PurchaseInvoices.Commands.CreatePurchaseInvoice
         IPurchaseInvoiceInsertRepository insertRepository,
         IPurchaseInvoiceReadRepository readRepository,
         IProductVariantReadRepository variantRepository,
-        ISupplierReadRepository supplierRepository,
         ICurrentUserContext currentUserContext,
         IUnitOfWork unitOfWork)
         : IRequestHandler<CreatePurchaseInvoiceCommand, Result<PurchaseInvoiceDetailResponse?>>

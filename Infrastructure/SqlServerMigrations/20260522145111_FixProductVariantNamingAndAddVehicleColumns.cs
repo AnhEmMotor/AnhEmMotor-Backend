@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.SqlServerMigrations
 {
     /// <inheritdoc />
     public partial class FixProductVariantNamingAndAddVehicleColumns : Migration

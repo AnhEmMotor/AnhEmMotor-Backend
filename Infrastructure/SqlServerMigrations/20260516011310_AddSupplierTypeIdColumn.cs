@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
 #nullable disable
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.SqlServerMigrations
 {
     /// <inheritdoc />
     public partial class AddSupplierTypeIdColumn : Migration

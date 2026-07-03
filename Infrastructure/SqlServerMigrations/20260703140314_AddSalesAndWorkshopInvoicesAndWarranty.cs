@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.SqlServerMigrations
 {
     /// <inheritdoc />
     public partial class AddSalesAndWorkshopInvoicesAndWarranty : Migration

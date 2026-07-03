@@ -56,12 +56,12 @@ public static class DependencyInjection
                 });
         } else
         {
-            services.AddDbContextPool<ApplicationDBContext>(
+            services.AddDbContextPool<ApplicationDBContext, SqlServerDBContext>(
                 options =>
                 {
                     options.UseSqlServer(
                         configuration.GetConnectionString("StringConnection"),
-                        b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
+                        b => b.MigrationsAssembly(typeof(SqlServerDBContext).Assembly.FullName)
                                 .CommandTimeout(30)
                                 .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
                     options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));

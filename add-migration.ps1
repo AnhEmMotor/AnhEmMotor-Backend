@@ -18,10 +18,8 @@ Write-Host "Migration Name: $MigrationName" -ForegroundColor Yellow
 Write-Host ""
 
 
-Write-Host ""
-
 Write-Host "[1/3] Creating SQL Server Migration (local)..." -ForegroundColor Cyan
-dotnet ef migrations add $MigrationName --context ApplicationDBContext --project Infrastructure --startup-project WebAPI
+dotnet ef migrations add $MigrationName --context SqlServerDBContext --output-dir SqlServerMigrations --project Infrastructure --startup-project WebAPI
 
 if ($LASTEXITCODE -ne 0)
 {
@@ -68,12 +66,12 @@ Write-Host "COMPLETED!" -ForegroundColor Green
 Write-Host "==================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Created migrations:" -ForegroundColor Cyan
-Write-Host "  - SQL Server: Infrastructure/Migrations/$MigrationName..." -ForegroundColor White
+Write-Host "  - SQL Server: Infrastructure/SqlServerMigrations/$MigrationName..." -ForegroundColor White
 Write-Host "  - MySQL:      Infrastructure/MySqlMigrations/$MigrationName..." -ForegroundColor White
 Write-Host "  - PostgreSql: Infrastructure/PostgreSqlMigrations/$MigrationName..." -ForegroundColor White
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. Review the migrations you just created" -ForegroundColor White
-Write-Host "  2. Run: dotnet ef database update --context ApplicationDBContext --project Infrastructure --startup-project WebAPI (to update local DB)" -ForegroundColor White
+Write-Host "  2. Run: dotnet ef database update --context SqlServerDBContext --project Infrastructure --startup-project WebAPI (to update local DB)" -ForegroundColor White
 Write-Host "  3. Commit and push to master -> GitHub Actions will auto-deploy!" -ForegroundColor White
 Write-Host ""

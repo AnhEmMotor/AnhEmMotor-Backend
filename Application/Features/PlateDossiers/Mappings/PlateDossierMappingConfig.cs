@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.PlateDossier.Responses;
+using Application.ApiContracts.PlateDossier.Responses;
 using Domain.Entities;
 using Mapster;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace Application.Features.PlateDossiers.Mappings
                 .Map(dest => dest.VehicleName, src => src.Output != null && src.Output.OutputInfos != null
                     ? src.Output.OutputInfos
                         .Where(oi => oi.ProductVariant != null && oi.ProductVariant.Product != null)
-                        .Select(oi => oi.ProductVariant.Product!.Name)
+                        .Select(oi => oi.ProductVariant!.Product!.Name)
                         .FirstOrDefault()
                     : null);
         }

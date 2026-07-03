@@ -58,7 +58,7 @@ public class VehicleController(IMediator mediator) : ApiController
     /// <summary>
     /// Tra cứu portfolio xe
     /// </summary>
-    /// <param name="query">The portfolio query.</param>
+    /// <param name="request">The portfolio query.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet("portfolio")]
     [Authorize]
