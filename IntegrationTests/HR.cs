@@ -1,5 +1,6 @@
 using Application.Features.HR.Commands.CreateCommissionPolicy;
 using Application.Features.HR.Commands.CreateEmployee;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -41,7 +42,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             "admin",
             "AdminPass123!",
-            [Domain.Constants.Permission.Permissions.HR.Create],
+            [Permissions.Admin.EmployeeManagement.Create],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -226,7 +227,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"admin_hr07_{uniqueId}",
             "Password123!",
-            [Domain.Constants.Permission.Permissions.HR.Edit, Domain.Constants.Permission.Permissions.HR.View, Domain.Constants.Permission.Permissions.Payroll.Approve, Domain.Constants.Permission.Permissions.Payroll.View],
+            [Permissions.Admin.EmployeeManagement.Edit, Permissions.Admin.EmployeeManagement.View, Permissions.Admin.PayrollManagement.Approve, Permissions.Admin.PayrollManagement.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var login = await IntegrationTestAuthHelper.AuthenticateAsync(

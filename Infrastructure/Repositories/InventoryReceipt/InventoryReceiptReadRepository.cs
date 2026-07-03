@@ -156,7 +156,15 @@ namespace Infrastructure.Repositories.InventoryReceipt
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
-            throw new NotImplementedException();
+            return GetQueryable(mode)
+                .Where(
+                    x => x.InventoryReceiptInfos
+                        .Any(
+                            ii => ii.DeletedAt == null &&
+                                    ii.PurchaseRequestItem != null &&
+                                    ii.PurchaseRequestItem.SupplierId == supplierId))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
         }
 
         public Task<IEnumerable<InventoryReceiptEntity>> GetBySupplierIdsAsync(
@@ -164,12 +172,35 @@ namespace Infrastructure.Repositories.InventoryReceipt
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
-            throw new NotImplementedException();
+            return GetQueryable(mode)
+                .Where(
+                    x => x.InventoryReceiptInfos
+                        .Any(
+                            ii => ii.DeletedAt == null &&
+                                    ii.PurchaseRequestItem != null &&
+                                    ii.PurchaseRequestItem.SupplierId.HasValue &&
+                                    supplierIds.Contains(ii.PurchaseRequestItem.SupplierId.Value)))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken)
+                .ContinueWith<IEnumerable<InventoryReceiptEntity>>(t => t.Result, cancellationToken);
         }
 
         public Task<InventoryReceiptInfoEntity?> GetInfoByIdAsync(int id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return context.InventoryReceiptInfos
+                .AsNoTracking()
+                .Where(x => x.Id == id && x.DeletedAt == null)
+                .Select(
+                    x => new InventoryReceiptInfoEntity
+                    {
+                        Id = x.Id,
+                        InventoryReceiptId = x.InventoryReceiptId,
+                        Count = x.Count,
+                        RemainingCount = x.RemainingCount,
+                        ParentOutputInfoId = x.ParentOutputInfoId,
+                        PurchaseRequestItemId = x.PurchaseRequestItemId
+                    })
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         public Task<List<InventoryReceiptInfoEntity>> GetInfosByInventoryReceiptIdsAsync(

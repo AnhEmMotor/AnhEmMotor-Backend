@@ -4,5 +4,6 @@ public enum ReturnOrderStatus
 {
     Pending = 0,
     Inspecting = 1,
-    Completed = 2
+    Completed = 2,
+    Rejected = 3
 }

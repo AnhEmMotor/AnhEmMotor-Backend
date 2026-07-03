@@ -26,7 +26,6 @@ using Moq;
 using System;
 using System.Linq;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
-using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
 using ProductVariant = Domain.Entities.ProductVariant;
 
 namespace UnitTests;
@@ -331,6 +330,7 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _prReadRepoMock.Object,
             _variantRepoMock.Object,
@@ -365,6 +365,7 @@ public class InventoryReceipts
         var handler = new UpdateInventoryReceiptCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _deleteRepoMock.Object,
             _prReadRepoMock.Object,
             _variantRepoMock.Object,
@@ -460,8 +461,6 @@ public class InventoryReceipts
         _updateRepoMock.Verify(x => x.Update(existingReceipt), Times.Once);
     }
 
-
-
     [Fact(DisplayName = "IR_023 - Tạo phiếu nhập kho thành công và lưu người tạo")]
     public async Task IR_023_CreateInventoryReceipt_SaveCreatedBy_Success()
     {
@@ -519,6 +518,7 @@ public class InventoryReceipts
         var handler = new SendInventoryReceiptCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _insertRepoMock.Object,
             _currentUserContextMock.Object,
             _unitOfWorkMock.Object);
         var command = new SendInventoryReceiptCommand { Id = 1 };

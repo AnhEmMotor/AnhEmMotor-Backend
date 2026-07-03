@@ -36,7 +36,7 @@ public class User
 
     #pragma warning disable IDE0079
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "USER_001 - L?y thông tin ngu?i dùng hi?n t?i thành công")]
+    [Fact(DisplayName = "USER_001 - Lấy thông tin người dùng hiện tại thành công")]
     public async Task GetCurrentUser_Success_ReturnsUserResponse()
     {
         var userId = Guid.NewGuid();
@@ -77,7 +77,7 @@ public class User
         result.Value.PhoneNumber.Should().Be("0123456789");
     }
 
-    [Fact(DisplayName = "USER_002 - L?y thông tin ngu?i dùng khi JWT không h?p l?")]
+    [Fact(DisplayName = "USER_002 - Lấy thông tin người dùng khi JWT không hợp lệ")]
     public async Task GetCurrentUser_InvalidJWT_ThrowsUnauthorizedException()
     {
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
@@ -92,7 +92,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_003 - L?y thông tin ngu?i dùng khi tài kho?n dã b? xóa m?m")]
+    [Fact(DisplayName = "USER_003 - Lấy thông tin người dùng khi tài khoản đã bị xóa mềm")]
     public async Task GetCurrentUser_DeletedAccount_ThrowsForbiddenException()
     {
         var userId = Guid.NewGuid();
@@ -114,7 +114,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_004 - L?y thông tin ngu?i dùng khi tài kho?n b? Ban")]
+    [Fact(DisplayName = "USER_004 - Lấy thông tin người dùng khi tài khoản bị Ban")]
     public async Task GetCurrentUser_BannedAccount_ReturnsUserResponseWithBannedStatus()
     {
         var userId = Guid.NewGuid();
@@ -139,7 +139,7 @@ public class User
         result.Value.Status.Should().Be(UserStatus.Banned);
     }
 
-    [Fact(DisplayName = "USER_051 - Verify UserResponse ch?a danh sách Permissions")]
+    [Fact(DisplayName = "USER_051 - Verify UserResponse chứa danh sách Permissions")]
     public async Task GetCurrentUser_WithPermissions_ReturnsPermissionsList()
     {
         var userId = Guid.NewGuid();
@@ -169,7 +169,7 @@ public class User
         result.Value.Permissions!.Should().Contain("User.Read");
     }
 
-    [Fact(DisplayName = "USER_052 - Verify UserResponse.Permissions r?ng khi user không có quy?n")]
+    [Fact(DisplayName = "USER_052 - Verify UserResponse.Permissions rỗng khi user không có quyền")]
     public async Task GetCurrentUser_NoPermissions_ReturnsEmptyPermissions()
     {
         var userId = Guid.NewGuid();
@@ -194,7 +194,7 @@ public class User
         result.Value.Permissions.Should().BeNull();
     }
 
-    [Fact(DisplayName = "USER_005 - C?p nh?t thông tin ngu?i dùng thành công")]
+    [Fact(DisplayName = "USER_005 - Cập nhật thông tin người dùng thành công")]
     public async Task UpdateCurrentUser_Success_ReturnsUpdatedUser()
     {
         var userId = Guid.NewGuid();
@@ -234,7 +234,7 @@ public class User
         result.Value.PhoneNumber.Should().Be("0987654321");
     }
 
-    [Fact(DisplayName = "USER_006 - C?p nh?t thông tin v?i d? li?u r?ng (không thay d?i gì)")]
+    [Fact(DisplayName = "USER_006 - Cập nhật thông tin với dữ liệu rỗng (không thay đổi gì)")]
     public async Task UpdateCurrentUser_EmptyData_KeepsOriginalData()
     {
         var userId = Guid.NewGuid();
@@ -267,7 +267,7 @@ public class User
         result.Value.PhoneNumber.Should().Be("0123456789");
     }
 
-    [Fact(DisplayName = "USER_007 - C?p nh?t thông tin v?i kho?ng tr?ng ? d?u và cu?i chu?i")]
+    [Fact(DisplayName = "USER_007 - Cập nhật thông tin với khoảng trắng ở đầu và cuối chuỗi")]
     public async Task UpdateCurrentUser_WhitespaceData_TrimmedCorrectly()
     {
         var userId = Guid.NewGuid();
@@ -291,7 +291,7 @@ public class User
         result.Value.PhoneNumber.Should().Be("0999888777");
     }
 
-    [Fact(DisplayName = "USER_008 - C?p nh?t thông tin v?i ký t? d?c bi?t trong FullName")]
+    [Fact(DisplayName = "USER_008 - Cập nhật thông tin với ký tự đặc biệt trong FullName")]
     public async Task UpdateCurrentUser_SpecialCharacters_SavedAsLiteral()
     {
         var userId = Guid.NewGuid();
@@ -318,7 +318,7 @@ public class User
         result.Value.FullName.Should().Be("<script>alert('XSS')</script>");
     }
 
-    [Fact(DisplayName = "USER_009 - C?p nh?t thông tin v?i Gender không h?p l?")]
+    [Fact(DisplayName = "USER_009 - Cập nhật thông tin với Gender không hợp lệ")]
     public async Task UpdateCurrentUser_InvalidGender_ThrowsValidationException()
     {
         var userId = Guid.NewGuid();
@@ -336,7 +336,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_010 - C?p nh?t thông tin v?i s? di?n tho?i không h?p l? (ch? vào ch? s?)")]
+    [Fact(DisplayName = "USER_010 - Cập nhật thông tin với số điện thoại không hợp lệ (chỉ vào chữ số)")]
     public async Task UpdateCurrentUser_InvalidPhoneNumber_ThrowsValidationException()
     {
         var userId = Guid.NewGuid();
@@ -354,7 +354,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_011 - C?p nh?t thông tin khi ngu?i dùng dã b? xóa m?m")]
+    [Fact(DisplayName = "USER_011 - Cập nhật thông tin khi người dùng đã bị xóa mềm")]
     public async Task UpdateCurrentUser_DeletedAccount_ThrowsForbiddenException()
     {
         var userId = Guid.NewGuid();
@@ -372,7 +372,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_012 - C?p nh?t thông tin khi ngu?i dùng b? Ban")]
+    [Fact(DisplayName = "USER_012 - Cập nhật thông tin khi người dùng bị Ban")]
     public async Task UpdateCurrentUser_BannedAccount_ThrowsForbiddenException()
     {
         var userId = Guid.NewGuid();
@@ -390,7 +390,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_013 - C?p nh?t thông tin v?i tru?ng Email trong body (ph?i b? ch?n)")]
+    [Fact(DisplayName = "USER_013 - Cập nhật thông tin với trường Email trong body (phải bị chặn)")]
     public async Task UpdateCurrentUser_EmailInBody_EmailNotChanged()
     {
         var userId = Guid.NewGuid();
@@ -422,7 +422,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_014 - Ð?i m?t kh?u thành công")]
+    [Fact(DisplayName = "USER_014 - Đổi mật khẩu thành công")]
     public async Task ChangePassword_Success_PasswordChangedAndSecurityStampRefreshed()
     {
         var userId = Guid.NewGuid();
@@ -455,7 +455,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_015 - Ð?i m?t kh?u v?i CurrentPassword sai")]
+    [Fact(DisplayName = "USER_015 - Đổi mật khẩu với CurrentPassword sai")]
     public async Task ChangePassword_WrongCurrentPassword_ThrowsUnauthorizedException()
     {
         var userId = Guid.NewGuid();
@@ -474,7 +474,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_016 - Ð?i m?t kh?u v?i NewPassword quá ng?n (validation)")]
+    [Fact(DisplayName = "USER_016 - Đổi mật khẩu với NewPassword quá ngắn (validation)")]
     public async Task ChangePassword_NewPasswordTooShort_ThrowsValidationException()
     {
         var userId = Guid.NewGuid();
@@ -493,7 +493,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_017 - Ð?i m?t kh?u khi tài kho?n dã b? xóa m?m")]
+    [Fact(DisplayName = "USER_017 - Đổi mật khẩu khi tài khoản đã bị xóa mềm")]
     public async Task ChangePassword_DeletedAccount_ThrowsForbiddenException()
     {
         var userId = Guid.NewGuid();
@@ -510,7 +510,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_018 - Xóa tài kho?n thành công")]
+    [Fact(DisplayName = "USER_018 - Xóa tài khoản thành công")]
     public async Task DeleteAccount_Success_AccountDeletedAndSecurityStampRefreshed()
     {
         var userId = Guid.NewGuid();
@@ -542,7 +542,7 @@ public class User
             Times.Once);
     }
 
-    [Fact(DisplayName = "USER_019 - Xóa tài kho?n khi dã b? Ban (không cho phép)")]
+    [Fact(DisplayName = "USER_019 - Xóa tài khoản khi đã bị Ban (không cho phép)")]
     public async Task DeleteAccount_BannedAccount_ThrowsForbiddenException()
     {
         var userId = Guid.NewGuid();
@@ -560,7 +560,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "USER_020 - Xóa tài kho?n khi tài kho?n dã b? xóa m?m tru?c dó")]
+    [Fact(DisplayName = "USER_020 - Xóa tài khoản khi tài khoản đã bị xóa mềm trước đó")]
     public async Task DeleteAccount_AlreadyDeleted_ThrowsBadRequestException()
     {
         var userId = Guid.NewGuid();

@@ -35,6 +35,9 @@ public class CarrierPartner
 
     public bool AllowOversizeCargo { get; set; }
 
+    public string? PricingRulesJson { get; set; }
+    public string? SlaJson { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAt { get; set; }

@@ -22,7 +22,15 @@ namespace Application.ApiContracts.Vehicle.Responses
 
         public int? ProductVariantId { get; set; }
 
+        public string? VariantName { get; set; }
+
         public int? ProductVariantColorId { get; set; }
+
+        public string? ColorName { get; set; }
+
+        public string? BrandName { get; set; }
+
+        public string? WarrantyPeriod { get; set; }
 
         public bool IsActive { get; set; }
 

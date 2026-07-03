@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptById;
+using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySupplierId;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsList;
 using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptStats;
 using Domain.Primitives;
@@ -92,6 +93,41 @@ public class InventoryReceipts
                 new UpdateInventoryReceiptStatusCommand(),
                 CancellationToken.None))
             .ConfigureAwait(true);
+    }
+
+    [Fact(
+        DisplayName = "IR_023 - Lấy danh sách phiếu nhập kho theo nhà cung cấp trả về PagedResult khi supplier tồn tại")]
+    public async Task IR_023_GetInventoryReceiptsBySupplierId_ReturnsPagedList()
+    {
+        var pagedResult = new PagedResult<InventoryReceiptListResponse>([], 0, 1, 10);
+        _mediatorMock.Setup(
+            m => m.Send(It.IsAny<GetInventoryReceiptsBySupplierIdQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PagedResult<InventoryReceiptListResponse>>.Success(pagedResult));
+        var result = await _controller.GetInventoryReceiptsBySupplierIdAsync(
+            1,
+            new SieveModel(),
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = result as OkObjectResult;
+        okResult!.Value.Should().BeEquivalentTo(pagedResult);
+    }
+
+    [Fact(
+        DisplayName = "IR_024 - Lấy danh sách phiếu nhập kho theo nhà cung cấp trả về NotFound khi supplier không tồn tại")]
+    public async Task IR_024_GetInventoryReceiptsBySupplierId_ReturnsNotFound()
+    {
+        var failure = Result<PagedResult<InventoryReceiptListResponse>>.Failure(
+            Error.NotFound("Không tìm thấy nhà cung cấp với Id = 999"));
+        _mediatorMock.Setup(
+            m => m.Send(It.IsAny<GetInventoryReceiptsBySupplierIdQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(failure);
+        var result = await _controller.GetInventoryReceiptsBySupplierIdAsync(
+            999,
+            new SieveModel(),
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        result.Should().BeOfType<NotFoundObjectResult>();
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

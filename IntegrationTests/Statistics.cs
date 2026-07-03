@@ -1,6 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Domain.Constants.Order;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -63,7 +63,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             "StrongPass1@",
-            [Statistical.View],
+            [Permissions.Admin.DashboardManagement.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var token = (await IntegrationTestAuthHelper.AuthenticateAsync(

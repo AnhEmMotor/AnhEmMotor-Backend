@@ -1,4 +1,6 @@
+using Application.ApiContracts.Customer.Responses;
 using Application.ApiContracts.Leads.Responses;
+using Application.Features.Customer.Queries.GetCustomerProfile360;
 using Application.Features.Leads.Commands.AddLeadActivity;
 using Application.Features.Leads.Commands.AssignLead;
 using Application.Features.Leads.Commands.CreateLead;
@@ -60,6 +62,18 @@ public class LeadController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetLeadByIdAsync(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetLeadByIdQuery(id), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy dữ liệu 360 chi tiết khách hàng (hồ sơ đầy đủ)
+    /// </summary>
+    [HttpGet("{id:int}/360")]
+    [Authorize]
+    [ProducesResponseType(typeof(CustomerProfile360Response), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCustomer360Async(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetCustomerProfile360Query(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

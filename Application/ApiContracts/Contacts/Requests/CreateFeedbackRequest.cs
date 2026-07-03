@@ -9,7 +9,7 @@ public record CreateFeedbackRequest
     public int Rating { get; set; }
 
     [Required]
-    [MaxLength(50)]
+    [MaxLength(250)]
     public string FeedbackArea { get; set; } = string.Empty;
 
     [Required]

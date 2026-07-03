@@ -5,7 +5,7 @@ namespace Application.Features.Permissions.Commands.CreateRole;
 
 public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>
 {
-    private static readonly HashSet<string> ValidPermissions = [.. PermissionsList.GetMetadataList().Select(m => m.Id)];
+    private static readonly HashSet<string> ValidPermissions = [.. PermissionsList.GetAllPermissions()];
 
     public CreateRoleCommandValidator()
     {

@@ -17,7 +17,7 @@ using Application.Features.Permissions.Queries.GetAllRoles;
 using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using FluentAssertions;
 using FluentValidation;
@@ -28,6 +28,7 @@ using Moq;
 using Sieve.Models;
 using System.Security.Claims;
 using WebAPI.Controllers.V1;
+using static Domain.Constants.Permission.Permissions;
 
 namespace ControllerTests;
 
@@ -49,37 +50,13 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_001 - Controller gọi GetAllPermissions thành công")]
     public async Task GetAllPermissions_MediatorReturnsData_ReturnsOkWithData()
     {
-        var expectedData = new Dictionary<string, List<PermissionResponse>>
-        {
-            {
-                "Brands",
-                new List<PermissionResponse>
-                {
-                    new() { ID = Brands.View, DisplayName = "View Brands", Description = "Xem danh sách thương hiệu" },
-                    new() { ID = Brands.Create, DisplayName = "Create Brand", Description = "Tạo thương hiệu mới" }
-                }
-            },
-            {
-                "Products",
-                new List<PermissionResponse>
-                {
-                    new() { ID = Products.View, DisplayName = "View Products", Description = "Xem danh sách sản phẩm" }
-                }
-            },
-            {
-                "Roles",
-                new List<PermissionResponse>
-                {
-                    new() { ID = Roles.View, DisplayName = "View Roles", Description = "Xem danh sách vai trò" }
-                }
-            }
-        };
+        var expectedData = Result<List<PermissionModuleMetadata>>.Success(new List<PermissionModuleMetadata>());
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetAllPermissionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedData);
         var result = await _controller.GetAllPermissionsAsync(CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
-        okResult!.Value.Should().BeEquivalentTo(expectedData);
+        okResult!.Value.Should().BeEquivalentTo(expectedData.Value);
     }
 
     [Fact(DisplayName = "PERM_CTRL_002 - Controller gọi GetMyPermissions thành công")]
@@ -93,7 +70,8 @@ public class PermissionAndRole
             UserName = "testuser",
             Email = "test@test.com",
             Roles = ["Manager"],
-            Permissions = [Brands.View, Brands.Create, Products.View, Products.Create]
+            Permissions =
+                [Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMyPermissionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
@@ -124,7 +102,8 @@ public class PermissionAndRole
             UserName = "targetuser",
             Email = "target@test.com",
             Roles = ["Staff"],
-            Permissions = [Products.View, Brands.View, Files.View, Files.Upload, Suppliers.View]
+            Permissions =
+                [Warehouse.ProductManagement.View, Warehouse.ProductManagement.View, Admin.FileManagement.View, Admin.FileManagement.Upload, Warehouse.SupplierManagement.View]
         };
         _mediatorMock.Setup(
             m => m.Send(It.Is<GetUserPermissionsByIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
@@ -156,12 +135,12 @@ public class PermissionAndRole
         var roleId = Guid.NewGuid();
         var expectedPermissions = new List<string>
         {
-            Brands.View,
-            Brands.Create,
-            Products.View,
-            Products.Create,
-            Files.View,
-            Suppliers.View
+            Warehouse.ProductManagement.View,
+            Warehouse.ProductManagement.Create,
+            Warehouse.ProductManagement.View,
+            Warehouse.ProductManagement.Create,
+            Admin.FileManagement.View,
+            Warehouse.SupplierManagement.View
         };
         _mediatorMock.Setup(
             m => m.Send(It.Is<GetRolePermissionsQuery>(q => q.RoleId == roleId), It.IsAny<CancellationToken>()))
@@ -215,7 +194,7 @@ public class PermissionAndRole
         {
             RoleName = "NewRole",
             Description = "Test Role",
-            Permissions = [Brands.View, Products.View]
+            Permissions = [Warehouse.ProductManagement.View, Warehouse.ProductManagement.View]
         };
         var expectedResponse = new RoleCreateResponse
         {
@@ -243,7 +222,7 @@ public class PermissionAndRole
         {
             RoleName = "Admin",
             Description = "Duplicate",
-            Permissions = [Brands.View]
+            Permissions = [Warehouse.ProductManagement.View]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("Role name already exists"));
@@ -429,11 +408,7 @@ public class PermissionAndRole
     public async Task UpdateRole_NewPermission_ReturnsOk()
     {
         var roleId = Guid.NewGuid();
-        var request = new UpdateRoleCommand
-        {
-            RoleId = roleId,
-            Permissions = [Domain.Constants.Permission.Permissions.News.Create]
-        };
+        var request = new UpdateRoleCommand { RoleId = roleId, Permissions = [Marketing.NewsManagement.Create] };
         var expectedResponse = new PermissionRoleUpdateResponse { Message = "Role updated successfully" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PermissionRoleUpdateResponse>.Success(expectedResponse));

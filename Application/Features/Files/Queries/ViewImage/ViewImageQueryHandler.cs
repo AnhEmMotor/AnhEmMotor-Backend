@@ -16,13 +16,25 @@ public class ViewImageQueryHandler(IFileReadService fileReadService) : IRequestH
         {
             return Error.NotFound("Image not found.");
         }
-        var (fileBytes, _) = fileResult.Value;
-        using var InventoryReceiptStream = new MemoryStream(fileBytes);
-        var processedStream = await fileReadService.ReadImageAsync(
-            InventoryReceiptStream,
-            request.Width,
-            cancellationToken)
-            .ConfigureAwait(false);
-        return new ViewImageResponse { FileStream = processedStream, ContentType = "image/webp" };
+        var (fileBytes, contentType) = fileResult.Value;
+        if (!contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+        {
+            var rawStream = new MemoryStream(fileBytes);
+            return new ViewImageResponse { FileStream = rawStream, ContentType = contentType };
+        }
+        var InventoryReceiptStream = new MemoryStream(fileBytes);
+        try
+        {
+            var processedStream = await fileReadService.ReadImageAsync(
+                InventoryReceiptStream,
+                request.Width,
+                cancellationToken)
+                .ConfigureAwait(false);
+            return new ViewImageResponse { FileStream = processedStream, ContentType = "image/webp" };
+        } catch (Exception)
+        {
+            var rawStream = new MemoryStream(fileBytes);
+            return new ViewImageResponse { FileStream = rawStream, ContentType = contentType };
+        }
     }
 }

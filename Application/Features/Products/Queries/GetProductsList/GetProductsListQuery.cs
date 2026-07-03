@@ -95,7 +95,7 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
             return null;
         }
         var parts = filters.Split(',');
-        var operators = new[] { "<=", ">=", "<", ">", "==", "!", "@", "=" };
+        var operators = new[] { "<=", ">=", "@=", "==", "!=", "!@=", "!_=", "_=", "<", ">", "!", "@", "=" };
         foreach (var part in parts)
         {
             var trimmedPart = part.AsSpan().Trim();

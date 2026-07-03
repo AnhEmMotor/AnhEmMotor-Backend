@@ -78,15 +78,7 @@ public class ImportSuppliersCommandHandler(
             {
                 rowErrors.AddRange(validationResult.Errors.Select(e => e.ErrorMessage));
             }
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                if (!rowErrors.Any(
-                    e => e.Contains("NotEmpty", StringComparison.OrdinalIgnoreCase) ||
-                        e.Contains("empty", StringComparison.OrdinalIgnoreCase)))
-                {
-                    rowErrors.Add("Thiếu tên đối tác.");
-                }
-            } else
+            if (!string.IsNullOrWhiteSpace(name))
             {
                 var nameExists = await supplierReadRepository.IsNameExistsAsync(name, null, cancellationToken)
                     .ConfigureAwait(false);

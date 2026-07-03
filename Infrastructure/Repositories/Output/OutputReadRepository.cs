@@ -149,4 +149,12 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
                         : o.CreatedAt < expirationThreshold))
             .ToListAsync(cancellationToken);
     }
+
+    public Task<List<OutputEntity>> GetByLeadIdAsync(int leadId, CancellationToken cancellationToken = default)
+    {
+        return GetQueryable()
+            .Where(o => o.LeadId == leadId)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
 }

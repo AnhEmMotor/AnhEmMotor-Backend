@@ -41,6 +41,8 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                     "StatusId");
             }
             var currentUserId = currentUserContext.GetUserId();
+            var oldStatusId = receipt.StatusId;
+            var oldNotes = receipt.Notes;
             if (string.Equals(
                 request.StatusId,
                 Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
@@ -150,9 +152,9 @@ namespace Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt
                     Action = "Update",
                     ChangedById = currentUserId,
                     ChangedAt = DateTimeOffset.UtcNow,
-                    OldStatusId = receipt.StatusId,
+                    OldStatusId = oldStatusId,
                     NewStatusId = request.StatusId,
-                    OldNotes = receipt.Notes,
+                    OldNotes = oldNotes,
                     NewNotes = receipt.Notes
                 }
             };

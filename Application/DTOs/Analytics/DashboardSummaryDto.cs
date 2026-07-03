@@ -6,6 +6,10 @@ namespace Application.DTOs.Analytics
     {
         public decimal TotalRevenue { get; set; }
 
+        public decimal TotalExpense { get; set; }
+
+        public decimal GrossProfit { get; set; }
+
         public decimal NetProfit { get; set; }
 
         public decimal PendingAmount { get; set; }

@@ -20,6 +20,8 @@ public record SupportRequestResponse
 
     public Guid? AssignedUserId { get; set; }
 
+    public string? AssignedUserName { get; set; }
+
     public ContactBasicResponse? Contact { get; set; }
 
     public DateTimeOffset? CreatedAt { get; set; }

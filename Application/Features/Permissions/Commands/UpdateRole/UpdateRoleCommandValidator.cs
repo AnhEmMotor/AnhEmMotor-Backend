@@ -5,7 +5,7 @@ namespace Application.Features.Permissions.Commands.UpdateRole;
 
 public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleCommand>
 {
-    private static readonly HashSet<string> ValidPermissions = [.. PermissionsList.GetMetadataList().Select(m => m.Id)];
+    private static readonly HashSet<string> ValidPermissions = [.. PermissionsList.GetAllPermissions()];
 
     public UpdateRoleCommandValidator()
     {

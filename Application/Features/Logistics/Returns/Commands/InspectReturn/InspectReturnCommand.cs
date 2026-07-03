@@ -15,6 +15,10 @@ public class InspectReturnCommand : IRequest<bool>
 
     public string? ReturnInternalNote { get; set; }
 
-    public string Action { get; set; } = string.Empty;
+    public string? Action { get; set; }
+
+    public decimal? RefundAmount { get; set; }
+
+    public decimal? ReturnShippingCost { get; set; }
 }
 

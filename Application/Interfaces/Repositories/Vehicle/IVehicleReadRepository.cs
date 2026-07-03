@@ -52,6 +52,14 @@ namespace Application.Interfaces.Repositories.Vehicle
         public Task<List<Domain.Entities.Vehicle>> GetByUserIdAsync(
             string userId,
             CancellationToken cancellationToken = default);
+
+        public Task<List<Domain.Entities.Vehicle>> GetByLeadIdAsync(
+            int leadId,
+            CancellationToken cancellationToken = default);
+
+        public Task<Domain.Entities.Vehicle?> GetByLicensePlateAsync(
+            string licensePlate,
+            CancellationToken cancellationToken = default);
     }
 }
 

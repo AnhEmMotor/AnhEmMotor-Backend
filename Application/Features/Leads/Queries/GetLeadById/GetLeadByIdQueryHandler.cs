@@ -12,7 +12,7 @@ namespace Application.Features.Leads.Queries.GetLeadById
         {
             var lead = await leadReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
             if (lead == null)
-                return Result<LeadResponse>.Failure("KhÙng tÏm th?y kh·ch h‡ng.");
+                return Result<LeadResponse>.Failure("Kh√¥ng t√¨m th·∫•y kh√°ch h√†ng.");
             return Result<LeadResponse>.Success(
                 new LeadResponse
                 {
@@ -33,6 +33,11 @@ namespace Application.Features.Leads.Queries.GetLeadById
                     Birthday = lead.Birthday,
                     IdentificationNumber = lead.IdentificationNumber,
                     CreatedAt = lead.CreatedAt ?? DateTimeOffset.MinValue,
+                    IsVerified = lead.IsVerified,
+                    Tier = lead.Tier,
+                    Points = lead.Points,
+                    AssignedToId = lead.AssignedToId,
+                    AssignedToName = lead.AssignedTo?.FullName,
                     Activities =
                         lead.Activities?.Select(
                                     a => new LeadActivityResponse
@@ -48,3 +53,4 @@ namespace Application.Features.Leads.Queries.GetLeadById
         }
     }
 }
+

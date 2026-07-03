@@ -48,6 +48,7 @@ namespace Application.Features.Leads.Commands.UpdateLead
             }
             lead.InterestedVehicle = request.InterestedVehicle;
             lead.Score = request.Score;
+            lead.IsVerified = request.IsVerified;
             await leadUpdateRepository.UpdateAsync(lead, cancellationToken).ConfigureAwait(false);
             return lead.Id;
         }

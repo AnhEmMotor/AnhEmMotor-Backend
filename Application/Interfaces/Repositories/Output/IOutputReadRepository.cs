@@ -38,5 +38,7 @@ public interface IOutputReadRepository
     public Task<List<OutputEntity>> GetExpiredOrdersAsync(
         DateTimeOffset expirationThreshold,
         CancellationToken cancellationToken);
+
+    public Task<List<OutputEntity>> GetByLeadIdAsync(int leadId, CancellationToken cancellationToken = default);
 }
 

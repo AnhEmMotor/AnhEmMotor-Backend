@@ -15,7 +15,8 @@ public static class VehicleTypeAssignmentSeeder
             return;
         var typeValues = await context.Set<OptionValue>()
             .Where(value => value.OptionId == vehicleTypeOption.Id && value.DeletedAt == null)
-            .ToDictionaryAsync(value => value.Name ?? string.Empty, cancellationToken)
+            .GroupBy(value => value.Name ?? string.Empty)
+            .ToDictionaryAsync(g => g.Key, g => g.First(), cancellationToken)
             .ConfigureAwait(false);
         var bikeCategory = await context.ProductCategories
             .FirstOrDefaultAsync(category => category.Name == "Xe máy" && category.DeletedAt == null, cancellationToken)

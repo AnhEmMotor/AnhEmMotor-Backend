@@ -55,7 +55,7 @@ jobs:
       - name: Check Migration Count
         shell: bash
         run: |
-          FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD | grep -E 'Infrastructure/(Migrations|MySqlMigrations|PostgreSqlMigrations)/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' || true)
+          FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD | grep -E 'Infrastructure/(SqlServerMigrations|MySqlMigrations|PostgreSqlMigrations)/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' || true)
           if [ -z "$FILES" ]; then
             echo "No new migrations found. Check passed."
             exit 0
@@ -107,11 +107,11 @@ jobs:
           echo "--- Checking SQL Server ---"
           export Provider=SqlServer
           export ConnectionStrings__StringConnection="Server=localhost,1433;Database=TestDb;User Id=sa;Password=Password123!;Encrypt=False;TrustServerCertificate=True"
-          dotnet ef migrations has-pending-model-changes --context ApplicationDBContext --project Infrastructure --startup-project WebAPI || { 
+          dotnet ef migrations has-pending-model-changes --context SqlServerDBContext --project Infrastructure --startup-project WebAPI || { 
             echo "::error::SQL Server migrations are out of sync with models. Please recreate migrations using @AnhEmMotor-Backend/add-migration.ps1"; 
             exit 1; 
           }
-          dotnet ef database update --context ApplicationDBContext --project Infrastructure --startup-project WebAPI || { 
+          dotnet ef database update --context SqlServerDBContext --project Infrastructure --startup-project WebAPI || { 
             echo "::error::Failed to apply SQL Server migrations. Please recreate migrations using @AnhEmMotor-Backend/add-migration.ps1"; 
             exit 1; 
           }

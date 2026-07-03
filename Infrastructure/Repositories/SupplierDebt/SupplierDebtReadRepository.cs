@@ -66,10 +66,41 @@ namespace Infrastructure.Repositories.SupplierDebt
             return await context.SupplierDebtLogs
                 .AsNoTracking()
                 .Include(l => l.CreatedBy)
+                .Include(l => l.ProofImages)
                 .Where(l => l.SupplierId == supplierId)
                 .OrderByDescending(l => l.PaymentDate)
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
+        }
+
+        public IQueryable<SupplierDebtLog> GetDebtLogsMissingProofsQueryable()
+        {
+            return context.SupplierDebtLogs
+                .Include(x => x.Supplier)
+                .Include(x => x.CreatedBy)
+                .Where(x => !x.ProofImages.Any());
+        }
+
+        public Task<SupplierDebtLog?> GetDebtLogByIdAsync(int logId, CancellationToken cancellationToken)
+        {
+            return context.SupplierDebtLogs
+                .Include(x => x.ProofImages)
+                .FirstOrDefaultAsync(x => x.Id == logId, cancellationToken);
+        }
+
+        public async Task<List<SupplierDebtLogImage>> GetDebtLogProofImagesAsync(
+            int debtLogId,
+            CancellationToken cancellationToken)
+        {
+            return await context.SupplierDebtLogImages
+                .Where(x => x.SupplierDebtLogId == debtLogId)
+                .ToListAsync(cancellationToken);
+        }
+
+        public Task<bool> IsDebtProofImageAsync(int mediaFileId, CancellationToken cancellationToken)
+        {
+            var suffix = $"/proof-image/{mediaFileId}";
+            return context.SupplierDebtLogImages.AnyAsync(x => x.ImageUrl.EndsWith(suffix), cancellationToken);
         }
     }
 }

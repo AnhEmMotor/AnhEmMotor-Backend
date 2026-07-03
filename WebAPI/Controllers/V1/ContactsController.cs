@@ -1,4 +1,5 @@
 using Application.ApiContracts.Contacts.Requests;
+using Application.Features.Contacts.Commands.AssignSupportRequest;
 using Application.Features.Contacts.Commands.CreateContact;
 using Application.Features.Contacts.Commands.CreateContactReply;
 using Application.Features.Contacts.Commands.CreateFeedback;
@@ -112,11 +113,12 @@ public class ContactsController(ISender sender) : ApiController
     public async Task<IActionResult> GetPaginatedAsync(
         [FromQuery] string? contactType,
         [FromQuery] string? status,
+        [FromQuery] Guid? assignedUserId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetPaginatedContactsQuery(contactType, status, page, pageSize);
+        var query = new GetPaginatedContactsQuery(contactType, status, assignedUserId, page, pageSize);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -134,6 +136,21 @@ public class ContactsController(ISender sender) : ApiController
     {
         var command = new UpdateContactStatusCommand(contactType, id, request);
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Phân công yêu cầu hỗ trợ cho nhân viên xử lý.
+    /// </summary>
+    [HttpPatch("{id:int}/assign")]
+    [Authorize]
+    public async Task<IActionResult> AssignAsync(
+        int id,
+        AssignSupportRequestCommand command,
+        CancellationToken cancellationToken)
+    {
+        var cmd = command with { SupportRequestId = id };
+        var result = await sender.Send(cmd, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
