@@ -1510,7 +1510,11 @@ public class Product
                             {
                                 RemainingCount = 10,
                                 InventoryReceipt =
-                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
+                                    new InventoryReceipt
+                                            {
+                                                StatusId =
+                                                    Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve
+                                            }
                             }],
                     OutputInfos = []
                 }, new ProductVariant
@@ -1520,7 +1524,11 @@ public class Product
                             {
                                 RemainingCount = 3,
                                 InventoryReceipt =
-                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
+                                    new InventoryReceipt
+                                            {
+                                                StatusId =
+                                                    Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve
+                                            }
                             }],
                     OutputInfos = []
                 }, new ProductVariant
@@ -1530,7 +1538,11 @@ public class Product
                             {
                                 RemainingCount = 0,
                                 InventoryReceipt =
-                                    new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
+                                    new InventoryReceipt
+                                            {
+                                                StatusId =
+                                                    Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve
+                                            }
                             }],
                     OutputInfos = []
                 }]
@@ -1682,12 +1694,18 @@ public class Product
                 {
                     RemainingCount = 5,
                     InventoryReceipt =
-                        new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
+                        new InventoryReceipt
+                            {
+                                StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve
+                            }
                 }, new InventoryReceiptInfo
                 {
                     RemainingCount = 10,
                     InventoryReceipt =
-                        new InventoryReceipt { StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve }
+                        new InventoryReceipt
+                            {
+                                StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve
+                            }
                 }]
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();

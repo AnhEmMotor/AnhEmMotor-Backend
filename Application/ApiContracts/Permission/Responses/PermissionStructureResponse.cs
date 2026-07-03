@@ -1,9 +1,10 @@
+using Domain.Constants.Permission;
 
 namespace Application.ApiContracts.Permission.Responses;
 
 public class PermissionStructureResponse
 {
-    public List<Domain.Constants.Permission.PermissionModuleMetadata> Modules { get; set; } = [];
+    public List<PermissionModuleMetadata> Modules { get; set; } = [];
 
     public Dictionary<string, List<string>> Conflicts { get; set; } = [];
 

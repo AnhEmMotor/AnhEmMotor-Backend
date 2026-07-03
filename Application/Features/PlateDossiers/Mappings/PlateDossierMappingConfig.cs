@@ -10,12 +10,14 @@ namespace Application.Features.PlateDossiers.Mappings
         public void Register(TypeAdapterConfig config)
         {
             config.NewConfig<PlateDossier, PlateDossierResponse>()
-                .Map(dest => dest.VehicleName, src => src.Output != null && src.Output.OutputInfos != null
-                    ? src.Output.OutputInfos
-                        .Where(oi => oi.ProductVariant != null && oi.ProductVariant.Product != null)
-                        .Select(oi => oi.ProductVariant!.Product!.Name)
-                        .FirstOrDefault()
-                    : null);
+                .Map(
+                    dest => dest.VehicleName,
+                    src => src.Output != null && src.Output.OutputInfos != null
+                        ? src.Output.OutputInfos
+                            .Where(oi => oi.ProductVariant != null && oi.ProductVariant.Product != null)
+                            .Select(oi => oi.ProductVariant!.Product!.Name)
+                            .FirstOrDefault()
+                        : null);
         }
     }
 }

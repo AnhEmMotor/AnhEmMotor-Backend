@@ -40,12 +40,12 @@ namespace Application.Features.PlateDossiers.Queries.GetPlateDossiersList
                 filter,
                 cancellationToken)
                 .ConfigureAwait(false);
-
             if (result == null || result.Items == null || result.Items.Count == 0)
             {
                 var mockItems = new List<PlateDossierResponse>
                 {
-                    new() {
+                    new()
+                    {
                         Id = 9991,
                         OutputId = 101,
                         CustomerName = "Nguyễn Văn Hùng",
@@ -58,7 +58,8 @@ namespace Application.Features.PlateDossiers.Queries.GetPlateDossiersList
                         Notes = "Khách hàng cần gấp trước cuối tuần",
                         CreatedAt = DateTimeOffset.Now.AddHours(-5)
                     },
-                    new() {
+                    new()
+                    {
                         Id = 9992,
                         OutputId = 102,
                         CustomerName = "Trần Thị Lan",
@@ -71,7 +72,8 @@ namespace Application.Features.PlateDossiers.Queries.GetPlateDossiersList
                         Notes = "Đã nộp thuế tại Chi cục Thuế Quận 1",
                         CreatedAt = DateTimeOffset.Now.AddDays(-1)
                     },
-                    new() {
+                    new()
+                    {
                         Id = 9993,
                         OutputId = 103,
                         CustomerName = "Lê Hoàng Nam",
@@ -85,7 +87,8 @@ namespace Application.Features.PlateDossiers.Queries.GetPlateDossiersList
                         Notes = "Biển số đẹp, chờ khách đến nhận xe",
                         CreatedAt = DateTimeOffset.Now.AddDays(-2)
                     },
-                    new() {
+                    new()
+                    {
                         Id = 9994,
                         OutputId = 104,
                         CustomerName = "Phạm Minh Tuấn",
@@ -99,7 +102,8 @@ namespace Application.Features.PlateDossiers.Queries.GetPlateDossiersList
                         Notes = "Đã có giấy hẹn nhận cà-vẹt",
                         CreatedAt = DateTimeOffset.Now.AddDays(-3)
                     },
-                    new() {
+                    new()
+                    {
                         Id = 9995,
                         OutputId = 105,
                         CustomerName = "Vũ Thị Hồng",
@@ -116,7 +120,6 @@ namespace Application.Features.PlateDossiers.Queries.GetPlateDossiersList
                 };
                 return new PagedResult<PlateDossierResponse>(mockItems, mockItems.Count, 1, 100);
             }
-
             return result;
         }
 

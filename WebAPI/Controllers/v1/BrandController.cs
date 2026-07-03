@@ -16,6 +16,7 @@ using Application.Features.Brands.Queries.GetDeletedBrandsList;
 using Application.Features.Brands.Queries.GetImportTemplate;
 using Asp.Versioning;
 using Domain.Constants.Permission;
+using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -143,7 +144,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <param name="id">ID của thương hiệu.</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thông tin chi tiết thương hiệu.</returns>
-    [HttpGet("{id:int}", Name = Domain.Constants.RouteNames.Brands.GetById)]
+    [HttpGet("{id:int}", Name = Brands.GetById)]
     [HasPermission(Permissions.Warehouse.ProductManagement.View)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -169,10 +170,7 @@ public class BrandController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateBrandCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return HandleCreated(
-            result,
-            Domain.Constants.RouteNames.Brands.GetById,
-            new { id = result.IsSuccess ? result.Value.Id : 0 });
+        return HandleCreated(result, Brands.GetById, new { id = result.IsSuccess ? result.Value.Id : 0 });
     }
 
     /// <summary>

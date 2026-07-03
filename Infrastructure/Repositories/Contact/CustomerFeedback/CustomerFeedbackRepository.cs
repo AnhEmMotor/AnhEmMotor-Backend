@@ -11,8 +11,8 @@ public class CustomerFeedbackRepository(ApplicationDBContext context) : ICustome
     {
         return context.CustomerFeedbacks
             .Include(f => f.Contact)
-                .ThenInclude(c => c.Replies)
-                    .ThenInclude(r => r.RepliedBy)
+            .ThenInclude(c => c.Replies)
+            .ThenInclude(r => r.RepliedBy)
             .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
     }
 
@@ -20,8 +20,8 @@ public class CustomerFeedbackRepository(ApplicationDBContext context) : ICustome
     {
         return context.CustomerFeedbacks
             .Include(f => f.Contact)
-                .ThenInclude(c => c.Replies)
-                    .ThenInclude(r => r.RepliedBy)
+            .ThenInclude(c => c.Replies)
+            .ThenInclude(r => r.RepliedBy)
             .OrderByDescending(f => f.CreatedAt)
             .ToListAsync(cancellationToken);
     }

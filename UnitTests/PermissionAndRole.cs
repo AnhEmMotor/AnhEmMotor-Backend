@@ -1,4 +1,3 @@
-using Application.ApiContracts.Permission.Responses;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
@@ -13,7 +12,6 @@ using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants.Permission;
-using static Domain.Constants.Permission.Permissions;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -27,6 +25,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Security.Claims;
+using static Domain.Constants.Permission.Permissions;
 using PermissionEntity = Domain.Entities.Permission;
 
 namespace UnitTests;
@@ -72,7 +71,14 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(
             x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(roles);
-        var permissions = new List<string> { Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Admin.RoleManagement.View };
+        var permissions = new List<string>
+        {
+            Warehouse.ProductManagement.View,
+            Warehouse.ProductManagement.Create,
+            Warehouse.ProductManagement.View,
+            Warehouse.ProductManagement.Create,
+            Admin.RoleManagement.View
+        };
         roleReadRepoMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
@@ -128,7 +134,12 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(
             x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(roles);
-        var permissions = new List<string> { Warehouse.ProductManagement.View, Warehouse.ProductManagement.View, Admin.FileManagement.View };
+        var permissions = new List<string>
+        {
+            Warehouse.ProductManagement.View,
+            Warehouse.ProductManagement.View,
+            Admin.FileManagement.View
+        };
         roleReadRepoMock.Setup(
             x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
@@ -163,7 +174,13 @@ public class PermissionAndRole
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
         roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([role]);
-        var permissions = new List<string> { Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Warehouse.ProductManagement.Edit, Warehouse.ProductManagement.Delete };
+        var permissions = new List<string>
+        {
+            Warehouse.ProductManagement.View,
+            Warehouse.ProductManagement.Create,
+            Warehouse.ProductManagement.Edit,
+            Warehouse.ProductManagement.Delete
+        };
         roleReadRepoMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
         var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
@@ -592,10 +609,15 @@ public class PermissionAndRole
     public void CreateRoleCommand_MissingDependency_ShouldHaveValidationError()
     {
         CreateRoleCommandValidator validator = new();
-        var command = new CreateRoleCommand { RoleName = "ValidRole", Permissions = [Warehouse.ProductManagement.Create] };
+        var command = new CreateRoleCommand
+        {
+            RoleName = "ValidRole",
+            Permissions = [Warehouse.ProductManagement.Create]
+        };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Permissions)
-            .WithErrorMessage($"Permission '{Warehouse.ProductManagement.Create}' requires: {Warehouse.ProductManagement.View}");
+            .WithErrorMessage(
+                $"Permission '{Warehouse.ProductManagement.Create}' requires: {Warehouse.ProductManagement.View}");
     }
 
     [Fact(DisplayName = "PERM_027 - Unit - Chặn tên vai trò chứa ký tự đặc biệt cấm")]

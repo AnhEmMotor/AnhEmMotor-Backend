@@ -142,7 +142,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     /// Lấy danh sách trạng thái đơn hàng.
     /// </summary>
     [HttpGet("status")]
-    [RequiresAnyPermissions(Permissions.Order.OrderManagement.View, Permissions.Order.OrderManagement.Create, Permissions.Order.OrderManagement.Edit)]
+    [RequiresAnyPermissions(
+        Permissions.Order.OrderManagement.View,
+        Permissions.Order.OrderManagement.Create,
+        Permissions.Order.OrderManagement.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOutputStatusesAsync(CancellationToken cancellationToken)
     {

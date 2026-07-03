@@ -1,19 +1,16 @@
 ﻿using Application.Common.Models;
 using Application.Features.Expenses.Responses;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Expense;
 using Domain.Entities;
 using Domain.Enums;
 using MediatR;
-using Application.Interfaces.Repositories;
 
 namespace Application.Features.Expenses.Commands.CreateExpense;
 
-public class CreateExpenseCommandHandler(IExpenseInsertRepository expenseInsertRepository, IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateExpenseCommand, Result<ExpenseResponse>>
+public class CreateExpenseCommandHandler(IExpenseInsertRepository expenseInsertRepository, IUnitOfWork unitOfWork) : IRequestHandler<CreateExpenseCommand, Result<ExpenseResponse>>
 {
-    public async Task<Result<ExpenseResponse>> Handle(
-        CreateExpenseCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<ExpenseResponse>> Handle(CreateExpenseCommand request, CancellationToken cancellationToken)
     {
         var expense = new Expense
         {
@@ -24,10 +21,8 @@ public class CreateExpenseCommandHandler(IExpenseInsertRepository expenseInsertR
             Note = request.Note,
             CreatedAt = DateTime.UtcNow
         };
-
         expenseInsertRepository.Add(expense);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var response = new ExpenseResponse
         {
             Id = expense.Id,
@@ -38,7 +33,6 @@ public class CreateExpenseCommandHandler(IExpenseInsertRepository expenseInsertR
             Note = expense.Note,
             CreatedAt = expense.CreatedAt
         };
-
         return Result<ExpenseResponse>.Success(response);
     }
 }

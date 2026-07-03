@@ -26,7 +26,6 @@ using Moq;
 using System;
 using System.Linq;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
-using InventoryReceiptInfoEntity = Domain.Entities.InventoryReceiptInfo;
 using ProductVariant = Domain.Entities.ProductVariant;
 
 namespace UnitTests;
@@ -461,8 +460,6 @@ public class InventoryReceipts
         string.Compare(existingReceipt.Notes, "New Notes").Should().Be(0);
         _updateRepoMock.Verify(x => x.Update(existingReceipt), Times.Once);
     }
-
-
 
     [Fact(DisplayName = "IR_023 - Tạo phiếu nhập kho thành công và lưu người tạo")]
     public async Task IR_023_CreateInventoryReceipt_SaveCreatedBy_Success()

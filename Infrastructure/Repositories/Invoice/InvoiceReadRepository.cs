@@ -3,9 +3,9 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Invoice;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
-using InvoiceEntity = Domain.Entities.Invoice;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
+using InvoiceEntity = Domain.Entities.Invoice;
 
 namespace Infrastructure.Repositories.Invoice;
 
@@ -17,7 +17,10 @@ public class InvoiceReadRepository(ApplicationDBContext context, ISievePaginator
     {
         var query = context.Set<InvoiceEntity>().Where(x => !x.DeletedAt.HasValue);
         return paginator.ApplyAsync<InvoiceEntity, AdminInvoiceSummaryResponse>(
-            query, sieveModel, null, cancellationToken);
+            query,
+            sieveModel,
+            null,
+            cancellationToken);
     }
 
     public Task<InvoiceEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)

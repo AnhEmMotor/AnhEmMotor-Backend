@@ -3,8 +3,6 @@ using Domain.Primitives;
 using Sieve.Models;
 using System;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Interfaces.Repositories.WarrantyClaim
 {

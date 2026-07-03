@@ -1,6 +1,6 @@
+using Application.Features.Statistical.DTOs;
 using MediatR;
 using System;
-using Application.Features.Statistical.DTOs;
 
 namespace Application.Features.Statistical.Queries.GetWorkshopDashboard;
 

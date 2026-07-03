@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.ConversionTool;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +17,6 @@ public class ConversionToolReadRepository(ApplicationDBContext context) : IConve
 
     public Task<Domain.Entities.ConversionTool?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return _context.Set<Domain.Entities.ConversionTool>()
-            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return _context.Set<Domain.Entities.ConversionTool>().FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 }

@@ -1,5 +1,6 @@
 using Application.Features.InventoryReceipts.Commands.DeleteManyInventoryReceipts;
 using Application.Features.InventoryReceipts.Commands.RestoreManyInventoryReceipts;
+using Domain.Constants.Permission;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
@@ -63,7 +64,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Delete],
+            [Permissions.Warehouse.ReceiptManagement.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -107,7 +108,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Delete],
+            [Permissions.Warehouse.ReceiptManagement.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -158,7 +159,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Delete],
+            [Permissions.Warehouse.ReceiptManagement.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -217,7 +218,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Delete],
+            [Permissions.Warehouse.ReceiptManagement.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);

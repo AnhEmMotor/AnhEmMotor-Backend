@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Application.ApiContracts.Contacts.Responses;
 
 public record ContactBasicResponse

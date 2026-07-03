@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories.Invoice;
 using Infrastructure.DBContexts;
 using InvoiceEntity = Domain.Entities.Invoice;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories.Invoice;
 

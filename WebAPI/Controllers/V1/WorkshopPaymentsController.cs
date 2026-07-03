@@ -1,6 +1,7 @@
 using Application.Features.WorkshopPayments.Commands.CreateWorkshopPayment;
 using Application.Features.WorkshopPayments.Queries.GetWorkshopPaymentDetail;
 using Application.Features.WorkshopPayments.Queries.GetWorkshopPaymentsList;
+using Application.Features.WorkshopPayments.Queries.GetWorkshopPaymentStats;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -19,9 +20,13 @@ namespace WebAPI.Controllers.V1
     {
         [HttpGet]
         [SwaggerOperation(Summary = "Danh sách phiếu thanh toán xưởng")]
-        public async Task<IActionResult> GetListAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetListAsync(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new GetWorkshopPaymentsListQuery { SieveModel = sieveModel }, cancellationToken);
+            var result = await sender.Send(
+                new GetWorkshopPaymentsListQuery { SieveModel = sieveModel },
+                cancellationToken);
             return HandleResult(result);
         }
 
@@ -35,7 +40,9 @@ namespace WebAPI.Controllers.V1
 
         [HttpPost]
         [SwaggerOperation(Summary = "Tạo phiếu thanh toán mới (thu tiền tại quầy)")]
-        public async Task<IActionResult> CreateAsync(CreateWorkshopPaymentCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateAsync(
+            CreateWorkshopPaymentCommand command,
+            CancellationToken cancellationToken)
         {
             var result = await sender.Send(command, cancellationToken);
             return HandleResult(result);
@@ -45,7 +52,7 @@ namespace WebAPI.Controllers.V1
         [SwaggerOperation(Summary = "Thống kê thu ngân xưởng")]
         public async Task<IActionResult> GetStatsAsync(CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new Application.Features.WorkshopPayments.Queries.GetWorkshopPaymentStats.GetWorkshopPaymentStatsQuery(), cancellationToken);
+            var result = await sender.Send(new GetWorkshopPaymentStatsQuery(), cancellationToken);
             return HandleResult(result);
         }
     }

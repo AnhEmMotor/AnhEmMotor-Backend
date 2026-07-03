@@ -43,7 +43,9 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The created employee ID.</returns>
     [HttpPost]
-    [RequiresAnyPermissions(Permissions.Admin.EmployeeManagement.Create, Permissions.Accountant.EmployeeManagement.Create)]
+    [RequiresAnyPermissions(
+        Permissions.Admin.EmployeeManagement.Create,
+        Permissions.Accountant.EmployeeManagement.Create)]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateEmployeeAsync(
         [FromBody] CreateEmployeeCommand command,

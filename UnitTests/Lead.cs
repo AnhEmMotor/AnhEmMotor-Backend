@@ -294,18 +294,11 @@ public class Lead
             Tier = "Gold",
             Points = 120,
             AssignedToId = assignedToId,
-            AssignedTo = new ApplicationUser
-            {
-                Id = assignedToId,
-                FullName = "Tran Thi B"
-            }
+            AssignedTo = new ApplicationUser { Id = assignedToId, FullName = "Tran Thi B" }
         };
-
         _leadReadRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([lead]);
         var handler = new GetLeadsQueryHandler(_leadReadRepoMock.Object);
-
         var result = await handler.Handle(new GetLeadsQuery(), CancellationToken.None).ConfigureAwait(true);
-
         result.Should().HaveCount(1);
         var response = result[0];
         response.InterestedVehicle.Should().Be(lead.InterestedVehicle);
@@ -326,13 +319,8 @@ public class Lead
     [Fact(DisplayName = "LEAD_017 - Khong tao nhac nho don hang ket trang thai cho dau ra da hoan tat")]
     public async Task GetCustomerProfile360_ShouldNotCreateStalledReminderForTerminalOutputs()
     {
-        var lead = new LeadEntity
-        {
-            Id = 1,
-            FullName = "Nguyen Van A",
-            PhoneNumber = "0909123456"
-        };
-        var output = new Domain.Entities.Output
+        var lead = new LeadEntity { Id = 1, FullName = "Nguyen Van A", PhoneNumber = "0909123456" };
+        var output = new Output
         {
             Id = 10,
             LeadId = lead.Id,
@@ -340,12 +328,11 @@ public class Lead
             CreatedAt = DateTimeOffset.UtcNow.AddDays(-45),
             LastStatusChangedAt = DateTimeOffset.UtcNow.AddDays(-40)
         };
-
-        _leadReadRepoMock.Setup(x => x.GetByIdAsync(lead.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(lead);
+        _leadReadRepoMock.Setup(x => x.GetByIdAsync(lead.Id, It.IsAny<CancellationToken>())).ReturnsAsync(lead);
         _outputReadRepoMock.Setup(x => x.GetByLeadIdAsync(lead.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync([output]);
-        _plateDossierReadRepoMock.Setup(x => x.GetPagedAsync<PlateDossierResponse>(
+        _plateDossierReadRepoMock.Setup(
+            x => x.GetPagedAsync<PlateDossierResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
                 It.IsAny<Expression<Func<PlateDossier, bool>>?>(),
@@ -353,17 +340,15 @@ public class Lead
             .ReturnsAsync(new PagedResult<PlateDossierResponse>([], 0, 1, int.MaxValue));
         _repairOrderReadRepoMock.Setup(x => x.GetByCustomerPhoneAsync(lead.PhoneNumber, It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        _vehicleReadRepoMock.Setup(x => x.GetByLeadIdAsync(lead.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
+        _vehicleReadRepoMock.Setup(x => x.GetByLeadIdAsync(lead.Id, It.IsAny<CancellationToken>())).ReturnsAsync([]);
         var handler = new GetCustomerProfile360QueryHandler(
             _leadReadRepoMock.Object,
             _outputReadRepoMock.Object,
             _plateDossierReadRepoMock.Object,
             _repairOrderReadRepoMock.Object,
             _vehicleReadRepoMock.Object);
-
-        var result = await handler.Handle(new GetCustomerProfile360Query(lead.Id), CancellationToken.None).ConfigureAwait(true);
-
+        var result = await handler.Handle(new GetCustomerProfile360Query(lead.Id), CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.CareReminders.Should().NotContain(r => r.Type == "stalled_order");
     }

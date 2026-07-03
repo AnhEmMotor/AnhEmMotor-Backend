@@ -2,8 +2,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PlateDossier;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.PlateDossiers.Commands.DeletePlateDossier
 {
@@ -20,10 +18,8 @@ namespace Application.Features.PlateDossiers.Commands.DeletePlateDossier
             {
                 return Result<bool>.Failure("Không tìm thấy hồ sơ biển số.");
             }
-
             plateDossierUpdateRepository.Remove(dossier);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return Result<bool>.Success(true);
         }
     }

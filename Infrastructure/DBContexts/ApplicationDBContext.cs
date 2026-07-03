@@ -57,6 +57,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
 
     public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
+
     public virtual DbSet<WorkshopPayment> WorkshopPayments { get; set; }
 
     public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
@@ -146,14 +147,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<WarrantyClaimPart> WarrantyClaimParts => Set<WarrantyClaimPart>();
 
     public virtual DbSet<RepairOrder> RepairOrders { get; set; }
-        public virtual DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
+
+    public virtual DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
 
     public virtual DbSet<RepairOrderDetail> RepairOrderDetails { get; set; }
 
     public virtual DbSet<ServiceCategory> ServiceCategories { get; set; }
 
     public virtual DbSet<Service> Services { get; set; }
-
 
     public virtual DbSet<Lead> Leads { get; set; }
 
@@ -168,6 +169,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<EmployeeProfile> EmployeeProfiles { get; set; }
 
     public virtual DbSet<CommissionPolicy> CommissionPolicies { get; set; }
+
     public virtual DbSet<CommissionRecord> CommissionRecords { get; set; }
 
     public virtual DbSet<Payroll> Payrolls { get; set; }
@@ -188,7 +190,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<InventoryOnHand> InventoryOnHands { get; set; }
 
-    
     public virtual DbSet<SalesContract> SalesContracts { get; set; }
 
     public virtual DbSet<FinanceContract> FinanceContracts { get; set; }
@@ -199,7 +200,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<SupplierContractAuditLog> SupplierContractAuditLogs { get; set; }
 
-    
     public virtual DbSet<SupplierFinance> SupplierFinances { get; set; }
 
     public virtual DbSet<SupplierDebtSettlement> SupplierDebtSettlements { get; set; }
@@ -225,10 +225,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<CurrentUnreconciledCod> CurrentUnreconciledCods { get; set; }
 
     public virtual DbSet<CarrierPartner> CarrierPartners { get; set; }
+
     public virtual DbSet<ReturnRequest> ReturnRequests { get; set; }
+
     public virtual DbSet<ReturnRequestItem> ReturnRequestItems { get; set; }
+
     public virtual DbSet<Invoice> Invoices { get; set; }
-        public virtual DbSet<ConversionTool> ConversionTools { get; set; }
+
+    public virtual DbSet<ConversionTool> ConversionTools { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -404,18 +408,19 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     .HasForeignKey(t => t.AssignedAdminId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
-modelBuilder.Entity<SupportRequest>(entity =>
-{
-    entity.HasOne(sr => sr.AssignedUser)
-        .WithMany()
-        .HasForeignKey(sr => sr.AssignedUserId)
-        .OnDelete(DeleteBehavior.SetNull);
-});
-modelBuilder.Entity<ProductVariantColor>()
-    .HasOne(pvc => pvc.ProductVariant)
-    .WithMany(pv => pv.ProductVariantColors)
-    .HasForeignKey(pvc => pvc.ProductVariantId)
-    .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<SupportRequest>(
+            entity =>
+            {
+                entity.HasOne(sr => sr.AssignedUser)
+                    .WithMany()
+                    .HasForeignKey(sr => sr.AssignedUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+        modelBuilder.Entity<ProductVariantColor>()
+            .HasOne(pvc => pvc.ProductVariant)
+            .WithMany(pv => pv.ProductVariantColors)
+            .HasForeignKey(pvc => pvc.ProductVariantId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => new { pt.ProductId, pt.TechnologyId });
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => pt.Id);
         modelBuilder.Entity<ProductStatus>().HasKey(ps => ps.Key);
@@ -429,11 +434,11 @@ modelBuilder.Entity<ProductVariantColor>()
                 new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Financial },
                 new Domain.Entities.PartnerType { Key = Domain.Constants.PartnerType.Insurance });
         modelBuilder.Entity<OutputStatus>().HasKey(ous => ous.Key);
-modelBuilder.Entity<Output>()
-    .HasOne(o => o.Lead)
-    .WithMany()
-    .HasForeignKey(o => o.LeadId)
-    .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Output>()
+            .HasOne(o => o.Lead)
+            .WithMany()
+            .HasForeignKey(o => o.LeadId)
+            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)
             .WithMany(p => p.ProductTechnologies)

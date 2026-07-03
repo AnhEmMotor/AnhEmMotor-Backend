@@ -1,4 +1,5 @@
 using Application.ApiContracts.News.Responses;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
@@ -161,7 +162,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Marketing.NewsManagement.Create],
+            [Permissions.Marketing.NewsManagement.Create],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -216,7 +217,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Marketing.NewsManagement.Create],
+            [Permissions.Marketing.NewsManagement.Create],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -260,7 +261,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Marketing.NewsManagement.Edit],
+            [Permissions.Marketing.NewsManagement.Edit],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -311,7 +312,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                 _factory.Services,
                 $"author_{uniqueId}",
                 "Password123!",
-                [Domain.Constants.Permission.Permissions.Marketing.NewsManagement.Create],
+                [Permissions.Marketing.NewsManagement.Create],
                 TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             authorId = user.Id;
@@ -332,7 +333,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"admin_{uniqueId}",
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Marketing.NewsManagement.Edit],
+            [Permissions.Marketing.NewsManagement.Edit],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -369,7 +370,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             $"user_{uniqueId}",
             "Password123!",
-            [Domain.Constants.Permission.Permissions.Marketing.NewsManagement.Delete],
+            [Permissions.Marketing.NewsManagement.Delete],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(

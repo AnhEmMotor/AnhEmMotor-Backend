@@ -2,8 +2,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Vehicle;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Maintenances.Commands.UpdateOdo
 {
@@ -19,11 +17,9 @@ namespace Application.Features.Maintenances.Commands.UpdateOdo
             {
                 return Result<bool>.Failure("Không tìm thấy phương tiện.");
             }
-
             vehicle.CurrentOdo = request.CurrentOdo;
             vehicleUpdateRepository.Update(vehicle);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return Result<bool>.Success(true);
         }
     }

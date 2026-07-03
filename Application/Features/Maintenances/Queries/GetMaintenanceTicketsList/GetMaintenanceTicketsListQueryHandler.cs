@@ -9,13 +9,10 @@ using Sieve.Models;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Maintenances.Queries.GetMaintenanceTicketsList
 {
-    public class GetMaintenanceTicketsListQueryHandler(IMaintenanceHistoryReadRepository repository)
-        : IRequestHandler<GetMaintenanceTicketsListQuery, Result<PagedResult<MaintenanceTicketResponse>>>
+    public class GetMaintenanceTicketsListQueryHandler(IMaintenanceHistoryReadRepository repository) : IRequestHandler<GetMaintenanceTicketsListQuery, Result<PagedResult<MaintenanceTicketResponse>>>
     {
         public async Task<Result<PagedResult<MaintenanceTicketResponse>>> Handle(
             GetMaintenanceTicketsListQuery request,

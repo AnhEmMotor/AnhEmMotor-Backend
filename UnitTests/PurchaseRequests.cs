@@ -41,7 +41,9 @@ public class PurchaseRequests
         _permissionRepoMock = new Mock<IPermissionReadRepository>();
         _currentUserContextMock = new Mock<ICurrentUserContext>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _supplierRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>())).ReturnsAsync([]);
+        _supplierRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([]);
     }
 
     #pragma warning disable IDE0079 

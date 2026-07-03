@@ -1,8 +1,6 @@
 using Application.ApiContracts.WarrantyClaim.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.WarrantyClaim;
-using Domain.Enums;
-using Domain.Constants;
 using Domain.Entities;
 using Domain.Primitives;
 using MediatR;
@@ -10,13 +8,10 @@ using Sieve.Models;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.WarrantyClaims.Queries.GetWarrantyClaimsList
 {
-    public class GetWarrantyClaimsListQueryHandler(IWarrantyClaimReadRepository warrantyClaimReadRepository)
-        : IRequestHandler<GetWarrantyClaimsListQuery, Result<PagedResult<WarrantyClaimResponse>>>
+    public class GetWarrantyClaimsListQueryHandler(IWarrantyClaimReadRepository warrantyClaimReadRepository) : IRequestHandler<GetWarrantyClaimsListQuery, Result<PagedResult<WarrantyClaimResponse>>>
     {
         public async Task<Result<PagedResult<WarrantyClaimResponse>>> Handle(
             GetWarrantyClaimsListQuery request,

@@ -1,15 +1,12 @@
 using Application.ApiContracts.ConversionTools.Responses;
 using Application.Common.Models;
-using Application.Features.ConversionTools.Queries.GetConversionTools;
 using Application.Interfaces.Repositories.ConversionTool;
-using Domain.Entities;
-using MediatR;
 using Mapster;
+using MediatR;
 
 namespace Application.Features.ConversionTools.Queries.GetConversionTools;
 
-public class GetConversionToolsQueryHandler(IConversionToolReadRepository repository)
-    : IRequestHandler<GetConversionToolsQuery, Result<List<ConversionToolResponse>>>
+public class GetConversionToolsQueryHandler(IConversionToolReadRepository repository) : IRequestHandler<GetConversionToolsQuery, Result<List<ConversionToolResponse>>>
 {
     public async Task<Result<List<ConversionToolResponse>>> Handle(
         GetConversionToolsQuery request,

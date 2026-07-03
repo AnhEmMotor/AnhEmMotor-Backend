@@ -32,16 +32,16 @@ namespace Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsByS
                 return Result<PagedResult<InventoryReceiptListResponse>>.Failure(
                     Error.NotFound($"Không tìm thấy nhà cung cấp với Id = {request.SupplierId}"));
             }
-
             var sieveModel = request.SieveModel ?? new SieveModel();
             var result = await repository.GetPagedAsync<InventoryReceiptListResponse>(
                 sieveModel,
-                filter: x => x.InventoryReceiptInfos.Any(
-                    ii => ii.DeletedAt == null && ii.PurchaseRequestItem != null &&
-                          ii.PurchaseRequestItem.SupplierId == request.SupplierId),
+                filter: x => x.InventoryReceiptInfos
+                    .Any(
+                        ii => ii.DeletedAt == null &&
+                                ii.PurchaseRequestItem != null &&
+                                ii.PurchaseRequestItem.SupplierId == request.SupplierId),
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-
             return result;
         }
     }

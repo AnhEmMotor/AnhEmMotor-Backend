@@ -5,6 +5,7 @@ using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
 using Application.Features.Statistical.Queries.GetOrderStatusCounts;
 using Application.Features.Statistical.Queries.GetProductReportLastMonth;
 using Application.Features.Statistical.Queries.GetProductStockAndPrice;
+using Application.Interfaces.Repositories.Statistical;
 using FluentAssertions;
 using FluentValidation;
 using MediatR;
@@ -18,13 +19,13 @@ namespace ControllerTests;
 public class Statistics
 {
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<Application.Interfaces.Repositories.Statistical.IStatisticalReadRepository> _repositoryMock;
+    private readonly Mock<IStatisticalReadRepository> _repositoryMock;
     private readonly StatisticsController _controller;
 
     public Statistics()
     {
         _mediatorMock = new Mock<IMediator>();
-        _repositoryMock = new Mock<Application.Interfaces.Repositories.Statistical.IStatisticalReadRepository>();
+        _repositoryMock = new Mock<IStatisticalReadRepository>();
         _controller = new StatisticsController(_mediatorMock.Object, _repositoryMock.Object);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };

@@ -1,7 +1,5 @@
 using Application.Interfaces.Repositories.WorkshopPayment;
 using Infrastructure.DBContexts;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.WorkshopPayment;
 

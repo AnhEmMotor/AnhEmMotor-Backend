@@ -1,15 +1,13 @@
 using Application.Features.Maintenances.Commands.CreateMaintenanceTicket;
 using Application.Features.Maintenances.Commands.UpdateOdo;
-using Application.Features.Maintenances.Queries.GetMaintenanceTicketsList;
 using Application.Features.Maintenances.Queries.GetMaintenanceTicketDetail;
+using Application.Features.Maintenances.Queries.GetMaintenanceTicketsList;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Threading;
-using System.Threading.Tasks;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1
@@ -43,7 +41,9 @@ namespace WebAPI.Controllers.V1
             [FromQuery] SieveModel sieveModel,
             CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new GetMaintenanceTicketsListQuery { SieveModel = sieveModel }, cancellationToken)
+            var result = await sender.Send(
+                new GetMaintenanceTicketsListQuery { SieveModel = sieveModel },
+                cancellationToken)
                 .ConfigureAwait(false);
             return HandleResult(result);
         }
@@ -52,9 +52,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy chi tiết phiếu bảo trì theo ID.
         /// </summary>
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetDetailAsync(
-            [FromRoute] int id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> GetDetailAsync([FromRoute] int id, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetMaintenanceTicketDetailQuery { Id = id }, cancellationToken)
                 .ConfigureAwait(false);

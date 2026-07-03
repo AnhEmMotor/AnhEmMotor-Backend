@@ -7,8 +7,6 @@ using Domain.Enums;
 using MediatR;
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.WarrantyClaims.Commands.CreateWarrantyClaim
 {
@@ -25,11 +23,9 @@ namespace Application.Features.WarrantyClaims.Commands.CreateWarrantyClaim
             {
                 return Result<int>.Failure(Error.BadRequest("Không tìm thấy phương tiện với biển số này."));
             }
-
             var todayStr = DateTime.UtcNow.ToString("yyyyMMdd");
             var randStr = Guid.NewGuid().ToString("N")[..4].ToUpper();
             var claimNumber = $"WAR-{todayStr}-{randStr}";
-
             var warrantyClaim = new WarrantyClaim
             {
                 ClaimNumber = claimNumber,
@@ -43,21 +39,20 @@ namespace Application.Features.WarrantyClaims.Commands.CreateWarrantyClaim
                 TotalLaborCost = 0,
                 TotalPartsCost = request.Parts.Sum(p => p.UnitPrice)
             };
-
             foreach (var partDto in request.Parts)
             {
-                warrantyClaim.Parts.Add(new WarrantyClaimPart
-                {
-                    PartName = partDto.PartName,
-                    PartCode = partDto.PartCode,
-                    UnitPrice = partDto.UnitPrice,
-                    Status = WarrantyPartStatus.Pending
-                });
+                warrantyClaim.Parts
+                    .Add(
+                        new WarrantyClaimPart
+                        {
+                            PartName = partDto.PartName,
+                            PartCode = partDto.PartCode,
+                            UnitPrice = partDto.UnitPrice,
+                            Status = WarrantyPartStatus.Pending
+                        });
             }
-
             warrantyClaimUpdateRepository.Add(warrantyClaim);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return Result<int>.Success(warrantyClaim.Id);
         }
     }

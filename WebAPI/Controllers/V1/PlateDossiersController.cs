@@ -1,5 +1,8 @@
 using Application.Features.PlateDossiers.Commands.CreatePlateDossier;
+using Application.Features.PlateDossiers.Commands.DeletePlateDossier;
+using Application.Features.PlateDossiers.Commands.UpdatePlateDossier;
 using Application.Features.PlateDossiers.Commands.UpdatePlateDossierStatus;
+using Application.Features.PlateDossiers.Queries.GetPlateDossierDetail;
 using Application.Features.PlateDossiers.Queries.GetPlateDossiersList;
 using Asp.Versioning;
 using MediatR;
@@ -61,11 +64,9 @@ namespace WebAPI.Controllers.V1
         /// Lấy thông tin chi tiết hồ sơ làm biển số xe.
         /// </summary>
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetDetailAsync(
-            [FromRoute] int id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> GetDetailAsync([FromRoute] int id, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new Application.Features.PlateDossiers.Queries.GetPlateDossierDetail.GetPlateDossierDetailQuery { Id = id }, cancellationToken)
+            var result = await sender.Send(new GetPlateDossierDetailQuery { Id = id }, cancellationToken)
                 .ConfigureAwait(false);
             return HandleResult(result);
         }
@@ -76,7 +77,7 @@ namespace WebAPI.Controllers.V1
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateAsync(
             [FromRoute] int id,
-            [FromBody] Application.Features.PlateDossiers.Commands.UpdatePlateDossier.UpdatePlateDossierCommand command,
+            [FromBody] UpdatePlateDossierCommand command,
             CancellationToken cancellationToken)
         {
             command.Id = id;
@@ -88,11 +89,9 @@ namespace WebAPI.Controllers.V1
         /// Xóa hồ sơ làm biển số xe.
         /// </summary>
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteAsync(
-            [FromRoute] int id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteAsync([FromRoute] int id, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new Application.Features.PlateDossiers.Commands.DeletePlateDossier.DeletePlateDossierCommand { Id = id }, cancellationToken)
+            var result = await sender.Send(new DeletePlateDossierCommand { Id = id }, cancellationToken)
                 .ConfigureAwait(false);
             return HandleResult(result);
         }

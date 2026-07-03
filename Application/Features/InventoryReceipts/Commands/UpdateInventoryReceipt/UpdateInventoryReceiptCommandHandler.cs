@@ -311,7 +311,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     vehicleAuditLogs,
                     cancellationToken)
                     .ConfigureAwait(false);
-                
                 if (oldQuantity != existingInfo.Count)
                 {
                     infoAuditLogs.Add(
@@ -340,7 +339,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                     cancellationToken)
                     .ConfigureAwait(false);
                 inventoryReceipt.InventoryReceiptInfos.Add(newInfo);
-                
                 infoAuditLogs.Add(
                     new InventoryReceiptInfoAuditLog
                     {
@@ -351,7 +349,6 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
             }
         }
         updateRepository.Update(inventoryReceipt);
-
         var receiptAuditLogs = new List<InventoryReceiptAuditLog>
         {
             new InventoryReceiptAuditLog
@@ -364,10 +361,8 @@ public sealed partial class UpdateInventoryReceiptCommandHandler(
                 NewNotes = inventoryReceipt.Notes
             }
         };
-        
         await insertRepository.InsertAuditLogsAsync(receiptAuditLogs, cancellationToken).ConfigureAwait(false);
         await insertRepository.InsertInfoAuditLogsAsync(infoAuditLogs, cancellationToken).ConfigureAwait(false);
-
         if (vehicleAuditLogs.Any())
         {
             await vehicleUpdateRepository.InsertAuditLogsAsync(vehicleAuditLogs, cancellationToken)

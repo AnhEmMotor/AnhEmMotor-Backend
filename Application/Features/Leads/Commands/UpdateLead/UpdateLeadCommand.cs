@@ -37,6 +37,6 @@ public record UpdateLeadCommand : IRequest<Result<int>>
 
     public int Score { get; set; }
 
-public bool IsVerified { get; set; }
+    public bool IsVerified { get; set; }
 }
 

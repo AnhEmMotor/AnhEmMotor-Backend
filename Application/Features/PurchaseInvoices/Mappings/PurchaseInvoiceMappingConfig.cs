@@ -10,10 +10,8 @@ namespace Application.Features.PurchaseInvoices.Mappings
         {
             config.NewConfig<PurchaseInvoice, PurchaseInvoiceListResponse>()
                 .Map(dest => dest.TotalItems, src => src.PurchaseInvoiceItems.Count);
-
             config.NewConfig<PurchaseInvoice, PurchaseInvoiceDetailResponse>()
                 .Map(dest => dest.Items, src => src.PurchaseInvoiceItems);
-
             config.NewConfig<PurchaseInvoiceItem, PurchaseInvoiceItemResponse>()
                 .Map(dest => dest.ProductName, src => src.ProductName)
                 .Map(dest => dest.VariantName, src => src.VariantName)

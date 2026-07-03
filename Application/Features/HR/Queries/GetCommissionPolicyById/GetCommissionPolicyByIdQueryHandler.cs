@@ -14,7 +14,6 @@ public class GetCommissionPolicyByIdQueryHandler(ICommissionPolicyReadRepository
         var policy = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (policy == null)
             return Result<CommissionPolicy>.Failure("Chính sách không tồn tại.");
-            
         return policy;
     }
 }

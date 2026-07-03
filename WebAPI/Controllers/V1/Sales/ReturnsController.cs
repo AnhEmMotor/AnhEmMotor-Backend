@@ -1,6 +1,5 @@
 using Application.Features.Sales.Returns.Queries.GetReturnRequestDetail;
 using Application.Features.Sales.Returns.Queries.GetReturnRequests;
-using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
@@ -19,7 +18,9 @@ public class ReturnsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetReturnRequests([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetReturnRequests(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetReturnRequestsQuery { SieveModel = sieveModel };
         var result = await _mediator.Send(query, cancellationToken);

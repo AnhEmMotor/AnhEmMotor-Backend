@@ -21,7 +21,7 @@ namespace Application.ApiContracts.Vehicle.Responses
         public int LeadId { get; set; }
 
         public int? ProductVariantId { get; set; }
-        
+
         public string? VariantName { get; set; }
 
         public int? ProductVariantColorId { get; set; }

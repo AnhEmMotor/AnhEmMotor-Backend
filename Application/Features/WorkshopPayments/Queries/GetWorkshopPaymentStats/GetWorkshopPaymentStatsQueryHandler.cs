@@ -1,8 +1,6 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories.WorkshopPayment;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.WorkshopPayments.Queries.GetWorkshopPaymentStats;
 

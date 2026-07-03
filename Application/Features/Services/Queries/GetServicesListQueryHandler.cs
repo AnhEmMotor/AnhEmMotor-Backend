@@ -26,10 +26,6 @@ public class GetServicesListQueryHandler(IServiceReadRepository serviceRepositor
             .Take(pageSize)
             .ProjectToType<ServiceResponse>()
             .ToList();
-        return new PagedResult<ServiceResponse>(
-            services,
-            totalCount,
-            page,
-            pageSize);
+        return new PagedResult<ServiceResponse>(services, totalCount, page, pageSize);
     }
 }

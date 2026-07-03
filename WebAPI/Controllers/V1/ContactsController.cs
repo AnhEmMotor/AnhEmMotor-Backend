@@ -108,20 +108,20 @@ public class ContactsController(ISender sender) : ApiController
     /// <summary>
     /// Lấy danh sách liên hệ phân trang (hỗ trợ lọc theo loại và trạng thái).
     /// </summary>
-[HttpGet("paginated")]
-[Authorize]
-public async Task<IActionResult> GetPaginatedAsync(
-    [FromQuery] string? contactType,
-    [FromQuery] string? status,
-    [FromQuery] Guid? assignedUserId,
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 20,
-    CancellationToken cancellationToken = default)
-{
-    var query = new GetPaginatedContactsQuery(contactType, status, assignedUserId, page, pageSize);
-    var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
-    return HandleResult(result);
-}
+    [HttpGet("paginated")]
+    [Authorize]
+    public async Task<IActionResult> GetPaginatedAsync(
+        [FromQuery] string? contactType,
+        [FromQuery] string? status,
+        [FromQuery] Guid? assignedUserId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetPaginatedContactsQuery(contactType, status, assignedUserId, page, pageSize);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
 
     /// <summary>
     /// Cập nhật trạng thái liên hệ ( hỗ trợ chuyển trạng thái hồ sơ).
@@ -134,28 +134,28 @@ public async Task<IActionResult> GetPaginatedAsync(
         UpdateContactStatusRequest request,
         CancellationToken cancellationToken)
     {
-var command = new UpdateContactStatusCommand(contactType, id, request);
-var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
-return HandleResult(result);
-}
+        var command = new UpdateContactStatusCommand(contactType, id, request);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
 
-/// <summary>
-/// Phân công yêu cầu hỗ trợ cho nhân viên xử lý.
-/// </summary>
-[HttpPatch("{id:int}/assign")]
-[Authorize]
-public async Task<IActionResult> AssignAsync(
-    int id,
-    AssignSupportRequestCommand command,
-    CancellationToken cancellationToken)
-{
-    var cmd = command with { SupportRequestId = id };
-    var result = await sender.Send(cmd, cancellationToken).ConfigureAwait(false);
-    return HandleResult(result);
-}
+    /// <summary>
+    /// Phân công yêu cầu hỗ trợ cho nhân viên xử lý.
+    /// </summary>
+    [HttpPatch("{id:int}/assign")]
+    [Authorize]
+    public async Task<IActionResult> AssignAsync(
+        int id,
+        AssignSupportRequestCommand command,
+        CancellationToken cancellationToken)
+    {
+        var cmd = command with { SupportRequestId = id };
+        var result = await sender.Send(cmd, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-/// <summary>
-/// Phản hồi yêu cầu liên hệ.
+    /// <summary>
+    /// Phản hồi yêu cầu liên hệ.
     /// </summary>
     [HttpPost("reply")]
     [Authorize]

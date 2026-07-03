@@ -21,43 +21,52 @@ public class GetReturnRequestsQueryHandler : IRequestHandler<GetReturnRequestsQu
         _repository = repository;
     }
 
-    public async Task<Result<PagedResult<ReturnRequestResponse>>> Handle(GetReturnRequestsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ReturnRequestResponse>>> Handle(
+        GetReturnRequestsQuery request,
+        CancellationToken cancellationToken)
     {
         var pagedEntities = await _repository.GetPagedAsync(request.SieveModel, cancellationToken);
-
-        var items = pagedEntities.Items?.Select(p => new ReturnRequestResponse
-        {
-            Id = p.Id,
-            OrderId = p.OrderId,
-            OrderCode = p.OrderCode,
-            OriginalTrackingNumber = p.OriginalTrackingNumber,
-            CustomerName = p.CustomerName,
-            CustomerPhone = p.CustomerPhone,
-            Carrier = p.Carrier,
-            Type = p.Type,
-            Status = p.Status,
-            Reason = p.Reason,
-            CancelReason = p.CancelReason,
-            Note = p.Note,
-            ReturnAction = p.ReturnAction,
-            RejectionReason = p.RejectionReason,
-            CreatedAt = p.CreatedAt ?? System.DateTimeOffset.UtcNow,
-            InspectedAt = p.InspectedAt,
-            Items = p.Items.Select(i => new ReturnRequestItemResponse
+        var items = pagedEntities.Items?.Select(
+            p => new ReturnRequestResponse
             {
-                Id = i.Id,
-                ProductId = i.ProductId,
-                ProductName = i.ProductName,
-                Sku = i.Sku,
-                ThumbnailUrl = i.ThumbnailUrl,
-                Quantity = i.Quantity,
-                ReturnQuantity = i.ReturnQuantity,
-                UnitPrice = i.UnitPrice
-            }).ToList()
-        }).ToList();
-
-        var pagedResult = new PagedResult<ReturnRequestResponse>(items, pagedEntities.TotalCount, pagedEntities.PageNumber, pagedEntities.PageSize);
-
+                Id = p.Id,
+                OrderId = p.OrderId,
+                OrderCode = p.OrderCode,
+                OriginalTrackingNumber = p.OriginalTrackingNumber,
+                CustomerName = p.CustomerName,
+                CustomerPhone = p.CustomerPhone,
+                Carrier = p.Carrier,
+                Type = p.Type,
+                Status = p.Status,
+                Reason = p.Reason,
+                CancelReason = p.CancelReason,
+                Note = p.Note,
+                ReturnAction = p.ReturnAction,
+                RejectionReason = p.RejectionReason,
+                CreatedAt = p.CreatedAt ?? DateTimeOffset.UtcNow,
+                InspectedAt = p.InspectedAt,
+                Items =
+                    p.Items
+                            .Select(
+                                i => new ReturnRequestItemResponse
+                            {
+                                Id = i.Id,
+                                ProductId = i.ProductId,
+                                ProductName = i.ProductName,
+                                Sku = i.Sku,
+                                ThumbnailUrl = i.ThumbnailUrl,
+                                Quantity = i.Quantity,
+                                ReturnQuantity = i.ReturnQuantity,
+                                UnitPrice = i.UnitPrice
+                            })
+                            .ToList()
+            })
+            .ToList();
+        var pagedResult = new PagedResult<ReturnRequestResponse>(
+            items,
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize);
         return Result<PagedResult<ReturnRequestResponse>>.Success(pagedResult);
     }
 }

@@ -8,8 +8,6 @@ using Sieve.Models;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.MaintenanceHistory
 {
@@ -33,27 +31,30 @@ namespace Infrastructure.Repositories.MaintenanceHistory
                 cancellationToken);
         }
 
-        public Task<Domain.Entities.MaintenanceHistory?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public Task<Domain.Entities.MaintenanceHistory?> GetByIdAsync(
+            int id,
+            CancellationToken cancellationToken = default)
         {
             return context.MaintenanceHistories
                 .Include(m => m.Vehicle)
-                    .ThenInclude(v => v.User)
+                .ThenInclude(v => v.User)
                 .Include(m => m.Vehicle)
-                    .ThenInclude(v => v.ProductVariantColor)
+                .ThenInclude(v => v.ProductVariantColor)
                 .Include(m => m.Vehicle)
-                    .ThenInclude(v => v.ProductVariant)
-                        .ThenInclude(pv => pv!.Product)
-                            .ThenInclude(p => p!.Brand)
+                .ThenInclude(v => v.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
+                .ThenInclude(p => p!.Brand)
                 .Include(m => m.Technician)
-                    .ThenInclude(t => t!.User)
+                .ThenInclude(t => t!.User)
                 .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
         }
 
-        private IQueryable<Domain.Entities.MaintenanceHistory> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+        private IQueryable<Domain.Entities.MaintenanceHistory> GetQueryable(
+            DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return context.GetQuery<Domain.Entities.MaintenanceHistory>(mode)
                 .Include(m => m.Vehicle)
-                    .ThenInclude(v => v.User);
+                .ThenInclude(v => v.User);
         }
     }
 }

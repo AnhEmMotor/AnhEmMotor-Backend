@@ -154,7 +154,11 @@ public class ProductController(ISender sender) : ApiController
     /// khi có quyền thêm hoặc sửa phiếu nhập).
     /// </summary>
     [HttpGet("variants-lite/for-InventoryReceipt")]
-    [RequiresAnyPermissions(Permissions.Warehouse.ReceiptManagement.Edit, Permissions.Warehouse.ReceiptManagement.Create, Permissions.Warehouse.PurchaseRequestManagement.Edit, Permissions.Warehouse.PurchaseRequestManagement.Create)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ReceiptManagement.Edit,
+        Permissions.Warehouse.ReceiptManagement.Create,
+        Permissions.Warehouse.PurchaseRequestManagement.Edit,
+        Permissions.Warehouse.PurchaseRequestManagement.Create)]
     [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponseForInventoryReceipt>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActiveVariantLiteProductsForInventoryReceiptAsync(
         [FromQuery] SieveModel request,
@@ -253,7 +257,11 @@ public class ProductController(ISender sender) : ApiController
     /// Kiểm tra slug có sẵn sàng sử dụng hay không.
     /// </summary>
     [HttpGet("check-slug")]
-    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create, Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ProductManagement.Create,
+        Permissions.Order.ProductManagement.Create,
+        Permissions.Warehouse.ProductManagement.Edit,
+        Permissions.Order.ProductManagement.Edit)]
     [ProducesResponseType(typeof(SlugAvailabilityResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CheckSlugAvailabilityAsync(
         [FromQuery] string slug,
@@ -362,7 +370,9 @@ public class ProductController(ISender sender) : ApiController
     /// Chỉnh giá cho tất cả các biến thể của 1 sản phẩm.
     /// </summary>
     [HttpPatch("{id:int}/price")]
-    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.EditPrice, Permissions.Order.ProductManagement.EditPrice)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ProductManagement.EditPrice,
+        Permissions.Order.ProductManagement.EditPrice)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -382,7 +392,9 @@ public class ProductController(ISender sender) : ApiController
     /// Chỉnh giá cho nhiều sản phẩm cùng lúc.
     /// </summary>
     [HttpPatch("prices")]
-    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.EditPrice, Permissions.Order.ProductManagement.EditPrice)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ProductManagement.EditPrice,
+        Permissions.Order.ProductManagement.EditPrice)]
     [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyProductPricesAsync(
@@ -414,7 +426,9 @@ public class ProductController(ISender sender) : ApiController
     /// <summary>
     /// Chỉnh giá cho 1 biến thể sản phẩm.
     /// </summary>
-    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.EditPrice, Permissions.Order.ProductManagement.EditPrice)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ProductManagement.EditPrice,
+        Permissions.Order.ProductManagement.EditPrice)]
     [HttpPatch("variant/{variantId:int}/price")]
     [ProducesResponseType(typeof(ProductVariantLiteResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -435,7 +449,9 @@ public class ProductController(ISender sender) : ApiController
     /// Chỉnh giá cho nhiều biến thể sản phẩm cùng lúc.
     /// </summary>
     [HttpPatch("variant/prices")]
-    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.EditPrice, Permissions.Order.ProductManagement.EditPrice)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ProductManagement.EditPrice,
+        Permissions.Order.ProductManagement.EditPrice)]
     [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyVariantPricesAsync(
@@ -453,7 +469,9 @@ public class ProductController(ISender sender) : ApiController
     /// Chỉnh trạng thái của 1 sản phẩm.
     /// </summary>
     [HttpPatch("{id:int}/status")]
-    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.ChangeStatus, Permissions.Order.ProductManagement.ChangeStatus)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ProductManagement.ChangeStatus,
+        Permissions.Order.ProductManagement.ChangeStatus)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -473,7 +491,9 @@ public class ProductController(ISender sender) : ApiController
     /// Chỉnh trạng thái nhiều sản phẩm cùng lúc.
     /// </summary>
     [HttpPatch("statuses")]
-    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.ChangeStatus, Permissions.Order.ProductManagement.ChangeStatus)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ProductManagement.ChangeStatus,
+        Permissions.Order.ProductManagement.ChangeStatus)]
     [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyProductStatusesAsync(

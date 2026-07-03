@@ -3,13 +3,10 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.WarrantyClaim;
 using Mapster;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.WarrantyClaims.Queries.GetWarrantyClaimDetail
 {
-    public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository warrantyClaimReadRepository)
-        : IRequestHandler<GetWarrantyClaimDetailQuery, Result<WarrantyClaimDetailResponse>>
+    public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository warrantyClaimReadRepository) : IRequestHandler<GetWarrantyClaimDetailQuery, Result<WarrantyClaimDetailResponse>>
     {
         public async Task<Result<WarrantyClaimDetailResponse>> Handle(
             GetWarrantyClaimDetailQuery request,

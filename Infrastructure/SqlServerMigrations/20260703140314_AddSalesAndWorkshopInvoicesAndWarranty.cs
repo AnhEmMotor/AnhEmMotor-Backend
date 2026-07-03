@@ -1,5 +1,5 @@
-using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -11,19 +11,10 @@ namespace Infrastructure.SqlServerMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_PlateDossier_Output_OutputId",
-                table: "PlateDossier");
-
-            migrationBuilder.DropTable(
-                name: "ContractTemplateAuditLog");
-
-            migrationBuilder.DropTable(
-                name: "ServiceEvaluation");
-
-            migrationBuilder.DropTable(
-                name: "ContractTemplates");
-
+            migrationBuilder.DropForeignKey(name: "FK_PlateDossier_Output_OutputId", table: "PlateDossier");
+            migrationBuilder.DropTable(name: "ContractTemplateAuditLog");
+            migrationBuilder.DropTable(name: "ServiceEvaluation");
+            migrationBuilder.DropTable(name: "ContractTemplates");
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "PlateDossier",
@@ -31,7 +22,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(20)");
-
             migrationBuilder.AlterColumn<int>(
                 name: "OutputId",
                 table: "PlateDossier",
@@ -39,41 +29,35 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "CompletedDate",
                 table: "PlateDossier",
                 type: "datetimeoffset",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "CustomerName",
                 table: "PlateDossier",
                 type: "nvarchar(100)",
                 nullable: false,
-                defaultValue: "");
-
+                defaultValue: string.Empty);
             migrationBuilder.AddColumn<string>(
                 name: "CustomerPhone",
                 table: "PlateDossier",
                 type: "nvarchar(20)",
                 nullable: false,
-                defaultValue: "");
-
+                defaultValue: string.Empty);
             migrationBuilder.AddColumn<string>(
                 name: "DossierNumber",
                 table: "PlateDossier",
                 type: "nvarchar(50)",
                 nullable: false,
-                defaultValue: "");
-
+                defaultValue: string.Empty);
             migrationBuilder.AddColumn<string>(
                 name: "VinNumber",
                 table: "PlateDossier",
                 type: "nvarchar(50)",
                 nullable: false,
-                defaultValue: "");
-
+                defaultValue: string.Empty);
             migrationBuilder.AddColumn<decimal>(
                 name: "RefundAmount",
                 table: "ParcelDeliveryOrders",
@@ -81,13 +65,11 @@ namespace Infrastructure.SqlServerMigrations
                 precision: 18,
                 scale: 2,
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "RejectionReason",
                 table: "ParcelDeliveryOrders",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<decimal>(
                 name: "ReturnShippingCost",
                 table: "ParcelDeliveryOrders",
@@ -95,13 +77,7 @@ namespace Infrastructure.SqlServerMigrations
                 precision: 18,
                 scale: 2,
                 nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "LeadId",
-                table: "Output",
-                type: "int",
-                nullable: true);
-
+            migrationBuilder.AddColumn<int>(name: "LeadId", table: "Output", type: "int", nullable: true);
             migrationBuilder.AddColumn<decimal>(
                 name: "LaborCost",
                 table: "MaintenanceHistory",
@@ -110,26 +86,22 @@ namespace Infrastructure.SqlServerMigrations
                 scale: 2,
                 nullable: false,
                 defaultValue: 0m);
-
             migrationBuilder.AddColumn<string>(
                 name: "MaintenanceNumber",
                 table: "MaintenanceHistory",
                 type: "nvarchar(50)",
                 nullable: false,
-                defaultValue: "");
-
+                defaultValue: string.Empty);
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "NextMaintenanceDate",
                 table: "MaintenanceHistory",
                 type: "datetimeoffset",
                 nullable: true);
-
             migrationBuilder.AddColumn<int>(
                 name: "NextMaintenanceOdo",
                 table: "MaintenanceHistory",
                 type: "int",
                 nullable: true);
-
             migrationBuilder.AddColumn<decimal>(
                 name: "PartsCost",
                 table: "MaintenanceHistory",
@@ -138,19 +110,16 @@ namespace Infrastructure.SqlServerMigrations
                 scale: 2,
                 nullable: false,
                 defaultValue: 0m);
-
             migrationBuilder.AddColumn<string>(
                 name: "PartsJson",
                 table: "MaintenanceHistory",
                 type: "nvarchar(MAX)",
                 nullable: true);
-
             migrationBuilder.AddColumn<int>(
                 name: "TechnicianId",
                 table: "MaintenanceHistory",
                 type: "int",
                 nullable: true);
-
             migrationBuilder.AddColumn<decimal>(
                 name: "TotalCost",
                 table: "MaintenanceHistory",
@@ -159,14 +128,12 @@ namespace Infrastructure.SqlServerMigrations
                 scale: 2,
                 nullable: false,
                 defaultValue: 0m);
-
             migrationBuilder.AddColumn<bool>(
                 name: "IsVerified",
                 table: "Lead",
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
-
             migrationBuilder.AlterColumn<string>(
                 name: "FeedbackArea",
                 table: "CustomerFeedback",
@@ -174,25 +141,21 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)");
-
             migrationBuilder.AddColumn<string>(
                 name: "PricingRulesJson",
                 table: "CarrierPartners",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "SlaJson",
                 table: "CarrierPartners",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "ConversionTool",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Type = table.Column<string>(type: "nvarchar(20)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(200)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
@@ -213,13 +176,11 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     table.PrimaryKey("PK_ConversionTool", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Invoice",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     InvoiceNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IssueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
@@ -233,9 +194,21 @@ namespace Infrastructure.SqlServerMigrations
                     VehicleColor = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ChassisNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EngineNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    VehiclePrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    RegistrationFee = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    InsuranceFee = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    VehiclePrice = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
+                    RegistrationFee = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
+                    InsuranceFee = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
                     PaymentMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BankName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -257,13 +230,11 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "PurchaseInvoice",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     InvoiceNumber = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     PurchaseRequestId = table.Column<int>(type: "int", nullable: true),
                     SupplierId = table.Column<int>(type: "int", nullable: true),
@@ -304,13 +275,11 @@ namespace Infrastructure.SqlServerMigrations
                         principalTable: "Supplier",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ReturnRequest",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     OrderCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OriginalTrackingNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -340,13 +309,11 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierDebtLogImages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     SupplierDebtLogId = table.Column<int>(type: "int", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -363,13 +330,11 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "WarrantyClaim",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ClaimNumber = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     VehicleId = table.Column<int>(type: "int", nullable: false),
                     IssueDescription = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
@@ -395,13 +360,11 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "WorkshopPayment",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     PaymentNumber = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     SourceType = table.Column<string>(type: "nvarchar(30)", nullable: false),
                     SourceId = table.Column<int>(type: "int", nullable: false),
@@ -426,13 +389,11 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     table.PrimaryKey("PK_WorkshopPayment", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "PurchaseInvoiceItem",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     PurchaseInvoiceId = table.Column<int>(type: "int", nullable: false),
                     PurchaseRequestItemId = table.Column<int>(type: "int", nullable: true),
                     ProductVariantId = table.Column<int>(type: "int", nullable: false),
@@ -459,13 +420,11 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ReturnRequestItem",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ReturnRequestId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -494,13 +453,11 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "WarrantyClaimPart",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     WarrantyClaimId = table.Column<int>(type: "int", nullable: false),
                     PartName = table.Column<string>(type: "nvarchar(200)", nullable: false),
                     PartCode = table.Column<string>(type: "nvarchar(100)", nullable: false),
@@ -520,79 +477,55 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupportRequest_AssignedUserId",
                 table: "SupportRequest",
                 column: "AssignedUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Output_LeadId",
-                table: "Output",
-                column: "LeadId");
-
+            migrationBuilder.CreateIndex(name: "IX_Output_LeadId", table: "Output", column: "LeadId");
             migrationBuilder.CreateIndex(
                 name: "IX_MaintenanceHistory_TechnicianId",
                 table: "MaintenanceHistory",
                 column: "TechnicianId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Invoice_UserId",
-                table: "Invoice",
-                column: "UserId");
-
+            migrationBuilder.CreateIndex(name: "IX_Invoice_UserId", table: "Invoice", column: "UserId");
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseInvoice_PurchaseRequestId",
                 table: "PurchaseInvoice",
                 column: "PurchaseRequestId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseInvoice_SupplierId",
                 table: "PurchaseInvoice",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseInvoiceItem_PurchaseInvoiceId",
                 table: "PurchaseInvoiceItem",
                 column: "PurchaseInvoiceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ReturnRequest_OrderId",
-                table: "ReturnRequest",
-                column: "OrderId");
-
+            migrationBuilder.CreateIndex(name: "IX_ReturnRequest_OrderId", table: "ReturnRequest", column: "OrderId");
             migrationBuilder.CreateIndex(
                 name: "IX_ReturnRequestItem_ProductId",
                 table: "ReturnRequestItem",
                 column: "ProductId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ReturnRequestItem_ReturnRequestId",
                 table: "ReturnRequestItem",
                 column: "ReturnRequestId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierDebtLogImages_SupplierDebtLogId",
                 table: "SupplierDebtLogImages",
                 column: "SupplierDebtLogId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_WarrantyClaim_VehicleId",
                 table: "WarrantyClaim",
                 column: "VehicleId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_WarrantyClaimPart_WarrantyClaimId",
                 table: "WarrantyClaimPart",
                 column: "WarrantyClaimId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory",
                 column: "TechnicianId",
                 principalTable: "EmployeeProfile",
                 principalColumn: "Id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_Output_Lead_LeadId",
                 table: "Output",
@@ -600,14 +533,12 @@ namespace Infrastructure.SqlServerMigrations
                 principalTable: "Lead",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_PlateDossier_Output_OutputId",
                 table: "PlateDossier",
                 column: "OutputId",
                 principalTable: "Output",
                 principalColumn: "id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_SupportRequest_Users_AssignedUserId",
                 table: "SupportRequest",
@@ -623,141 +554,42 @@ namespace Infrastructure.SqlServerMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Output_Lead_LeadId",
-                table: "Output");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_PlateDossier_Output_OutputId",
-                table: "PlateDossier");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_SupportRequest_Users_AssignedUserId",
-                table: "SupportRequest");
-
-            migrationBuilder.DropTable(
-                name: "ConversionTool");
-
-            migrationBuilder.DropTable(
-                name: "Invoice");
-
-            migrationBuilder.DropTable(
-                name: "PurchaseInvoiceItem");
-
-            migrationBuilder.DropTable(
-                name: "ReturnRequestItem");
-
-            migrationBuilder.DropTable(
-                name: "SupplierDebtLogImages");
-
-            migrationBuilder.DropTable(
-                name: "WarrantyClaimPart");
-
-            migrationBuilder.DropTable(
-                name: "WorkshopPayment");
-
-            migrationBuilder.DropTable(
-                name: "PurchaseInvoice");
-
-            migrationBuilder.DropTable(
-                name: "ReturnRequest");
-
-            migrationBuilder.DropTable(
-                name: "WarrantyClaim");
-
-            migrationBuilder.DropIndex(
-                name: "IX_SupportRequest_AssignedUserId",
-                table: "SupportRequest");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Output_LeadId",
-                table: "Output");
-
-            migrationBuilder.DropIndex(
-                name: "IX_MaintenanceHistory_TechnicianId",
-                table: "MaintenanceHistory");
-
-            migrationBuilder.DropColumn(
-                name: "CompletedDate",
-                table: "PlateDossier");
-
-            migrationBuilder.DropColumn(
-                name: "CustomerName",
-                table: "PlateDossier");
-
-            migrationBuilder.DropColumn(
-                name: "CustomerPhone",
-                table: "PlateDossier");
-
-            migrationBuilder.DropColumn(
-                name: "DossierNumber",
-                table: "PlateDossier");
-
-            migrationBuilder.DropColumn(
-                name: "VinNumber",
-                table: "PlateDossier");
-
-            migrationBuilder.DropColumn(
-                name: "RefundAmount",
-                table: "ParcelDeliveryOrders");
-
-            migrationBuilder.DropColumn(
-                name: "RejectionReason",
-                table: "ParcelDeliveryOrders");
-
-            migrationBuilder.DropColumn(
-                name: "ReturnShippingCost",
-                table: "ParcelDeliveryOrders");
-
-            migrationBuilder.DropColumn(
-                name: "LeadId",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "LaborCost",
-                table: "MaintenanceHistory");
-
-            migrationBuilder.DropColumn(
-                name: "MaintenanceNumber",
-                table: "MaintenanceHistory");
-
-            migrationBuilder.DropColumn(
-                name: "NextMaintenanceDate",
-                table: "MaintenanceHistory");
-
-            migrationBuilder.DropColumn(
-                name: "NextMaintenanceOdo",
-                table: "MaintenanceHistory");
-
-            migrationBuilder.DropColumn(
-                name: "PartsCost",
-                table: "MaintenanceHistory");
-
-            migrationBuilder.DropColumn(
-                name: "PartsJson",
-                table: "MaintenanceHistory");
-
-            migrationBuilder.DropColumn(
-                name: "TechnicianId",
-                table: "MaintenanceHistory");
-
-            migrationBuilder.DropColumn(
-                name: "TotalCost",
-                table: "MaintenanceHistory");
-
-            migrationBuilder.DropColumn(
-                name: "IsVerified",
-                table: "Lead");
-
-            migrationBuilder.DropColumn(
-                name: "PricingRulesJson",
-                table: "CarrierPartners");
-
-            migrationBuilder.DropColumn(
-                name: "SlaJson",
-                table: "CarrierPartners");
-
+            migrationBuilder.DropForeignKey(name: "FK_Output_Lead_LeadId", table: "Output");
+            migrationBuilder.DropForeignKey(name: "FK_PlateDossier_Output_OutputId", table: "PlateDossier");
+            migrationBuilder.DropForeignKey(name: "FK_SupportRequest_Users_AssignedUserId", table: "SupportRequest");
+            migrationBuilder.DropTable(name: "ConversionTool");
+            migrationBuilder.DropTable(name: "Invoice");
+            migrationBuilder.DropTable(name: "PurchaseInvoiceItem");
+            migrationBuilder.DropTable(name: "ReturnRequestItem");
+            migrationBuilder.DropTable(name: "SupplierDebtLogImages");
+            migrationBuilder.DropTable(name: "WarrantyClaimPart");
+            migrationBuilder.DropTable(name: "WorkshopPayment");
+            migrationBuilder.DropTable(name: "PurchaseInvoice");
+            migrationBuilder.DropTable(name: "ReturnRequest");
+            migrationBuilder.DropTable(name: "WarrantyClaim");
+            migrationBuilder.DropIndex(name: "IX_SupportRequest_AssignedUserId", table: "SupportRequest");
+            migrationBuilder.DropIndex(name: "IX_Output_LeadId", table: "Output");
+            migrationBuilder.DropIndex(name: "IX_MaintenanceHistory_TechnicianId", table: "MaintenanceHistory");
+            migrationBuilder.DropColumn(name: "CompletedDate", table: "PlateDossier");
+            migrationBuilder.DropColumn(name: "CustomerName", table: "PlateDossier");
+            migrationBuilder.DropColumn(name: "CustomerPhone", table: "PlateDossier");
+            migrationBuilder.DropColumn(name: "DossierNumber", table: "PlateDossier");
+            migrationBuilder.DropColumn(name: "VinNumber", table: "PlateDossier");
+            migrationBuilder.DropColumn(name: "RefundAmount", table: "ParcelDeliveryOrders");
+            migrationBuilder.DropColumn(name: "RejectionReason", table: "ParcelDeliveryOrders");
+            migrationBuilder.DropColumn(name: "ReturnShippingCost", table: "ParcelDeliveryOrders");
+            migrationBuilder.DropColumn(name: "LeadId", table: "Output");
+            migrationBuilder.DropColumn(name: "LaborCost", table: "MaintenanceHistory");
+            migrationBuilder.DropColumn(name: "MaintenanceNumber", table: "MaintenanceHistory");
+            migrationBuilder.DropColumn(name: "NextMaintenanceDate", table: "MaintenanceHistory");
+            migrationBuilder.DropColumn(name: "NextMaintenanceOdo", table: "MaintenanceHistory");
+            migrationBuilder.DropColumn(name: "PartsCost", table: "MaintenanceHistory");
+            migrationBuilder.DropColumn(name: "PartsJson", table: "MaintenanceHistory");
+            migrationBuilder.DropColumn(name: "TechnicianId", table: "MaintenanceHistory");
+            migrationBuilder.DropColumn(name: "TotalCost", table: "MaintenanceHistory");
+            migrationBuilder.DropColumn(name: "IsVerified", table: "Lead");
+            migrationBuilder.DropColumn(name: "PricingRulesJson", table: "CarrierPartners");
+            migrationBuilder.DropColumn(name: "SlaJson", table: "CarrierPartners");
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "PlateDossier",
@@ -765,7 +597,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)");
-
             migrationBuilder.AlterColumn<int>(
                 name: "OutputId",
                 table: "PlateDossier",
@@ -775,7 +606,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "FeedbackArea",
                 table: "CustomerFeedback",
@@ -783,7 +613,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(250)");
-
             migrationBuilder.CreateTable(
                 name: "ContractTemplates",
                 columns: table => new
@@ -807,13 +636,11 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     table.PrimaryKey("PK_ContractTemplates", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ServiceEvaluation",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ContactId = table.Column<int>(type: "int", nullable: false),
                     ServiceBookingId = table.Column<int>(type: "int", nullable: false),
                     AdminRepliedById = table.Column<int>(type: "int", nullable: true),
@@ -844,7 +671,6 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ContractTemplateAuditLog",
                 columns: table => new
@@ -871,22 +697,18 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_ContractTemplateAuditLog_ContractTemplateId",
                 table: "ContractTemplateAuditLog",
                 column: "ContractTemplateId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceEvaluation_ContactId",
                 table: "ServiceEvaluation",
                 column: "ContactId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceEvaluation_ServiceBookingId",
                 table: "ServiceEvaluation",
                 column: "ServiceBookingId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_PlateDossier_Output_OutputId",
                 table: "PlateDossier",

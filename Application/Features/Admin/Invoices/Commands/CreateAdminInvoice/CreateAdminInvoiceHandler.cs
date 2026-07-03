@@ -9,14 +9,17 @@ namespace Application.Features.Admin.Invoices.Commands.CreateAdminInvoice;
 
 public record CreateAdminInvoiceCommand(CreateAdminInvoiceRequest Request) : IRequest<Result<AdminInvoiceDetailResponse>>;
 
-public class CreateAdminInvoiceHandler(IInvoiceWriteRepository writeRepo, IInvoiceReadRepository readRepo, IUnitOfWork unitOfWork) : IRequestHandler<CreateAdminInvoiceCommand, Result<AdminInvoiceDetailResponse>>
+public class CreateAdminInvoiceHandler(
+    IInvoiceWriteRepository writeRepo,
+    IInvoiceReadRepository readRepo,
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateAdminInvoiceCommand, Result<AdminInvoiceDetailResponse>>
 {
-    public async Task<Result<AdminInvoiceDetailResponse>> Handle(CreateAdminInvoiceCommand request, CancellationToken cancellationToken)
+    public async Task<Result<AdminInvoiceDetailResponse>> Handle(
+        CreateAdminInvoiceCommand request,
+        CancellationToken cancellationToken)
     {
         var req = request.Request;
-
         var invoiceNumber = GenerateInvoiceNumber();
-
         var invoice = new Invoice
         {
             InvoiceNumber = invoiceNumber,
@@ -40,14 +43,11 @@ public class CreateAdminInvoiceHandler(IInvoiceWriteRepository writeRepo, IInvoi
             DeliveryDate = req.DeliveryDate,
             CreatedAt = DateTimeOffset.Now
         };
-
         writeRepo.Add(invoice);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         var created = await readRepo.GetByIdAsync(invoice.Id, cancellationToken);
         if (created == null)
             return Result<AdminInvoiceDetailResponse>.Failure(Error.BadRequest("Không thể tạo hóa đơn", "Create"));
-
         var response = new AdminInvoiceDetailResponse(
             created.Id,
             created.InvoiceNumber,
@@ -72,9 +72,7 @@ public class CreateAdminInvoiceHandler(IInvoiceWriteRepository writeRepo, IInvoi
             created.ProcessedBy,
             created.ProcessedAt,
             created.CreatedAt,
-            new List<InvoicePaymentBreakdownItem>()
-        );
-
+            new List<InvoicePaymentBreakdownItem>());
         return Result<AdminInvoiceDetailResponse>.Success(response);
     }
 

@@ -36,11 +36,9 @@ public class SendInventoryReceiptCommandHandler(
         }
         var oldStatusId = inventoryReceipt.StatusId;
         var currentUserId = currentUserContext.GetUserId();
-        
         inventoryReceipt.StatusId = InventoryReceiptStatus.Sent;
         inventoryReceipt.SentBy = currentUserId;
         updateRepository.Update(inventoryReceipt);
-
         var receiptAuditLogs = new List<Domain.Entities.InventoryReceiptAuditLog>
         {
             new Domain.Entities.InventoryReceiptAuditLog
@@ -56,7 +54,6 @@ public class SendInventoryReceiptCommandHandler(
             }
         };
         await insertRepository.InsertAuditLogsAsync(receiptAuditLogs, cancellationToken).ConfigureAwait(false);
-        
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var updated = await readRepository.GetByIdWithDetailsAsync(inventoryReceipt.Id, cancellationToken)
             .ConfigureAwait(false);

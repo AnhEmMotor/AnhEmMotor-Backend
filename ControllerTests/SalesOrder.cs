@@ -1,5 +1,3 @@
-using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
-using Application.Features.Outputs.Queries.GetOutputsByUserIdForManager;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Features.Outputs.Commands.CreateOutput;
@@ -15,11 +13,12 @@ using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
 using Application.Features.Outputs.Queries.GetOutputById;
-using Application.Features.Outputs.Queries.GetOutputsByUserId;
+using Application.Features.Outputs.Queries.GetOutputsByUserIdForManager;
+using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
+using Application.Interfaces.Services;
 using Domain.Constants.Order;
-using static Domain.Constants.Permission.Permissions;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.Authorization.Attribute;
@@ -31,19 +30,20 @@ using Sieve.Models;
 using System.Reflection;
 using System.Security.Claims;
 using WebAPI.Controllers.V1;
+using static Domain.Constants.Permission.Permissions;
 
 namespace ControllerTests;
 
 public class SalesOrder
 {
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<Application.Interfaces.Services.ICurrentUserContext> _currentUserContextMock;
+    private readonly Mock<ICurrentUserContext> _currentUserContextMock;
     private readonly SalesOrdersController _controller;
 
     public SalesOrder()
     {
         _mediatorMock = new Mock<IMediator>();
-        _currentUserContextMock = new Mock<Application.Interfaces.Services.ICurrentUserContext>();
+        _currentUserContextMock = new Mock<ICurrentUserContext>();
         _controller = new SalesOrdersController(_mediatorMock.Object, _currentUserContextMock.Object);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
@@ -65,12 +65,15 @@ public class SalesOrder
         };
         var sieveModel = new SieveModel();
         var expectedOrder = new MyOrderResponse { Id = 1 };
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsForCurrentUserQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync(Result<PagedResult<MyOrderResponse>>.Success(
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsForCurrentUserQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                Result<PagedResult<MyOrderResponse>>.Success(
                     new PagedResult<MyOrderResponse>([expectedOrder], 1, 1, 10)));
         var result = await _controller.GetMyPurchasesAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         _mediatorMock.Verify(
-            m => m.Send(It.IsAny<GetOutputsForCurrentUserQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+            m => m.Send(It.IsAny<GetOutputsForCurrentUserQuery>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact(DisplayName = "SO_082 - GetPurchasesByID - Lấy đơn hàng theo BuyerId (có quyền)")]
@@ -80,12 +83,14 @@ public class SalesOrder
         _currentUserContextMock.Setup(c => c.GetUserId()).Returns(buyerId);
         var sieveModel = new SieveModel();
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdForManagerQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
+            .ReturnsAsync(
+                Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
         var result = await _controller.GetPurchasesByIDAsync(sieveModel, buyerId, CancellationToken.None)
             .ConfigureAwait(true);
         result.Should().NotBeNull();
         _mediatorMock.Verify(
-            m => m.Send(It.IsAny<GetOutputsByUserIdForManagerQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+            m => m.Send(It.IsAny<GetOutputsByUserIdForManagerQuery>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact(DisplayName = "SO_084 - GetDeletedOutputs - Lấy danh sách đơn hàng đã xóa")]
@@ -469,13 +474,4 @@ public class SalesOrder
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
-
-
-
-
-
-
-
-
-
 

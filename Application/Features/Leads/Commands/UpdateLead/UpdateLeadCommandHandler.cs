@@ -46,10 +46,10 @@ namespace Application.Features.Leads.Commands.UpdateLead
             {
                 lead.Source = request.Source;
             }
-lead.InterestedVehicle = request.InterestedVehicle;
-lead.Score = request.Score;
-lead.IsVerified = request.IsVerified;
-await leadUpdateRepository.UpdateAsync(lead, cancellationToken).ConfigureAwait(false);
+            lead.InterestedVehicle = request.InterestedVehicle;
+            lead.Score = request.Score;
+            lead.IsVerified = request.IsVerified;
+            await leadUpdateRepository.UpdateAsync(lead, cancellationToken).ConfigureAwait(false);
             return lead.Id;
         }
     }

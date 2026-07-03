@@ -6,14 +6,13 @@ using Application.Features.SalesContracts.Commands.DeleteSalesContract;
 using Application.Features.SalesContracts.Commands.UpdateSalesContract;
 using Application.Features.SalesContracts.Commands.UpdateSalesContractStatus;
 using Application.Features.SalesContracts.Queries.GetSalesContractById;
-using Application.Features.SalesContracts.Queries.GetSalesContractStatistics;
 using Application.Features.SalesContracts.Queries.GetSalesContractsList;
+using Application.Features.SalesContracts.Queries.GetSalesContractStatistics;
 using Asp.Versioning;
 using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
@@ -87,7 +86,10 @@ public class SalesContractsController(IMediator mediator) : ApiController
     {
         var command = new CreateSalesContractCommand(request);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return HandleCreated(result, nameof(GetSalesContractByIdAsync), new { id = result.IsSuccess ? result.Value?.Id : Guid.Empty });
+        return HandleCreated(
+            result,
+            nameof(GetSalesContractByIdAsync),
+            new { id = result.IsSuccess ? result.Value?.Id : Guid.Empty });
     }
 
     /// <summary>

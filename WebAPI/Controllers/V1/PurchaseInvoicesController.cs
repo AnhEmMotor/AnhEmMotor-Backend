@@ -1,10 +1,11 @@
-using Asp.Versioning;
 using Application.ApiContracts.PurchaseInvoice.Requests;
 using Application.ApiContracts.PurchaseInvoice.Responses;
 using Application.Common.Models;
 using Application.Features.PurchaseInvoices.Commands.CreatePurchaseInvoice;
 using Application.Features.PurchaseInvoices.Queries.GetPurchaseInvoiceById;
 using Application.Features.PurchaseInvoices.Queries.GetPurchaseInvoices;
+using Asp.Versioning;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -22,7 +23,7 @@ namespace WebAPI.Controllers.V1
     public class PurchaseInvoicesController(IMediator mediator) : ApiController
     {
         [HttpPost]
-        [HasPermission(Domain.Constants.Permission.PurchaseInvoices.Create)]
+        [HasPermission(PurchaseInvoices.Create)]
         [ProducesResponseType(typeof(PurchaseInvoiceDetailResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateAsync(
@@ -55,7 +56,7 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpGet]
-        [HasPermission(Domain.Constants.Permission.PurchaseInvoices.View)]
+        [HasPermission(PurchaseInvoices.View)]
         [ProducesResponseType(typeof(PagedResult<PurchaseInvoiceListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllAsync(
             [FromQuery] SieveModel sieveModel,
@@ -69,16 +70,12 @@ namespace WebAPI.Controllers.V1
         }
 
         [HttpGet("{id:int}")]
-        [HasPermission(Domain.Constants.Permission.PurchaseInvoices.View)]
+        [HasPermission(PurchaseInvoices.View)]
         [ProducesResponseType(typeof(PurchaseInvoiceDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetByIdAsync(
-            int id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var result = await mediator.Send(
-                new GetPurchaseInvoiceByIdQuery(id),
-                cancellationToken)
+            var result = await mediator.Send(new GetPurchaseInvoiceByIdQuery(id), cancellationToken)
                 .ConfigureAwait(false);
             return HandleResult(result);
         }

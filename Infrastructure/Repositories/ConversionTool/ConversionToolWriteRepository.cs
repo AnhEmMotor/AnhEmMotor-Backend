@@ -1,7 +1,5 @@
 using Application.Interfaces.Repositories.ConversionTool;
-using Domain.Entities;
 using Infrastructure.DBContexts;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories.ConversionTool;
 
@@ -9,7 +7,9 @@ public class ConversionToolWriteRepository(ApplicationDBContext context) : IConv
 {
     private readonly ApplicationDBContext _context = context;
 
-    public async Task<Domain.Entities.ConversionTool> AddAsync(Domain.Entities.ConversionTool entity, CancellationToken cancellationToken = default)
+    public async Task<Domain.Entities.ConversionTool> AddAsync(
+        Domain.Entities.ConversionTool entity,
+        CancellationToken cancellationToken = default)
     {
         await _context.Set<Domain.Entities.ConversionTool>().AddAsync(entity, cancellationToken);
         return entity;
@@ -27,7 +27,9 @@ public class ConversionToolWriteRepository(ApplicationDBContext context) : IConv
         return Task.CompletedTask;
     }
 
-    public Task DeleteRangeAsync(IEnumerable<Domain.Entities.ConversionTool> entities, CancellationToken cancellationToken = default)
+    public Task DeleteRangeAsync(
+        IEnumerable<Domain.Entities.ConversionTool> entities,
+        CancellationToken cancellationToken = default)
     {
         _context.Set<Domain.Entities.ConversionTool>().RemoveRange(entities);
         return Task.CompletedTask;

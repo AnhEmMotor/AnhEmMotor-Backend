@@ -1,8 +1,7 @@
 ﻿using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
-using PurchaseInvoiceEntity = Domain.Entities.PurchaseInvoice;
 using Sieve.Models;
+using PurchaseInvoiceEntity = Domain.Entities.PurchaseInvoice;
 
 namespace Application.Interfaces.Repositories.PurchaseInvoice
 {

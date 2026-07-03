@@ -131,11 +131,8 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Lead>(l => l.PhoneNumber).CanSort().CanFilter();
         mapper.Property<Lead>(l => l.Tier).CanSort().CanFilter();
         mapper.Property<Lead>(l => l.Points).CanSort().CanFilter();
-
         return mapper;
     }
-
-
 
     public IQueryable<Product> SafetyStandard(IQueryable<Product> source, string op, string[] values)
     {

@@ -21,7 +21,10 @@ namespace WebAPI.Controllers.V1;
 public class ConversionToolController(IMediator mediator) : ApiController
 {
     [HttpGet]
-    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
+    [RequiresAnyPermissions(
+        Permissions.Admin.DashboardManagement.View,
+        Permissions.Accountant.DashboardManagement.View,
+        Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(List<ConversionToolResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
@@ -30,18 +33,29 @@ public class ConversionToolController(IMediator mediator) : ApiController
     }
 
     [HttpPost]
-    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
+    [RequiresAnyPermissions(
+        Permissions.Admin.DashboardManagement.View,
+        Permissions.Accountant.DashboardManagement.View,
+        Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(ConversionToolResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Create([FromBody] CreateConversionToolCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(
+        [FromBody] CreateConversionToolCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     [HttpPut("{id:int}")]
-    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
+    [RequiresAnyPermissions(
+        Permissions.Admin.DashboardManagement.View,
+        Permissions.Accountant.DashboardManagement.View,
+        Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(ConversionToolResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateConversionToolCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(
+        int id,
+        [FromBody] UpdateConversionToolCommand command,
+        CancellationToken cancellationToken)
     {
         var cmd = command with { Id = id };
         var result = await mediator.Send(cmd, cancellationToken).ConfigureAwait(false);
@@ -49,7 +63,10 @@ public class ConversionToolController(IMediator mediator) : ApiController
     }
 
     [HttpDelete("{id:int}")]
-    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
+    [RequiresAnyPermissions(
+        Permissions.Admin.DashboardManagement.View,
+        Permissions.Accountant.DashboardManagement.View,
+        Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {

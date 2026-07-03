@@ -1,6 +1,7 @@
 using Application.ApiContracts.PurchaseRequest.Requests;
 using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
@@ -63,7 +64,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.Create, Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.View],
+            [Permissions.Warehouse.PurchaseRequestManagement.Create, Permissions.Warehouse.PurchaseRequestManagement.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -110,7 +111,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.View],
+            [Permissions.Warehouse.PurchaseRequestManagement.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -159,7 +160,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.View],
+            [Permissions.Warehouse.PurchaseRequestManagement.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -202,7 +203,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.Send],
+            [Permissions.Warehouse.PurchaseRequestManagement.Send],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -246,7 +247,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.ApproveReject],
+            [Permissions.Warehouse.PurchaseRequestManagement.ApproveReject],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -293,7 +294,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.Delete],
+            [Permissions.Warehouse.PurchaseRequestManagement.Delete],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -337,7 +338,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.View],
+            [Permissions.Warehouse.PurchaseRequestManagement.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -388,7 +389,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.View],
+            [Permissions.Warehouse.PurchaseRequestManagement.View],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -400,7 +401,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             adminUsername,
             adminPassword,
-            [Domain.Constants.Permission.Permissions.Warehouse.PurchaseRequestManagement.View],
+            [Permissions.Warehouse.PurchaseRequestManagement.View],
             TestContext.Current.CancellationToken,
             adminEmail)
             .ConfigureAwait(true);
@@ -451,7 +452,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Create],
+            [Permissions.Warehouse.ReceiptManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -506,7 +507,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Create],
+            [Permissions.Warehouse.ReceiptManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
@@ -550,7 +551,7 @@ public class PurchaseRequests : IClassFixture<IntegrationTestWebAppFactory>, IAs
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Create],
+            [Permissions.Warehouse.ReceiptManagement.Create],
             TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);

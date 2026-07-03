@@ -4,11 +4,8 @@ using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Seeders
 {
@@ -16,37 +13,31 @@ namespace Infrastructure.Seeders
     {
         public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
         {
-            // 1. Kiểm tra xem đã có dữ liệu trong các bảng Workshop & Service chưa
             if (await context.WarrantyClaims.AnyAsync(cancellationToken).ConfigureAwait(false) ||
                 await context.MaintenanceHistories.AnyAsync(cancellationToken).ConfigureAwait(false) ||
                 await context.PlateDossiers.AnyAsync(cancellationToken).ConfigureAwait(false))
             {
                 return;
             }
-
             var now = DateTimeOffset.UtcNow;
-
-            // 2. Đảm bảo có dữ liệu xe (Vehicle) để làm việc
             var vehicles = await context.Vehicles.ToListAsync(cancellationToken).ConfigureAwait(false);
             if (vehicles.Count == 0)
             {
-                // Lấy các Leads có sẵn từ LeadSeeder làm khách hàng đại diện
                 var leads = await context.Leads.ToListAsync(cancellationToken).ConfigureAwait(false);
                 var variants = await context.ProductVariants
                     .Include(v => v.ProductVariantColors)
                     .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
-
                 if (leads.Count > 0 && variants.Count > 0)
                 {
                     var lead1 = leads.FirstOrDefault(l => l.PhoneNumber == "0987123456") ?? leads[0];
-                    var lead2 = leads.FirstOrDefault(l => l.PhoneNumber == "0912345678") ?? (leads.Count > 1 ? leads[1] : leads[0]);
-                    var lead3 = leads.FirstOrDefault(l => l.PhoneNumber == "0909888999") ?? (leads.Count > 2 ? leads[2] : leads[0]);
-
+                    var lead2 = leads.FirstOrDefault(l => l.PhoneNumber == "0912345678") ??
+                        (leads.Count > 1 ? leads[1] : leads[0]);
+                    var lead3 = leads.FirstOrDefault(l => l.PhoneNumber == "0909888999") ??
+                        (leads.Count > 2 ? leads[2] : leads[0]);
                     var variant1 = variants[0];
                     var variant2 = variants.Count > 1 ? variants[1] : variants[0];
                     var variant3 = variants.Count > 2 ? variants[2] : variants[0];
-
                     var v1 = new Vehicle
                     {
                         LeadId = lead1.Id,
@@ -61,7 +52,6 @@ namespace Infrastructure.Seeders
                         PurchaseDate = now.AddYears(-1),
                         IsActive = true
                     };
-
                     var v2 = new Vehicle
                     {
                         LeadId = lead2.Id,
@@ -76,7 +66,6 @@ namespace Infrastructure.Seeders
                         PurchaseDate = now.AddYears(-4),
                         IsActive = true
                     };
-
                     var v3 = new Vehicle
                     {
                         LeadId = lead3.Id,
@@ -91,24 +80,18 @@ namespace Infrastructure.Seeders
                         PurchaseDate = now.AddMonths(-1),
                         IsActive = true
                     };
-
                     context.Vehicles.AddRange(new[] { v1, v2, v3 });
                     await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     vehicles = new List<Vehicle> { v1, v2, v3 };
                 }
             }
-
-            if (vehicles.Count == 0) return;
-
+            if (vehicles.Count == 0)
+                return;
             var vehicle1 = vehicles[0];
             var vehicle2 = vehicles.Count > 1 ? vehicles[1] : vehicles[0];
             var vehicle3 = vehicles.Count > 2 ? vehicles[2] : vehicles[0];
-
-            // Lấy danh sách kỹ thuật viên để phân công
             var technicians = await context.EmployeeProfiles.ToListAsync(cancellationToken).ConfigureAwait(false);
             var techId = technicians.FirstOrDefault()?.Id;
-
-            // 3. Seed dữ liệu Đăng ký Biển số (PlateDossier)
             var dossiers = new List<PlateDossier>
             {
                 new()
@@ -156,63 +139,61 @@ namespace Infrastructure.Seeders
                 }
             };
             context.PlateDossiers.AddRange(dossiers);
-
-            // 4. Seed dữ liệu Phiếu Bảo hành (WarrantyClaim)
             var warrantyClaims = new List<WarrantyClaim>
             {
                 new()
                 {
                     ClaimNumber = "WAR-" + now.AddDays(-10).ToString("yyyyMMdd") + "-01",
-                    VehicleId = vehicle3.Id, // CBR150R mới, còn bảo hành
+                    VehicleId = vehicle3.Id,
                     IssueDescription = "Cụm giảm xóc trước có hiện tượng rò rỉ dầu nhớt làm ướt ty phuộc.",
                     ServiceCenterName = "Chi nhánh Đống Đa - AnhEmMotor",
                     Status = WarrantyClaimStatus.Received,
                     TotalLaborCost = 0,
                     TotalPartsCost = 0,
                     CreatedAt = now.AddDays(-10),
-                    Parts = new List<WarrantyClaimPart>
-                    {
-                        new()
+                    Parts =
+                        new List<WarrantyClaimPart>
                         {
-                            PartName = "Phớt dầu giảm xóc trước CBR150R",
-                            PartCode = "SHOCK-SEAL-CBR",
-                            UnitPrice = 0,
-                            Status = WarrantyPartStatus.Pending
+                            new()
+                            {
+                                PartName = "Phớt dầu giảm xóc trước CBR150R",
+                                PartCode = "SHOCK-SEAL-CBR",
+                                UnitPrice = 0,
+                                Status = WarrantyPartStatus.Pending
+                            }
                         }
-                    }
                 },
                 new()
                 {
                     ClaimNumber = "WAR-" + now.AddDays(-2).ToString("yyyyMMdd") + "-02",
-                    VehicleId = vehicle1.Id, // Winner X còn bảo hành
+                    VehicleId = vehicle1.Id,
                     IssueDescription = "Đèn xi nhan trước bên phải nhấp nháy chập chờn khi rẽ.",
                     ServiceCenterName = "Trung tâm Bảo hành AnhEmMotor",
                     Status = WarrantyClaimStatus.Approved,
                     TotalLaborCost = 0,
                     TotalPartsCost = 120000,
                     CreatedAt = now.AddDays(-2),
-                    Parts = new List<WarrantyClaimPart>
-                    {
-                        new()
+                    Parts =
+                        new List<WarrantyClaimPart>
                         {
-                            PartName = "Cụm đèn xi nhan trước Winner X",
-                            PartCode = "TURNSIGNAL-WINNERX",
-                            UnitPrice = 0,
-                            Status = WarrantyPartStatus.Approved
-                        },
-                        new()
-                        {
-                            PartName = "Rơ le nháy xi nhan phát sinh ngoài diện BH",
-                            PartCode = "FLASHER-RELAY-12V",
-                            UnitPrice = 120000,
-                            Status = WarrantyPartStatus.Approved
+                            new()
+                            {
+                                PartName = "Cụm đèn xi nhan trước Winner X",
+                                PartCode = "TURNSIGNAL-WINNERX",
+                                UnitPrice = 0,
+                                Status = WarrantyPartStatus.Approved
+                            },
+                            new()
+                            {
+                                PartName = "Rơ le nháy xi nhan phát sinh ngoài diện BH",
+                                PartCode = "FLASHER-RELAY-12V",
+                                UnitPrice = 120000,
+                                Status = WarrantyPartStatus.Approved
+                            }
                         }
-                    }
                 }
             };
             context.WarrantyClaims.AddRange(warrantyClaims);
-
-            // 5. Seed dữ liệu Phiếu Bảo trì (MaintenanceHistory)
             var parts1 = new[]
             {
                 new { PartName = "Dầu nhớt Motul 7100 10W40", PartCode = "OIL-MOTUL-7100", UnitPrice = 280000 },
@@ -224,7 +205,6 @@ namespace Infrastructure.Seeders
                 new { PartName = "Lọc gió AirBlade 160", PartCode = "FILTER-AIR-AB160", UnitPrice = 110000 },
                 new { PartName = "Bugi NGK Iridium", PartCode = "SPARK-NGK-IRIDIUM", UnitPrice = 220000 }
             };
-
             var maintenanceRecords = new List<MaintenanceHistory>
             {
                 new()
@@ -249,7 +229,8 @@ namespace Infrastructure.Seeders
                     VehicleId = vehicle2.Id,
                     MaintenanceDate = now.AddDays(-15),
                     Mileage = 30000,
-                    Description = "Bảo dưỡng mốc lớn 30.000 km. Kiểm tra hệ thống côn truyền động, thay dầu láp xe ga, bugi và lọc gió.",
+                    Description =
+                        "Bảo dưỡng mốc lớn 30.000 km. Kiểm tra hệ thống côn truyền động, thay dầu láp xe ga, bugi và lọc gió.",
                     TechnicianId = techId,
                     LaborCost = 250000,
                     PartsCost = 390000,
@@ -261,8 +242,6 @@ namespace Infrastructure.Seeders
                 }
             };
             context.MaintenanceHistories.AddRange(maintenanceRecords);
-
-            // Lưu tất cả dữ liệu mẫu xuống cơ sở dữ liệu
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }

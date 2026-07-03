@@ -8,8 +8,6 @@ using Sieve.Models;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.WarrantyClaim
 {
@@ -38,13 +36,13 @@ namespace Infrastructure.Repositories.WarrantyClaim
             return context.WarrantyClaims
                 .Include(w => w.Parts)
                 .Include(w => w.Vehicle)
-                    .ThenInclude(v => v!.User)
+                .ThenInclude(v => v!.User)
                 .Include(w => w.Vehicle)
-                    .ThenInclude(v => v!.ProductVariantColor)
+                .ThenInclude(v => v!.ProductVariantColor)
                 .Include(w => w.Vehicle)
-                    .ThenInclude(v => v!.ProductVariant)
-                        .ThenInclude(pv => pv!.Product)
-                            .ThenInclude(p => p!.Brand)
+                .ThenInclude(v => v!.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
+                .ThenInclude(p => p!.Brand)
                 .FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
         }
 
@@ -52,7 +50,7 @@ namespace Infrastructure.Repositories.WarrantyClaim
         {
             return context.GetQuery<Domain.Entities.WarrantyClaim>(mode)
                 .Include(w => w.Vehicle)
-                    .ThenInclude(v => v!.User)
+                .ThenInclude(v => v!.User)
                 .Include(w => w.Parts);
         }
     }

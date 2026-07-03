@@ -91,13 +91,11 @@ public class ProductCategoryReadRepository(
                 totalCount,
                 sieveModel.Page ?? 1,
                 sieveModel.PageSize ?? 10);
-        }
-        else
+        } else
         {
             result = await GetPagedAsync<ProductCategoryResponse>(sieveModel, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
-
         if (result.Items != null)
         {
             await PopulateInventoryQtyAsync(result.Items, cancellationToken).ConfigureAwait(false);
@@ -105,22 +103,25 @@ public class ProductCategoryReadRepository(
         return result;
     }
 
-    private async Task PopulateInventoryQtyAsync(List<ProductCategoryResponse> items, CancellationToken cancellationToken)
+    private async Task PopulateInventoryQtyAsync(
+        List<ProductCategoryResponse> items,
+        CancellationToken cancellationToken)
     {
-        if (items.Count == 0) return;
-        
+        if (items.Count == 0)
+            return;
         var targetMonth = DateTimeOffset.UtcNow.Month;
         var targetYear = DateTimeOffset.UtcNow.Year;
-
-
         var categoryInventory = await context.InventoryOnHands
-            .Where(x => x.Month == targetMonth && x.Year == targetYear && x.ProductVariant != null && x.ProductVariant.Product != null && x.ProductVariant.Product.CategoryId != null)
+            .Where(
+                x => x.Month == targetMonth &&
+                    x.Year == targetYear &&
+                    x.ProductVariant != null &&
+                    x.ProductVariant.Product != null &&
+                    x.ProductVariant.Product.CategoryId != null)
             .GroupBy(x => x.ProductVariant!.Product!.CategoryId)
             .Select(g => new { CategoryId = g.Key!.Value, TotalStock = g.Sum(x => x.StockQty) })
             .ToDictionaryAsync(x => x.CategoryId, x => x.TotalStock, cancellationToken)
             .ConfigureAwait(false);
-
-
         foreach (var item in items)
         {
             if (item.Id.HasValue)

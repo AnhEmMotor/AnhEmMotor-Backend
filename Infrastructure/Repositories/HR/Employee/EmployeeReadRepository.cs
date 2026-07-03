@@ -25,7 +25,7 @@ public class EmployeeReadRepository(ApplicationDBContext context) : IEmployeeRea
     {
         return context.KPIs
             .Include(k => k.EmployeeProfile)
-                .ThenInclude(ep => ep!.User)
+            .ThenInclude(ep => ep!.User)
             .OrderByDescending(k => k.PeriodEnd)
             .ToListAsync(cancellationToken);
     }

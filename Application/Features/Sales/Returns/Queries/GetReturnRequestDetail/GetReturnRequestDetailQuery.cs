@@ -3,9 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.ReturnRequest;
 using MediatR;
 using System.Linq;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Sales.Returns.Queries.GetReturnRequestDetail;
 
@@ -23,11 +20,13 @@ public class GetReturnRequestDetailQueryHandler : IRequestHandler<GetReturnReque
         _repository = repository;
     }
 
-    public async Task<Result<ReturnRequestResponse>> Handle(GetReturnRequestDetailQuery request, CancellationToken cancellationToken)
+    public async Task<Result<ReturnRequestResponse>> Handle(
+        GetReturnRequestDetailQuery request,
+        CancellationToken cancellationToken)
     {
         var p = await _repository.GetByIdAsync(request.Id, cancellationToken);
-        if (p == null) return Result<ReturnRequestResponse>.Failure("Not found");
-
+        if (p == null)
+            return Result<ReturnRequestResponse>.Failure("Not found");
         var response = new ReturnRequestResponse
         {
             Id = p.Id,
@@ -44,21 +43,24 @@ public class GetReturnRequestDetailQueryHandler : IRequestHandler<GetReturnReque
             Note = p.Note,
             ReturnAction = p.ReturnAction,
             RejectionReason = p.RejectionReason,
-            CreatedAt = p.CreatedAt ?? System.DateTimeOffset.UtcNow,
+            CreatedAt = p.CreatedAt ?? DateTimeOffset.UtcNow,
             InspectedAt = p.InspectedAt,
-            Items = p.Items.Select(i => new ReturnRequestItemResponse
-            {
-                Id = i.Id,
-                ProductId = i.ProductId,
-                ProductName = i.ProductName,
-                Sku = i.Sku,
-                ThumbnailUrl = i.ThumbnailUrl,
-                Quantity = i.Quantity,
-                ReturnQuantity = i.ReturnQuantity,
-                UnitPrice = i.UnitPrice
-            }).ToList()
+            Items =
+                p.Items
+                    .Select(
+                        i => new ReturnRequestItemResponse
+                    {
+                        Id = i.Id,
+                        ProductId = i.ProductId,
+                        ProductName = i.ProductName,
+                        Sku = i.Sku,
+                        ThumbnailUrl = i.ThumbnailUrl,
+                        Quantity = i.Quantity,
+                        ReturnQuantity = i.ReturnQuantity,
+                        UnitPrice = i.UnitPrice
+                    })
+                    .ToList()
         };
-
         return Result<ReturnRequestResponse>.Success(response);
     }
 }

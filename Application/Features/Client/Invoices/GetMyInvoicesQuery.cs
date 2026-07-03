@@ -3,8 +3,6 @@ using Application.Interfaces.Repositories.Invoice;
 using MediatR;
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Client.Invoices
 {
@@ -21,16 +19,14 @@ namespace Application.Features.Client.Invoices
             _repository = repository;
         }
 
-        public async Task<List<InvoiceSummaryResponse>> Handle(GetMyInvoicesQuery request, CancellationToken cancellationToken)
+        public async Task<List<InvoiceSummaryResponse>> Handle(
+            GetMyInvoicesQuery request,
+            CancellationToken cancellationToken)
         {
             var invoices = await _repository.GetByUserIdAsync(request.UserId, cancellationToken);
-            return invoices.Select(inv => new InvoiceSummaryResponse(
-                inv.Id,
-                inv.InvoiceNumber,
-                inv.IssueDate,
-                inv.TotalAmount,
-                inv.Type
-            )).ToList();
+            return invoices.Select(
+                inv => new InvoiceSummaryResponse(inv.Id, inv.InvoiceNumber, inv.IssueDate, inv.TotalAmount, inv.Type))
+                .ToList();
         }
     }
 
@@ -43,11 +39,13 @@ namespace Application.Features.Client.Invoices
             _repository = repository;
         }
 
-        public async Task<InvoiceDetailResponse?> Handle(GetInvoiceDetailQuery request, CancellationToken cancellationToken)
+        public async Task<InvoiceDetailResponse?> Handle(
+            GetInvoiceDetailQuery request,
+            CancellationToken cancellationToken)
         {
             var invoice = await _repository.GetByIdAsync(request.Id, cancellationToken);
-            if (invoice == null) return null;
-
+            if (invoice == null)
+                return null;
             return new InvoiceDetailResponse(
                 invoice.Id,
                 invoice.InvoiceNumber,
@@ -57,8 +55,7 @@ namespace Application.Features.Client.Invoices
                 {
                     new InvoiceItemDto(invoice.Type, 1, invoice.TotalAmount, invoice.TotalAmount)
                 },
-                $"https://storage.anhmmotor.vn/invoices/{invoice.InvoiceNumber.ToLower()}.pdf"
-            );
+                $"https://storage.anhmmotor.vn/invoices/{invoice.InvoiceNumber.ToLower()}.pdf");
         }
     }
 }

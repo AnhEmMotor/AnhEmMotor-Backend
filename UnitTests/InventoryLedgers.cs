@@ -60,7 +60,8 @@ namespace UnitTests
                         new()
                         {
                             Count = 5,
-                            PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100, UnitPrice = 100000 }
+                            PurchaseRequestItem =
+                                new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100, UnitPrice = 100000 }
                         }
                     }
             };
@@ -104,7 +105,8 @@ namespace UnitTests
                         new()
                         {
                             Count = 5,
-                            PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100, UnitPrice = 100000 }
+                            PurchaseRequestItem =
+                                new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100, UnitPrice = 100000 }
                         }
                     }
             };
@@ -149,7 +151,14 @@ namespace UnitTests
                         new()
                         {
                             Count = 3,
-                            PurchaseRequestItem = new PurchaseRequestItem { ProductVariantId = 10, Quantity = 100, UnitPrice = 150000, Supplier = new Domain.Entities.Supplier { Name = "Supplier Auto" } }
+                            PurchaseRequestItem =
+                                new PurchaseRequestItem
+                                    {
+                                        ProductVariantId = 10,
+                                        Quantity = 100,
+                                        UnitPrice = 150000,
+                                        Supplier = new Domain.Entities.Supplier { Name = "Supplier Auto" }
+                                    }
                         }
                     }
             };

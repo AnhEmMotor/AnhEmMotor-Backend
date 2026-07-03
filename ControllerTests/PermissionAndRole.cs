@@ -17,7 +17,7 @@ using Application.Features.Permissions.Queries.GetAllRoles;
 using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
-using static Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using FluentAssertions;
 using FluentValidation;
@@ -28,6 +28,7 @@ using Moq;
 using Sieve.Models;
 using System.Security.Claims;
 using WebAPI.Controllers.V1;
+using static Domain.Constants.Permission.Permissions;
 
 namespace ControllerTests;
 
@@ -49,7 +50,7 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_001 - Controller gọi GetAllPermissions thành công")]
     public async Task GetAllPermissions_MediatorReturnsData_ReturnsOkWithData()
     {
-        var expectedData = Result<List<Domain.Constants.Permission.PermissionModuleMetadata>>.Success(new List<Domain.Constants.Permission.PermissionModuleMetadata>());
+        var expectedData = Result<List<PermissionModuleMetadata>>.Success(new List<PermissionModuleMetadata>());
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetAllPermissionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedData);
         var result = await _controller.GetAllPermissionsAsync(CancellationToken.None).ConfigureAwait(true);
@@ -69,7 +70,8 @@ public class PermissionAndRole
             UserName = "testuser",
             Email = "test@test.com",
             Roles = ["Manager"],
-            Permissions = [Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create]
+            Permissions =
+                [Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create, Warehouse.ProductManagement.View, Warehouse.ProductManagement.Create]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMyPermissionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
@@ -100,7 +102,8 @@ public class PermissionAndRole
             UserName = "targetuser",
             Email = "target@test.com",
             Roles = ["Staff"],
-            Permissions = [Warehouse.ProductManagement.View, Warehouse.ProductManagement.View, Admin.FileManagement.View, Admin.FileManagement.Upload, Warehouse.SupplierManagement.View]
+            Permissions =
+                [Warehouse.ProductManagement.View, Warehouse.ProductManagement.View, Admin.FileManagement.View, Admin.FileManagement.Upload, Warehouse.SupplierManagement.View]
         };
         _mediatorMock.Setup(
             m => m.Send(It.Is<GetUserPermissionsByIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
@@ -405,11 +408,7 @@ public class PermissionAndRole
     public async Task UpdateRole_NewPermission_ReturnsOk()
     {
         var roleId = Guid.NewGuid();
-        var request = new UpdateRoleCommand
-        {
-            RoleId = roleId,
-            Permissions = [Domain.Constants.Permission.Permissions.Marketing.NewsManagement.Create]
-        };
+        var request = new UpdateRoleCommand { RoleId = roleId, Permissions = [Marketing.NewsManagement.Create] };
         var expectedResponse = new PermissionRoleUpdateResponse { Message = "Role updated successfully" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PermissionRoleUpdateResponse>.Success(expectedResponse));

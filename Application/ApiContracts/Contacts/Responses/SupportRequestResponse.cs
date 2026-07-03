@@ -18,11 +18,11 @@ public record SupportRequestResponse
 
     public string Status { get; set; } = string.Empty;
 
-public Guid? AssignedUserId { get; set; }
+    public Guid? AssignedUserId { get; set; }
 
-public string? AssignedUserName { get; set; }
+    public string? AssignedUserName { get; set; }
 
-public ContactBasicResponse? Contact { get; set; }
+    public ContactBasicResponse? Contact { get; set; }
 
     public DateTimeOffset? CreatedAt { get; set; }
 }

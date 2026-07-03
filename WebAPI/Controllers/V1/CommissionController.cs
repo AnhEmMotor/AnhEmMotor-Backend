@@ -58,7 +58,9 @@ public class CommissionController(ISender mediator) : ApiController
     /// <param name="command">Lệnh phê duyệt payroll.</param>
     /// <param name="ct">Token hủy bỏ.</param>
     [HttpPost("approve-payroll")]
-    [RequiresAnyPermissions(Permissions.Admin.PayrollManagement.Approve, Permissions.Accountant.PayrollManagement.Approve)]
+    [RequiresAnyPermissions(
+        Permissions.Admin.PayrollManagement.Approve,
+        Permissions.Accountant.PayrollManagement.Approve)]
     public async Task<IActionResult> ApprovePayrollAsync([FromBody] ApprovePayrollCommand command, CancellationToken ct)
     {
         var result = await mediator.Send(command, ct).ConfigureAwait(false);

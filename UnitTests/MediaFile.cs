@@ -14,6 +14,7 @@ using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Domain.Constants;
 using FluentAssertions;
 using Moq;
+using SixLabors.ImageSharp;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace UnitTests;
@@ -319,7 +320,9 @@ public class MediaFile
         var outputBytes = new byte[4];
         await outputStream.ReadExactlyAsync(outputBytes, CancellationToken.None);
         outputBytes.Should().Equal(rawBytes);
-        _fileReadServiceMock.Verify(x => x.ReadImageAsync(It.IsAny<Stream>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Never);
+        _fileReadServiceMock.Verify(
+            x => x.ReadImageAsync(It.IsAny<Stream>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact(DisplayName = "MF_026_Fallback - Xem ảnh lỗi định dạng trả về trực tiếp luồng dữ liệu thô của file")]
@@ -328,8 +331,9 @@ public class MediaFile
         var rawBytes = new byte[] { 5, 6, 7, 8 };
         _fileReadServiceMock.Setup(x => x.GetFileAsync("fake_image.png", It.IsAny<CancellationToken>()))
             .ReturnsAsync((rawBytes, "image/png"));
-        _fileReadServiceMock.Setup(x => x.ReadImageAsync(It.IsAny<Stream>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new SixLabors.ImageSharp.UnknownImageFormatException("Unknown format"));
+        _fileReadServiceMock.Setup(
+            x => x.ReadImageAsync(It.IsAny<Stream>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new UnknownImageFormatException("Unknown format"));
         var handler = new ViewImageQueryHandler(_fileReadServiceMock.Object);
         var query = new ViewImageQuery { StoragePath = "fake_image.png", Width = 300 };
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);

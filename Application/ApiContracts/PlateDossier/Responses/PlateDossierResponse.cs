@@ -31,6 +31,7 @@ namespace Application.ApiContracts.PlateDossier.Responses
         public DateTimeOffset? CreatedAt { get; set; }
 
         public DateTimeOffset? CompletedDate { get; set; }
+
         public string? VehicleName { get; set; }
     }
 }

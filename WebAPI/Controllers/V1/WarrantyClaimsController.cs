@@ -1,15 +1,13 @@
 using Application.Features.WarrantyClaims.Commands.CreateWarrantyClaim;
 using Application.Features.WarrantyClaims.Commands.UpdateWarrantyClaimStatus;
-using Application.Features.WarrantyClaims.Queries.GetWarrantyClaimsList;
 using Application.Features.WarrantyClaims.Queries.GetWarrantyClaimDetail;
+using Application.Features.WarrantyClaims.Queries.GetWarrantyClaimsList;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Threading;
-using System.Threading.Tasks;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1
@@ -43,7 +41,9 @@ namespace WebAPI.Controllers.V1
             [FromQuery] SieveModel sieveModel,
             CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new GetWarrantyClaimsListQuery { SieveModel = sieveModel }, cancellationToken)
+            var result = await sender.Send(
+                new GetWarrantyClaimsListQuery { SieveModel = sieveModel },
+                cancellationToken)
                 .ConfigureAwait(false);
             return HandleResult(result);
         }
@@ -52,9 +52,7 @@ namespace WebAPI.Controllers.V1
         /// Lấy chi tiết hồ sơ bảo hành theo ID.
         /// </summary>
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetDetailAsync(
-            [FromRoute] int id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> GetDetailAsync([FromRoute] int id, CancellationToken cancellationToken)
         {
             var result = await sender.Send(new GetWarrantyClaimDetailQuery { Id = id }, cancellationToken)
                 .ConfigureAwait(false);

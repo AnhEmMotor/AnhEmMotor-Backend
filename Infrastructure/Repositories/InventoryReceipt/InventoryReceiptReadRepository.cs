@@ -157,8 +157,12 @@ namespace Infrastructure.Repositories.InventoryReceipt
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return GetQueryable(mode)
-                .Where(x => x.InventoryReceiptInfos
-                    .Any(ii => ii.DeletedAt == null && ii.PurchaseRequestItem != null && ii.PurchaseRequestItem.SupplierId == supplierId))
+                .Where(
+                    x => x.InventoryReceiptInfos
+                        .Any(
+                            ii => ii.DeletedAt == null &&
+                                    ii.PurchaseRequestItem != null &&
+                                    ii.PurchaseRequestItem.SupplierId == supplierId))
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -169,8 +173,13 @@ namespace Infrastructure.Repositories.InventoryReceipt
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return GetQueryable(mode)
-                .Where(x => x.InventoryReceiptInfos
-                    .Any(ii => ii.DeletedAt == null && ii.PurchaseRequestItem != null && ii.PurchaseRequestItem.SupplierId.HasValue && supplierIds.Contains(ii.PurchaseRequestItem.SupplierId.Value)))
+                .Where(
+                    x => x.InventoryReceiptInfos
+                        .Any(
+                            ii => ii.DeletedAt == null &&
+                                    ii.PurchaseRequestItem != null &&
+                                    ii.PurchaseRequestItem.SupplierId.HasValue &&
+                                    supplierIds.Contains(ii.PurchaseRequestItem.SupplierId.Value)))
                 .AsNoTracking()
                 .ToListAsync(cancellationToken)
                 .ContinueWith<IEnumerable<InventoryReceiptEntity>>(t => t.Result, cancellationToken);
@@ -181,15 +190,16 @@ namespace Infrastructure.Repositories.InventoryReceipt
             return context.InventoryReceiptInfos
                 .AsNoTracking()
                 .Where(x => x.Id == id && x.DeletedAt == null)
-                .Select(x => new InventoryReceiptInfoEntity
-                {
-                    Id = x.Id,
-                    InventoryReceiptId = x.InventoryReceiptId,
-                    Count = x.Count,
-                    RemainingCount = x.RemainingCount,
-                    ParentOutputInfoId = x.ParentOutputInfoId,
-                    PurchaseRequestItemId = x.PurchaseRequestItemId
-                })
+                .Select(
+                    x => new InventoryReceiptInfoEntity
+                    {
+                        Id = x.Id,
+                        InventoryReceiptId = x.InventoryReceiptId,
+                        Count = x.Count,
+                        RemainingCount = x.RemainingCount,
+                        ParentOutputInfoId = x.ParentOutputInfoId,
+                        PurchaseRequestItemId = x.PurchaseRequestItemId
+                    })
                 .FirstOrDefaultAsync(cancellationToken);
         }
 

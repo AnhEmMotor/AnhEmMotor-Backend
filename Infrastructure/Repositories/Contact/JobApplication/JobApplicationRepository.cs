@@ -11,8 +11,8 @@ public class JobApplicationRepository(ApplicationDBContext context) : IJobApplic
     {
         return context.JobApplications
             .Include(j => j.Contact)
-                .ThenInclude(c => c.Replies)
-                    .ThenInclude(r => r.RepliedBy)
+            .ThenInclude(c => c.Replies)
+            .ThenInclude(r => r.RepliedBy)
             .FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
     }
 
@@ -20,8 +20,8 @@ public class JobApplicationRepository(ApplicationDBContext context) : IJobApplic
     {
         return context.JobApplications
             .Include(j => j.Contact)
-                .ThenInclude(c => c.Replies)
-                    .ThenInclude(r => r.RepliedBy)
+            .ThenInclude(c => c.Replies)
+            .ThenInclude(r => r.RepliedBy)
             .OrderByDescending(j => j.CreatedAt)
             .ToListAsync(cancellationToken);
     }

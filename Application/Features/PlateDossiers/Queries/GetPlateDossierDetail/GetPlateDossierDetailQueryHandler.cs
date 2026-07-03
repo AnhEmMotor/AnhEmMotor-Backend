@@ -3,13 +3,10 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.PlateDossier;
 using Mapster;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.PlateDossiers.Queries.GetPlateDossierDetail
 {
-    public class GetPlateDossierDetailQueryHandler(IPlateDossierReadRepository repository)
-        : IRequestHandler<GetPlateDossierDetailQuery, Result<PlateDossierResponse>>
+    public class GetPlateDossierDetailQueryHandler(IPlateDossierReadRepository repository) : IRequestHandler<GetPlateDossierDetailQuery, Result<PlateDossierResponse>>
     {
         public async Task<Result<PlateDossierResponse>> Handle(
             GetPlateDossierDetailQuery request,
@@ -20,7 +17,6 @@ namespace Application.Features.PlateDossiers.Queries.GetPlateDossierDetail
             {
                 return Result<PlateDossierResponse>.Failure("Không tìm thấy hồ sơ biển số.");
             }
-
             var response = dossier.Adapt<PlateDossierResponse>();
             return Result<PlateDossierResponse>.Success(response);
         }

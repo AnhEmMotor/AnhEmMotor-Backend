@@ -6,11 +6,11 @@ namespace Application.ApiContracts.Statistical.Responses
     {
         public decimal TotalRevenue { get; set; }
 
-        public decimal TotalExpense { get; set; } // Tổng chi phí
+        public decimal TotalExpense { get; set; }
 
-        public decimal GrossProfit { get; set; } // Lợi nhuận gộp (Revenue - COGS)
+        public decimal GrossProfit { get; set; }
 
-        public decimal NetProfit { get; set; } // Lợi nhuận ròng
+        public decimal NetProfit { get; set; }
 
         public decimal RevenueVsYesterdayPercentage { get; set; }
 

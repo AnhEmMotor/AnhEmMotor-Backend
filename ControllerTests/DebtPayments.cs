@@ -2,15 +2,15 @@ using Application.ApiContracts.DebtPayment.Responses;
 using Application.Common.Models;
 using Application.Features.DebtPayments.Queries.GetReceiptsWithDebtBySupplierId;
 using Application.Features.DebtPayments.Queries.GetSuppliersWithDebt;
+using Domain.Primitives;
 using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
-using WebAPI.Controllers.V1;
 
-using Domain.Primitives;
+using WebAPI.Controllers.V1;
 
 namespace ControllerTests
 {
@@ -84,6 +84,5 @@ namespace ControllerTests
                 .ConfigureAwait(true);
             result.Should().BeOfType<NotFoundObjectResult>();
         }
-
     }
 }

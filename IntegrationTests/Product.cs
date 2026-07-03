@@ -382,7 +382,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [Permissions.Warehouse.ProductManagement.View, Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.View],
+            [Permissions.Warehouse.ProductManagement.View, Permissions.Warehouse.ReceiptManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -490,7 +490,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Edit],
+            [Permissions.Warehouse.ReceiptManagement.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -1134,7 +1134,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         dbP1!.StatusId.Should().Be(productStatusId);
     }
 
-    [Fact(DisplayName = "PRODUCT_101 - Lấy danh sách PredefinedOptions thành công khi có quyền Permissions.Warehouse.ProductManagement.Create")]
+    [Fact(
+        DisplayName = "PRODUCT_101 - Lấy danh sách PredefinedOptions thành công khi có quyền Permissions.Warehouse.ProductManagement.Create")]
     public async Task GetPredefinedOptions_WithCreatePermission_ReturnsOkWithDictionary()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1683,7 +1684,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [Domain.Constants.Permission.Permissions.Warehouse.ReceiptManagement.Edit],
+            [Permissions.Warehouse.ReceiptManagement.Edit],
             CancellationToken.None,
             $"{username}@x.com")
             .ConfigureAwait(true);

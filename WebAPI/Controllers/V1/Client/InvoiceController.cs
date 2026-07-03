@@ -15,16 +15,14 @@ public class InvoiceController(IMediator mediator) : ApiController
     [HttpGet]
     public async Task<IActionResult> GetMyInvoices(CancellationToken cancellationToken)
     {
-        var userIdStr = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-            ?? User.FindFirst("sub")?.Value
-            ?? User.Identity?.Name
-            ?? string.Empty;
-
+        var userIdStr = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
+            User.FindFirst("sub")?.Value ??
+            User.Identity?.Name ??
+            string.Empty;
         if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
         {
             return BadRequest(new { message = "Invalid user identifier" });
         }
-
         var result = await mediator.Send(new GetMyInvoicesQuery(userId), cancellationToken);
         return Ok(result);
     }

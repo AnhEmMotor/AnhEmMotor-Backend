@@ -1,18 +1,16 @@
-﻿using PurchaseInvoiceEntity = Domain.Entities.PurchaseInvoice;
-using Domain.Constants;
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PurchaseInvoice;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using System.Linq;
+using PurchaseInvoiceEntity = Domain.Entities.PurchaseInvoice;
 
 namespace Infrastructure.Repositories.PurchaseInvoice
 {
-    public class PurchaseInvoiceReadRepository(
-        ApplicationDBContext context,
-        ISievePaginator paginator) : IPurchaseInvoiceReadRepository
+    public class PurchaseInvoiceReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IPurchaseInvoiceReadRepository
     {
         public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
             SieveModel sieveModel,
@@ -24,12 +22,10 @@ namespace Infrastructure.Repositories.PurchaseInvoice
                 .Include(x => x.PurchaseInvoiceItems)
                 .Include(x => x.Supplier)
                 .AsSplitQuery();
-
             if (mode == DataFetchMode.ActiveOnly)
                 query = query.Where(x => x.DeletedAt == null);
             else if (mode == DataFetchMode.DeletedOnly)
                 query = query.Where(x => x.DeletedAt != null);
-
             return paginator.ApplyAsync<PurchaseInvoiceEntity, TResponse>(query, sieveModel, mode, cancellationToken);
         }
 
@@ -56,12 +52,10 @@ namespace Infrastructure.Repositories.PurchaseInvoice
                 .Include(x => x.PurchaseInvoiceItems)
                 .Include(x => x.Supplier)
                 .AsSplitQuery();
-
             if (mode == DataFetchMode.ActiveOnly)
                 query = query.Where(x => x.DeletedAt == null);
             else if (mode == DataFetchMode.DeletedOnly)
                 query = query.Where(x => x.DeletedAt != null);
-
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
     }

@@ -134,7 +134,10 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách các trạng thái của yêu cầu mua hàng.
         /// </summary>
         [HttpGet("status")]
-        [RequiresAnyPermissions(Permissions.Warehouse.PurchaseRequestManagement.View, Permissions.Warehouse.PurchaseRequestManagement.Create, Permissions.Warehouse.PurchaseRequestManagement.Edit)]
+        [RequiresAnyPermissions(
+            Permissions.Warehouse.PurchaseRequestManagement.View,
+            Permissions.Warehouse.PurchaseRequestManagement.Create,
+            Permissions.Warehouse.PurchaseRequestManagement.Edit)]
         [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPurchaseRequestStatusesAsync(CancellationToken cancellationToken)
         {
@@ -164,7 +167,9 @@ namespace WebAPI.Controllers.V1
         /// Lấy danh sách yêu cầu mua hàng đã duyệt (dành cho người có quyền Tạo/Sửa phiếu nhập).
         /// </summary>
         [HttpGet("approved")]
-        [RequiresAnyPermissions(Permissions.Warehouse.ReceiptManagement.Create, Permissions.Warehouse.ReceiptManagement.Edit)]
+        [RequiresAnyPermissions(
+            Permissions.Warehouse.ReceiptManagement.Create,
+            Permissions.Warehouse.ReceiptManagement.Edit)]
         [ProducesResponseType(typeof(PagedResult<PurchaseRequestListResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetApprovedAsync(
             [FromQuery] SieveModel sieveModel,
@@ -181,7 +186,9 @@ namespace WebAPI.Controllers.V1
         /// Lấy chi tiết yêu cầu mua hàng đã duyệt theo ID.
         /// </summary>
         [HttpGet("approved/{id:int}")]
-        [RequiresAnyPermissions(Permissions.Warehouse.ReceiptManagement.Create, Permissions.Warehouse.ReceiptManagement.Edit)]
+        [RequiresAnyPermissions(
+            Permissions.Warehouse.ReceiptManagement.Create,
+            Permissions.Warehouse.ReceiptManagement.Edit)]
         [ProducesResponseType(typeof(ApprovedPurchaseRequestDetailResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

@@ -148,14 +148,16 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
             .ToListAsync(cancellationToken);
     }
 
-    public Task<Domain.Entities.Vehicle?> GetByLicensePlateAsync(string licensePlate, CancellationToken cancellationToken = default)
+    public Task<Domain.Entities.Vehicle?> GetByLicensePlateAsync(
+        string licensePlate,
+        CancellationToken cancellationToken = default)
     {
         return context.Vehicles
             .Include(v => v.User)
             .Include(v => v.ProductVariantColor)
             .Include(v => v.ProductVariant)
-                .ThenInclude(pv => pv!.Product)
-                    .ThenInclude(p => p!.Brand)
+            .ThenInclude(pv => pv!.Product)
+            .ThenInclude(p => p!.Brand)
             .FirstOrDefaultAsync(v => string.Compare(v.LicensePlate, licensePlate) == 0, cancellationToken);
     }
 }

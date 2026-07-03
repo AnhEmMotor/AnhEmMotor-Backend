@@ -16,8 +16,10 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturns
                 .ConfigureAwait(false);
             var filtered = request.Status switch
             {
-                ReturnOrderStatus.Pending => [.. returns.Where(x => x.InspectedAt == null && string.IsNullOrWhiteSpace(x.ReturnAction))],
-                ReturnOrderStatus.Inspecting => [.. returns.Where(x => x.InspectedAt != null && string.IsNullOrWhiteSpace(x.ReturnAction))],
+                ReturnOrderStatus.Pending => [.. returns.Where(
+                    x => x.InspectedAt == null && string.IsNullOrWhiteSpace(x.ReturnAction))],
+                ReturnOrderStatus.Inspecting => [.. returns.Where(
+                    x => x.InspectedAt != null && string.IsNullOrWhiteSpace(x.ReturnAction))],
                 ReturnOrderStatus.Completed => [.. returns.Where(x => !string.IsNullOrWhiteSpace(x.ReturnAction))],
                 _ => returns
             };

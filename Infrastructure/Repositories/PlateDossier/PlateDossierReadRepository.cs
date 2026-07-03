@@ -57,9 +57,8 @@ namespace Infrastructure.Repositories.PlateDossier
                 .Include(p => p.Output)
                 .ThenInclude(o => o!.OutputInfos)
                 .ThenInclude(oi => oi.ProductVariant)
-            .ThenInclude(pv => pv!.Product);
+                .ThenInclude(pv => pv!.Product);
         }
     }
 }
-
 

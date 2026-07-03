@@ -39,7 +39,15 @@ public class OptionController(ISender sender) : ApiController
     /// Lấy danh sách toàn bộ các thuộc tính (Options) và các giá trị của chúng (Dành cho Quản trị viên).
     /// </summary>
     [HttpGet("all")]
-    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.View, Permissions.Order.ProductManagement.View, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create, Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Delete, Permissions.Order.ProductManagement.Delete)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ProductManagement.View,
+        Permissions.Order.ProductManagement.View,
+        Permissions.Warehouse.ProductManagement.Create,
+        Permissions.Order.ProductManagement.Create,
+        Permissions.Warehouse.ProductManagement.Edit,
+        Permissions.Order.ProductManagement.Edit,
+        Permissions.Warehouse.ProductManagement.Delete,
+        Permissions.Order.ProductManagement.Delete)]
     [ProducesResponseType(typeof(List<OptionResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllOptionsAsync(CancellationToken cancellationToken)
     {
@@ -52,7 +60,15 @@ public class OptionController(ISender sender) : ApiController
     /// Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value.
     /// </summary>
     [HttpGet("predefined")]
-    [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.View, Permissions.Order.ProductManagement.View, Permissions.Warehouse.ProductManagement.Create, Permissions.Order.ProductManagement.Create, Permissions.Warehouse.ProductManagement.Edit, Permissions.Order.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Delete, Permissions.Order.ProductManagement.Delete)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ProductManagement.View,
+        Permissions.Order.ProductManagement.View,
+        Permissions.Warehouse.ProductManagement.Create,
+        Permissions.Order.ProductManagement.Create,
+        Permissions.Warehouse.ProductManagement.Edit,
+        Permissions.Order.ProductManagement.Edit,
+        Permissions.Warehouse.ProductManagement.Delete,
+        Permissions.Order.ProductManagement.Delete)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetPredefinedOptionsAsync(CancellationToken cancellationToken)

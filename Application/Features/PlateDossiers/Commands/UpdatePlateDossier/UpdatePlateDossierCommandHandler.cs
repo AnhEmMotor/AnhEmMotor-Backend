@@ -3,8 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.PlateDossier;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.PlateDossiers.Commands.UpdatePlateDossier
 {
@@ -21,7 +19,6 @@ namespace Application.Features.PlateDossiers.Commands.UpdatePlateDossier
             {
                 return Result<bool>.Failure("Không tìm thấy hồ sơ biển số.");
             }
-
             dossier.CustomerName = request.CustomerName;
             dossier.CustomerPhone = request.CustomerPhone;
             dossier.LicensePlate = request.LicensePlate;
@@ -31,19 +28,15 @@ namespace Application.Features.PlateDossiers.Commands.UpdatePlateDossier
             dossier.ActualCost = request.ActualCost;
             dossier.ServiceFee = request.ServiceFee;
             dossier.Notes = request.Notes;
-
             if (request.Status == "Hoàn thành")
             {
                 dossier.CompletedDate = request.CompletedDate ?? DateTimeOffset.UtcNow;
-            }
-            else
+            } else
             {
                 dossier.CompletedDate = null;
             }
-
             plateDossierUpdateRepository.Update(dossier);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return Result<bool>.Success(true);
         }
     }

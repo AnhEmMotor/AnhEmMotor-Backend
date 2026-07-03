@@ -1,6 +1,5 @@
-using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Services;
+using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Enums;
 using MediatR;
 using System;
@@ -17,7 +16,6 @@ public class RejectReturnCommandHandler(
         var order = await readRepo.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (order == null || order.Status != ParcelDeliveryStatus.Returned)
             return false;
-
         order.RejectionReason = request.RejectionReason;
         order.ReturnAction = "rejected";
         order.InspectedAt = DateTime.UtcNow;

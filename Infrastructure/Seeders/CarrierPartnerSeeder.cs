@@ -26,7 +26,8 @@ public static class CarrierPartnerSeeder
                 MaxParcelWeightKg = 25,
                 AllowLiquidCargo = true,
                 AllowOversizeCargo = false,
-                PricingRulesJson = @"[
+                PricingRulesJson =
+                    @"[
   {""routeType"": ""IntraProvince"", ""weightTier"": ""0-2kg"", ""price"": 22000},
   {""routeType"": ""IntraProvince"", ""weightTier"": ""2-5kg"", ""price"": 35000},
   {""routeType"": ""IntraProvince"", ""weightTier"": "">5kg"", ""price"": 50000},
@@ -37,7 +38,8 @@ public static class CarrierPartnerSeeder
   {""routeType"": ""InterRegion"", ""weightTier"": ""2-5kg"", ""price"": 65000},
   {""routeType"": ""InterRegion"", ""weightTier"": "">5kg"", ""price"": 95000}
 ]",
-                SlaJson = @"[
+                SlaJson =
+                    @"[
   {""routeType"": ""IntraProvince"", ""expectedDays"": ""1-2 ngày""},
   {""routeType"": ""IntraRegion"", ""expectedDays"": ""2-3 ngày""},
   {""routeType"": ""InterRegion"", ""expectedDays"": ""3-5 ngày""}
@@ -57,7 +59,8 @@ public static class CarrierPartnerSeeder
                 MaxParcelWeightKg = 30,
                 AllowLiquidCargo = false,
                 AllowOversizeCargo = true,
-                PricingRulesJson = @"[
+                PricingRulesJson =
+                    @"[
   {""routeType"": ""IntraProvince"", ""weightTier"": ""0-2kg"", ""price"": 24000},
   {""routeType"": ""IntraProvince"", ""weightTier"": ""2-5kg"", ""price"": 38000},
   {""routeType"": ""IntraProvince"", ""weightTier"": "">5kg"", ""price"": 55000},
@@ -68,7 +71,8 @@ public static class CarrierPartnerSeeder
   {""routeType"": ""InterRegion"", ""weightTier"": ""2-5kg"", ""price"": 68000},
   {""routeType"": ""InterRegion"", ""weightTier"": "">5kg"", ""price"": 99000}
 ]",
-                SlaJson = @"[
+                SlaJson =
+                    @"[
   {""routeType"": ""IntraProvince"", ""expectedDays"": ""1-2 ngày""},
   {""routeType"": ""IntraRegion"", ""expectedDays"": ""2-3 ngày""},
   {""routeType"": ""InterRegion"", ""expectedDays"": ""3-4 ngày""}
@@ -88,7 +92,8 @@ public static class CarrierPartnerSeeder
                 MaxParcelWeightKg = 50,
                 AllowLiquidCargo = false,
                 AllowOversizeCargo = true,
-                PricingRulesJson = @"[
+                PricingRulesJson =
+                    @"[
   {""routeType"": ""IntraProvince"", ""weightTier"": ""0-2kg"", ""price"": 20000},
   {""routeType"": ""IntraProvince"", ""weightTier"": ""2-5kg"", ""price"": 32000},
   {""routeType"": ""IntraProvince"", ""weightTier"": "">5kg"", ""price"": 45000},
@@ -99,7 +104,8 @@ public static class CarrierPartnerSeeder
   {""routeType"": ""InterRegion"", ""weightTier"": ""2-5kg"", ""price"": 60000},
   {""routeType"": ""InterRegion"", ""weightTier"": "">5kg"", ""price"": 90000}
 ]",
-                SlaJson = @"[
+                SlaJson =
+                    @"[
   {""routeType"": ""IntraProvince"", ""expectedDays"": ""1-3 ngày""},
   {""routeType"": ""IntraRegion"", ""expectedDays"": ""2-4 ngày""},
   {""routeType"": ""InterRegion"", ""expectedDays"": ""3-6 ngày""}
@@ -119,7 +125,8 @@ public static class CarrierPartnerSeeder
                 MaxParcelWeightKg = 20,
                 AllowLiquidCargo = true,
                 AllowOversizeCargo = false,
-                PricingRulesJson = @"[
+                PricingRulesJson =
+                    @"[
   {""routeType"": ""IntraProvince"", ""weightTier"": ""0-2kg"", ""price"": 15000},
   {""routeType"": ""IntraProvince"", ""weightTier"": ""2-5kg"", ""price"": 25000},
   {""routeType"": ""IntraProvince"", ""weightTier"": "">5kg"", ""price"": 35000},
@@ -130,7 +137,8 @@ public static class CarrierPartnerSeeder
   {""routeType"": ""InterRegion"", ""weightTier"": ""2-5kg"", ""price"": 70000},
   {""routeType"": ""InterRegion"", ""weightTier"": "">5kg"", ""price"": 100000}
 ]",
-                SlaJson = @"[
+                SlaJson =
+                    @"[
   {""routeType"": ""IntraProvince"", ""expectedDays"": ""Trong ngày""},
   {""routeType"": ""IntraRegion"", ""expectedDays"": ""1 ngày""},
   {""routeType"": ""InterRegion"", ""expectedDays"": ""2 ngày""}
@@ -145,8 +153,7 @@ public static class CarrierPartnerSeeder
             if (existing == null)
             {
                 await context.CarrierPartners.AddAsync(carrier, cancellationToken).ConfigureAwait(false);
-            }
-            else
+            } else
             {
                 if (string.IsNullOrEmpty(existing.PricingRulesJson))
                     existing.PricingRulesJson = carrier.PricingRulesJson;

@@ -48,7 +48,10 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách loại đối tác.</returns>
     [HttpGet("partner-types")]
-    [RequiresAnyPermissions(Permissions.Warehouse.SupplierManagement.View, Permissions.Warehouse.SupplierManagement.Create, Permissions.Warehouse.SupplierManagement.Edit)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.SupplierManagement.View,
+        Permissions.Warehouse.SupplierManagement.Create,
+        Permissions.Warehouse.SupplierManagement.Edit)]
     [ProducesResponseType(typeof(List<PartnerTypeResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPartnerTypesAsync(CancellationToken cancellationToken)
     {
@@ -155,7 +158,9 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp cho việc nhập hàng.</returns>
     [HttpGet("for-InventoryReceipt")]
-    [RequiresAnyPermissions(Permissions.Warehouse.ReceiptManagement.Create, Permissions.Warehouse.ReceiptManagement.Edit)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.ReceiptManagement.Create,
+        Permissions.Warehouse.ReceiptManagement.Edit)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersForInventoryReceiptAsync(
         [FromQuery] SieveModel sieveModel,
@@ -305,7 +310,10 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thống kê số lượng nhà cung cấp.</returns>
     [HttpGet("statistics")]
-    [RequiresAnyPermissions(Permissions.Warehouse.SupplierManagement.View, Permissions.Warehouse.ReceiptManagement.Edit, Permissions.Warehouse.ReceiptManagement.Create)]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.SupplierManagement.View,
+        Permissions.Warehouse.ReceiptManagement.Edit,
+        Permissions.Warehouse.ReceiptManagement.Create)]
     [ProducesResponseType(typeof(SupplierStatisticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSupplierStatisticsAsync(CancellationToken cancellationToken)
     {

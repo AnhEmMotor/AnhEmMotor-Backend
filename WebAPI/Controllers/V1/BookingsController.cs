@@ -1,7 +1,7 @@
 using Application.Features.Bookings.Commands.ConfirmBooking;
 using Application.Features.Bookings.Commands.CreateBooking;
-using Application.Features.Bookings.Commands.UpdateBooking;
 using Application.Features.Bookings.Commands.DeleteBooking;
+using Application.Features.Bookings.Commands.UpdateBooking;
 using Application.Features.Bookings.Queries.GetBookings;
 using Asp.Versioning;
 using MediatR;
@@ -71,7 +71,10 @@ public class BookingsController(ISender sender) : ApiController
     /// <returns></returns>
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateBookingCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateAsync(
+        int id,
+        [FromBody] UpdateBookingCommand command,
+        CancellationToken cancellationToken)
     {
         if (id != command.Id)
         {
