@@ -19,15 +19,17 @@ public class GetServicesListQueryHandler(IServiceReadRepository serviceRepositor
         var query = serviceRepository.GetQueryable();
         var filteredQuery = sieveProcessor.Apply(request.SieveModel, query);
         var totalCount = filteredQuery.Count();
+        var page = request.SieveModel.Page ?? 1;
+        var pageSize = request.SieveModel.PageSize ?? 10;
         var services = filteredQuery
-            .Skip((request.SieveModel.Page!.Value - 1) * request.SieveModel.PageSize!.Value)
-            .Take(request.SieveModel.PageSize.Value)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ProjectToType<ServiceResponse>()
             .ToList();
         return new PagedResult<ServiceResponse>(
             services,
             totalCount,
-            request.SieveModel.Page.Value,
-            request.SieveModel.PageSize.Value);
+            page,
+            pageSize);
     }
 }

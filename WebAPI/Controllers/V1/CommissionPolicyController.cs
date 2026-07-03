@@ -3,6 +3,7 @@ using Application.Features.HR.Commands.DeleteCommissionPolicy;
 using Application.Features.HR.Commands.UpdateCommissionPolicy;
 using Application.Features.HR.Queries.GetCommissionPolicies;
 using Application.Features.HR.Queries.GetCommissionPolicyAuditLogs;
+using Application.Features.HR.Queries.GetCommissionPolicyById;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +30,19 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     public async Task<IActionResult> GetPoliciesAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetCommissionPoliciesQuery(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy chi tiết một chính sách hoa hồng.
+    /// </summary>
+    /// <param name="id">ID của chính sách.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu chính sách hoa hồng.</returns>
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetPolicyByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetCommissionPolicyByIdQuery(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
