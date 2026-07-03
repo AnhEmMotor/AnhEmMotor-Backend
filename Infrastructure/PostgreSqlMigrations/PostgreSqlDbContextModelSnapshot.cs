@@ -2078,7 +2078,8 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("text");
 
                     b.Property<decimal?>("RefundAmount")
-                        .HasColumnType("numeric");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<string>("RejectionReason")
                         .HasColumnType("text");
@@ -2096,7 +2097,8 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("text");
 
                     b.Property<decimal?>("ReturnShippingCost")
-                        .HasColumnType("numeric");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<decimal>("ShippingCost")
                         .HasPrecision(18, 2)
