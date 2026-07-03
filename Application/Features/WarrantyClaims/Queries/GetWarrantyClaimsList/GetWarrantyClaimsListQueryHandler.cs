@@ -24,7 +24,8 @@ namespace Application.Features.WarrantyClaims.Queries.GetWarrantyClaimsList
             {
                 filter = w => (w.ClaimNumber.Contains(search)) ||
                     (w.Vehicle != null && w.Vehicle.LicensePlate.Contains(search)) ||
-                    (w.Vehicle != null && w.Vehicle.User != null && w.Vehicle.User.FullName.Contains(search));
+                    (w.Vehicle != null && w.Vehicle.User != null && w.Vehicle.User.FullName.Contains(search)) ||
+                    (w.Vehicle != null && w.Vehicle.Lead != null && w.Vehicle.Lead.FullName.Contains(search));
                 sieveModel.Filters = RemoveFilter(sieveModel.Filters, "search");
             }
             if (string.IsNullOrWhiteSpace(sieveModel.Sorts))
