@@ -117,7 +117,7 @@ public class Supplier
         var validator = new CreateSupplierCommandValidator();
         var command = new CreateSupplierCommand { Name = "Supplier D", Address = "123 Street" };
         var result = validator.TestValidate(command);
-        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Phone") || e.ErrorMessage.Contains("Email"));
+        result.Errors.Should().Contain(e => e.PropertyName == "Phone" || e.PropertyName == "Email");
     }
 
     [Fact(DisplayName = "SUP_006 - Tạo Supplier thất bại khi thiếu Address")]
@@ -478,7 +478,7 @@ public class Supplier
         var validator = new UpdateSupplierCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(x => x.ErrorMessage.Contains("At least one field must be provided"));
+        result.Errors.Should().Contain(e => e.PropertyName == "Name" || e.PropertyName == "Phone");
     }
 
     [Fact(DisplayName = "SUP_018 - Cập nhật Supplier thất bại khi Name trùng với Supplier khác")]

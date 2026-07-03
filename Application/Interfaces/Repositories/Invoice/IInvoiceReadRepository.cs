@@ -1,11 +1,17 @@
+using Application.ApiContracts.Admin.Invoices;
+using Domain.Primitives;
 using InvoiceEntity = Domain.Entities.Invoice;
+using Sieve.Models;
 
-namespace Application.Interfaces.Repositories.Invoice
+namespace Application.Interfaces.Repositories.Invoice;
+
+public interface IInvoiceReadRepository
 {
-    public interface IInvoiceReadRepository
-    {
-        public Task<List<InvoiceEntity>> GetByUserIdAsync(string userId, CancellationToken cancellationToken);
+  Task<PagedResult<AdminInvoiceSummaryResponse>> GetPagedAsync(
+      SieveModel sieveModel,
+      CancellationToken cancellationToken = default);
 
-        public Task<InvoiceEntity?> GetByIdAsync(int id, CancellationToken cancellationToken);
-    }
+  Task<InvoiceEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+
+  Task<List<InvoiceEntity>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
 }

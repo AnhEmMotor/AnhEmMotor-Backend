@@ -6,7 +6,7 @@ using Application.Features.Banners.Queries.GetBannersList;
 using Application.Features.Banners.Queries.GetStoreBanners;
 using Asp.Versioning;
 using Domain.Constants;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
@@ -31,7 +31,7 @@ public class BannerController(ISender sender) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
     [HttpPost]
-    [HasPermission(Banners.Create)]
+    [HasPermission(Permissions.Marketing.BannerManagement.Create)]
     [SwaggerOperation(Summary = "Thêm banner mới")]
     public async Task<IActionResult> CreateAsync(
         [FromBody] CreateBannerCommand command,
@@ -49,7 +49,7 @@ public class BannerController(ISender sender) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPut("{id}")]
-    [HasPermission(Banners.Edit)]
+    [HasPermission(Permissions.Marketing.BannerManagement.Edit)]
     [SwaggerOperation(Summary = "Cập nhật banner")]
     public async Task<IActionResult> UpdateAsync(
         int id,
@@ -68,7 +68,7 @@ public class BannerController(ISender sender) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả xóa</returns>
     [HttpDelete("{id}")]
-    [HasPermission(Banners.Delete)]
+    [HasPermission(Permissions.Marketing.BannerManagement.Delete)]
     [SwaggerOperation(Summary = "Xóa banner")]
     public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
@@ -110,7 +110,7 @@ public class BannerController(ISender sender) : ApiController
     /// <param name="query">Lọc danh sách</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet]
-    [HasPermission(Banners.View)]
+    [HasPermission(Permissions.Marketing.BannerManagement.View)]
     [SwaggerOperation(Summary = "Lấy toàn bộ danh sách banner")]
     public async Task<IActionResult> GetListAsync(
         [FromQuery] GetBannersListQuery query,
@@ -127,7 +127,7 @@ public class BannerController(ISender sender) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Danh sách lịch sử</returns>
     [HttpGet("{id}/audit")]
-    [HasPermission(Banners.View)]
+    [HasPermission(Permissions.Marketing.BannerManagement.View)]
     [SwaggerOperation(Summary = "Lấy lịch sử thay đổi của banner")]
     public async Task<IActionResult> GetAuditLogsAsync(int id, CancellationToken cancellationToken)
     {

@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Features.Permissions.Queries.GetAllPermissions;
 
-public record GetAllPermissionsQuery : IRequest<Result<Dictionary<string, List<PermissionResponse>>>>;
+public record GetAllPermissionsQuery : IRequest<Result<List<Domain.Constants.Permission.PermissionModuleMetadata>>>;

@@ -16,9 +16,9 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturns
                 .ConfigureAwait(false);
             var filtered = request.Status switch
             {
-                ReturnOrderStatus.Pending => [.. returns.Where(x => x.InspectedAt == null && x.ReturnAction == null)],
-                ReturnOrderStatus.Inspecting => [.. returns.Where(x => x.InspectedAt != null && x.ReturnAction == null)],
-                ReturnOrderStatus.Completed => [.. returns.Where(x => x.ReturnAction != null)],
+                ReturnOrderStatus.Pending => [.. returns.Where(x => x.InspectedAt == null && string.IsNullOrWhiteSpace(x.ReturnAction))],
+                ReturnOrderStatus.Inspecting => [.. returns.Where(x => x.InspectedAt != null && string.IsNullOrWhiteSpace(x.ReturnAction))],
+                ReturnOrderStatus.Completed => [.. returns.Where(x => !string.IsNullOrWhiteSpace(x.ReturnAction))],
                 _ => returns
             };
             return[.. filtered
@@ -38,7 +38,7 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturns
 
         private static ReturnOrderStatus GetReturnStatus(ParcelDeliveryOrder order)
         {
-            if (order.ReturnAction != null)
+            if (!string.IsNullOrWhiteSpace(order.ReturnAction))
                 return ReturnOrderStatus.Completed;
             if (order.InspectedAt != null)
                 return ReturnOrderStatus.Inspecting;

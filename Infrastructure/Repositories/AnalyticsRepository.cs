@@ -26,6 +26,8 @@ namespace Infrastructure.Repositories
                 .Where(e => e.ExpenseDate >= start && e.ExpenseDate <= end)
                 .SumAsync(e => e.Amount);
             var cogs = totalRevenue * 0.7m;
+            var grossProfit = totalRevenue - cogs;
+            var netProfit = grossProfit - totalExpenses;
             var pendingAmount = await _context.OutputOrders
                 .Where(o => o.StatusId == "Pending" || o.StatusId == "WaitingForPayment")
                 .SelectMany(o => o.OutputInfos)
@@ -33,7 +35,9 @@ namespace Infrastructure.Repositories
             return new DashboardSummaryDto
             {
                 TotalRevenue = totalRevenue,
-                NetProfit = totalRevenue - cogs - totalExpenses,
+                TotalExpense = totalExpenses,
+                GrossProfit = grossProfit,
+                NetProfit = netProfit,
                 PendingAmount = pendingAmount,
                 AlertsCount = 0,
                 MonthAchieved = totalRevenue,

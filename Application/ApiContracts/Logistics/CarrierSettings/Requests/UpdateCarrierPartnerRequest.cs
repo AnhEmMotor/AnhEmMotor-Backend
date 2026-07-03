@@ -21,5 +21,7 @@ public class UpdateCarrierPartnerRequest
     public bool AllowLiquidCargo { get; set; }
 
     public bool AllowOversizeCargo { get; set; }
+    public string? PricingRulesJson { get; set; }
+    public string? SlaJson { get; set; }
 }
 

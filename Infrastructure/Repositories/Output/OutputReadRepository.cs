@@ -135,18 +135,28 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         return currentStock;
     }
 
-    public Task<List<OutputEntity>> GetExpiredOrdersAsync(
-        DateTimeOffset expirationThreshold,
-        CancellationToken cancellationToken)
-    {
-        return GetQueryable()
-            .Where(
-                o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
-                    !string.IsNullOrEmpty(o.PaymentMethod) &&
-                    o.PaymentMethod != PaymentMethod.COD &&
-                    (o.PaymentExpiredAt.HasValue
-                        ? o.PaymentExpiredAt.Value < DateTimeOffset.UtcNow
-                        : o.CreatedAt < expirationThreshold))
-            .ToListAsync(cancellationToken);
-    }
+public Task<List<OutputEntity>> GetExpiredOrdersAsync(
+  DateTimeOffset expirationThreshold,
+  CancellationToken cancellationToken)
+{
+  return GetQueryable()
+  .Where(
+    o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
+    !string.IsNullOrEmpty(o.PaymentMethod) &&
+    o.PaymentMethod != PaymentMethod.COD &&
+    (o.PaymentExpiredAt.HasValue
+      ? o.PaymentExpiredAt.Value < DateTimeOffset.UtcNow
+      : o.CreatedAt < expirationThreshold))
+  .ToListAsync(cancellationToken);
+}
+
+public Task<List<OutputEntity>> GetByLeadIdAsync(
+  int leadId,
+  CancellationToken cancellationToken = default)
+{
+  return GetQueryable()
+  .Where(o => o.LeadId == leadId)
+  .OrderByDescending(o => o.CreatedAt)
+  .ToListAsync(cancellationToken);
+}
 }

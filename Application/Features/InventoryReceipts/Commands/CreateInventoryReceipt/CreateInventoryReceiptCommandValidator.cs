@@ -6,7 +6,6 @@ public class CreateInventoryReceiptCommandValidator : AbstractValidator<CreateIn
 {
     public CreateInventoryReceiptCommandValidator()
     {
-        RuleFor(x => x.PurchaseRequestId).GreaterThan(0).When(x => x.PurchaseRequestId.HasValue);
         RuleFor(x => x.Notes).MaximumLength(1000).WithMessage("Notes cannot exceed 1000 characters.");
         RuleFor(x => x.Products).NotEmpty().WithMessage("InventoryReceipt must contain at least one product.");
         RuleFor(x => x.Products)

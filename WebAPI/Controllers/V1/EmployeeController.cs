@@ -3,7 +3,7 @@ using Application.Features.HR.Commands.CreateEmployee;
 using Application.Features.HR.Commands.UpdateEmployee;
 using Application.Features.HR.Queries.GetEmployees;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
@@ -28,7 +28,7 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A list of employee responses.</returns>
     [HttpGet]
-    [HasPermission(HR.View)]
+    [RequiresAnyPermissions(Permissions.Admin.EmployeeManagement.View, Permissions.Accountant.EmployeeManagement.View)]
     [ProducesResponseType(typeof(List<EmployeeResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetEmployeesAsync(CancellationToken cancellationToken)
     {
@@ -43,7 +43,7 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The created employee ID.</returns>
     [HttpPost]
-    [HasPermission(HR.Create)]
+    [RequiresAnyPermissions(Permissions.Admin.EmployeeManagement.Create, Permissions.Accountant.EmployeeManagement.Create)]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateEmployeeAsync(
         [FromBody] CreateEmployeeCommand command,
@@ -61,7 +61,7 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The updated employee ID.</returns>
     [HttpPut("{id}")]
-    [HasPermission(HR.Edit)]
+    [RequiresAnyPermissions(Permissions.Admin.EmployeeManagement.Edit, Permissions.Accountant.EmployeeManagement.Edit)]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateEmployeeAsync(
         int id,

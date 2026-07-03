@@ -18,6 +18,10 @@ public class CloneManySuppliersCommandHandler(
         {
             return Result.Success();
         }
+        if (request.Ids.Count > 1)
+        {
+            return Result.Failure(Error.BadRequest("Chỉ được phép nhân bản 1 đối tác duy nhất mỗi lần."));
+        }
         foreach (var id in request.Ids)
         {
             var existingSupplier = await readRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);

@@ -1,87 +1,49 @@
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Expense;
-using Domain.Entities;
+﻿using Application.Features.Expenses.Commands.CreateExpense;
+using Application.Features.Expenses.Commands.DeleteExpense;
+using Application.Features.Expenses.Queries.GetExpenses;
+using Application.Features.Expenses.Responses;
+using Asp.Versioning;
+using Domain.Constants.Permission;
+using Infrastructure.Authorization.Attribute;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
+using Swashbuckle.AspNetCore.Annotations;
+using WebAPI.Controllers.Base;
+using Application.Common.Models;
 
-namespace WebAPI.Controllers.V1
+namespace WebAPI.Controllers.V1;
+
+[ApiVersion("1.0")]
+[SwaggerTag("Quản lý chi phí")]
+[Route("api/v{version:apiVersion}/expenses")]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+public class ExpenseController(IMediator mediator) : ApiController
 {
-    /// <summary>
-    /// Controller for managing expenses.
-    /// </summary>
-    [Authorize]
-    [ApiController]
-    [Route("api/v1/[controller]")]
-    public class ExpenseController : ControllerBase
+    [HttpGet]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
+    [ProducesResponseType(typeof(List<ExpenseResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        private readonly IExpenseReadRepository _expenseReadRepository;
-        private readonly IExpenseInsertRepository _expenseInsertRepository;
-        private readonly IExpenseDeleteRepository _expenseDeleteRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        var result = await mediator.Send(new GetExpensesQuery(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExpenseController" /> class.
-        /// </summary>
-        /// <param name="expenseReadRepository">Read repository for expenses.</param>
-        /// <param name="expenseInsertRepository">Insert repository for expenses.</param>
-        /// <param name="expenseDeleteRepository">Delete repository for expenses.</param>
-        /// <param name="unitOfWork">Shared unit of work boundary.</param>
-        public ExpenseController(
-            IExpenseReadRepository expenseReadRepository,
-            IExpenseInsertRepository expenseInsertRepository,
-            IExpenseDeleteRepository expenseDeleteRepository,
-            IUnitOfWork unitOfWork)
-        {
-            _expenseReadRepository = expenseReadRepository;
-            _expenseInsertRepository = expenseInsertRepository;
-            _expenseDeleteRepository = expenseDeleteRepository;
-            _unitOfWork = unitOfWork;
-        }
+    [HttpPost]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
+    [ProducesResponseType(typeof(ExpenseResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Create([FromBody] CreateExpenseCommand command, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-        /// <summary>
-        /// Retrieves all expenses ordered by date descending.
-        /// </summary>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>A list of expenses.</returns>
-        [HttpGet]
-        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
-        {
-            var expenses = await _expenseReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-            return Ok(expenses);
-        }
-
-        /// <summary>
-        /// Creates a new expense.
-        /// </summary>
-        /// <param name="expense">The expense to create.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>The created expense.</returns>
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Expense expense, CancellationToken cancellationToken)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            _expenseInsertRepository.Add(expense);
-            await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            return Ok(expense);
-        }
-
-        /// <summary>
-        /// Deletes an expense by its identifier.
-        /// </summary>
-        /// <param name="id">The identifier of the expense to delete.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>An empty result if successful, or NotFound if the expense does not exist.</returns>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
-        {
-            var expense = await _expenseReadRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
-            if (expense == null)
-                return NotFound();
-            _expenseDeleteRepository.Remove(expense);
-            await _unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            return Ok();
-        }
+    [HttpDelete("{id:int}")]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View, Permissions.Factory.DashboardManagement.View)]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new DeleteExpenseCommand(id), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 }

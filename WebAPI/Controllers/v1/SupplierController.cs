@@ -20,7 +20,7 @@ using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Application.Features.Suppliers.Queries.GetSuppliersListForInventoryReceiptManager;
 using Application.Features.Suppliers.Queries.GetSupplierStatistics;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Constants.RouteNames;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
@@ -48,7 +48,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách loại đối tác.</returns>
     [HttpGet("partner-types")]
-    [RequiresAnyPermissions(Suppliers.View, Suppliers.Create, Suppliers.Edit)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierManagement.View, Permissions.Warehouse.SupplierManagement.Create, Permissions.Warehouse.SupplierManagement.Edit)]
     [ProducesResponseType(typeof(List<PartnerTypeResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPartnerTypesAsync(CancellationToken cancellationToken)
     {
@@ -64,7 +64,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp.</returns>
     [HttpGet]
-    [RequiresAnyPermissions(Suppliers.View)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierManagement.View)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersAsync(
         [FromQuery] SieveModel sieveModel,
@@ -82,7 +82,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp đã xóa.</returns>
     [HttpGet("deleted")]
-    [HasPermission(Suppliers.View)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.View)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedSuppliersAsync(
         [FromQuery] SieveModel sieveModel,
@@ -100,7 +100,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Chi tiết nhà cung cấp.</returns>
     [HttpGet("{id:int}", Name = Supplier.GetById)]
-    [HasPermission(Suppliers.View)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.View)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSupplierByIdAsync(int id, CancellationToken cancellationToken)
@@ -118,7 +118,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Lịch sử nhập hàng.</returns>
     [HttpGet("{id:int}/purchase-history")]
-    [HasPermission(Suppliers.View)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.View)]
     [ProducesResponseType(typeof(PagedResult<SupplierPurchaseHistoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSupplierPurchaseHistoryAsync(
         int id,
@@ -137,7 +137,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Nhà cung cấp vừa được tạo.</returns>
     [HttpPost]
-    [HasPermission(Suppliers.Create)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Create)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateSupplierAsync(
         [FromBody] CreateSupplierCommand request,
@@ -155,9 +155,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp cho việc nhập hàng.</returns>
     [HttpGet("for-InventoryReceipt")]
-    [RequiresAnyPermissions(
-        Domain.Constants.Permission.Permissions.InventoryReceipts.Create,
-        Domain.Constants.Permission.Permissions.InventoryReceipts.Edit)]
+    [RequiresAnyPermissions(Permissions.Warehouse.ReceiptManagement.Create, Permissions.Warehouse.ReceiptManagement.Edit)]
     [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersForInventoryReceiptAsync(
         [FromQuery] SieveModel sieveModel,
@@ -176,7 +174,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thông tin nhà cung cấp sau khi cập nhật.</returns>
     [HttpPut("{id:int}")]
-    [HasPermission(Suppliers.Edit)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Edit)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSupplierAsync(
@@ -197,7 +195,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thông tin nhà cung cấp sau khi cập nhật trạng thái.</returns>
     [HttpPatch("{id:int}/status")]
-    [HasPermission(Suppliers.Edit)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Edit)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSupplierStatusAsync(
@@ -217,7 +215,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả xóa.</returns>
     [HttpDelete("{id:int}")]
-    [HasPermission(Suppliers.Delete)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteSupplierAsync(int id, CancellationToken cancellationToken)
@@ -234,7 +232,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thông tin nhà cung cấp sau khi khôi phục.</returns>
     [HttpPost("restore/{id:int}")]
-    [HasPermission(Suppliers.Delete)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Delete)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreSupplierAsync(int id, CancellationToken cancellationToken)
@@ -251,7 +249,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả xóa nhiều.</returns>
     [HttpDelete("delete-many")]
-    [HasPermission(Suppliers.Delete)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteSuppliersAsync(
@@ -270,7 +268,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp đã được khôi phục.</returns>
     [HttpPost("restore-many")]
-    [HasPermission(Suppliers.Delete)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Delete)]
     [ProducesResponseType(typeof(List<SupplierResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreSuppliersAsync(
@@ -289,7 +287,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách nhà cung cấp sau khi cập nhật trạng thái.</returns>
     [HttpPatch("update-status-many")]
-    [HasPermission(Suppliers.Edit)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Edit)]
     [ProducesResponseType(typeof(List<SupplierResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManySupplierStatusAsync(
@@ -307,10 +305,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Thống kê số lượng nhà cung cấp.</returns>
     [HttpGet("statistics")]
-    [RequiresAnyPermissions(
-        Suppliers.View,
-        Domain.Constants.Permission.Permissions.InventoryReceipts.Edit,
-        Domain.Constants.Permission.Permissions.InventoryReceipts.Create)]
+    [RequiresAnyPermissions(Permissions.Warehouse.SupplierManagement.View, Permissions.Warehouse.ReceiptManagement.Edit, Permissions.Warehouse.ReceiptManagement.Create)]
     [ProducesResponseType(typeof(SupplierStatisticsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSupplierStatisticsAsync(CancellationToken cancellationToken)
     {
@@ -326,7 +321,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>File Excel chứa danh sách nhà cung cấp.</returns>
     [HttpGet("export")]
-    [HasPermission(Suppliers.View)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.View)]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> ExportSuppliersAsync(
         [FromQuery] SieveModel sieveModel,
@@ -344,7 +339,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả nhân bản.</returns>
     [HttpPost("clone-many")]
-    [HasPermission(Suppliers.Create)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Create)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CloneManySuppliersAsync(
@@ -362,7 +357,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả nhập dữ liệu.</returns>
     [HttpPost("import")]
-    [HasPermission(Suppliers.Create)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Create)]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(ImportSuppliersResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -380,7 +375,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>File Excel mẫu.</returns>
     [HttpGet("import-template")]
-    [HasPermission(Suppliers.Create)]
+    [HasPermission(Permissions.Warehouse.SupplierManagement.Create)]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetImportTemplateAsync(CancellationToken cancellationToken)
     {

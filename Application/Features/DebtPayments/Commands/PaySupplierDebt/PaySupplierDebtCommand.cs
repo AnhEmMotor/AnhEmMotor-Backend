@@ -8,5 +8,7 @@ namespace Application.Features.DebtPayments.Commands.PaySupplierDebt
         public int SupplierId { get; set; }
 
         public decimal Amount { get; set; }
+
+        public List<string>? ProofImageUrls { get; set; }
     }
 }

@@ -9,7 +9,7 @@ public static class PermissionDataSeeder
 {
     public static async Task SeedPermissionsAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        var allPermissions = PermissionsList.GetMetadataList().Select(m => m.Id).ToList();
+        var allPermissions = PermissionsList.GetAllPermissions();
         var existingPermissions = await context.Permissions.ToListAsync(cancellationToken).ConfigureAwait(false);
         var newPermissions = allPermissions
             .Except(existingPermissions.Select(p => p.Name))

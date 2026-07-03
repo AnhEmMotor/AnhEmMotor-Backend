@@ -19,7 +19,7 @@ public class CustomerFeedback : BaseEntity
     [Column("Rating")]
     public int Rating { get; set; }
 
-    [Column("FeedbackArea", TypeName = "nvarchar(50)")]
+    [Column("FeedbackArea", TypeName = "nvarchar(250)")]
     public string FeedbackArea { get; set; } = string.Empty;
 
     [Column("CustomerName", TypeName = "nvarchar(100)")]

@@ -25,5 +25,7 @@ namespace Domain.Entities
 
         [ForeignKey("CreatedById")]
         public virtual ApplicationUser? CreatedBy { get; set; }
+
+        public virtual ICollection<SupplierDebtLogImage> ProofImages { get; set; } = new List<SupplierDebtLogImage>();
     }
 }

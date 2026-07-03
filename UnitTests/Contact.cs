@@ -1,6 +1,7 @@
 using Application.Features.Contacts.Commands.CreateContact;
 using Application.Features.Contacts.Commands.CreateContactReply;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
+using Application.Features.Contacts.Commands.AssignSupportRequest;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Contact;
 using Application.Interfaces.Services;
@@ -109,5 +110,61 @@ public class Contact
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().Contain(e => string.Compare(e.Message, "Liên hệ không tồn tại.") == 0);
+    }
+
+    [Fact(DisplayName = "AssignSupportRequest - Phân công với UserId hợp lệ")]
+    public async Task AssignSupportRequest_WithValidUserId_SetsAssignedUserIdAndStatusToAssigned()
+    {
+        var supportRequest = new SupportRequest { Id = 1, Status = Domain.Enums.SupportRequestStatus.New };
+        var supportRequestRepoMock = new Mock<ISupportRequestRepository>();
+        supportRequestRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(supportRequest);
+
+        var userId = Guid.NewGuid();
+        var command = new AssignSupportRequestCommand(1, userId);
+        var handler = new AssignSupportRequestCommandHandler(supportRequestRepoMock.Object, _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        supportRequest.AssignedUserId.Should().Be(userId);
+        supportRequest.Status.Should().Be(Domain.Enums.SupportRequestStatus.Assigned);
+        supportRequestRepoMock.Verify(x => x.UpdateAsync(supportRequest, It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = "AssignSupportRequest - Phân công với UserId null")]
+    public async Task AssignSupportRequest_WithNullUserId_ClearsAssignedUserIdAndRevertsStatusToNew()
+    {
+        var supportRequest = new SupportRequest { Id = 1, AssignedUserId = Guid.NewGuid(), Status = Domain.Enums.SupportRequestStatus.Assigned };
+        var supportRequestRepoMock = new Mock<ISupportRequestRepository>();
+        supportRequestRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(supportRequest);
+
+        var command = new AssignSupportRequestCommand(1, null);
+        var handler = new AssignSupportRequestCommandHandler(supportRequestRepoMock.Object, _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        supportRequest.AssignedUserId.Should().BeNull();
+        supportRequest.Status.Should().Be(Domain.Enums.SupportRequestStatus.New);
+        supportRequestRepoMock.Verify(x => x.UpdateAsync(supportRequest, It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = "AssignSupportRequest - Yêu cầu hỗ trợ không tồn tại")]
+    public async Task AssignSupportRequest_WithNonExistentRequest_ReturnsFailure()
+    {
+        var supportRequestRepoMock = new Mock<ISupportRequestRepository>();
+        supportRequestRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((SupportRequest?)null);
+
+        var command = new AssignSupportRequestCommand(999, Guid.NewGuid());
+        var handler = new AssignSupportRequestCommandHandler(supportRequestRepoMock.Object, _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().Contain(e => e.Message == "Không tìm thấy yêu cầu hỗ trợ.");
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 }

@@ -1,5 +1,7 @@
 using Application.Features.Bookings.Commands.ConfirmBooking;
 using Application.Features.Bookings.Commands.CreateBooking;
+using Application.Features.Bookings.Commands.UpdateBooking;
+using Application.Features.Bookings.Commands.DeleteBooking;
 using Application.Features.Bookings.Queries.GetBookings;
 using Asp.Versioning;
 using MediatR;
@@ -57,6 +59,39 @@ public class BookingsController(ISender sender) : ApiController
     public async Task<IActionResult> ConfirmAsync(ConfirmBookingCommand command, CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Cập nhật đặt lịch lái thử.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPut("{id}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateBookingCommand command, CancellationToken cancellationToken)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("Id in path does not match Id in body.");
+        }
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Xóa đặt lịch lái thử.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpDelete("{id}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new DeleteBookingCommand(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

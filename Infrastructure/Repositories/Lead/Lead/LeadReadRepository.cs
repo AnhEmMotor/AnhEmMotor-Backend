@@ -25,10 +25,13 @@ public class LeadReadRepository(ApplicationDBContext context, ISievePaginator pa
         return paginator.ApplyAsync<Domain.Entities.Lead, TResponse>(query, sieveModel, mode, cancellationToken);
     }
 
-    public Task<Domain.Entities.Lead?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-    {
-        return context.Leads.Include(l => l.Activities).FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
-    }
+public Task<Domain.Entities.Lead?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+{
+  return context.Leads
+    .Include(l => l.Activities)
+    .Include(l => l.AssignedTo)
+    .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
+}
 
     public Task<Domain.Entities.Lead?> GetByPhoneNumberAsync(
         string phoneNumber,

@@ -6,15 +6,15 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 namespace WebAPI.StartupExtensions
 {
     /// <summary>
-    /// C?u hÏnh c·c t‡i li?u Swagger cho t?ng phiÍn b?n API.
+    /// C·∫•u h√¨nh c√°c t√†i li·ªáu Swagger cho t·ª´ng phi√™n b·∫£n API.
     /// </summary>
-    /// <param name="provider">Cung c?p mÙ t? v? c·c phiÍn b?n API d„ kh·m ph·.</param>
+    /// <param name="provider">Cung c·∫•p m√¥ t·∫£ v·ªÅ c√°c phi√™n b·∫£n API ƒë√£ kh√°m ph√°.</param>
     public class ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) : IConfigureOptions<SwaggerGenOptions>
     {
         /// <summary>
-        /// C?u hÏnh c·c t˘y ch?n SwaggerGen.
+        /// C·∫•u h√¨nh c√°c t√πy ch·ªçn SwaggerGen.
         /// </summary>
-        /// <param name="options">C·c t˘y ch?n cho SwaggerGen.</param>
+        /// <param name="options">C√°c t√πy ch·ªçn cho SwaggerGen.</param>
         public void Configure(SwaggerGenOptions options)
         {
             foreach (var description in provider.ApiVersionDescriptions)

@@ -9,5 +9,8 @@ namespace Application.ApiContracts.DebtPayment.Requests
         [Range(1, double.MaxValue, ErrorMessage = "Số tiền thanh toán phải lớn hơn 0.")]
         [JsonPropertyName("amount")]
         public decimal Amount { get; set; }
+
+        [JsonPropertyName("proofImageUrls")]
+        public List<string>? ProofImageUrls { get; set; }
     }
 }

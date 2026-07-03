@@ -1,6 +1,6 @@
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -30,8 +30,8 @@ public class MediaFile
         var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.UploadProductImageAsync));
         var attribute = methodInfo!.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
         Assert.NotNull(attribute);
-        Assert.Contains(Products.Edit, attribute.Policy);
-        Assert.Contains(Products.Create, attribute.Policy);
+        Assert.Contains(Permissions.Warehouse.ProductManagement.Edit, attribute.Policy);
+        Assert.Contains(Permissions.Warehouse.ProductManagement.Create, attribute.Policy);
     }
 
     [Fact(DisplayName = "MF_CT_004: DeleteFileAsync has RequiresAnyPermissions with Edit/Create permissions")]
@@ -40,8 +40,8 @@ public class MediaFile
         var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.DeleteProductFileAsync));
         var attribute = methodInfo!.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
         Assert.NotNull(attribute);
-        Assert.Contains(Products.Edit, attribute.Policy);
-        Assert.Contains(Products.Create, attribute.Policy);
+        Assert.Contains(Permissions.Warehouse.ProductManagement.Edit, attribute.Policy);
+        Assert.Contains(Permissions.Warehouse.ProductManagement.Create, attribute.Policy);
     }
 
     [Fact(DisplayName = "MF_012: DeleteFileAsync has RequiresAnyPermissions with Edit/Create permissions")]
@@ -50,8 +50,8 @@ public class MediaFile
         var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.DeleteProductFileAsync));
         var attribute = methodInfo!.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
         Assert.NotNull(attribute);
-        Assert.Contains(Products.Edit, attribute.Policy);
-        Assert.Contains(Products.Create, attribute.Policy);
+        Assert.Contains(Permissions.Warehouse.ProductManagement.Edit, attribute.Policy);
+        Assert.Contains(Permissions.Warehouse.ProductManagement.Create, attribute.Policy);
     }
 
     [Fact(DisplayName = "MF_018: RestoreFileAsync has RequiresAnyPermissions with Edit/Create permissions")]
@@ -60,8 +60,8 @@ public class MediaFile
         var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.RestoreFileAsync));
         var attribute = methodInfo?.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
         Assert.NotNull(attribute);
-        Assert.Contains(Products.Edit, attribute.Policy);
-        Assert.Contains(Products.Create, attribute.Policy);
+        Assert.Contains(Permissions.Warehouse.ProductManagement.Edit, attribute.Policy);
+        Assert.Contains(Permissions.Warehouse.ProductManagement.Create, attribute.Policy);
     }
 
     [Fact(DisplayName = "MF_CT_002: UploadProductImageAsync throws ArgumentNullException when file is null")]

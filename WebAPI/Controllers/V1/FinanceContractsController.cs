@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
+using WebAPI.Models;
 
 namespace WebAPI.Controllers.V1;
 
@@ -88,18 +89,19 @@ public class FinanceContractsController(ISender sender) : ApiController
     /// Uploads evidence documentation for a finance contract's disbursement.
     /// </summary>
     [HttpPost("{financeContractId:guid}/disbursement/evidence/upload")]
+    [Consumes("multipart/form-data")]
     public async Task<IActionResult> UploadDisbursementEvidence(
         [FromRoute] Guid financeContractId,
-        [FromForm] IFormFile file,
+        [FromForm] UploadDisbursementEvidenceForm form,
         CancellationToken cancellationToken)
     {
-        if (file == null)
+        if (form?.File == null)
             return BadRequest(new { success = false, message = "File is required" });
-        using var stream = file.OpenReadStream();
+        using var stream = form.File.OpenReadStream();
         await sender.Send(
             new UploadDisbursementEvidenceCommand(
                 financeContractId,
-                new UploadDisbursementEvidenceRequest { FileContent = stream, FileName = file.FileName },
+                new UploadDisbursementEvidenceRequest { FileContent = stream, FileName = form.File.FileName },
                 Guid.Empty),
             cancellationToken)
             .ConfigureAwait(false);

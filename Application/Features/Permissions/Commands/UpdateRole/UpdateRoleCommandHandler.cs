@@ -53,7 +53,7 @@ public class UpdateRoleCommandHandler(
         }
         if (request.Permissions != null)
         {
-            var validSystemPermissions = PermissionsList.GetMetadataList().Select(m => m.Id).ToHashSet();
+            var validSystemPermissions = PermissionsList.GetAllPermissions().ToHashSet();
             var invalidPermissions = request.Permissions.Where(p => !validSystemPermissions.Contains(p)).ToList();
             if (invalidPermissions.Count != 0)
             {

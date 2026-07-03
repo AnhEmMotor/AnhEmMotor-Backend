@@ -17,7 +17,7 @@ namespace Application.Features.HR.Commands.UpdateEmployee
                 .ConfigureAwait(false);
             if (employee == null)
             {
-                return Result<int>.Failure("Kh�ng t�m th?y h? so nh�n s?.");
+                return Result<int>.Failure("Không tìm thấy hồ sơ nhân sự.");
             }
             employee.IdentityNumber = request.IdentityNumber.Trim();
             employee.Address = request.Address.Trim();

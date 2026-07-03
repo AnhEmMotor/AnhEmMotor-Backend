@@ -42,6 +42,10 @@ public class ParcelDeliveryOrder
     public string? ReturnInternalNote { get; set; }
 
     public string? ReturnAction { get; set; }
+    public decimal? RefundAmount { get; set; }
+    public decimal? ReturnShippingCost { get; set; }
+
+    public string? RejectionReason { get; set; }
 
     [Required]
     public string CustomerPhone { get; set; } = string.Empty;

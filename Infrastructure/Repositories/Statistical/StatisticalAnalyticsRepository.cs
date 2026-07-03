@@ -22,19 +22,23 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
             .Where(e => e.ExpenseDate >= start && e.ExpenseDate <= end)
             .SumAsync(e => e.Amount, cancellationToken)
             .ConfigureAwait(false);
-        var cogs = totalRevenue * 0.7m;
+        var cogs = totalRevenue * 0.7m; // Cost of Goods Sold (70% of revenue)
+        var grossProfit = totalRevenue - cogs;
         var pendingAmount = await context.OutputOrders
             .Where(o => o.StatusId == "Pending" || o.StatusId == "WaitingForPayment")
             .SelectMany(o => o.OutputInfos)
             .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0), cancellationToken)
             .ConfigureAwait(false);
+        var netProfit = grossProfit - totalExpenses;
         return new DashboardSummaryResponse
         {
             TotalRevenue = totalRevenue,
+            TotalExpense = totalExpenses,
+            GrossProfit = grossProfit,
+            NetProfit = netProfit,
             RevenueVsYesterdayPercentage = 12.5m,
             DailyTarget = 100000000m,
-            NetProfit = totalRevenue - cogs - totalExpenses,
-            ProfitMargin = 21.0m,
+            ProfitMargin = netProfit > 0 && totalRevenue > 0 ? (decimal)(netProfit / totalRevenue * 100) : 0,
             ProfitVsYesterdayPercentage = -3.0m,
             PendingAmount = pendingAmount,
             DepositAmount = pendingAmount * 0.3m,

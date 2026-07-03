@@ -20,6 +20,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý các hoạt động thanh toán")]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[Route("api/payment")]
 public class PaymentController(ISender sender) : ApiController
 {
     /// <summary>

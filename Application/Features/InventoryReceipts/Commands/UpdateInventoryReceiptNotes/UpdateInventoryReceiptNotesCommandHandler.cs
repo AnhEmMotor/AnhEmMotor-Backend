@@ -25,7 +25,7 @@ public class UpdateInventoryReceiptNotesCommandHandler(
             .ConfigureAwait(false);
         if (InventoryReceipt is null)
         {
-            return Error.NotFound($"Kh�ng t�m th?y phi?u nh?p c� ID {request.Id}.", "Id");
+            return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
         InventoryReceipt.Notes = request.Notes;
         updateRepository.Update(InventoryReceipt);

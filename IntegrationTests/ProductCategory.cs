@@ -4,7 +4,7 @@ using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
 using Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -56,7 +56,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -109,7 +109,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -162,7 +162,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -220,7 +220,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -268,7 +268,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -303,7 +303,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -355,7 +355,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -410,7 +410,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -457,7 +457,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -484,7 +484,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View],
+            [Permissions.Warehouse.ProductManagement.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -525,7 +525,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.Create],
+            [Permissions.Warehouse.ProductManagement.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -563,7 +563,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.Edit],
+            [Permissions.Warehouse.ProductManagement.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -610,7 +610,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.Delete],
+            [Permissions.Warehouse.ProductManagement.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -661,7 +661,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.Delete],
+            [Permissions.Warehouse.ProductManagement.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -722,7 +722,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.Delete],
+            [Permissions.Warehouse.ProductManagement.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -781,7 +781,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.Delete],
+            [Permissions.Warehouse.ProductManagement.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -837,7 +837,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.Delete],
+            [Permissions.Warehouse.ProductManagement.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -893,7 +893,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.Delete],
+            [Permissions.Warehouse.ProductManagement.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -994,7 +994,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View, ProductCategories.Edit, ProductCategories.Create],
+            [Permissions.Warehouse.ProductManagement.View, Permissions.Warehouse.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.Create],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await _client.PostAsJsonAsync(
@@ -1078,7 +1078,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ProductCategories.View, ProductCategories.Edit],
+            [Permissions.Warehouse.ProductManagement.View, Permissions.Warehouse.ProductManagement.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await _client.PostAsJsonAsync(
@@ -1166,7 +1166,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     [Fact(DisplayName = "PC_065 - Xóa danh mục cha khi còn danh mục con (Không có sản phẩm) - Thành công")]
     public async Task DeleteParentCategory_WithChildren_NoProducts_ShouldSucceed()
     {
-        await AuthenticateAsync([ProductCategories.Delete, ProductCategories.View]).ConfigureAwait(true);
+        await AuthenticateAsync([Permissions.Warehouse.ProductManagement.Delete, Permissions.Warehouse.ProductManagement.View]).ConfigureAwait(true);
         int parentId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -1204,7 +1204,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     [Fact(DisplayName = "PC_066 - Sửa danh mục cha thành chính nó - Thất bại")]
     public async Task UpdateCategory_ParentAsSelf_ShouldFail()
     {
-        await AuthenticateAsync([ProductCategories.Edit, ProductCategories.View]).ConfigureAwait(true);
+        await AuthenticateAsync([Permissions.Warehouse.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.View]).ConfigureAwait(true);
         int categoryId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -1227,7 +1227,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     [Fact(DisplayName = "PC_067 - Sửa danh mục cha thành con của chính nó - Thất bại")]
     public async Task UpdateCategory_ParentAsChild_ShouldFail()
     {
-        await AuthenticateAsync([ProductCategories.Edit, ProductCategories.View]).ConfigureAwait(true);
+        await AuthenticateAsync([Permissions.Warehouse.ProductManagement.Edit, Permissions.Warehouse.ProductManagement.View]).ConfigureAwait(true);
         int parentId, childId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -1254,7 +1254,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     [Fact(DisplayName = "PC_068 - Xóa danh mục cấp 1 có sản phẩm ở danh mục con (cấp 2) - Thất bại")]
     public async Task DeleteLevel1_WithProductsInLevel2_ShouldFail()
     {
-        await AuthenticateAsync([ProductCategories.Delete, ProductCategories.View]).ConfigureAwait(true);
+        await AuthenticateAsync([Permissions.Warehouse.ProductManagement.Delete, Permissions.Warehouse.ProductManagement.View]).ConfigureAwait(true);
         int parentId, childId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -1281,7 +1281,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     [Fact(DisplayName = "PC_069 - Xóa danh mục cấp 2 đang có sản phẩm - Thất bại")]
     public async Task DeleteLevel2_WithProducts_ShouldFail()
     {
-        await AuthenticateAsync([ProductCategories.Delete, ProductCategories.View]).ConfigureAwait(true);
+        await AuthenticateAsync([Permissions.Warehouse.ProductManagement.Delete, Permissions.Warehouse.ProductManagement.View]).ConfigureAwait(true);
         int childId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -1307,7 +1307,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
     [Fact(DisplayName = "PC_070 - Xóa nhiều danh mục, hỗn hợp thành công và thất bại - Phải Rollback tất cả")]
     public async Task DeleteMany_MixedResults_ShouldRollbackAll()
     {
-        await AuthenticateAsync([ProductCategories.Delete, ProductCategories.View]).ConfigureAwait(true);
+        await AuthenticateAsync([Permissions.Warehouse.ProductManagement.Delete, Permissions.Warehouse.ProductManagement.View]).ConfigureAwait(true);
         int cat1Id, cat2Id;
         using (var scope = _factory.Services.CreateScope())
         {

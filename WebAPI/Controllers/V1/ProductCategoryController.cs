@@ -12,7 +12,7 @@ using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
 using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Asp.Versioning;
-using Domain.Constants.Permission.Permissions;
+using Domain.Constants.Permission;
 using Domain.Constants.Product;
 using Domain.Constants.RouteNames;
 using Domain.Primitives;
@@ -49,7 +49,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Lấy thống kê danh mục sản phẩm và loại xe.
     /// </summary>
     [HttpGet("stats")]
-    [HasPermission(ProductCategories.View)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.View)]
     [ProducesResponseType(typeof(ProductCategoryStatsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProductCategoryStatsAsync(CancellationToken cancellationToken)
     {
@@ -62,7 +62,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Xuất danh sách danh mục sản phẩm ra file Excel (có hỗ trợ lọc và sắp xếp).
     /// </summary>
     [HttpGet("export")]
-    [HasPermission(ProductCategories.View)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.View)]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
     public async Task<IActionResult> ExportProductCategoriesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -91,7 +91,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp - chỉ được vào khi có quyền xem danh mục sản phẩm).
     /// </summary>
     [HttpGet("for-manager")]
-    [HasPermission(ProductCategories.View)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.View)]
     [ProducesResponseType(typeof(PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProductCategoriesForManagerAsync(
         [FromQuery] SieveModel sieveModel,
@@ -106,7 +106,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Lấy danh sách danh mục sản phẩm đã bị xoá (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
-    [HasPermission(ProductCategories.View)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.View)]
     [ProducesResponseType(typeof(PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedProductCategoriesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -121,7 +121,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Lấy thông tin danh mục sản phẩm theo Id.
     /// </summary>
     [HttpGet("{id:int}", Name = ProductCategory.GetById)]
-    [HasPermission(ProductCategories.View)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.View)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductCategoryByIdAsync(int id, CancellationToken cancellationToken)
@@ -135,7 +135,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Tạo mới danh mục sản phẩm.
     /// </summary>
     [HttpPost]
-    [HasPermission(ProductCategories.Create)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.Create)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateProductCategoryAsync(
         [FromBody] CreateProductCategoryCommand request,
@@ -150,7 +150,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Cập nhật danh mục sản phẩm.
     /// </summary>
     [HttpPut("{id:int}")]
-    [HasPermission(ProductCategories.Edit)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.Edit)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProductCategoryAsync(
@@ -167,7 +167,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Xoá danh mục sản phẩm (soft delete).
     /// </summary>
     [HttpDelete("{id:int}")]
-    [HasPermission(ProductCategories.Delete)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProductCategoryAsync(int id, CancellationToken cancellationToken)
@@ -181,7 +181,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Xoá nhiều danh mục sản phẩm cùng lúc.
     /// </summary>
     [HttpDelete("delete-many")]
-    [HasPermission(ProductCategories.Delete)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteProductCategoriesAsync(
@@ -197,7 +197,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Khôi phục 1 danh mục sản phẩm đã bị xoá.
     /// </summary>
     [HttpPatch("restore/{id:int}")]
-    [HasPermission(ProductCategories.Delete)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.Delete)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -212,7 +212,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// Khôi phục nhiều danh mục sản phẩm cùng lúc.
     /// </summary>
     [HttpPost("restore-many")]
-    [HasPermission(ProductCategories.Delete)]
+    [HasPermission(Permissions.Warehouse.ProductManagement.Delete)]
     [ProducesResponseType(typeof(List<ProductCategoryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreProductCategoriesAsync(

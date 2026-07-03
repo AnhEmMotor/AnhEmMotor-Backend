@@ -3,7 +3,7 @@ namespace Application.ApiContracts.Permission.Responses;
 
 public class PermissionStructureResponse
 {
-    public Dictionary<string, List<string>> Groups { get; set; } = [];
+    public List<Domain.Constants.Permission.PermissionModuleMetadata> Modules { get; set; } = [];
 
     public Dictionary<string, List<string>> Conflicts { get; set; } = [];
 

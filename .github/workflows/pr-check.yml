@@ -2,10 +2,41 @@ name: AnhEmMotor Backend - Pull Request (Pre-deploy) check
 
 on:
   pull_request:
-    branches: ["master", "main"]
+    branches: ["main", "merge/dev"]
 
 jobs:
-  test:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Run Unit Tests
+        run: dotnet test UnitTests/UnitTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
+        env:
+          Logging__LogLevel__Default: "Warning"
+          Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+      - name: Run Controller Tests
+        run: dotnet test ControllerTests/ControllerTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
+        env:
+          Logging__LogLevel__Default: "Warning"
+          Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+      - name: Run Integration Tests
+        run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
+        env:
+          Logging__LogLevel__Default: "Warning"
+          Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+
+  verify-migrations:
+    if: github.base_ref != 'merge/dev'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -39,7 +70,6 @@ jobs:
           MSSQL_SA_PASSWORD: Password123!
         ports:
           - 1433:1433
-
     steps:
       - uses: actions/checkout@v6
         with:
@@ -81,25 +111,6 @@ jobs:
           if [ "$FAILED" -eq 1 ]; then
             exit 1
           fi
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build --no-restore
-      - name: Run Unit Tests
-        run: dotnet test UnitTests/UnitTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
-        env:
-          Logging__LogLevel__Default: "Warning"
-          Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
-      - name: Run Controller Tests
-        run: dotnet test ControllerTests/ControllerTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
-        env:
-          Logging__LogLevel__Default: "Warning"
-          Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
-      - name: Run Integration Tests
-        run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
-        env:
-          Logging__LogLevel__Default: "Warning"
-          Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
       - name: Verify Migrations (SQL Server, MySQL, PostgreSql)
         shell: bash
         run: |
