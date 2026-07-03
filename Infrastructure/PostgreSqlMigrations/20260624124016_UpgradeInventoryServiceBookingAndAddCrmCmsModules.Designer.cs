@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.PostgreSqlMigrations
 {
     [DbContext(typeof(PostgreSqlDbContext))]
-    [Migration("20260702195431_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260624124016_UpgradeInventoryServiceBookingAndAddCrmCmsModules")]
+    partial class UpgradeInventoryServiceBookingAndAddCrmCmsModules
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -709,77 +709,110 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("ContactReply");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ConversionTool", b =>
+            modelBuilder.Entity("Domain.Entities.ContractTemplate", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Clicks")
-                        .HasColumnType("integer")
-                        .HasColumnName("Clicks");
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Content")
-                        .HasColumnType("text")
-                        .HasColumnName("Content");
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("DelaySeconds")
-                        .HasColumnType("integer")
-                        .HasColumnName("DelaySeconds");
-
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("ImageUrl");
+                    b.Property<string>("DynamicFields")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("IsActive");
+                        .HasColumnType("boolean");
 
-                    b.Property<int>("Leads")
-                        .HasColumnType("integer")
-                        .HasColumnName("Leads");
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("Name");
+                        .HasColumnType("text");
 
-                    b.Property<string>("Pages")
-                        .HasColumnType("text")
-                        .HasColumnName("Pages");
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("text")
-                        .HasColumnName("Status");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("Type");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Url")
-                        .HasColumnType("text")
-                        .HasColumnName("Url");
-
-                    b.Property<int>("Views")
-                        .HasColumnType("integer")
-                        .HasColumnName("Views");
+                    b.Property<decimal>("Version")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConversionTool");
+                    b.ToTable("ContractTemplates");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ContractTemplateAuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ChangedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("ContractTemplateId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Details")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("NewValue")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("OldValue")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractTemplateId");
+
+                    b.ToTable("ContractTemplateAuditLog");
                 });
 
             modelBuilder.Entity("Domain.Entities.CustomerContact", b =>
@@ -1557,117 +1590,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("InventoryTransaction");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Invoice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BankName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ChassisNo")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CustomerAddress")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("CustomerIdCard")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("CustomerPhone")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeliveryDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("EngineNo")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("InsuranceFee")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("InvoiceNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("IssueDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ProcessedBy")
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("RegistrationFee")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("SalesPerson")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("VehicleColor")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("VehicleModel")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("VehiclePrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Invoice");
-                });
-
             modelBuilder.Entity("Domain.Entities.JobApplication", b =>
                 {
                     b.Property<int>("Id")
@@ -1840,10 +1762,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("text")
                         .HasColumnName("InterestedVehicle");
 
-                    b.Property<bool>("IsVerified")
-                        .HasColumnType("boolean")
-                        .HasColumnName("IsVerified");
-
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1988,12 +1906,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("PricingRulesJson")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SlaJson")
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -2080,12 +1992,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<string>("ProductCondition")
                         .HasColumnType("text");
 
-                    b.Property<decimal?>("RefundAmount")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("RejectionReason")
-                        .HasColumnType("text");
-
                     b.Property<string>("ReturnAction")
                         .HasColumnType("text");
 
@@ -2097,9 +2003,6 @@ namespace Infrastructure.PostgreSqlMigrations
 
                     b.Property<string>("ReturnReason")
                         .HasColumnType("text");
-
-                    b.Property<decimal?>("ReturnShippingCost")
-                        .HasColumnType("numeric");
 
                     b.Property<decimal>("ShippingCost")
                         .HasPrecision(18, 2)
@@ -2185,49 +2088,13 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("text")
                         .HasColumnName("Description");
 
-                    b.Property<decimal>("LaborCost")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)")
-                        .HasColumnName("LaborCost");
-
                     b.Property<DateTimeOffset>("MaintenanceDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("MaintenanceDate");
 
-                    b.Property<string>("MaintenanceNumber")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("MaintenanceNumber");
-
                     b.Property<int>("Mileage")
                         .HasColumnType("integer")
                         .HasColumnName("Mileage");
-
-                    b.Property<DateTimeOffset?>("NextMaintenanceDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("NextMaintenanceDate");
-
-                    b.Property<int?>("NextMaintenanceOdo")
-                        .HasColumnType("integer")
-                        .HasColumnName("NextMaintenanceOdo");
-
-                    b.Property<decimal>("PartsCost")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)")
-                        .HasColumnName("PartsCost");
-
-                    b.Property<string>("PartsJson")
-                        .HasColumnType("text")
-                        .HasColumnName("PartsJson");
-
-                    b.Property<int?>("TechnicianId")
-                        .HasColumnType("integer")
-                        .HasColumnName("TechnicianId");
-
-                    b.Property<decimal>("TotalCost")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)")
-                        .HasColumnName("TotalCost");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -2237,8 +2104,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnName("VehicleId");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TechnicianId");
 
                     b.HasIndex("VehicleId");
 
@@ -2830,10 +2695,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("LastStatusChangedAt");
 
-                    b.Property<int?>("LeadId")
-                        .HasColumnType("integer")
-                        .HasColumnName("LeadId");
-
                     b.Property<string>("Notes")
                         .HasColumnType("text")
                         .HasColumnName("Notes");
@@ -2884,8 +2745,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasIndex("CreatedBy");
 
                     b.HasIndex("FinishedBy");
-
-                    b.HasIndex("LeadId");
 
                     b.HasIndex("StatusId");
 
@@ -3086,30 +2945,11 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("ActualCost");
 
-                    b.Property<DateTimeOffset?>("CompletedDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("CompletedDate");
-
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("CustomerName");
-
-                    b.Property<string>("CustomerPhone")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("CustomerPhone");
-
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DossierNumber")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("DossierNumber");
 
                     b.Property<string>("LicensePlate")
                         .IsRequired()
@@ -3120,7 +2960,7 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("text")
                         .HasColumnName("Notes");
 
-                    b.Property<int?>("OutputId")
+                    b.Property<int>("OutputId")
                         .HasColumnType("integer")
                         .HasColumnName("OutputId");
 
@@ -3139,11 +2979,6 @@ namespace Infrastructure.PostgreSqlMigrations
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("VinNumber")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("VinNumber");
 
                     b.HasKey("Id");
 
@@ -3865,196 +3700,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("PromotionBanner");
                 });
 
-            modelBuilder.Entity("Domain.Entities.PurchaseInvoice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("CreatedByUserId");
-
-                    b.Property<string>("CustomerAddress")
-                        .HasColumnType("text")
-                        .HasColumnName("CustomerAddress");
-
-                    b.Property<string>("CustomerIdCard")
-                        .HasColumnType("text")
-                        .HasColumnName("CustomerIdCard");
-
-                    b.Property<string>("CustomerName")
-                        .HasColumnType("text")
-                        .HasColumnName("CustomerName");
-
-                    b.Property<string>("CustomerPhone")
-                        .HasColumnType("text")
-                        .HasColumnName("CustomerPhone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("DueDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("DueDate");
-
-                    b.Property<DateTimeOffset>("InvoiceDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("InvoiceDate");
-
-                    b.Property<string>("InvoiceNumber")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("InvoiceNumber");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("text")
-                        .HasColumnName("Notes");
-
-                    b.Property<DateTimeOffset?>("PaidAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("PaidAt");
-
-                    b.Property<string>("PaymentMethod")
-                        .HasColumnType("text")
-                        .HasColumnName("PaymentMethod");
-
-                    b.Property<string>("PaymentStatus")
-                        .HasColumnType("text")
-                        .HasColumnName("PaymentStatus");
-
-                    b.Property<int?>("PurchaseRequestId")
-                        .HasColumnType("integer")
-                        .HasColumnName("PurchaseRequestId");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("Status");
-
-                    b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("SubTotal");
-
-                    b.Property<string>("SupplierAddress")
-                        .HasColumnType("text")
-                        .HasColumnName("SupplierAddress");
-
-                    b.Property<int?>("SupplierId")
-                        .HasColumnType("integer")
-                        .HasColumnName("SupplierId");
-
-                    b.Property<string>("SupplierName")
-                        .HasColumnType("text")
-                        .HasColumnName("SupplierName");
-
-                    b.Property<string>("SupplierPhone")
-                        .HasColumnType("text")
-                        .HasColumnName("SupplierPhone");
-
-                    b.Property<string>("SupplierTaxCode")
-                        .HasColumnType("text")
-                        .HasColumnName("SupplierTaxCode");
-
-                    b.Property<decimal>("TaxAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("TaxAmount");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("TotalAmount");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PurchaseRequestId");
-
-                    b.HasIndex("SupplierId");
-
-                    b.ToTable("PurchaseInvoice");
-                });
-
-            modelBuilder.Entity("Domain.Entities.PurchaseInvoiceItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ColorName")
-                        .HasColumnType("text")
-                        .HasColumnName("ColorName");
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ProductName")
-                        .HasColumnType("text")
-                        .HasColumnName("ProductName");
-
-                    b.Property<int?>("ProductVariantColorId")
-                        .HasColumnType("integer")
-                        .HasColumnName("ProductVariantColorId");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("integer")
-                        .HasColumnName("ProductVariantId");
-
-                    b.Property<int>("PurchaseInvoiceId")
-                        .HasColumnType("integer")
-                        .HasColumnName("PurchaseInvoiceId");
-
-                    b.Property<int?>("PurchaseRequestItemId")
-                        .HasColumnType("integer")
-                        .HasColumnName("PurchaseRequestItemId");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("Quantity");
-
-                    b.Property<decimal>("TaxAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("TaxAmount");
-
-                    b.Property<decimal>("TaxRate")
-                        .HasColumnType("decimal(5,2)")
-                        .HasColumnName("TaxRate");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("TotalAmount");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("UnitPrice");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("VariantName")
-                        .HasColumnType("text")
-                        .HasColumnName("VariantName");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PurchaseInvoiceId");
-
-                    b.ToTable("PurchaseInvoiceItem");
-                });
-
             modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -4442,137 +4087,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("RepairOrderDetail");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ReturnRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CancelReason")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Carrier")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("CustomerPhone")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("EvidenceImagesJson")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("InspectedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("text");
-
-                    b.Property<string>("OrderCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("OriginalTrackingNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("RejectionReason")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ReturnAction")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("ReturnRequest");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ReturnRequestItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ReturnQuantity")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ReturnRequestId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Sku")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ThumbnailUrl")
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("ReturnRequestId");
-
-                    b.ToTable("ReturnRequestItem");
-                });
-
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
                 {
                     b.Property<Guid>("RoleId")
@@ -4748,100 +4262,61 @@ namespace Infrastructure.PostgreSqlMigrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CancelledDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("CancelledDate");
+                    b.Property<string>("AdminNote")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<string>("CancelledReason")
-                        .HasColumnType("text")
-                        .HasColumnName("CancelledReason");
+                    b.Property<DateTime>("AppointmentDate")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTimeOffset?>("CompletedDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("CompletedDate");
+                    b.Property<TimeSpan>("AppointmentTime")
+                        .HasColumnType("interval");
+
+                    b.Property<Guid?>("AssignedSaleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CancellationReason")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("CustomerId");
-
-                    b.Property<string>("CustomerNotes")
-                        .HasColumnType("text")
-                        .HasColumnName("CustomerNotes");
+                    b.Property<string>("CustomerNote")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal?>("DepositAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("DepositAmount");
-
-                    b.Property<int?>("EstimatedDurationMinutes")
-                        .HasColumnType("integer")
-                        .HasColumnName("EstimatedDurationMinutes");
-
                     b.Property<string>("Notes")
-                        .HasColumnType("text")
-                        .HasColumnName("Notes");
-
-                    b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("PaymentStatus");
+                        .HasColumnType("text");
 
-                    b.Property<int?>("Rating")
-                        .HasColumnType("integer")
-                        .HasColumnName("Rating");
-
-                    b.Property<string>("Review")
-                        .HasColumnType("text")
-                        .HasColumnName("Review");
-
-                    b.Property<DateTimeOffset>("ScheduledDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("ScheduledDate");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("integer")
-                        .HasColumnName("ServiceId");
+                    b.Property<string>("ServiceType")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("Status");
-
-                    b.Property<int?>("TechnicianId")
-                        .HasColumnType("integer")
-                        .HasColumnName("TechnicianId");
-
-                    b.Property<string>("TechnicianNotes")
-                        .HasColumnType("text")
-                        .HasColumnName("TechnicianNotes");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("TotalAmount");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("VehicleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("VehicleId");
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.HasIndex("TechnicianId");
+                    b.HasIndex("AssignedSaleId");
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("ServiceBooking");
+                    b.ToTable("ServiceBookings");
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceCategory", b =>
@@ -4871,6 +4346,76 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasKey("Id");
 
                     b.ToTable("ServiceCategories");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ServiceEvaluation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AdminRepliedById")
+                        .HasColumnType("integer")
+                        .HasColumnName("AdminRepliedById");
+
+                    b.Property<int>("ContactId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ContactId");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Criteria")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Criteria");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DirectReplyText")
+                        .HasColumnType("text")
+                        .HasColumnName("DirectReplyText");
+
+                    b.Property<string>("InternalNotes")
+                        .HasColumnType("text")
+                        .HasColumnName("InternalNotes");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ProcessedAt");
+
+                    b.Property<string>("ProcessingStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ProcessingStatus");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer")
+                        .HasColumnName("Rating");
+
+                    b.Property<string>("Review")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("Review");
+
+                    b.Property<int>("ServiceBookingId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ServiceBookingId");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("ServiceBookingId");
+
+                    b.ToTable("ServiceEvaluation");
                 });
 
             modelBuilder.Entity("Domain.Entities.Setting", b =>
@@ -5251,76 +4796,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("SupplierDebtLog");
                 });
 
-            modelBuilder.Entity("Domain.Entities.SupplierDebtLogImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<int>("SupplierDebtLogId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SupplierDebtLogId");
-
-                    b.ToTable("SupplierDebtLogImages");
-                });
-
-            modelBuilder.Entity("Domain.Entities.SupplierDebtSettlement", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("EvidenceUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("PaymentDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SupplierId");
-
-                    b.ToTable("SupplierDebtSettlements");
-                });
-
             modelBuilder.Entity("Domain.Entities.SupplierFinance", b =>
                 {
                     b.Property<int>("SupplierId")
@@ -5420,8 +4895,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AssignedUserId");
 
                     b.HasIndex("ContactId");
 
@@ -5843,217 +5316,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("VehicleDocument");
                 });
 
-            modelBuilder.Entity("Domain.Entities.WarrantyClaim", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimNumber")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("ClaimNumber");
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsRecall")
-                        .HasColumnType("boolean")
-                        .HasColumnName("IsRecall");
-
-                    b.Property<string>("IssueDescription")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("IssueDescription");
-
-                    b.Property<string>("ManufacturerClaimNumber")
-                        .HasColumnType("text")
-                        .HasColumnName("ManufacturerClaimNumber");
-
-                    b.Property<string>("ManufacturerDecision")
-                        .HasColumnType("text")
-                        .HasColumnName("ManufacturerDecision");
-
-                    b.Property<string>("MediaUrls")
-                        .HasColumnType("text")
-                        .HasColumnName("MediaUrls");
-
-                    b.Property<string>("ServiceCenterName")
-                        .HasColumnType("text")
-                        .HasColumnName("ServiceCenterName");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("Status");
-
-                    b.Property<decimal>("TotalLaborCost")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("TotalLaborCost");
-
-                    b.Property<decimal>("TotalPartsCost")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("TotalPartsCost");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("VehicleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("VehicleId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VehicleId");
-
-                    b.ToTable("WarrantyClaim");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WarrantyClaimPart", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("PartCode")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("PartCode");
-
-                    b.Property<string>("PartName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("PartName");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("Status");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("UnitPrice");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("WarrantyClaimId")
-                        .HasColumnType("integer")
-                        .HasColumnName("WarrantyClaimId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("WarrantyClaimId");
-
-                    b.ToTable("WarrantyClaimPart");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WorkshopPayment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("Id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("CustomerName");
-
-                    b.Property<string>("CustomerPhone")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("CustomerPhone");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("DiscountAmount");
-
-                    b.Property<DateTimeOffset?>("InvoicePrintedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("InvoicePrintedAt");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("text")
-                        .HasColumnName("Notes");
-
-                    b.Property<DateTimeOffset?>("PaidAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("PaidAt");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("PaymentMethod");
-
-                    b.Property<string>("PaymentNumber")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("PaymentNumber");
-
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("PaymentStatus");
-
-                    b.Property<Guid?>("ReceivedById")
-                        .HasColumnType("uuid")
-                        .HasColumnName("ReceivedById");
-
-                    b.Property<string>("ServiceDescription")
-                        .HasColumnType("text")
-                        .HasColumnName("ServiceDescription");
-
-                    b.Property<int>("SourceId")
-                        .HasColumnType("integer")
-                        .HasColumnName("SourceId");
-
-                    b.Property<string>("SourceType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("SourceType");
-
-                    b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("SubTotal");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("TotalAmount");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("VehicleInfo")
-                        .HasColumnType("text")
-                        .HasColumnName("VehicleInfo");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WorkshopPayment");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -6259,6 +5521,17 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("Contact");
 
                     b.Navigation("RepliedBy");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ContractTemplateAuditLog", b =>
+                {
+                    b.HasOne("Domain.Entities.ContractTemplate", "ContractTemplate")
+                        .WithMany()
+                        .HasForeignKey("ContractTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContractTemplate");
                 });
 
             modelBuilder.Entity("Domain.Entities.CustomerContact", b =>
@@ -6477,17 +5750,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("ProductVariant");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Invoice", b =>
-                {
-                    b.HasOne("Domain.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Domain.Entities.JobApplication", b =>
                 {
                     b.HasOne("Domain.Entities.Contact", "Contact")
@@ -6543,17 +5805,11 @@ namespace Infrastructure.PostgreSqlMigrations
 
             modelBuilder.Entity("Domain.Entities.MaintenanceHistory", b =>
                 {
-                    b.HasOne("Domain.Entities.EmployeeProfile", "Technician")
-                        .WithMany()
-                        .HasForeignKey("TechnicianId");
-
                     b.HasOne("Domain.Entities.Vehicle", "Vehicle")
                         .WithMany("MaintenanceHistories")
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Technician");
 
                     b.Navigation("Vehicle");
                 });
@@ -6685,11 +5941,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         .WithMany()
                         .HasForeignKey("FinishedBy");
 
-                    b.HasOne("Domain.Entities.Lead", "Lead")
-                        .WithMany()
-                        .HasForeignKey("LeadId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Domain.Entities.OutputStatus", "OutputStatus")
                         .WithMany("OutputOrders")
                         .HasForeignKey("StatusId");
@@ -6699,8 +5950,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("FinishedByUser");
-
-                    b.Navigation("Lead");
 
                     b.Navigation("OutputStatus");
                 });
@@ -6744,7 +5993,9 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.HasOne("Domain.Entities.Output", "Output")
                         .WithMany()
-                        .HasForeignKey("OutputId");
+                        .HasForeignKey("OutputId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Output");
                 });
@@ -6890,32 +6141,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("Domain.Entities.PurchaseInvoice", b =>
-                {
-                    b.HasOne("Domain.Entities.PurchaseRequest", "PurchaseRequest")
-                        .WithMany()
-                        .HasForeignKey("PurchaseRequestId");
-
-                    b.HasOne("Domain.Entities.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId");
-
-                    b.Navigation("PurchaseRequest");
-
-                    b.Navigation("Supplier");
-                });
-
-            modelBuilder.Entity("Domain.Entities.PurchaseInvoiceItem", b =>
-                {
-                    b.HasOne("Domain.Entities.PurchaseInvoice", "PurchaseInvoice")
-                        .WithMany("PurchaseInvoiceItems")
-                        .HasForeignKey("PurchaseInvoiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PurchaseInvoice");
-                });
-
             modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
                 {
                     b.HasOne("Domain.Entities.ApplicationUser", "ApprovedByUser")
@@ -7045,36 +6270,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("Service");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ReturnRequest", b =>
-                {
-                    b.HasOne("Domain.Entities.Output", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ReturnRequestItem", b =>
-                {
-                    b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.ReturnRequest", "ReturnRequest")
-                        .WithMany("Items")
-                        .HasForeignKey("ReturnRequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("ReturnRequest");
-                });
-
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
                 {
                     b.HasOne("Domain.Entities.Permission", "Permission")
@@ -7122,33 +6317,39 @@ namespace Infrastructure.PostgreSqlMigrations
 
             modelBuilder.Entity("Domain.Entities.ServiceBooking", b =>
                 {
-                    b.HasOne("Domain.Entities.ApplicationUser", "Customer")
+                    b.HasOne("Domain.Entities.ApplicationUser", "AssignedSale")
                         .WithMany()
-                        .HasForeignKey("CustomerId");
-
-                    b.HasOne("Domain.Entities.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.EmployeeProfile", "Technician")
-                        .WithMany()
-                        .HasForeignKey("TechnicianId")
+                        .HasForeignKey("AssignedSaleId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Domain.Entities.Vehicle", "Vehicle")
                         .WithMany()
                         .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Customer");
-
-                    b.Navigation("Service");
-
-                    b.Navigation("Technician");
+                    b.Navigation("AssignedSale");
 
                     b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ServiceEvaluation", b =>
+                {
+                    b.HasOne("Domain.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.ServiceBooking", "ServiceBooking")
+                        .WithMany()
+                        .HasForeignKey("ServiceBookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("ServiceBooking");
                 });
 
             modelBuilder.Entity("Domain.Entities.Supplier", b =>
@@ -7256,28 +6457,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("Domain.Entities.SupplierDebtLogImage", b =>
-                {
-                    b.HasOne("Domain.Entities.SupplierDebtLog", "SupplierDebtLog")
-                        .WithMany("ProofImages")
-                        .HasForeignKey("SupplierDebtLogId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SupplierDebtLog");
-                });
-
-            modelBuilder.Entity("Domain.Entities.SupplierDebtSettlement", b =>
-                {
-                    b.HasOne("Domain.Entities.Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Supplier");
-                });
-
             modelBuilder.Entity("Domain.Entities.SupplierFinance", b =>
                 {
                     b.HasOne("Domain.Entities.Supplier", "Supplier")
@@ -7291,18 +6470,11 @@ namespace Infrastructure.PostgreSqlMigrations
 
             modelBuilder.Entity("Domain.Entities.SupportRequest", b =>
                 {
-                    b.HasOne("Domain.Entities.ApplicationUser", "AssignedUser")
-                        .WithMany()
-                        .HasForeignKey("AssignedUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("Domain.Entities.Contact", "Contact")
                         .WithMany()
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("AssignedUser");
 
                     b.Navigation("Contact");
                 });
@@ -7444,28 +6616,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         .IsRequired();
 
                     b.Navigation("Vehicle");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WarrantyClaim", b =>
-                {
-                    b.HasOne("Domain.Entities.Vehicle", "Vehicle")
-                        .WithMany()
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Vehicle");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WarrantyClaimPart", b =>
-                {
-                    b.HasOne("Domain.Entities.WarrantyClaim", "WarrantyClaim")
-                        .WithMany("Parts")
-                        .HasForeignKey("WarrantyClaimId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("WarrantyClaim");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -7693,11 +6843,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("VariantOptionValues");
                 });
 
-            modelBuilder.Entity("Domain.Entities.PurchaseInvoice", b =>
-                {
-                    b.Navigation("PurchaseInvoiceItems");
-                });
-
             modelBuilder.Entity("Domain.Entities.PurchaseRequest", b =>
                 {
                     b.Navigation("PurchaseRequestItems");
@@ -7711,11 +6856,6 @@ namespace Infrastructure.PostgreSqlMigrations
             modelBuilder.Entity("Domain.Entities.RepairOrder", b =>
                 {
                     b.Navigation("Details");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ReturnRequest", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Domain.Entities.ServiceCategory", b =>
@@ -7737,11 +6877,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("AuditLogs");
 
                     b.Navigation("ContractItems");
-                });
-
-            modelBuilder.Entity("Domain.Entities.SupplierDebtLog", b =>
-                {
-                    b.Navigation("ProofImages");
                 });
 
             modelBuilder.Entity("Domain.Entities.SupplierStatus", b =>
@@ -7771,11 +6906,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("Documents");
 
                     b.Navigation("MaintenanceHistories");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WarrantyClaim", b =>
-                {
-                    b.Navigation("Parts");
                 });
 #pragma warning restore 612, 618
         }
