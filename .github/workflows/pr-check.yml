@@ -85,7 +85,9 @@ jobs:
       - name: Check Migration Count
         shell: bash
         run: |
-          FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD | grep -E 'Infrastructure/(Migrations|MySqlMigrations|PostgreSqlMigrations)/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' || true)
+          BASE_REF="origin/${{ github.base_ref }}"
+    MERGE_BASE=$(git merge-base HEAD "$BASE_REF")
+    FILES=$(git diff --name-only --diff-filter=A "$MERGE_BASE" HEAD | grep -E 'Infrastructure/(Migrations|MySqlMigrations|PostgreSqlMigrations)/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' || true)
           if [ -z "$FILES" ]; then
             echo "No new migrations found. Check passed."
             exit 0

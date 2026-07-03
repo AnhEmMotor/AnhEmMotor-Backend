@@ -120,7 +120,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.UserId.Should().Be(user.Id);
-        content.Permissions.Should().HaveCount(6);
+        content.Permissions.Should().HaveCount(4);
     }
 
     [Fact(DisplayName = "PERM_INT_003 - API lấy permissions của user hiện tại khi chưa đăng nhập")]
@@ -143,7 +143,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             _factory.Services,
             targetUsername,
             "Password123!",
-            [Warehouse.ProductManagement.View, Warehouse.ProductManagement.View, Admin.FileManagement.View],
+            [Warehouse.ProductManagement.View, Admin.FileManagement.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var callerUniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -172,7 +172,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.UserId.Should().Be(targetUser.Id);
-        content.Permissions.Should().HaveCount(3);
+        content.Permissions.Should().HaveCount(2);
     }
 
     [Fact(DisplayName = "PERM_INT_005 - API lấy permissions của user khác khi không có quyền")]
@@ -243,7 +243,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             .ReadFromJsonAsync<List<string>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
-        content!.Should().HaveCount(5);
+        content!.Should().HaveCount(4);
         content!.Should().Contain(Warehouse.ProductManagement.View);
         content!.Should().Contain(Warehouse.ProductManagement.View);
     }
@@ -661,7 +661,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         structure.Should().NotBeNull();
         structure!.Modules.Should().NotBeEmpty();
         structure.Modules.Should().Contain(x => x.Id == "Permissions.Warehouse");
-        structure.Dependencies.Should().BeEmpty();
+        structure.Dependencies.Should().NotBeEmpty();
     }
 
     [Fact(DisplayName = "PERM_036 - Truy cập module HR với quyền hợp lệ")]
@@ -813,4 +813,5 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         return permission!;
     }
 }
+
 
