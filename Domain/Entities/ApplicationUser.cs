@@ -21,6 +21,9 @@ public class ApplicationUser : IdentityUser<Guid>
 
     public string? AvatarUrl { get; set; }
 
+public string? PasswordResetToken { get; set; }
+public DateTimeOffset? PasswordResetTokenExpiry { get; set; }
+
     public DateTime? DateOfBirth { get; set; }
 
     public ICollection<IdentityUserRole<Guid>> UserRoles { get; set; } = [];
