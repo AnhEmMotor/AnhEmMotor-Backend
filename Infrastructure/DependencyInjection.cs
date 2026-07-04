@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.LogisticsDashboard;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.WorkshopDashboard;
 using Application.Interfaces.Services;
@@ -10,7 +9,6 @@ using Infrastructure.BackgroundJobs;
 using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
-using Infrastructure.Repositories.LogisticsDashboard;
 using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Repositories.WorkshopDashboard;
 using Infrastructure.Services;
@@ -91,7 +89,6 @@ public static class DependencyInjection
         services.AddScoped<IFileReadService, FileReadService>();
         services.AddScoped<IFileInsertService, FileInsertService>();
         services.AddScoped<IWorkshopDashboardRepository, WorkshopDashboardRepository>();
-services.AddScoped<ILogisticsDashboardRepository, LogisticsDashboardRepository>();
         services.AddScoped<IFileUpdateService, FileUpdateService>();
         services.AddScoped<IFileDeleteService, FileDeleteService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();

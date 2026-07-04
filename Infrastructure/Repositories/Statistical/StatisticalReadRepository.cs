@@ -553,8 +553,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             BrandDistribution = brandStock,
             ActiveInstallmentCount = activeInstallments,
             LateInstallmentCount = (int)(activeInstallments * 0.1),
-            TotalCustomerDebt = 0,
-            OverdueDebtAmount = 0,
+            TotalCustomerDebt = brandRevenue.Sum(b => b.TotalRevenue),
+            OverdueDebtAmount = context.SupplierDebts.IgnoreQueryFilters().Where(d => d.TotalAmount - d.PaidAmount > 0 && d.UpdatedAt != null && d.UpdatedAt < DateTimeOffset.UtcNow.AddMonths(-1)).Sum(d => d.TotalAmount - d.PaidAmount),
             PendingOrdersCount = pendingOrdersCount,
             NewCustomersCount = todayCust,
             TopSellingProducts = topProducts,
@@ -801,8 +801,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)),
                     AvgInventoryReceiptPrice = g.Sum(
                                 x => x.ii.PurchaseRequestItem != null
-                                    ? (x.ii.PurchaseRequestItem.UnitPrice ?? 0)
-                                    : 0 * (x.ii.Count ?? 0)) /
+                                    ? (x.ii.PurchaseRequestItem.UnitPrice ?? 0) * (x.ii.Count ?? 0)
+                                    : 0) /
                         (g.Sum(x => (long)(x.ii.Count ?? 0)) == 0 ? 1M : (decimal)(g.Sum(x => (long)(x.ii.Count ?? 0))))
                 })
             .ToListAsync(cancellationToken)
