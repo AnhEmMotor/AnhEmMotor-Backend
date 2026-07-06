@@ -69,7 +69,8 @@ await WorkshopDataSeeder.SeedAsync(dbContext2, configuration, cancellationToken)
 		var applied = new HashSet<string>(StringComparer.Ordinal);
 		using (var cmd = conn.CreateCommand())
 		{
-			cmd.CommandText = "SELECT MigrationId FROM __EFMigrationsHistory";
+			cmd.CommandTimeout = 120;
+			cmd.CommandText = "SELECT MigrationId FROM __EFMigrationsHistory WITH (NOLOCK)";
 			using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
 			while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
 				applied.Add(reader.GetString(0));
@@ -116,14 +117,16 @@ await WorkshopDataSeeder.SeedAsync(dbContext2, configuration, cancellationToken)
 	{
 		var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		using var cmd = conn.CreateCommand();
+		cmd.CommandTimeout = 120;
 		cmd.CommandText = @"
-SELECT TABLE_NAME + '.' + COLUMN_NAME
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_SCHEMA = 'dbo'
+SELECT t.name + '.' + c.name
+FROM sys.tables t WITH (NOLOCK)
+JOIN sys.columns c WITH (NOLOCK) ON t.object_id = c.object_id
+WHERE SCHEMA_NAME(t.schema_id) = 'dbo'
 UNION
-SELECT TABLE_NAME
-FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_SCHEMA = 'dbo' AND TABLE_TYPE = 'BASE TABLE'";
+SELECT name
+FROM sys.tables WITH (NOLOCK)
+WHERE SCHEMA_NAME(schema_id) = 'dbo'";
 		using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
 		while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
 			set.Add(reader.GetString(0));
@@ -140,7 +143,7 @@ WHERE TABLE_SCHEMA = 'dbo' AND TABLE_TYPE = 'BASE TABLE'";
 		var inHistory = false;
 		using (var checkCmd = conn.CreateCommand())
 		{
-			checkCmd.CommandText = "SELECT COUNT(1) FROM __EFMigrationsHistory WHERE MigrationId = '20260704133950_AddPasswordResetTokenFields'";
+			checkCmd.CommandText = "SELECT COUNT(1) FROM __EFMigrationsHistory WITH (NOLOCK) WHERE MigrationId = '20260704133950_AddPasswordResetTokenFields'";
 			var result = await checkCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
 			inHistory = Convert.ToInt32(result) > 0;
 		}
@@ -153,10 +156,11 @@ WHERE TABLE_SCHEMA = 'dbo' AND TABLE_TYPE = 'BASE TABLE'";
 		{
 			colCmd.CommandText = @"
 SELECT COUNT(1)
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_SCHEMA = 'dbo'
-AND TABLE_NAME = 'Users'
-AND COLUMN_NAME IN ('PasswordResetToken', 'PasswordResetTokenExpiry')";
+FROM sys.columns c WITH (NOLOCK)
+JOIN sys.tables t WITH (NOLOCK) ON c.object_id = t.object_id
+WHERE SCHEMA_NAME(t.schema_id) = 'dbo'
+AND t.name = 'Users'
+AND c.name IN ('PasswordResetToken', 'PasswordResetTokenExpiry')";
 			var result = await colCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
 			columnsExist = Convert.ToInt32(result) == 2;
 		}

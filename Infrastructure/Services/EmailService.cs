@@ -29,7 +29,7 @@ return;
 }
 
 var message = new MimeMessage();
-message.From.Add(new MailboxAddress(_settings.FromName ?? "AnhEmMotor", _settings.FromEmail));
+message.From.Add(new MailboxAddress(_settings.FromName ?? "AnhEmMotor", _settings.FromEmail ?? "noreply@anhemmotor.com"));
 message.To.Add(MailboxAddress.Parse(to));
 message.Subject = subject;
 message.Body = new TextPart(TextFormat.Html) { Text = body };
