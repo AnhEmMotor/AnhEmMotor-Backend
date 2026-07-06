@@ -20,52 +20,51 @@ namespace WebAPI.Extensions;
 /// </remarks>
 public static class MvcExtensions
 {
-    /// <summary>
-    /// Adds and configures custom MVC, API versioning, routing, validation response, exception handling, and JSON
-    /// serialization settings to the application's service collection.
-    /// </summary>
-    /// <remarks>
-    /// This method configures routing to use lowercase URLs and query strings, sets up API versioning with URL segment
-    /// support, customizes validation error responses, registers a global exception handler, and applies JSON
-    /// serialization options. It is intended to be called during application startup to standardize API behavior across
-    /// the application.
-    /// </remarks>
-    /// <param name="services">The <see cref="IServiceCollection" /> to which the MVC and related services will be added. Cannot be null.</param>
-    /// <returns>The same <see cref="IServiceCollection" /> instance so that additional calls can be chained.</returns>
-    public static IServiceCollection AddCustomMvc(this IServiceCollection services)
+/// <summary>
+/// Adds and configures custom MVC, API versioning, routing, validation response, exception handling, and JSON
+/// serialization settings to the application's service collection.
+/// </summary>
+/// <remarks>
+/// This method configures routing to use lowercase URLs and query strings, sets up API versioning with URL segment
+/// support, customizes validation error responses, registers a global exception handler, and applies JSON
+/// serialization options. It is intended to be called during application startup to standardize API behavior across
+/// the application.
+/// </remarks>
+/// <param name="services">The <see cref="IServiceCollection" /> to which the MVC and related services will be added. Cannot be null.</param>
+/// <returns>The same <see cref="IServiceCollection" /> instance so that additional calls can be chained.</returns>
+public static IServiceCollection AddCustomMvc(this IServiceCollection services)
+{
+// LowercaseUrls disabled to preserve original route casing (WarrantyClaims, RepairOrders, etc.)
+services.Configure<RouteOptions>(
+    options =>
     {
-        services.Configure<RouteOptions>(
-            options =>
-            {
-                options.LowercaseUrls = true;
-                options.LowercaseQueryStrings = true;
-            });
-        services.AddApiVersioning(
-            config =>
-            {
-                config.DefaultApiVersion = new ApiVersion(1, 0);
-                config.AssumeDefaultVersionWhenUnspecified = true;
-                config.ReportApiVersions = true;
-                config.ApiVersionReader = new UrlSegmentApiVersionReader();
-            })
-            .AddApiExplorer(
-                options =>
-                {
-                    options.GroupNameFormat = "'v'VVV";
-                    options.SubstituteApiVersionInUrl = true;
-                });
-        services.AddExceptionHandler<GlobalExceptionHandler>();
-        services.AddProblemDetails();
-        services.AddControllers()
-            .AddJsonOptions(
-                options =>
-                {
-                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-                    options.JsonSerializerOptions.Converters.Add(new EmptyStringConverter());
-                    options.JsonSerializerOptions.Converters.Add(new NullableDecimalConverter());
-                });
-        return services;
-    }
+    });
+services.AddApiVersioning(
+    config =>
+    {
+        config.DefaultApiVersion = new ApiVersion(1, 0);
+        config.AssumeDefaultVersionWhenUnspecified = true;
+        config.ReportApiVersions = true;
+        config.ApiVersionReader = new UrlSegmentApiVersionReader();
+    })
+    .AddApiExplorer(
+        options =>
+        {
+            options.GroupNameFormat = "'v'VVV";
+            options.SubstituteApiVersionInUrl = true;
+        });
+services.AddExceptionHandler<GlobalExceptionHandler>();
+services.AddProblemDetails();
+services.AddControllers()
+    .AddJsonOptions(
+        options =>
+        {
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            options.JsonSerializerOptions.Converters.Add(new EmptyStringConverter());
+            options.JsonSerializerOptions.Converters.Add(new NullableDecimalConverter());
+        });
+return services;
+}
 }

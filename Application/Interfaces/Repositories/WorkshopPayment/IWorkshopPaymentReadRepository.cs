@@ -1,15 +1,29 @@
+using Domain.Constants;
+using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
+using System.Linq.Expressions;
+using WorkshopPaymentEntity = Domain.Entities.WorkshopPayment;
 
-namespace Application.Interfaces.Repositories.WorkshopPayment;
+namespace Application.Interfaces.Repositories;
 
 public interface IWorkshopPaymentReadRepository
 {
-    Task<PagedResult<Domain.Entities.WorkshopPayment>> GetPagedAsync(
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
-        CancellationToken cancellationToken);
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<WorkshopPaymentEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default);
 
-    Task<Domain.Entities.WorkshopPayment?> GetByIdAsync(int id, CancellationToken cancellationToken);
+    public Task<IEnumerable<WorkshopPaymentEntity>> GetAllAsync(
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<object> GetStatsAsync(CancellationToken cancellationToken);
+    public Task<WorkshopPaymentEntity?> GetByIdAsync(
+        int id, CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<IEnumerable<WorkshopPaymentEntity>> GetBySourceAsync(
+        string sourceType, int sourceId, CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
 }

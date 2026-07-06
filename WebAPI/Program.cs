@@ -42,7 +42,7 @@ builder.Services
                 "CorsPolicy",
                 policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:3000")
+                    policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:3000", "http://localhost:8081", "http://192.168.1.16:8081", "http://192.168.137.1:8081")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials();

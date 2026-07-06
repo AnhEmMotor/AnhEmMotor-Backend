@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../AnhEmMotor-Mobile"
+		},
+		{
+			"path": "../anhemmotor-utils"
+		}
+	],
+	"settings": {}
+}

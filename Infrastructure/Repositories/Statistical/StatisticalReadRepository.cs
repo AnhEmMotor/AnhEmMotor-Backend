@@ -553,8 +553,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             BrandDistribution = brandStock,
             ActiveInstallmentCount = activeInstallments,
             LateInstallmentCount = (int)(activeInstallments * 0.1),
-            TotalCustomerDebt = brandRevenue.Sum(b => b.TotalRevenue),
-            OverdueDebtAmount = context.SupplierDebts.IgnoreQueryFilters().Where(d => d.TotalAmount - d.PaidAmount > 0 && d.UpdatedAt != null && d.UpdatedAt < DateTimeOffset.UtcNow.AddMonths(-1)).Sum(d => d.TotalAmount - d.PaidAmount),
+            TotalCustomerDebt = 0,
+            OverdueDebtAmount = 0,
             PendingOrdersCount = pendingOrdersCount,
             NewCustomersCount = todayCust,
             TopSellingProducts = topProducts,
@@ -801,8 +801,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)),
                     AvgInventoryReceiptPrice = g.Sum(
                                 x => x.ii.PurchaseRequestItem != null
-                                    ? (x.ii.PurchaseRequestItem.UnitPrice ?? 0) * (x.ii.Count ?? 0)
-                                    : 0) /
+                                    ? (x.ii.PurchaseRequestItem.UnitPrice ?? 0)
+                                    : 0 * (x.ii.Count ?? 0)) /
                         (g.Sum(x => (long)(x.ii.Count ?? 0)) == 0 ? 1M : (decimal)(g.Sum(x => (long)(x.ii.Count ?? 0))))
                 })
             .ToListAsync(cancellationToken)
@@ -1054,135 +1054,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         public decimal AverageInputPrice => TotalIn == 0 ? 0 : WeightedInputTotal / TotalIn;
     }
 
-    public async Task<WorkshopOverviewResponse> GetWorkshopOverviewAsync(CancellationToken cancellationToken)
-    {
-        var now = DateTimeOffset.UtcNow;
-        var startOfMonth = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
-        var allOrders = await context.RepairOrders
-            .IgnoreQueryFilters()
-            .Include(ro => ro.Technician)
-            .ThenInclude(t => t!.User)
-            .Include(ro => ro.Vehicle)
-            .ThenInclude(v => v!.Product)
-            .ToListAsync(cancellationToken);
-        var inProgressCount = allOrders.Count(ro => ro.Status == "InProgress");
-        var completedOrders = allOrders.Where(
-            ro => ro.Status == "Completed" && ro.StartTime != null && ro.CompletedDate != null)
-            .ToList();
-        double avgCompletionHours = 0;
-        if (completedOrders.Count > 0)
-        {
-            avgCompletionHours = completedOrders.Average(
-                ro => (ro.CompletedDate.GetValueOrDefault() - ro.StartTime.GetValueOrDefault()).TotalHours);
-        }
-        var monthlyRevenue = allOrders
-            .Where(ro => ro.Status == "Completed" && ro.CompletedDate >= startOfMonth)
-            .Sum(ro => ro.TotalAmount);
-        var overdueCount = allOrders.Count(ro => ro.Status != "Completed" && ro.ExpectedCompletionTime < now);
-        var activeRepairOrders = allOrders
-            .Where(ro => ro.Status == "InProgress" || ro.Status == "Pending")
-            .OrderByDescending(ro => ro.CreatedAt)
-            .Select(
-                ro =>
-                {
-                    string statusVN = ro.Status == "InProgress" ? "Đang sửa" : "Chờ phụ tùng";
-                    string techName = ro.Technician?.User?.FullName ?? "Chưa phân công";
-                    string vehicleName = ro.Vehicle?.Product?.Name ?? "Xe máy khách hàng";
-                    if (ro.Vehicle != null && !string.IsNullOrEmpty(ro.Vehicle.LicensePlate))
-                    {
-                        vehicleName += $" ({ro.Vehicle.LicensePlate})";
-                    }
-                    return new WorkshopRepairOrderDto
-                    {
-                        Id = ro.Id,
-                        OrderCode = $"SC{ro.Id}",
-                        CustomerName = ro.CustomerName,
-                        VehicleInfo = vehicleName,
-                        TechnicianName = techName,
-                        Status = statusVN,
-                        StartedAt = ro.StartTime,
-                        LaborFee = ro.LaborCost
-                    };
-                })
-            .ToList();
-        return new WorkshopOverviewResponse
-        {
-            Kpi =
-                new WorkshopKpi
-                {
-                    InProgressCount = inProgressCount,
-                    AvgCompletionHours = Math.Round(avgCompletionHours, 1),
-                    MonthlyRevenue = monthlyRevenue,
-                    OverdueCount = overdueCount
-                },
-            RepairOrders = activeRepairOrders
-        };
-    }
-
-    public async Task<FinancingOverviewResponse> GetFinancingOverviewAsync(CancellationToken cancellationToken)
-    {
-        var now = DateTimeOffset.UtcNow;
-        var contracts = await context.FinanceContracts
-            .IgnoreQueryFilters()
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync(cancellationToken);
-        var totalApplications = contracts.Count;
-        var disbursedCount = contracts.Count(c => c.DisbursementStatus == "Disbursed");
-        var pendingCount = contracts.Count(c => c.DisbursementStatus == "Pending");
-        var overdueCount = contracts.Count(c => c.DisbursementStatus == "Pending" && c.SignedDate < now);
-        var list = contracts.Select(
-            c =>
-            {
-                string statusVN = c.DisbursementStatus == "Disbursed"
-                    ? "Đã giải ngân"
-                    : (c.SignedDate < now ? "Chờ giải ngân" : "Chờ duyệt");
-                string cavetVN = c.CavetLocation switch
-                {
-                    "Bank" => "Công ty tài chính giữ",
-                    "Store" => "Cửa hàng giữ hộ",
-                    "Customer" => "Đã giao khách",
-                    _ => "Chưa xác định"
-                };
-                var cust360 = FinanceContractCustomer360Catalog.GetCustomer360(c.ContractNumber);
-                string customerName = cust360?.FullName ?? "Khách hàng trả góp";
-                string vehicleName = c.ContractNumber switch
-                {
-                    string s when s.Contains("HDSAISON") => "Honda Vision 110cc",
-                    string s when s.Contains("FECREDIT") => "Honda SH 150i",
-                    string s when s.Contains("HOMECREDIT") => "Yamaha Exciter 155",
-                    string s when s.Contains("MBANK") => "Suzuki Raider R150",
-                    _ => "Honda Vision 110cc"
-                };
-                return new FinancingInstallmentDto
-                {
-                    ApplicationCode = c.ContractNumber,
-                    CustomerName = customerName,
-                    PartnerName = c.BankName,
-                    VehicleName = vehicleName,
-                    Amount = c.LoanAmount,
-                    Status = statusVN,
-                    CavetStatus = cavetVN,
-                    CreatedAt = c.CreatedAt
-                };
-            })
-            .ToList();
-        for (int i = 0; i < list.Count; i++)
-        {
-            list[i].Id = i + 1;
-        }
-        return new FinancingOverviewResponse
-        {
-            Kpi =
-                new FinancingKpi
-                {
-                    TotalApplications = totalApplications,
-                    DisbursedCount = disbursedCount,
-                    PendingCount = pendingCount,
-                    OverdueCount = overdueCount
-                },
-            Installments = list
-        };
-    }
 
     public async Task<CustomerAnalyticsResponse> GetCustomerAnalyticsAsync(CancellationToken cancellationToken)
     {
@@ -1296,4 +1167,5 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         };
     }
 }
+
 

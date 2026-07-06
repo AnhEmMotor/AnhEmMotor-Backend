@@ -1,30 +1,54 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-      <NoWarn>$(NoWarn);IDE0040</NoWarn>
-  </PropertyGroup>
+<PropertyGroup>
+<TargetFramework>net10.0</TargetFramework>
+<NoWarn>$(NoWarn);1591</NoWarn>
+<Nullable>enable</Nullable>
+<ImplicitUsings>enable</ImplicitUsings>
+<GenerateDocumentationFile>True</GenerateDocumentationFile>
+<DocumentationFile>api.xml</DocumentationFile>
+<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+<NoWarn>$(NoWarn);1591</NoWarn>
+</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="ClosedXML" Version="0.105.0" />
-    <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="libphonenumber-csharp" Version="9.0.32" />
-    <PackageReference Include="Mapster" Version="10.0.8" />
-    <PackageReference Include="Mapster.DependencyInjection" Version="10.0.8" />
-    <PackageReference Include="MediatR" Version="14.1.0" />
-    <PackageReference Include="Sieve" Version="2.5.5" />
-  </ItemGroup>
+<ItemGroup>
+<PackageReference Include="Asp.Versioning.Mvc" Version="10.0.0" />
+<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.0.0" />
+<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
+<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+<PrivateAssets>all</PrivateAssets>
+</PackageReference>
+<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.16.0" />
+<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.14.0-beta.1" />
+<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.16.0" />
+<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.2" />
+<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1" />
+<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
+<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+<PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
+<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+<PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
+<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.1" />
+<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.1" />
+<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.9" />
+<PackageReference Include="MediatR" Version="14.1.0" />
+<PackageReference Include="Mapster" Version="10.0.8" />
+<PackageReference Include="Mapster.DependencyInjection" Version="10.0.8" />
+<PackageReference Include="FluentValidation" Version="12.1.1" />
+<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+<PackageReference Include="Sieve" Version="2.5.5" />
+<PackageReference Include="ClosedXML" Version="0.105.0" />
+<PackageReference Include="libphonenumber-csharp" Version="9.0.32" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\Domain\Domain.csproj" />
-  </ItemGroup>
+</ItemGroup>
 
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-  
+<ItemGroup>
+<InternalsVisibleTo Include="IntegrationTests" />
+</ItemGroup>
+
+<ItemGroup>
+<ProjectReference Include="..\Domain\Domain.csproj" />
+</ItemGroup>
+
 </Project>

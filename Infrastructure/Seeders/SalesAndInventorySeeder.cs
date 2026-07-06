@@ -100,82 +100,6 @@ namespace Infrastructure.Seeders
                 };
                 context.OutputInfos.Add(outputInfo);
             }
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            if (!await context.RepairOrders.AnyAsync(cancellationToken).ConfigureAwait(false))
-            {
-                var technicians = await context.EmployeeProfiles.ToListAsync(cancellationToken).ConfigureAwait(false);
-                for (int i = 0; i < 4; i++)
-                {
-                    var ticketDate = now.AddHours(-random.Next(1, 12));
-                    var tech = technicians.Count > 0 ? technicians[random.Next(technicians.Count)] : null;
-                    var ro = new RepairOrder
-                    {
-                        CustomerName = $"Nguyễn Anh Tuấn {i + 1}",
-                        CustomerPhone = $"091{random.Next(1000000, 9999999)}",
-                        Description = "Kiểm tra định kỳ, thay dầu nhớt động cơ và vệ sinh bộ côn xe ga",
-                        Status = "InProgress",
-                        StartTime = ticketDate,
-                        ExpectedCompletionTime = now.AddHours(random.Next(1, 6)),
-                        LaborCost = 150000,
-                        PartsCost = 450000,
-                        TotalAmount = 600000,
-                        PaymentStatus = "Unpaid",
-                        TechnicianId = tech?.Id,
-                        CreatedAt = ticketDate,
-                        UpdatedAt = ticketDate
-                    };
-                    context.RepairOrders.Add(ro);
-                }
-                for (int i = 0; i < 20; i++)
-                {
-                    var ticketDate = now.AddDays(-random.Next(1, 30)).AddHours(random.Next(8, 18));
-                    var durationHours = random.Next(1, 4);
-                    var completionDate = ticketDate.AddHours(durationHours);
-                    var tech = technicians.Count > 0 ? technicians[random.Next(technicians.Count)] : null;
-                    var ro = new RepairOrder
-                    {
-                        CustomerName = $"Trần Thanh Sơn {i + 1}",
-                        CustomerPhone = $"093{random.Next(1000000, 9999999)}",
-                        Description = "Bảo dưỡng toàn bộ xe máy, thay lọc gió, bugi và cặp má phanh trước sau",
-                        Status = "Completed",
-                        StartTime = ticketDate,
-                        CompletedDate = completionDate,
-                        ExpectedCompletionTime = ticketDate.AddHours(3),
-                        LaborCost = 300000,
-                        PartsCost = 650000,
-                        TotalAmount = 950000,
-                        PaymentStatus = "Paid",
-                        PaymentMethod = "Banking",
-                        TechnicianId = tech?.Id,
-                        CreatedAt = ticketDate,
-                        UpdatedAt = completionDate
-                    };
-                    context.RepairOrders.Add(ro);
-                }
-                for (int i = 0; i < 3; i++)
-                {
-                    var ticketDate = now.AddHours(-15);
-                    var tech = technicians.Count > 0 ? technicians[random.Next(technicians.Count)] : null;
-                    var ro = new RepairOrder
-                    {
-                        CustomerName = $"Lê Minh Hoàng {i + 1}",
-                        CustomerPhone = $"098{random.Next(1000000, 9999999)}",
-                        Description = "Khắc phục lỗi xước xát nhựa sườn, căn chỉnh phuộc nhún trước",
-                        Status = "Pending",
-                        StartTime = ticketDate,
-                        ExpectedCompletionTime = now.AddHours(-2),
-                        LaborCost = 400000,
-                        PartsCost = 1500000,
-                        TotalAmount = 1900000,
-                        PaymentStatus = "Unpaid",
-                        TechnicianId = tech?.Id,
-                        CreatedAt = ticketDate,
-                        UpdatedAt = ticketDate
-                    };
-                    context.RepairOrders.Add(ro);
-                }
-                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
             if (!await context.Contacts.AnyAsync(cancellationToken).ConfigureAwait(false))
             {
                 var adminUser = await context.Users
@@ -274,3 +198,5 @@ namespace Infrastructure.Seeders
         }
     }
 }
+
+

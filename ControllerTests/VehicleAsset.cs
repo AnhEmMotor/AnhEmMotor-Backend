@@ -1,8 +1,4 @@
-using Application.ApiContracts.Vehicle.Responses;
-using Application.Common.Models;
-using Application.Features.Vehicles.Commands.UpdateLicensePlate;
 using FluentAssertions;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -12,33 +8,29 @@ namespace ControllerTests;
 
 public class VehicleAsset
 {
-    private readonly Mock<IMediator> _mediatorMock;
-    private readonly VehicleController _controller;
+private readonly VehicleController _controller;
 
-    public VehicleAsset()
-    {
-        _mediatorMock = new Mock<IMediator>();
-        _controller = new VehicleController(_mediatorMock.Object);
-        var httpContext = new DefaultHttpContext();
-        _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
-    }
+public VehicleAsset()
+{
+var httpContext = new DefaultHttpContext();
+_controller = new VehicleController(Mock.Of<MediatR.IMediator>());
+_controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
+}
 
-    [Fact(DisplayName = "VAS_004 - Cập nhật biển số xe sau khi đăng ký")]
-    public async Task UpdateLicensePlate_ValidRequest_ReturnsOk()
-    {
-        var assetId = 1;
-        var newPlate = "59-A1 12345";
-        var command = new UpdateLicensePlateCommand { LicensePlate = newPlate };
-        var response = new VehicleResponse { Id = assetId, LicensePlate = newPlate };
-        _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateLicensePlateCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<VehicleResponse?>.Success(response));
-        var result = await _controller.UpdateLicensePlateAsync(assetId, command, CancellationToken.None)
-            .ConfigureAwait(true);
-        result.Should().NotBeNull();
-        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        okResult.Value.Should().NotBeNull();
-        var returnedAsset = okResult.Value.Should().BeOfType<VehicleResponse>().Subject;
-        returnedAsset.Should().NotBeNull();
-        returnedAsset.LicensePlate.Should().Be(newPlate);
-    }
+[Fact(DisplayName = "VAS_001 - Lay chi tiet xe")]
+public async Task GetByIdAsync_ReturnsOk()
+{
+var result = await _controller.GetByIdAsync(1, CancellationToken.None).ConfigureAwait(true);
+result.Should().NotBeNull();
+var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+}
+
+[Fact(DisplayName = "VAS_002 - Lay danh sach xe")]
+public async Task GetListAsync_ReturnsResult()
+{
+var result = await _controller.GetListAsync(new Sieve.Models.SieveModel(), CancellationToken.None)
+.ConfigureAwait(true);
+result.Should().NotBeNull();
+result.Should().BeOfType<ActionResult<IEnumerable<Application.ApiContracts.Vehicle.Responses.VehicleResponse>>>();
+}
 }

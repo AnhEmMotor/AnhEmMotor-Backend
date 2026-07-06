@@ -1,6 +1,5 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
-using Application.Interfaces.Repositories.WorkshopDashboard;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Infrastructure.Authorization;
@@ -10,7 +9,6 @@ using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.MediaFile.File;
-using Infrastructure.Repositories.WorkshopDashboard;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -24,88 +22,89 @@ namespace Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureServices(
-        this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.Configure<LocalFileStorageOptions>(configuration.GetSection(LocalFileStorageOptions.SectionName));
-        var provider = configuration.GetValue("Provider", "SqlServer");
-        if (string.Compare(provider, "MySql", StringComparison.OrdinalIgnoreCase) == 0)
-        {
-            var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
-            var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
-            services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
-                options =>
-                {
-                    options.UseMySql(connectionString, serverVersion);
-                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-                });
-        } else if (string.Compare(provider, "PostgreSql", StringComparison.OrdinalIgnoreCase) == 0)
-        {
-            var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
-            services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
-                options =>
-                {
-                    options.UseNpgsql(connectionString);
-                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-                });
-        } else
-        {
-            services.AddDbContextPool<ApplicationDBContext, SqlServerDBContext>(
-                options =>
-                {
-                    options.UseSqlServer(
-                        configuration.GetConnectionString("StringConnection"),
-                        b => b.MigrationsAssembly(typeof(SqlServerDBContext).Assembly.FullName)
-                                .CommandTimeout(30)
-                                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-                });
-        }
-        services.AddIdentity<ApplicationUser, ApplicationRole>(
-            options =>
-            {
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireDigit = true;
-                options.User.RequireUniqueEmail = true;
-            })
-            .AddEntityFrameworkStores<ApplicationDBContext>()
-            .AddDefaultTokenProviders();
-        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
-        services.AddSingleton<IUserStreamService, UserStreamService>();
-        services.AddSingleton<INotificationService, NotificationService>();
-        services.AddScoped<IAuthorizationHandler, PermissionHandler>();
-        services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
-        services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
-        services.AddScoped<ITokenManagerService, TokenManagerService>();
-        services.AddScoped<ICookieTokenManager, CookieTokenManager>();
-        services.AddScoped<ICurrentUserContext, CurrentUserContext>();
-        services.AddScoped<IIdentityService, IdentityService>();
-        services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
-        services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
-        services.AddScoped<IFileReadService, FileReadService>();
-        services.AddScoped<IFileInsertService, FileInsertService>();
-        services.AddScoped<IWorkshopDashboardRepository, WorkshopDashboardRepository>();
-        services.AddScoped<IFileUpdateService, FileUpdateService>();
-        services.AddScoped<IFileDeleteService, FileDeleteService>();
-        services.AddScoped<IExternalAuthService, ExternalAuthService>();
-        services.AddScoped<IVNPayService, VNPayService>();
-        services.AddScoped<IPayOSService, PayOSService>();
-        services.AddScoped<ISievePaginator, SievePaginator>();
-        services.AddScoped<IEmailService, EmailService>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddHostedService<OrderCleanupService>();
-        services.AddHttpClient();
-        services.Scan(
-            scan => scan
-            .FromAssemblies(Assembly.GetExecutingAssembly())
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
-                .AsImplementedInterfaces()
-                .WithScopedLifetime());
-        services.AddHostedService<SupplierContractExpiryWorker>();
-        return services;
-    }
+	public static IServiceCollection AddInfrastructureServices(
+		this IServiceCollection services,
+		IConfiguration configuration)
+	{
+		services.Configure<LocalFileStorageOptions>(configuration.GetSection(LocalFileStorageOptions.SectionName));
+		var provider = configuration.GetValue("Provider", "SqlServer");
+		if (string.Compare(provider, "MySql", StringComparison.OrdinalIgnoreCase) == 0)
+		{
+			var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
+			var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
+			services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
+			options =>
+			{
+				options.UseMySql(connectionString, serverVersion);
+				options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+			});
+		}
+		else if (string.Compare(provider, "PostgreSql", StringComparison.OrdinalIgnoreCase) == 0)
+		{
+			var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
+			services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
+			options =>
+			{
+				options.UseNpgsql(connectionString);
+				options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+			});
+		}
+		else
+		{
+			services.AddDbContextPool<ApplicationDBContext, SqlServerDBContext>(
+			options =>
+			{
+				options.UseSqlServer(
+				configuration.GetConnectionString("StringConnection"),
+				b => b.MigrationsAssembly(typeof(SqlServerDBContext).Assembly.FullName)
+				.CommandTimeout(30)
+				.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+				options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+			});
+		}
+		services.AddIdentity<ApplicationUser, ApplicationRole>(
+		options =>
+		{
+			options.Password.RequiredLength = 8;
+			options.Password.RequireNonAlphanumeric = true;
+			options.Password.RequireUppercase = true;
+			options.Password.RequireLowercase = true;
+			options.Password.RequireDigit = true;
+			options.User.RequireUniqueEmail = true;
+		})
+		.AddEntityFrameworkStores<ApplicationDBContext>()
+		.AddDefaultTokenProviders();
+		services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+		services.AddSingleton<IUserStreamService, UserStreamService>();
+		services.AddSingleton<INotificationService, NotificationService>();
+		services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+		services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
+		services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
+		services.AddScoped<ITokenManagerService, TokenManagerService>();
+		services.AddScoped<ICookieTokenManager, CookieTokenManager>();
+		services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+		services.AddScoped<IIdentityService, IdentityService>();
+		services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
+		services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
+		services.AddScoped<IFileReadService, FileReadService>();
+		services.AddScoped<IFileUpdateService, FileUpdateService>();
+		services.AddScoped<IFileDeleteService, FileDeleteService>();
+		services.AddScoped<IFileInsertService, FileInsertService>();
+		services.AddScoped<IExternalAuthService, ExternalAuthService>();
+		services.AddScoped<IVNPayService, VNPayService>();
+		services.AddScoped<IPayOSService, PayOSService>();
+		services.AddScoped<ISievePaginator, SievePaginator>();
+		services.AddScoped<IEmailService, EmailService>();
+		services.AddScoped<IUnitOfWork, UnitOfWork>();
+		services.AddHostedService<OrderCleanupService>();
+		services.AddHttpClient();
+		services.Scan(
+		scan => scan
+		.FromAssemblies(Assembly.GetExecutingAssembly())
+		.AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
+		.AsImplementedInterfaces()
+		.WithScopedLifetime());
+		services.AddHostedService<SupplierContractExpiryWorker>();
+		return services;
+	}
 }

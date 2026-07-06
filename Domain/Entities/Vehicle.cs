@@ -91,5 +91,5 @@ public class Vehicle : BaseEntity
 
     public ICollection<VehicleDocument> Documents { get; set; } = new List<VehicleDocument>();
 
-    public ICollection<MaintenanceHistory> MaintenanceHistories { get; set; } = new List<MaintenanceHistory>();
+
 }

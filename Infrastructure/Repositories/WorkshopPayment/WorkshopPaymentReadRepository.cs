@@ -1,65 +1,66 @@
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.WorkshopPayment;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
-using Sieve.Services;
-using System.Linq;
+using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories.WorkshopPayment;
 
-public class WorkshopPaymentReadRepository : IWorkshopPaymentReadRepository
+public class WorkshopPaymentReadRepository(
+    ApplicationDBContext context,
+    ISievePaginator paginator) : IWorkshopPaymentReadRepository
 {
-    private readonly ApplicationDBContext _context;
-    private readonly ISieveProcessor _sieveProcessor;
-    private readonly ISievePaginator _paginator;
-
-    public WorkshopPaymentReadRepository(
-        ApplicationDBContext context,
-        ISieveProcessor sieveProcessor,
-        ISievePaginator paginator)
-    {
-        _context = context;
-        _sieveProcessor = sieveProcessor;
-        _paginator = paginator;
-    }
-
-    public async Task<PagedResult<Domain.Entities.WorkshopPayment>> GetPagedAsync(
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
-        CancellationToken cancellationToken)
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<global::Domain.Entities.WorkshopPayment, bool>>? filter = null,
+        CancellationToken cancellationToken = default)
     {
-        var query = _context.WorkshopPayments.AsNoTracking().Where(x => x.DeletedAt == null);
-        var paged = await _paginator.ApplyAsync<Domain.Entities.WorkshopPayment, Domain.Entities.WorkshopPayment>(
-            query,
-            sieveModel,
-            cancellationToken: cancellationToken);
-        return paged;
+        var query = GetQueryable(mode);
+        if (filter != null) query = query.Where(filter);
+        return paginator.ApplyAsync<global::Domain.Entities.WorkshopPayment, TResponse>(query, sieveModel, mode, cancellationToken);
     }
 
-    public async Task<Domain.Entities.WorkshopPayment?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    internal IQueryable<global::Domain.Entities.WorkshopPayment> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return await _context.WorkshopPayments
-            .FirstOrDefaultAsync(x => x.Id == id && x.DeletedAt == null, cancellationToken);
+        var query = context.Set<global::Domain.Entities.WorkshopPayment>().IgnoreQueryFilters();
+        if (mode == DataFetchMode.ActiveOnly)
+            query = query.Where(x => x.DeletedAt == null);
+        else if (mode == DataFetchMode.DeletedOnly)
+            query = query.Where(x => x.DeletedAt != null);
+        return query.AsNoTracking();
     }
 
-    public async Task<object> GetStatsAsync(CancellationToken cancellationToken)
+    public Task<IEnumerable<global::Domain.Entities.WorkshopPayment>> GetAllAsync(
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        var today = DateTimeOffset.UtcNow.Date;
-        var startOfMonth = new DateTimeOffset(today.Year, today.Month, 1, 0, 0, 0, TimeSpan.Zero);
-        var query = _context.WorkshopPayments.AsNoTracking().Where(x => x.DeletedAt == null);
-        var unpaid = await query.Where(x => x.PaymentStatus == "Unpaid").CountAsync(cancellationToken);
-        var unpaidAmount = await query.Where(x => x.PaymentStatus == "Unpaid")
-            .SumAsync(x => (double?)x.TotalAmount ?? 0, cancellationToken);
-        var partial = await query.Where(x => x.PaymentStatus == "Partial").CountAsync(cancellationToken);
-        var partialAmount = await query.Where(x => x.PaymentStatus == "Partial")
-            .SumAsync(x => (double?)x.TotalAmount ?? 0, cancellationToken);
-        var paidTodayQuery = query.Where(x => x.PaymentStatus == "Paid" && x.PaidAt != null && x.PaidAt >= today);
-        var paidToday = await paidTodayQuery.CountAsync(cancellationToken);
-        var paidTodayAmount = await paidTodayQuery.SumAsync(x => (double?)x.TotalAmount ?? 0, cancellationToken);
-        var monthRevenue = await query.Where(
-            x => x.PaymentStatus == "Paid" && x.PaidAt != null && x.PaidAt >= startOfMonth)
-            .SumAsync(x => (double?)x.TotalAmount ?? 0, cancellationToken);
-        return new { unpaid, unpaidAmount, partial, partialAmount, paidToday, paidTodayAmount, monthRevenue };
+        return GetQueryable(mode).ToListAsync(cancellationToken)
+            .ContinueWith<IEnumerable<global::Domain.Entities.WorkshopPayment>>(t => t.Result, cancellationToken);
+    }
+
+    public Task<global::Domain.Entities.WorkshopPayment?> GetByIdAsync(
+        int id,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return GetQueryable(mode)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+            .ContinueWith(t => t.Result, cancellationToken);
+    }
+
+    public Task<IEnumerable<global::Domain.Entities.WorkshopPayment>> GetBySourceAsync(
+        string sourceType,
+        int sourceId,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return GetQueryable(mode)
+            .Where(x => x.SourceType == sourceType && x.SourceId == sourceId)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken)
+            .ContinueWith<IEnumerable<global::Domain.Entities.WorkshopPayment>>(t => t.Result, cancellationToken);
     }
 }

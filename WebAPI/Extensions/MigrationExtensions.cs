@@ -53,8 +53,7 @@ public static class MigrationExtensions
         await SalesAndInventorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await CarrierPartnerSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await LogisticsDataSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-        await WorkshopAndServiceSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-    }
+            }
 
     private static async Task ApplyMigrationsSafelyAsync(ApplicationDBContext dbContext, ILogger<Program> logger, CancellationToken cancellationToken)
     {
@@ -134,6 +133,8 @@ public static class MigrationExtensions
             "20260509132251_InitialCreate" => existingObjects.Contains("Banner"),
             "20260703140314_AddSalesAndWorkshopInvoicesAndWarranty"
                 => existingObjects.Contains("Supplier.PartnerTypeId"),
+            "20260704133950_AddPasswordResetTokenFields"
+                => existingObjects.Contains("Users.PasswordResetToken"),
             _ => false,
         };
     }

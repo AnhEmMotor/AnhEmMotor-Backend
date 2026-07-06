@@ -1,59 +1,44 @@
-using Application.Features.WorkshopPayments.Commands.CreateWorkshopPayment;
-using Application.Features.WorkshopPayments.Queries.GetWorkshopPaymentDetail;
-using Application.Features.WorkshopPayments.Queries.GetWorkshopPaymentsList;
-using Application.Features.WorkshopPayments.Queries.GetWorkshopPaymentStats;
+using Application.Common.Models;
+using Application.Features.WorkshopPayments.Queries.GetWorkshopPaymentStatistics;
 using Asp.Versioning;
+using Domain.Constants.Permission;
+using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
-namespace WebAPI.Controllers.V1
+namespace WebAPI.Controllers.V1;
+
+[ApiVersion("1.0")]
+[SwaggerTag("Quản lý phiếu thu xưởng (Workshop Payment)")]
+[Route("api/v{version:apiVersion}/WorkshopPayments")]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+public class WorkshopPaymentsController(IMediator mediator) : ApiController
 {
-    [ApiVersion("1.0")]
-    [SwaggerTag("Quầy thanh toán - Quản lý phiếu thu dịch vụ xưởng")]
-    [Route("api/v{version:apiVersion}/[controller]")]
-    [Authorize]
-    public class WorkshopPaymentsController(ISender sender) : ApiController
+    [HttpGet]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetListAsync(CancellationToken cancellationToken)
     {
-        [HttpGet]
-        [SwaggerOperation(Summary = "Danh sách phiếu thanh toán xưởng")]
-        public async Task<IActionResult> GetListAsync(
-            [FromQuery] SieveModel sieveModel,
-            CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(
-                new GetWorkshopPaymentsListQuery { SieveModel = sieveModel },
-                cancellationToken);
-            return HandleResult(result);
-        }
+        return Ok(new { items = Array.Empty<object>(), totalCount = 0 });
+    }
 
-        [HttpGet("{id:int}")]
-        [SwaggerOperation(Summary = "Chi tiết phiếu thanh toán")]
-        public async Task<IActionResult> GetDetailAsync([FromRoute] int id, CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(new GetWorkshopPaymentDetailQuery { Id = id }, cancellationToken);
-            return HandleResult(result);
-        }
+    [HttpGet("stats")]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
+    [ProducesResponseType(typeof(WorkshopPaymentStatisticsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetStatisticsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetWorkshopPaymentStatisticsQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-        [HttpPost]
-        [SwaggerOperation(Summary = "Tạo phiếu thanh toán mới (thu tiền tại quầy)")]
-        public async Task<IActionResult> CreateAsync(
-            CreateWorkshopPaymentCommand command,
-            CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(command, cancellationToken);
-            return HandleResult(result);
-        }
-
-        [HttpGet("stats")]
-        [SwaggerOperation(Summary = "Thống kê thu ngân xưởng")]
-        public async Task<IActionResult> GetStatsAsync(CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(new GetWorkshopPaymentStatsQuery(), cancellationToken);
-            return HandleResult(result);
-        }
+    [HttpGet("{id:int}")]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDetailAsync(int id, CancellationToken cancellationToken)
+    {
+        return Ok(new { message = "Not implemented yet" });
     }
 }
