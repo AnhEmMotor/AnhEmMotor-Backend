@@ -11,6 +11,12 @@ public class WorkshopDashboardResponse
     public Analytics Analytics { get; set; } = new();
 
     public Productivity Productivity { get; set; } = new();
+
+    public int WarrantyRequestsCount { get; set; }
+
+    public int ComplaintsCount { get; set; }
+
+    public List<RecentItem> RecentItems { get; set; } = new();
 }
 
 public class KpiCards
@@ -97,4 +103,15 @@ public class TechnicianRankingDto
     public decimal TotalRevenue { get; set; }
 
     public double ComplaintRate { get; set; }
+}
+
+public class RecentItem
+{
+    public string TicketId { get; set; } = string.Empty;
+
+    public string Type { get; set; } = string.Empty;
+
+    public string CustomerName { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
 }

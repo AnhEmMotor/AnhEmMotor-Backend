@@ -1,4 +1,5 @@
 using Application.ApiContracts.Statistical.Responses;
+using Application.Api.Contracts.Statistical.Responses;
 using Application.Features.FinanceContracts;
 using Application.Interfaces.Repositories.Statistical;
 using Domain.Constants.InventoryReceipt;
@@ -12,6 +13,12 @@ namespace Infrastructure.Repositories.Statistical;
 
 public class StatisticalReadRepository(ApplicationDBContext context) : IStatisticalReadRepository
 {
+    public async Task<WorkshopDashboardResponse> GetWorkshopDashboardOverviewAsync(string from, string to, CancellationToken cancellationToken)
+    {
+        // Mock implementation
+        return await Task.FromResult(new WorkshopDashboardResponse());
+    }
+
     public Task<List<RecentOrderResponse>> GetRecentOrdersAsync(int count, CancellationToken cancellationToken)
     {
         return context.OutputOrders

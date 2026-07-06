@@ -10,7 +10,26 @@ using WebAPI.Middleware;
 using WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    try
+    {
+        using var httpListener = new System.Net.HttpListener();
+        httpListener.Prefixes.Add("http://127.0.0.1:5000/");
+        httpListener.Start();
+        httpListener.Stop();
+    }
+    catch (System.Net.HttpListenerException)
+    {
+        try { System.Diagnostics.Process.GetProcessesByName("dotnet").ToList().ForEach(p => p.Kill(true)); } catch { }
+        try { System.Diagnostics.Process.GetProcessesByName("WebAPI").ToList().ForEach(p => p.Kill(true)); } catch { }
+        System.Threading.Thread.Sleep(500);
+    }
+}
+
 builder.Host.UseSerilog();
+builder.Host.ConfigureHostOptions(opts => opts.BackgroundServiceExceptionBehavior = Microsoft.Extensions.Hosting.BackgroundServiceExceptionBehavior.Ignore);
 var configuration = builder.Configuration;
 var environment = builder.Environment;
 var customUploadPath = configuration["LocalFileStorage:UploadPath"];

@@ -1,6 +1,7 @@
 using Application.ApiContracts.Vehicle.Responses;
 using Application.Features.Vehicles.Commands.CreateVehicle;
 using Application.Features.Vehicles.Commands.TransferOwnership;
+using Application.Features.Vehicles.Queries.GetVehiclePortfolio;
 using Application.Features.Vehicles.Queries.GetVehicles;
 using Asp.Versioning;
 using MediatR;
@@ -73,6 +74,24 @@ CancellationToken cancellationToken)
 {
 command.Id = id;
 var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+return HandleResult(result);
+}
+
+/// <summary>
+/// Tra cứu hồ sơ xe theo VIN, biển số, số điện thoại
+/// </summary>
+[HttpGet("portfolio")]
+[Authorize]
+[SwaggerOperation(Summary = "Tra cứu hồ sơ xe")]
+public async Task<IActionResult> GetPortfolioAsync(
+[FromQuery] string query,
+[FromQuery] string queryType,
+[FromQuery] int page = 1,
+[FromQuery] int pageSize = 5,
+CancellationToken cancellationToken = default)
+{
+var result = await mediator.Send(
+new GetVehiclePortfolioQuery(query ?? "", queryType ?? "auto", page, pageSize), cancellationToken).ConfigureAwait(false);
 return HandleResult(result);
 }
 }

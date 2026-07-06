@@ -14,12 +14,20 @@ public class SupplierContractExpiryWorker(IServiceProvider serviceProvider) : Ba
         {
             try
             {
+                await Task.Delay(TimeSpan.FromHours(24), stoppingToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+            try
+            {
                 await UpdateExpiredContractsAsync(stoppingToken).ConfigureAwait(false);
                 await SendExpiryWarningsAsync(stoppingToken).ConfigureAwait(false);
-            } catch
+            }
+            catch
             {
             }
-            await Task.Delay(TimeSpan.FromHours(24), stoppingToken).ConfigureAwait(false);
         }
     }
 
@@ -29,27 +37,26 @@ public class SupplierContractExpiryWorker(IServiceProvider serviceProvider) : Ba
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var now = DateTimeOffset.UtcNow;
         var expiredContracts = await context.SupplierContracts
-            .IgnoreQueryFilters()
-            .Where(c => c.Status == "Active" && c.ExpirationDate.HasValue && c.ExpirationDate.Value < now)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        .IgnoreQueryFilters()
+        .Where(c => c.Status == "Active" && c.ExpirationDate.HasValue && c.ExpirationDate.Value < now)
+        .ToListAsync(cancellationToken)
+        .ConfigureAwait(false);
         if (expiredContracts.Count == 0)
             return;
         foreach (var contract in expiredContracts)
         {
             contract.Status = "Expired";
             context.SupplierContractAuditLogs
-                .Add(
-                    new SupplierContractAuditLog
-                    {
-                        SupplierContractId = contract.Id,
-                        Action = "StatusChange",
-                        Details =
-                            $"Hợp đồng {contract.ContractNumber} tự động chuyển sang trạng thái Expired do hết hạn.",
-                        ChangedBy = "System (Background Worker)",
-                        OldValue = "Active",
-                        NewValue = "Expired"
-                    });
+            .Add(
+                new SupplierContractAuditLog
+                {
+                    SupplierContractId = contract.Id,
+                    Action = "StatusChange",
+                    Details = $"Hợp đồng {contract.ContractNumber} tự động chuyển sang trạng thái Expired do hết hạn.",
+                    ChangedBy = "System (Background Worker)",
+                    OldValue = "Active",
+                    NewValue = "Expired"
+                });
         }
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -61,36 +68,35 @@ public class SupplierContractExpiryWorker(IServiceProvider serviceProvider) : Ba
         var now = DateTimeOffset.UtcNow;
         var warningThreshold = now.AddDays(30);
         var expiringSoon = await context.SupplierContracts
-            .IgnoreQueryFilters()
-            .Where(
-                c => c.Status == "Active" &&
-                    c.ExpirationDate.HasValue &&
-                    c.ExpirationDate.Value > now &&
-                    c.ExpirationDate.Value <= warningThreshold)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        .IgnoreQueryFilters()
+        .Where(
+            c => c.Status == "Active" &&
+            c.ExpirationDate.HasValue &&
+            c.ExpirationDate.Value > now &&
+            c.ExpirationDate.Value <= warningThreshold)
+        .ToListAsync(cancellationToken)
+        .ConfigureAwait(false);
         foreach (var contract in expiringSoon)
         {
             var alreadyLogged = await context.SupplierContractAuditLogs
-                .IgnoreQueryFilters()
-                .AnyAsync(
-                    al => al.SupplierContractId == contract.Id &&
-                        string.Compare(al.Action, "ExpiryWarning") == 0 &&
-                        al.CreatedAt > now.AddDays(-1),
-                    cancellationToken)
-                .ConfigureAwait(false);
+            .IgnoreQueryFilters()
+            .AnyAsync(
+                al => al.SupplierContractId == contract.Id &&
+                string.Compare(al.Action, "ExpiryWarning") == 0 &&
+                al.CreatedAt > now.AddDays(-1),
+                cancellationToken)
+            .ConfigureAwait(false);
             if (!alreadyLogged)
             {
                 context.SupplierContractAuditLogs
-                    .Add(
-                        new SupplierContractAuditLog
-                        {
-                            SupplierContractId = contract.Id,
-                            Action = "ExpiryWarning",
-                            Details =
-                                $"Hợp đồng {contract.ContractNumber} sắp hết hạn trong {(contract.ExpirationDate!.Value - now).Days} ngày.",
-                            ChangedBy = "System (Background Worker)"
-                        });
+                .Add(
+                    new SupplierContractAuditLog
+                    {
+                        SupplierContractId = contract.Id,
+                        Action = "ExpiryWarning",
+                        Details = $"Hop dong {contract.ContractNumber} sap het han trong {(contract.ExpirationDate!.Value - now).Days} ngay.",
+                        ChangedBy = "System (Background Worker)"
+                    });
             }
         }
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
