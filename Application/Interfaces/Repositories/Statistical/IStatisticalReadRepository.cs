@@ -46,4 +46,8 @@ public interface IStatisticalReadRepository
     Task<CustomerAnalyticsResponse> GetCustomerAnalyticsAsync(CancellationToken cancellationToken);
 
     Task<CustomerServiceAnalyticsResponse> GetCustomerServiceAnalyticsAsync(CancellationToken cancellationToken);
+
+ Task<IEnumerable<RevenueByCategoryResponse>> GetRevenueByCategoryAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken);
+
+ Task<IEnumerable<DailyCategoryRevenueResponse>> GetDailyCategoryRevenueAsync(int days, CancellationToken cancellationToken);
 }

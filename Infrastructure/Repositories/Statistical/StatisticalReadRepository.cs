@@ -1267,6 +1267,76 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             Complaints = complaintList
         };
     }
+
+  public async Task<IEnumerable<RevenueByCategoryResponse>> GetRevenueByCategoryAsync(
+      DateTimeOffset start,
+      DateTimeOffset end,
+      CancellationToken cancellationToken)
+  {
+    var data = await context.OutputInfos
+      .IgnoreQueryFilters()
+      .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+      .Where(x =>
+        x.o.CreatedAt >= start && x.o.CreatedAt <= end && (
+          string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
+          string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
+          string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
+      .Select(x => new
+      {
+        CategoryName = x.oi.ProductVariant != null && x.oi.ProductVariant.Product != null && x.oi.ProductVariant.Product.ProductCategory != null
+          ? x.oi.ProductVariant.Product.ProductCategory.Name
+          : "Khác",
+        Revenue = (x.oi.Price ?? 0M) * (x.oi.Count ?? 0)
+      })
+      .ToListAsync(cancellationToken)
+      .ConfigureAwait(false);
+
+    decimal totalRevenue = data.Sum(d => d.Revenue);
+    return data
+      .GroupBy(d => d.CategoryName)
+      .Select(g => new RevenueByCategoryResponse
+      {
+        CategoryName = g.Key,
+        Revenue = g.Sum(x => x.Revenue),
+        Percentage = totalRevenue > 0 ? Math.Round(g.Sum(x => x.Revenue) / totalRevenue * 100, 1) : 0
+      })
+      .OrderByDescending(r => r.Revenue)
+      .ToList();
+  }
+
+  public async Task<IEnumerable<DailyCategoryRevenueResponse>> GetDailyCategoryRevenueAsync(
+      int days, CancellationToken cancellationToken)
+  {
+    var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-(days - 1)));
+    var startDt = new DateTimeOffset(startDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+
+    var raw = await context.OutputInfos
+      .IgnoreQueryFilters()
+      .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+      .Where(x => x.o.CreatedAt != null && x.o.CreatedAt >= startDt && (
+          string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
+          string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
+          string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
+      .Select(x => new
+      {
+        Day = DateOnly.FromDateTime(x.o.CreatedAt!.Value.DateTime),
+        CategoryName = x.oi.ProductVariant != null && x.oi.ProductVariant.Product != null && x.oi.ProductVariant.Product.ProductCategory != null
+          ? x.oi.ProductVariant.Product.ProductCategory.Name : "Khác",
+        Revenue = (x.oi.Price ?? 0M) * (x.oi.Count ?? 0)
+      })
+      .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+    var dates = Enumerable.Range(0, days).Select(i => startDate.AddDays(i)).ToList();
+    return dates.SelectMany(d => raw
+      .Where(r => r.Day == d)
+      .GroupBy(r => r.CategoryName)
+      .Select(g => new DailyCategoryRevenueResponse
+      {
+        ReportDay = d.ToString("dd/MM"),
+        CategoryName = g.Key,
+        Revenue = g.Sum(x => x.Revenue)
+      })).ToList();
+  }
 }
 
 

@@ -15,6 +15,9 @@ using Application.Features.Statistical.Queries.GetAdminDashboardOverview;
 using Application.Features.Statistical.Queries.GetAdminRevenueAnalysis;
 using Application.Features.Statistical.Queries.GetAdminProductReport;
 using Application.Features.Statistical.Queries.GetAdminWarehouseReport;
+using Application.Features.Statistical.Queries.GetRevenueByCategory;
+using Application.Features.Statistical.Queries.GetDailyCategoryRevenue;
+using Application.ApiContracts.Statistical.Responses;
 using Application.Features.Order.Queries.GetOrderStatistics;
 using Asp.Versioning;
 using Domain.Constants.Permission;
@@ -544,4 +547,149 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
             invoicesData.OrderByDescending(x => x.Date).ToList()
         ));
     }
+
+    /// <summary>
+    /// Thống kê hợp đồng tổng hợp (Bán xe & Nhà cung cấp).
+    /// </summary>
+    [HttpGet("contract-overview")]
+    [RequiresAnyPermissions(
+        Permissions.Admin.DashboardManagement.View,
+        Permissions.Accountant.DashboardManagement.View)]
+    [ProducesResponseType(typeof(ContractOverviewResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetContractOverviewAsync(
+        [FromQuery] string startDate,
+        [FromQuery] string endDate,
+        CancellationToken cancellationToken = default)
+    {
+        var start = DateTimeOffset.Parse(startDate);
+        var end = DateTimeOffset.Parse(endDate).AddDays(1).AddTicks(-1);
+
+        var salesContracts = await dbContext.SalesContracts
+            .IgnoreQueryFilters()
+            .Where(c => c.CreatedAt >= start && c.CreatedAt <= end)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        var supplierContracts = await dbContext.SupplierContracts
+            .IgnoreQueryFilters()
+            .Include(c => c.Supplier)
+            .Where(c => c.CreatedAt >= start && c.CreatedAt <= end)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        int totalSalesCount = salesContracts.Count;
+        decimal totalSalesValue = salesContracts.Sum(c => c.ActualSalePrice);
+        
+        int totalSupplierCount = supplierContracts.Count;
+        decimal totalSupplierValue = supplierContracts.Sum(c => c.ContractValue);
+
+        var trendDataDict = new Dictionary<string, (decimal Sales, decimal Supplier)>();
+        var statusDataDict = new Dictionary<string, int>();
+        var topSupplierDict = new Dictionary<string, decimal>();
+        var contractsData = new List<ContractListItem>();
+
+        for (var d = start.Date; d <= end.Date; d = d.AddDays(1))
+        {
+            trendDataDict[d.ToString("dd/MM")] = (0, 0);
+        }
+
+        foreach (var sc in salesContracts)
+        {
+            var dayStr = sc.CreatedAt?.ToString("dd/MM") ?? start.ToString("dd/MM");
+            if (trendDataDict.ContainsKey(dayStr))
+            {
+                var cur = trendDataDict[dayStr];
+                trendDataDict[dayStr] = (cur.Sales + sc.ActualSalePrice, cur.Supplier);
+            }
+
+            var statusName = sc.Status ?? "Nháp";
+            if (statusDataDict.ContainsKey(statusName)) statusDataDict[statusName]++;
+            else statusDataDict[statusName] = 1;
+
+            contractsData.Add(new ContractListItem(
+                sc.Id.ToString(),
+                sc.ContractNumber ?? "HD-BX-...",
+                "Bán xe",
+                sc.CustomerFullName ?? "Khách lẻ",
+                sc.ActualSalePrice,
+                statusName,
+                sc.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? ""
+            ));
+        }
+
+        foreach (var supc in supplierContracts)
+        {
+            var dayStr = supc.CreatedAt?.ToString("dd/MM") ?? start.ToString("dd/MM");
+            if (trendDataDict.ContainsKey(dayStr))
+            {
+                var cur = trendDataDict[dayStr];
+                trendDataDict[dayStr] = (cur.Sales, cur.Supplier + supc.ContractValue);
+            }
+
+            var statusName = supc.Status ?? "Draft";
+            if (statusDataDict.ContainsKey(statusName)) statusDataDict[statusName]++;
+            else statusDataDict[statusName] = 1;
+
+            var supplierName = supc.Supplier?.Name ?? "NCC Khác";
+            if (topSupplierDict.ContainsKey(supplierName)) topSupplierDict[supplierName] += supc.ContractValue;
+            else topSupplierDict[supplierName] = supc.ContractValue;
+
+            contractsData.Add(new ContractListItem(
+                supc.Id.ToString(),
+                supc.ContractNumber ?? "HD-NCC-...",
+                "Nhà cung cấp",
+                supplierName,
+                supc.ContractValue,
+                statusName,
+                supc.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? ""
+            ));
+        }
+
+        var trendDataList = trendDataDict.Select(kvp => new ContractTrendData(kvp.Key, kvp.Value.Sales, kvp.Value.Supplier)).ToList();
+        var statusDataList = statusDataDict.Select(kvp => new ContractStatusData(kvp.Key, kvp.Value)).ToList();
+        var topSuppliersList = topSupplierDict.OrderByDescending(x => x.Value).Take(5)
+            .Select(kvp => new ContractTopSupplierData(kvp.Key, kvp.Value)).ToList();
+
+        return Ok(new ContractOverviewResponse(
+            new ContractOverviewKpi(totalSalesCount, totalSalesValue, totalSupplierCount, totalSupplierValue),
+            trendDataList,
+            statusDataList,
+            topSuppliersList,
+            contractsData.OrderByDescending(x => x.Date).ToList()
+        ));
+    }
+
+  /// <summary>
+  /// Lấy doanh thu phân theo danh mục sản phẩm.
+  /// </summary>
+  [HttpGet("revenue-by-category")]
+  [RequiresAnyPermissions(
+    Permissions.Admin.DashboardManagement.View,
+    Permissions.Accountant.DashboardManagement.View)]
+  [ProducesResponseType(typeof(IEnumerable<RevenueByCategoryResponse>), StatusCodes.Status200OK)]
+  public async Task<IActionResult> GetRevenueByCategoryAsync(
+      [FromQuery] DateTimeOffset start,
+      [FromQuery] DateTimeOffset end,
+      CancellationToken cancellationToken)
+  {
+    var query = new GetRevenueByCategoryQuery(start, end);
+    var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+    return HandleResult(result);
+  }
+
+  /// <summary>
+  /// Lấy doanh thu theo ngày và danh mục (multi-series cho biểu đồ).
+  /// </summary>
+  [HttpGet("daily-category-revenue")]
+  [RequiresAnyPermissions(
+    Permissions.Admin.DashboardManagement.View,
+    Permissions.Accountant.DashboardManagement.View,
+    Permissions.Factory.DashboardManagement.View)]
+  [ProducesResponseType(typeof(IEnumerable<DailyCategoryRevenueResponse>), StatusCodes.Status200OK)]
+  public async Task<IActionResult> GetDailyCategoryRevenueAsync(
+      [FromQuery] int days = 7,
+      CancellationToken cancellationToken = default)
+  {
+    var query = new GetDailyCategoryRevenueQuery(days);
+    var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+    return HandleResult(result);
+  }
 }
