@@ -55,10 +55,19 @@ public class WarrantyClaimsController(ISender sender) : ApiController
  {
   var result = await sender.Send(command, cancellationToken);
   if (!result.IsSuccess) return HandleResult(result);
-  return CreatedAtAction(nameof(GetDetailAsync), new { id = result.Value, version = "1.0" }, result.Value);
+  return CreatedAtAction("GetDetail", new { id = result.Value, version = "1.0" }, result.Value);
  }
 
- [HttpPatch("{id:int}/status")]
+ [HttpDelete("{id:int}")]
+[HasPermission(Permissions.Factory.RepairOrderManagement.AssignTechnician)]
+[ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
+public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
+{
+  var result = await sender.Send(new DeleteWarrantyClaimCommand(id), cancellationToken);
+  return HandleResult(result);
+}
+
+[HttpPatch("{id:int}/status")]
  [HasPermission(Permissions.Factory.RepairOrderManagement.AssignTechnician)]
  [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
  public async Task<IActionResult> UpdateStatusAsync(int id, [FromBody] UpdateWarrantyClaimCommand command, CancellationToken cancellationToken)

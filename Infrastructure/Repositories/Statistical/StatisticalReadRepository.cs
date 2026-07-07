@@ -1,5 +1,6 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Api.Contracts.Statistical.Responses;
+using WorkshopRevenueComparison = Application.Api.Contracts.Statistical.Responses.RevenueComparison;
 using Application.Features.FinanceContracts;
 using Application.Interfaces.Repositories.Statistical;
 using Domain.Constants.InventoryReceipt;
@@ -15,8 +16,101 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 {
     public async Task<WorkshopDashboardResponse> GetWorkshopDashboardOverviewAsync(string from, string to, CancellationToken cancellationToken)
     {
-        // Mock implementation
-        return await Task.FromResult(new WorkshopDashboardResponse());
+        var fromDate = DateTimeOffset.Parse(from).ToUniversalTime();
+        var toDate = DateTimeOffset.Parse(to).ToUniversalTime();
+
+        var repairOrders = await context.MaintenanceHistory
+            .Where(m => m.CreatedAt >= fromDate && m.CreatedAt <= toDate)
+            .ToListAsync(cancellationToken);
+
+        var inProgressCount = repairOrders.Count(r => r.TotalCost == 0);
+        
+        var completedOrders = repairOrders.Where(r => r.TotalCost > 0).ToList();
+        double avgHours = 0;
+        if (completedOrders.Any())
+        {
+            avgHours = completedOrders.Average(r => 
+                r.UpdatedAt.HasValue && r.CreatedAt.HasValue 
+                ? (r.UpdatedAt.Value - r.CreatedAt.Value).TotalHours 
+                : 2.5);
+        }
+
+        var workshopPayments = await context.WorkshopPayments
+            .Where(p => p.CreatedAt >= fromDate && p.CreatedAt <= toDate)
+            .ToListAsync(cancellationToken);
+        var workshopRevenue = workshopPayments.Sum(p => p.TotalAmount);
+
+        var retailOrders = await context.OutputInfos
+            .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+            .Where(x => x.o.CreatedAt >= fromDate && x.o.CreatedAt <= toDate && 
+                        (x.o.StatusId == OrderStatus.Completed || x.o.StatusId == OrderStatus.Delivering))
+            .ToListAsync(cancellationToken);
+        var retailRevenue = retailOrders.Sum(x => (x.oi.Price ?? 0) * (x.oi.Count ?? 0));
+
+        var empIds = completedOrders.Where(r => r.TechnicianId.HasValue).Select(r => r.TechnicianId!.Value).Distinct().ToList();
+        var employees = await context.EmployeeProfiles
+            .Include(e => e.User)
+            .Where(e => empIds.Contains(e.Id))
+            .ToListAsync(cancellationToken);
+
+        var techRankings = new List<TechnicianRankingDto>();
+        foreach (var empId in empIds)
+        {
+            var empOrders = completedOrders.Where(r => r.TechnicianId == empId).ToList();
+            var emp = employees.FirstOrDefault(e => e.Id == empId);
+            techRankings.Add(new TechnicianRankingDto
+            {
+                TechnicianName = emp?.User?.FullName ?? "Không rõ",
+                CompletedTickets = empOrders.Count,
+                TotalRevenue = empOrders.Sum(o => o.TotalCost),
+                ComplaintRate = 0
+            });
+        }
+        techRankings = techRankings.OrderByDescending(t => t.CompletedTickets).ToList();
+
+        var warrantyCount = await context.WarrantyClaims
+            .Where(w => w.CreatedAt >= fromDate && w.CreatedAt <= toDate)
+            .CountAsync(cancellationToken);
+
+        var complaintsCount = await context.CustomerFeedbacks
+            .Where(c => c.CreatedAt >= fromDate && c.CreatedAt <= toDate && c.FeedbackArea == "Workshop")
+            .CountAsync(cancellationToken);
+
+        return new WorkshopDashboardResponse
+        {
+            KpiCards = new KpiCards
+            {
+                InProgressCount = inProgressCount,
+                AvgCompletionHours = Math.Round(avgHours, 1),
+                CumulativeRevenue = workshopRevenue
+            },
+            Alerts = new UrgentAlerts
+            {
+                OverdueTickets = new List<OverdueTicketDto>(),
+                PartShortages = new List<PartShortageDto>()
+            },
+            Analytics = new Analytics
+            {
+                RevenueComparison = new WorkshopRevenueComparison
+                {
+                    WorkshopRevenue = workshopRevenue,
+                    RetailRevenue = retailRevenue
+                },
+                RevenueSources = new List<RevenueSourceDto>
+                {
+                    new RevenueSourceDto { Source = "Sửa chữa dịch vụ", Amount = workshopRevenue },
+                    new RevenueSourceDto { Source = "Bán lẻ phụ tùng/xe", Amount = retailRevenue }
+                }
+            },
+            Productivity = new Productivity
+            {
+                TechnicianStatuses = new List<TechnicianStatusDto>(),
+                TechnicianRankings = techRankings
+            },
+            WarrantyRequestsCount = warrantyCount,
+            ComplaintsCount = complaintsCount,
+            RecentItems = new List<RecentItem>()
+        };
     }
 
     public Task<List<RecentOrderResponse>> GetRecentOrdersAsync(int count, CancellationToken cancellationToken)

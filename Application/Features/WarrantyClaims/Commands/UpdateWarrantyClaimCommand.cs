@@ -5,14 +5,14 @@ namespace Application.Features.WarrantyClaims.Commands;
 
 public record UpdateWarrantyClaimCommand(
     int Id,
-    int VehicleId,
-    string IssueDescription,
-    string? MediaUrls,
-    string? ServiceCenterName,
-    string? ManufacturerClaimNumber,
-    int Status,
-    string? ManufacturerDecision,
-    bool IsRecall,
-    decimal TotalPartsCost,
-    decimal TotalLaborCost
+    int? VehicleId = null,
+    string? IssueDescription = null,
+    string? MediaUrls = null,
+    string? ServiceCenterName = null,
+    string? ManufacturerClaimNumber = null,
+    int? Status = null,
+    string? ManufacturerDecision = null,
+    bool? IsRecall = null,
+    decimal? TotalPartsCost = null,
+    decimal? TotalLaborCost = null
 ) : IRequest<Result>;

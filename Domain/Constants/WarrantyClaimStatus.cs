@@ -5,6 +5,7 @@ public static class WarrantyClaimStatus
 	public const int Received = 1;
 	public const int AwaitingManufacturer = 2;
 	public const int Approved = 3;
+	public const int ReplacedByTechnician = 4;
 	public const int Completed = 5;
 	public const int Rejected = 6;
 
@@ -13,6 +14,7 @@ public static class WarrantyClaimStatus
 		Received => "Tiếp nhận",
 		AwaitingManufacturer => "Chờ hãng thẩm định",
 		Approved => "Đã duyệt bồi hoàn",
+		ReplacedByTechnician => "Thợ thay thế",
 		Completed => "Hoàn tất",
 		Rejected => "Từ chối",
 		_ => "Không xác định"
