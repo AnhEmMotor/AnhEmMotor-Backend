@@ -22,9 +22,13 @@ namespace Infrastructure.Repositories
 
         public decimal TotalSales { get; set; }
 
+        public decimal TargetSales { get; set; }
+
         public decimal CommissionPaid { get; set; }
 
         public string KpiStatus { get; set; } = string.Empty;
+
+        public bool IsTopSeller { get; set; }
     }
 
     public class TransactionLogDto

@@ -68,14 +68,13 @@ namespace Infrastructure.Repositories
                 TotalOperatingExpenses = totalExpenses,
                 GrossProfit = revenue - cogs,
                 NetProfit = revenue - cogs - totalExpenses,
-                ExpenseDetails =
-                    expenses.Select(
-                        e => new ExpenseDetailDto
-                        {
-                            Category = e.Category == ExpenseCategory.Fixed ? "Cố định" : "Biến đổi",
-                            Amount = e.Amount
-                        })
-                        .ToList()
+                ExpenseDetails = expenses.Select(
+                    e => new ExpenseDetailDto
+                    {
+                        Category = e.Category == ExpenseCategory.Fixed ? "Cố định" : "Biến đổi",
+                        Amount = e.Amount
+                    })
+                    .ToList()
             };
         }
 
@@ -86,28 +85,60 @@ namespace Infrastructure.Repositories
                 .Select(
                     e => new
                     {
+                        e.Id,
                         FullName = e.User.FullName ?? e.User.UserName,
                         Role = e.JobTitle,
                         Sales = _context.OutputOrders
                             .Where(
-                                o => o.FinishedBy == e.User.Id &&
-                                        o.CreatedAt >= start &&
-                                        o.CreatedAt <= end &&
-                                        o.StatusId == "Completed")
+                                o => o.FinishedBy == e.User.Id
+                                    && o.CreatedAt >= start
+                                    && o.CreatedAt <= end
+                                    && o.StatusId == "Completed")
                             .SelectMany(o => o.OutputInfos)
                             .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0))
                     })
                 .ToListAsync();
-            return staffSales.Select(
-                s => new StaffPerformanceDto
+
+            var result = new List<StaffPerformanceDto>();
+            foreach (var s in staffSales)
+            {
+                var targetSales = await _context.KPIs
+                    .Where(k => k.EmployeeProfileId == s.Id
+                                && k.PeriodStart >= start
+                                && k.PeriodEnd <= end)
+                    .Select(k => k.TargetValue)
+                    .FirstOrDefaultAsync();
+
+                var commissionPaid = await _context.CommissionRecords
+                    .Where(cr => cr.EmployeeProfileId == s.Id
+                                 && cr.DateEarned >= start
+                                 && cr.DateEarned <= end
+                                 && cr.Status == Domain.Entities.CommissionStatus.Confirmed)
+                    .SumAsync(cr => cr.Amount);
+
+                result.Add(
+                    new StaffPerformanceDto
+                    {
+                        EmployeeName = s.FullName ?? string.Empty,
+                        Role = s.Role ?? string.Empty,
+                        TotalSales = s.Sales,
+                        TargetSales = targetSales > 0 ? targetSales : s.Sales,
+                        CommissionPaid = commissionPaid > 0 ? commissionPaid : s.Sales * 0.02m,
+                        KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện"),
+                        IsTopSeller = false
+                    });
+            }
+
+            var maxSales = result.Max(r => r.TotalSales);
+            if (maxSales > 0)
+            {
+                foreach (var r in result)
                 {
-                    EmployeeName = s.FullName ?? string.Empty,
-                    Role = s.Role ?? string.Empty,
-                    TotalSales = s.Sales,
-                    CommissionPaid = s.Sales * 0.02m,
-                    KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện")
-                })
-                .ToList();
+                    r.IsTopSeller = r.TotalSales == maxSales;
+                }
+            }
+
+            return result;
         }
 
         public async Task<List<TransactionLogDto>> GetRecentTransactionsAsync(int limit = 50)
@@ -122,12 +153,12 @@ namespace Infrastructure.Repositories
                         CustomerName = o.CustomerName ?? string.Empty,
                         ProductName =
                             o.OutputInfos
-                                        .Select(
-                                            oi => oi.ProductVariant != null && oi.ProductVariant.Product != null
-                                                            ? oi.ProductVariant.Product.Name
-                                                            : "N/A")
-                                        .FirstOrDefault() ??
-                                    "N/A",
+                                .Select(
+                                    oi => oi.ProductVariant != null && oi.ProductVariant.Product != null
+                                        ? oi.ProductVariant.Product.Name
+                                        : "N/A")
+                                .FirstOrDefault() ??
+                            "N/A",
                         Amount = o.OutputInfos.Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
                         IsRevenue = true,
                         StaffName = "N/A"
