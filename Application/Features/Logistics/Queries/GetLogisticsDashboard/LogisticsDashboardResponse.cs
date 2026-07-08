@@ -7,12 +7,4 @@ public class LogisticsDashboardResponse
 
 {
     public LogisticsDashboardSummaryResponse Summary { get; set; } = new();
-
-    public Dictionary<string, int> FulfillmentFunnel { get; set; } = [];
-
-    public List<LogisticsTrendPointResponse> Trends { get; set; } = [];
-
-    public List<CarrierScoreRowResponse> CarrierScorecard { get; set; } = [];
-
-    public List<LogisticsExceptionRowResponse> Exceptions { get; set; } = [];
 }

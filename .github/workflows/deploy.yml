@@ -49,6 +49,9 @@ jobs:
           PAYOS_RETURN_URL: ${{ secrets.PAYOS__RETURN_URL }}
           PAYOS_CANCEL_URL: ${{ secrets.PAYOS__CANCEL_URL }}
           UPLOAD_PATH: ${{ secrets.UPLOAD_PATH }}
+          GHTK_TOKEN: ${{ secrets.GHTK__TOKEN }}
+          GHTK_SHOP_ID: ${{ secrets.GHTK__SHOP_ID }}
+          GHTK_BASE_URL: ${{ secrets.GHTK__BASE_URL || 'https://services.giaohangtietkiem.vn' }}
         run: >
           jq '
             .Provider = "PostgreSql" |
@@ -78,7 +81,10 @@ jobs:
             .PayOS.BaseUrl = env.PAYOS_BASE_URL |
             .PayOS.ReturnUrl = env.PAYOS_RETURN_URL |
             .PayOS.CancelUrl = env.PAYOS_CANCEL_URL |
-            .LocalFileStorage.UploadPath = env.UPLOAD_PATH
+            .LocalFileStorage.UploadPath = env.UPLOAD_PATH |
+            .GhtkSettings.Token = env.GHTK_TOKEN |
+            .GhtkSettings.ShopId = env.GHTK_SHOP_ID |
+            .GhtkSettings.BaseUrl = env.GHTK_BASE_URL
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
       - name: Restore dependencies
         run: dotnet restore

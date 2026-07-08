@@ -36,13 +36,13 @@ public class ShipmentTrackingResponse
 
     public List<TrackingProductResponse> Products { get; set; } = [];
 
-    public double? OriginLat { get; set; }
+    public double? OriginLatitude { get; set; }
 
-    public double? OriginLng { get; set; }
+    public double? OriginLongitude { get; set; }
 
-    public double? DestLat { get; set; }
+    public double? DestinationLatitude { get; set; }
 
-    public double? DestLng { get; set; }
+    public double? DestinationLongitude { get; set; }
 
     public string? OrderCode { get; set; }
 

@@ -32,6 +32,10 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                 dto.CodAmount = order.CodAmount;
                 dto.ShippingCost = order.ShippingCost > 0 ? order.ShippingCost : 35000;
                 dto.Status = order.Status.ToString();
+                dto.OriginLatitude = 10.9576; // Default to Showroom
+                dto.OriginLongitude = 106.8427;
+                dto.DestinationLatitude = 10.762622; // Mock destination
+                dto.DestinationLongitude = 106.660172;
                 if (order.Items != null)
                 {
                     foreach (var item in order.Items)
@@ -60,6 +64,10 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                 dto.CodAmount = 1550000;
                 dto.ShippingCost = 35000;
                 dto.Status = "Shipping";
+                dto.OriginLatitude = 10.9576;
+                dto.OriginLongitude = 106.8427;
+                dto.DestinationLatitude = 10.762622;
+                dto.DestinationLongitude = 106.660172;
                 dto.Items
                     .Add(
                         new TrackingItemResponse

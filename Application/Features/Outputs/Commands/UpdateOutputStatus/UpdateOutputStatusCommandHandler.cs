@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Vehicle;
+using Application.Interfaces.Services.Shipping;
 using Domain.Constants;
 using Domain.Constants.Lead;
 using Domain.Constants.Order;
@@ -26,7 +27,8 @@ public class UpdateOutputStatusCommandHandler(
     IVehicleReadRepository? vehicleReadRepository = null,
     IVehicleUpdateRepository? vehicleUpdateRepository = null,
     ILeadReadRepository? leadReadRepository = null,
-    ILeadInsertRepository? leadInsertRepository = null) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
+    ILeadInsertRepository? leadInsertRepository = null,
+    IShippingService? shippingService = null) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         UpdateOutputStatusCommand request,
@@ -91,6 +93,14 @@ public class UpdateOutputStatusCommandHandler(
                 if (checkResult.IsFailure)
                 {
                     return Result<OrderDetailResponse>.Failure(checkResult.Errors!);
+                }
+                if (shippingService != null)
+                {
+                    var shippingResult = await shippingService.CreateShippingOrderAsync(output, cancellationToken).ConfigureAwait(false);
+                    if (shippingResult.IsFailure)
+                    {
+                        return Result<OrderDetailResponse>.Failure(shippingResult.Errors!);
+                    }
                 }
                 break;
             case OrderStatus.Cancelled:

@@ -56,13 +56,13 @@ See the [LICENSE](LICENSE) file for details.
   - [3. Application Configuration](#3-application-configuration)
   - [4. Database Creation](#4-database-creation)
 - [3. Create and Manage Database Migrations](#3-create-and-manage-database-migrations)
-  - [Create Migration (Recommended Way)](#create-migration-recommended-way)
-  - [Create Migration Manually (Advanced)](#create-migration-manually-advanced)
-  - [Useful Migration Commands](#useful-migration-commands)
 - [4. Running the application](#4-running-the-application)
-- [5. Test Environment Configuration (Required)](#5-test-environment-configuration-required)
-- [6. GitHub Secrets Configuration (For Production Deploy)](#6-github-secrets-configuration-for-production-deploy)
-- [7. Troubleshooting](#7-troubleshooting)
+- [5. Social Login Configuration Guide](#5-social-login-configuration-guide)
+- [6. Test Environment Configuration (Required)](#6-test-environment-configuration-required)
+- [7. GitHub Secrets Configuration (For Production Deploy)](#7-github-secrets-configuration-for-production-deploy)
+- [8. Online Payment Configuration (English)](#8-online-payment-configuration-english)
+- [9. GHTK (Giao Hàng Tiết Kiệm) Configuration (English)](#9-ghtk-giao-hàng-tiết-kiệm-configuration-english)
+- [10. Troubleshooting](#10-troubleshooting)
 
 # 1. System Requirements
 
@@ -291,7 +291,7 @@ Configure initial data seeding:
 }
 ```
 
-### 8. Some additional settings
+### 9. Some additional settings
 
 - Configure undeletable product categories
 
@@ -468,7 +468,7 @@ https://localhost:7001/swagger
    - **HTTPS:** `https://localhost:7001`
    - **HTTP:** `http://localhost:5000`
 
-## 5. Social Login Configuration Guide
+# 5. Social Login Configuration Guide
 
 If you don't have Social Login credentials yet, follow these steps to create your own Client ID and Client Secret:
 
@@ -513,7 +513,7 @@ If you don't have Social Login credentials yet, follow these steps to create you
       - `https://localhost:7001/signin-facebook`
     - Ensure **"Embedded Browser OAuth Login"** is turned on.
 
-# 5. Test Environment Configuration (Required)
+# 6. Test Environment Configuration (Required)
 
 The project uses **Testcontainers** to automatically create an isolated MySQL environment when running tests.
 
@@ -530,7 +530,7 @@ The project uses **Testcontainers** to automatically create an isolated MySQL en
     - Execute Tests.
     - Automatically clean up afterwards.
 
-# 6. GitHub Secrets Configuration (For Production Deploy)
+# 7. GitHub Secrets Configuration (For Production Deploy)
 
 The following secrets need to be set up in the GitHub repository:
 
@@ -570,6 +570,9 @@ The following secrets need to be set up in the GitHub repository:
 | `PAYOS__RETURN_URL`                | PayOS Return URL                         | `https://anhemmotor.online/payment-processing`                                                           |
 | `PAYOS__CANCEL_URL`                | PayOS Cancel URL                         | `https://anhemmotor.online/payment-processing`                                                           |
 | `UPLOAD_PATH`                      | Persistent image storage path            | `/var/www/anhemmotor/uploads`                                                                            |
+| `GHTK_TOKEN`                       | GHTK API Token                           | `a1b2c3d4e5f6g7h8...`                                                                                    |
+| `GHTK_SHOP_ID`                     | GHTK Shop ID                             | `S229988`                                                                                                |
+| `GHTK_BASE_URL`                    | GHTK API Base URL                        | `https://services.ghtk.vn`                                                                               |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -628,7 +631,7 @@ The following secrets need to be set up in the GitHub repository:
 ["admin@anhem.com:Admin@123456", "manager@anhem.com"]
 ```
 
-# 7. Online Payment Configuration (English)
+# 8. Online Payment Configuration (English)
 
 To enable payment features, you need to obtain credentials from VNPay and PayOS.
 
@@ -651,7 +654,17 @@ To enable payment features, you need to obtain credentials from VNPay and PayOS.
     - **API Key**
     - **Checksum Key**
 
-# 8. Troubleshooting
+# 9. GHTK (Giao Hàng Tiết Kiệm) Configuration (English)
+
+To enable automatic shipping order creation via GHTK, you need to configure the following secrets:
+
+1. **Log in**: Log in to the [GHTK Web Portal](https://khachhang.giaohangtietkiem.vn/).
+2. **Get API Token**: Hover over your Avatar, from the dropdown menu select "Thông tin tài khoản" (Account Information) -> Scroll down to "Cấu hình API" (API Configuration). If you do not have an API token, create a new one and copy it. If you already have one, click "Xem" (View) on the API token you want to use, enter your password, and copy the displayed token. This will be your `GHTK_TOKEN`.
+3. **Setup Webhook**: Also in the "Cấu hình API" section, under "Webhook", create or edit a webhook. For "Data format", choose "X-www-form-encoded". The destination URL is your Backend's API Endpoint (for local development, you can use ngrok to expose your localhost API to the Internet for testing).
+4. **Get Shop ID**: Hover over your Avatar, and from the dropdown menu you will see your Store Code (usually starts with an "S", e.g., "S229988"). This will be your `GHTK_SHOP_ID`.
+5. **GHTK URL**: Use `https://services.giaohangtietkiem.vn` for production environment, or `https://services-staging.ghtklab.com` if you are in a Development environment. This is your `GHTK_BASE_URL`.
+
+# 10. Troubleshooting
 
 ## Error: "Docker is not running"
 
@@ -762,13 +775,13 @@ Xem tệp [LICENSE](LICENSE) để biết chi tiết.
   - [3. Cấu hình ứng dụng](#3-cấu-hình-ứng-dụng)
   - [4. Tạo Database](#4-tạo-database)
 - [3. Tạo và Quản Lý Database Migrations](#3-tạo-và-quản-lý-database-migrations)
-  - [Tạo Migration (Recommended Way)](#tạo-migration-recommended-way)
-  - [Tạo Migration Thủ Công (Advanced)](#tạo-migration-thủ-công-advanced)
-  - [Các Lệnh Migration Hữu Ích](#các-lệnh-migration-hữu-ích)
 - [4. Chạy ứng dụng](#4-chạy-ứng-dụng)
 - [5. Cấu hình Môi trường Test (Yêu cầu)](#5-cấu-hình-môi-trường-test-yêu-cầu)
-- [6. GitHub Secrets Configuration (Cho Production Deploy)](#6-github-secrets-configuration-cho-production-deploy)
-- [7. Troubleshooting](#7-troubleshooting-1)
+- [6. Hướng dẫn Cấu hình Đăng nhập Mạng xã hội](#6-hướng-dẫn-cấu-hình-đăng-nhập-mạng-xã-hội)
+- [7. GitHub Secrets Configuration (Cho Production Deploy)](#7-github-secrets-configuration-cho-production-deploy)
+- [8. Hướng dẫn Cấu hình Thanh toán Online](#8-hướng-dẫn-cấu-hình-thanh-toán-online)
+- [9. Hướng dẫn Cấu hình Giao Hàng Tiết Kiệm (GHTK)](#9-hướng-dẫn-cấu-hình-giao-hàng-tiết-kiệm-ghtk)
+- [10. Troubleshooting](#10-troubleshooting-1)
 
 # 1. Yêu cầu hệ thống
 
@@ -997,7 +1010,7 @@ Cấu hình seeding dữ liệu ban đầu:
 }
 ```
 
-### 8. Một số cài đặt bổ sung
+### 9. Một số cài đặt bổ sung
 
 - Cấu hình các danh mục sản phẩm không xoá
 
@@ -1282,6 +1295,9 @@ Cần setup các secrets sau trong GitHub repository:
 | `PAYOS__RETURN_URL`                | PayOS Return URL                          | `https://yourdomain.online/payment-processing`                                                           |
 | `PAYOS__CANCEL_URL`                | PayOS Cancel URL                          | `https://yourdomain.online/payment-processing`                                                           |
 | `UPLOAD_PATH`                      | Đường dẫn lưu trữ ảnh vĩnh viễn           | `/var/www/anhemmotor/uploads`                                                                            |
+| `GHTK_TOKEN`                       | Mã API Token từ GHTK                      | `a1b2c3d4e5f6g7h8...`                                                                                    |
+| `GHTK_SHOP_ID`                     | Mã cửa hàng (Shop ID) trên GHTK           | `S229988`                                                                                                |
+| `GHTK_BASE_URL`                    | Địa chỉ API của GHTK                      | `https://services.ghtk.vn`                                                                               |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -1363,7 +1379,17 @@ Cần setup các secrets sau trong GitHub repository:
     - **API Key**
     - **Checksum Key**
 
-# 9. Troubleshooting
+# 9. Hướng dẫn Cấu hình Giao Hàng Tiết Kiệm (GHTK)
+
+Để kích hoạt tính năng tự động đẩy đơn hàng sang GHTK, bạn cần thiết lập cấu hình trên GitHub Secrets:
+
+1. **Đăng nhập**: Truy cập vào [Website Khách hàng GHTK](https://khachhang.giaohangtietkiem.vn/).
+2. **Lấy API Token**: Di chuột vào phần Avatar, khi menu xổ xuống, bạn chọn "Thông tin tài khoản" -> Kéo xuống dưới cùng tìm mục "Cấu hình API". Nếu chưa có API trong phần mã API, tạo 1 API mới rồi sao chép mã API sau khi tạo, nếu đã có API rồi thì bấm vào nút "Xem" tại API muốn sử dụng, sau đó nhập mật khẩu rồi sao chép mã hiện ra. Đây chính là giá trị cho bí mật `GHTK_TOKEN`.
+3. **Setup Webhook**: Cũng trong mục "Cấu hình API", phần "Webhook", tạo hoặc chỉnh sửa webhook, ở phần "Data format", chọn "X-www-form-encoded", URL đích chính là API Endpoint của Backend (trên môi trường đang lập trình, có thể sử dụng ngrok để host API Backend đang từ môi trường localhost sang Internet để test).
+4. **Lấy Shop ID (Mã Cửa Hàng)**: Di chuột vào phần Avatar, khi menu xổ xuống, bạn sẽ thấy Mã Cửa Hàng (thường bắt đầu bằng chữ "S" ví dụ "S229988"). Đây chính là giá trị cho bí mật `GHTK_SHOP_ID`.
+5. **URL GHTK**: Sử dụng https://services.giaohangtietkiem.vn cho môi trường production, hoặc https://services-staging.ghtklab.com nếu bạn ở môi trường Development. Đây là GHTK_BASE_URL của bạn.
+
+# 10. Troubleshooting
 
 ## Lỗi: "Docker is not running"
 
