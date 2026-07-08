@@ -44,7 +44,6 @@ public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDe
                         Id = i.Id,
                         ProductId = i.ProductId,
                         ProductName = i.ProductName,
-                        Sku = i.Sku,
                         ThumbnailUrl = i.ThumbnailUrl,
                         ShelfLocation = i.ShelfLocation,
                         Quantity = i.Quantity,

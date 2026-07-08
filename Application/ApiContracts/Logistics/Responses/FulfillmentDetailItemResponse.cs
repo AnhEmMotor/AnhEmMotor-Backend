@@ -10,7 +10,6 @@ namespace Application.ApiContracts.Logistics.Responses
 
         public string ProductName { get; set; } = string.Empty;
 
-        public string Sku { get; set; } = string.Empty;
 
         public string? ThumbnailUrl { get; set; }
 

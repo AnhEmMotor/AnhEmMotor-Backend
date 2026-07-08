@@ -4,7 +4,6 @@ namespace Application.ApiContracts.Logistics.Responses
 {
     public class TrackingItemResponse
     {
-        public string? Sku { get; set; }
 
         public string? ProductName { get; set; }
 

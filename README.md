@@ -656,13 +656,14 @@ To enable payment features, you need to obtain credentials from VNPay and PayOS.
 
 # 9. GHTK (Giao Hàng Tiết Kiệm) Configuration (English)
 
-To enable automatic shipping order creation via GHTK, you need to configure the following secrets:
+To enable the automatic feature of pushing orders to GHTK, you need to configure the settings in GitHub Secrets and in `appsettings.*.json`. The following guide will help you get these 3 pieces of information in the Staging/Development environment (Not production, to avoid losing money):
 
-1. **Log in**: Log in to the [GHTK Web Portal](https://khachhang.giaohangtietkiem.vn/).
-2. **Get API Token**: Hover over your Avatar, from the dropdown menu select "Thông tin tài khoản" (Account Information) -> Scroll down to "Cấu hình API" (API Configuration). If you do not have an API token, create a new one and copy it. If you already have one, click "Xem" (View) on the API token you want to use, enter your password, and copy the displayed token. This will be your `GHTK_TOKEN`.
-3. **Setup Webhook**: Also in the "Cấu hình API" section, under "Webhook", create or edit a webhook. For "Data format", choose "X-www-form-encoded". The destination URL is your Backend's API Endpoint (for local development, you can use ngrok to expose your localhost API to the Internet for testing).
-4. **Get Shop ID**: Hover over your Avatar, and from the dropdown menu you will see your Store Code (usually starts with an "S", e.g., "S229988"). This will be your `GHTK_SHOP_ID`.
-5. **GHTK URL**: Use `https://services.giaohangtietkiem.vn` for production environment, or `https://services-staging.ghtklab.com` if you are in a Development environment. This is your `GHTK_BASE_URL`.
+1. **Log in**: Access the [GHTK Customer Website](https://khachhang.giaohangtietkiem.vn/). No need to verify phone number, email, or identity card.
+2. **Get Shop ID**: Hover over the Avatar section, when the menu drops down, you will see the Store Code (usually starting with the letter "S" e.g., "S229988"). This is the value for the `GHTK_SHOP_ID` secret (and in the `appsettings.*.json` file, it is GhtkSettings -> ShopId).
+3. **Move customer code from the above website to Development/Staging environment**: Join the Zalo chat channel at [here](https://zalo.me/g/wwqeds160), request to move the shop from production to staging including the shop id. After being accepted, log in again to the [GHTK Staging Website](https://khachhang-staging.ghtklab.com/).
+4. **Get API Token**: Hover over the Avatar section, when the menu drops down, select "Thông tin tài khoản" (Account Information) -> Scroll to the bottom to find the "Cấu hình API" (API Configuration) section. If there is no API in the API code section, create a new 1 API then copy the API code after creation. If you already have an API, click the "Xem" (View) button at the API you want to use, then enter the password and copy the code that appears. This is the value for the `GHTK_TOKEN` secret (and in the `appsettings.*.json` file, it is GhtkSettings -> Token).
+5. **Setup Webhook**: Also in the "Cấu hình API" (API Configuration) section, under "Webhook", create or edit a webhook. For "Data format", select "X-www-form-encoded", the destination URL is your Backend's API Endpoint (in the programming environment, you can use ngrok to host the Backend API from the localhost environment to the Internet for testing).
+6. **GHTK URL**: Use `https://services.giaohangtietkiem.vn` for the production environment, or `https://services-staging.ghtklab.com` if you are in the Development environment. This is your `GHTK_BASE_URL` (and in the `appsettings.*.json` file, it is GhtkSettings -> BaseUrl).
 
 # 10. Troubleshooting
 
@@ -1381,13 +1382,14 @@ Cần setup các secrets sau trong GitHub repository:
 
 # 9. Hướng dẫn Cấu hình Giao Hàng Tiết Kiệm (GHTK)
 
-Để kích hoạt tính năng tự động đẩy đơn hàng sang GHTK, bạn cần thiết lập cấu hình trên GitHub Secrets:
+Để kích hoạt tính năng tự động đẩy đơn hàng sang GHTK, bạn cần thiết lập cấu hình trên GitHub Secrets và trong appsetting.\*.json. Hướng dẫn sau sẽ giúp bạn lấy được 3 thông tin này dưới tầng Staging/Development (Không phải production, tránh bị mất tiền):
 
-1. **Đăng nhập**: Truy cập vào [Website Khách hàng GHTK](https://khachhang.giaohangtietkiem.vn/).
-2. **Lấy API Token**: Di chuột vào phần Avatar, khi menu xổ xuống, bạn chọn "Thông tin tài khoản" -> Kéo xuống dưới cùng tìm mục "Cấu hình API". Nếu chưa có API trong phần mã API, tạo 1 API mới rồi sao chép mã API sau khi tạo, nếu đã có API rồi thì bấm vào nút "Xem" tại API muốn sử dụng, sau đó nhập mật khẩu rồi sao chép mã hiện ra. Đây chính là giá trị cho bí mật `GHTK_TOKEN`.
-3. **Setup Webhook**: Cũng trong mục "Cấu hình API", phần "Webhook", tạo hoặc chỉnh sửa webhook, ở phần "Data format", chọn "X-www-form-encoded", URL đích chính là API Endpoint của Backend (trên môi trường đang lập trình, có thể sử dụng ngrok để host API Backend đang từ môi trường localhost sang Internet để test).
-4. **Lấy Shop ID (Mã Cửa Hàng)**: Di chuột vào phần Avatar, khi menu xổ xuống, bạn sẽ thấy Mã Cửa Hàng (thường bắt đầu bằng chữ "S" ví dụ "S229988"). Đây chính là giá trị cho bí mật `GHTK_SHOP_ID`.
-5. **URL GHTK**: Sử dụng https://services.giaohangtietkiem.vn cho môi trường production, hoặc https://services-staging.ghtklab.com nếu bạn ở môi trường Development. Đây là GHTK_BASE_URL của bạn.
+1. **Đăng nhập**: Truy cập vào [Website Khách hàng GHTK](https://khachhang.giaohangtietkiem.vn/). Không cần xác thực số điện thoại, email, căn cước công dân.
+2. **Lấy Shop ID (Mã Cửa Hàng)**: Di chuột vào phần Avatar, khi menu xổ xuống, bạn sẽ thấy Mã Cửa Hàng (thường bắt đầu bằng chữ "S" ví dụ "S229988"). Đây chính là giá trị cho bí mật `GHTK_SHOP_ID` (và trong file appsettings.\*.json là GhtkSettings -> ShopId).
+3. **Thực hiện đưa mã khách hàng từ trang web trên vào môi trường Development/Staging**: Vào kênh chat Zalo tại (đây)[https://zalo.me/g/wwqeds160], yêu cầu chuyển shop đang từ production vào staging bao gồm cả shop id, sau khi được chắp nhận, bạn đăng nhập lại vào [Trang web Staging GHTK](https://khachhang-staging.ghtklab.com/)
+4. **Lấy API Token**: Di chuột vào phần Avatar, khi menu xổ xuống, bạn chọn "Thông tin tài khoản" -> Kéo xuống dưới cùng tìm mục "Cấu hình API". Nếu chưa có API trong phần mã API, tạo 1 API mới rồi sao chép mã API sau khi tạo, nếu đã có API rồi thì bấm vào nút "Xem" tại API muốn sử dụng, sau đó nhập mật khẩu rồi sao chép mã hiện ra. Đây chính là giá trị cho bí mật `GHTK_TOKEN` (và trong file appsettings.\*.json là GhtkSettings -> Token).
+5. **Setup Webhook**: Cũng trong mục "Cấu hình API", phần "Webhook", tạo hoặc chỉnh sửa webhook, ở phần "Data format", chọn "X-www-form-encoded", URL đích chính là API Endpoint của Backend (trên môi trường đang lập trình, có thể sử dụng ngrok để host API Backend đang từ môi trường localhost sang Internet để test).
+6. **URL GHTK**: Sử dụng https://services.giaohangtietkiem.vn cho môi trường production, hoặc https://services-staging.ghtklab.com nếu bạn ở môi trường Development. Đây là GHTK_BASE_URL của bạn (và trong file appsettings.\*.json là GhtkSettings -> BaseUrl).
 
 # 10. Troubleshooting
 

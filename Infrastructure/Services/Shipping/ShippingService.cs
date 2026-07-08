@@ -51,7 +51,8 @@ public class ShippingService : IShippingService
                 name = oi.ProductVariant?.Product?.Name ?? "Product",
                 weight = 0.1, // Fixed weight as requested
                 quantity = oi.Count ?? 1,
-                price = (int)(oi.Price ?? 0)
+                price = (int)(oi.Price ?? 0),
+                product_code = oi.ProductVariantId ?? oi.Id
             }).ToList();
 
             var payload = new
@@ -59,7 +60,7 @@ public class ShippingService : IShippingService
                 products = products,
                 order = new
                 {
-                    id = output.Id,
+                    id = $"{output.Id}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
                     pick_name = "Kho Anh Em Motor", // Example
                     pick_address = "123 Đường XYZ",
                     pick_province = "TP. Hồ Chí Minh",
@@ -75,7 +76,7 @@ public class ShippingService : IShippingService
                     ward = "Phường Bến Nghé",
                     hamlet = "Khác",
                     
-                    is_freeship = 0, // As requested: người nhận trả
+                    is_freeship = "0", // As requested: người nhận trả
                     pick_money = (int)(output.Total - (output.PaidAmount ?? 0)), // Cod amount
                     value = (int)output.Total, // Value for insurance
                     transport = "fly",
@@ -83,7 +84,11 @@ public class ShippingService : IShippingService
                 }
             };
 
-            request.Content = JsonContent.Create(payload);
+            var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null };
+            request.Content = JsonContent.Create(payload, null, jsonOptions);
+
+            var payloadString = JsonSerializer.Serialize(payload, jsonOptions);
+            _logger.LogInformation("GHTK Request Payload: {Payload}", payloadString);
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
             var contentString = await response.Content.ReadAsStringAsync(cancellationToken);

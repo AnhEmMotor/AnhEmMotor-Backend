@@ -49,9 +49,9 @@ jobs:
           PAYOS_RETURN_URL: ${{ secrets.PAYOS__RETURN_URL }}
           PAYOS_CANCEL_URL: ${{ secrets.PAYOS__CANCEL_URL }}
           UPLOAD_PATH: ${{ secrets.UPLOAD_PATH }}
-          GHTK_TOKEN: ${{ secrets.GHTK__TOKEN }}
-          GHTK_SHOP_ID: ${{ secrets.GHTK__SHOP_ID }}
-          GHTK_BASE_URL: ${{ secrets.GHTK__BASE_URL || 'https://services.giaohangtietkiem.vn' }}
+          GHTK_TOKEN: ${{ secrets.GHTK_TOKEN }}
+          GHTK_SHOP_ID: ${{ secrets.GHTK_SHOP_ID }}
+          GHTK_BASE_URL: ${{ secrets.GHTK_BASE_URL }}
         run: >
           jq '
             .Provider = "PostgreSql" |

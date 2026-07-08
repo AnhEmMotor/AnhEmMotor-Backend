@@ -1,34 +1,37 @@
 using Application.ApiContracts.Logistics.Responses;
-using Application.Interfaces.Repositories.ParcelDeliveryOrder;
+using Application.Interfaces.Repositories.Logistics.Shipment;
 using MediatR;
 using System;
 
 namespace Application.Features.Logistics.Queries.GetActiveShipments
 {
-    public class GetActiveShipmentsQueryHandler(IParcelDeliveryOrderReadRepository db) : IRequestHandler<GetActiveShipmentsQuery, List<ActiveShipmentResponse>>
+    public class GetActiveShipmentsQueryHandler(IShipmentReadRepository db) : IRequestHandler<GetActiveShipmentsQuery, List<ActiveShipmentResponse>>
     {
         public async Task<List<ActiveShipmentResponse>> Handle(
             GetActiveShipmentsQuery request,
             CancellationToken cancellationToken)
         {
-            var now = DateTime.UtcNow;
-            var shipments = await db.GetActiveShipmentsAsync(cancellationToken);
-            var result = shipments.Select(
+            var now = DateTimeOffset.UtcNow;
+            var shipments = await db.GetAllAsync(cancellationToken);
+            // Lấy các đơn chưa giao (DeliveredAt = null)
+            var activeShipments = shipments.Where(x => !x.DeliveredAt.HasValue).ToList();
+            
+            var result = activeShipments.Select(
                 x => new ActiveShipmentResponse
                 {
                     Id = x.Id,
                     TrackingNumber = x.TrackingNumber ?? string.Empty,
                     CustomerName = x.CustomerName ?? string.Empty,
                     CustomerPhone = x.CustomerPhone ?? string.Empty,
-                    CustomerAddress = x.CustomerAddress ?? string.Empty,
+                    CustomerAddress = x.DestinationAddress ?? string.Empty,
                     Carrier = x.Carrier ?? string.Empty,
-                    Status = (int)x.Status,
+                    Status = 2, // 2 = Shipping (InTransit)
                     CodAmount = x.CodAmount,
                     ShippingCost = x.ShippingCost,
-                    CreatedAt = x.CreatedAt,
-                    ExpectedAt = x.ExpectedAt,
-                    DaysInTransit = (int)(now - x.CreatedAt).TotalDays,
-                    IsStuck = (now - x.CreatedAt).TotalHours > 48
+                    CreatedAt = x.CreatedAt?.DateTime ?? DateTime.MinValue,
+                    ExpectedAt = null,
+                    DaysInTransit = (int)(now - (x.CreatedAt ?? now)).TotalDays,
+                    IsStuck = (now - (x.CreatedAt ?? now)).TotalHours > 48
                 })
                 .ToList();
             return result;

@@ -108,6 +108,8 @@ services.AddScoped<ILogisticsDashboardRepository, LogisticsDashboardRepository>(
             client.BaseAddress = new Uri(baseAddress);
         });
 
+        services.AddHttpClient<Application.Interfaces.Services.Logistics.IGeocodingService, Infrastructure.Services.Logistics.GeocodingService>();
+
         services.Scan(
             scan => scan
             .FromAssemblies(Assembly.GetExecutingAssembly())

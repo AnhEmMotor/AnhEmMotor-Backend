@@ -222,6 +222,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ParcelDeliveryOrderItem> ParcelDeliveryOrderItems { get; set; }
 
+    public virtual DbSet<Shipment> Shipments { get; set; }
+
+    public virtual DbSet<ShipmentItem> ShipmentItems { get; set; }
+
     public virtual DbSet<CurrentUnreconciledCod> CurrentUnreconciledCods { get; set; }
 
     public virtual DbSet<CarrierPartner> CarrierPartners { get; set; }
@@ -252,6 +256,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.ShippingCost).HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.RefundAmount).HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.ReturnShippingCost).HasPrecision(18, 2);
+        modelBuilder.Entity<Shipment>().Property(e => e.CodAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<Shipment>().Property(e => e.ShippingCost).HasPrecision(18, 2);
         modelBuilder.Entity<CarrierPartner>().Property(e => e.MaxParcelWeightKg).HasPrecision(18, 2);
         modelBuilder.Entity<SupplierDebtLog>().Property(l => l.AmountPaid).HasPrecision(18, 2);
         modelBuilder.Entity<SupplierDebtLog>().Property(l => l.RemainingDebt).HasPrecision(18, 2);
@@ -259,6 +265,11 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasMany(p => p.Items)
             .WithOne(i => i.ParcelDeliveryOrder)
             .HasForeignKey(i => i.ParcelDeliveryOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Shipment>()
+            .HasMany(s => s.Items)
+            .WithOne(i => i.Shipment)
+            .HasForeignKey(i => i.ShipmentId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ApplicationUser>().ToTable("Users");
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");

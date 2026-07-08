@@ -6,6 +6,8 @@ using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services.Shipping;
+using Application.Interfaces.Repositories.Logistics.Shipment;
+using Application.Interfaces.Services.Logistics;
 using Domain.Constants;
 using Domain.Constants.Lead;
 using Domain.Constants.Order;
@@ -28,7 +30,9 @@ public class UpdateOutputStatusCommandHandler(
     IVehicleUpdateRepository? vehicleUpdateRepository = null,
     ILeadReadRepository? leadReadRepository = null,
     ILeadInsertRepository? leadInsertRepository = null,
-    IShippingService? shippingService = null) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
+    IShippingService? shippingService = null,
+    IShipmentInsertRepository? shipmentInsertRepository = null,
+    IGeocodingService? geocodingService = null) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         UpdateOutputStatusCommand request,
@@ -101,6 +105,45 @@ public class UpdateOutputStatusCommandHandler(
                     {
                         return Result<OrderDetailResponse>.Failure(shippingResult.Errors!);
                     }
+                }
+
+                if (shipmentInsertRepository != null)
+                {
+                    double? destLat = null;
+                    double? destLon = null;
+                    if (geocodingService != null && !string.IsNullOrWhiteSpace(output.CustomerAddress))
+                    {
+                        var coords = await geocodingService.GetCoordinatesAsync(output.CustomerAddress, cancellationToken).ConfigureAwait(false);
+                        if (coords.HasValue)
+                        {
+                            destLat = coords.Value.Latitude;
+                            destLon = coords.Value.Longitude;
+                        }
+                    }
+
+                    var shipment = new Domain.Entities.Logistics.Shipment
+                    {
+                        TrackingNumber = $"GHTK-{output.Id}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
+                        CustomerName = output.CustomerName ?? string.Empty,
+                        CustomerPhone = output.CustomerPhone ?? string.Empty,
+                        CodAmount = output.Total,
+                        ShippingCost = 0,
+                        OriginAddress = "Kho AnhEmMotor",
+                        OriginLatitude = Domain.Constants.Logistics.LogisticsConstants.DefaultShowroomLatitude,
+                        OriginLongitude = Domain.Constants.Logistics.LogisticsConstants.DefaultShowroomLongitude,
+                        DestinationAddress = output.CustomerAddress ?? string.Empty,
+                        DestinationLatitude = destLat,
+                        DestinationLongitude = destLon,
+                        Type = Domain.Constants.Logistics.ShipmentType.OrderDelivery,
+                        OutputId = output.Id,
+                        Items = output.OutputInfos.Select(oi => new Domain.Entities.Logistics.ShipmentItem
+                        {
+                            ProductVariantId = oi.ProductVariantId,
+                            ProductVariantColorId = oi.ProductVariantColorId,
+                            Quantity = oi.Count ?? 1
+                        }).ToList()
+                    };
+                    await shipmentInsertRepository.AddAsync(shipment, cancellationToken).ConfigureAwait(false);
                 }
                 break;
             case OrderStatus.Cancelled:

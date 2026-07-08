@@ -2,29 +2,28 @@ using Application.ApiContracts.Shipping.Requests;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Domain.Constants.Order;
 using MediatR;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Logistics.Shipment;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using System;
 
 namespace WebAPI.Controllers;
 
 [Route("api/shipping-webhook")]
 [ApiController]
-public class ShippingWebhookController : ControllerBase
+public class ShippingWebhookController(
+    ISender sender,
+    ILogger<ShippingWebhookController> logger,
+    IShipmentReadRepository shipmentReadRepository,
+    IShipmentUpdateRepository shipmentUpdateRepository,
+    IUnitOfWork unitOfWork) : ControllerBase
 {
-    private readonly ISender _sender;
-    private readonly ILogger<ShippingWebhookController> _logger;
-
-    public ShippingWebhookController(ISender sender, ILogger<ShippingWebhookController> logger)
-    {
-        _sender = sender;
-        _logger = logger;
-    }
-
     [HttpPost("ghtk")]
     public async Task<IActionResult> HandleGhtkWebhook([FromForm] GhtkWebhookRequest request)
     {
-        _logger.LogInformation("Received GHTK webhook for partner_id: {PartnerId}, status_id: {StatusId}", request.partner_id, request.status_id);
+        logger.LogInformation("Received GHTK webhook for partner_id: {PartnerId}, status_id: {StatusId}", request.partner_id, request.status_id);
 
         if (string.IsNullOrEmpty(request.partner_id))
         {
@@ -43,6 +42,13 @@ public class ShippingWebhookController : ControllerBase
         if (request.status_id == 5)
         {
             newStatus = OrderStatus.Completed;
+            var shipment = await shipmentReadRepository.GetByOutputIdAsync(outputIdInt);
+            if (shipment != null)
+            {
+                shipment.DeliveredAt = DateTimeOffset.UtcNow;
+                shipmentUpdateRepository.Update(shipment);
+                await unitOfWork.SaveChangesAsync();
+            }
         }
         else if (request.status_id == -1)
         {
@@ -59,11 +65,11 @@ public class ShippingWebhookController : ControllerBase
                 CurrentUserId = System.Guid.Empty // System user identifier
             };
 
-            var result = await _sender.Send(command);
+            var result = await sender.Send(command);
 
             if (result.IsFailure)
             {
-                _logger.LogError("Failed to update order status via webhook: {Error}", result.Error);
+                logger.LogError("Failed to update order status via webhook: {Error}", result.Error);
                 // Even if our update failed due to some transition rules, we return OK to GHTK so they don't retry unnecessarily
             }
         }
