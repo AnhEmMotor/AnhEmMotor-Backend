@@ -1,5 +1,6 @@
 using Application.ApiContracts.Logistics.Responses;
 using Application.Interfaces.Repositories.Logistics.Shipment;
+using Domain.Enums;
 using MediatR;
 using System;
 using System.Linq;
@@ -16,17 +17,15 @@ namespace Application.Features.Logistics.Queries.GetFulfillmentOrders
             var query = shipments.AsEnumerable();
             if (request.Status.HasValue)
             {
-                if (request.Status.Value == Domain.Enums.ParcelDeliveryStatus.Completed)
+                if (request.Status.Value == ParcelDeliveryStatus.Completed)
                 {
-                    query = query.Where(x => x.Status == Domain.Enums.ParcelDeliveryStatus.Completed);
-                }
-                else if (request.Status.Value == Domain.Enums.ParcelDeliveryStatus.Shipping)
+                    query = query.Where(x => x.Status == ParcelDeliveryStatus.Completed);
+                } else if (request.Status.Value == ParcelDeliveryStatus.Shipping)
                 {
-                    query = query.Where(x => x.Status == Domain.Enums.ParcelDeliveryStatus.Shipping);
-                }
-                else if (request.Status.Value == Domain.Enums.ParcelDeliveryStatus.Returned)
+                    query = query.Where(x => x.Status == ParcelDeliveryStatus.Shipping);
+                } else if (request.Status.Value == ParcelDeliveryStatus.Returned)
                 {
-                    query = query.Where(x => x.Status == Domain.Enums.ParcelDeliveryStatus.Returned);
+                    query = query.Where(x => x.Status == ParcelDeliveryStatus.Returned);
                 }
             }
             if (!string.IsNullOrWhiteSpace(request.Carrier))
@@ -53,9 +52,10 @@ namespace Application.Features.Logistics.Queries.GetFulfillmentOrders
                         CustomerPhone = x.CustomerPhone ?? string.Empty,
                         CustomerAddress = x.DestinationAddress ?? string.Empty,
                         Carrier = x.Carrier ?? string.Empty,
-                        Status = x.Status == Domain.Enums.ParcelDeliveryStatus.Shipping && x.DeliveredAt.HasValue 
-                            ? Domain.Enums.ParcelDeliveryStatus.Completed 
-                            : x.Status,
+                        Status =
+                            x.Status == ParcelDeliveryStatus.Shipping && x.DeliveredAt.HasValue
+                                    ? ParcelDeliveryStatus.Completed
+                                    : x.Status,
                         CodAmount = x.CodAmount,
                         ShippingCost = x.ShippingCost,
                         CreatedAt = x.CreatedAt?.DateTime ?? DateTime.MinValue,

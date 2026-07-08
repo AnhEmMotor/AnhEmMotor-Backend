@@ -3,16 +3,18 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Lead.Lead;
+using Application.Interfaces.Repositories.Logistics.Shipment;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Vehicle;
-using Application.Interfaces.Services.Shipping;
-using Application.Interfaces.Repositories.Logistics.Shipment;
 using Application.Interfaces.Services.Logistics;
+using Application.Interfaces.Services.Shipping;
 using Domain.Constants;
 using Domain.Constants.Lead;
+using Domain.Constants.Logistics;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
 using Domain.Entities;
+using Domain.Entities.Logistics;
 using Mapster;
 using MediatR;
 using LeadEntity = Domain.Entities.Lead;
@@ -101,29 +103,31 @@ public class UpdateOutputStatusCommandHandler(
                 string trackingNumber = $"GHN-{output.Id}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
                 if (shippingService != null)
                 {
-                    var shippingResult = await shippingService.CreateShippingOrderAsync(output, cancellationToken).ConfigureAwait(false);
+                    var shippingResult = await shippingService.CreateShippingOrderAsync(output, cancellationToken)
+                        .ConfigureAwait(false);
                     if (shippingResult.IsFailure)
                     {
                         return Result<OrderDetailResponse>.Failure(shippingResult.Errors!);
                     }
-                    trackingNumber = shippingResult.Value; // The real order_code
+                    trackingNumber = shippingResult.Value;
                 }
-
                 if (shipmentInsertRepository != null)
                 {
                     double? destLat = null;
                     double? destLon = null;
                     if (geocodingService != null && !string.IsNullOrWhiteSpace(output.CustomerAddress))
                     {
-                        var coords = await geocodingService.GetCoordinatesAsync(output.CustomerAddress, cancellationToken).ConfigureAwait(false);
+                        var coords = await geocodingService.GetCoordinatesAsync(
+                            output.CustomerAddress,
+                            cancellationToken)
+                            .ConfigureAwait(false);
                         if (coords.HasValue)
                         {
                             destLat = coords.Value.Latitude;
                             destLon = coords.Value.Longitude;
                         }
                     }
-
-                    var shipment = new Domain.Entities.Logistics.Shipment
+                    var shipment = new Shipment
                     {
                         TrackingNumber = trackingNumber,
                         CustomerName = output.CustomerName ?? string.Empty,
@@ -131,19 +135,23 @@ public class UpdateOutputStatusCommandHandler(
                         CodAmount = output.Total,
                         ShippingCost = 0,
                         OriginAddress = "Kho AnhEmMotor",
-                        OriginLatitude = Domain.Constants.Logistics.LogisticsConstants.DefaultShowroomLatitude,
-                        OriginLongitude = Domain.Constants.Logistics.LogisticsConstants.DefaultShowroomLongitude,
+                        OriginLatitude = LogisticsConstants.DefaultShowroomLatitude,
+                        OriginLongitude = LogisticsConstants.DefaultShowroomLongitude,
                         DestinationAddress = output.CustomerAddress ?? string.Empty,
                         DestinationLatitude = destLat,
                         DestinationLongitude = destLon,
-                        Type = Domain.Constants.Logistics.ShipmentType.OrderDelivery,
+                        Type = ShipmentType.OrderDelivery,
                         OutputId = output.Id,
-                        Items = output.OutputInfos.Select(oi => new Domain.Entities.Logistics.ShipmentItem
-                        {
-                            ProductVariantId = oi.ProductVariantId,
-                            ProductVariantColorId = oi.ProductVariantColorId,
-                            Quantity = oi.Count ?? 1
-                        }).ToList()
+                        Items =
+                            output.OutputInfos
+                                .Select(
+                                    oi => new ShipmentItem
+                                {
+                                    ProductVariantId = oi.ProductVariantId,
+                                    ProductVariantColorId = oi.ProductVariantColorId,
+                                    Quantity = oi.Count ?? 1
+                                })
+                                .ToList()
                     };
                     await shipmentInsertRepository.AddAsync(shipment, cancellationToken).ConfigureAwait(false);
                 }
@@ -214,13 +222,10 @@ public class UpdateOutputStatusCommandHandler(
         }
         var selectedVehicleIds = request.SelectedVehicleIds?.Distinct().ToList() ?? [];
         var requiredVehicleCount = vehicleOutputInfos.Sum(oi => oi.Count ?? 0);
-
-        // If no vehicles were provided but the order already has assigned vehicles, auto-fill them
         if (selectedVehicleIds.Count == 0 && output.OutputInfos.SelectMany(oi => oi.Vehicles).Any())
         {
             selectedVehicleIds = output.OutputInfos.SelectMany(oi => oi.Vehicles).Select(v => v.Id).ToList();
         }
-
         if (selectedVehicleIds.Count != requiredVehicleCount)
         {
             return Result.Failure(

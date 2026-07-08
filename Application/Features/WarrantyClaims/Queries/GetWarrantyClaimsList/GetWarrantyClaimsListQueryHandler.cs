@@ -1,6 +1,7 @@
 using Application.ApiContracts.WarrantyClaim.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.WarrantyClaim;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Primitives;
 using MediatR;
@@ -34,7 +35,7 @@ namespace Application.Features.WarrantyClaims.Queries.GetWarrantyClaimsList
             }
             var result = await warrantyClaimReadRepository.GetPagedAsync<WarrantyClaimResponse>(
                 sieveModel,
-                Domain.Constants.DataFetchMode.ActiveOnly,
+                DataFetchMode.ActiveOnly,
                 filter,
                 cancellationToken)
                 .ConfigureAwait(false);

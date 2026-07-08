@@ -1,4 +1,3 @@
-using Domain.Entities.Logistics;
 
 namespace Application.Interfaces.Repositories.Logistics.Shipment;
 

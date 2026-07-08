@@ -1,5 +1,6 @@
 using Application.ApiContracts.Logistics.Responses;
 using Application.Interfaces.Repositories.Logistics.Shipment;
+using Domain.Entities.Logistics;
 using MediatR;
 using System;
 using System.Linq;
@@ -15,9 +16,9 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
             var search = request.TrackingNumberOrPhone?.Trim();
             var shipments = await context.GetAllAsync(cancellationToken).ConfigureAwait(false);
             var order = shipments.FirstOrDefault(
-                    o => string.Compare(o.TrackingNumber, search) == 0 ||
-                        string.Compare(o.CustomerPhone, search) == 0 ||
-                        o.OutputId.ToString() == search);
+                o => string.Compare(o.TrackingNumber, search) == 0 ||
+                    string.Compare(o.CustomerPhone, search) == 0 ||
+                    o.OutputId.ToString() == search);
             var dto = new ShipmentTrackingResponse();
             if (order != null)
             {
@@ -46,17 +47,19 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                                 {
                                     ProductName = GenerateProductName(item),
                                     Quantity = item.Quantity,
-                                    ThumbnailUrl = item.ProductVariantColor?.CoverImageUrl ?? item.ProductVariant?.CoverImageUrl ?? string.Empty
+                                    ThumbnailUrl =
+                                        item.ProductVariantColor?.CoverImageUrl ??
+                                                item.ProductVariant?.CoverImageUrl ??
+                                                string.Empty
                                 });
                     }
                 }
-            } 
-            
+            }
             dto.Milestones = [];
             return dto;
         }
 
-        private static string GenerateProductName(Domain.Entities.Logistics.ShipmentItem item)
+        private static string GenerateProductName(ShipmentItem item)
         {
             var parts = new List<string>();
             if (!string.IsNullOrWhiteSpace(item.ProductVariant?.Product?.Name))

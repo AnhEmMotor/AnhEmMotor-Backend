@@ -1,9 +1,6 @@
-using Application.Features.Logistics.Queries.GetLogisticsDashboard;
 using Application.Interfaces.Repositories.LogisticsDashboard;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Logistics.Queries.GetLogisticsDashboard;
 
@@ -20,7 +17,6 @@ public class GetLogisticsDashboardQueryHandler(ILogisticsDashboardRepository log
             "year" => now.AddDays(-365),
             _ => now.AddDays(-1),
         };
-
         return await logisticsDashboardRepository.GetDashboardAsync(from, cancellationToken);
     }
 }

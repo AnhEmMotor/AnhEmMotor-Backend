@@ -3,6 +3,8 @@ using Application.Interfaces.Repositories.LogisticsDashboard;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.WorkshopDashboard;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Logistics;
+using Application.Interfaces.Services.Shipping;
 using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
@@ -14,6 +16,7 @@ using Infrastructure.Repositories.LogisticsDashboard;
 using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Repositories.WorkshopDashboard;
 using Infrastructure.Services;
+using Infrastructure.Services.Logistics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -91,7 +94,7 @@ public static class DependencyInjection
         services.AddScoped<IFileReadService, FileReadService>();
         services.AddScoped<IFileInsertService, FileInsertService>();
         services.AddScoped<IWorkshopDashboardRepository, WorkshopDashboardRepository>();
-services.AddScoped<ILogisticsDashboardRepository, LogisticsDashboardRepository>();
+        services.AddScoped<ILogisticsDashboardRepository, LogisticsDashboardRepository>();
         services.AddScoped<IFileUpdateService, FileUpdateService>();
         services.AddScoped<IFileDeleteService, FileDeleteService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();
@@ -101,15 +104,13 @@ services.AddScoped<ILogisticsDashboardRepository, LogisticsDashboardRepository>(
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddHostedService<OrderCleanupService>();
-        
-        services.AddHttpClient<Application.Interfaces.Services.Shipping.IShippingService, ShippingService>(client =>
-        {
-            var baseAddress = configuration["GhtkSettings:BaseUrl"] ?? "https://services.ghtk.vn";
-            client.BaseAddress = new Uri(baseAddress);
-        });
-
-        services.AddHttpClient<Application.Interfaces.Services.Logistics.IGeocodingService, Infrastructure.Services.Logistics.GeocodingService>();
-
+        services.AddHttpClient<IShippingService, ShippingService>(
+            client =>
+            {
+                var baseAddress = configuration["GhtkSettings:BaseUrl"] ?? "https://services.ghtk.vn";
+                client.BaseAddress = new Uri(baseAddress);
+            });
+        services.AddHttpClient<IGeocodingService, GeocodingService>();
         services.Scan(
             scan => scan
             .FromAssemblies(Assembly.GetExecutingAssembly())

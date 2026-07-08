@@ -5,7 +5,9 @@ namespace Application.Features.Logistics.Queries.GetDeliveryStatuses
 {
     public class GetDeliveryStatusesQueryHandler : IRequestHandler<GetDeliveryStatusesQuery, List<DeliveryStatusResponse>>
     {
-        public Task<List<DeliveryStatusResponse>> Handle(GetDeliveryStatusesQuery request, CancellationToken cancellationToken)
+        public Task<List<DeliveryStatusResponse>> Handle(
+            GetDeliveryStatusesQuery request,
+            CancellationToken cancellationToken)
         {
             var statuses = new List<DeliveryStatusResponse>
             {
@@ -28,7 +30,6 @@ namespace Application.Features.Logistics.Queries.GetDeliveryStatuses
                     NameVi = "Đã hoàn trả"
                 }
             };
-
             return Task.FromResult(statuses);
         }
     }

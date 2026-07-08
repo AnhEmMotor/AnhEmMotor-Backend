@@ -1,5 +1,6 @@
 using Application.ApiContracts.Logistics.Responses;
 using Application.Interfaces.Repositories.Logistics.Shipment;
+using Domain.Entities.Logistics;
 using Domain.Enums;
 using MediatR;
 using System.Linq;
@@ -22,19 +23,19 @@ public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDe
         var order = await _context.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (order == null)
             return null!;
-            
         return new FulfillmentDetailResponse
         {
             Id = order.Id,
             TrackingNumber = order.TrackingNumber,
-            OriginalOrderCode = order.OutputId?.ToString() ?? "",
+            OriginalOrderCode = order.OutputId?.ToString() ?? string.Empty,
             CustomerName = order.CustomerName,
             CustomerPhone = order.CustomerPhone,
             CustomerAddress = order.DestinationAddress,
             Carrier = order.Carrier,
-            Status = order.Status == Domain.Enums.ParcelDeliveryStatus.Shipping && order.DeliveredAt.HasValue 
-                ? Domain.Enums.ParcelDeliveryStatus.Completed 
-                : order.Status,
+            Status =
+                order.Status == ParcelDeliveryStatus.Shipping && order.DeliveredAt.HasValue
+                    ? ParcelDeliveryStatus.Completed
+                    : order.Status,
             CodAmount = order.CodAmount,
             ShippingCost = order.ShippingCost,
             CreatedAt = order.CreatedAt.HasValue ? order.CreatedAt.Value.UtcDateTime : default,
@@ -48,10 +49,11 @@ public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDe
                         Id = i.Id,
                         ProductId = i.ProductVariant?.ProductId ?? 0,
                         ProductName = GenerateProductName(i),
-                        ThumbnailUrl = i.ProductVariantColor?.CoverImageUrl ?? i.ProductVariant?.CoverImageUrl ?? string.Empty,
-                        ShelfLocation = "", // Not needed anymore
+                        ThumbnailUrl =
+                            i.ProductVariantColor?.CoverImageUrl ?? i.ProductVariant?.CoverImageUrl ?? string.Empty,
+                        ShelfLocation = string.Empty,
                         Quantity = i.Quantity,
-                        IsPicked = true, // Force true to hide alert
+                        IsPicked = true,
                         IsRestricted = false,
                         IsOutOfStock = false
                     })
@@ -59,7 +61,7 @@ public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDe
         };
     }
 
-    private static string GenerateProductName(Domain.Entities.Logistics.ShipmentItem item)
+    private static string GenerateProductName(ShipmentItem item)
     {
         var parts = new List<string>();
         if (!string.IsNullOrWhiteSpace(item.ProductVariant?.Product?.Name))

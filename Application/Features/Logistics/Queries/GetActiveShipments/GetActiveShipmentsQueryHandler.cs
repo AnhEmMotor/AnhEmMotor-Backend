@@ -1,5 +1,6 @@
 using Application.ApiContracts.Logistics.Responses;
 using Application.Interfaces.Repositories.Logistics.Shipment;
+using Domain.Enums;
 using MediatR;
 using System;
 
@@ -13,9 +14,9 @@ namespace Application.Features.Logistics.Queries.GetActiveShipments
         {
             var now = DateTimeOffset.UtcNow;
             var shipments = await db.GetAllAsync(cancellationToken);
-            // Lấy các đơn đang giao (Status == Shipping và DeliveredAt = null)
-            var activeShipments = shipments.Where(x => x.Status == Domain.Enums.ParcelDeliveryStatus.Shipping && !x.DeliveredAt.HasValue).ToList();
-            
+            var activeShipments = shipments.Where(
+                x => x.Status == ParcelDeliveryStatus.Shipping && !x.DeliveredAt.HasValue)
+                .ToList();
             var result = activeShipments.Select(
                 x => new ActiveShipmentResponse
                 {
@@ -25,7 +26,7 @@ namespace Application.Features.Logistics.Queries.GetActiveShipments
                     CustomerPhone = x.CustomerPhone ?? string.Empty,
                     CustomerAddress = x.DestinationAddress ?? string.Empty,
                     Carrier = x.Carrier ?? string.Empty,
-                    Status = 2, // 2 = Shipping (InTransit)
+                    Status = 2,
                     CodAmount = x.CodAmount,
                     ShippingCost = x.ShippingCost,
                     CreatedAt = x.CreatedAt?.DateTime ?? DateTime.MinValue,
