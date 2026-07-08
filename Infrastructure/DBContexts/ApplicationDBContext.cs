@@ -55,6 +55,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
  public virtual DbSet<Product> Products { get; set; }
 
  public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+ public virtual DbSet<ProductCategoryTranslation> ProductCategoryTranslations { get; set; }
 
  public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
 
@@ -270,7 +271,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
   {
    modelBuilder.Entity<ProductCategory>().HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
   }
-  modelBuilder.Entity<RolePermission>().HasKey(rp => new { rp.RoleId, rp.PermissionId });
+  modelBuilder.Entity<ProductCategoryTranslation>()
+.HasOne<ProductCategory>()
+.WithMany(c => c.Translations)
+.HasForeignKey(t => t.ProductCategoryId)
+.OnDelete(DeleteBehavior.Cascade);
+modelBuilder.Entity<ProductCategoryTranslation>()
+.Ignore(t => t.ProductCategory);
+modelBuilder.Entity<RolePermission>().HasKey(rp => new { rp.RoleId, rp.PermissionId });
   modelBuilder.Entity<RolePermission>()
   .HasOne(rp => rp.Role)
   .WithMany(r => r.RolePermissions)

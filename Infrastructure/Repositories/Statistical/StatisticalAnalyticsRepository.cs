@@ -93,18 +93,20 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
         DateTime end,
         CancellationToken cancellationToken)
     {
+        var endOfDay = end.Date.AddDays(1).AddTicks(-1);
+        
         var staffSales = await context.EmployeeProfiles
             .Include(e => e.User)
             .Select(
                 e => new
                 {
-                    FullName = e.User.UserName,
+                    FullName = e.User != null ? e.User.FullName : "N/A",
                     Role = e.JobTitle,
                     Sales = context.OutputOrders
                         .Where(
-                            o => o.FinishedBy == e.User.Id &&
+                            o => o.CreatedBy == e.User.Id &&
                                     o.CreatedAt >= start &&
-                                    o.CreatedAt <= end &&
+                                    o.CreatedAt <= endOfDay &&
                                     o.StatusId == "Completed")
                         .SelectMany(o => o.OutputInfos)
                         .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0))

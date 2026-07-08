@@ -743,18 +743,22 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             0,
             0,
             TimeSpan.Zero);
-        var confirmedInventoryReceipts = await context.InventoryReceiptInfos
+        var confirmedInventoryReceiptsRaw = await context.InventoryReceiptInfos
             .IgnoreQueryFilters()
             .Join(
                 context.InventoryReceipts.IgnoreQueryFilters(),
                 ii => ii.InventoryReceiptId,
                 i => i.Id,
                 (ii, i) => new { ii, i })
-            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0)
-            .GroupBy(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
-            .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
+            .Where(x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 && x.ii.PurchaseRequestItem != null)
+            .Select(x => new { VariantId = x.ii.PurchaseRequestItem!.ProductVariantId, Count = (long)(x.ii.Count ?? 0) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
+
+        var confirmedInventoryReceipts = confirmedInventoryReceiptsRaw
+            .GroupBy(x => x.VariantId)
+            .Select(g => new { VariantId = (int?)g.Key, TotalIn = g.Sum(x => x.Count) })
+            .ToList();
         var soldOutputsAll = await context.OutputInfos
             .IgnoreQueryFilters()
             .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
@@ -806,16 +810,21 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CancellationToken cancellationToken)
     {
         var last30Days = new DateTimeOffset(DateTime.UtcNow.AddDays(-30), TimeSpan.Zero);
-        var confirmedInventoryReceipts = await context.InventoryReceiptInfos
+        var confirmedInventoryReceiptsRaw = await context.InventoryReceiptInfos
             .Join(context.InventoryReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
             .Where(
                 x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
-                    x.i.DeletedAt == null)
-            .GroupBy(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
-            .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
+                    x.i.DeletedAt == null &&
+                    x.ii.PurchaseRequestItem != null)
+            .Select(x => new { VariantId = x.ii.PurchaseRequestItem!.ProductVariantId, Count = (long)(x.ii.Count ?? 0) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
+
+        var confirmedInventoryReceipts = confirmedInventoryReceiptsRaw
+            .GroupBy(x => x.VariantId)
+            .Select(g => new { VariantId = (int?)g.Key, TotalIn = g.Sum(x => x.Count) })
+            .ToList();
         var outputsData = await context.OutputInfos
             .IgnoreQueryFilters()
             .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
@@ -888,33 +897,41 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ThenInclude(p => p!.Brand)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-        var confirmedInventoryReceipts = await context.InventoryReceiptInfos
-            .Join(context.InventoryReceipts, ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
+        // Tính tổng nhập kho từ phiếu đã duyệt, group by VariantId trực tiếp qua InventoryReceiptInfo
+        var confirmedInventoryReceiptsRaw = await context.InventoryReceiptInfos
+            .IgnoreQueryFilters()
+            .Join(context.InventoryReceipts.IgnoreQueryFilters(), ii => ii.InventoryReceiptId, i => i.Id, (ii, i) => new { ii, i })
             .Where(
                 x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
-                    x.i.DeletedAt == null)
-            .GroupBy(x => (x.ii.PurchaseRequestItem != null ? x.ii.PurchaseRequestItem.ProductVariantId : (int?)null))
-            .Select(
-                g => new
-                {
-                    VariantId = g.Key,
-                    TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)),
-                    AvgInventoryReceiptPrice = g.Sum(
-                                x => x.ii.PurchaseRequestItem != null
-                                    ? (x.ii.PurchaseRequestItem.UnitPrice ?? 0)
-                                    : 0 * (x.ii.Count ?? 0)) /
-                        (g.Sum(x => (long)(x.ii.Count ?? 0)) == 0 ? 1M : (decimal)(g.Sum(x => (long)(x.ii.Count ?? 0))))
-                })
+                    x.i.DeletedAt == null &&
+                    x.ii.PurchaseRequestItem != null &&
+                    x.ii.PurchaseRequestItem.ProductVariantId != null)
+            .Select(x => new
+            {
+                VariantId = x.ii.PurchaseRequestItem!.ProductVariantId,
+                Count = (long)(x.ii.Count ?? 0),
+                Cost = (x.ii.PurchaseRequestItem.UnitPrice ?? 0m) * (x.ii.Count ?? 0)
+            })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
+
+        var confirmedInventoryReceipts = confirmedInventoryReceiptsRaw
+            .GroupBy(x => x.VariantId)
+            .Select(g => new
+            {
+                VariantId = (int?)g.Key,
+                TotalIn = g.Sum(x => x.Count),
+                TotalCost = g.Sum(x => x.Cost)
+            })
+            .ToList();
         var soldOutputsAll = await context.OutputInfos
             .IgnoreQueryFilters()
             .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
-                x => (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
+                x => string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                     string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
-                    string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
+                    string.Compare(x.o.StatusId, OrderStatus.Completed) == 0)
             .GroupBy(x => x.oi.ProductVariantId)
             .Select(g => new { VariantId = g.Key, TotalOut = g.Sum(x => (long)(x.oi.Count ?? 0)) })
             .ToListAsync(cancellationToken)
@@ -922,11 +939,13 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var variantDatas = variants.Select(
             pv =>
             {
-                var confirmedInventoryReceipt = confirmedInventoryReceipts.FirstOrDefault(x => x.VariantId == pv.Id);
-                var stock = (int)((confirmedInventoryReceipt?.TotalIn ?? 0) -
-                    (soldOutputsAll.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalOut ?? 0));
-                var costPrice = confirmedInventoryReceipt?.AvgInventoryReceiptPrice ?? 0;
-                return new { BrandName = pv.Product?.Brand?.Name, Stock = stock, Value = stock * costPrice };
+                var inboundData = confirmedInventoryReceipts.FirstOrDefault(x => x.VariantId == pv.Id);
+                var totalIn = inboundData?.TotalIn ?? 0;
+                var totalOut = soldOutputsAll.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalOut ?? 0;
+                // Đảm bảo tồn kho không âm
+                var stock = Math.Max(0, (int)(totalIn - totalOut));
+                var avgCostPrice = (totalIn > 0 && inboundData != null) ? (inboundData.TotalCost / (decimal)inboundData.TotalIn) : 0m;
+                return new { BrandName = pv.Product?.Brand?.Name, Stock = stock, Value = stock * avgCostPrice };
             });
         var grouped = variantDatas
             .GroupBy(x => x.BrandName ?? "Khác")
@@ -934,17 +953,22 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 g =>
                 {
                     int totalStock = g.Sum(x => x.Stock);
+                    // Sắp hết: tồn > 0 nhưng < 5
                     int lowStock = g.Count(x => x.Stock > 0 && x.Stock < 5);
-                    int outOfStock = g.Count(x => x.Stock <= 0);
+                    // Hết hàng: tồn = 0
+                    int outOfStock = g.Count(x => x.Stock == 0);
                     decimal value = g.Sum(x => x.Value);
+                    // Capacity = số lượng variant trong nhóm (tổng SKU)
+                    int capacity = g.Count();
+                    string status = outOfStock > 0 ? "Cảnh báo" : (lowStock > 0 ? "Sắp hết" : "Bình thường");
                     return new WarehouseTableDataResponse
                     {
                         BrandName = g.Key,
                         TotalStock = totalStock,
-                        Capacity = totalStock > 0 ? (totalStock + 100) : 100,
+                        Capacity = capacity,
                         LowStock = lowStock,
                         OutOfStock = outOfStock,
-                        Status = outOfStock > 0 ? "Cảnh báo" : "Bình thường",
+                        Status = status,
                         Value = value
                     };
                 })
@@ -1336,6 +1360,78 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CategoryName = g.Key,
         Revenue = g.Sum(x => x.Revenue)
       })).ToList();
+  }
+
+  public async Task<IEnumerable<StaffPerformanceResponse>> GetTopStaffPerformanceAsync(DateTimeOffset start, DateTimeOffset end, int limit, CancellationToken cancellationToken)
+  {
+      var rawData = await context.OutputInfos
+          .IgnoreQueryFilters()
+          .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+          .Where(
+              x => x.o.CreatedAt >= start &&
+                  x.o.CreatedAt <= end &&
+                  (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
+                      string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
+                      string.Compare(x.o.StatusId, OrderStatus.Completed) == 0) &&
+                  x.o.CreatedByUser != null)
+          .Select(x => new 
+          {
+              FullName = x.o.CreatedByUser!.FullName,
+              Revenue = (x.oi.Price ?? 0) * (x.oi.Count ?? 0)
+          })
+          .ToListAsync(cancellationToken)
+          .ConfigureAwait(false);
+
+      var data = rawData
+          .GroupBy(x => x.FullName)
+          .Select(g => new StaffPerformanceResponse
+          {
+              EmployeeName = g.Key ?? "Unknown",
+              Role = "Nhân viên bán hàng", 
+              TotalSales = g.Sum(x => x.Revenue),
+              TargetSales = 50000000M, 
+              CommissionPaid = g.Sum(x => x.Revenue) * 0.05M, 
+              KpiStatus = g.Sum(x => x.Revenue) > 50000000M ? "Vượt KPI" : "Cần cải thiện",
+              IsTopSeller = false 
+          })
+          .OrderByDescending(x => x.TotalSales)
+          .Take(limit)
+          .ToList();
+
+      if (data.Count > 0)
+          data[0].IsTopSeller = true;
+
+      return data;
+  }
+
+  public async Task<IEnumerable<TransactionLogResponse>> GetRecentTransactionsAsync(int limit, CancellationToken cancellationToken)
+  {
+      var ordersRaw = await context.OutputOrders
+          .IgnoreQueryFilters()
+          .Include(o => o.Buyer)
+          .Include(o => o.CreatedByUser)
+          .Include(o => o.OutputInfos)
+          .ThenInclude(oi => oi.ProductVariant)
+          .ThenInclude(pv => pv.Product)
+          .OrderByDescending(o => o.CreatedAt)
+          .Take(limit)
+          .ToListAsync(cancellationToken)
+          .ConfigureAwait(false);
+
+      var orders = ordersRaw
+          .Select(o => new TransactionLogResponse
+          {
+              Timestamp = o.CreatedAt?.DateTime ?? DateTime.UtcNow,
+              CustomerName = o.Buyer?.FullName ?? "Khách lẻ",
+              ProductName = o.OutputInfos.FirstOrDefault()?.ProductVariant?.Product?.Name ?? "Sản phẩm",
+              Amount = o.OutputInfos.Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
+              IsRevenue = true,
+              Status = o.StatusId ?? "",
+              StaffName = o.CreatedByUser?.FullName ?? "Admin"
+          })
+          .ToList();
+
+      return orders;
   }
 }
 

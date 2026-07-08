@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader>
+    <name>resmimetype</name>
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader>
+    <name>version</name>
+    <value>1.0</value>
+  </resheader>
+  <resheader>
+    <name>reader</name>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader>
+    <name>writer</name>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ValidationRequired" xml:space="preserve">
+    <value>Trường {0} là bắt buộc.</value>
+  </data>
+  <data name="ValidationMaxLength" xml:space="preserve">
+    <value>Trường {0} không được vượt quá {1} ký tự.</value>
+  </data>
+  <data name="ValidationMinLength" xml:space="preserve">
+    <value>Trường {0} phải có ít nhất {1} ký tự.</value>
+  </data>
+  <data name="ServerError" xml:space="preserve">
+    <value>Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>Không tìm thấy dữ liệu yêu cầu.</value>
+  </data>
+  <data name="Unauthorized" xml:space="preserve">
+    <value>Bạn không có quyền thực hiện thao tác này.</value>
+  </data>
+  <data name="BadRequest" xml:space="preserve">
+    <value>Yêu cầu không hợp lệ. Vui lòng kiểm tra lại thông tin.</value>
+  </data>
+  <data name="Conflict" xml:space="preserve">
+    <value>Dữ liệu đã tồn tại trong hệ thống.</value>
+  </data>
+  <data name="CreatedSuccessfully" xml:space="preserve">
+    <value>Đã tạo mới thành công.</value>
+  </data>
+  <data name="UpdatedSuccessfully" xml:space="preserve">
+    <value>Đã cập nhật thành công.</value>
+  </data>
+  <data name="DeletedSuccessfully" xml:space="preserve">
+    <value>Đã xóa thành công.</value>
+  </data>
+  <data name="DuplicateSlug" xml:space="preserve">
+    <value>Slug đã tồn tại trong hệ thống.</value>
+  </data>
+</root>

@@ -23,9 +23,9 @@ public class UpdateProductCategoryCommandHandler(
             return Result<ProductCategoryResponse?>.Failure(
                 Error.NotFound($"Product category with Id {request.Id} not found or has been deleted."));
         }
-        if (!string.IsNullOrWhiteSpace(request.Name))
+        if (!string.IsNullOrWhiteSpace(request.NameVi))
         {
-            var nameToUpdate = request.Name.Trim();
+            var nameToUpdate = request.NameVi.Trim();
             var isDuplicate = await readRepository.ExistsByNameExceptIdAsync(
                 nameToUpdate,
                 request.Id,

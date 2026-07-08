@@ -13,6 +13,9 @@ namespace Domain.Entities
         [Column("Name", TypeName = "nvarchar(100)")]
         public string? Name { get; set; }
 
+        [Column("NameJson", TypeName = "nvarchar(max)")]
+        public string? NameJson { get; set; }
+
         [Column("Origin", TypeName = "nvarchar(100)")]
         public string? Origin { get; set; }
 
@@ -21,6 +24,9 @@ namespace Domain.Entities
 
         [Column("Description", TypeName = "nvarchar(MAX)")]
         public string? Description { get; set; }
+
+        [Column("DescriptionJson", TypeName = "nvarchar(max)")]
+        public string? DescriptionJson { get; set; }
 
         [Column("RowVersion", TypeName = "rowversion")]
         [Timestamp]

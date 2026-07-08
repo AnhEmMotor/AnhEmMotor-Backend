@@ -538,7 +538,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var request = new CreateProductCategoryCommand
         {
-            Name = $"API_Test_{uniqueId}",
+            NameVi = $"API_Test_{uniqueId}",
             Description = "Integration test",
             ManagementType = "vin_number"
         };
@@ -588,7 +588,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
-        var request = new UpdateProductCategoryCommand { Name = $"Updated_{uniqueId}" };
+        var request = new UpdateProductCategoryCommand { NameVi = $"Updated_{uniqueId}" };
         var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{categoryId}", request)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
