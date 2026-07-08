@@ -3,13 +3,18 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Lead.Lead;
+using Application.Interfaces.Repositories.Logistics.Shipment;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Vehicle;
+using Application.Interfaces.Services.Logistics;
+using Application.Interfaces.Services.Shipping;
 using Domain.Constants;
 using Domain.Constants.Lead;
+using Domain.Constants.Logistics;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
 using Domain.Entities;
+using Domain.Entities.Logistics;
 using Mapster;
 using MediatR;
 using LeadEntity = Domain.Entities.Lead;
@@ -26,7 +31,10 @@ public class UpdateOutputStatusCommandHandler(
     IVehicleReadRepository? vehicleReadRepository = null,
     IVehicleUpdateRepository? vehicleUpdateRepository = null,
     ILeadReadRepository? leadReadRepository = null,
-    ILeadInsertRepository? leadInsertRepository = null) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
+    ILeadInsertRepository? leadInsertRepository = null,
+    IShippingService? shippingService = null,
+    IShipmentInsertRepository? shipmentInsertRepository = null,
+    IGeocodingService? geocodingService = null) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         UpdateOutputStatusCommand request,
@@ -66,7 +74,7 @@ public class UpdateOutputStatusCommandHandler(
         {
             case OrderStatus.Completed:
                 isCompleting = true;
-                output.FinishedBy = request.CurrentUserId;
+                output.FinishedBy = request.CurrentUserId == Guid.Empty ? null : request.CurrentUserId;
                 foreach (var vehicle in output.OutputInfos.SelectMany(oi => oi.Vehicles))
                 {
                     vehicle.Status = VehicleStatus.Sold;
@@ -91,6 +99,61 @@ public class UpdateOutputStatusCommandHandler(
                 if (checkResult.IsFailure)
                 {
                     return Result<OrderDetailResponse>.Failure(checkResult.Errors!);
+                }
+                string trackingNumber = $"GHN-{output.Id}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+                if (shippingService != null)
+                {
+                    var shippingResult = await shippingService.CreateShippingOrderAsync(output, cancellationToken)
+                        .ConfigureAwait(false);
+                    if (shippingResult.IsFailure)
+                    {
+                        return Result<OrderDetailResponse>.Failure(shippingResult.Errors!);
+                    }
+                    trackingNumber = shippingResult.Value;
+                }
+                if (shipmentInsertRepository != null)
+                {
+                    double? destLat = null;
+                    double? destLon = null;
+                    if (geocodingService != null && !string.IsNullOrWhiteSpace(output.CustomerAddress))
+                    {
+                        var coords = await geocodingService.GetCoordinatesAsync(
+                            output.CustomerAddress,
+                            cancellationToken)
+                            .ConfigureAwait(false);
+                        if (coords.HasValue)
+                        {
+                            destLat = coords.Value.Latitude;
+                            destLon = coords.Value.Longitude;
+                        }
+                    }
+                    var shipment = new Shipment
+                    {
+                        TrackingNumber = trackingNumber,
+                        CustomerName = output.CustomerName ?? string.Empty,
+                        CustomerPhone = output.CustomerPhone ?? string.Empty,
+                        CodAmount = output.Total,
+                        ShippingCost = 0,
+                        OriginAddress = "Kho AnhEmMotor",
+                        OriginLatitude = LogisticsConstants.DefaultShowroomLatitude,
+                        OriginLongitude = LogisticsConstants.DefaultShowroomLongitude,
+                        DestinationAddress = output.CustomerAddress ?? string.Empty,
+                        DestinationLatitude = destLat,
+                        DestinationLongitude = destLon,
+                        Type = ShipmentType.OrderDelivery,
+                        OutputId = output.Id,
+                        Items =
+                            output.OutputInfos
+                                .Select(
+                                    oi => new ShipmentItem
+                                {
+                                    ProductVariantId = oi.ProductVariantId,
+                                    ProductVariantColorId = oi.ProductVariantColorId,
+                                    Quantity = oi.Count ?? 1
+                                })
+                                .ToList()
+                    };
+                    await shipmentInsertRepository.AddAsync(shipment, cancellationToken).ConfigureAwait(false);
                 }
                 break;
             case OrderStatus.Cancelled:
@@ -159,6 +222,10 @@ public class UpdateOutputStatusCommandHandler(
         }
         var selectedVehicleIds = request.SelectedVehicleIds?.Distinct().ToList() ?? [];
         var requiredVehicleCount = vehicleOutputInfos.Sum(oi => oi.Count ?? 0);
+        if (selectedVehicleIds.Count == 0 && output.OutputInfos.SelectMany(oi => oi.Vehicles).Any())
+        {
+            selectedVehicleIds = output.OutputInfos.SelectMany(oi => oi.Vehicles).Select(v => v.Id).ToList();
+        }
         if (selectedVehicleIds.Count != requiredVehicleCount)
         {
             return Result.Failure(

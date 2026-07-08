@@ -1,5 +1,5 @@
 using Application.Features.Logistics.Queries.GetFulfillmentOrders;
-using Application.Interfaces.Repositories.ParcelDeliveryOrder;
+using Application.Interfaces.Repositories.Logistics.Shipment;
 using Domain.Entities.Logistics;
 using Domain.Enums;
 using FluentAssertions;
@@ -11,11 +11,11 @@ namespace UnitTests
 {
     public class LogisticsFulfillment
     {
-        private readonly Mock<IParcelDeliveryOrderReadRepository> _readRepoMock;
+        private readonly Mock<IShipmentReadRepository> _readRepoMock;
 
         public LogisticsFulfillment()
         {
-            _readRepoMock = new Mock<IParcelDeliveryOrderReadRepository>();
+            _readRepoMock = new Mock<IShipmentReadRepository>();
         }
 
         [Fact(DisplayName = "LOGISTICS_001 - Lấy danh sách đơn vận chuyển không có bộ lọc")]
@@ -23,21 +23,21 @@ namespace UnitTests
         {
             var handler = new GetFulfillmentOrdersQueryHandler(_readRepoMock.Object);
             var query = new GetFulfillmentOrdersQuery();
-            var mockParcels = new List<ParcelDeliveryOrder>
+            var mockParcels = new List<Shipment>
             {
                 new()
                 {
                     Id = 1,
-                    OriginalOrderCode = "ORD-001",
-                    Status = ParcelDeliveryStatus.Completed,
-                    CreatedAt = DateTime.UtcNow.AddDays(-1)
+                    TrackingNumber = "ORD-001",
+                    DeliveredAt = DateTimeOffset.UtcNow,
+                    CreatedAt = DateTimeOffset.UtcNow.AddDays(-1)
                 },
                 new()
                 {
                     Id = 2,
-                    OriginalOrderCode = "ORD-002",
-                    Status = ParcelDeliveryStatus.Shipping,
-                    CreatedAt = DateTime.UtcNow
+                    TrackingNumber = "ORD-002",
+                    DeliveredAt = null,
+                    CreatedAt = DateTimeOffset.UtcNow
                 }
             };
             _readRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(mockParcels);
@@ -52,21 +52,21 @@ namespace UnitTests
         {
             var handler = new GetFulfillmentOrdersQueryHandler(_readRepoMock.Object);
             var query = new GetFulfillmentOrdersQuery { Status = ParcelDeliveryStatus.Completed };
-            var mockParcels = new List<ParcelDeliveryOrder>
+            var mockParcels = new List<Shipment>
             {
                 new()
                 {
                     Id = 1,
-                    OriginalOrderCode = "ORD-001",
-                    Status = ParcelDeliveryStatus.Completed,
-                    CreatedAt = DateTime.UtcNow.AddDays(-1)
+                    TrackingNumber = "ORD-001",
+                    DeliveredAt = DateTimeOffset.UtcNow,
+                    CreatedAt = DateTimeOffset.UtcNow.AddDays(-1)
                 },
                 new()
                 {
                     Id = 2,
-                    OriginalOrderCode = "ORD-002",
-                    Status = ParcelDeliveryStatus.Shipping,
-                    CreatedAt = DateTime.UtcNow
+                    TrackingNumber = "ORD-002",
+                    DeliveredAt = null,
+                    CreatedAt = DateTimeOffset.UtcNow
                 }
             };
             _readRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(mockParcels);

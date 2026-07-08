@@ -85,6 +85,7 @@ builder.Services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
+builder.Services.AddHostedService<WebAPI.BackgroundServices.GhnStatusPollingWorker>();
 var app = builder.Build();
 app.UseMiddleware<LogContextMiddleware>();
 app.UseSerilogRequestLogging(

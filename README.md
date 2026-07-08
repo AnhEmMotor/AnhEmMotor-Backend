@@ -56,13 +56,13 @@ See the [LICENSE](LICENSE) file for details.
   - [3. Application Configuration](#3-application-configuration)
   - [4. Database Creation](#4-database-creation)
 - [3. Create and Manage Database Migrations](#3-create-and-manage-database-migrations)
-  - [Create Migration (Recommended Way)](#create-migration-recommended-way)
-  - [Create Migration Manually (Advanced)](#create-migration-manually-advanced)
-  - [Useful Migration Commands](#useful-migration-commands)
 - [4. Running the application](#4-running-the-application)
-- [5. Test Environment Configuration (Required)](#5-test-environment-configuration-required)
-- [6. GitHub Secrets Configuration (For Production Deploy)](#6-github-secrets-configuration-for-production-deploy)
-- [7. Troubleshooting](#7-troubleshooting)
+- [5. Social Login Configuration Guide](#5-social-login-configuration-guide)
+- [6. Test Environment Configuration (Required)](#6-test-environment-configuration-required)
+- [7. GitHub Secrets Configuration (For Production Deploy)](#7-github-secrets-configuration-for-production-deploy)
+- [8. Online Payment Configuration (English)](#8-online-payment-configuration-english)
+- [9. GHN (Giao Hàng Nhanh) Configuration (English)](#9-GHN-giao-hàng-tiết-kiệm-configuration-english)
+- [10. Troubleshooting](#10-troubleshooting)
 
 # 1. System Requirements
 
@@ -291,7 +291,7 @@ Configure initial data seeding:
 }
 ```
 
-### 8. Some additional settings
+### 9. Some additional settings
 
 - Configure undeletable product categories
 
@@ -468,7 +468,7 @@ https://localhost:7001/swagger
    - **HTTPS:** `https://localhost:7001`
    - **HTTP:** `http://localhost:5000`
 
-## 5. Social Login Configuration Guide
+# 5. Social Login Configuration Guide
 
 If you don't have Social Login credentials yet, follow these steps to create your own Client ID and Client Secret:
 
@@ -513,7 +513,7 @@ If you don't have Social Login credentials yet, follow these steps to create you
       - `https://localhost:7001/signin-facebook`
     - Ensure **"Embedded Browser OAuth Login"** is turned on.
 
-# 5. Test Environment Configuration (Required)
+# 6. Test Environment Configuration (Required)
 
 The project uses **Testcontainers** to automatically create an isolated MySQL environment when running tests.
 
@@ -530,7 +530,7 @@ The project uses **Testcontainers** to automatically create an isolated MySQL en
     - Execute Tests.
     - Automatically clean up afterwards.
 
-# 6. GitHub Secrets Configuration (For Production Deploy)
+# 7. GitHub Secrets Configuration (For Production Deploy)
 
 The following secrets need to be set up in the GitHub repository:
 
@@ -570,6 +570,9 @@ The following secrets need to be set up in the GitHub repository:
 | `PAYOS__RETURN_URL`                | PayOS Return URL                         | `https://anhemmotor.online/payment-processing`                                                           |
 | `PAYOS__CANCEL_URL`                | PayOS Cancel URL                         | `https://anhemmotor.online/payment-processing`                                                           |
 | `UPLOAD_PATH`                      | Persistent image storage path            | `/var/www/anhemmotor/uploads`                                                                            |
+| `GHN_TOKEN`                        | GHN API Token                            | `a1b2c3d4e5f6g7h8...`                                                                                    |
+| `GHN_SHOP_ID`                      | GHN Shop ID                              | `012345`                                                                                                 |
+| `GHN_BASE_URL`                     | GHN API Base URL                         | `https://dev-online-gateway.ghn.vn`                                                                      |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -628,7 +631,7 @@ The following secrets need to be set up in the GitHub repository:
 ["admin@anhem.com:Admin@123456", "manager@anhem.com"]
 ```
 
-# 7. Online Payment Configuration (English)
+# 8. Online Payment Configuration (English)
 
 To enable payment features, you need to obtain credentials from VNPay and PayOS.
 
@@ -651,7 +654,17 @@ To enable payment features, you need to obtain credentials from VNPay and PayOS.
     - **API Key**
     - **Checksum Key**
 
-# 8. Troubleshooting
+# 9. GHN (Giao Hàng Nhanh) Configuration (English)
+
+To enable the automatic feature of pushing orders to GHN, you need to configure the settings in GitHub Secrets and in `appsettings.*.json`. The following guide will help you get these 3 pieces of information in the Staging/Development environment (Not production, to avoid losing money):
+
+1. **Log in**: Access the [GHN Customer Website](https://5sao.ghn.dev/).
+2. **Get Shop ID**: Click on "Chủ cửa hàng" (Shop owner) in the sidebar. In the "Thông tin cá nhân" (Personal information) tab, there is an ID field. This ID is the value for the `GHN_SHOP_ID` secret (and in the `appsettings.*.json` file, it is GHNSettings -> ShopId).
+3. **Get API Token**: Also in the "Chủ cửa hàng" section, select the "Bảo mật" (Security) tab. On the "Token API & IP Tin cậy" line, click "Quản lý" (Manage). Another tab will open. In the "Token API" section, click the eye icon, verify your phone number, and a string will appear. This is the value for the `GHN_TOKEN` secret (and in the `appsettings.*.json` file, it is GHNSettings -> Token).
+4. **GHN URL**: Use `https://dev-online-gateway.ghn.vn` if you are in the Development environment. This is your `GHN_BASE_URL` (and in the `appsettings.*.json` file, it is GHNSettings -> BaseUrl).
+5. **Register Webhook**: If you want to use Webhooks to receive notifications when an order is completed, you need to send an email to api@ghn.vn with the following information: Company Name, Client ID, Requested Environment, Webhook URL (which is the Endpoint URL running this project). Then wait for their response.
+
+# 10. Troubleshooting
 
 ## Error: "Docker is not running"
 
@@ -762,13 +775,13 @@ Xem tệp [LICENSE](LICENSE) để biết chi tiết.
   - [3. Cấu hình ứng dụng](#3-cấu-hình-ứng-dụng)
   - [4. Tạo Database](#4-tạo-database)
 - [3. Tạo và Quản Lý Database Migrations](#3-tạo-và-quản-lý-database-migrations)
-  - [Tạo Migration (Recommended Way)](#tạo-migration-recommended-way)
-  - [Tạo Migration Thủ Công (Advanced)](#tạo-migration-thủ-công-advanced)
-  - [Các Lệnh Migration Hữu Ích](#các-lệnh-migration-hữu-ích)
 - [4. Chạy ứng dụng](#4-chạy-ứng-dụng)
 - [5. Cấu hình Môi trường Test (Yêu cầu)](#5-cấu-hình-môi-trường-test-yêu-cầu)
-- [6. GitHub Secrets Configuration (Cho Production Deploy)](#6-github-secrets-configuration-cho-production-deploy)
-- [7. Troubleshooting](#7-troubleshooting-1)
+- [6. Hướng dẫn Cấu hình Đăng nhập Mạng xã hội](#6-hướng-dẫn-cấu-hình-đăng-nhập-mạng-xã-hội)
+- [7. GitHub Secrets Configuration (Cho Production Deploy)](#7-github-secrets-configuration-cho-production-deploy)
+- [8. Hướng dẫn Cấu hình Thanh toán Online](#8-hướng-dẫn-cấu-hình-thanh-toán-online)
+- [9. Hướng dẫn Cấu hình Giao Hàng Nhanh (GHN)](#9-hướng-dẫn-cấu-hình-giao-hàng-tiết-kiệm-GHN)
+- [10. Troubleshooting](#10-troubleshooting-1)
 
 # 1. Yêu cầu hệ thống
 
@@ -997,7 +1010,7 @@ Cấu hình seeding dữ liệu ban đầu:
 }
 ```
 
-### 8. Một số cài đặt bổ sung
+### 9. Một số cài đặt bổ sung
 
 - Cấu hình các danh mục sản phẩm không xoá
 
@@ -1282,6 +1295,9 @@ Cần setup các secrets sau trong GitHub repository:
 | `PAYOS__RETURN_URL`                | PayOS Return URL                          | `https://yourdomain.online/payment-processing`                                                           |
 | `PAYOS__CANCEL_URL`                | PayOS Cancel URL                          | `https://yourdomain.online/payment-processing`                                                           |
 | `UPLOAD_PATH`                      | Đường dẫn lưu trữ ảnh vĩnh viễn           | `/var/www/anhemmotor/uploads`                                                                            |
+| `GHN_TOKEN`                        | Mã API Token từ GHN                       | `a1b2c3d4e5f6g7h8...`                                                                                    |
+| `GHN_SHOP_ID`                      | Mã cửa hàng (Shop ID) trên GHN            | `012345`                                                                                                 |
+| `GHN_BASE_URL`                     | Địa chỉ API của GHN                       | `https://dev-online-gateway.ghn.vn`                                                                      |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -1363,7 +1379,17 @@ Cần setup các secrets sau trong GitHub repository:
     - **API Key**
     - **Checksum Key**
 
-# 9. Troubleshooting
+# 9. Hướng dẫn Cấu hình Giao Hàng Nhanh (GHN)
+
+Để kích hoạt tính năng tự động đẩy đơn hàng sang GHN, bạn cần thiết lập cấu hình trên GitHub Secrets và trong appsetting.\*.json. Hướng dẫn sau sẽ giúp bạn lấy được 3 thông tin này dưới tầng Staging/Development (Không phải production, tránh bị mất tiền):
+
+1. **Đăng nhập**: Truy cập vào [Website Khách hàng GHN](https://5sao.ghn.dev/).
+2. **Lấy Shop ID (Mã Cửa Hàng)**: Bạn sẽ nhấn vào chữ "Chủ cửa hàng" ở tại sidebar, Ở trong tab "Thông tin cá nhân", có 1 ô ID. ID này chính là giá trị cho bí mật `GHN_SHOP_ID` (và trong file appsettings.\*.json là GHNSettings -> ShopId).
+3. **Lấy API Token**: Cũng ở trong mục "Chủ cửa hàng", chọn tab "Bảo mật", trên dòng "Token API & IP Tin cậy", nhấn "Quản lý", 1 tab khác hiện ra, trong phần "Token API", bạn nhấn vào hình con mắt, xác thực số điện thoại và 1 chuỗi sẽ hiện ra. Đây chính là giá trị cho bí mật `GHN_TOKEN` (và trong file appsettings.\*.json là GHNSettings -> Token).
+4. **URL GHN**: Sử dụng https://dev-online-gateway.ghn.vn nếu bạn ở môi trường Development. Đây là GHN_BASE_URL của bạn (và trong file appsettings.\*.json là GHNSettings -> BaseUrl).
+5. **Đăng kí Webhook**: Nếu như bạn muốn sử dụng Webhook để nhận tin khi có đơn hàng đã hoàn tất, bạn sẽ cần gửi mail đến địa chỉ api@ghn.vn với các thông tin làTên công ty, Mã khách hàng (ClientID), Môi trường yêu cầu, URL Webhook (chính là URL Endpoint chạy dự án này). Rồi chờ họ phản hồi.
+
+# 10. Troubleshooting
 
 ## Lỗi: "Docker is not running"
 
