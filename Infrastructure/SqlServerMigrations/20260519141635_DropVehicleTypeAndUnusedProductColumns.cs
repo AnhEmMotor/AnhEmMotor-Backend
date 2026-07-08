@@ -11,12 +11,30 @@ namespace Infrastructure.SqlServerMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(name: "FK_Product_VehicleType_VehicleTypeId", table: "Product");
-            migrationBuilder.DropTable(name: "VehicleType");
-            migrationBuilder.DropIndex(name: "IX_Product_VehicleTypeId", table: "Product");
-            migrationBuilder.DropColumn(name: "StockQuantity", table: "ProductVariant");
-            migrationBuilder.DropColumn(name: "SortOrder", table: "ProductCategory");
-            migrationBuilder.DropColumn(name: "VehicleTypeId", table: "Product");
+            migrationBuilder.Sql(@"
+IF OBJECT_ID('FK_Product_VehicleType_VehicleTypeId', 'F') IS NOT NULL
+    ALTER TABLE [Product] DROP CONSTRAINT [FK_Product_VehicleType_VehicleTypeId]
+");
+            migrationBuilder.Sql(@"
+IF OBJECT_ID('VehicleType', 'U') IS NOT NULL
+    DROP TABLE [VehicleType]
+");
+            migrationBuilder.Sql(@"
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Product_VehicleTypeId' AND object_id = OBJECT_ID('Product'))
+    DROP INDEX [IX_Product_VehicleTypeId] ON [Product]
+");
+            migrationBuilder.Sql(@"
+IF EXISTS (SELECT 1 FROM sys.columns WHERE name = 'StockQuantity' AND object_id = OBJECT_ID('ProductVariant'))
+    ALTER TABLE [ProductVariant] DROP COLUMN [StockQuantity]
+");
+            migrationBuilder.Sql(@"
+IF EXISTS (SELECT 1 FROM sys.columns WHERE name = 'SortOrder' AND object_id = OBJECT_ID('ProductCategory'))
+    ALTER TABLE [ProductCategory] DROP COLUMN [SortOrder]
+");
+            migrationBuilder.Sql(@"
+IF EXISTS (SELECT 1 FROM sys.columns WHERE name = 'VehicleTypeId' AND object_id = OBJECT_ID('Product'))
+    ALTER TABLE [Product] DROP COLUMN [VehicleTypeId]
+");
         }
 
         /// <inheritdoc />

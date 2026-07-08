@@ -36,32 +36,36 @@ public static class DependencyInjection
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
-            services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
-                options =>
-                {
-                    options.UseMySql(connectionString, serverVersion);
-                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-                });
+      services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
+        options =>
+        {
+          options.UseMySql(connectionString, serverVersion);
+          options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+        });
         } else if (string.Compare(provider, "PostgreSql", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
                 options =>
                 {
-                    options.UseNpgsql(connectionString);
-                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+        options.UseNpgsql(connectionString);
+        options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 });
         } else
         {
             services.AddDbContextPool<ApplicationDBContext, SqlServerDBContext>(
                 options =>
                 {
-                    options.UseSqlServer(
-                        configuration.GetConnectionString("StringConnection"),
-                        b => b.MigrationsAssembly(typeof(SqlServerDBContext).Assembly.FullName)
-                                .CommandTimeout(30)
-                                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+options.UseSqlServer(
+            configuration.GetConnectionString("StringConnection"),
+            b => b.MigrationsAssembly(typeof(SqlServerDBContext).Assembly.FullName)
+            .CommandTimeout(30)
+            .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+        options.ConfigureWarnings(w =>
+        {
+          w.Ignore(RelationalEventId.PendingModelChangesWarning);
+          w.Ignore(SqlServerEventId.SavepointsDisabledBecauseOfMARS);
+        });
                 });
         }
         services.AddIdentity<ApplicationUser, ApplicationRole>(

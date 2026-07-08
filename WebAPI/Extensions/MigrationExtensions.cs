@@ -2,6 +2,7 @@ using Domain.Entities;
 using Infrastructure.DBContexts;
 using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Extensions;
@@ -39,6 +40,7 @@ public static class MigrationExtensions
         try
         {
             var dbContext = services.GetRequiredService<ApplicationDBContext>();
+            await RepairMigrationDriftAsync(dbContext, logger, cancellationToken).ConfigureAwait(false);
             await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
             var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
             if (shouldSeed)
@@ -79,5 +81,101 @@ public static class MigrationExtensions
             logger.LogError(ex, "An error occurred during migration/seeding.");
             throw;
         }
+    }
+
+    /// <summary>
+    /// Repairs migration drift by inserting missing migration records into __EFMigrationsHistory
+    /// when the corresponding schema objects already exist in the database.
+    /// </summary>
+    /// <remarks>
+    /// This handles the common local-dev scenario where the database has schema objects from
+    /// migrations but the __EFMigrationsHistory table is missing the corresponding records —
+    /// typically due to partial restores, manual schema changes, or migration history
+    /// being cleared.
+    ///
+    /// Each entry in <see cref="_migrationSignatures"/> defines a migration ID and a SQL query
+    /// that returns a non-null/non-zero value when that migration's effects are present.
+    /// The check is idempotent: if the migration is already recorded, or the signature
+    /// isn't found, no action is taken for that migration.
+    ///
+    /// To add a new migration signature, add a tuple to <see cref="_migrationSignatures"/>.
+    /// </remarks>
+    private static async Task RepairMigrationDriftAsync(
+        ApplicationDBContext dbContext,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        const string historyTable = "__EFMigrationsHistory";
+
+        // List of (migrationId, signatureCheckSql).
+        // The SQL must return a scalar: null/DBNull = not present, non-zero/int = present.
+        // Add entries for migrations whose effects may exist in the DB without a history record.
+        var migrationSignatures = new (string MigrationId, string SignatureSql)[]
+        {
+            // InitialCreate — Banner table is a reliable signature
+            ("20260509132251_InitialCreate",
+             "SELECT OBJECT_ID('Banner', 'U')"),
+
+            // AddSupplierTypeIdColumn — PartnerTypeId column on Supplier
+            ("20260516011310_AddSupplierTypeIdColumn",
+             "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Supplier' AND COLUMN_NAME = 'PartnerTypeId'"),
+        };
+
+        try
+        {
+            var connection = dbContext.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            foreach (var (migrationId, signatureSql) in migrationSignatures)
+            {
+                // Check if migration is already recorded
+                using var historyCmd = connection.CreateCommand();
+                historyCmd.CommandText = $"SELECT COUNT(*) FROM [{historyTable}] WHERE [MigrationId] = '{migrationId}'";
+                var count = await historyCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+
+                if (count != null && Convert.ToInt32(count) > 0)
+                {
+                    continue; // Already recorded, no drift for this migration
+                }
+
+                // Check if migration's signature exists in the database
+                using var checkCmd = connection.CreateCommand();
+                checkCmd.CommandText = signatureSql;
+                var result = await checkCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+
+                if (result == DBNull.Value || result == null || (result is int intResult && intResult == 0))
+                {
+                    continue; // Signature not present — migration was genuinely never applied
+                }
+
+                // Drift detected: insert the missing migration record
+                logger.LogWarning(
+                    "Migration drift detected: signature for '{MigrationId}' exists but history record is missing. "
+                    + "Inserting missing history row.",
+                    migrationId);
+
+                using var insertCmd = connection.CreateCommand();
+                insertCmd.CommandText = $"INSERT INTO [{historyTable}] ([MigrationId], [ProductVersion]) VALUES ('{migrationId}', '10.0.0')";
+                await insertCmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+
+                logger.LogInformation("Successfully repaired migration drift for '{MigrationId}'.", migrationId);
+            }
+        }
+catch (Exception ex)
+  {
+    if (ex is SqlException sqlEx && sqlEx.Number == 4060)
+    {
+      // Error 4060 = cannot open database — local DB does not exist at all.
+      // MigrateAsync() will create it; no drift to repair, skip without stack trace noise.
+      logger.LogInformation("Migration drift repair skipped: database does not exist yet (Error 4060).");
+    }
+    else
+    {
+      logger.LogWarning(ex, "Migration drift repair check failed (non-fatal): {Message}", ex.Message);
+    }
+  }
     }
 }
