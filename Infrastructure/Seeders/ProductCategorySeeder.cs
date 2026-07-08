@@ -19,6 +19,7 @@ public static class ProductCategorySeeder
         var existingCategories = await context.ProductCategories.ToListAsync(cancellationToken).ConfigureAwait(false);
         var existingCategoryDict = existingCategories
             .Where(c => c.Name != null)
+            .DistinctBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(c => c.Name!, StringComparer.OrdinalIgnoreCase);
         var categoriesToAdd = new List<ProductCategory>();
         bool hasChanges = false;

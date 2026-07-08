@@ -105,9 +105,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetConfirmedOutputsAsync(
         [FromQuery] SieveModel sieveModel,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        [FromQuery] string? search = null)
     {
-        return GetOutputsByStatusesAsync(sieveModel, OrderStatus.ConfirmedOrderStatuses, cancellationToken);
+        return GetOutputsByStatusesAsync(sieveModel, search, OrderStatus.ConfirmedOrderStatuses, cancellationToken);
     }
 
     /// <summary>
@@ -118,9 +119,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
     public Task<IActionResult> GetUnconfirmedOutputsAsync(
         [FromQuery] SieveModel sieveModel,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        [FromQuery] string? search = null)
     {
-        return GetOutputsByStatusesAsync(sieveModel, OrderStatus.UnconfirmedOrderStatuses, cancellationToken);
+        return GetOutputsByStatusesAsync(sieveModel, search, OrderStatus.UnconfirmedOrderStatuses, cancellationToken);
     }
 
     /// <summary>
@@ -448,10 +450,11 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
 
     private async Task<IActionResult> GetOutputsByStatusesAsync(
         SieveModel sieveModel,
+        string? search,
         IReadOnlyCollection<string> statusIds,
         CancellationToken cancellationToken)
     {
-        var query = new GetOutputsListQuery { SieveModel = sieveModel, StatusIds = statusIds };
+        var query = new GetOutputsListQuery { SieveModel = sieveModel, Search = search, StatusIds = statusIds };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
