@@ -102,7 +102,7 @@ services.AddScoped<ILogisticsDashboardRepository, LogisticsDashboardRepository>(
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddHostedService<OrderCleanupService>();
         
-        services.AddHttpClient<Application.Interfaces.Services.Shipping.IShippingService, Infrastructure.Services.Shipping.ShippingService>(client =>
+        services.AddHttpClient<Application.Interfaces.Services.Shipping.IShippingService, ShippingService>(client =>
         {
             var baseAddress = configuration["GhtkSettings:BaseUrl"] ?? "https://services.ghtk.vn";
             client.BaseAddress = new Uri(baseAddress);

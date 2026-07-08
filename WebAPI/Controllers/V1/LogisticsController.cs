@@ -11,6 +11,7 @@ using Application.Features.Logistics.Queries.GetActiveShipments;
 using Application.Features.Logistics.Queries.GetCarriers;
 using Application.Features.Logistics.Queries.GetFulfillmentDetail;
 using Application.Features.Logistics.Queries.GetFulfillmentOrders;
+using Application.Features.Logistics.Queries.GetDeliveryStatuses;
 using Application.Features.Logistics.Queries.GetLogisticsDashboard;
 using Application.Features.Logistics.Queries.GetShipmentTracking;
 using Application.Features.Logistics.Returns;
@@ -89,6 +90,13 @@ public class LogisticsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetActiveShipments(CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new GetActiveShipmentsQuery(), cancellationToken).ConfigureAwait(false);
+        return Ok(result);
+    }
+
+    [HttpGet("delivery-statuses")]
+    public async Task<IActionResult> GetDeliveryStatuses(CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetDeliveryStatusesQuery(), cancellationToken).ConfigureAwait(false);
         return Ok(result);
     }
 

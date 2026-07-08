@@ -49,9 +49,9 @@ jobs:
           PAYOS_RETURN_URL: ${{ secrets.PAYOS__RETURN_URL }}
           PAYOS_CANCEL_URL: ${{ secrets.PAYOS__CANCEL_URL }}
           UPLOAD_PATH: ${{ secrets.UPLOAD_PATH }}
-          GHTK_TOKEN: ${{ secrets.GHTK_TOKEN }}
-          GHTK_SHOP_ID: ${{ secrets.GHTK_SHOP_ID }}
-          GHTK_BASE_URL: ${{ secrets.GHTK_BASE_URL }}
+          GHN_TOKEN: ${{ secrets.GHN_TOKEN }}
+          GHN_SHOP_ID: ${{ secrets.GHN_SHOP_ID }}
+          GHN_BASE_URL: ${{ secrets.GHN_BASE_URL }}
         run: >
           jq '
             .Provider = "PostgreSql" |
@@ -82,9 +82,9 @@ jobs:
             .PayOS.ReturnUrl = env.PAYOS_RETURN_URL |
             .PayOS.CancelUrl = env.PAYOS_CANCEL_URL |
             .LocalFileStorage.UploadPath = env.UPLOAD_PATH |
-            .GhtkSettings.Token = env.GHTK_TOKEN |
-            .GhtkSettings.ShopId = env.GHTK_SHOP_ID |
-            .GhtkSettings.BaseUrl = env.GHTK_BASE_URL
+            .GhnSettings.Token = env.GHN_TOKEN |
+            .GhnSettings.ShopId = env.GHN_SHOP_ID |
+            .GhnSettings.BaseUrl = env.GHN_BASE_URL
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
       - name: Restore dependencies
         run: dotnet restore
@@ -147,3 +147,4 @@ jobs:
             fi
 
             sudo systemctl restart anhemmotor.service
+

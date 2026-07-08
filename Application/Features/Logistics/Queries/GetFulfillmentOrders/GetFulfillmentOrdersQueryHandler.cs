@@ -18,11 +18,15 @@ namespace Application.Features.Logistics.Queries.GetFulfillmentOrders
             {
                 if (request.Status.Value == Domain.Enums.ParcelDeliveryStatus.Completed)
                 {
-                    query = query.Where(x => x.DeliveredAt.HasValue);
+                    query = query.Where(x => x.Status == Domain.Enums.ParcelDeliveryStatus.Completed);
                 }
                 else if (request.Status.Value == Domain.Enums.ParcelDeliveryStatus.Shipping)
                 {
-                    query = query.Where(x => !x.DeliveredAt.HasValue);
+                    query = query.Where(x => x.Status == Domain.Enums.ParcelDeliveryStatus.Shipping);
+                }
+                else if (request.Status.Value == Domain.Enums.ParcelDeliveryStatus.Returned)
+                {
+                    query = query.Where(x => x.Status == Domain.Enums.ParcelDeliveryStatus.Returned);
                 }
             }
             if (!string.IsNullOrWhiteSpace(request.Carrier))
@@ -49,7 +53,9 @@ namespace Application.Features.Logistics.Queries.GetFulfillmentOrders
                         CustomerPhone = x.CustomerPhone ?? string.Empty,
                         CustomerAddress = x.DestinationAddress ?? string.Empty,
                         Carrier = x.Carrier ?? string.Empty,
-                        Status = x.DeliveredAt.HasValue ? Domain.Enums.ParcelDeliveryStatus.Completed : Domain.Enums.ParcelDeliveryStatus.Shipping,
+                        Status = x.Status == Domain.Enums.ParcelDeliveryStatus.Shipping && x.DeliveredAt.HasValue 
+                            ? Domain.Enums.ParcelDeliveryStatus.Completed 
+                            : x.Status,
                         CodAmount = x.CodAmount,
                         ShippingCost = x.ShippingCost,
                         CreatedAt = x.CreatedAt?.DateTime ?? DateTime.MinValue,

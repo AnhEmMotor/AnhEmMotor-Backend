@@ -61,7 +61,7 @@ See the [LICENSE](LICENSE) file for details.
 - [6. Test Environment Configuration (Required)](#6-test-environment-configuration-required)
 - [7. GitHub Secrets Configuration (For Production Deploy)](#7-github-secrets-configuration-for-production-deploy)
 - [8. Online Payment Configuration (English)](#8-online-payment-configuration-english)
-- [9. GHTK (Giao Hàng Tiết Kiệm) Configuration (English)](#9-ghtk-giao-hàng-tiết-kiệm-configuration-english)
+- [9. GHN (Giao Hàng Nhanh) Configuration (English)](#9-GHN-giao-hàng-tiết-kiệm-configuration-english)
 - [10. Troubleshooting](#10-troubleshooting)
 
 # 1. System Requirements
@@ -570,9 +570,9 @@ The following secrets need to be set up in the GitHub repository:
 | `PAYOS__RETURN_URL`                | PayOS Return URL                         | `https://anhemmotor.online/payment-processing`                                                           |
 | `PAYOS__CANCEL_URL`                | PayOS Cancel URL                         | `https://anhemmotor.online/payment-processing`                                                           |
 | `UPLOAD_PATH`                      | Persistent image storage path            | `/var/www/anhemmotor/uploads`                                                                            |
-| `GHTK_TOKEN`                       | GHTK API Token                           | `a1b2c3d4e5f6g7h8...`                                                                                    |
-| `GHTK_SHOP_ID`                     | GHTK Shop ID                             | `S229988`                                                                                                |
-| `GHTK_BASE_URL`                    | GHTK API Base URL                        | `https://services.ghtk.vn`                                                                               |
+| `GHN_TOKEN`                        | GHN API Token                            | `a1b2c3d4e5f6g7h8...`                                                                                    |
+| `GHN_SHOP_ID`                      | GHN Shop ID                              | `012345`                                                                                                 |
+| `GHN_BASE_URL`                     | GHN API Base URL                         | `https://dev-online-gateway.ghn.vn`                                                                      |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -654,16 +654,15 @@ To enable payment features, you need to obtain credentials from VNPay and PayOS.
     - **API Key**
     - **Checksum Key**
 
-# 9. GHTK (Giao Hàng Tiết Kiệm) Configuration (English)
+# 9. GHN (Giao Hàng Nhanh) Configuration (English)
 
-To enable the automatic feature of pushing orders to GHTK, you need to configure the settings in GitHub Secrets and in `appsettings.*.json`. The following guide will help you get these 3 pieces of information in the Staging/Development environment (Not production, to avoid losing money):
+To enable the automatic feature of pushing orders to GHN, you need to configure the settings in GitHub Secrets and in `appsettings.*.json`. The following guide will help you get these 3 pieces of information in the Staging/Development environment (Not production, to avoid losing money):
 
-1. **Log in**: Access the [GHTK Customer Website](https://khachhang.giaohangtietkiem.vn/). No need to verify phone number, email, or identity card.
-2. **Get Shop ID**: Hover over the Avatar section, when the menu drops down, you will see the Store Code (usually starting with the letter "S" e.g., "S229988"). This is the value for the `GHTK_SHOP_ID` secret (and in the `appsettings.*.json` file, it is GhtkSettings -> ShopId).
-3. **Move customer code from the above website to Development/Staging environment**: Join the Zalo chat channel at [here](https://zalo.me/g/wwqeds160), request to move the shop from production to staging including the shop id. After being accepted, log in again to the [GHTK Staging Website](https://khachhang-staging.ghtklab.com/).
-4. **Get API Token**: Hover over the Avatar section, when the menu drops down, select "Thông tin tài khoản" (Account Information) -> Scroll to the bottom to find the "Cấu hình API" (API Configuration) section. If there is no API in the API code section, create a new 1 API then copy the API code after creation. If you already have an API, click the "Xem" (View) button at the API you want to use, then enter the password and copy the code that appears. This is the value for the `GHTK_TOKEN` secret (and in the `appsettings.*.json` file, it is GhtkSettings -> Token).
-5. **Setup Webhook**: Also in the "Cấu hình API" (API Configuration) section, under "Webhook", create or edit a webhook. For "Data format", select "X-www-form-encoded", the destination URL is your Backend's API Endpoint (in the programming environment, you can use ngrok to host the Backend API from the localhost environment to the Internet for testing).
-6. **GHTK URL**: Use `https://services.giaohangtietkiem.vn` for the production environment, or `https://services-staging.ghtklab.com` if you are in the Development environment. This is your `GHTK_BASE_URL` (and in the `appsettings.*.json` file, it is GhtkSettings -> BaseUrl).
+1. **Log in**: Access the [GHN Customer Website](https://5sao.ghn.dev/).
+2. **Get Shop ID**: Click on "Chủ cửa hàng" (Shop owner) in the sidebar. In the "Thông tin cá nhân" (Personal information) tab, there is an ID field. This ID is the value for the `GHN_SHOP_ID` secret (and in the `appsettings.*.json` file, it is GHNSettings -> ShopId).
+3. **Get API Token**: Also in the "Chủ cửa hàng" section, select the "Bảo mật" (Security) tab. On the "Token API & IP Tin cậy" line, click "Quản lý" (Manage). Another tab will open. In the "Token API" section, click the eye icon, verify your phone number, and a string will appear. This is the value for the `GHN_TOKEN` secret (and in the `appsettings.*.json` file, it is GHNSettings -> Token).
+4. **GHN URL**: Use `https://dev-online-gateway.ghn.vn` if you are in the Development environment. This is your `GHN_BASE_URL` (and in the `appsettings.*.json` file, it is GHNSettings -> BaseUrl).
+5. **Register Webhook**: If you want to use Webhooks to receive notifications when an order is completed, you need to send an email to api@ghn.vn with the following information: Company Name, Client ID, Requested Environment, Webhook URL (which is the Endpoint URL running this project). Then wait for their response.
 
 # 10. Troubleshooting
 
@@ -781,7 +780,7 @@ Xem tệp [LICENSE](LICENSE) để biết chi tiết.
 - [6. Hướng dẫn Cấu hình Đăng nhập Mạng xã hội](#6-hướng-dẫn-cấu-hình-đăng-nhập-mạng-xã-hội)
 - [7. GitHub Secrets Configuration (Cho Production Deploy)](#7-github-secrets-configuration-cho-production-deploy)
 - [8. Hướng dẫn Cấu hình Thanh toán Online](#8-hướng-dẫn-cấu-hình-thanh-toán-online)
-- [9. Hướng dẫn Cấu hình Giao Hàng Tiết Kiệm (GHTK)](#9-hướng-dẫn-cấu-hình-giao-hàng-tiết-kiệm-ghtk)
+- [9. Hướng dẫn Cấu hình Giao Hàng Nhanh (GHN)](#9-hướng-dẫn-cấu-hình-giao-hàng-tiết-kiệm-GHN)
 - [10. Troubleshooting](#10-troubleshooting-1)
 
 # 1. Yêu cầu hệ thống
@@ -1296,9 +1295,9 @@ Cần setup các secrets sau trong GitHub repository:
 | `PAYOS__RETURN_URL`                | PayOS Return URL                          | `https://yourdomain.online/payment-processing`                                                           |
 | `PAYOS__CANCEL_URL`                | PayOS Cancel URL                          | `https://yourdomain.online/payment-processing`                                                           |
 | `UPLOAD_PATH`                      | Đường dẫn lưu trữ ảnh vĩnh viễn           | `/var/www/anhemmotor/uploads`                                                                            |
-| `GHTK_TOKEN`                       | Mã API Token từ GHTK                      | `a1b2c3d4e5f6g7h8...`                                                                                    |
-| `GHTK_SHOP_ID`                     | Mã cửa hàng (Shop ID) trên GHTK           | `S229988`                                                                                                |
-| `GHTK_BASE_URL`                    | Địa chỉ API của GHTK                      | `https://services.ghtk.vn`                                                                               |
+| `GHN_TOKEN`                        | Mã API Token từ GHN                       | `a1b2c3d4e5f6g7h8...`                                                                                    |
+| `GHN_SHOP_ID`                      | Mã cửa hàng (Shop ID) trên GHN            | `012345`                                                                                                 |
+| `GHN_BASE_URL`                     | Địa chỉ API của GHN                       | `https://dev-online-gateway.ghn.vn`                                                                      |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -1380,16 +1379,15 @@ Cần setup các secrets sau trong GitHub repository:
     - **API Key**
     - **Checksum Key**
 
-# 9. Hướng dẫn Cấu hình Giao Hàng Tiết Kiệm (GHTK)
+# 9. Hướng dẫn Cấu hình Giao Hàng Nhanh (GHN)
 
-Để kích hoạt tính năng tự động đẩy đơn hàng sang GHTK, bạn cần thiết lập cấu hình trên GitHub Secrets và trong appsetting.\*.json. Hướng dẫn sau sẽ giúp bạn lấy được 3 thông tin này dưới tầng Staging/Development (Không phải production, tránh bị mất tiền):
+Để kích hoạt tính năng tự động đẩy đơn hàng sang GHN, bạn cần thiết lập cấu hình trên GitHub Secrets và trong appsetting.\*.json. Hướng dẫn sau sẽ giúp bạn lấy được 3 thông tin này dưới tầng Staging/Development (Không phải production, tránh bị mất tiền):
 
-1. **Đăng nhập**: Truy cập vào [Website Khách hàng GHTK](https://khachhang.giaohangtietkiem.vn/). Không cần xác thực số điện thoại, email, căn cước công dân.
-2. **Lấy Shop ID (Mã Cửa Hàng)**: Di chuột vào phần Avatar, khi menu xổ xuống, bạn sẽ thấy Mã Cửa Hàng (thường bắt đầu bằng chữ "S" ví dụ "S229988"). Đây chính là giá trị cho bí mật `GHTK_SHOP_ID` (và trong file appsettings.\*.json là GhtkSettings -> ShopId).
-3. **Thực hiện đưa mã khách hàng từ trang web trên vào môi trường Development/Staging**: Vào kênh chat Zalo tại (đây)[https://zalo.me/g/wwqeds160], yêu cầu chuyển shop đang từ production vào staging bao gồm cả shop id, sau khi được chắp nhận, bạn đăng nhập lại vào [Trang web Staging GHTK](https://khachhang-staging.ghtklab.com/)
-4. **Lấy API Token**: Di chuột vào phần Avatar, khi menu xổ xuống, bạn chọn "Thông tin tài khoản" -> Kéo xuống dưới cùng tìm mục "Cấu hình API". Nếu chưa có API trong phần mã API, tạo 1 API mới rồi sao chép mã API sau khi tạo, nếu đã có API rồi thì bấm vào nút "Xem" tại API muốn sử dụng, sau đó nhập mật khẩu rồi sao chép mã hiện ra. Đây chính là giá trị cho bí mật `GHTK_TOKEN` (và trong file appsettings.\*.json là GhtkSettings -> Token).
-5. **Setup Webhook**: Cũng trong mục "Cấu hình API", phần "Webhook", tạo hoặc chỉnh sửa webhook, ở phần "Data format", chọn "X-www-form-encoded", URL đích chính là API Endpoint của Backend (trên môi trường đang lập trình, có thể sử dụng ngrok để host API Backend đang từ môi trường localhost sang Internet để test).
-6. **URL GHTK**: Sử dụng https://services.giaohangtietkiem.vn cho môi trường production, hoặc https://services-staging.ghtklab.com nếu bạn ở môi trường Development. Đây là GHTK_BASE_URL của bạn (và trong file appsettings.\*.json là GhtkSettings -> BaseUrl).
+1. **Đăng nhập**: Truy cập vào [Website Khách hàng GHN](https://5sao.ghn.dev/).
+2. **Lấy Shop ID (Mã Cửa Hàng)**: Bạn sẽ nhấn vào chữ "Chủ cửa hàng" ở tại sidebar, Ở trong tab "Thông tin cá nhân", có 1 ô ID. ID này chính là giá trị cho bí mật `GHN_SHOP_ID` (và trong file appsettings.\*.json là GHNSettings -> ShopId).
+3. **Lấy API Token**: Cũng ở trong mục "Chủ cửa hàng", chọn tab "Bảo mật", trên dòng "Token API & IP Tin cậy", nhấn "Quản lý", 1 tab khác hiện ra, trong phần "Token API", bạn nhấn vào hình con mắt, xác thực số điện thoại và 1 chuỗi sẽ hiện ra. Đây chính là giá trị cho bí mật `GHN_TOKEN` (và trong file appsettings.\*.json là GHNSettings -> Token).
+4. **URL GHN**: Sử dụng https://dev-online-gateway.ghn.vn nếu bạn ở môi trường Development. Đây là GHN_BASE_URL của bạn (và trong file appsettings.\*.json là GHNSettings -> BaseUrl).
+5. **Đăng kí Webhook**: Nếu như bạn muốn sử dụng Webhook để nhận tin khi có đơn hàng đã hoàn tất, bạn sẽ cần gửi mail đến địa chỉ api@ghn.vn với các thông tin làTên công ty, Mã khách hàng (ClientID), Môi trường yêu cầu, URL Webhook (chính là URL Endpoint chạy dự án này). Rồi chờ họ phản hồi.
 
 # 10. Troubleshooting
 

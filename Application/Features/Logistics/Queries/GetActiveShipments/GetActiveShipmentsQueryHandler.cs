@@ -13,8 +13,8 @@ namespace Application.Features.Logistics.Queries.GetActiveShipments
         {
             var now = DateTimeOffset.UtcNow;
             var shipments = await db.GetAllAsync(cancellationToken);
-            // Lấy các đơn chưa giao (DeliveredAt = null)
-            var activeShipments = shipments.Where(x => !x.DeliveredAt.HasValue).ToList();
+            // Lấy các đơn đang giao (Status == Shipping và DeliveredAt = null)
+            var activeShipments = shipments.Where(x => x.Status == Domain.Enums.ParcelDeliveryStatus.Shipping && !x.DeliveredAt.HasValue).ToList();
             
             var result = activeShipments.Select(
                 x => new ActiveShipmentResponse

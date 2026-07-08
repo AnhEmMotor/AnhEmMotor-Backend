@@ -24,33 +24,30 @@ public class LogisticsDashboardRepository : ILogisticsDashboardRepository
     {
         var response = new LogisticsDashboardResponse();
 
-        // 1. FulfillmentWorkload: Số đơn đang giao (Delivering)
-        var workload = await _context.OutputOrders
-            .Where(o => o.StatusId == OrderStatus.Delivering)
+        // 1. FulfillmentWorkload: Số đơn đang giao (Shipping)
+        var workload = await _context.Shipments
+            .Where(s => s.Status == Domain.Enums.ParcelDeliveryStatus.Shipping && s.DeliveredAt == null)
             .CountAsync(cancellationToken);
 
         // 2. PendingUnreconciledCod: Tổng tiền COD chờ đối soát của các bưu kiện
-        // Use OutputOrders directly to find unpaid amounts for delivering orders
-        var pendingOrders = await _context.OutputOrders
-            .Include(o => o.OutputInfos)
-            .Where(o => o.StatusId == OrderStatus.Delivering)
-            .ToListAsync(cancellationToken);
+        var pendingCod = await _context.Shipments
+            .Where(s => s.Status == Domain.Enums.ParcelDeliveryStatus.Shipping && s.DeliveredAt == null)
+            .SumAsync(s => s.CodAmount, cancellationToken);
 
-        decimal pendingCod = pendingOrders.Sum(o => o.Total - (o.PaidAmount ?? 0));
-
-        // 3. OtifRate (On Time In Full): Tỷ lệ giao đúng hạn (Giả lập tính toán đơn giản)
-        double otif = 95.0; // Mocked value since detailed delivery time tracking is delegated to GHTK
-
-        // 4. ReturnsClaimsRate: Tỷ lệ hoàn/hủy
-        var totalOrders = await _context.OutputOrders
-            .Where(o => o.CreatedAt >= fromDate)
+        // 3. OtifRate: Tỷ lệ giao hàng thành công (Completed / Total Finished)
+        var completedShipments = await _context.Shipments
+            .Where(s => (s.Status == Domain.Enums.ParcelDeliveryStatus.Completed || (s.Status == Domain.Enums.ParcelDeliveryStatus.Shipping && s.DeliveredAt != null)) && s.CreatedAt >= fromDate)
             .CountAsync(cancellationToken);
             
-        var returnedOrders = await _context.OutputOrders
-            .Where(o => (o.StatusId == OrderStatus.Refunding || o.StatusId == OrderStatus.Refunded) && o.CreatedAt >= fromDate)
+        // 4. ReturnsClaimsRate: Tỷ lệ hoàn/hủy (Returned / Total Finished)
+        var returnedShipments = await _context.Shipments
+            .Where(s => s.Status == Domain.Enums.ParcelDeliveryStatus.Returned && s.CreatedAt >= fromDate)
             .CountAsync(cancellationToken);
 
-        double returnRate = totalOrders > 0 ? Math.Round((double)returnedOrders / totalOrders * 100, 2) : 0.0;
+        var totalFinished = completedShipments + returnedShipments;
+        
+        double otif = totalFinished > 0 ? (double)completedShipments / totalFinished : 0.0;
+        double returnRate = totalFinished > 0 ? (double)returnedShipments / totalFinished : 0.0;
 
         response.Summary = new LogisticsDashboardSummaryResponse
         {

@@ -37,6 +37,17 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
             .FirstOrDefaultAsync(s => s.OutputId == outputId, cancellationToken);
     }
 
+    public async Task<Domain.Entities.Logistics.Shipment?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Shipments
+            .Include(s => s.Items)
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(pv => pv.Product)
+            .Include(s => s.Items)
+                .ThenInclude(i => i.ProductVariantColor)
+            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
+
     public async Task<List<Domain.Entities.Logistics.Shipment>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Shipments
@@ -45,6 +56,18 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
                     .ThenInclude(pv => pv.Product)
             .Include(s => s.Items)
                 .ThenInclude(i => i.ProductVariantColor)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Domain.Entities.Logistics.Shipment>> GetActiveDeliveryShipmentsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Shipments
+            .Where(s => s.Status == Domain.Enums.ParcelDeliveryStatus.Shipping &&
+                        s.DeliveredAt == null && 
+                        s.Type == Domain.Constants.Logistics.ShipmentType.OrderDelivery && 
+                        s.TrackingNumber != null && 
+                        !s.TrackingNumber.StartsWith("GHN-") && 
+                        s.OutputId != null)
             .ToListAsync(cancellationToken);
     }
 }

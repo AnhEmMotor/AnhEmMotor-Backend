@@ -8,6 +8,8 @@ public class Shipment : BaseEntity
     [Key]
     public int Id { get; set; }
 
+    public Domain.Enums.ParcelDeliveryStatus Status { get; set; } = Domain.Enums.ParcelDeliveryStatus.Shipping;
+
     [Required]
     public string TrackingNumber { get; set; } = string.Empty;
 

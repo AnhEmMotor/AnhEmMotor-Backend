@@ -72,7 +72,7 @@ public class UpdateOutputStatusCommandHandler(
         {
             case OrderStatus.Completed:
                 isCompleting = true;
-                output.FinishedBy = request.CurrentUserId;
+                output.FinishedBy = request.CurrentUserId == Guid.Empty ? null : request.CurrentUserId;
                 foreach (var vehicle in output.OutputInfos.SelectMany(oi => oi.Vehicles))
                 {
                     vehicle.Status = VehicleStatus.Sold;
@@ -98,6 +98,7 @@ public class UpdateOutputStatusCommandHandler(
                 {
                     return Result<OrderDetailResponse>.Failure(checkResult.Errors!);
                 }
+                string trackingNumber = $"GHN-{output.Id}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
                 if (shippingService != null)
                 {
                     var shippingResult = await shippingService.CreateShippingOrderAsync(output, cancellationToken).ConfigureAwait(false);
@@ -105,6 +106,7 @@ public class UpdateOutputStatusCommandHandler(
                     {
                         return Result<OrderDetailResponse>.Failure(shippingResult.Errors!);
                     }
+                    trackingNumber = shippingResult.Value; // The real order_code
                 }
 
                 if (shipmentInsertRepository != null)
@@ -123,7 +125,7 @@ public class UpdateOutputStatusCommandHandler(
 
                     var shipment = new Domain.Entities.Logistics.Shipment
                     {
-                        TrackingNumber = $"GHTK-{output.Id}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
+                        TrackingNumber = trackingNumber,
                         CustomerName = output.CustomerName ?? string.Empty,
                         CustomerPhone = output.CustomerPhone ?? string.Empty,
                         CodAmount = output.Total,
@@ -212,6 +214,13 @@ public class UpdateOutputStatusCommandHandler(
         }
         var selectedVehicleIds = request.SelectedVehicleIds?.Distinct().ToList() ?? [];
         var requiredVehicleCount = vehicleOutputInfos.Sum(oi => oi.Count ?? 0);
+
+        // If no vehicles were provided but the order already has assigned vehicles, auto-fill them
+        if (selectedVehicleIds.Count == 0 && output.OutputInfos.SelectMany(oi => oi.Vehicles).Any())
+        {
+            selectedVehicleIds = output.OutputInfos.SelectMany(oi => oi.Vehicles).Select(v => v.Id).ToList();
+        }
+
         if (selectedVehicleIds.Count != requiredVehicleCount)
         {
             return Result.Failure(

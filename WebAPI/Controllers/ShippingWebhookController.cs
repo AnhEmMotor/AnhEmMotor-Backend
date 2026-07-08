@@ -20,26 +20,27 @@ public class ShippingWebhookController(
     IShipmentUpdateRepository shipmentUpdateRepository,
     IUnitOfWork unitOfWork) : ControllerBase
 {
-    [HttpPost("ghtk")]
-    public async Task<IActionResult> HandleGhtkWebhook([FromForm] GhtkWebhookRequest request)
+    [HttpPost("ghn")]
+    public async Task<IActionResult> HandleGhnWebhook([FromBody] GhnWebhookRequest request)
     {
-        logger.LogInformation("Received GHTK webhook for partner_id: {PartnerId}, status_id: {StatusId}", request.partner_id, request.status_id);
+        logger.LogInformation("Received GHN webhook for OrderCode: {OrderCode}, Status: {Status}", request.ClientOrderCode, request.Status);
 
-        if (string.IsNullOrEmpty(request.partner_id))
+        if (string.IsNullOrEmpty(request.ClientOrderCode))
         {
             return BadRequest();
         }
 
-        if (!int.TryParse(request.partner_id, out int outputIdInt))
+        // Parse GHN-{outputId}-{timestamp}
+        var parts = request.ClientOrderCode.Split('-');
+        if (parts.Length < 2 || !int.TryParse(parts[1], out int outputIdInt))
         {
             return BadRequest();
         }
         
         string newStatus = string.Empty;
 
-        // Map GHTK status_id to our OrderStatus
-        // Theo GHTK: 5 = Đã giao hàng/Chưa đối soát, -1 = Hủy đơn hàng
-        if (request.status_id == 5)
+        // Map GHN status to our OrderStatus
+        if (request.Status == "delivered")
         {
             newStatus = OrderStatus.Completed;
             var shipment = await shipmentReadRepository.GetByOutputIdAsync(outputIdInt);
@@ -50,9 +51,8 @@ public class ShippingWebhookController(
                 await unitOfWork.SaveChangesAsync();
             }
         }
-        else if (request.status_id == -1)
+        else if (request.Status == "cancel" || request.Status == "returned")
         {
-            // The plan says: "nếu đã bị huỷ đơn hàng thì sẽ về phần đang hoàn tiền."
             newStatus = OrderStatus.Refunding;
         }
 
@@ -70,7 +70,7 @@ public class ShippingWebhookController(
             if (result.IsFailure)
             {
                 logger.LogError("Failed to update order status via webhook: {Error}", result.Error);
-                // Even if our update failed due to some transition rules, we return OK to GHTK so they don't retry unnecessarily
+                // Even if our update failed due to some transition rules, we return OK to GHN so they don't retry unnecessarily
             }
         }
 
