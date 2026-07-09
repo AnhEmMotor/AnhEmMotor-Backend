@@ -1,5 +1,7 @@
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.LogisticsDashboard;
 using Application.Interfaces.Repositories.MediaFile.File;
+using Application.Interfaces.Repositories.Statistical;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Logistics;
 using Application.Interfaces.Services.Shipping;
@@ -10,7 +12,9 @@ using Infrastructure.BackgroundJobs;
 using Infrastructure.Configurations.Options;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
+using Infrastructure.Repositories.LogisticsDashboard;
 using Infrastructure.Repositories.MediaFile.File;
+using Infrastructure.Repositories.Statistical;
 using Infrastructure.Services;
 using Infrastructure.Services.Logistics;
 using Microsoft.AspNetCore.Authorization;
@@ -97,7 +101,7 @@ public static class DependencyInjection
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
         services.AddScoped<IFileReadService, FileReadService>();
         services.AddScoped<IFileInsertService, FileInsertService>();
-        services.AddScoped<IWorkshopDashboardRepository, WorkshopDashboardRepository>();
+        services.AddScoped<IStatisticalReadRepository, StatisticalReadRepository>();
         services.AddScoped<ILogisticsDashboardRepository, LogisticsDashboardRepository>();
         services.AddScoped<IFileUpdateService, FileUpdateService>();
         services.AddScoped<IFileDeleteService, FileDeleteService>();

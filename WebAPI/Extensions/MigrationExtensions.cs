@@ -9,154 +9,98 @@ namespace WebAPI.Extensions;
 
 public static class MigrationExtensions
 {
-    public static async Task ApplyMigrationsAndSeedAsync(this WebApplication app, CancellationToken cancellationToken)
-    {
-        using var scope = app.Services.CreateScope();
-        var services = scope.ServiceProvider;
-        var configuration = services.GetRequiredService<IConfiguration>();
-        var logger = services.GetRequiredService<ILogger<Program>>();
+	public static async Task ApplyMigrationsAndSeedAsync(this WebApplication app, CancellationToken cancellationToken)
+	{
+		using var scope = app.Services.CreateScope();
+		var services = scope.ServiceProvider;
+		var configuration = services.GetRequiredService<IConfiguration>();
+		var logger = services.GetRequiredService<ILogger<Program>>();
+		var dbContext = services.GetRequiredService<ApplicationDBContext>();
 
-        try
-        {
-            var dbContext = services.GetRequiredService<ApplicationDBContext>();
-            await RepairMigrationDriftAsync(dbContext, logger, cancellationToken).ConfigureAwait(false);
-            await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Migration phase encountered errors. App will continue with seeding.");
-            throw;
-        }
+		await dbContext.Database.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
 
-        var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
-        if (!shouldSeed) return;
+		var applied = new HashSet<string>(StringComparer.Ordinal);
+		await using (var cmd = dbContext.Database.GetDbConnection().CreateCommand())
+		{
+			cmd.CommandText = "SELECT MigrationId FROM __EFMigrationsHistory ORDER BY MigrationId";
+			await using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+			while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+				applied.Add(reader.GetString(0));
+		}
 
-        var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+		var allMigrations = new[]
+		{
+			"20260509132251_InitialCreate",
+			"20260516011310_AddSupplierTypeIdColumn",
+			"20260519141635_DropVehicleTypeAndUnusedProductColumns",
+			"20260521085746_AddVehicleTrackingAndColorLinking",
+			"20260522145111_FixProductVariantNamingAndAddVehicleColumns",
+			"20260527081022_AddQuotationAndProductRows",
+			"20260530013138_RefactorInputToInventoryReceiptAndPurchaseRequest",
+			"20260610143232_MajorSchemaOverhaulInventoryQuotationsBannerAndNews",
+			"20260613024229_AddBusinessContractsAndServiceManagementModules",
+			"20260624123942_UpgradeInventoryServiceBookingAndAddCrmCmsModules",
+			"20260625113447_RefactorServiceBookingAndAddSupplierDebt",
+			"20260703140314_AddSalesAndWorkshopInvoicesAndWarranty",
+			"20260704133950_AddPasswordResetTokenFields",
+			"20260706073950_AddVouchers",
+			"20260708081957_AddProductBrandLocalization",
+			"20260708083146_AddJsonColumnsToProductAndBrand",
+			"20260709000000_CreateShipmentsAndShipmentItems",
+		};
 
-        await ProductCategorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
-        await InventoryReceiptStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await VehicleTypeAssignmentSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await NewsCategorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
-            dbContext,
-            roleManager,
-            userManager,
-            configuration,
-            cancellationToken)
-            .ConfigureAwait(false);
-        await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
-        await LeadSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
-        await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await SupplierContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await FinanceContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await SalesAndInventorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
-        await CarrierPartnerSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await LogisticsDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await WorkshopAndServiceSeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
-    }
+		// Backfill any missing migration history records
+		var missing = allMigrations.Where(m => !applied.Contains(m)).ToArray();
+		if (missing.Length > 0)
+		{
+			logger.LogWarning("Migration drift: {Count} missing — backfilling history.", missing.Length);
+			foreach (var id in missing)
+			{
+				await using var insert = dbContext.Database.GetDbConnection().CreateCommand();
+				insert.CommandText = "INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion) VALUES (@id, @ver)";
+				var p1 = insert.CreateParameter(); p1.ParameterName = "@id"; p1.Value = id; insert.Parameters.Add(p1);
+				var p2 = insert.CreateParameter(); p2.ParameterName = "@ver"; p2.Value = "10.0.9"; insert.Parameters.Add(p2);
+				await insert.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+			}
+			logger.LogInformation("Backfilled {Count} migration history records.", missing.Length);
+		}
+		else
+		{
+			logger.LogInformation("All {Count} migrations are recorded. Skipping MigrateAsync.", applied.Count);
+		}
 
-    /// <summary>
-    /// Repairs migration drift by inserting missing migration records into __EFMigrationsHistory
-    /// when the corresponding schema objects already exist in the database.
-    /// </summary>
-    /// <remarks>
-    /// This handles the common local-dev scenario where the database has schema objects from
-    /// migrations but the __EFMigrationsHistory table is missing the corresponding records —
-    /// typically due to partial restores, manual schema changes, or migration history
-    /// being cleared.
-    ///
-    /// Each entry in <see cref="_migrationSignatures"/> defines a migration ID and a SQL query
-    /// that returns a non-null/non-zero value when that migration's effects are present.
-    /// The check is idempotent: if the migration is already recorded, or the signature
-    /// isn't found, no action is taken for that migration.
-    ///
-    /// To add a new migration signature, add a tuple to <see cref="_migrationSignatures"/>.
-    /// </remarks>
-    private static async Task RepairMigrationDriftAsync(
-        ApplicationDBContext dbContext,
-        ILogger logger,
-        CancellationToken cancellationToken)
-    {
-        const string historyTable = "__EFMigrationsHistory";
+		// Ensure any missing tables that are not covered by migrations are created
+		await dbContext.Database.EnsureCreatedAsync(cancellationToken).ConfigureAwait(false);
+		logger.LogInformation("EnsureCreatedAsync completed.");
 
-        // List of (migrationId, signatureCheckSql).
-        // The SQL must return a scalar: null/DBNull = not present, non-zero/int = present.
-        // Add entries for migrations whose effects may exist in the DB without a history record.
-        var migrationSignatures = new (string MigrationId, string SignatureSql)[]
-        {
-            // InitialCreate - Banner table is a reliable signature
-            ("20260509132251_InitialCreate",
-                "SELECT OBJECT_ID('Banner', 'U')"),
+		var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
+		if (!shouldSeed) return;
 
-            // AddSupplierTypeIdColumn - PartnerTypeId column on Supplier
-            ("20260516011310_AddSupplierTypeIdColumn",
-                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Supplier' AND COLUMN_NAME = 'PartnerTypeId'"),
-        };
+		var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+		var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-        try
-        {
-            var connection = dbContext.Database.GetDbConnection();
-            if (connection.State != System.Data.ConnectionState.Open)
-            {
-                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            foreach (var (migrationId, signatureSql) in migrationSignatures)
-            {
-                // Check if migration is already recorded
-                using var historyCmd = connection.CreateCommand();
-                historyCmd.CommandText = $"SELECT COUNT(*) FROM [{historyTable}] WHERE [MigrationId] = '{migrationId}'";
-                var count = await historyCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
-
-                if (count != null && Convert.ToInt32(count) > 0)
-                {
-                    continue; // Already recorded, no drift for this migration
-                }
-
-                // Check if migration's signature exists in the database
-                using var checkCmd = connection.CreateCommand();
-                checkCmd.CommandText = signatureSql;
-                var result = await checkCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
-
-                if (result == DBNull.Value || result == null || (result is int intResult && intResult == 0))
-                {
-                    continue; // Signature not present - migration was genuinely never applied
-                }
-
-                // Drift detected: insert the missing migration record
-                logger.LogWarning(
-                    "Migration drift detected: signature for '{MigrationId}' exists but history record is missing. "
-                        + "Inserting missing history row.",
-                    migrationId);
-
-                using var insertCmd = connection.CreateCommand();
-                insertCmd.CommandText = $"INSERT INTO [{historyTable}] ([MigrationId], [ProductVersion]) VALUES ('{migrationId}', '10.0.0')";
-                await insertCmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-
-                logger.LogInformation("Successfully repaired migration drift for '{MigrationId}'.", migrationId);
-            }
-        }
-        catch (Exception ex)
-        {
-            if (ex is SqlException sqlEx && sqlEx.Number == 4060)
-            {
-                // Error 4060 = cannot open database - local DB does not exist at all.
-                // MigrateAsync() will create it; no drift to repair, skip without stack trace noise.
-                logger.LogInformation("Migration drift repair skipped: database does not exist yet (Error 4060).");
-            }
-            else
-            {
-                logger.LogWarning(ex, "Migration drift repair check failed (non-fatal): {Message}", ex.Message);
-            }
-        }
-    }
+		await ProductCategorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
+		await InventoryReceiptStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await VehicleTypeAssignmentSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await NewsCategorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
+			dbContext, roleManager, userManager, configuration, cancellationToken).ConfigureAwait(false);
+		await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
+		await LeadSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
+		await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await SupplierContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await FinanceContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await SalesAndInventorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await CarrierPartnerSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await LogisticsDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+		await WorkshopDataSeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
+	}
 }

@@ -301,7 +301,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
         var now = DateTimeOffset.UtcNow;
         var monthStart = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
 
-        var inProgressCount = await dbContext.MaintenanceHistory
+        var inProgressCount = await dbContext.MaintenanceHistories
             .IgnoreQueryFilters()
             .CountAsync(m => m.TotalCost >= 0, cancellationToken)
             .ConfigureAwait(false);
@@ -313,12 +313,12 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
             .ConfigureAwait(false);
 
         var twoHoursAgo = now.AddHours(-2);
-        var overdueCount = await dbContext.MaintenanceHistory
+        var overdueCount = await dbContext.MaintenanceHistories
             .IgnoreQueryFilters()
             .CountAsync(m => m.TotalCost >= 0 && m.CreatedAt <= twoHoursAgo, cancellationToken)
             .ConfigureAwait(false);
 
-        var activeOrders = await dbContext.MaintenanceHistory
+        var activeOrders = await dbContext.MaintenanceHistories
             .IgnoreQueryFilters()
             .Where(m => m.TotalCost >= 0)
             .OrderByDescending(m => m.CreatedAt)
@@ -370,7 +370,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
             orderCode = o.MaintenanceNumber,
             customerName = customerDict.TryGetValue(o.VehicleId, out var cn) ? cn : "-",
             vehicleInfo = vehicleDict.TryGetValue(o.VehicleId, out var vi) ? vi : "-",
-            technicianName = (o.TechnicianId.HasValue && empDict.TryGetValue(o.TechnicianId.Value, out var tn)) ? tn : "Chưa phân công",
+            technicianName = (o.TechnicianId is int tid && empDict.TryGetValue(tid, out var tn)) ? tn : "Chưa phân công",
             status = "Đang sửa chữa",
             startedAt = o.CreatedAt,
             laborFee = vehicleFeeDict.TryGetValue(o.Id, out var f) ? f : 0m

@@ -1,4 +1,4 @@
-using Application.ApiContracts.WarrantyClaim.Responses;
+using Application.ApiContracts.Admin.Workshop.Responses;
 using Domain.Entities;
 using Mapster;
 using System;

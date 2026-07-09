@@ -8,4 +8,5 @@ public class WarrantyClaimPartResponse
     public string PartCode { get; set; } = string.Empty;
     public decimal UnitPrice { get; set; }
     public int Status { get; set; }
+    public string? StatusText { get; set; }
 }
