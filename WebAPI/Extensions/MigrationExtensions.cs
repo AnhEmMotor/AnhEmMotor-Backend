@@ -2,8 +2,8 @@ using Domain.Entities;
 using Infrastructure.DBContexts;
 using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace WebAPI.Extensions;
 
@@ -17,61 +17,17 @@ public static class MigrationExtensions
 		var logger = services.GetRequiredService<ILogger<Program>>();
 		var dbContext = services.GetRequiredService<ApplicationDBContext>();
 
-		await dbContext.Database.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-
-		var applied = new HashSet<string>(StringComparer.Ordinal);
-		await using (var cmd = dbContext.Database.GetDbConnection().CreateCommand())
+		try
 		{
-			cmd.CommandText = "SELECT MigrationId FROM __EFMigrationsHistory ORDER BY MigrationId";
-			await using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-			while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
-				applied.Add(reader.GetString(0));
+			await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+			logger.LogInformation("EF Core MigrateAsync completed successfully.");
 		}
-
-		var allMigrations = new[]
+		catch (Exception ex)
 		{
-			"20260509132251_InitialCreate",
-			"20260516011310_AddSupplierTypeIdColumn",
-			"20260519141635_DropVehicleTypeAndUnusedProductColumns",
-			"20260521085746_AddVehicleTrackingAndColorLinking",
-			"20260522145111_FixProductVariantNamingAndAddVehicleColumns",
-			"20260527081022_AddQuotationAndProductRows",
-			"20260530013138_RefactorInputToInventoryReceiptAndPurchaseRequest",
-			"20260610143232_MajorSchemaOverhaulInventoryQuotationsBannerAndNews",
-			"20260613024229_AddBusinessContractsAndServiceManagementModules",
-			"20260624123942_UpgradeInventoryServiceBookingAndAddCrmCmsModules",
-			"20260625113447_RefactorServiceBookingAndAddSupplierDebt",
-			"20260703140314_AddSalesAndWorkshopInvoicesAndWarranty",
-			"20260704133950_AddPasswordResetTokenFields",
-			"20260706073950_AddVouchers",
-			"20260708081957_AddProductBrandLocalization",
-			"20260708083146_AddJsonColumnsToProductAndBrand",
-			"20260709000000_CreateShipmentsAndShipmentItems",
-		};
-
-		// Backfill any missing migration history records
-		var missing = allMigrations.Where(m => !applied.Contains(m)).ToArray();
-		if (missing.Length > 0)
-		{
-			logger.LogWarning("Migration drift: {Count} missing — backfilling history.", missing.Length);
-			foreach (var id in missing)
-			{
-				await using var insert = dbContext.Database.GetDbConnection().CreateCommand();
-				insert.CommandText = "INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion) VALUES (@id, @ver)";
-				var p1 = insert.CreateParameter(); p1.ParameterName = "@id"; p1.Value = id; insert.Parameters.Add(p1);
-				var p2 = insert.CreateParameter(); p2.ParameterName = "@ver"; p2.Value = "10.0.9"; insert.Parameters.Add(p2);
-				await insert.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-			}
-			logger.LogInformation("Backfilled {Count} migration history records.", missing.Length);
+			logger.LogError(ex, "FATAL: MigrateAsync failed — {Error}", ex.Message);
+			Console.Error.WriteLine($"FATAL: MigrateAsync failed — {ex.Message}");
+			throw;
 		}
-		else
-		{
-			logger.LogInformation("All {Count} migrations are recorded. Skipping MigrateAsync.", applied.Count);
-		}
-
-		// Ensure any missing tables that are not covered by migrations are created
-		await dbContext.Database.EnsureCreatedAsync(cancellationToken).ConfigureAwait(false);
-		logger.LogInformation("EnsureCreatedAsync completed.");
 
 		var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
 		if (!shouldSeed) return;

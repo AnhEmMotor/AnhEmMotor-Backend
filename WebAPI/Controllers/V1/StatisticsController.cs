@@ -301,7 +301,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
         var now = DateTimeOffset.UtcNow;
         var monthStart = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
 
-        var inProgressCount = await dbContext.MaintenanceHistories
+        var inProgressCount = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
             .CountAsync(m => m.TotalCost >= 0, cancellationToken)
             .ConfigureAwait(false);
@@ -313,12 +313,12 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
             .ConfigureAwait(false);
 
         var twoHoursAgo = now.AddHours(-2);
-        var overdueCount = await dbContext.MaintenanceHistories
+        var overdueCount = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
             .CountAsync(m => m.TotalCost >= 0 && m.CreatedAt <= twoHoursAgo, cancellationToken)
             .ConfigureAwait(false);
 
-        var activeOrders = await dbContext.MaintenanceHistories
+        var activeOrders = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
             .Where(m => m.TotalCost >= 0)
             .OrderByDescending(m => m.CreatedAt)

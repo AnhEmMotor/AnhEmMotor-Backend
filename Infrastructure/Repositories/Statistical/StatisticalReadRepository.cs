@@ -19,7 +19,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var fromDate = DateTimeOffset.Parse(from).ToUniversalTime();
         var toDate = DateTimeOffset.Parse(to).ToUniversalTime();
 
-        var repairOrders = await context.MaintenanceHistories
+        var repairOrders = await context.MaintenanceHistory
             .Where(m => m.CreatedAt >= fromDate && m.CreatedAt <= toDate)
             .ToListAsync(cancellationToken);
 

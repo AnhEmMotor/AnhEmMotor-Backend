@@ -129,7 +129,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 	public virtual DbSet<ReturnRequestItem> ReturnRequestItems { get; set; }
 	public virtual DbSet<Invoice> Invoices { get; set; }
 	public virtual DbSet<ConversionTool> ConversionTools { get; set; }
-	public virtual DbSet<MaintenanceHistory> MaintenanceHistories { get; set; }
+	public virtual DbSet<MaintenanceHistory> MaintenanceHistory { get; set; }
 	public virtual DbSet<WarrantyClaim> WarrantyClaims { get; set; }
 	public virtual DbSet<WarrantyClaimPart> WarrantyClaimParts { get; set; }
 	public virtual DbSet<WorkshopPayment> WorkshopPayments { get; set; }
