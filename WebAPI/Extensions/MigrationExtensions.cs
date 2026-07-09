@@ -2,283 +2,161 @@ using Domain.Entities;
 using Infrastructure.DBContexts;
 using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Extensions;
 
 public static class MigrationExtensions
 {
-	public static async Task ApplyMigrationsAndSeedAsync(this WebApplication app, CancellationToken cancellationToken)
-	{
-		using var scope = app.Services.CreateScope();
-		var services = scope.ServiceProvider;
-		var configuration = services.GetRequiredService<IConfiguration>();
-		var logger = services.GetRequiredService<ILogger<Program>>();
+    public static async Task ApplyMigrationsAndSeedAsync(this WebApplication app, CancellationToken cancellationToken)
+    {
+        using var scope = app.Services.CreateScope();
+        var services = scope.ServiceProvider;
+        var configuration = services.GetRequiredService<IConfiguration>();
+        var logger = services.GetRequiredService<ILogger<Program>>();
 
-		try
-		{
-			var dbContext = services.GetRequiredService<ApplicationDBContext>();
-			await ApplyMigrationsSafelyAsync(dbContext, logger, cancellationToken).ConfigureAwait(false);
-		}
-		catch (Exception ex)
-		{
-			logger.LogError(ex, "Migration phase encountered errors. App will continue with seeding.");
-		}
+        try
+        {
+            var dbContext = services.GetRequiredService<ApplicationDBContext>();
+            await RepairMigrationDriftAsync(dbContext, logger, cancellationToken).ConfigureAwait(false);
+            await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Migration phase encountered errors. App will continue with seeding.");
+            throw;
+        }
 
-		var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
-		if (!shouldSeed) return;
+        var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
+        if (!shouldSeed) return;
 
-		var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-		var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-		var dbContext2 = services.GetRequiredService<ApplicationDBContext>();
+        var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-		await ProductCategorySeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
-		await InventoryReceiptStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await OutputStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await SupplierStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await PredefinedOptionSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await ProductOptionSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await ProductStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await VehicleTypeAssignmentSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await SettingsSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await NewsCategorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await TechnologySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await PermissionDataSeeder.SeedPermissionsAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(dbContext2, roleManager, userManager, configuration, cancellationToken).ConfigureAwait(false);
-		await EmployeeSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
-		await LeadSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
-		await CommissionPolicySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await SupplierContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await FinanceContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await SalesAndInventorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await CarrierPartnerSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await LogisticsDataSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-await WorkshopDataSeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
-	}
+        await ProductCategorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
+        await InventoryReceiptStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await VehicleTypeAssignmentSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await NewsCategorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
+            dbContext,
+            roleManager,
+            userManager,
+            configuration,
+            cancellationToken)
+            .ConfigureAwait(false);
+        await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
+        await LeadSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
+        await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await SupplierContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await FinanceContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await SalesAndInventorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
+        await CarrierPartnerSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await LogisticsDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await WorkshopAndServiceSeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
+    }
 
-	private static async Task ApplyMigrationsSafelyAsync(ApplicationDBContext dbContext, ILogger<Program> logger, CancellationToken cancellationToken)
-	{
-		var conn = dbContext.Database.GetDbConnection();
-		if (conn.State != System.Data.ConnectionState.Open)
-			await conn.OpenAsync(cancellationToken).ConfigureAwait(false);
+    /// <summary>
+    /// Repairs migration drift by inserting missing migration records into __EFMigrationsHistory
+    /// when the corresponding schema objects already exist in the database.
+    /// </summary>
+    /// <remarks>
+    /// This handles the common local-dev scenario where the database has schema objects from
+    /// migrations but the __EFMigrationsHistory table is missing the corresponding records —
+    /// typically due to partial restores, manual schema changes, or migration history
+    /// being cleared.
+    ///
+    /// Each entry in <see cref="_migrationSignatures"/> defines a migration ID and a SQL query
+    /// that returns a non-null/non-zero value when that migration's effects are present.
+    /// The check is idempotent: if the migration is already recorded, or the signature
+    /// isn't found, no action is taken for that migration.
+    ///
+    /// To add a new migration signature, add a tuple to <see cref="_migrationSignatures"/>.
+    /// </remarks>
+    private static async Task RepairMigrationDriftAsync(
+        ApplicationDBContext dbContext,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        const string historyTable = "__EFMigrationsHistory";
 
-		// Clean up any stale migration history entries where the record is applied but the schema is wrong
-		await CleanupFalsePositiveMigrationAsync(conn, logger, cancellationToken).ConfigureAwait(false);
+        // List of (migrationId, signatureCheckSql).
+        // The SQL must return a scalar: null/DBNull = not present, non-zero/int = present.
+        // Add entries for migrations whose effects may exist in the DB without a history record.
+        var migrationSignatures = new (string MigrationId, string SignatureSql)[]
+        {
+            // InitialCreate - Banner table is a reliable signature
+            ("20260509132251_InitialCreate",
+                "SELECT OBJECT_ID('Banner', 'U')"),
 
-		// Read already-applied migrations from __EFMigrationsHistory
-		var applied = new HashSet<string>(StringComparer.Ordinal);
-		using (var cmd = conn.CreateCommand())
-		{
-			cmd.CommandTimeout = 120;
-			cmd.CommandText = "SELECT MigrationId FROM __EFMigrationsHistory WITH (NOLOCK)";
-			using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-			while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
-				applied.Add(reader.GetString(0));
-		}
+            // AddSupplierTypeIdColumn - PartnerTypeId column on Supplier
+            ("20260516011310_AddSupplierTypeIdColumn",
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Supplier' AND COLUMN_NAME = 'PartnerTypeId'"),
+        };
 
-		// Also check actual DB schema for tables/columns
-		var existingObjects = await GetExistingSchemaObjectsAsync(conn, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var connection = dbContext.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+            }
 
-		// Ensure MaintenanceHistory table exists (migration file was deleted from codebase, create directly)
-		await EnsureMaintenanceHistoryTableExistsAsync(conn, logger, cancellationToken).ConfigureAwait(false);
+            foreach (var (migrationId, signatureSql) in migrationSignatures)
+            {
+                // Check if migration is already recorded
+                using var historyCmd = connection.CreateCommand();
+                historyCmd.CommandText = $"SELECT COUNT(*) FROM [{historyTable}] WHERE [MigrationId] = '{migrationId}'";
+                var count = await historyCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
 
-		// Collect all known migrations from EF
-		var allMigrations = dbContext.Database.GetMigrations();
-		var lastApplied = applied.LastOrDefault() ?? string.Empty;
-		var pending = allMigrations
-			.Where(m => string.Compare(m, lastApplied, StringComparison.Ordinal) > 0)
-			.ToList();
+                if (count != null && Convert.ToInt32(count) > 0)
+                {
+                    continue; // Already recorded, no drift for this migration
+                }
 
-		foreach (var migrationId in pending)
-		{
-			// Pre-check: if all expected schema objects already exist, skip without running
-			if (await IsMigrationAlreadyInDatabaseAsync(migrationId, existingObjects, cancellationToken).ConfigureAwait(false))
-			{
-				logger.LogInformation("Migration {Migration} — schema already present, marking as applied.", migrationId);
-				await MarkMigrationAsAppliedAsync(conn, migrationId, cancellationToken).ConfigureAwait(false);
-				continue;
-			}
+                // Check if migration's signature exists in the database
+                using var checkCmd = connection.CreateCommand();
+                checkCmd.CommandText = signatureSql;
+                var result = await checkCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
 
-			try
-			{
-				await dbContext.Database.MigrateAsync(migrationId, cancellationToken).ConfigureAwait(false);
-			}
-			catch (Microsoft.Data.SqlClient.SqlException ex) when (IsSchemaAlreadyExistsError(ex) ||
-			                                                       migrationId.Contains("AddPasswordResetTokenFields"))
-			{
-				logger.LogWarning("Migration {Migration} (err {ErrNo}: {Error}) — object may already exist. Marking as applied.",
-					migrationId, ex.Number, ex.Message);
-				await MarkMigrationAsAppliedAsync(conn, migrationId, cancellationToken).ConfigureAwait(false);
-			}
-		}
-	}
+                if (result == DBNull.Value || result == null || (result is int intResult && intResult == 0))
+                {
+                    continue; // Signature not present - migration was genuinely never applied
+                }
 
-	private static async Task<HashSet<string>> GetExistingSchemaObjectsAsync(System.Data.Common.DbConnection conn, CancellationToken cancellationToken)
-	{
-		var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-		using var cmd = conn.CreateCommand();
-		cmd.CommandTimeout = 120;
-		cmd.CommandText = @"
-SELECT t.name + '.' + c.name
-FROM sys.tables t WITH (NOLOCK)
-JOIN sys.columns c WITH (NOLOCK) ON t.object_id = c.object_id
-WHERE SCHEMA_NAME(t.schema_id) = 'dbo'
-UNION
-SELECT name
-FROM sys.tables WITH (NOLOCK)
-WHERE SCHEMA_NAME(schema_id) = 'dbo'";
-		using var reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-		while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
-			set.Add(reader.GetString(0));
+                // Drift detected: insert the missing migration record
+                logger.LogWarning(
+                    "Migration drift detected: signature for '{MigrationId}' exists but history record is missing. "
+                        + "Inserting missing history row.",
+                    migrationId);
 
-		return set;
-	}
+                using var insertCmd = connection.CreateCommand();
+                insertCmd.CommandText = $"INSERT INTO [{historyTable}] ([MigrationId], [ProductVersion]) VALUES ('{migrationId}', '10.0.0')";
+                await insertCmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
-	private static async Task CleanupFalsePositiveMigrationAsync(
-		System.Data.Common.DbConnection conn,
-		ILogger<Program> logger,
-		CancellationToken cancellationToken)
-	{
-		// Check if migration 20260704133950_AddPasswordResetTokenFields is in history but columns are missing
-		var inHistory = false;
-		using (var checkCmd = conn.CreateCommand())
-		{
-			checkCmd.CommandText = "SELECT COUNT(1) FROM __EFMigrationsHistory WITH (NOLOCK) WHERE MigrationId = '20260704133950_AddPasswordResetTokenFields'";
-			var result = await checkCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
-			inHistory = Convert.ToInt32(result) > 0;
-		}
-
-		if (!inHistory) return;
-
-		// Verify the columns actually exist in the DB
-		var columnsExist = false;
-		using (var colCmd = conn.CreateCommand())
-		{
-			colCmd.CommandText = @"
-SELECT COUNT(1)
-FROM sys.columns c WITH (NOLOCK)
-JOIN sys.tables t WITH (NOLOCK) ON c.object_id = t.object_id
-WHERE SCHEMA_NAME(t.schema_id) = 'dbo'
-AND t.name = 'Users'
-AND c.name IN ('PasswordResetToken', 'PasswordResetTokenExpiry')";
-			var result = await colCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
-			columnsExist = Convert.ToInt32(result) == 2;
-		}
-
-		if (columnsExist)
-		{
-			logger.LogInformation("Migration 20260704133950_AddPasswordResetTokenFields entries present and columns exist. OK.");
-			return;
-		}
-
-		// Columns are missing — clean up history and add them directly (triệt để, chỉ thêm không xóa dữ liệu)
-		logger.LogWarning("PasswordResetToken columns missing in Users table. Adding them directly via SQL.");
-
-		using var delCmd = conn.CreateCommand();
-		delCmd.CommandText = "DELETE FROM __EFMigrationsHistory WHERE MigrationId = '20260704133950_AddPasswordResetTokenFields'";
-		await delCmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-
-		using (var addCmd = conn.CreateCommand())
-		{
-			addCmd.CommandText = @"
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'Users') AND name = N'PasswordResetToken')
-    ALTER TABLE [Users] ADD [PasswordResetToken] NVARCHAR(MAX) NULL;
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'Users') AND name = N'PasswordResetTokenExpiry')
-    ALTER TABLE [Users] ADD [PasswordResetTokenExpiry] DATETIMEOFFSET NULL;";
-			await addCmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-		}
-
-		await MarkMigrationAsAppliedAsync(conn, "20260704133950_AddPasswordResetTokenFields", cancellationToken).ConfigureAwait(false);
-		logger.LogInformation("PasswordResetToken columns added and migration marked as applied.");
-	}
-
-	private static async Task<bool> IsMigrationAlreadyInDatabaseAsync(
-		string migrationId,
-		HashSet<string> existingObjects,
-		CancellationToken cancellationToken)
-	{
-		return migrationId switch
-		{
-			"20260509132251_InitialCreate" => existingObjects.Contains("Banner"),
-			"20260516011310_AddSupplierTypeIdColumn" => existingObjects.Contains("Supplier.PartnerTypeId"),
-			"20260703140314_AddSalesAndWorkshopInvoicesAndWarranty"
-				=> existingObjects.Contains("Supplier.PartnerTypeId"),
-			"20260704133950_AddPasswordResetTokenFields"
-				=> existingObjects.Contains("Users.PasswordResetToken"),
-			_ => false,
-		};
-	}
-
-	private static async Task MarkMigrationAsAppliedAsync(
-		System.Data.Common.DbConnection conn,
-		string migrationId,
-		CancellationToken cancellationToken)
-	{
-		using var cmd = conn.CreateCommand();
-		cmd.CommandText = "IF NOT EXISTS (SELECT 1 FROM __EFMigrationsHistory WHERE MigrationId = @id) "
-			+ "INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion) VALUES (@id, @ver)";
-		var p1 = cmd.CreateParameter(); p1.ParameterName = "@id"; p1.Value = migrationId;
-		var p2 = cmd.CreateParameter(); p2.ParameterName = "@ver"; p2.Value = "10.0.0";
-		cmd.Parameters.Add(p1); cmd.Parameters.Add(p2);
-		await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-	}
-
-	private static async Task EnsureMaintenanceHistoryTableExistsAsync(
-		System.Data.Common.DbConnection conn,
-		ILogger<Program> logger,
-		CancellationToken cancellationToken)
-	{
-		var tableExists = false;
-		using (var checkCmd = conn.CreateCommand())
-		{
-			checkCmd.CommandText = "SELECT COUNT(1) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'MaintenanceHistory'";
-			var result = await checkCmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
-			tableExists = Convert.ToInt32(result) > 0;
-		}
-
-		if (tableExists)
-		{
-			logger.LogInformation("Table MaintenanceHistory already exists. OK.");
-			return;
-		}
-
-		logger.LogWarning("Table MaintenanceHistory missing. Creating it directly via SQL.");
-
-		using (var createCmd = conn.CreateCommand())
-		{
-			createCmd.CommandText = @"
-CREATE TABLE [dbo].[MaintenanceHistory] (
-    [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [VehicleId] INT NOT NULL,
-    [TechnicianId] INT NULL,
-    [MaintenanceNumber] NVARCHAR(50) NOT NULL,
-    [MaintenanceDate] DATETIMEOFFSET NOT NULL,
-    [Description] NVARCHAR(MAX) NOT NULL,
-    [Mileage] INT NOT NULL,
-    [PartsCost] DECIMAL(18,2) NOT NULL,
-    [LaborCost] DECIMAL(18,2) NOT NULL,
-    [TotalCost] DECIMAL(18,2) NOT NULL,
-    [NextMaintenanceDate] DATETIMEOFFSET NULL,
-    [NextMaintenanceOdo] INT NULL,
-    [PartsJson] NVARCHAR(MAX) NULL,
-    [CreatedAt] DATETIMEOFFSET NULL,
-    [UpdatedAt] DATETIMEOFFSET NULL,
-    [DeletedAt] DATETIMEOFFSET NULL
-);
-
-CREATE NONCLUSTERED INDEX IX_MaintenanceHistory_TechnicianId ON [dbo].[MaintenanceHistory] ([TechnicianId]);
-CREATE NONCLUSTERED INDEX IX_MaintenanceHistory_VehicleId ON [dbo].[MaintenanceHistory] ([VehicleId]);";
-			await createCmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-		}
-
-		logger.LogInformation("Table MaintenanceHistory created successfully.");
-	}
-
-	private static bool IsSchemaAlreadyExistsError(Microsoft.Data.SqlClient.SqlException ex)
-	{
-		return ex.Number is 2714 or 2705
-			|| ex.Message.Contains("already an object named", StringComparison.OrdinalIgnoreCase)
-			|| ex.Message.Contains("Column names in each table must be unique", StringComparison.OrdinalIgnoreCase)
-			|| ex.Message.Contains("is specified more than once", StringComparison.OrdinalIgnoreCase);
-	}
+                logger.LogInformation("Successfully repaired migration drift for '{MigrationId}'.", migrationId);
+            }
+        }
+        catch (Exception ex)
+        {
+            if (ex is SqlException sqlEx && sqlEx.Number == 4060)
+            {
+                // Error 4060 = cannot open database - local DB does not exist at all.
+                // MigrateAsync() will create it; no drift to repair, skip without stack trace noise.
+                logger.LogInformation("Migration drift repair skipped: database does not exist yet (Error 4060).");
+            }
+            else
+            {
+                logger.LogWarning(ex, "Migration drift repair check failed (non-fatal): {Message}", ex.Message);
+            }
+        }
+    }
 }

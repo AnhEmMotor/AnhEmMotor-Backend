@@ -36,47 +36,53 @@ public static class DependencyInjection
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
             services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
-            options =>
-            {
-                options.UseMySql(connectionString, serverVersion);
-                options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-            });
+                options =>
+                {
+                    options.UseMySql(connectionString, serverVersion);
+                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+                });
         }
         else if (string.Compare(provider, "PostgreSql", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
-            options =>
-            {
-                options.UseNpgsql(connectionString);
-                options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-            });
+                options =>
+                {
+                    options.UseNpgsql(connectionString);
+                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+                });
         }
         else
         {
             services.AddDbContextPool<ApplicationDBContext, SqlServerDBContext>(
+                options =>
+                {
+                    options.UseSqlServer(
+                        configuration.GetConnectionString("StringConnection"),
+                        b => b.MigrationsAssembly(typeof(SqlServerDBContext).Assembly.FullName)
+                            .CommandTimeout(30)
+                            .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+                    options.ConfigureWarnings(w =>
+                    {
+                        w.Ignore(RelationalEventId.PendingModelChangesWarning);
+                        w.Ignore(SqlServerEventId.SavepointsDisabledBecauseOfMARS);
+                    });
+                });
+        }
+
+        services.AddIdentity<ApplicationUser, ApplicationRole>(
             options =>
             {
-                options.UseSqlServer(
-                configuration.GetConnectionString("StringConnection"),
-                b => b.MigrationsAssembly(typeof(SqlServerDBContext).Assembly.FullName)
-                    .CommandTimeout(30)
-                    .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-                options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
-            });
-        }
-        services.AddIdentity<ApplicationUser, ApplicationRole>(
-        options =>
-        {
-            options.Password.RequiredLength = 8;
-            options.Password.RequireNonAlphanumeric = true;
-            options.Password.RequireUppercase = true;
-            options.Password.RequireLowercase = true;
-            options.Password.RequireDigit = true;
-            options.User.RequireUniqueEmail = true;
-        })
-        .AddEntityFrameworkStores<ApplicationDBContext>()
-        .AddDefaultTokenProviders();
+                options.Password.RequiredLength = 8;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireDigit = true;
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<ApplicationDBContext>()
+            .AddDefaultTokenProviders();
+
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IUserStreamService, UserStreamService>();
         services.AddSingleton<INotificationService, NotificationService>();
@@ -103,18 +109,18 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient<IShippingService, ShippingService>(
-        client =>
-        {
-            var baseAddress = configuration["GhtkSettings:BaseUrl"] ?? "https://services.ghtk.vn";
-            client.BaseAddress = new Uri(baseAddress);
-        });
+            client =>
+            {
+                var baseAddress = configuration["GhtkSettings:BaseUrl"] ?? "https://services.ghtk.vn";
+                client.BaseAddress = new Uri(baseAddress);
+            });
         services.AddHttpClient<IGeocodingService, GeocodingService>();
         services.Scan(
-        scan => scan
-            .FromAssemblies(Assembly.GetExecutingAssembly())
-            .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
-            .AsImplementedInterfaces()
-            .WithScopedLifetime());
+            scan => scan
+                .FromAssemblies(Assembly.GetExecutingAssembly())
+                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
         services.AddHostedService<SupplierContractExpiryWorker>();
         return services;
     }

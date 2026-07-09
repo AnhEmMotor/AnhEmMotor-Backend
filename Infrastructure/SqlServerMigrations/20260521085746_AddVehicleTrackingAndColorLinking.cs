@@ -11,10 +11,22 @@ namespace Infrastructure.SqlServerMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(name: "FK_Vehicle_Lead_LeadId", table: "Vehicle");
-            migrationBuilder.DropColumn(name: "ColorCode", table: "ProductVariant");
-            migrationBuilder.DropColumn(name: "ColorName", table: "ProductVariant");
-            migrationBuilder.DropColumn(name: "CategoryGroup", table: "ProductCategory");
+            migrationBuilder.Sql(@"
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Vehicle_Lead_LeadId' AND parent_object_id = OBJECT_ID('Vehicle'))
+    ALTER TABLE [Vehicle] DROP CONSTRAINT [FK_Vehicle_Lead_LeadId]
+");
+            migrationBuilder.Sql(@"
+IF EXISTS (SELECT 1 FROM sys.columns WHERE name = 'ColorCode' AND object_id = OBJECT_ID('ProductVariant'))
+    ALTER TABLE [ProductVariant] DROP COLUMN [ColorCode]
+");
+            migrationBuilder.Sql(@"
+IF EXISTS (SELECT 1 FROM sys.columns WHERE name = 'ColorName' AND object_id = OBJECT_ID('ProductVariant'))
+    ALTER TABLE [ProductVariant] DROP COLUMN [ColorName]
+");
+            migrationBuilder.Sql(@"
+IF EXISTS (SELECT 1 FROM sys.columns WHERE name = 'CategoryGroup' AND object_id = OBJECT_ID('ProductCategory'))
+    ALTER TABLE [ProductCategory] DROP COLUMN [CategoryGroup]
+");
             migrationBuilder.RenameColumn(name: "VersionName", table: "ProductVariant", newName: "VariantName");
             migrationBuilder.AlterColumn<int>(
                 name: "LeadId",
