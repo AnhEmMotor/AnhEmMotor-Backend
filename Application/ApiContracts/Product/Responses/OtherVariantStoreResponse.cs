@@ -5,6 +5,8 @@ namespace Application.ApiContracts.Product.Responses
 {
     public class OtherVariantStoreResponse
     {
+        public int Id { get; set; }
+
         [JsonPropertyName("display_name")]
         public string? DisplayName { get; set; }
 

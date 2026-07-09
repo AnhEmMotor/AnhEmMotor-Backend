@@ -20,6 +20,13 @@ public sealed record CreateOutputCommand : IRequest<Result<OrderDetailResponse>>
 
     public string? PaymentMethod { get; init; }
 
+    public bool IsCompanyInvoice { get; init; } = false;
+    public string? CompanyName { get; init; }
+    public string? CompanyAddress { get; init; }
+    public string? CompanyTaxCode { get; init; }
+    public string? CompanyEmail { get; init; }
+    public string? BudgetCode { get; init; }
+
     [JsonPropertyName("products")]
     public List<CreateOutputInfoRequest> OutputInfos { get; init; } = [];
 }
