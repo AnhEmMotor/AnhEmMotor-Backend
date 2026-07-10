@@ -3,7 +3,6 @@ using Infrastructure.DBContexts;
 using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace WebAPI.Extensions;
 
@@ -15,18 +14,15 @@ public static class MigrationExtensions
 		var services = scope.ServiceProvider;
 		var configuration = services.GetRequiredService<IConfiguration>();
 		var logger = services.GetRequiredService<ILogger<Program>>();
-		var dbContext = services.GetRequiredService<ApplicationDBContext>();
 
 		try
 		{
+			var dbContext = services.GetRequiredService<ApplicationDBContext>();
 			await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
-			logger.LogInformation("EF Core MigrateAsync completed successfully.");
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "FATAL: MigrateAsync failed — {Error}", ex.Message);
-			Console.Error.WriteLine($"FATAL: MigrateAsync failed — {ex.Message}");
-			throw;
+			logger.LogError(ex, "Migration phase encountered errors. App will continue with seeding.");
 		}
 
 		var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
@@ -34,29 +30,29 @@ public static class MigrationExtensions
 
 		var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
 		var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+		var dbContext2 = services.GetRequiredService<ApplicationDBContext>();
 
-		await ProductCategorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
-		await InventoryReceiptStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await VehicleTypeAssignmentSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await NewsCategorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
-			dbContext, roleManager, userManager, configuration, cancellationToken).ConfigureAwait(false);
-		await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
-		await LeadSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
-		await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await SupplierContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await FinanceContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await SalesAndInventorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await CarrierPartnerSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await LogisticsDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-		await WorkshopDataSeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
+		await ProductCategorySeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
+		await InventoryReceiptStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await OutputStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await SupplierStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await PredefinedOptionSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await ProductOptionSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await ProductStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await VehicleTypeAssignmentSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await SettingsSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await NewsCategorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await TechnologySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await PermissionDataSeeder.SeedPermissionsAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(dbContext2, roleManager, userManager, configuration, cancellationToken).ConfigureAwait(false);
+		await EmployeeSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
+		await LeadSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
+		await CommissionPolicySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await SupplierContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await FinanceContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await SalesAndInventorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await CarrierPartnerSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await LogisticsDataSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await WorkshopDataSeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
 	}
 }

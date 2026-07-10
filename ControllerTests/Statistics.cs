@@ -8,7 +8,6 @@ using Application.Features.Statistical.Queries.GetProductStockAndPrice;
 using Application.Interfaces.Repositories.Statistical;
 using FluentAssertions;
 using FluentValidation;
-using Infrastructure.DBContexts;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +26,7 @@ public class Statistics
     {
         _mediatorMock = new Mock<IMediator>();
         _repositoryMock = new Mock<IStatisticalReadRepository>();
-        _controller = new StatisticsController(_mediatorMock.Object, _repositoryMock.Object, Mock.Of<ApplicationDBContext>());
+        _controller = new StatisticsController(_mediatorMock.Object, _repositoryMock.Object, null!);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
