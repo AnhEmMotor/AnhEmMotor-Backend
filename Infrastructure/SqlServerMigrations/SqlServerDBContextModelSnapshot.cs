@@ -252,78 +252,78 @@ namespace Infrastructure.SqlServerMigrations
                 });
 
             modelBuilder.Entity("Domain.Entities.Booking", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BookingType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("BookingType");
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("Email");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("FullName");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("Location");
-
-                    b.Property<string>("Note")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
-                        .HasColumnName("Note");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("PhoneNumber");
-
-                    b.Property<DateTimeOffset>("PreferredDate")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("PreferredDate");
-
-                    b.Property<int?>("ProductVariantId")
-                        .HasColumnType("int")
-                        .HasColumnName("ProductVariantId");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("Status");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int?>("VehicleId")
-                        .HasColumnType("int")
-                        .HasColumnName("VehicleId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("VehicleId");
-
-                    b.ToTable("Booking");
-                });
+            {
+                b.Property<int>("Id")
+                .ValueGeneratedOnAdd()
+                .HasColumnType("int")
+                .HasColumnName("Id");
+                
+                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                
+                b.Property<string>("BookingType")
+                .IsRequired()
+                .HasColumnType("nvarchar(20)")
+                .HasColumnName("BookingType");
+                
+                b.Property<DateTimeOffset?>("CreatedAt")
+                .HasColumnType("datetimeoffset");
+                
+                b.Property<DateTimeOffset?>("DeletedAt")
+                .HasColumnType("datetimeoffset");
+                
+                b.Property<string>("Email")
+                .IsRequired()
+                .HasColumnType("nvarchar(100)")
+                .HasColumnName("Email");
+                
+                b.Property<string>("FullName")
+                .IsRequired()
+                .HasColumnType("nvarchar(100)")
+                .HasColumnName("FullName");
+                
+                b.Property<string>("Location")
+                .IsRequired()
+                .HasColumnType("nvarchar(200)")
+                .HasColumnName("Location");
+                
+                b.Property<string>("Note")
+                .IsRequired()
+                .HasColumnType("nvarchar(MAX)")
+                .HasColumnName("Note");
+                
+                b.Property<string>("PhoneNumber")
+                .IsRequired()
+                .HasColumnType("nvarchar(20)")
+                .HasColumnName("PhoneNumber");
+                
+                b.Property<DateTimeOffset>("PreferredDate")
+                .HasColumnType("datetimeoffset")
+                .HasColumnName("PreferredDate");
+                
+                b.Property<int?>("ProductVariantId")
+                .HasColumnType("int")
+                .HasColumnName("ProductVariantId");
+                
+                b.Property<string>("Status")
+                .IsRequired()
+                .HasColumnType("nvarchar(20)")
+                .HasColumnName("Status");
+                
+                b.Property<DateTimeOffset?>("UpdatedAt")
+                .HasColumnType("datetimeoffset");
+                
+                b.Property<int?>("VehicleId")
+                .HasColumnType("int")
+                .HasColumnName("VehicleId");
+                
+                b.HasKey("Id");
+                
+                b.HasIndex("ProductVariantId");
+                
+                b.HasIndex("VehicleId");
+                
+                b.ToTable("Booking", (string)null);
+            });
 
             modelBuilder.Entity("Domain.Entities.BookingAppointment", b =>
                 {

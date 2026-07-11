@@ -18,7 +18,7 @@ public static class MigrationExtensions
 		try
 		{
 			var dbContext = services.GetRequiredService<ApplicationDBContext>();
-			await ApplyMigrationsSafelyAsync(dbContext, logger, cancellationToken).ConfigureAwait(false);
+			await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
 		}
 		catch (Exception ex)
 		{
@@ -48,6 +48,13 @@ public static class MigrationExtensions
 		await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(dbContext2, roleManager, userManager, configuration, cancellationToken).ConfigureAwait(false);
 		await EmployeeSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
 		await LeadSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
+		await CommissionPolicySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await SupplierContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await FinanceContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await SalesAndInventorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await CarrierPartnerSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await LogisticsDataSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+		await WorkshopDataSeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
 	}
 
 	private static async Task ApplyMigrationsSafelyAsync(ApplicationDBContext dbContext, ILogger<Program> logger, CancellationToken cancellationToken)
@@ -133,7 +140,6 @@ WHERE SCHEMA_NAME(schema_id) = 'dbo'";
 		ILogger<Program> logger,
 		CancellationToken cancellationToken)
 	{
-		// Check if migration 20260704133950_AddPasswordResetTokenFields is in history but columns are missing
 		var inHistory = false;
 		using (var checkCmd = conn.CreateCommand())
 		{
@@ -144,7 +150,6 @@ WHERE SCHEMA_NAME(schema_id) = 'dbo'";
 
 		if (!inHistory) return;
 
-		// Verify the columns actually exist in the DB
 		var columnsExist = false;
 		using (var colCmd = conn.CreateCommand())
 		{
@@ -165,7 +170,6 @@ AND c.name IN ('PasswordResetToken', 'PasswordResetTokenExpiry')";
 			return;
 		}
 
-		// Columns are missing — clean up history and add them directly (triệt để, chỉ thêm không xóa dữ liệu)
 		logger.LogWarning("PasswordResetToken columns missing in Users table. Adding them directly via SQL.");
 
 		using var delCmd = conn.CreateCommand();
