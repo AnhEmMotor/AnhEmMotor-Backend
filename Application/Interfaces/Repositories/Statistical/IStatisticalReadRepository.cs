@@ -29,6 +29,11 @@ public interface IStatisticalReadRepository
 
     Task<List<RecentOrderResponse>> GetRecentOrdersAsync(int count, CancellationToken cancellationToken);
 
+    Task<IEnumerable<StaffPerformanceResponse>> GetTopStaffPerformanceAsync(DateTimeOffset start, DateTimeOffset end, int limit, CancellationToken cancellationToken);
+
+    Task<IEnumerable<TransactionLogResponse>> GetRecentTransactionsAsync(int limit, CancellationToken cancellationToken);
+
+
     Task<IEnumerable<TopProductRevenueResponse>> GetTopProductsByRevenueAsync(
     int limit,
     CancellationToken cancellationToken);

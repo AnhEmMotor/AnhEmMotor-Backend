@@ -10,5 +10,7 @@ public sealed record GetOutputsListQuery : IRequest<Result<PagedResult<OutputIte
 {
     public SieveModel? SieveModel { get; init; }
 
+    public string? Search { get; init; }
+
     public IReadOnlyCollection<string> StatusIds { get; init; } = [];
 }

@@ -41,7 +41,7 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Điện thoại", Description = "Các sản phẩm điện thoại" };
+        var command = new CreateProductCategoryCommand { NameVi = "Điện thoại", NameEn = "Phone", Description = "Các sản phẩm điện thoại" };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.Name.Should().Be("Điện thoại");
@@ -61,7 +61,7 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Laptop", Description = null };
+        var command = new CreateProductCategoryCommand { NameVi = "Laptop", NameEn = "Laptop", Description = null };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.Name.Should().Be("Laptop");
@@ -76,7 +76,7 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Tablet", Description = string.Empty };
+        var command = new CreateProductCategoryCommand { NameVi = "Tablet", NameEn = "Tablet", Description = string.Empty };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.Name.Should().Be("Tablet");
@@ -90,7 +90,7 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "  Phụ kiện  ", Description = "Test" };
+        var command = new CreateProductCategoryCommand { NameVi = "  Phụ kiện  ", Description = "Test" };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.Name.Should().Be("Phụ kiện");
@@ -103,7 +103,7 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Máy tính", Description = "  Mô tả test  " };
+        var command = new CreateProductCategoryCommand { NameVi = "Máy tính", Description = "  Mô tả test  " };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.Description.Should().Be("Mô tả test");
@@ -116,7 +116,7 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Đồ điện tử & Công nghệ <Tag>", Description = "Test" };
+        var command = new CreateProductCategoryCommand { NameVi = "Đồ điện tử & Công nghệ <Tag>", Description = "Test" };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.Name.Should().Be("Đồ điện tử & Công nghệ <Tag>");
@@ -126,18 +126,18 @@ public class ProductCategory
     public void CreateProductCategory_WithNullName_ShouldFailValidation()
     {
         var validator = new CreateProductCategoryCommandValidator();
-        var command = new CreateProductCategoryCommand { Name = null, Description = "Test" };
+        var command = new CreateProductCategoryCommand { NameVi = null, NameEn = "Test", Description = "Test" };
         var result = validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Name);
+        result.ShouldHaveValidationErrorFor(x => x.NameVi);
     }
 
     [Fact(DisplayName = "PC_008 - Tạo danh mục sản phẩm thiếu Name (Name empty)")]
     public void CreateProductCategory_WithEmptyName_ShouldFailValidation()
     {
         var validator = new CreateProductCategoryCommandValidator();
-        var command = new CreateProductCategoryCommand { Name = string.Empty, Description = "Test" };
+        var command = new CreateProductCategoryCommand { NameVi = string.Empty, NameEn = "Test", Description = "Test" };
         var result = validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Name);
+        result.ShouldHaveValidationErrorFor(x => x.NameVi);
     }
 
     [Fact(DisplayName = "PC_009 - Tạo danh mục sản phẩm với Name trùng (case-sensitive)")]
@@ -147,7 +147,7 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Gaming", Description = "Test" };
+        var command = new CreateProductCategoryCommand { NameVi = "Gaming", NameEn = "Gaming", Description = "Test" };
         _readRepoMock.Setup(
             x => x.ExistsByNameAsync(
                 It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
@@ -165,7 +165,7 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "gaming", Description = "Test" };
+        var command = new CreateProductCategoryCommand { NameVi = "gaming", Description = "Test" };
         _readRepoMock.Setup(
             x => x.ExistsByNameAsync(
                 It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
@@ -183,7 +183,7 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Đã xóa", Description = "Test" };
+        var command = new CreateProductCategoryCommand { NameVi = "Đã xóa", Description = "Test" };
         _readRepoMock.Setup(x => x.ExistsByNameAsync("Đã xóa", It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(true);
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -197,7 +197,7 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { Name = "Valid", Description = "Valid" };
+        var command = new CreateProductCategoryCommand { NameVi = "Valid", Description = "Valid" };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.Name.Should().Be("Valid");
@@ -214,7 +214,7 @@ public class ProductCategory
         var command = new UpdateProductCategoryCommand
         {
             Id = 1,
-            Name = "Updated Name",
+            NameVi = "Updated Name",
             Description = "Updated Description"
         };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -237,7 +237,7 @@ public class ProductCategory
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new UpdateProductCategoryCommand { Id = 2, Name = "Only Name Updated", Description = null };
+        var command = new UpdateProductCategoryCommand { Id = 2, NameVi = "Only Name Updated", Description = null };
         _readRepoMock.Setup(x => x.GetByIdAsync(2, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 new ProductCategoryEntity { Id = 2, Name = "Original", Description = "Keep This", DeletedAt = null });
@@ -255,7 +255,7 @@ public class ProductCategory
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new UpdateProductCategoryCommand { Id = 3, Name = null, Description = "Only Description Updated" };
+        var command = new UpdateProductCategoryCommand { Id = 3, NameVi = null, Description = "Only Description Updated" };
         _readRepoMock.Setup(x => x.GetByIdAsync(3, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 new ProductCategoryEntity { Id = 3, Name = "Keep This", Description = "Original", DeletedAt = null });
@@ -270,7 +270,7 @@ public class ProductCategory
     public void UpdateProductCategory_WithEmptyBody_ShouldFailValidation()
     {
         var validator = new UpdateProductCategoryCommandValidator();
-        var command = new UpdateProductCategoryCommand { Id = 4, Name = null, Description = null };
+        var command = new UpdateProductCategoryCommand { Id = 4, NameVi = null, Description = null };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x);
     }
@@ -282,7 +282,7 @@ public class ProductCategory
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new UpdateProductCategoryCommand { Id = 5, Name = "Existing", Description = null };
+        var command = new UpdateProductCategoryCommand { Id = 5, NameVi = "Existing", Description = null };
         _readRepoMock.Setup(x => x.GetByIdAsync(5, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new ProductCategoryEntity { Id = 5, Name = "Original", DeletedAt = null });
         _readRepoMock.Setup(
@@ -299,7 +299,7 @@ public class ProductCategory
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new UpdateProductCategoryCommand { Id = 999, Name = "Updated" };
+        var command = new UpdateProductCategoryCommand { Id = 999, NameVi = "Updated" };
         _readRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((ProductCategoryEntity?)null);
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -313,7 +313,7 @@ public class ProductCategory
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new UpdateProductCategoryCommand { Id = 7, Name = "Updated" };
+        var command = new UpdateProductCategoryCommand { Id = 7, NameVi = "Updated" };
         _readRepoMock.Setup(x => x.GetByIdAsync(7, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new ProductCategoryEntity { Id = 7, Name = "Deleted", DeletedAt = DateTime.UtcNow });
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);

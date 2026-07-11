@@ -422,6 +422,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(MAX)")
                         .HasColumnName("Description");
 
+                    b.Property<string>("DescriptionJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DescriptionJson");
+
                     b.Property<string>("LogoUrl")
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("LogoUrl");
@@ -429,6 +433,10 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("Name");
+
+                    b.Property<string>("NameJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("NameJson");
 
                     b.Property<string>("Origin")
                         .HasColumnType("nvarchar(100)")
@@ -3147,6 +3155,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(MAX)")
                         .HasColumnName("Description");
 
+                    b.Property<string>("DescriptionJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DescriptionJson");
+
                     b.Property<string>("Dimensions")
                         .HasColumnType("nvarchar(35)")
                         .HasColumnName("Dimensions");
@@ -3214,13 +3226,25 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("MetaDescription");
 
+                    b.Property<string>("MetaDescriptionJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("MetaDescriptionJson");
+
                     b.Property<string>("MetaTitle")
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("MetaTitle");
 
+                    b.Property<string>("MetaTitleJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("MetaTitleJson");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("Name");
+
+                    b.Property<string>("NameJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("NameJson");
 
                     b.Property<string>("OilCapacity")
                         .HasColumnType("nvarchar(250)")
@@ -3253,6 +3277,10 @@ namespace Infrastructure.Migrations
                     b.Property<string>("ShortDescription")
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("ShortDescription");
+
+                    b.Property<string>("ShortDescriptionJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ShortDescriptionJson");
 
                     b.Property<string>("StarterSystem")
                         .HasColumnType("nvarchar(30)")
@@ -3374,6 +3402,44 @@ namespace Infrastructure.Migrations
                     b.ToTable("ProductCategory");
 
                     b.HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ProductCategoryTranslation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LanguageCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductCategoryId");
+
+                    b.ToTable("ProductCategoryTranslations");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCollectionPhoto", b =>
@@ -6574,6 +6640,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("Parent");
                 });
 
+            modelBuilder.Entity("Domain.Entities.ProductCategoryTranslation", b =>
+                {
+                    b.HasOne("Domain.Entities.ProductCategory", null)
+                        .WithMany("Translations")
+                        .HasForeignKey("ProductCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Entities.ProductCollectionPhoto", b =>
                 {
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
@@ -7445,6 +7520,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("Products");
 
                     b.Navigation("SubCategories");
+
+                    b.Navigation("Translations");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductStatus", b =>

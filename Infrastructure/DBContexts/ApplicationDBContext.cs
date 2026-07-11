@@ -256,6 +256,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
   modelBuilder.Entity<CarrierPartner>().Property(e => e.MaxParcelWeightKg).HasPrecision(18, 2);
   modelBuilder.Entity<SupplierDebtLog>().Property(l => l.AmountPaid).HasPrecision(18, 2);
   modelBuilder.Entity<SupplierDebtLog>().Property(l => l.RemainingDebt).HasPrecision(18, 2);
+  modelBuilder.Entity<Voucher>().Property(v => v.DiscountValue).HasPrecision(18, 2);
+  modelBuilder.Entity<Voucher>().Property(v => v.MaxDiscountAmount).HasPrecision(18, 2);
   modelBuilder.Entity<ParcelDeliveryOrder>()
   .HasMany(p => p.Items)
   .WithOne(i => i.ParcelDeliveryOrder)
@@ -683,6 +685,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
   .WithMany()
   .HasForeignKey(vl => vl.LeadId)
   .OnDelete(DeleteBehavior.Cascade);
+
+  modelBuilder.Entity<VoucherLead>()
+  .HasQueryFilter(vl => vl.Lead.DeletedAt == null && vl.Voucher.DeletedAt == null);
 
   foreach (var entityType in modelBuilder.Model.GetEntityTypes())
   {

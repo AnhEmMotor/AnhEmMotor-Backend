@@ -13,14 +13,26 @@ namespace Domain.Entities
         [Column("Name", TypeName = "nvarchar(100)")]
         public string? Name { get; set; }
 
+        [Column("NameJson", TypeName = "nvarchar(max)")]
+        public string? NameJson { get; set; }
+
         [Column("ShortDescription", TypeName = "nvarchar(255)")]
         public string? ShortDescription { get; set; }
+
+        [Column("ShortDescriptionJson", TypeName = "nvarchar(max)")]
+        public string? ShortDescriptionJson { get; set; }
 
         [Column("MetaTitle", TypeName = "nvarchar(100)")]
         public string? MetaTitle { get; set; }
 
+        [Column("MetaTitleJson", TypeName = "nvarchar(max)")]
+        public string? MetaTitleJson { get; set; }
+
         [Column("MetaDescription", TypeName = "nvarchar(255)")]
         public string? MetaDescription { get; set; }
+
+        [Column("MetaDescriptionJson", TypeName = "nvarchar(max)")]
+        public string? MetaDescriptionJson { get; set; }
 
         [Column("CategoryId")]
         [ForeignKey("ProductCategory")]
@@ -49,10 +61,10 @@ namespace Domain.Entities
         public decimal? SeatHeight { get; set; }
 
         [Column("GroundClearance", TypeName = "nvarchar(20)")]
-        public decimal? GroundClearance { get; set; }
+        public string? GroundClearance { get; set; }
 
         [Column("FuelCapacity", TypeName = "nvarchar(20)")]
-        public decimal? FuelCapacity { get; set; }
+        public string? FuelCapacity { get; set; }
 
         [Column("TireSize", TypeName = "nvarchar(100)")]
         public string? TireSize { get; set; }
@@ -149,6 +161,9 @@ namespace Domain.Entities
 
         [Column("Description", TypeName = "nvarchar(MAX)")]
         public string? Description { get; set; }
+
+        [Column("DescriptionJson", TypeName = "nvarchar(max)")]
+        public string? DescriptionJson { get; set; }
 
         public int? MaxPurchaseQuantity { get; set; }
 

@@ -87,18 +87,38 @@ public class BrandReadRepository(
             .OrderByDescending(x => x.Count)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
-        var latestUpdatedBrand = await query
+
+        var latestBrandEntity = await query
             .OrderByDescending(b => b.UpdatedAt ?? b.CreatedAt)
-            .Select(b => new { b.Name, LatestTime = b.UpdatedAt ?? b.CreatedAt })
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
+
+        string? latestBrandName = latestBrandEntity?.Name;
+        if (latestBrandEntity != null && !string.IsNullOrWhiteSpace(latestBrandEntity.NameJson))
+        {
+            try
+            {
+                var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(latestBrandEntity.NameJson);
+                if (dict != null)
+                {
+                    var culture = System.Globalization.CultureInfo.CurrentCulture.Name;
+                    var lang = culture.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ? "vi" : "en";
+                    if (dict.TryGetValue(lang, out var localized) && !string.IsNullOrEmpty(localized))
+                    {
+                        latestBrandName = localized;
+                    }
+                }
+            }
+            catch { }
+        }
+
         return new BrandStatisticsResponse
         {
             TotalBrands = totalBrands,
             PopularOrigin = popularOriginGroup?.Origin,
             PopularOriginCount = popularOriginGroup?.Count ?? 0,
-            LatestUpdatedBrandName = latestUpdatedBrand?.Name,
-            LatestUpdatedAt = latestUpdatedBrand?.LatestTime,
+            LatestUpdatedBrandName = latestBrandName,
+            LatestUpdatedAt = latestBrandEntity?.UpdatedAt ?? latestBrandEntity?.CreatedAt,
             DeletedBrandsCount = deletedBrandsCount
         };
     }

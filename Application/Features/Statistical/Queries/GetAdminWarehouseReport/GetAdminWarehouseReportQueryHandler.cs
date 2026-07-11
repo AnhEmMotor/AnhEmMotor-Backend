@@ -28,12 +28,13 @@ public class GetAdminWarehouseReportQueryHandler(IStatisticalReadRepository repo
             x => new BrandStockResponse
             {
                 BrandName = x.BrandName,
-                InStock = x.TotalStock - x.LowStock - x.OutOfStock,
+                StockCount = x.TotalStock,
+                InStock = Math.Max(0, x.TotalStock - x.LowStock - x.OutOfStock),
                 LowStock = x.LowStock,
                 OutOfStock = x.OutOfStock
             })
             .ToList();
-        var safeCount = totalStock - lowStockCount - outOfStockCount;
+        var safeCount = Math.Max(0, totalStock - lowStockCount - outOfStockCount);
         var stockStatusRatio = new List<StockStatusRatioResponse>
         {
             new StockStatusRatioResponse { StatusLabel = "An toàn", Count = safeCount },

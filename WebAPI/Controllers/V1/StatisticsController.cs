@@ -303,7 +303,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
 
         var inProgressCount = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
-            .CountAsync(m => m.TotalCost == 0, cancellationToken)
+            .CountAsync(m => m.TotalCost >= 0, cancellationToken)
             .ConfigureAwait(false);
 
         var workshopRevenue = await dbContext.WorkshopPayments
@@ -315,12 +315,12 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
         var twoHoursAgo = now.AddHours(-2);
         var overdueCount = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
-            .CountAsync(m => m.TotalCost == 0 && m.CreatedAt <= twoHoursAgo, cancellationToken)
+            .CountAsync(m => m.TotalCost >= 0 && m.CreatedAt <= twoHoursAgo, cancellationToken)
             .ConfigureAwait(false);
 
         var activeOrders = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
-            .Where(m => m.TotalCost == 0)
+            .Where(m => m.TotalCost >= 0)
             .OrderByDescending(m => m.CreatedAt)
             .Take(20)
             .Select(m => new { m.Id, m.MaintenanceNumber, m.VehicleId, m.Description, m.LaborCost, m.PartsCost, m.CreatedAt, m.TechnicianId })
@@ -337,8 +337,13 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
             var vehicleList = await dbContext.Vehicles
                 .IgnoreQueryFilters()
                 .Include(v => v.User)
+                .Include(v => v.Lead)
                 .Where(v => vehicleIds.Contains(v.Id))
-                .Select(v => new { v.Id, VehicleInfo = !string.IsNullOrEmpty(v.LicensePlate) ? v.LicensePlate : v.VinNumber, CustomerName = v.User != null ? v.User.FullName : "-" })
+                .Select(v => new { 
+                    v.Id, 
+                    VehicleInfo = !string.IsNullOrEmpty(v.LicensePlate) ? v.LicensePlate : v.VinNumber, 
+                    CustomerName = v.User != null ? v.User.FullName : (v.Lead != null ? v.Lead.FullName : "-") 
+                })
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
             vehicleDict = vehicleList.ToDictionary(x => x.Id, x => x.VehicleInfo);
@@ -365,7 +370,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
             orderCode = o.MaintenanceNumber,
             customerName = customerDict.TryGetValue(o.VehicleId, out var cn) ? cn : "-",
             vehicleInfo = vehicleDict.TryGetValue(o.VehicleId, out var vi) ? vi : "-",
-            technicianName = (o.TechnicianId.HasValue && empDict.TryGetValue(o.TechnicianId.Value, out var tn)) ? tn : "Chưa phân công",
+            technicianName = (o.TechnicianId is int tid && empDict.TryGetValue(tid, out var tn)) ? tn : "Chưa phân công",
             status = "Đang sửa chữa",
             startedAt = o.CreatedAt,
             laborFee = vehicleFeeDict.TryGetValue(o.Id, out var f) ? f : 0m

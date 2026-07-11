@@ -12,4 +12,8 @@ public class AdminDashboardOverviewResponse
     public IEnumerable<MonthlyRevenueProfitResponse> MonthlyComparison { get; set; } = [];
 
     public IEnumerable<RecentOrderResponse> RecentOrders { get; set; } = [];
+
+    public IEnumerable<StaffPerformanceResponse> TopStaff { get; set; } = [];
+
+    public IEnumerable<TransactionLogResponse> RecentTransactions { get; set; } = [];
 }
