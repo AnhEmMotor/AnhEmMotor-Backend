@@ -168,9 +168,9 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
         Permissions.Accountant.DashboardManagement.View,
         Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(AdminWarehouseReportResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAdminWarehouseReportAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAdminWarehouseReportAsync([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, CancellationToken cancellationToken)
     {
-        var query = new GetAdminWarehouseReportQuery();
+        var query = new GetAdminWarehouseReportQuery { StartDate = startDate, EndDate = endDate };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -184,9 +184,9 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
         Permissions.Accountant.DashboardManagement.View,
         Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(AdminRevenueAnalysisResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAdminRevenueAnalysisAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAdminRevenueAnalysisAsync([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, CancellationToken cancellationToken)
     {
-        var query = new GetAdminRevenueAnalysisQuery();
+        var query = new GetAdminRevenueAnalysisQuery { StartDate = startDate, EndDate = endDate };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -263,9 +263,9 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
         Permissions.Accountant.DashboardManagement.View,
         Permissions.Factory.DashboardManagement.View)]
     [ProducesResponseType(typeof(AdminDashboardOverviewResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAdminDashboardOverviewAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAdminDashboardOverviewAsync([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, CancellationToken cancellationToken)
     {
-        var query = new GetAdminDashboardOverviewQuery();
+        var query = new GetAdminDashboardOverviewQuery { StartDate = startDate, EndDate = endDate };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -296,10 +296,11 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
         Permissions.Accountant.DashboardManagement.View)]
-    public async Task<IActionResult> GetWorkshopOverviewAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetWorkshopOverviewAsync([FromQuery] DateTimeOffset? start, [FromQuery] DateTimeOffset? end, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
-        var monthStart = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
+        var periodStart = start ?? new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
+        var periodEnd = end ?? now;
 
         var inProgressCount = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
@@ -308,7 +309,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
 
         var workshopRevenue = await dbContext.WorkshopPayments
             .IgnoreQueryFilters()
-            .Where(p => p.CreatedAt >= monthStart)
+            .Where(p => p.CreatedAt >= periodStart && p.CreatedAt <= periodEnd)
             .SumAsync(p => p.TotalAmount, cancellationToken)
             .ConfigureAwait(false);
 

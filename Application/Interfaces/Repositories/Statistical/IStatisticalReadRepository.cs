@@ -4,16 +4,16 @@ namespace Application.Interfaces.Repositories.Statistical;
 
 public interface IStatisticalReadRepository
 {
-    Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(int days, CancellationToken cancellationToken);
+    Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken);
 
     Task<WorkshopDashboardResponse> GetWorkshopDashboardOverviewAsync(string from, string to, CancellationToken cancellationToken);
 
     Task<IEnumerable<DailyRevenueDetailResponse>> GetDailyRevenueDetailAsync(
     DateOnly reportDay,
-    int days,
+    DateTimeOffset start, DateTimeOffset end,
     CancellationToken cancellationToken);
 
-    Task<DashboardStatsResponse?> GetDashboardStatsAsync(CancellationToken cancellationToken);
+    Task<DashboardStatsResponse?> GetDashboardStatsAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken);
 
     Task<IEnumerable<MonthlyRevenueProfitResponse>> GetMonthlyRevenueProfitAsync(
     int months,
@@ -34,19 +34,19 @@ public interface IStatisticalReadRepository
     Task<IEnumerable<TransactionLogResponse>> GetRecentTransactionsAsync(int limit, CancellationToken cancellationToken);
 
 
-    Task<IEnumerable<TopProductRevenueResponse>> GetTopProductsByRevenueAsync(
+    Task<IEnumerable<TopProductRevenueResponse>> GetTopProductsByRevenueAsync(DateTimeOffset start, DateTimeOffset end,
     int limit,
     CancellationToken cancellationToken);
 
-    Task<IEnumerable<BrandRevenueResponse>> GetBrandRevenueDistributionAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<BrandRevenueResponse>> GetBrandRevenueDistributionAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken);
 
     Task<IEnumerable<DailyRevenueTableResponse>> GetDailyRevenueTableDataAsync(
-    int days,
+    DateTimeOffset start, DateTimeOffset end,
     CancellationToken cancellationToken);
 
-    Task<IEnumerable<ProductPerformanceTableResponse>> GetProductPerformanceTableAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<ProductPerformanceTableResponse>> GetProductPerformanceTableAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken);
 
-    Task<IEnumerable<WarehouseTableDataResponse>> GetWarehouseTableDataAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<WarehouseTableDataResponse>> GetWarehouseTableDataAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken);
 
     Task<CustomerAnalyticsResponse> GetCustomerAnalyticsAsync(CancellationToken cancellationToken);
 
@@ -54,5 +54,5 @@ public interface IStatisticalReadRepository
 
  Task<IEnumerable<RevenueByCategoryResponse>> GetRevenueByCategoryAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken);
 
- Task<IEnumerable<DailyCategoryRevenueResponse>> GetDailyCategoryRevenueAsync(int days, CancellationToken cancellationToken);
+ Task<IEnumerable<DailyCategoryRevenueResponse>> GetDailyCategoryRevenueAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken);
 }

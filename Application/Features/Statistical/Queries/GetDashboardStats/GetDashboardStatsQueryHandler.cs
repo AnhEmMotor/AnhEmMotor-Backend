@@ -11,7 +11,11 @@ public class GetDashboardStatsQueryHandler(IStatisticalReadRepository repository
         GetDashboardStatsQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await repository.GetDashboardStatsAsync(cancellationToken).ConfigureAwait(false);
+        var _now = DateTimeOffset.UtcNow;
+        var end = _now;
+        var start = _now.AddDays(-30);
+
+        var result = await repository.GetDashboardStatsAsync(start, end, cancellationToken).ConfigureAwait(false);
         return result ?? new DashboardStatsResponse();
     }
 }

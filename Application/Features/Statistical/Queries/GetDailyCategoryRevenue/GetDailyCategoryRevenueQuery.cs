@@ -16,7 +16,12 @@ public class GetDailyCategoryRevenueQueryHandler(
       GetDailyCategoryRevenueQuery request,
       CancellationToken cancellationToken)
   {
-    var result = await repo.GetDailyCategoryRevenueAsync(request.Days, cancellationToken)
+        var _now = DateTimeOffset.UtcNow;
+        var end = _now;
+        var days = request.Days > 0 ? request.Days : 30;
+        var start = _now.AddDays(-days);
+
+    var result = await repo.GetDailyCategoryRevenueAsync(start, end, cancellationToken)
       .ConfigureAwait(false);
     return Result<IEnumerable<DailyCategoryRevenueResponse>>.Success(result);
   }

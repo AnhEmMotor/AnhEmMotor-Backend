@@ -11,7 +11,11 @@ public class GetAdminWarehouseReportQueryHandler(IStatisticalReadRepository repo
         GetAdminWarehouseReportQuery request,
         CancellationToken cancellationToken)
     {
-        var warehouseData = await repository.GetWarehouseTableDataAsync(cancellationToken).ConfigureAwait(false);
+        var _now = DateTimeOffset.UtcNow;
+        var end = request.EndDate ?? _now;
+        var start = request.StartDate ?? _now.AddDays(-30);
+
+        var warehouseData = await repository.GetWarehouseTableDataAsync(start, end, cancellationToken).ConfigureAwait(false);
         var tableDataList = warehouseData.ToList();
         var totalStock = tableDataList.Sum(x => x.TotalStock);
         var totalValue = tableDataList.Sum(x => x.Value);

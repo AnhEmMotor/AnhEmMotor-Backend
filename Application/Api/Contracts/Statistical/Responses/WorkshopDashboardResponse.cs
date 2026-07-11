@@ -62,6 +62,10 @@ public class Analytics
     public RevenueComparison RevenueComparison { get; set; } = new();
 
     public List<RevenueSourceDto> RevenueSources { get; set; } = new();
+
+    public RevenueTrendDto RevenueTrend { get; set; } = new();
+
+    public List<RepairOrderStatusCountDto> RepairOrderStatusCounts { get; set; } = new();
 }
 
 public class RevenueComparison
@@ -114,4 +118,19 @@ public class RecentItem
     public string CustomerName { get; set; } = string.Empty;
 
     public string Status { get; set; } = string.Empty;
+}
+
+public class RevenueTrendDto
+{
+    public List<string> Labels { get; set; } = new();
+    
+    public List<decimal> ServiceRevenue { get; set; } = new();
+    
+    public List<decimal> RetailRevenue { get; set; } = new();
+}
+
+public class RepairOrderStatusCountDto
+{
+    public string Status { get; set; } = string.Empty;
+    public int Count { get; set; }
 }

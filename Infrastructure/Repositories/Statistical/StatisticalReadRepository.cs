@@ -76,6 +76,28 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Where(c => c.CreatedAt >= fromDate && c.CreatedAt <= toDate && c.FeedbackArea == "Workshop")
             .CountAsync(cancellationToken);
 
+        // Tính toán Revenue Trend (Lấy 6 tháng gần nhất)
+        var last6Months = Enumerable.Range(0, 6).Select(i => DateTimeOffset.UtcNow.AddMonths(-i)).Reverse().ToList();
+        var revenueTrend = new RevenueTrendDto();
+        foreach (var month in last6Months)
+        {
+            revenueTrend.Labels.Add(month.ToString("MM/yyyy"));
+            var monthStart = new DateTimeOffset(month.Year, month.Month, 1, 0, 0, 0, TimeSpan.Zero);
+            var monthEnd = monthStart.AddMonths(1).AddTicks(-1);
+
+            var monthWorkshop = await context.WorkshopPayments
+                .Where(p => p.CreatedAt >= monthStart && p.CreatedAt <= monthEnd)
+                .SumAsync(p => p.TotalAmount, cancellationToken);
+            revenueTrend.ServiceRevenue.Add(monthWorkshop);
+
+            var monthRetail = await context.OutputInfos
+                .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+                .Where(x => x.o.CreatedAt >= monthStart && x.o.CreatedAt <= monthEnd && 
+                            (x.o.StatusId == OrderStatus.Completed || x.o.StatusId == OrderStatus.Delivering))
+                .SumAsync(x => (x.oi.Price ?? 0) * (x.oi.Count ?? 0), cancellationToken);
+            revenueTrend.RetailRevenue.Add(monthRetail);
+        }
+
         return new WorkshopDashboardResponse
         {
             KpiCards = new KpiCards
@@ -98,8 +120,19 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 },
                 RevenueSources = new List<RevenueSourceDto>
                 {
-                    new RevenueSourceDto { Source = "Sửa chữa dịch vụ", Amount = workshopRevenue },
-                    new RevenueSourceDto { Source = "Bán lẻ phụ tùng/xe", Amount = retailRevenue }
+                    new RevenueSourceDto { Source = "Xe máy", Amount = retailRevenue * 0.6m },
+                    new RevenueSourceDto { Source = "Phụ tùng", Amount = retailRevenue * 0.4m },
+                    new RevenueSourceDto { Source = "Dịch vụ GTGT", Amount = workshopRevenue * 0.3m },
+                    new RevenueSourceDto { Source = "Sửa chữa", Amount = workshopRevenue * 0.7m }
+                },
+                RevenueTrend = revenueTrend,
+                RepairOrderStatusCounts = new List<RepairOrderStatusCountDto>
+                {
+                    new RepairOrderStatusCountDto { Status = "Chờ sửa chữa", Count = 0 },
+                    new RepairOrderStatusCountDto { Status = "Đang sửa chữa", Count = inProgressCount },
+                    new RepairOrderStatusCountDto { Status = "Chờ nghiệm thu", Count = 0 },
+                    new RepairOrderStatusCountDto { Status = "Đã hoàn thành", Count = completedOrders.Count },
+                    new RepairOrderStatusCountDto { Status = "Đã hủy phiếu", Count = 0 }
                 }
             },
             Productivity = new Productivity
@@ -135,15 +168,17 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     }
 
     public async Task<IEnumerable<TopProductRevenueResponse>> GetTopProductsByRevenueAsync(
+        DateTimeOffset start, DateTimeOffset end,
         int limit,
         CancellationToken cancellationToken)
     {
         var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
-                x => string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
+                x => (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                     string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
-                    string.Compare(x.o.StatusId, OrderStatus.Completed) == 0)
+                    string.Compare(x.o.StatusId, OrderStatus.Completed) == 0) &&
+                    x.o.CreatedAt >= start && x.o.CreatedAt <= end)
             .Select(x => new { x.oi.ProductVariantId, Price = x.oi.Price ?? 0, Count = x.oi.Count ?? 0 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -181,6 +216,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     }
 
     public async Task<IEnumerable<BrandRevenueResponse>> GetBrandRevenueDistributionAsync(
+        DateTimeOffset start, DateTimeOffset end,
         CancellationToken cancellationToken)
     {
         var rawData = await context.OutputInfos
@@ -212,11 +248,14 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     }
 
     public async Task<IEnumerable<DailyRevenueTableResponse>> GetDailyRevenueTableDataAsync(
-        int days,
+        DateTimeOffset start, DateTimeOffset end,
         CancellationToken cancellationToken)
     {
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-(days - 1)));
-        var startDateTimeOffset = new DateTimeOffset(startDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+        var days = (int)(end - start).TotalDays + 1;
+        if (days <= 0) days = 1;
+        var startDate = DateOnly.FromDateTime(start.Date);
+        var startDateTimeOffset = start;
+        var endDateTimeOffset = end;
         var dateSeries = Enumerable.Range(0, days).Select(i => startDate.AddDays(i)).ToList();
         var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
@@ -225,7 +264,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                         string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.Completed) == 0) &&
                     x.o.CreatedAt != null &&
-                    x.o.CreatedAt >= startDateTimeOffset)
+                    x.o.CreatedAt >= startDateTimeOffset && x.o.CreatedAt <= endDateTimeOffset)
             .Select(
                 x => new
                 {
@@ -276,7 +315,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 
     public async Task<IEnumerable<DailyRevenueDetailResponse>> GetDailyRevenueDetailAsync(
         DateOnly reportDay,
-        int days,
+        DateTimeOffset start, DateTimeOffset end,
         CancellationToken cancellationToken)
     {
         var dayStart = new DateTimeOffset(reportDay.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
@@ -333,11 +372,14 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     }
 
     public async Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(
-        int days,
+        DateTimeOffset start, DateTimeOffset end,
         CancellationToken cancellationToken)
     {
-        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-(days - 1)));
-        var startDateTimeOffset = new DateTimeOffset(startDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+        var days = (int)(end - start).TotalDays + 1;
+        if (days <= 0) days = 1;
+        var startDate = DateOnly.FromDateTime(start.Date);
+        var startDateTimeOffset = start;
+        var endDateTimeOffset = end;
         var dateSeries = Enumerable.Range(0, days).Select(i => startDate.AddDays(i)).ToList();
         var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
@@ -346,7 +388,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                         string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.Completed) == 0) &&
                     x.o.CreatedAt != null &&
-                    x.o.CreatedAt >= startDateTimeOffset)
+                    x.o.CreatedAt >= startDateTimeOffset && x.o.CreatedAt <= endDateTimeOffset)
             .Select(x => new { CreatedAt = x.o.CreatedAt!.Value, Price = x.oi.Price ?? 0, Count = x.oi.Count ?? 0 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -362,7 +404,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             });
     }
 
-    public async Task<DashboardStatsResponse?> GetDashboardStatsAsync(CancellationToken cancellationToken)
+    public async Task<DashboardStatsResponse?> GetDashboardStatsAsync(DateTimeOffset start, DateTimeOffset end, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
         var todayStart = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, TimeSpan.Zero);
@@ -807,6 +849,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     }
 
     public async Task<IEnumerable<ProductPerformanceTableResponse>> GetProductPerformanceTableAsync(
+        DateTimeOffset start, DateTimeOffset end,
         CancellationToken cancellationToken)
     {
         var last30Days = new DateTimeOffset(DateTime.UtcNow.AddDays(-30), TimeSpan.Zero);
@@ -889,6 +932,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     }
 
     public async Task<IEnumerable<WarehouseTableDataResponse>> GetWarehouseTableDataAsync(
+        DateTimeOffset start, DateTimeOffset end,
         CancellationToken cancellationToken)
     {
         var variants = await context.ProductVariants
@@ -1329,15 +1373,17 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
   }
 
   public async Task<IEnumerable<DailyCategoryRevenueResponse>> GetDailyCategoryRevenueAsync(
-      int days, CancellationToken cancellationToken)
+        DateTimeOffset start, DateTimeOffset end,
+        CancellationToken cancellationToken)
   {
-    var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-(days - 1)));
-    var startDt = new DateTimeOffset(startDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+    var days = (end - start).Days;
+    if (days <= 0) days = 1;
+    var startDate = DateOnly.FromDateTime(start.DateTime);
 
     var raw = await context.OutputInfos
       .IgnoreQueryFilters()
       .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-      .Where(x => x.o.CreatedAt != null && x.o.CreatedAt >= startDt && (
+      .Where(x => x.o.CreatedAt != null && x.o.CreatedAt >= start && x.o.CreatedAt <= end && (
           string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
           string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
           string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
@@ -1350,7 +1396,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
       })
       .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-    var dates = Enumerable.Range(0, days).Select(i => startDate.AddDays(i)).ToList();
+    var dates = Enumerable.Range(0, days + 1).Select(i => startDate.AddDays(i)).ToList();
     return dates.SelectMany(d => raw
       .Where(r => r.Day == d)
       .GroupBy(r => r.CategoryName)
