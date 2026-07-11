@@ -5,7 +5,10 @@ namespace Application.ApiContracts.Client.Catalog
         string Name,
         string ImageUrl,
         decimal ReferencePrice,
-        string PromotionText);
+        string PromotionText,
+        string? CategoryName,
+        string? BrandName,
+        string? TypeName);
 
     public record ProductDetailResponse(
         int Id,

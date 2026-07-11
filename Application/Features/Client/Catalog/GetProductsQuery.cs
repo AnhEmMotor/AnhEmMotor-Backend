@@ -1,5 +1,7 @@
 using Application.ApiContracts.Client.Catalog;
 using Application.Interfaces.Repositories.Lead.Lead;
+using Application.Interfaces.Repositories.Product;
+using Domain.Constants;
 using Domain.Entities;
 using MediatR;
 using System;
@@ -15,34 +17,46 @@ namespace Application.Features.Client.Catalog
 
     public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<ProductSummaryResponse>>
     {
+        private readonly IProductReadRepository _productReadRepository;
+
+        public GetProductsHandler(IProductReadRepository productReadRepository) => _productReadRepository = productReadRepository;
+
         public async Task<List<ProductSummaryResponse>> Handle(
             GetProductsQuery request,
             CancellationToken cancellationToken)
         {
-            return await Task.FromResult(
-                new List<ProductSummaryResponse>
-                {
-                    new ProductSummaryResponse(1, "Honda SH", "url", 100000000, "Ưu đãi 2%"),
-                    new ProductSummaryResponse(2, "Honda Vision", "url", 30000000, "Tặng mũ bảo hiểm")
-                });
+            return await _productReadRepository.GetClientCatalogProductsAsync(
+                request.Search ?? string.Empty,
+                request.CategoryId,
+                cancellationToken);
         }
     }
 
-    public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, ProductDetailResponse>
+    public class GetProductDetailHandler(IProductReadRepository productReadRepository) : IRequestHandler<GetProductDetailQuery, ProductDetailResponse>
     {
         public async Task<ProductDetailResponse> Handle(
             GetProductDetailQuery request,
             CancellationToken cancellationToken)
         {
-            return await Task.FromResult(
-                new ProductDetailResponse(
-                    request.Id,
-                    "Honda SH",
-                    "Mô tả chi tiết xe SH",
-                    100000000,
-                    new List<string> { "Phanh ABS", "Smartkey" },
-                    true,
-                    "Tương thích hoàn toàn"));
+            var product = await productReadRepository.GetByIdAsync(request.Id, cancellationToken);
+            if (product == null)
+            {
+                throw new KeyNotFoundException($"Product {request.Id} not found");
+            }
+
+            var variant = product.ProductVariants
+                .Where(v => v.DeletedAt == null)
+                .OrderBy(v => v.Id)
+                .FirstOrDefault();
+
+            return new ProductDetailResponse(
+                product.Id,
+                product.Name ?? "Sản phẩm",
+                product.ShortDescription ?? string.Empty,
+                variant?.Price ?? 0m,
+                new List<string>(),
+                false,
+                string.Empty);
         }
     }
 

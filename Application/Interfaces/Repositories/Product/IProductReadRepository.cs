@@ -1,3 +1,4 @@
+using Application.ApiContracts.Client.Catalog;
 using Application.Common.Models;
 using Domain.Constants;
 using Domain.Primitives;
@@ -18,6 +19,11 @@ public interface IProductReadRepository
     public Task<IEnumerable<ProductEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<List<ProductSummaryResponse>> GetClientCatalogProductsAsync(
+        string search,
+        int? categoryId,
+        CancellationToken cancellationToken = default);
 
     public Task<ProductEntity?> GetByIdAsync(
         int id,

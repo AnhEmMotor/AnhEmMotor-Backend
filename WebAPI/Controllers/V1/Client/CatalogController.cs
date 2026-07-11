@@ -14,10 +14,19 @@ namespace WebAPI.Controllers.V1.Client
         public CatalogController(IMediator mediator) => _mediator = mediator;
 
         [HttpGet("products")]
-        public async Task<IActionResult> GetProducts([FromQuery] string search, [FromQuery] int? categoryId)
+        public async Task<IActionResult> GetProducts([FromQuery] string? search, [FromQuery] int? categoryId)
         {
-            var result = await _mediator.Send(new GetProductsQuery(search, categoryId));
+            var result = await _mediator.Send(new GetProductsQuery(search ?? string.Empty, categoryId));
             return Ok(result);
+        }
+
+        [HttpGet("products-debug")]
+        public IActionResult GetProductsDebug()
+        {
+            return Ok(new[]
+            {
+                new ProductSummaryResponse(1, "Sản phẩm thử", "", 1000000, "", "Xe máy", "Honda", "Xe côn tay")
+            });
         }
 
         [HttpGet("products/{id}")]

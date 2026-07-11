@@ -10,7 +10,10 @@ using IntegrationTests.SetupClass;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests;
 
@@ -279,6 +282,74 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode
             .Should()
             .BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized, HttpStatusCode.BadRequest);
+    }
+
+    [Fact(DisplayName = "AUTH_FPW_001 - Forgot password endpoint returns success for existing account")]
+    public async Task AUTH_FPW_001_ForgotPassword_Success()
+    {
+        var email = "forgot_password@example.com";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            "forgotuser",
+            "Password123!",
+            [],
+            CancellationToken.None,
+            email: email)
+            .ConfigureAwait(true);
+
+        var response = await _client.PostAsJsonAsync(
+            "/api/v1/Auth/forgot-password",
+            new { email })
+            .ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<JsonElement>(CancellationToken.None).ConfigureAwait(true);
+        content.GetProperty("isSuccess").GetBoolean().Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "CLIENT_VEHICLES_001 - Authenticated client can list their vehicles")]
+    public async Task CLIENT_VEHICLES_001_GetMyVehicles_ReturnsCurrentUserVehicles()
+    {
+        var email = "client_vehicle@example.com";
+        var password = "Password123!";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            "clientvehicleuser",
+            password,
+            [],
+            CancellationToken.None,
+            email: email)
+            .ConfigureAwait(true);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var user = await db.Users.FirstAsync(u => u.Email == email).ConfigureAwait(true);
+        db.Vehicles.Add(new Vehicle
+        {
+            UserId = user.Id,
+            LicensePlate = "30A-12345",
+            VinNumber = "VIN123456",
+            EngineNumber = "ENG123456",
+            PurchaseDate = DateTimeOffset.UtcNow,
+            IsActive = true,
+            Status = Domain.Constants.Order.VehicleStatus.Available
+        });
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var loginRes = await _client.PostAsJsonAsync(
+            "/api/v1/Auth/login",
+            new LoginCommand { UsernameOrEmail = email, Password = password })
+            .ConfigureAwait(true);
+        var loginContent = await loginRes.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken.None).ConfigureAwait(true);
+        loginRes.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/client/vehicles");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginContent!.AccessToken);
+        var response = await _client.SendAsync(request, CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+        payload.Should().Contain("30A-12345");
     }
     #pragma warning restore CRR0035
 }

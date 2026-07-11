@@ -139,14 +139,19 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         DateTimeOffset expirationThreshold,
         CancellationToken cancellationToken)
     {
-        return GetQueryable()
+        var now = DateTimeOffset.UtcNow;
+        return context.OutputOrders
+            .IgnoreQueryFilters()
+            .AsNoTracking()
             .Where(
                 o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
                     !string.IsNullOrEmpty(o.PaymentMethod) &&
                     o.PaymentMethod != PaymentMethod.COD &&
                     (o.PaymentExpiredAt.HasValue
-                        ? o.PaymentExpiredAt.Value < DateTimeOffset.UtcNow
+                        ? o.PaymentExpiredAt.Value < now
                         : o.CreatedAt < expirationThreshold))
+            .OrderBy(o => o.Id)
+            .Take(200)
             .ToListAsync(cancellationToken);
     }
 

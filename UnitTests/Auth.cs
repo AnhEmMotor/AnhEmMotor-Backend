@@ -3,6 +3,7 @@ using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Features.Auth.Commands.FacebookLogin;
 using Application.Features.Auth.Commands.GoogleLogin;
+using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Register;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
@@ -143,6 +144,34 @@ public class Auth
         var resultInv2 = await validator.TestValidateAsync(invalidCommand2, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
         resultInv2.ShouldHaveValidationErrorFor(x => x.PhoneNumber).WithErrorMessage("Invalid phone number format.");
+    }
+
+    [Fact(DisplayName = "AUTH_LOG_001 - Login returns refresh token")]
+    public async Task AUTH_LOG_001_Login_Returns_Refresh_Token()
+    {
+        var command = new LoginCommand { UsernameOrEmail = "user@example.com", Password = "Password123!" };
+        var userAuth = new UserAuth { Id = Guid.NewGuid(), Email = "user@example.com", FullName = "Test User" };
+        _identityServiceMock.Setup(x => x.AuthenticateAsync(command.UsernameOrEmail, command.Password, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<UserAuth>.Success(userAuth));
+        _tokenManagerServiceMock.Setup(x => x.GetAccessTokenExpiryMinutes()).Returns(15);
+        _tokenManagerServiceMock.Setup(x => x.CreateAccessToken(It.IsAny<UserAuth>(), It.IsAny<DateTimeOffset>()))
+            .Returns("access_token");
+        _tokenManagerServiceMock.Setup(x => x.CreateRefreshToken()).Returns("refresh_token");
+        _tokenManagerServiceMock.Setup(x => x.GetRefreshTokenExpiryDays()).Returns(7);
+
+        var handler = new LoginCommandHandler(
+            _identityServiceMock.Object,
+            _tokenManagerServiceMock.Object,
+            _cookieTokenManagerMock.Object,
+            _userUpdateRepositoryMock.Object);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("access_token", result.Value.AccessToken);
+        Assert.Equal("refresh_token", result.Value.RefreshToken);
+        _cookieTokenManagerMock.Verify(x => x.SetRefreshToken("refresh_token", It.IsAny<DateTimeOffset>()), Times.Once);
+        _userUpdateRepositoryMock.Verify(x => x.UpdateRefreshTokenAsync(userAuth.Id, "refresh_token", It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "AUTH_017 - Google Login - Thành công (User mới)")]

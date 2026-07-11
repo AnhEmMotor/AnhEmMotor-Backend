@@ -142,6 +142,23 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
         return Task.FromResult(new List<Domain.Entities.Vehicle>());
     }
 
+    public Task<Domain.Entities.Vehicle?> GetByUserIdAndIdAsync(
+        Guid userId,
+        int vehicleId,
+        CancellationToken cancellationToken = default)
+    {
+        return context.Vehicles
+            .Include(v => v.Lead)
+            .Include(v => v.ProductVariant)
+                .ThenInclude(pv => pv!.Product)
+                    .ThenInclude(p => p!.Brand)
+            .Include(v => v.ProductVariantColor)
+            .Include(v => v.Product)
+                .ThenInclude(p => p.Brand)
+            .Include(v => v.User)
+            .FirstOrDefaultAsync(v => v.UserId == userId && v.Id == vehicleId, cancellationToken);
+    }
+
     public Task<List<Domain.Entities.Vehicle>> GetByLeadIdAsync(
         int leadId,
         CancellationToken cancellationToken = default)

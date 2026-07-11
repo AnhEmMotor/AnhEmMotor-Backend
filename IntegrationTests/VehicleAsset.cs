@@ -222,4 +222,78 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
             .ConfigureAwait(true);
         updatedAsset!.LeadId.Should().Be(lead2.Id);
     }
+
+    [Fact(DisplayName = "VAS_010 - Client endpoint đăng ký và lấy thông tin xe")]
+    public async Task ClientVehicleEndpoints_RegisterAndGetVehicles_ReturnsVehicleProfile()
+    {
+        await AuthenticateAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+
+        var payload = new
+        {
+            plate = "59A-12345",
+            vin_number = "VIN_CLIENT_001",
+            engine_number = "ENG_CLIENT_001",
+            color = "Đỏ",
+            purchase_date = DateTimeOffset.UtcNow,
+            warranty_date = DateTimeOffset.UtcNow.AddYears(2),
+            current_odometer = 1250
+        };
+
+        var registerResponse = await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(
+            _client,
+            "/api/v1/client/vehicles/register-odo",
+            payload,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        registerResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var getResponse = await _client.GetAsync(
+            "/api/v1/client/vehicles",
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+
+        getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await getResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        content.Should().Contain("59A-12345");
+        content.Should().Contain("VIN_CLIENT_001");
+    }
+
+    [Fact(DisplayName = "VAS_015 - Client endpoint lấy chi tiết xe bao gồm bảo hành và bảo trì")]
+    public async Task ClientVehicleDetailEndpoint_ReturnsWarrantyAndMaintenanceInfo()
+    {
+        await AuthenticateAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+
+        var payload = new
+        {
+            plate = "59A-77777",
+            vin_number = "VIN_CLIENT_DETAIL_001",
+            engine_number = "ENG_CLIENT_DETAIL_001",
+            color = "Xanh",
+            purchase_date = DateTimeOffset.UtcNow,
+            warranty_date = DateTimeOffset.UtcNow.AddMonths(6),
+            current_odometer = 500
+        };
+
+        var registerResponse = await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(
+            _client,
+            "/api/v1/client/vehicles/register-odo",
+            payload,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+
+        registerResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var createdVehicle = await registerResponse.Content.ReadFromJsonAsync<VehicleResponse>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        createdVehicle.Should().NotBeNull();
+
+        var detailResponse = await _client.GetAsync($"/api/v1/client/vehicles/{createdVehicle!.Id}/detail", TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+
+        detailResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var vehicleDetail = await detailResponse.Content.ReadFromJsonAsync<VehicleResponse>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+
+        vehicleDetail.Should().NotBeNull();
+        vehicleDetail!.Id.Should().Be(createdVehicle.Id);
+        vehicleDetail.WarrantyRemainingDays.Should().BeGreaterThan(0);
+        vehicleDetail.MaintenanceStatus.Should().NotBeNull();
+    }
 }

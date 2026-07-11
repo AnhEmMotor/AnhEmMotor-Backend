@@ -56,10 +56,14 @@ public class CreateVehicleCommandHandler(
         var vehicle = new Vehicle
         {
             LeadId = request.LeadId,
+            ProductId = request.ProductId,
             VinNumber = request.VinNumber.Trim(),
             EngineNumber = request.EngineNumber.Trim(),
             LicensePlate = request.LicensePlate?.Trim() ?? string.Empty,
             PurchaseDate = request.PurchaseDate ?? DateTimeOffset.UtcNow,
+            WarrantyDate = request.WarrantyDate,
+            Color = request.Color?.Trim() ?? string.Empty,
+            CurrentOdo = request.CurrentOdo ?? 0,
             IsActive = true,
             Status = VehicleStatus.Available
         };

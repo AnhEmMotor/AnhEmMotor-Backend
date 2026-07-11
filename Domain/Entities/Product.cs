@@ -160,6 +160,8 @@ namespace Domain.Entities
 
         public ICollection<ProductVariant> ProductVariants { get; set; } = [];
 
+        public ICollection<Vehicle> Vehicles { get; set; } = [];
+
         [InverseProperty("BaseProduct")]
         public ICollection<ProductCompatibility> CompatibleWith { get; set; } = [];
 

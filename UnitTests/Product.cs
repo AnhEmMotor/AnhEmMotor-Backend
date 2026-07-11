@@ -1,5 +1,7 @@
+using Application.ApiContracts.Client.Catalog;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
+using Application.Features.Client.Catalog;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -29,6 +31,7 @@ using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
 using Domain.Entities;
+using BrandEntity = Domain.Entities.Brand;
 using FluentAssertions;
 using Mapster;
 using Moq;
@@ -91,6 +94,58 @@ public class Product
         _technologyReadRepoMock.Setup(x => x.GetByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
         new ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
+    }
+
+    [Fact(DisplayName = "CLIENT_CATALOG_001 - Lấy danh sách sản phẩm từ repository")]
+    public async Task GetProductsHandler_ReturnsProductsFromRepository()
+    {
+        var repoMock = new Mock<IProductReadRepository>();
+        var product = new ProductEntity
+        {
+            Id = 7,
+            Name = "Honda SH",
+            CategoryId = 2,
+            ProductCategory = new Domain.Entities.ProductCategory { Id = 2, Name = "Xe máy" },
+            Brand = new BrandEntity { Id = 3, Name = "Honda" },
+            ProductVariants =
+            [
+                new ProductVariant
+                {
+                    Id = 77,
+                    Price = 100000000,
+                    CoverImageUrl = "img.jpg",
+                    VariantName = "SH",
+                    VariantOptionValues =
+                    [
+                        new VariantOptionValue
+                        {
+                            OptionValue = new OptionValue
+                            {
+                                Name = "Xe ga",
+                                Option = new Option { Name = "VehicleType" }
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        repoMock
+            .Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
+            .ReturnsAsync([product]);
+
+        var handler = new GetProductsHandler(repoMock.Object);
+
+        var result = await handler.Handle(new GetProductsQuery(null, null), CancellationToken.None);
+
+        result.Should().ContainSingle();
+        result[0].Id.Should().Be(7);
+        result[0].Name.Should().Be("Honda SH");
+        result[0].ReferencePrice.Should().Be(100000000m);
+        result[0].ImageUrl.Should().Be("img.jpg");
+        result[0].CategoryName.Should().Be("Xe máy");
+        result[0].BrandName.Should().Be("Honda");
+        result[0].TypeName.Should().Be("Xe ga");
     }
 
     [Fact(DisplayName = "PRODUCT_184a - Kiểm tra định dạng kích thước lốp xe - Hợp lệ")]

@@ -32,15 +32,17 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
 		var updateRepository = scope.ServiceProvider.GetRequiredService<IOutputUpdateRepository>();
 		var expirationThreshold = DateTimeOffset.UtcNow.AddMinutes(-15);
 		var expiredOrders = await readRepository.GetExpiredOrdersAsync(expirationThreshold, cancellationToken)
-		.ConfigureAwait(false);
-		if (expiredOrders.Count > 0)
+			.ConfigureAwait(false);
+		if (expiredOrders.Count == 0)
 		{
-			foreach (var order in expiredOrders)
-			{
-				order.StatusId = OrderStatus.Cancelled;
-				updateRepository.Update(order);
-			}
-			await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+			return;
 		}
+
+		foreach (var order in expiredOrders)
+		{
+			order.StatusId = OrderStatus.Cancelled;
+			updateRepository.Update(order);
+		}
+		await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 	}
 }

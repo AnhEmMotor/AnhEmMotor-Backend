@@ -86,10 +86,22 @@ public class Vehicle : BaseEntity
     [Column("PurchaseDate")]
     public DateTimeOffset PurchaseDate { get; set; }
 
+    [Column("WarrantyDate")]
+    public DateTimeOffset? WarrantyDate { get; set; }
+
+    [Column("Color", TypeName = "nvarchar(100)")]
+    public string Color { get; set; } = string.Empty;
+
     [Column("ImportPrice", TypeName = "decimal(18, 2)")]
     public decimal ImportPrice { get; set; } = 0;
 
     public ICollection<VehicleDocument> Documents { get; set; } = new List<VehicleDocument>();
 
+    public ICollection<Booking> Bookings { get; set; } = [];
 
+    public ICollection<MaintenanceHistory> MaintenanceHistories { get; set; } = [];
+
+    public ICollection<VehicleWarrantyHistory> VehicleWarrantyHistories { get; set; } = [];
+
+    public ICollection<WarrantyClaim> WarrantyClaims { get; set; } = [];
 }

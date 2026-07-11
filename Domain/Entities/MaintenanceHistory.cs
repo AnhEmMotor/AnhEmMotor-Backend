@@ -1,10 +1,18 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Domain.Entities;
 
 public class MaintenanceHistory : BaseEntity
 {
     public int Id { get; set; }
     public string MaintenanceNumber { get; set; } = string.Empty;
+
+    [Column("VehicleId")]
+    [ForeignKey("Vehicle")]
     public int VehicleId { get; set; }
+
+    public Vehicle? Vehicle { get; set; }
+
     public DateTimeOffset MaintenanceDate { get; set; }
     public string Description { get; set; } = string.Empty;
     public int Mileage { get; set; }

@@ -152,6 +152,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
  public virtual DbSet<Vehicle> Vehicles { get; set; }
 
+ public virtual DbSet<VehiclePurchaseHistory> VehiclePurchaseHistories { get; set; }
+
+ public virtual DbSet<VehicleWarrantyHistory> VehicleWarrantyHistories { get; set; }
+
  public virtual DbSet<VehicleDocument> VehicleDocuments { get; set; }
 
  public virtual DbSet<EmployeeProfile> EmployeeProfiles { get; set; }
@@ -309,6 +313,56 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
   .HasForeignKey(i => i.PerformedBy)
   .OnDelete(DeleteBehavior.SetNull);
   modelBuilder.Entity<InventoryTransaction>().HasIndex(i => new { i.ProductVariantId, i.PerformedAt });
+  modelBuilder.Entity<Vehicle>()
+  .HasOne(v => v.Product)
+  .WithMany(p => p.Vehicles)
+  .HasForeignKey(v => v.ProductId)
+  .OnDelete(DeleteBehavior.SetNull);
+  modelBuilder.Entity<Vehicle>()
+  .HasOne(v => v.ProductVariant)
+  .WithMany(pv => pv.Vehicles)
+  .HasForeignKey(v => v.ProductVariantId)
+  .OnDelete(DeleteBehavior.SetNull);
+  modelBuilder.Entity<Vehicle>()
+  .HasIndex(v => v.UserId);
+  modelBuilder.Entity<Vehicle>()
+  .HasIndex(v => v.ProductId);
+  modelBuilder.Entity<Vehicle>()
+  .HasIndex(v => v.ProductVariantId);
+  modelBuilder.Entity<Vehicle>()
+  .HasIndex(v => v.LicensePlate);
+  modelBuilder.Entity<Vehicle>()
+  .HasIndex(v => v.VinNumber);
+  modelBuilder.Entity<Booking>()
+  .HasOne(b => b.Vehicle)
+  .WithMany(v => v.Bookings)
+  .HasForeignKey(b => b.VehicleId)
+  .OnDelete(DeleteBehavior.SetNull);
+  modelBuilder.Entity<Booking>()
+  .HasIndex(b => b.VehicleId);
+  modelBuilder.Entity<Booking>()
+  .HasIndex(b => b.ProductVariantId);
+  modelBuilder.Entity<MaintenanceHistory>()
+  .HasOne(m => m.Vehicle)
+  .WithMany(v => v.MaintenanceHistories)
+  .HasForeignKey(m => m.VehicleId)
+  .OnDelete(DeleteBehavior.Cascade);
+  modelBuilder.Entity<MaintenanceHistory>()
+  .HasIndex(m => m.VehicleId);
+  modelBuilder.Entity<WarrantyClaim>()
+  .HasOne(w => w.Vehicle)
+  .WithMany(v => v.WarrantyClaims)
+  .HasForeignKey(w => w.VehicleId)
+  .OnDelete(DeleteBehavior.Cascade);
+  modelBuilder.Entity<WarrantyClaim>()
+  .HasIndex(w => w.VehicleId);
+  modelBuilder.Entity<VehicleWarrantyHistory>()
+  .HasOne(vw => vw.Vehicle)
+  .WithMany(v => v.VehicleWarrantyHistories)
+  .HasForeignKey(vw => vw.VehicleId)
+  .OnDelete(DeleteBehavior.Cascade);
+  modelBuilder.Entity<VehicleWarrantyHistory>()
+  .HasIndex(vw => vw.VehicleId);
   modelBuilder.Entity<OrderStatusHistory>()
   .HasOne(h => h.Output)
   .WithMany(o => o.StatusHistories)
@@ -480,6 +534,16 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
   .HasOne(vd => vd.Vehicle)
   .WithMany(v => v.Documents)
   .HasForeignKey(vd => vd.VehicleId)
+  .OnDelete(DeleteBehavior.Cascade);
+  modelBuilder.Entity<VehiclePurchaseHistory>()
+  .HasOne(h => h.Vehicle)
+  .WithMany()
+  .HasForeignKey(h => h.VehicleId)
+  .OnDelete(DeleteBehavior.Cascade);
+  modelBuilder.Entity<VehicleWarrantyHistory>()
+  .HasOne(h => h.Vehicle)
+  .WithMany()
+  .HasForeignKey(h => h.VehicleId)
   .OnDelete(DeleteBehavior.Cascade);
   modelBuilder.Entity<Vehicle>()
   .HasOne(v => v.InventoryReceiptInfo)

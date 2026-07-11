@@ -33,6 +33,7 @@ public static class MigrationExtensions
 		var dbContext2 = services.GetRequiredService<ApplicationDBContext>();
 
 		await ProductCategorySeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
+		await ProductDataSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
 		await InventoryReceiptStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
 		await OutputStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
 		await SupplierStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
@@ -47,13 +48,6 @@ public static class MigrationExtensions
 		await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(dbContext2, roleManager, userManager, configuration, cancellationToken).ConfigureAwait(false);
 		await EmployeeSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
 		await LeadSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
-		await CommissionPolicySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await SupplierContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await FinanceContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await SalesAndInventorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await CarrierPartnerSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-		await LogisticsDataSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-await WorkshopDataSeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
 	}
 
 	private static async Task ApplyMigrationsSafelyAsync(ApplicationDBContext dbContext, ILogger<Program> logger, CancellationToken cancellationToken)

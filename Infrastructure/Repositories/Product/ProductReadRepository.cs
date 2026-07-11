@@ -1,3 +1,4 @@
+using Application.ApiContracts.Client.Catalog;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
@@ -34,12 +35,17 @@ public class ProductReadRepository(
     internal IQueryable<ProductEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<ProductEntity>(mode)
+            .AsNoTracking()
             .Include(p => p.ProductCategory)
             .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
             .Include(p => p.ProductTechnologies)
             .ThenInclude(pt => pt.Technology)
-            .ThenInclude(t => t!.Category);
+            .ThenInclude(t => t!.Category)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.VariantOptionValues)
+            .ThenInclude(vov => vov.OptionValue)
+            .ThenInclude(ov => ov!.Option);
     }
 
     public Task<IEnumerable<ProductEntity>> GetAllAsync(
@@ -49,6 +55,56 @@ public class ProductReadRepository(
         return GetQueryable(mode)
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<ProductEntity>>(t => t.Result, cancellationToken);
+    }
+
+    public async Task<List<ProductSummaryResponse>> GetClientCatalogProductsAsync(
+        string search,
+        int? categoryId,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedSearch = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+        var pattern = normalizedSearch == null ? null : $"%{normalizedSearch}%";
+
+        var products = await context.Products.AsNoTracking()
+            .Where(p => p.DeletedAt == null)
+            .Where(p => !categoryId.HasValue || p.CategoryId == categoryId.Value)
+            .Where(p => normalizedSearch == null ||
+                EF.Functions.Like(p.Name ?? string.Empty, pattern) ||
+                (p.ProductCategory != null && EF.Functions.Like(p.ProductCategory.Name ?? string.Empty, pattern)))
+            .Include(p => p.ProductCategory)
+            .Include(p => p.Brand)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.ProductCollectionPhotos)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.ProductVariantColors)
+            .OrderByDescending(p => p.Id)
+            .Take(20)
+            .ToListAsync(cancellationToken);
+
+        return products.Select(p =>
+        {
+            var variant = p.ProductVariants
+                .Where(v => v.DeletedAt == null)
+                .OrderBy(v => v.Id)
+                .FirstOrDefault();
+
+            var imageUrl = variant?.CoverImageUrl
+                ?? variant?.ProductCollectionPhotos.FirstOrDefault(photo => !string.IsNullOrWhiteSpace(photo.ImageUrl))?.ImageUrl
+                ?? variant?.ProductVariantColors.FirstOrDefault(color => !string.IsNullOrWhiteSpace(color.CoverImageUrl))?.CoverImageUrl
+                ?? string.Empty;
+
+            var referencePrice = variant?.Price ?? 0m;
+
+            return new ProductSummaryResponse(
+                p.Id,
+                p.Name ?? "Sản phẩm",
+                imageUrl,
+                referencePrice,
+                p.ShortDescription ?? string.Empty,
+                p.ProductCategory?.Name,
+                p.Brand?.Name,
+                null);
+        }).ToList();
     }
 
     public Task<ProductEntity?> GetByIdAsync(

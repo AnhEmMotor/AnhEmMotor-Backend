@@ -82,5 +82,7 @@ namespace Domain.Entities
         public ICollection<InventoryTransaction> InventoryTransactions { get; set; } = [];
 
         public ICollection<BookingAppointment> BookingAppointments { get; set; } = [];
+
+        public ICollection<Vehicle> Vehicles { get; set; } = [];
     }
 }

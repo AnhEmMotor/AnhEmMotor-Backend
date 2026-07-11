@@ -26,6 +26,12 @@ public class Booking : BaseEntity
 
     public ProductVariant? ProductVariant { get; set; }
 
+    [Column("VehicleId")]
+    [ForeignKey("Vehicle")]
+    public int? VehicleId { get; set; }
+
+    public Vehicle? Vehicle { get; set; }
+
     [Column("PreferredDate")]
     public DateTimeOffset PreferredDate { get; set; }
 

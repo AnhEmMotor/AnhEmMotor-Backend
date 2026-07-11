@@ -18,6 +18,22 @@ namespace Application.ApiContracts.Vehicle.Responses
 
         public DateTimeOffset PurchaseDate { get; set; }
 
+        public DateTimeOffset? WarrantyDate { get; set; }
+
+    public DateTime? LastMaintenanceDate { get; set; }
+
+    public DateTime? NextMaintenanceDate { get; set; }
+
+    public double? NextMaintenanceOdo { get; set; }
+
+    public int WarrantyRemainingDays { get; set; }
+
+    public string? MaintenanceStatus { get; set; }
+
+    public string? Color { get; set; }
+
+        public double CurrentOdo { get; set; }
+
         public int LeadId { get; set; }
 
         public int? ProductVariantId { get; set; }

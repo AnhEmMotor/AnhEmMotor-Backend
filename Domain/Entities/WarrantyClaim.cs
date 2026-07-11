@@ -11,7 +11,11 @@ public class WarrantyClaim : BaseEntity
 	public int Id { get; set; }
 
 	public string ClaimNumber { get; set; } = string.Empty;
+
+	[ForeignKey("Vehicle")]
 	public int VehicleId { get; set; }
+
+	public Domain.Entities.Vehicle? Vehicle { get; set; }
 	public string IssueDescription { get; set; } = string.Empty;
 	public string? MediaUrls { get; set; }
 	public string? ServiceCenterName { get; set; }
@@ -21,9 +25,6 @@ public class WarrantyClaim : BaseEntity
 	public bool IsRecall { get; set; }
 	public decimal TotalPartsCost { get; set; }
 	public decimal TotalLaborCost { get; set; }
-
-	[NotMapped]
-	public Domain.Entities.Vehicle? Vehicle { get; set; }
 
 	public virtual ICollection<WarrantyClaimPart> WarrantyClaimParts { get; set; } = new List<WarrantyClaimPart>();
 }

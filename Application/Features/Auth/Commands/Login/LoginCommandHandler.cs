@@ -37,6 +37,11 @@ public class LoginCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
         cookieTokenManager.SetRefreshToken(refreshToken, expiryRefreshTokenDate);
-        return new LoginResponse { AccessToken = accessToken, ExpiresAt = expiryAccessTokenDate };
+        return new LoginResponse
+        {
+            AccessToken = accessToken,
+            ExpiresAt = expiryAccessTokenDate,
+            RefreshToken = refreshToken
+        };
     }
 }

@@ -24,4 +24,13 @@ public sealed record CreateVehicleCommand : IRequest<Result<VehicleResponse?>>
 
     [JsonPropertyName("purchase_date")]
     public DateTimeOffset? PurchaseDate { get; init; }
+
+    [JsonPropertyName("color")]
+    public string? Color { get; init; }
+
+    [JsonPropertyName("warranty_date")]
+    public DateTimeOffset? WarrantyDate { get; init; }
+
+    [JsonPropertyName("current_odometer")]
+    public double? CurrentOdo { get; init; }
 }
