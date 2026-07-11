@@ -154,7 +154,6 @@ public class UpdateSupplierContractCommandHandler(
             log.SupplierContractId = entity.Id;
             entity.AuditLogs.Add(log);
         }
-        updateRepo.Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return entity.Adapt<SupplierContractResponse>();
     }
