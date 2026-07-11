@@ -138,9 +138,13 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
  public virtual DbSet<Booking> Bookings { get; set; }
 
+ public virtual DbSet<Domain.Entities.Logistics.Shipment> Shipments { get; set; }
+ public virtual DbSet<Domain.Entities.Logistics.ShipmentItem> ShipmentItems { get; set; }
+ public virtual DbSet<ProductCategoryTranslation> ProductCategoryTranslations { get; set; }
 
 
  public virtual DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
+
 
  public virtual DbSet<ServiceCategory> ServiceCategories { get; set; }
 
