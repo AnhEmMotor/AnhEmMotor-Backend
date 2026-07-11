@@ -195,6 +195,92 @@ namespace Infrastructure.Seeders
                 }
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+
+            // Seed Invoices
+            if (!await context.Invoices.AnyAsync(cancellationToken).ConfigureAwait(false))
+            {
+                var salesUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "tran.thi.b@anhemmotor.com", cancellationToken).ConfigureAwait(false);
+                var userId = salesUser?.Id ?? context.Users.First().Id;
+
+                var invoices = new List<Invoice>
+                {
+                    new Invoice
+                    {
+                        InvoiceNumber = "HD-20260701-SH150",
+                        IssueDate = DateTime.Now.AddDays(-8),
+                        CustomerName = "Nguyễn Văn Hùng",
+                        CustomerIdCard = "031203004567",
+                        CustomerPhone = "0987654321",
+                        CustomerAddress = "123 Giải Phóng, Hà Nội",
+                        VehicleModel = "Honda SH 150i ABS",
+                        VehicleColor = "Đen bóng",
+                        ChassisNo = "RLHSH150I2026001",
+                        EngineNo = "KF12E-1002345",
+                        VehiclePrice = 102000000,
+                        RegistrationFee = 5000000,
+                        InsuranceFee = 1500000,
+                        TotalAmount = 108500000,
+                        PaymentMethod = "transfer",
+                        BankName = "Vietcombank",
+                        Status = "completed",
+                        SalesPerson = "Trần Thị B",
+                        DeliveryDate = DateTime.Now.AddDays(-6),
+                        UserId = userId,
+                        CreatedAt = DateTimeOffset.Now.AddDays(-8)
+                    },
+                    new Invoice
+                    {
+                        InvoiceNumber = "HD-20260703-W110",
+                        IssueDate = DateTime.Now.AddDays(-5),
+                        CustomerName = "Lê Thị Thảo",
+                        CustomerIdCard = "031203009999",
+                        CustomerPhone = "0912345678",
+                        CustomerAddress = "45 Cầu Giấy, Hà Nội",
+                        VehicleModel = "Honda Wave Alpha 110cc",
+                        VehicleColor = "Đỏ thẫm",
+                        ChassisNo = "RLHWAVE110202602",
+                        EngineNo = "HC11E-2003456",
+                        VehiclePrice = 18500000,
+                        RegistrationFee = 1500000,
+                        InsuranceFee = 500000,
+                        TotalAmount = 20500000,
+                        PaymentMethod = "cash",
+                        BankName = "",
+                        Status = "completed",
+                        SalesPerson = "Nguyễn Văn A",
+                        DeliveryDate = DateTime.Now.AddDays(-5),
+                        UserId = userId,
+                        CreatedAt = DateTimeOffset.Now.AddDays(-5)
+                    },
+                    new Invoice
+                    {
+                        InvoiceNumber = "HD-20260705-V125",
+                        IssueDate = DateTime.Now.AddDays(-2),
+                        CustomerName = "Phạm Minh Đức",
+                        CustomerIdCard = "031203008888",
+                        CustomerPhone = "0904567890",
+                        CustomerAddress = "78 Lê Lợi, Hải Phòng",
+                        VehicleModel = "Honda Vision 125cc",
+                        VehicleColor = "Xanh xi măng",
+                        ChassisNo = "RLHVISION202603",
+                        EngineNo = "JF58E-3004567",
+                        VehiclePrice = 33000000,
+                        RegistrationFee = 2500000,
+                        InsuranceFee = 800000,
+                        TotalAmount = 36300000,
+                        PaymentMethod = "installment",
+                        BankName = "",
+                        Status = "pending",
+                        SalesPerson = "Phạm Thị D",
+                        DeliveryDate = DateTime.Now.AddDays(3),
+                        UserId = userId,
+                        CreatedAt = DateTimeOffset.Now.AddDays(-2)
+                    }
+                };
+
+                context.Invoices.AddRange(invoices);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }

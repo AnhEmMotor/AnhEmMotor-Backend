@@ -1,5 +1,6 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
+using Application.Features.Outputs.Commands.UpdateOutputCompanyInvoice;
 using Application.Features.Outputs.Commands.CancelOrderByBuyer;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
@@ -445,6 +446,22 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     {
         var command = request.Adapt<RestoreManyOutputsCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Cập nhật thông tin hóa đơn doanh nghiệp (VAT) cho đơn hàng.
+    /// </summary>
+    [HttpPatch("{id:int}/company-invoice")]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateCompanyInvoiceAsync(
+        int id,
+        [FromBody] UpdateOutputCompanyInvoiceCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command with { Id = id }, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
