@@ -2,56 +2,61 @@ namespace Application.ApiContracts.Output.Responses;
 
 public class OrderDetailResponse
 {
- public int? Id { get; set; }
+    public int? Id { get; set; }
 
- public string? StatusId { get; set; }
+    public string? StatusId { get; set; }
 
- public string? PaymentMethod { get; set; }
+    public string? PaymentMethod { get; set; }
 
- public string? PaymentStatus { get; set; }
+    public string? PaymentStatus { get; set; }
 
- public string? PaymentUrl { get; set; }
+    public string? PaymentUrl { get; set; }
 
- public string? Notes { get; set; }
+    public string? Notes { get; set; }
 
- public Guid? BuyerId { get; set; }
+    public Guid? BuyerId { get; set; }
 
- public string? BuyerName { get; set; }
+    public string? BuyerName { get; set; }
 
- public string? BuyerPhone { get; set; }
+    public string? BuyerPhone { get; set; }
 
- public string? BuyerEmail { get; set; }
+    public string? BuyerEmail { get; set; }
 
- public string? CustomerName { get; set; }
+    public string? CustomerName { get; set; }
 
- public string? CustomerAddress { get; set; }
+    public string? CustomerAddress { get; set; }
 
- public string? CustomerPhone { get; set; }
+    public string? CustomerPhone { get; set; }
 
- public Guid? CreatedByUserId { get; set; }
+    public Guid? CreatedByUserId { get; set; }
 
- public string? CompletedByUserName { get; set; }
+    public string? CompletedByUserName { get; set; }
 
- public DateTimeOffset? CreatedAt { get; set; }
+    public DateTimeOffset? CreatedAt { get; set; }
 
- public decimal? Total { get; set; }
+    public decimal? Total { get; set; }
 
- public decimal? Subtotal { get; set; }
+    public decimal? Subtotal { get; set; }
 
- public decimal? ShippingFee { get; set; }
+    public decimal? ShippingFee { get; set; }
 
- public int? DepositRatio { get; set; }
+    public int? DepositRatio { get; set; }
 
- public decimal? DepositAmount { get; set; }
+    public decimal? DepositAmount { get; set; }
 
- public decimal? RemainingAmount { get; set; }
+    public decimal? RemainingAmount { get; set; }
 
- public bool IsCompanyInvoice { get; set; }
- public string? CompanyName { get; set; }
- public string? CompanyAddress { get; set; }
- public string? CompanyTaxCode { get; set; }
- public string? CompanyEmail { get; set; }
- public string? BudgetCode { get; set; }
+    public bool IsCompanyInvoice { get; set; }
 
- public List<OutputInfoResponse> Products { get; set; } = [];
+    public string? CompanyName { get; set; }
+
+    public string? CompanyAddress { get; set; }
+
+    public string? CompanyTaxCode { get; set; }
+
+    public string? CompanyEmail { get; set; }
+
+    public string? BudgetCode { get; set; }
+
+    public List<OutputInfoResponse> Products { get; set; } = [];
 }

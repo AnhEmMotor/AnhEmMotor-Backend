@@ -19,21 +19,13 @@ public class Payroll
     {
         var period = new DateTime(2026, 7, 1);
         var employee = CreateEmployee(1, 10_000_000m);
-        var records = CreateRecords(
-            employee.Id,
-            CommissionStatus.Confirmed,
-            count: 10,
-            amount: 500_000m,
-            period);
+        var records = CreateRecords(employee.Id, CommissionStatus.Confirmed, count: 10, amount: 500_000m, period);
         records.Add(CreateRecord(employee.Id, CommissionStatus.Pending, 200, 700_000m, period.AddDays(10)));
         records.Add(CreateRecord(employee.Id, CommissionStatus.Confirmed, 201, 900_000m, period.AddMonths(-1)));
-
         var handler = CreateSummaryHandler([employee], records);
-
         var result = await handler
             .Handle(new GetPayrollSummaryQuery(7, 2026), CancellationToken.None)
             .ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         var payroll = result.Value.Should().ContainSingle().Subject;
         payroll.PendingCommission.Should().Be(700_000m);
@@ -49,19 +41,11 @@ public class Payroll
     {
         var period = new DateTime(2026, 7, 1);
         var employee = CreateEmployee(1, 10_000_000m);
-        var records = CreateRecords(
-            employee.Id,
-            CommissionStatus.Confirmed,
-            count: 9,
-            amount: 500_000m,
-            period);
-
+        var records = CreateRecords(employee.Id, CommissionStatus.Confirmed, count: 9, amount: 500_000m, period);
         var handler = CreateSummaryHandler([employee], records);
-
         var result = await handler
             .Handle(new GetPayrollSummaryQuery(7, 2026), CancellationToken.None)
             .ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         var payroll = result.Value.Should().ContainSingle().Subject;
         payroll.ConfirmedCommission.Should().Be(4_500_000m);
@@ -74,19 +58,11 @@ public class Payroll
     {
         var period = new DateTime(2026, 7, 1);
         var employee = CreateEmployee(1, 10_000_000m);
-        var records = CreateRecords(
-            employee.Id,
-            CommissionStatus.Paid,
-            count: 10,
-            amount: 500_000m,
-            period);
-
+        var records = CreateRecords(employee.Id, CommissionStatus.Paid, count: 10, amount: 500_000m, period);
         var handler = CreateSummaryHandler([employee], records);
-
         var result = await handler
             .Handle(new GetPayrollSummaryQuery(7, 2026), CancellationToken.None)
             .ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         var payroll = result.Value.Should().ContainSingle().Subject;
         payroll.ConfirmedCommission.Should().Be(0m);
@@ -103,22 +79,16 @@ public class Payroll
         var previousMonthRecord = CreateRecord(1, CommissionStatus.Confirmed, 2, 500_000m, period.AddMonths(-1));
         var allConfirmedRecords = new List<CommissionRecord> { targetRecord, previousMonthRecord };
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         _commissionRepositoryMock
             .Setup(r => r.GetRecordsByStatusAsync(CommissionStatus.Confirmed, 1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(allConfirmedRecords);
         unitOfWorkMock
             .Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-
-        var handler = new ApprovePayrollCommandHandler(
-            _commissionRepositoryMock.Object,
-            unitOfWorkMock.Object);
-
+        var handler = new ApprovePayrollCommandHandler(_commissionRepositoryMock.Object, unitOfWorkMock.Object);
         var result = await handler
             .Handle(new ApprovePayrollCommand(1, 7, 2026), CancellationToken.None)
             .ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         targetRecord.Status.Should().Be(CommissionStatus.Paid);
         targetRecord.PaidAt.Should().NotBeNull();
@@ -137,10 +107,7 @@ public class Payroll
         _commissionRepositoryMock
             .Setup(r => r.GetRecordsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(records);
-
-        return new GetPayrollSummaryQueryHandler(
-            _employeeRepositoryMock.Object,
-            _commissionRepositoryMock.Object);
+        return new GetPayrollSummaryQueryHandler(_employeeRepositoryMock.Object, _commissionRepositoryMock.Object);
     }
 
     private static EmployeeProfile CreateEmployee(int id, decimal baseSalary)
@@ -150,11 +117,7 @@ public class Payroll
         {
             Id = id,
             UserId = userId,
-            User = new ApplicationUser
-            {
-                Id = userId,
-                FullName = $"Employee {id}",
-            },
+            User = new ApplicationUser { Id = userId, FullName = $"Employee {id}", },
             JobTitle = "Sales",
             BaseSalary = baseSalary,
         };

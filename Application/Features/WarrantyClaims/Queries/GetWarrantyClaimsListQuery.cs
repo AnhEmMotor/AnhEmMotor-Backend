@@ -10,5 +10,6 @@ namespace Application.Features.WarrantyClaims.Queries;
 public class GetWarrantyClaimsListQuery : IRequest<Result<PagedResult<WarrantyClaimResponse>>>
 {
     public SieveModel Sieve { get; set; } = new();
+
     public DataFetchMode Mode { get; set; } = DataFetchMode.ActiveOnly;
 }

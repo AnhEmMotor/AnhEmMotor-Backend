@@ -1,5 +1,6 @@
 using Application.ApiContracts.Logistics.Responses;
 using Application.Interfaces.Repositories.Logistics.Shipment;
+using Application.Interfaces.Repositories.ParcelDeliveryOrder;
 using Domain.Entities.Logistics;
 using Domain.Enums;
 using MediatR;
@@ -10,11 +11,11 @@ namespace Application.Features.Logistics.Queries.GetFulfillmentDetail;
 public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDetailQuery, FulfillmentDetailResponse>
 {
     private readonly IShipmentReadRepository _context;
-    private readonly Application.Interfaces.Repositories.ParcelDeliveryOrder.IParcelDeliveryOrderReadRepository _parcelOrderRepo;
+    private readonly IParcelDeliveryOrderReadRepository _parcelOrderRepo;
 
     public GetFulfillmentDetailQueryHandler(
-        IShipmentReadRepository context, 
-        Application.Interfaces.Repositories.ParcelDeliveryOrder.IParcelDeliveryOrderReadRepository parcelOrderRepo)
+        IShipmentReadRepository context,
+        IParcelDeliveryOrderReadRepository parcelOrderRepo)
     {
         _context = context;
         _parcelOrderRepo = parcelOrderRepo;
@@ -27,9 +28,7 @@ public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDe
         var order = await _context.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (order == null)
             return null!;
-            
         var parcelOrder = await _parcelOrderRepo.FindByTrackingOrPhoneAsync(order.TrackingNumber, cancellationToken);
-
         return new FulfillmentDetailResponse
         {
             Id = order.Id,
@@ -51,22 +50,23 @@ public class GetFulfillmentDetailQueryHandler : IRequestHandler<GetFulfillmentDe
             Items =
                 order.Items
                     .Select(
-                        i => 
+                        i =>
                         {
-                            var pItem = parcelOrder?.Items?.FirstOrDefault(pi => pi.ProductId == (i.ProductVariant?.ProductId ?? 0) || pi.Id == i.Id);
+                            var pItem = parcelOrder?.Items?.FirstOrDefault(
+                                pi => pi.ProductId == (i.ProductVariant?.ProductId ?? 0) || pi.Id == i.Id);
                             return new FulfillmentDetailItemResponse
-                            {
-                                Id = pItem?.Id ?? i.Id,
-                                ProductId = i.ProductVariant?.ProductId ?? 0,
-                                ProductName = GenerateProductName(i),
-                                ThumbnailUrl =
-                                    i.ProductVariantColor?.CoverImageUrl ?? i.ProductVariant?.CoverImageUrl ?? string.Empty,
-                                ShelfLocation = pItem?.ShelfLocation ?? "A1-01",
-                                Quantity = i.Quantity,
-                                IsPicked = pItem?.IsPicked ?? false,
-                                IsRestricted = pItem?.IsRestricted ?? false,
-                                IsOutOfStock = pItem?.IsOutOfStock ?? false
-                            };
+                    {
+                        Id = pItem?.Id ?? i.Id,
+                        ProductId = i.ProductVariant?.ProductId ?? 0,
+                        ProductName = GenerateProductName(i),
+                        ThumbnailUrl =
+                            i.ProductVariantColor?.CoverImageUrl ?? i.ProductVariant?.CoverImageUrl ?? string.Empty,
+                        ShelfLocation = pItem?.ShelfLocation ?? "A1-01",
+                        Quantity = i.Quantity,
+                        IsPicked = pItem?.IsPicked ?? false,
+                        IsRestricted = pItem?.IsRestricted ?? false,
+                        IsOutOfStock = pItem?.IsOutOfStock ?? false
+                    };
                         })
                     .ToList()
         };

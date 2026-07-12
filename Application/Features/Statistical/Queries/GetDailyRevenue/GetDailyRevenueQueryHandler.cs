@@ -15,7 +15,6 @@ public class GetDailyRevenueQueryHandler(IStatisticalReadRepository repository) 
         var end = _now;
         var days = request.Days > 0 ? request.Days : 30;
         var start = _now.AddDays(-days);
-
         var result = await repository.GetDailyRevenueAsync(start, end, cancellationToken).ConfigureAwait(false);
         if (result == null)
         {

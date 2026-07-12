@@ -1,6 +1,5 @@
-using Application.Common.Models;
 using Application.ApiContracts.Admin.Workshop.Responses;
-using Domain.Primitives;
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.WarrantyClaims.Queries;

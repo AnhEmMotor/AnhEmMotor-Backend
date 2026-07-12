@@ -3,13 +3,9 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Logistics.Shipment;
 using Application.Interfaces.Services.Shipping;
 using Domain.Constants.Order;
+using Domain.Enums;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace WebAPI.BackgroundServices;
 
@@ -27,15 +23,13 @@ public class GhnStatusPollingWorker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(15));
-
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 await timer.WaitForNextTickAsync(stoppingToken);
                 await DoWorkAsync(stoppingToken);
-            }
-            catch (OperationCanceledException)
+            } catch (OperationCanceledException)
             {
                 break;
             }
@@ -50,40 +44,34 @@ public class GhnStatusPollingWorker : BackgroundService
         var shippingService = scope.ServiceProvider.GetRequiredService<IShippingService>();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
         var activeShipments = await shipmentReadRepository.GetActiveDeliveryShipmentsAsync(stoppingToken);
-
         foreach (var shipment in activeShipments)
         {
-            if (string.IsNullOrEmpty(shipment.TrackingNumber)) continue;
-
+            if (string.IsNullOrEmpty(shipment.TrackingNumber))
+                continue;
             var statusResult = await shippingService.GetShippingOrderStatusAsync(shipment.TrackingNumber, stoppingToken);
             if (statusResult.IsFailure)
             {
                 continue;
             }
-
             var ghnStatus = statusResult.Value?.ToLowerInvariant();
-            if (string.IsNullOrEmpty(ghnStatus)) continue;
-
+            if (string.IsNullOrEmpty(ghnStatus))
+                continue;
             string newStatus = string.Empty;
-
             if (ghnStatus == "delivered")
             {
                 newStatus = OrderStatus.Completed;
-                shipment.Status = Domain.Enums.ParcelDeliveryStatus.Completed;
+                shipment.Status = ParcelDeliveryStatus.Completed;
                 shipment.DeliveredAt = DateTimeOffset.UtcNow;
                 shipmentUpdateRepository.Update(shipment);
                 await unitOfWork.SaveChangesAsync(stoppingToken);
-            }
-            else if (ghnStatus == "cancel" || ghnStatus == "returned" || ghnStatus == "return")
+            } else if (ghnStatus == "cancel" || ghnStatus == "returned" || ghnStatus == "return")
             {
                 newStatus = OrderStatus.Refunding;
-                shipment.Status = Domain.Enums.ParcelDeliveryStatus.Returned;
+                shipment.Status = ParcelDeliveryStatus.Returned;
                 shipmentUpdateRepository.Update(shipment);
                 await unitOfWork.SaveChangesAsync(stoppingToken);
             }
-
             if (!string.IsNullOrEmpty(newStatus) && shipment.OutputId.HasValue)
             {
                 var command = new UpdateOutputStatusCommand
@@ -92,7 +80,6 @@ public class GhnStatusPollingWorker : BackgroundService
                     StatusId = newStatus,
                     CurrentUserId = Guid.Empty
                 };
-
                 await sender.Send(command, stoppingToken);
             }
         }

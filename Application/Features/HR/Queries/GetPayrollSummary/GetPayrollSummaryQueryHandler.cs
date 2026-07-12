@@ -24,31 +24,23 @@ public class GetPayrollSummaryQueryHandler(
         {
             return Result<List<PayrollResponse>>.Failure("Ky luong khong hop le.");
         }
-
         var employees = await employeeRepository
             .GetAllWithUsersAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var allRecords = await commissionRepository
             .GetRecordsAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var periodStart = new DateTime(request.Year, request.Month, 1);
         var periodEnd = periodStart.AddMonths(1);
-
         var result = new List<PayrollResponse>();
         foreach (var emp in employees)
         {
             var periodRecords = allRecords
-                .Where(r => r.EmployeeProfileId == emp.Id
-                         && r.DateEarned >= periodStart
-                         && r.DateEarned < periodEnd)
+                .Where(r => r.EmployeeProfileId == emp.Id && r.DateEarned >= periodStart && r.DateEarned < periodEnd)
                 .ToList();
-
             var pendingThisMonth = periodRecords
                 .Where(r => r.Status == CommissionStatus.Pending)
                 .Sum(r => r.Amount);
-
             var confirmedThisMonth = periodRecords
                 .Where(r => r.Status == CommissionStatus.Confirmed)
                 .Sum(r => r.Amount);
@@ -66,20 +58,19 @@ public class GetPayrollSummaryQueryHandler(
             var volumeBonus = payrollEligibleOrderCount >= VolumeBonusOrderThreshold
                 ? payrollEligibleCommission * VolumeBonusRate
                 : 0;
-
-            result.Add(new PayrollResponse
-            {
-                EmployeeId = emp.Id,
-                FullName = emp.User?.FullName ?? "Unknown",
-                JobTitle = emp.JobTitle,
-                BaseSalary = emp.BaseSalary,
-                PendingCommission = pendingThisMonth,
-                ConfirmedCommission = confirmedThisMonth,
-                PaidCommission = paidThisMonth,
-                VolumeBonus = volumeBonus,
-            });
+            result.Add(
+                new PayrollResponse
+                {
+                    EmployeeId = emp.Id,
+                    FullName = emp.User?.FullName ?? "Unknown",
+                    JobTitle = emp.JobTitle,
+                    BaseSalary = emp.BaseSalary,
+                    PendingCommission = pendingThisMonth,
+                    ConfirmedCommission = confirmedThisMonth,
+                    PaidCommission = paidThisMonth,
+                    VolumeBonus = volumeBonus,
+                });
         }
-
         return Result<List<PayrollResponse>>.Success(result);
     }
 

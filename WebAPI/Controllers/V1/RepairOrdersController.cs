@@ -1,13 +1,12 @@
 using Application.ApiContracts.Admin.Workshop.Responses;
 using Application.Common.Models;
-using Application.Features.RepairOrders.Queries;
 using Application.Features.RepairOrders.Commands;
+using Application.Features.RepairOrders.Queries;
 using Asp.Versioning;
 using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
@@ -20,68 +19,81 @@ namespace WebAPI.Controllers.V1;
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class RepairOrdersController(ISender sender) : ApiController
 {
-	[HttpGet]
-	[HasPermission(Permissions.Factory.RepairOrderManagement.View)]
-	[ProducesResponseType(typeof(PagedResult<RepairOrderResponse>), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetListAsync([FromQuery] GetRepairOrdersListQuery query, CancellationToken cancellationToken)
-	{
-		var result = await sender.Send(query, cancellationToken);
-		return HandleResult(result);
-	}
+    [HttpGet]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
+    [ProducesResponseType(typeof(PagedResult<RepairOrderResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetListAsync(
+        [FromQuery] GetRepairOrdersListQuery query,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(query, cancellationToken);
+        return HandleResult(result);
+    }
 
-	[HttpGet("{id:int}")]
-	[HasPermission(Permissions.Factory.RepairOrderManagement.View)]
-	[ProducesResponseType(typeof(RepairOrderResponse), StatusCodes.Status200OK)]
-	public async Task<IActionResult> GetDetailAsync(int id, CancellationToken cancellationToken)
-	{
-		var result = await sender.Send(new GetRepairOrderDetailQuery { Id = id }, cancellationToken);
-		return HandleResult(result);
-	}
+    [HttpGet("{id:int}")]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
+    [ProducesResponseType(typeof(RepairOrderResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDetailAsync(int id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetRepairOrderDetailQuery { Id = id }, cancellationToken);
+        return HandleResult(result);
+    }
 
-	[HttpPost]
-	[HasPermission(Permissions.Factory.RepairOrderManagement.StartRepair)]
-	[ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-	public async Task<IActionResult> CreateAsync([FromBody] CreateRepairOrderCommand command, CancellationToken cancellationToken)
-	{
-		var result = await sender.Send(command, cancellationToken);
-		if (!result.IsSuccess) return HandleResult(result);
-		return CreatedAtAction("GetDetail", new { id = result.Value, version = "1.0" }, result.Value);
-	}
+    [HttpPost]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.StartRepair)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateRepairOrderCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken);
+        if (!result.IsSuccess)
+            return HandleResult(result);
+        return CreatedAtAction("GetDetail", new { id = result.Value, version = "1.0" }, result.Value);
+    }
 
-	[HttpPut("{id:int}")]
-	[HasPermission(Permissions.Factory.RepairOrderManagement.AssignTechnician)]
-	[ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
-	public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateRepairOrderCommand command, CancellationToken cancellationToken)
-	{
-		if (id != command.Id) return BadRequest();
-		var result = await sender.Send(command, cancellationToken);
-		return HandleResult(result);
-	}
+    [HttpPut("{id:int}")]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.AssignTechnician)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
+    public async Task<IActionResult> UpdateAsync(
+        int id,
+        [FromBody] UpdateRepairOrderCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.Id)
+            return BadRequest();
+        var result = await sender.Send(command, cancellationToken);
+        return HandleResult(result);
+    }
 
-	[HttpDelete("{id:int}")]
-	[HasPermission(Permissions.Factory.RepairOrderManagement.AssignTechnician)]
-	[ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
-	public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
-	{
-		var result = await sender.Send(new DeleteRepairOrderCommand(id), cancellationToken);
-		return HandleResult(result);
-	}
+    [HttpDelete("{id:int}")]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.AssignTechnician)]
+    [ProducesResponseType(typeof(Result), StatusCodes.Status200OK)]
+    public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new DeleteRepairOrderCommand(id), cancellationToken);
+        return HandleResult(result);
+    }
 
-	[HttpPost("issue-parts")]
-	[HasPermission(Permissions.Factory.RepairOrderManagement.StartRepair)]
-	[ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-	public async Task<IActionResult> IssuePartsAsync([FromBody] IssuePartsCommand command, CancellationToken cancellationToken)
-	{
-		var result = await sender.Send(command, cancellationToken);
-		return HandleResult(result);
-	}
+    [HttpPost("issue-parts")]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.StartRepair)]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    public async Task<IActionResult> IssuePartsAsync(
+        [FromBody] IssuePartsCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken);
+        return HandleResult(result);
+    }
 
-	[HttpPost("complete")]
-	[HasPermission(Permissions.Factory.RepairOrderManagement.Complete)]
-	[ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-	public async Task<IActionResult> CompleteAsync([FromBody] CompleteRepairOrderCommand command, CancellationToken cancellationToken)
-	{
-		var result = await sender.Send(command, cancellationToken);
-		return HandleResult(result);
-	}
+    [HttpPost("complete")]
+    [HasPermission(Permissions.Factory.RepairOrderManagement.Complete)]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    public async Task<IActionResult> CompleteAsync(
+        [FromBody] CompleteRepairOrderCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken);
+        return HandleResult(result);
+    }
 }

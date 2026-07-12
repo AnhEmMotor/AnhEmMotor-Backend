@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -15,29 +15,20 @@ namespace Infrastructure.MySqlMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory");
-
-            migrationBuilder.DropTable(
-                name: "PlateDossier");
-
-            migrationBuilder.DropTable(
-                name: "RepairOrderDetail");
-
-            migrationBuilder.DropTable(
-                name: "RepairOrder");
-
+            migrationBuilder.DropTable(name: "PlateDossier");
+            migrationBuilder.DropTable(name: "RepairOrderDetail");
+            migrationBuilder.DropTable(name: "RepairOrder");
             migrationBuilder.AddColumn<string>(
                 name: "PasswordResetToken",
                 table: "Users",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<long>(
                 name: "PasswordResetTokenExpiry",
                 table: "Users",
                 type: "bigint",
                 nullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "GroundClearance",
                 table: "Product",
@@ -47,7 +38,6 @@ namespace Infrastructure.MySqlMigrations
                 oldType: "decimal(65,30)",
                 oldNullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AlterColumn<string>(
                 name: "FuelCapacity",
                 table: "Product",
@@ -57,42 +47,32 @@ namespace Infrastructure.MySqlMigrations
                 oldType: "decimal(65,30)",
                 oldNullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "DescriptionJson",
                 table: "Product",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "MetaDescriptionJson",
                 table: "Product",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "MetaTitleJson",
                 table: "Product",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.AddColumn<string>(
-                name: "NameJson",
-                table: "Product",
-                type: "longtext",
-                nullable: true)
+            migrationBuilder.AddColumn<string>(name: "NameJson", table: "Product", type: "longtext", nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "ShortDescriptionJson",
                 table: "Product",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "BudgetCode",
                 table: "Output",
@@ -100,7 +80,6 @@ namespace Infrastructure.MySqlMigrations
                 maxLength: 50,
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "CompanyAddress",
                 table: "Output",
@@ -108,7 +87,6 @@ namespace Infrastructure.MySqlMigrations
                 maxLength: 500,
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "CompanyEmail",
                 table: "Output",
@@ -116,7 +94,6 @@ namespace Infrastructure.MySqlMigrations
                 maxLength: 150,
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "CompanyName",
                 table: "Output",
@@ -124,7 +101,6 @@ namespace Infrastructure.MySqlMigrations
                 maxLength: 200,
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "CompanyTaxCode",
                 table: "Output",
@@ -132,28 +108,20 @@ namespace Infrastructure.MySqlMigrations
                 maxLength: 50,
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<bool>(
                 name: "IsCompanyInvoice",
                 table: "Output",
                 type: "tinyint(1)",
                 nullable: false,
                 defaultValue: false);
-
             migrationBuilder.AddColumn<string>(
                 name: "DescriptionJson",
                 table: "Brand",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.AddColumn<string>(
-                name: "NameJson",
-                table: "Brand",
-                type: "longtext",
-                nullable: true)
+            migrationBuilder.AddColumn<string>(name: "NameJson", table: "Brand", type: "longtext", nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ProductCategoryTranslations",
                 columns: table => new
@@ -182,7 +150,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Shipments",
                 columns: table => new
@@ -199,7 +166,11 @@ namespace Infrastructure.MySqlMigrations
                     CustomerPhone = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CodAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    ShippingCost = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    ShippingCost = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
                     DeliveredAt = table.Column<long>(type: "bigint", nullable: true),
                     OriginAddress = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -226,7 +197,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Vouchers",
                 columns: table => new
@@ -241,8 +211,16 @@ namespace Infrastructure.MySqlMigrations
                     Channel = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     DiscountType = table.Column<int>(type: "int", nullable: false),
-                    DiscountValue = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    MaxDiscountAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
+                    DiscountValue = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
+                    MaxDiscountAmount = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: true),
                     ValidFrom = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ValidTo = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
@@ -254,7 +232,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_Vouchers", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ShipmentItems",
                 columns: table => new
@@ -290,7 +267,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "VoucherLeads",
                 columns: table => new
@@ -315,43 +291,25 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductCategoryTranslations_ProductCategoryId",
                 table: "ProductCategoryTranslations",
                 column: "ProductCategoryId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ShipmentItems_ProductVariantColorId",
                 table: "ShipmentItems",
                 column: "ProductVariantColorId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ShipmentItems_ProductVariantId",
                 table: "ShipmentItems",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ShipmentItems_ShipmentId",
                 table: "ShipmentItems",
                 column: "ShipmentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Shipments_OutputId",
-                table: "Shipments",
-                column: "OutputId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_VoucherLeads_LeadId",
-                table: "VoucherLeads",
-                column: "LeadId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Vouchers_Code",
-                table: "Vouchers",
-                column: "Code",
-                unique: true);
-
+            migrationBuilder.CreateIndex(name: "IX_Shipments_OutputId", table: "Shipments", column: "OutputId");
+            migrationBuilder.CreateIndex(name: "IX_VoucherLeads_LeadId", table: "VoucherLeads", column: "LeadId");
+            migrationBuilder.CreateIndex(name: "IX_Vouchers_Code", table: "Vouchers", column: "Code", unique: true);
             migrationBuilder.AddForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory",
@@ -367,82 +325,26 @@ namespace Infrastructure.MySqlMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory");
-
-            migrationBuilder.DropTable(
-                name: "ProductCategoryTranslations");
-
-            migrationBuilder.DropTable(
-                name: "ShipmentItems");
-
-            migrationBuilder.DropTable(
-                name: "VoucherLeads");
-
-            migrationBuilder.DropTable(
-                name: "Shipments");
-
-            migrationBuilder.DropTable(
-                name: "Vouchers");
-
-            migrationBuilder.DropColumn(
-                name: "PasswordResetToken",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "PasswordResetTokenExpiry",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "DescriptionJson",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "MetaDescriptionJson",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "MetaTitleJson",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "NameJson",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "ShortDescriptionJson",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "BudgetCode",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "CompanyAddress",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "CompanyEmail",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "CompanyName",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "CompanyTaxCode",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "IsCompanyInvoice",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "DescriptionJson",
-                table: "Brand");
-
-            migrationBuilder.DropColumn(
-                name: "NameJson",
-                table: "Brand");
-
+            migrationBuilder.DropTable(name: "ProductCategoryTranslations");
+            migrationBuilder.DropTable(name: "ShipmentItems");
+            migrationBuilder.DropTable(name: "VoucherLeads");
+            migrationBuilder.DropTable(name: "Shipments");
+            migrationBuilder.DropTable(name: "Vouchers");
+            migrationBuilder.DropColumn(name: "PasswordResetToken", table: "Users");
+            migrationBuilder.DropColumn(name: "PasswordResetTokenExpiry", table: "Users");
+            migrationBuilder.DropColumn(name: "DescriptionJson", table: "Product");
+            migrationBuilder.DropColumn(name: "MetaDescriptionJson", table: "Product");
+            migrationBuilder.DropColumn(name: "MetaTitleJson", table: "Product");
+            migrationBuilder.DropColumn(name: "NameJson", table: "Product");
+            migrationBuilder.DropColumn(name: "ShortDescriptionJson", table: "Product");
+            migrationBuilder.DropColumn(name: "BudgetCode", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyAddress", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyEmail", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyName", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyTaxCode", table: "Output");
+            migrationBuilder.DropColumn(name: "IsCompanyInvoice", table: "Output");
+            migrationBuilder.DropColumn(name: "DescriptionJson", table: "Brand");
+            migrationBuilder.DropColumn(name: "NameJson", table: "Brand");
             migrationBuilder.AlterColumn<decimal>(
                 name: "GroundClearance",
                 table: "Product",
@@ -452,7 +354,6 @@ namespace Infrastructure.MySqlMigrations
                 oldType: "longtext",
                 oldNullable: true)
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AlterColumn<decimal>(
                 name: "FuelCapacity",
                 table: "Product",
@@ -462,7 +363,6 @@ namespace Infrastructure.MySqlMigrations
                 oldType: "longtext",
                 oldNullable: true)
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "PlateDossier",
                 columns: table => new
@@ -502,7 +402,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "RepairOrder",
                 columns: table => new
@@ -551,7 +450,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "RepairOrderDetail",
                 columns: table => new
@@ -593,37 +491,24 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlateDossier_OutputId",
-                table: "PlateDossier",
-                column: "OutputId");
-
+            migrationBuilder.CreateIndex(name: "IX_PlateDossier_OutputId", table: "PlateDossier", column: "OutputId");
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrder_TechnicianId",
                 table: "RepairOrder",
                 column: "TechnicianId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RepairOrder_VehicleId",
-                table: "RepairOrder",
-                column: "VehicleId");
-
+            migrationBuilder.CreateIndex(name: "IX_RepairOrder_VehicleId", table: "RepairOrder", column: "VehicleId");
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_ProductVariantId",
                 table: "RepairOrderDetail",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_RepairOrderId",
                 table: "RepairOrderDetail",
                 column: "RepairOrderId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_ServiceId",
                 table: "RepairOrderDetail",
                 column: "ServiceId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory",

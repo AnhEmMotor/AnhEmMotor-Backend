@@ -1,4 +1,3 @@
-using Application.ApiContracts.Admin.Workshop.Responses;
 using Application.Common.Models;
 using MediatR;
 
@@ -18,7 +17,10 @@ public record CreateWarrantyClaimCommand(
 public class WarrantyClaimPartRequest
 {
     public string PartName { get; set; } = string.Empty;
+
     public string PartCode { get; set; } = string.Empty;
+
     public decimal UnitPrice { get; set; }
+
     public int Status { get; set; }
 }

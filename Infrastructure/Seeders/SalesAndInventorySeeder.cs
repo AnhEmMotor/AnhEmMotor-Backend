@@ -195,13 +195,12 @@ namespace Infrastructure.Seeders
                 }
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-
-            // Seed Invoices
             if (!await context.Invoices.AnyAsync(cancellationToken).ConfigureAwait(false))
             {
-                var salesUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "tran.thi.b@anhemmotor.com", cancellationToken).ConfigureAwait(false);
+                var salesUser = await context.Users
+                    .FirstOrDefaultAsync(u => u.Email == "tran.thi.b@anhemmotor.com", cancellationToken)
+                    .ConfigureAwait(false);
                 var userId = salesUser?.Id ?? context.Users.First().Id;
-
                 var invoices = new List<Invoice>
                 {
                     new Invoice
@@ -245,7 +244,7 @@ namespace Infrastructure.Seeders
                         InsuranceFee = 500000,
                         TotalAmount = 20500000,
                         PaymentMethod = "cash",
-                        BankName = "",
+                        BankName = string.Empty,
                         Status = "completed",
                         SalesPerson = "Nguyễn Văn A",
                         DeliveryDate = DateTime.Now.AddDays(-5),
@@ -269,7 +268,7 @@ namespace Infrastructure.Seeders
                         InsuranceFee = 800000,
                         TotalAmount = 36300000,
                         PaymentMethod = "installment",
-                        BankName = "",
+                        BankName = string.Empty,
                         Status = "pending",
                         SalesPerson = "Phạm Thị D",
                         DeliveryDate = DateTime.Now.AddDays(3),
@@ -277,12 +276,10 @@ namespace Infrastructure.Seeders
                         CreatedAt = DateTimeOffset.Now.AddDays(-2)
                     }
                 };
-
                 context.Invoices.AddRange(invoices);
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }
 }
-
 

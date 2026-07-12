@@ -1,4 +1,5 @@
 using Application.DTOs.Analytics;
+using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -34,34 +35,42 @@ namespace Infrastructure.Repositories
                 .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0));
             var channelRaw = await _context.OutputInfos
                 .IgnoreQueryFilters()
-                .Join(_context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+                .Join(
+                    _context.OutputOrders.IgnoreQueryFilters(),
+                    oi => oi.OutputId,
+                    o => o.Id,
+                    (oi, o) => new { oi, o })
                 .Where(x => x.o.CreatedAt >= start && x.o.CreatedAt <= end && x.o.StatusId == "Completed")
-                .Select(x => new
-                {
-                    CategoryName = x.oi.ProductVariant != null && x.oi.ProductVariant.Product != null && x.oi.ProductVariant.Product.ProductCategory != null
-                        ? x.oi.ProductVariant.Product.ProductCategory.Name : "Khác",
-                    Revenue = (x.oi.Price ?? 0M) * (x.oi.Count ?? 0),
-                    OrderId = x.o.Id
-                })
+                .Select(
+                    x => new
+                    {
+                        CategoryName = x.oi.ProductVariant != null &&
+                                    x.oi.ProductVariant.Product != null &&
+                                    x.oi.ProductVariant.Product.ProductCategory != null
+                            ? x.oi.ProductVariant.Product.ProductCategory.Name
+                            : "Khác",
+                        Revenue = (x.oi.Price ?? 0M) * (x.oi.Count ?? 0),
+                        OrderId = x.o.Id
+                    })
                 .ToListAsync();
-
             var channelData = channelRaw
                 .GroupBy(x => x.CategoryName)
-                .Select(g => 
-                {
-                    var ordersCount = g.Select(x => x.OrderId).Distinct().Count();
-                    var visits = ordersCount * 5 + 12; // Derived visits
-                    return new Application.DTOs.Analytics.ChannelDataDto
+                .Select(
+                    g =>
                     {
-                        Name = g.Key ?? "Unknown",
-                        Amount = g.Sum(x => x.Revenue),
-                        Orders = ordersCount,
-                        Visits = visits,
-                        ConversionRate = visits > 0 ? Math.Round((decimal)ordersCount / visits * 100, 1) : 0,
-                        ChangePercent = 2.5m // Placeholder positive trend
-                    };
-                }).ToList();
-
+                        var ordersCount = g.Select(x => x.OrderId).Distinct().Count();
+                        var visits = ordersCount * 5 + 12;
+                        return new ChannelDataDto
+                        {
+                            Name = g.Key ?? "Unknown",
+                            Amount = g.Sum(x => x.Revenue),
+                            Orders = ordersCount,
+                            Visits = visits,
+                            ConversionRate = visits > 0 ? Math.Round((decimal)ordersCount / visits * 100, 1) : 0,
+                            ChangePercent = 2.5m
+                        };
+                    })
+                .ToList();
             return new DashboardSummaryDto
             {
                 TotalRevenue = totalRevenue,
@@ -99,13 +108,14 @@ namespace Infrastructure.Repositories
                 TotalOperatingExpenses = totalExpenses,
                 GrossProfit = revenue - cogs,
                 NetProfit = revenue - cogs - totalExpenses,
-                ExpenseDetails = expenses.Select(
-                    e => new ExpenseDetailDto
-                    {
-                        Category = e.Category == ExpenseCategory.Fixed ? "Cố định" : "Biến đổi",
-                        Amount = e.Amount
-                    })
-                    .ToList()
+                ExpenseDetails =
+                    expenses.Select(
+                        e => new ExpenseDetailDto
+                        {
+                            Category = e.Category == ExpenseCategory.Fixed ? "Cố định" : "Biến đổi",
+                            Amount = e.Amount
+                        })
+                        .ToList()
             };
         }
 
@@ -121,32 +131,28 @@ namespace Infrastructure.Repositories
                         Role = e.JobTitle,
                         Sales = _context.OutputOrders
                             .Where(
-                                o => o.FinishedBy == e.User.Id
-                                    && o.CreatedAt >= start
-                                    && o.CreatedAt <= end
-                                    && o.StatusId == "Completed")
+                                o => o.FinishedBy == e.User.Id &&
+                                        o.CreatedAt >= start &&
+                                        o.CreatedAt <= end &&
+                                        o.StatusId == "Completed")
                             .SelectMany(o => o.OutputInfos)
                             .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0))
                     })
                 .ToListAsync();
-
             var result = new List<StaffPerformanceDto>();
             foreach (var s in staffSales)
             {
                 var targetSales = await _context.KPIs
-                    .Where(k => k.EmployeeProfileId == s.Id
-                                && k.PeriodStart >= start
-                                && k.PeriodEnd <= end)
+                    .Where(k => k.EmployeeProfileId == s.Id && k.PeriodStart >= start && k.PeriodEnd <= end)
                     .Select(k => k.TargetValue)
                     .FirstOrDefaultAsync();
-
                 var commissionPaid = await _context.CommissionRecords
-                    .Where(cr => cr.EmployeeProfileId == s.Id
-                                 && cr.DateEarned >= start
-                                 && cr.DateEarned <= end
-                                 && cr.Status == Domain.Entities.CommissionStatus.Confirmed)
+                    .Where(
+                        cr => cr.EmployeeProfileId == s.Id &&
+                            cr.DateEarned >= start &&
+                            cr.DateEarned <= end &&
+                            cr.Status == CommissionStatus.Confirmed)
                     .SumAsync(cr => cr.Amount);
-
                 result.Add(
                     new StaffPerformanceDto
                     {
@@ -159,7 +165,6 @@ namespace Infrastructure.Repositories
                         IsTopSeller = false
                     });
             }
-
             var maxSales = result.Max(r => r.TotalSales);
             if (maxSales > 0)
             {
@@ -168,7 +173,6 @@ namespace Infrastructure.Repositories
                     r.IsTopSeller = r.TotalSales == maxSales;
                 }
             }
-
             return result;
         }
 
@@ -184,12 +188,12 @@ namespace Infrastructure.Repositories
                         CustomerName = o.CustomerName ?? string.Empty,
                         ProductName =
                             o.OutputInfos
-                                .Select(
-                                    oi => oi.ProductVariant != null && oi.ProductVariant.Product != null
-                                        ? oi.ProductVariant.Product.Name
-                                        : "N/A")
-                                .FirstOrDefault() ??
-                            "N/A",
+                                        .Select(
+                                            oi => oi.ProductVariant != null && oi.ProductVariant.Product != null
+                                                            ? oi.ProductVariant.Product.Name
+                                                            : "N/A")
+                                        .FirstOrDefault() ??
+                                    "N/A",
                         Amount = o.OutputInfos.Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
                         IsRevenue = true,
                         StaffName = "N/A"

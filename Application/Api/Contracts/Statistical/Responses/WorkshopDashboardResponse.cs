@@ -123,14 +123,15 @@ public class RecentItem
 public class RevenueTrendDto
 {
     public List<string> Labels { get; set; } = new();
-    
+
     public List<decimal> ServiceRevenue { get; set; } = new();
-    
+
     public List<decimal> RetailRevenue { get; set; } = new();
 }
 
 public class RepairOrderStatusCountDto
 {
     public string Status { get; set; } = string.Empty;
+
     public int Count { get; set; }
 }

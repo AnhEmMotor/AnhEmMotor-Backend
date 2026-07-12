@@ -28,16 +28,12 @@ namespace UnitTests
                 new()
                 {
                     Id = 1,
-                    TrackingNumber = "ORD-001", Status = Domain.Enums.ParcelDeliveryStatus.Completed, DeliveredAt = DateTimeOffset.UtcNow,
+                    TrackingNumber = "ORD-001",
+                    Status = ParcelDeliveryStatus.Completed,
+                    DeliveredAt = DateTimeOffset.UtcNow,
                     CreatedAt = DateTimeOffset.UtcNow.AddDays(-1)
                 },
-                new()
-                {
-                    Id = 2,
-                    TrackingNumber = "ORD-002",
-                    DeliveredAt = null,
-                    CreatedAt = DateTimeOffset.UtcNow
-                }
+                new() { Id = 2, TrackingNumber = "ORD-002", DeliveredAt = null, CreatedAt = DateTimeOffset.UtcNow }
             };
             _readRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(mockParcels);
             var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
@@ -56,16 +52,12 @@ namespace UnitTests
                 new()
                 {
                     Id = 1,
-                    TrackingNumber = "ORD-001", Status = Domain.Enums.ParcelDeliveryStatus.Completed, DeliveredAt = DateTimeOffset.UtcNow,
+                    TrackingNumber = "ORD-001",
+                    Status = ParcelDeliveryStatus.Completed,
+                    DeliveredAt = DateTimeOffset.UtcNow,
                     CreatedAt = DateTimeOffset.UtcNow.AddDays(-1)
                 },
-                new()
-                {
-                    Id = 2,
-                    TrackingNumber = "ORD-002",
-                    DeliveredAt = null,
-                    CreatedAt = DateTimeOffset.UtcNow
-                }
+                new() { Id = 2, TrackingNumber = "ORD-002", DeliveredAt = null, CreatedAt = DateTimeOffset.UtcNow }
             };
             _readRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(mockParcels);
             var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);

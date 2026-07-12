@@ -90,6 +90,4 @@ public class Vehicle : BaseEntity
     public decimal ImportPrice { get; set; } = 0;
 
     public ICollection<VehicleDocument> Documents { get; set; } = new List<VehicleDocument>();
-
-
 }

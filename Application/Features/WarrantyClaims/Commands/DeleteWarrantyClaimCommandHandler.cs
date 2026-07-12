@@ -1,7 +1,6 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.WarrantyClaim;
-using Domain.Primitives;
 using MediatR;
 
 namespace Application.Features.WarrantyClaims.Commands;
@@ -16,7 +15,6 @@ public class DeleteWarrantyClaimCommandHandler(
         var claim = await readRepo.GetByIdAsync(req.Id, ct);
         if (claim is null)
             return Result.Failure([Error.NotFound($"Không tìm thấy khiếu nại bảo hành id={req.Id}", "Id")]);
-
         writeRepo.Delete(claim);
         await uow.SaveChangesAsync(ct);
         return Result.Success();

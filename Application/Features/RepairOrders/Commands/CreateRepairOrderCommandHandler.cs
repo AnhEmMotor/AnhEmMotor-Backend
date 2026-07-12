@@ -17,11 +17,9 @@ public class CreateRepairOrderCommandHandler(
         var vehicle = await vehicleRepo.GetByIdAsync(req.VehicleId, ct);
         if (vehicle is null)
             return Result<int>.Failure([Error.BadRequest("Xe không tồn tại.", "VehicleId")]);
-
         var totalCost = req.PartsCost + req.LaborCost;
         var dateStr = DateTimeOffset.UtcNow.ToString("yyyyMMdd");
         var number = $"RO-{dateStr}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
-
         var entity = new MaintenanceHistory
         {
             VehicleId = req.VehicleId,
@@ -38,10 +36,8 @@ public class CreateRepairOrderCommandHandler(
             MaintenanceNumber = number,
             CreatedAt = DateTimeOffset.UtcNow
         };
-
         writeRepo.Add(entity);
         await uow.SaveChangesAsync(ct);
-
         return Result<int>.Success(entity.Id);
     }
 }

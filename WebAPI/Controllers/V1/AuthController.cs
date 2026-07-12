@@ -30,150 +30,154 @@ namespace WebAPI.Controllers.V1;
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class AuthController(IMediator mediator) : ApiController
 {
-/// <summary>
-/// Đăng ký tài khoản mới
-/// </summary>
-[HttpPost("register")]
-[AnonymousOnly]
-[EnableRateLimiting("public_api")]
-[SwaggerOperation(Summary = "Đăng ký tài khoản mới", Description = "Tạo 1 tài khoản mới (với email và password)")]
-[ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-public async Task<IActionResult> RegisterAsync(
-[FromBody] RegisterCommand command,
-CancellationToken cancellationToken)
-{
-var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-return HandleCreated(result);
-}
+    /// <summary>
+    /// Đăng ký tài khoản mới
+    /// </summary>
+    [HttpPost("register")]
+    [AnonymousOnly]
+    [EnableRateLimiting("public_api")]
+    [SwaggerOperation(Summary = "Đăng ký tài khoản mới", Description = "Tạo 1 tài khoản mới (với email và password)")]
+    [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RegisterAsync(
+        [FromBody] RegisterCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleCreated(result);
+    }
 
-/// <summary>
-/// Đăng nhập bằng Username/Email và Password
-/// </summary>
-[HttpPost("login")]
-[EnableRateLimiting("public_api")]
-[ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
-{
-var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-return HandleResult(result);
-}
+    /// <summary>
+    /// Đăng nhập bằng Username/Email và Password
+    /// </summary>
+    [HttpPost("login")]
+    [EnableRateLimiting("public_api")]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-/// <summary>
-/// Làm mới Access Token bằng Refresh Token
-/// </summary>
-[HttpPost("refresh-token")]
-[AllowAnonymous]
-[EnableRateLimiting("public_api")]
-[ProducesResponseType(typeof(GetAccessTokenFromRefreshTokenResponse), StatusCodes.Status200OK)]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
-public async Task<IActionResult> RefreshTokenAsync(CancellationToken cancellationToken)
-{
-var result = await mediator.Send(new RefreshTokenCommand(), cancellationToken).ConfigureAwait(false);
-return HandleResult(result);
-}
+    /// <summary>
+    /// Làm mới Access Token bằng Refresh Token
+    /// </summary>
+    [HttpPost("refresh-token")]
+    [AllowAnonymous]
+    [EnableRateLimiting("public_api")]
+    [ProducesResponseType(typeof(GetAccessTokenFromRefreshTokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> RefreshTokenAsync(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new RefreshTokenCommand(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-/// <summary>
-/// Đăng xuất
-/// </summary>
-[HttpPost("logout")]
-[ProducesResponseType(typeof(LogoutResponse), StatusCodes.Status200OK)]
-[Authorize]
-public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
-{
-var result = await mediator.Send(new LogoutCommand(), cancellationToken).ConfigureAwait(false);
-return HandleResult(result);
-}
+    /// <summary>
+    /// Đăng xuất
+    /// </summary>
+    [HttpPost("logout")]
+    [ProducesResponseType(typeof(LogoutResponse), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new LogoutCommand(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-/// <summary>
-/// Đăng nhập bằng Google
-/// </summary>
-[HttpPost("google")]
-[EnableRateLimiting("public_api")]
-[ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-public async Task<IActionResult> GoogleLoginAsync(
-[FromBody] GoogleLoginCommand command,
-CancellationToken cancellationToken)
-{
-var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-return HandleResult(result);
-}
+    /// <summary>
+    /// Đăng nhập bằng Google
+    /// </summary>
+    [HttpPost("google")]
+    [EnableRateLimiting("public_api")]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GoogleLoginAsync(
+        [FromBody] GoogleLoginCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-/// <summary>
-/// Đăng nhập bằng Facebook
-/// </summary>
-[HttpPost("facebook")]
-[EnableRateLimiting("public_api")]
-[ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-public async Task<IActionResult> FacebookLoginAsync(
-[FromBody] FacebookLoginCommand command,
-CancellationToken cancellationToken)
-{
-var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-return HandleResult(result);
-}
+    /// <summary>
+    /// Đăng nhập bằng Facebook
+    /// </summary>
+    [HttpPost("facebook")]
+    [EnableRateLimiting("public_api")]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> FacebookLoginAsync(
+        [FromBody] FacebookLoginCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-/// <summary>
-/// Đăng nhập bằng Username/Email và Password - Dành cho quản lý
-/// </summary>
-[HttpPost("login/for-manager")]
-[EnableRateLimiting("public_api")]
-[SwaggerOperation(
-Summary = "Đăng nhập cho quản lý",
-Description = "Đăng nhập với Username/Email và Password. Chỉ cho phép người dùng có ít nhất một quyền trong hệ thống.")]
-[ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
-public async Task<IActionResult> LoginForManagerAsync(
-[FromBody] LoginForManagerCommand command,
-CancellationToken cancellationToken)
-{
-var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-return HandleResult(result);
-}
+    /// <summary>
+    /// Đăng nhập bằng Username/Email và Password - Dành cho quản lý
+    /// </summary>
+    [HttpPost("login/for-manager")]
+    [EnableRateLimiting("public_api")]
+    [SwaggerOperation(
+        Summary = "Đăng nhập cho quản lý",
+        Description = "Đăng nhập với Username/Email và Password. Chỉ cho phép người dùng có ít nhất một quyền trong hệ thống.")]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> LoginForManagerAsync(
+        [FromBody] LoginForManagerCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-/// <summary>
-/// Yêu cầu đặt lại mật khẩu qua email
-/// </summary>
-[HttpPost("forgot-password")]
-[AllowAnonymous]
-[EnableRateLimiting("public_api")]
-[SwaggerOperation(Summary = "Quên mật khẩu", Description = "Gửi email chứa liên kết đặt lại mật khẩu")]
-[ProducesResponseType(typeof(ForgotPasswordResponse), StatusCodes.Status200OK)]
-public async Task<IActionResult> ForgotPasswordAsync([FromBody] ForgotPasswordCommand command, CancellationToken cancellationToken)
-{
-var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-return HandleResult(result);
-}
+    /// <summary>
+    /// Yêu cầu đặt lại mật khẩu qua email
+    /// </summary>
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    [EnableRateLimiting("public_api")]
+    [SwaggerOperation(Summary = "Quên mật khẩu", Description = "Gửi email chứa liên kết đặt lại mật khẩu")]
+    [ProducesResponseType(typeof(ForgotPasswordResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ForgotPasswordAsync(
+        [FromBody] ForgotPasswordCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-/// <summary>
-/// Đặt lại mật khẩu bằng token nhận được qua email
-/// </summary>
-[HttpPost("reset-password")]
-[AllowAnonymous]
-[EnableRateLimiting("public_api")]
-[SwaggerOperation(Summary = "Đặt lại mật khẩu", Description = "Đặt mật khẩu mới bằng token từ email")]
-[ProducesResponseType(typeof(ResetPasswordResponse), StatusCodes.Status200OK)]
-public async Task<IActionResult> ResetPasswordAsync([FromBody] ResetPasswordCommand command, CancellationToken cancellationToken)
-{
-var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-return HandleResult(result);
-}
+    /// <summary>
+    /// Đặt lại mật khẩu bằng token nhận được qua email
+    /// </summary>
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    [EnableRateLimiting("public_api")]
+    [SwaggerOperation(Summary = "Đặt lại mật khẩu", Description = "Đặt mật khẩu mới bằng token từ email")]
+    [ProducesResponseType(typeof(ResetPasswordResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ResetPasswordAsync(
+        [FromBody] ResetPasswordCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 
-/// <summary>
-/// Lấy cấu hình các dịch vụ xác thực bên ngoài
-/// </summary>
-[HttpGet("external-config")]
-[AllowAnonymous]
-[SwaggerOperation(Summary = "Lấy cấu hình Social Login", Description = "Lấy Google Client ID và Facebook App ID")]
-[ProducesResponseType(typeof(ExternalAuthConfigResponse), StatusCodes.Status200OK)]
-public async Task<IActionResult> GetExternalAuthConfigAsync(CancellationToken cancellationToken)
-{
-var result = await mediator.Send(new GetExternalAuthConfigQuery(), cancellationToken).ConfigureAwait(false);
-return HandleResult(result);
-}
+    /// <summary>
+    /// Lấy cấu hình các dịch vụ xác thực bên ngoài
+    /// </summary>
+    [HttpGet("external-config")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Lấy cấu hình Social Login", Description = "Lấy Google Client ID và Facebook App ID")]
+    [ProducesResponseType(typeof(ExternalAuthConfigResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetExternalAuthConfigAsync(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetExternalAuthConfigQuery(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 }

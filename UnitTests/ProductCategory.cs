@@ -41,7 +41,12 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { NameVi = "Điện thoại", NameEn = "Phone", Description = "Các sản phẩm điện thoại" };
+        var command = new CreateProductCategoryCommand
+        {
+            NameVi = "Điện thoại",
+            NameEn = "Phone",
+            Description = "Các sản phẩm điện thoại"
+        };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.Name.Should().Be("Điện thoại");
@@ -76,7 +81,12 @@ public class ProductCategory
             _insertRepoMock.Object,
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new CreateProductCategoryCommand { NameVi = "Tablet", NameEn = "Tablet", Description = string.Empty };
+        var command = new CreateProductCategoryCommand
+        {
+            NameVi = "Tablet",
+            NameEn = "Tablet",
+            Description = string.Empty
+        };
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.Name.Should().Be("Tablet");
@@ -186,7 +196,8 @@ public class ProductCategory
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { NameVi = "Đã xóa", Description = "Test" };
-        _readRepoMock.Setup(x => x.ExistsByNameExceptIdAsync("Đã xóa", 0, It.IsAny<CancellationToken>(), DataFetchMode.All))
+        _readRepoMock.Setup(
+            x => x.ExistsByNameExceptIdAsync("Đã xóa", 0, It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(true);
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
@@ -257,7 +268,12 @@ public class ProductCategory
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new UpdateProductCategoryCommand { Id = 3, NameVi = null!, Description = "Only Description Updated" };
+        var command = new UpdateProductCategoryCommand
+        {
+            Id = 3,
+            NameVi = null!,
+            Description = "Only Description Updated"
+        };
         _readRepoMock.Setup(x => x.GetByIdAsync(3, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 new ProductCategoryEntity { Id = 3, Name = "Keep This", Description = "Original", DeletedAt = null });
@@ -367,9 +383,9 @@ public class ProductCategory
         resultObj.Value.Should().NotBeNull();
         _updateRepoMock.Verify(x => x.Restore(It.Is<ProductCategoryEntity>(c => c.Id == 10)), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-      }
+    }
 
-      [Fact(DisplayName = "PC_024 - Khôi phục danh mục sản phẩm chưa bị xóa")]
+    [Fact(DisplayName = "PC_024 - Khôi phục danh mục sản phẩm chưa bị xóa")]
     public async Task RestoreProductCategory_NotDeleted_ShouldThrowException()
     {
         var handler = new RestoreProductCategoryCommandHandler(

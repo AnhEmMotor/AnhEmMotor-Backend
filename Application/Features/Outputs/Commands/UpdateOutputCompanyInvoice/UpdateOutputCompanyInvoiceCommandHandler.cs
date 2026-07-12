@@ -22,25 +22,20 @@ public class UpdateOutputCompanyInvoiceCommandHandler(
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
         if (output is null)
         {
             return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
-
         output.IsCompanyInvoice = true;
         output.CompanyName = request.CompanyName.Trim();
         output.CompanyAddress = request.CompanyAddress.Trim();
         output.CompanyTaxCode = request.CompanyTaxCode.Trim();
         output.CompanyEmail = string.IsNullOrWhiteSpace(request.CompanyEmail) ? null : request.CompanyEmail.Trim();
         output.BudgetCode = string.IsNullOrWhiteSpace(request.BudgetCode) ? null : request.BudgetCode.Trim();
-
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
-
         return updated.Adapt<OrderDetailResponse>();
     }
 }

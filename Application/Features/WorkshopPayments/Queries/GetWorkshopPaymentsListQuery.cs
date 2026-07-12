@@ -10,5 +10,6 @@ namespace Application.Features.WorkshopPayments.Queries;
 public class GetWorkshopPaymentsListQuery : IRequest<Result<PagedResult<WorkshopPaymentResponse>>>
 {
     public SieveModel Sieve { get; set; } = new();
+
     public DataFetchMode Mode { get; set; } = DataFetchMode.ActiveOnly;
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace Application.ApiContracts.Statistical.Responses;
 
@@ -37,8 +36,8 @@ public record ContractTopSupplierData(
 public record ContractListItem(
     string Id,
     string ContractNumber,
-    string Type, // "Bán xe" or "Nhà cung cấp"
-    string PartnerName, // Customer or Supplier Name
+    string Type,
+    string PartnerName,
     decimal Value,
     string Status,
     string Date

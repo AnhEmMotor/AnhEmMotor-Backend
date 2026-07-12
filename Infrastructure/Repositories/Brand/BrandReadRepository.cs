@@ -7,6 +7,8 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
+using System.Globalization;
+using System.Text.Json;
 using BrandEntity = Domain.Entities.Brand;
 
 namespace Infrastructure.Repositories.Brand;
@@ -87,31 +89,29 @@ public class BrandReadRepository(
             .OrderByDescending(x => x.Count)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var latestBrandEntity = await query
             .OrderByDescending(b => b.UpdatedAt ?? b.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
-
         string? latestBrandName = latestBrandEntity?.Name;
         if (latestBrandEntity != null && !string.IsNullOrWhiteSpace(latestBrandEntity.NameJson))
         {
             try
             {
-                var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(latestBrandEntity.NameJson);
+                var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(latestBrandEntity.NameJson);
                 if (dict != null)
                 {
-                    var culture = System.Globalization.CultureInfo.CurrentCulture.Name;
+                    var culture = CultureInfo.CurrentCulture.Name;
                     var lang = culture.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ? "vi" : "en";
                     if (dict.TryGetValue(lang, out var localized) && !string.IsNullOrEmpty(localized))
                     {
                         latestBrandName = localized;
                     }
                 }
+            } catch
+            {
             }
-            catch { }
         }
-
         return new BrandStatisticsResponse
         {
             TotalBrands = totalBrands,

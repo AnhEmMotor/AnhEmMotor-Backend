@@ -1,9 +1,6 @@
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 using SieveModel = global::Sieve.Models.SieveModel;
 
 namespace Application.Interfaces.Repositories.Voucher;
@@ -17,6 +14,8 @@ public interface IVoucherReadRepository
         CancellationToken cancellationToken = default);
 
     Task<Domain.Entities.Voucher?> GetByIdAsync(int id, CancellationToken cancellationToken);
+
     Task<bool> ExistsByCodeAsync(string code, CancellationToken cancellationToken);
+
     Task<bool> ExistsByCodeAsync(string code, int excludeId, CancellationToken cancellationToken);
 }

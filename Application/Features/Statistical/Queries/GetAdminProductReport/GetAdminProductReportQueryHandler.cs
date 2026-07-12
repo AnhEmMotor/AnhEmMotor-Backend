@@ -14,8 +14,8 @@ public class GetAdminProductReportQueryHandler(IStatisticalReadRepository reposi
         var _now = DateTimeOffset.UtcNow;
         var end = _now;
         var start = _now.AddDays(-30);
-
-        var performanceList = await repository.GetProductPerformanceTableAsync(start, end, cancellationToken).ConfigureAwait(false);
+        var performanceList = await repository.GetProductPerformanceTableAsync(start, end, cancellationToken)
+            .ConfigureAwait(false);
         var tableData = performanceList.ToList();
         var bestSeller = tableData.OrderByDescending(p => p.SoldCount30Days).FirstOrDefault();
         var deadStockOptions = tableData.Where(p => p.StockQuantity > 0).OrderBy(p => p.SoldCount30Days).ToList();

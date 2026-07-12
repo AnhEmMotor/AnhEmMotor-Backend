@@ -2,9 +2,7 @@ using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
-using Domain.Constants;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Auth.Commands.ForgotPassword;
@@ -16,12 +14,13 @@ public class ForgotPasswordCommandHandler(
     IEmailService emailService,
     IConfiguration configuration) : IRequestHandler<ForgotPasswordCommand, Result<ForgotPasswordResponse>>
 {
-    public async Task<Result<ForgotPasswordResponse>> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ForgotPasswordResponse>> Handle(
+        ForgotPasswordCommand request,
+        CancellationToken cancellationToken)
     {
         var email = request.Email?.Trim();
         if (string.IsNullOrEmpty(email))
             return Error.BadRequest("Email is required.");
-
         var user = await userReadRepository.FindUserByEmailAsync(email, cancellationToken).ConfigureAwait(false);
         if (user is null || user.DeletedAt is not null)
             return new ForgotPasswordResponse
@@ -29,16 +28,12 @@ public class ForgotPasswordCommandHandler(
                 Success = true,
                 Message = "If an account with that email exists, a reset link has been sent."
             };
-
         var resetToken = tokenManagerService.CreateRandomToken();
         user.PasswordResetToken = resetToken;
         user.PasswordResetTokenExpiry = DateTimeOffset.UtcNow.AddHours(1);
-
         await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
-
         var frontendBase = configuration["Frontend:AdminUrl"] ?? "http://localhost:5174";
         var resetLink = $"{frontendBase}/auth/reset-password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(resetToken)}";
-
         var emailBody = $@"
 <!DOCTYPE html>
 <html>
@@ -49,16 +44,13 @@ public class ForgotPasswordCommandHandler(
 <p>Liên kết này sẽ hết hạn sau 1 giờ. Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
 </body>
 </html>";
-
         try
         {
-            await emailService.SendEmailAsync(email, "Đặt lại mật khẩu — AnhEmMotor", emailBody, cancellationToken).ConfigureAwait(false);
-        }
-        catch
+            await emailService.SendEmailAsync(email, "Đặt lại mật khẩu — AnhEmMotor", emailBody, cancellationToken)
+                .ConfigureAwait(false);
+        } catch
         {
-            // Don't expose email sending failure to prevent user enumeration
         }
-
         return new ForgotPasswordResponse
         {
             Success = true,

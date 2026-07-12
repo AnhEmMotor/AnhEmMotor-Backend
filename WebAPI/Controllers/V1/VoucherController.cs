@@ -44,7 +44,8 @@ public class VoucherController(IMediator mediator) : ApiController
     [Authorize]
     public async Task<IActionResult> UpdateVoucher(int id, [FromBody] UpdateVoucherRequest request)
     {
-        if (id != request.Id) return BadRequest("Id không hợp lệ");
+        if (id != request.Id)
+            return BadRequest("Id không hợp lệ");
         var result = await mediator.Send(new UpdateVoucherCommand { Request = request });
         return Ok(result);
     }

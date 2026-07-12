@@ -1,5 +1,4 @@
 using Application.Common.Models;
-using Domain.Primitives;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
 

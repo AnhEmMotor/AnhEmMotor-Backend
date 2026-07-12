@@ -3,9 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Voucher;
 using MediatR;
 using System.Linq;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Vouchers.Queries.GetVoucherById;
 
@@ -18,7 +15,6 @@ public class GetVoucherByIdQueryHandler(IVoucherReadRepository readRepository) :
         {
             return Result<VoucherResponse>.Failure(Error.NotFound("Voucher không tồn tại.", "Id"));
         }
-
         var response = new VoucherResponse
         {
             Id = voucher.Id,
@@ -34,7 +30,6 @@ public class GetVoucherByIdQueryHandler(IVoucherReadRepository readRepository) :
             ValidTo = voucher.ValidTo,
             AssignedCustomerIds = voucher.VoucherLeads?.Select(l => l.LeadId).ToList() ?? new List<int>()
         };
-
         return Result<VoucherResponse>.Success(response);
     }
 }

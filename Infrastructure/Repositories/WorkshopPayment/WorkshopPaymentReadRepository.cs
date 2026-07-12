@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.WorkshopPayment;
 using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
@@ -8,9 +9,7 @@ using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories.WorkshopPayment;
 
-public class WorkshopPaymentReadRepository(
-    ApplicationDBContext context,
-    ISievePaginator paginator) : IWorkshopPaymentReadRepository
+public class WorkshopPaymentReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IWorkshopPaymentReadRepository
 {
     public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
@@ -19,11 +18,17 @@ public class WorkshopPaymentReadRepository(
         CancellationToken cancellationToken = default)
     {
         var query = GetQueryable(mode);
-        if (filter != null) query = query.Where(filter);
-        return paginator.ApplyAsync<global::Domain.Entities.WorkshopPayment, TResponse>(query, sieveModel, mode, cancellationToken);
+        if (filter != null)
+            query = query.Where(filter);
+        return paginator.ApplyAsync<global::Domain.Entities.WorkshopPayment, TResponse>(
+            query,
+            sieveModel,
+            mode,
+            cancellationToken);
     }
 
-    internal IQueryable<global::Domain.Entities.WorkshopPayment> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    internal IQueryable<global::Domain.Entities.WorkshopPayment> GetQueryable(
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = context.Set<global::Domain.Entities.WorkshopPayment>().IgnoreQueryFilters();
         if (mode == DataFetchMode.ActiveOnly)
@@ -37,7 +42,8 @@ public class WorkshopPaymentReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return GetQueryable(mode).ToListAsync(cancellationToken)
+        return GetQueryable(mode)
+            .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<global::Domain.Entities.WorkshopPayment>>(t => t.Result, cancellationToken);
     }
 

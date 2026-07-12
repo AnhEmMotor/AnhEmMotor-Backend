@@ -17,23 +17,17 @@ public class VoucherReadRepository(ApplicationDBContext context, ISievePaginator
         Expression<Func<Domain.Entities.Voucher, bool>>? filter = null,
         CancellationToken cancellationToken = default)
     {
-        var query = context.GetQuery<Domain.Entities.Voucher>(mode)
-            .Include(v => v.VoucherLeads)
-            .AsQueryable();
-
+        var query = context.GetQuery<Domain.Entities.Voucher>(mode).Include(v => v.VoucherLeads).AsQueryable();
         if (filter != null)
         {
             query = query.Where(filter);
         }
-
         return paginator.ApplyAsync<Domain.Entities.Voucher, TResponse>(query, sieveModel, mode, cancellationToken);
     }
 
     public Task<Domain.Entities.Voucher?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return context.Vouchers
-            .Include(v => v.VoucherLeads)
-            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+        return context.Vouchers.Include(v => v.VoucherLeads).FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
     }
 
     public Task<bool> ExistsByCodeAsync(string code, CancellationToken cancellationToken)

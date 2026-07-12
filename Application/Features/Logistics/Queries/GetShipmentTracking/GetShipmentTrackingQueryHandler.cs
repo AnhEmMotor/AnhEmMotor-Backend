@@ -1,6 +1,7 @@
 using Application.ApiContracts.Logistics.Responses;
 using Application.Interfaces.Repositories.Logistics.Shipment;
 using Domain.Entities.Logistics;
+using Domain.Enums;
 using MediatR;
 using System;
 using System.Linq;
@@ -59,40 +60,37 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
             {
                 var milestones = new List<TrackingMilestoneResponse>();
                 var baseDate = order.CreatedAt?.UtcDateTime ?? DateTime.UtcNow.AddDays(-2);
-                
-                milestones.Add(new TrackingMilestoneResponse
-                {
-                    Timestamp = baseDate,
-                    Location = "Showroom AnhEmMotor Biên Hòa",
-                    Status = "Đã lấy hàng",
-                    IsCurrent = false
-                });
-
-                if (order.Status == Domain.Enums.ParcelDeliveryStatus.Shipping || order.Status == Domain.Enums.ParcelDeliveryStatus.Completed)
-                {
-                    milestones.Add(new TrackingMilestoneResponse
+                milestones.Add(
+                    new TrackingMilestoneResponse
                     {
-                        Timestamp = baseDate.AddHours(4),
-                        Location = "Bưu cục trung chuyển Đồng Nai",
-                        Status = "Đã đến bưu cục trung chuyển",
-                        IsCurrent = order.Status == Domain.Enums.ParcelDeliveryStatus.Shipping
+                        Timestamp = baseDate,
+                        Location = "Showroom AnhEmMotor Biên Hòa",
+                        Status = "Đã lấy hàng",
+                        IsCurrent = false
                     });
-                }
-
-                if (order.Status == Domain.Enums.ParcelDeliveryStatus.Completed && order.DeliveredAt.HasValue)
+                if (order.Status == ParcelDeliveryStatus.Shipping || order.Status == ParcelDeliveryStatus.Completed)
                 {
-                    milestones.Add(new TrackingMilestoneResponse
-                    {
-                        Timestamp = order.DeliveredAt.Value.UtcDateTime,
-                        Location = order.DestinationAddress ?? "Địa chỉ người nhận",
-                        Status = "Giao hàng thành công",
-                        IsCurrent = true
-                    });
+                    milestones.Add(
+                        new TrackingMilestoneResponse
+                        {
+                            Timestamp = baseDate.AddHours(4),
+                            Location = "Bưu cục trung chuyển Đồng Nai",
+                            Status = "Đã đến bưu cục trung chuyển",
+                            IsCurrent = order.Status == ParcelDeliveryStatus.Shipping
+                        });
                 }
-
+                if (order.Status == ParcelDeliveryStatus.Completed && order.DeliveredAt.HasValue)
+                {
+                    milestones.Add(
+                        new TrackingMilestoneResponse
+                        {
+                            Timestamp = order.DeliveredAt.Value.UtcDateTime,
+                            Location = order.DestinationAddress ?? "Địa chỉ người nhận",
+                            Status = "Giao hàng thành công",
+                            IsCurrent = true
+                        });
+                }
                 dto.Milestones = milestones;
-                
-                // Mock Coordinates if they are 0
                 if (dto.OriginLatitude == 0 && dto.OriginLongitude == 0)
                 {
                     dto.OriginLatitude = 10.9576;

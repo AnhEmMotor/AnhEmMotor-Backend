@@ -1,11 +1,10 @@
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
 using System.Linq.Expressions;
 using WorkshopPaymentEntity = Domain.Entities.WorkshopPayment;
 
-namespace Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories.WorkshopPayment;
 
 public interface IWorkshopPaymentReadRepository
 {
@@ -20,10 +19,13 @@ public interface IWorkshopPaymentReadRepository
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
     public Task<WorkshopPaymentEntity?> GetByIdAsync(
-        int id, CancellationToken cancellationToken,
+        int id,
+        CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
     public Task<IEnumerable<WorkshopPaymentEntity>> GetBySourceAsync(
-        string sourceType, int sourceId, CancellationToken cancellationToken,
+        string sourceType,
+        int sourceId,
+        CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 }

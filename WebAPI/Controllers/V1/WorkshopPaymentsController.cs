@@ -23,9 +23,12 @@ public class WorkshopPaymentsController(IMediator mediator) : ApiController
     [HttpGet]
     [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
     [ProducesResponseType(typeof(PagedResult<WorkshopPaymentResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetListAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetListAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetWorkshopPaymentsListQuery { Sieve = sieveModel }, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new GetWorkshopPaymentsListQuery { Sieve = sieveModel }, cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 

@@ -1,9 +1,8 @@
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
-using MaintenanceHistoryEntity = Domain.Entities.MaintenanceHistory;
 using Sieve.Models;
 using System.Linq.Expressions;
+using MaintenanceHistoryEntity = Domain.Entities.MaintenanceHistory;
 
 namespace Application.Interfaces.Repositories;
 
@@ -20,10 +19,12 @@ public interface IMaintenanceHistoryReadRepository
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
     public Task<MaintenanceHistoryEntity?> GetByIdAsync(
-        int id, CancellationToken cancellationToken,
+        int id,
+        CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
     public Task<IEnumerable<MaintenanceHistoryEntity>> GetByVehicleIdAsync(
-        int vehicleId, CancellationToken cancellationToken,
+        int vehicleId,
+        CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 }

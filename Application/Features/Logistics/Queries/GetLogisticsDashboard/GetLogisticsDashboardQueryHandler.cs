@@ -1,14 +1,10 @@
-using Application.Features.Logistics.Queries.GetLogisticsDashboard;
 using Application.Interfaces.Repositories.LogisticsDashboard;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Logistics.Queries.GetLogisticsDashboard;
 
-public class GetLogisticsDashboardQueryHandler(
-    ILogisticsDashboardRepository logisticsDashboardRepository) : IRequestHandler<GetLogisticsDashboardQuery, LogisticsDashboardResponse>
+public class GetLogisticsDashboardQueryHandler(ILogisticsDashboardRepository logisticsDashboardRepository) : IRequestHandler<GetLogisticsDashboardQuery, LogisticsDashboardResponse>
 {
     public async Task<LogisticsDashboardResponse> Handle(
         GetLogisticsDashboardQuery request,

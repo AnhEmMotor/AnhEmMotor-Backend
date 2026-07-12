@@ -1,3 +1,5 @@
+using Domain.Constants.Logistics;
+using Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -8,7 +10,7 @@ public class Shipment : BaseEntity
     [Key]
     public int Id { get; set; }
 
-    public Domain.Enums.ParcelDeliveryStatus Status { get; set; } = Domain.Enums.ParcelDeliveryStatus.Shipping;
+    public ParcelDeliveryStatus Status { get; set; } = ParcelDeliveryStatus.Shipping;
 
     [Required]
     public string TrackingNumber { get; set; } = string.Empty;
@@ -41,7 +43,7 @@ public class Shipment : BaseEntity
     public double? DestinationLongitude { get; set; }
 
     [Required]
-    public string Type { get; set; } = Constants.Logistics.ShipmentType.OrderDelivery;
+    public string Type { get; set; } = ShipmentType.OrderDelivery;
 
     public int? OutputId { get; set; }
 

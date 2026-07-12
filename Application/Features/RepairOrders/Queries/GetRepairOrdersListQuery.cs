@@ -10,5 +10,6 @@ namespace Application.Features.RepairOrders.Queries;
 public class GetRepairOrdersListQuery : IRequest<Result<PagedResult<RepairOrderResponse>>>
 {
     public SieveModel Sieve { get; set; } = new();
+
     public DataFetchMode Mode { get; set; } = DataFetchMode.ActiveOnly;
 }

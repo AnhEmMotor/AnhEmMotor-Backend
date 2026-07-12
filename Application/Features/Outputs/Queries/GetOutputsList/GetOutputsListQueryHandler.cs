@@ -21,26 +21,24 @@ public class GetOutputsListQueryHandler(IOutputReadRepository repository, ISetti
             .Where(statusId => !string.IsNullOrWhiteSpace(statusId))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
-
         Expression<Func<Output, bool>>? filter = null;
         var term = request.Search?.Trim().ToLower();
-
         if (statusIds.Length > 0 && !string.IsNullOrEmpty(term))
         {
-            filter = output => output.StatusId != null && statusIds.Contains(output.StatusId) &&
+            filter = output => output.StatusId != null &&
+                statusIds.Contains(output.StatusId) &&
                 ((output.CustomerName != null && output.CustomerName.ToLower().Contains(term)) ||
-                 (output.CustomerPhone != null && output.CustomerPhone.Contains(term)) ||
-                 (output.Notes != null && output.Notes.ToLower().Contains(term)) ||
-                 (output.Buyer != null && output.Buyer.FullName != null && output.Buyer.FullName.ToLower().Contains(term)));
-        }
-        else if (statusIds.Length > 0)
+                    (output.CustomerPhone != null && output.CustomerPhone.Contains(term)) ||
+                    (output.Notes != null && output.Notes.ToLower().Contains(term)) ||
+                    (output.Buyer != null &&
+                        output.Buyer.FullName != null &&
+                        output.Buyer.FullName.ToLower().Contains(term)));
+        } else if (statusIds.Length > 0)
         {
             filter = output => output.StatusId != null && statusIds.Contains(output.StatusId);
-        }
-        else if (!string.IsNullOrEmpty(term))
+        } else if (!string.IsNullOrEmpty(term))
         {
-            filter = output =>
-                (output.CustomerName != null && output.CustomerName.ToLower().Contains(term)) ||
+            filter = output => (output.CustomerName != null && output.CustomerName.ToLower().Contains(term)) ||
                 (output.CustomerPhone != null && output.CustomerPhone.Contains(term)) ||
                 (output.Notes != null && output.Notes.ToLower().Contains(term)) ||
                 (output.Buyer != null && output.Buyer.FullName != null && output.Buyer.FullName.ToLower().Contains(term));

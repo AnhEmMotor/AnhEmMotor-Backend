@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -14,16 +14,9 @@ namespace Infrastructure.SqlServerMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory");
-
-            migrationBuilder.DropTable(
-                name: "PlateDossier");
-
-            migrationBuilder.DropTable(
-                name: "RepairOrderDetail");
-
-            migrationBuilder.DropTable(
-                name: "RepairOrder");
-
+            migrationBuilder.DropTable(name: "PlateDossier");
+            migrationBuilder.DropTable(name: "RepairOrderDetail");
+            migrationBuilder.DropTable(name: "RepairOrder");
             migrationBuilder.AlterColumn<string>(
                 name: "VehicleInfo",
                 table: "WorkshopPayment",
@@ -32,7 +25,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(200)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "SourceType",
                 table: "WorkshopPayment",
@@ -40,7 +32,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(30)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "ServiceDescription",
                 table: "WorkshopPayment",
@@ -49,7 +40,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "PaymentStatus",
                 table: "WorkshopPayment",
@@ -57,7 +47,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(30)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "PaymentNumber",
                 table: "WorkshopPayment",
@@ -65,7 +54,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "PaymentMethod",
                 table: "WorkshopPayment",
@@ -73,7 +61,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(30)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "Notes",
                 table: "WorkshopPayment",
@@ -82,7 +69,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "CustomerPhone",
                 table: "WorkshopPayment",
@@ -90,7 +76,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(20)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "CustomerName",
                 table: "WorkshopPayment",
@@ -98,7 +83,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "PartName",
                 table: "WarrantyClaimPart",
@@ -106,7 +90,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(200)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "PartCode",
                 table: "WarrantyClaimPart",
@@ -114,7 +97,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "ServiceCenterName",
                 table: "WarrantyClaim",
@@ -123,7 +105,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(200)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "MediaUrls",
                 table: "WarrantyClaim",
@@ -132,7 +113,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "ManufacturerDecision",
                 table: "WarrantyClaim",
@@ -141,7 +121,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "ManufacturerClaimNumber",
                 table: "WarrantyClaim",
@@ -150,7 +129,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "IssueDescription",
                 table: "WarrantyClaim",
@@ -158,7 +136,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "ClaimNumber",
                 table: "WarrantyClaim",
@@ -166,91 +143,77 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)");
-
             migrationBuilder.AddColumn<string>(
                 name: "PasswordResetToken",
                 table: "Users",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "PasswordResetTokenExpiry",
                 table: "Users",
                 type: "datetimeoffset",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "DescriptionJson",
                 table: "Product",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "MetaDescriptionJson",
                 table: "Product",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "MetaTitleJson",
                 table: "Product",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "NameJson",
                 table: "Product",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "ShortDescriptionJson",
                 table: "Product",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "BudgetCode",
                 table: "Output",
                 type: "nvarchar(50)",
                 maxLength: 50,
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "CompanyAddress",
                 table: "Output",
                 type: "nvarchar(500)",
                 maxLength: 500,
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "CompanyEmail",
                 table: "Output",
                 type: "nvarchar(150)",
                 maxLength: 150,
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "CompanyName",
                 table: "Output",
                 type: "nvarchar(200)",
                 maxLength: 200,
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "CompanyTaxCode",
                 table: "Output",
                 type: "nvarchar(50)",
                 maxLength: 50,
                 nullable: true);
-
             migrationBuilder.AddColumn<bool>(
                 name: "IsCompanyInvoice",
                 table: "Output",
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
-
             migrationBuilder.AlterColumn<string>(
                 name: "PartsJson",
                 table: "MaintenanceHistory",
@@ -259,7 +222,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "MaintenanceNumber",
                 table: "MaintenanceHistory",
@@ -267,7 +229,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
                 table: "MaintenanceHistory",
@@ -275,25 +236,17 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)");
-
             migrationBuilder.AddColumn<string>(
                 name: "DescriptionJson",
                 table: "Brand",
                 type: "nvarchar(max)",
                 nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "NameJson",
-                table: "Brand",
-                type: "nvarchar(max)",
-                nullable: true);
-
+            migrationBuilder.AddColumn<string>(name: "NameJson", table: "Brand", type: "nvarchar(max)", nullable: true);
             migrationBuilder.CreateTable(
                 name: "ProductCategoryTranslations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ProductCategoryId = table.Column<int>(type: "int", nullable: false),
                     LanguageCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -312,20 +265,22 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Shipments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Status = table.Column<int>(type: "int", nullable: false),
                     TrackingNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Carrier = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CodAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    ShippingCost = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    ShippingCost = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
                     DeliveredAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     OriginAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DestinationAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -348,21 +303,27 @@ namespace Infrastructure.SqlServerMigrations
                         principalTable: "Output",
                         principalColumn: "id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "Vouchers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ApplyFor = table.Column<int>(type: "int", nullable: false),
                     Channel = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     DiscountType = table.Column<int>(type: "int", nullable: false),
-                    DiscountValue = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    MaxDiscountAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true),
+                    DiscountValue = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
+                    MaxDiscountAmount = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: true),
                     ValidFrom = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ValidTo = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -373,13 +334,11 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     table.PrimaryKey("PK_Vouchers", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ShipmentItems",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ShipmentId = table.Column<int>(type: "int", nullable: false),
                     ProductVariantId = table.Column<int>(type: "int", nullable: true),
                     ProductVariantColorId = table.Column<int>(type: "int", nullable: true),
@@ -408,7 +367,6 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "VoucherLeads",
                 columns: table => new
@@ -432,43 +390,25 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductCategoryTranslations_ProductCategoryId",
                 table: "ProductCategoryTranslations",
                 column: "ProductCategoryId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ShipmentItems_ProductVariantColorId",
                 table: "ShipmentItems",
                 column: "ProductVariantColorId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ShipmentItems_ProductVariantId",
                 table: "ShipmentItems",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ShipmentItems_ShipmentId",
                 table: "ShipmentItems",
                 column: "ShipmentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Shipments_OutputId",
-                table: "Shipments",
-                column: "OutputId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_VoucherLeads_LeadId",
-                table: "VoucherLeads",
-                column: "LeadId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Vouchers_Code",
-                table: "Vouchers",
-                column: "Code",
-                unique: true);
-
+            migrationBuilder.CreateIndex(name: "IX_Shipments_OutputId", table: "Shipments", column: "OutputId");
+            migrationBuilder.CreateIndex(name: "IX_VoucherLeads_LeadId", table: "VoucherLeads", column: "LeadId");
+            migrationBuilder.CreateIndex(name: "IX_Vouchers_Code", table: "Vouchers", column: "Code", unique: true);
             migrationBuilder.AddForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory",
@@ -484,82 +424,26 @@ namespace Infrastructure.SqlServerMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory");
-
-            migrationBuilder.DropTable(
-                name: "ProductCategoryTranslations");
-
-            migrationBuilder.DropTable(
-                name: "ShipmentItems");
-
-            migrationBuilder.DropTable(
-                name: "VoucherLeads");
-
-            migrationBuilder.DropTable(
-                name: "Shipments");
-
-            migrationBuilder.DropTable(
-                name: "Vouchers");
-
-            migrationBuilder.DropColumn(
-                name: "PasswordResetToken",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "PasswordResetTokenExpiry",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "DescriptionJson",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "MetaDescriptionJson",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "MetaTitleJson",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "NameJson",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "ShortDescriptionJson",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "BudgetCode",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "CompanyAddress",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "CompanyEmail",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "CompanyName",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "CompanyTaxCode",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "IsCompanyInvoice",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "DescriptionJson",
-                table: "Brand");
-
-            migrationBuilder.DropColumn(
-                name: "NameJson",
-                table: "Brand");
-
+            migrationBuilder.DropTable(name: "ProductCategoryTranslations");
+            migrationBuilder.DropTable(name: "ShipmentItems");
+            migrationBuilder.DropTable(name: "VoucherLeads");
+            migrationBuilder.DropTable(name: "Shipments");
+            migrationBuilder.DropTable(name: "Vouchers");
+            migrationBuilder.DropColumn(name: "PasswordResetToken", table: "Users");
+            migrationBuilder.DropColumn(name: "PasswordResetTokenExpiry", table: "Users");
+            migrationBuilder.DropColumn(name: "DescriptionJson", table: "Product");
+            migrationBuilder.DropColumn(name: "MetaDescriptionJson", table: "Product");
+            migrationBuilder.DropColumn(name: "MetaTitleJson", table: "Product");
+            migrationBuilder.DropColumn(name: "NameJson", table: "Product");
+            migrationBuilder.DropColumn(name: "ShortDescriptionJson", table: "Product");
+            migrationBuilder.DropColumn(name: "BudgetCode", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyAddress", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyEmail", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyName", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyTaxCode", table: "Output");
+            migrationBuilder.DropColumn(name: "IsCompanyInvoice", table: "Output");
+            migrationBuilder.DropColumn(name: "DescriptionJson", table: "Brand");
+            migrationBuilder.DropColumn(name: "NameJson", table: "Brand");
             migrationBuilder.AlterColumn<string>(
                 name: "VehicleInfo",
                 table: "WorkshopPayment",
@@ -568,7 +452,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "SourceType",
                 table: "WorkshopPayment",
@@ -576,7 +459,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "ServiceDescription",
                 table: "WorkshopPayment",
@@ -585,7 +467,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "PaymentStatus",
                 table: "WorkshopPayment",
@@ -593,7 +474,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "PaymentNumber",
                 table: "WorkshopPayment",
@@ -601,7 +481,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "PaymentMethod",
                 table: "WorkshopPayment",
@@ -609,7 +488,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "Notes",
                 table: "WorkshopPayment",
@@ -618,7 +496,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "CustomerPhone",
                 table: "WorkshopPayment",
@@ -626,7 +503,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "CustomerName",
                 table: "WorkshopPayment",
@@ -634,7 +510,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "PartName",
                 table: "WarrantyClaimPart",
@@ -642,7 +517,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "PartCode",
                 table: "WarrantyClaimPart",
@@ -650,7 +524,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "ServiceCenterName",
                 table: "WarrantyClaim",
@@ -659,7 +532,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "MediaUrls",
                 table: "WarrantyClaim",
@@ -668,7 +540,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "ManufacturerDecision",
                 table: "WarrantyClaim",
@@ -677,7 +548,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "ManufacturerClaimNumber",
                 table: "WarrantyClaim",
@@ -686,7 +556,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "IssueDescription",
                 table: "WarrantyClaim",
@@ -694,7 +563,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "ClaimNumber",
                 table: "WarrantyClaim",
@@ -702,7 +570,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "PartsJson",
                 table: "MaintenanceHistory",
@@ -711,7 +578,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "MaintenanceNumber",
                 table: "MaintenanceHistory",
@@ -719,7 +585,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
                 table: "MaintenanceHistory",
@@ -727,13 +592,11 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.CreateTable(
                 name: "PlateDossier",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     OutputId = table.Column<int>(type: "int", nullable: true),
                     ActualCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CompletedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -759,13 +622,11 @@ namespace Infrastructure.SqlServerMigrations
                         principalTable: "Output",
                         principalColumn: "id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "RepairOrder",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     TechnicianId = table.Column<int>(type: "int", nullable: true),
                     VehicleId = table.Column<int>(type: "int", nullable: true),
                     CompletedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -800,13 +661,11 @@ namespace Infrastructure.SqlServerMigrations
                         principalTable: "Vehicle",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "RepairOrderDetail",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ProductVariantId = table.Column<int>(type: "int", nullable: true),
                     RepairOrderId = table.Column<int>(type: "int", nullable: false),
                     ServiceId = table.Column<int>(type: "int", nullable: true),
@@ -839,37 +698,24 @@ namespace Infrastructure.SqlServerMigrations
                         principalTable: "Services",
                         principalColumn: "Id");
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlateDossier_OutputId",
-                table: "PlateDossier",
-                column: "OutputId");
-
+            migrationBuilder.CreateIndex(name: "IX_PlateDossier_OutputId", table: "PlateDossier", column: "OutputId");
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrder_TechnicianId",
                 table: "RepairOrder",
                 column: "TechnicianId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RepairOrder_VehicleId",
-                table: "RepairOrder",
-                column: "VehicleId");
-
+            migrationBuilder.CreateIndex(name: "IX_RepairOrder_VehicleId", table: "RepairOrder", column: "VehicleId");
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_ProductVariantId",
                 table: "RepairOrderDetail",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_RepairOrderId",
                 table: "RepairOrderDetail",
                 column: "RepairOrderId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RepairOrderDetail_ServiceId",
                 table: "RepairOrderDetail",
                 column: "ServiceId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory",

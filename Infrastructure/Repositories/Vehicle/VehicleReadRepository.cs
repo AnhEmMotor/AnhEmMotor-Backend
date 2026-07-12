@@ -167,8 +167,8 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
     }
 
     public Task<Domain.Entities.Vehicle?> GetVehicleForPortfolioAsync(
-        string query, 
-        string queryType, 
+        string query,
+        string queryType,
         CancellationToken cancellationToken = default)
     {
         var baseQuery = context.Vehicles.AsQueryable();
@@ -177,12 +177,11 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
             "phone" => baseQuery.Where(v => v.Lead != null && v.Lead.PhoneNumber.Contains(query)),
             "licensePlate" => baseQuery.Where(v => v.LicensePlate.Contains(query)),
             "vin" => baseQuery.Where(v => v.VinNumber.Contains(query)),
-            _ => baseQuery.Where(v =>
-                v.LicensePlate.Contains(query) ||
-                v.VinNumber.Contains(query) ||
-                (v.Lead != null && v.Lead.PhoneNumber.Contains(query)))
+            _ => baseQuery.Where(
+                v => v.LicensePlate.Contains(query) ||
+                    v.VinNumber.Contains(query) ||
+                    (v.Lead != null && v.Lead.PhoneNumber.Contains(query)))
         };
-
         return vehicleQuery
             .Include(v => v.Lead)
             .Include(v => v.ProductVariant)

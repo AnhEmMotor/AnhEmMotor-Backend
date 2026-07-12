@@ -150,8 +150,6 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         return source.Where(l => l.FullName.Contains(term) || l.PhoneNumber.Contains(term));
     }
 
-
-
     private static void MapBaseProperties<T>(SievePropertyMapper mapper) where T : BaseEntity
     {
         mapper.Property<T>(x => x.CreatedAt).CanSort().CanFilter().HasName("createdAt");

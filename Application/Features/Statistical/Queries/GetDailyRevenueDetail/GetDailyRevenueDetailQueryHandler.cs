@@ -15,7 +15,6 @@ public sealed class GetDailyRevenueDetailQueryHandler(IStatisticalReadRepository
         var end = _now;
         var days = request.Days > 0 ? request.Days : 30;
         var start = _now.AddDays(-days);
-
         if (!DateOnly.TryParse(request.ReportDay, out var reportDay))
         {
             return Result<IEnumerable<DailyRevenueDetailResponse>>.Failure(Error.Validation("Invalid date format"));

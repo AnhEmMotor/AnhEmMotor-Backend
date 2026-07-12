@@ -248,16 +248,14 @@ public class ProductReadRepository(
                         .Select(v => v.Trim())
                         .Where(v => !string.IsNullOrEmpty(v))
                         .ToList();
-                }
-                else if (trimmed.StartsWith("ColorName==", StringComparison.OrdinalIgnoreCase))
+                } else if (trimmed.StartsWith("ColorName==", StringComparison.OrdinalIgnoreCase))
                 {
                     var val = trimmed["ColorName==".Length..].Trim();
                     colorFilters = val.Split('|', StringSplitOptions.RemoveEmptyEntries)
                         .Select(v => v.Trim())
                         .Where(v => !string.IsNullOrEmpty(v))
                         .ToList();
-                }
-                else
+                } else
                 {
                     cleanFiltersList.Add(trimmed);
                 }
@@ -265,11 +263,21 @@ public class ProductReadRepository(
         }
         if (versionFilters.Count > 0)
         {
-            query = query.Where(p => p.ProductVariants.Any(v => v.DeletedAt == null && v.VariantName != null && versionFilters.Contains(v.VariantName)));
+            query = query.Where(
+                p => p.ProductVariants
+                    .Any(v => v.DeletedAt == null && v.VariantName != null && versionFilters.Contains(v.VariantName)));
         }
         if (colorFilters.Count > 0)
         {
-            query = query.Where(p => p.ProductVariants.Any(v => v.DeletedAt == null && v.ProductVariantColors.Any(c => c.DeletedAt == null && c.ColorName != null && colorFilters.Contains(c.ColorName))));
+            query = query.Where(
+                p => p.ProductVariants
+                    .Any(
+                        v => v.DeletedAt == null &&
+                                v.ProductVariantColors
+                                    .Any(
+                                        c => c.DeletedAt == null &&
+                                                        c.ColorName != null &&
+                                                        colorFilters.Contains(c.ColorName))));
         }
         var cleanFilters = cleanFiltersList.Count > 0 ? string.Join(",", cleanFiltersList) : null;
         if (searchPattern != null)

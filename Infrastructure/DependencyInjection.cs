@@ -45,8 +45,7 @@ public static class DependencyInjection
                     options.UseMySql(connectionString, serverVersion);
                     options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 });
-        }
-        else if (string.Compare(provider, "PostgreSql", StringComparison.OrdinalIgnoreCase) == 0)
+        } else if (string.Compare(provider, "PostgreSql", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
@@ -55,8 +54,7 @@ public static class DependencyInjection
                     options.UseNpgsql(connectionString);
                     options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 });
-        }
-        else
+        } else
         {
             services.AddDbContextPool<ApplicationDBContext, SqlServerDBContext>(
                 options =>
@@ -64,16 +62,16 @@ public static class DependencyInjection
                     options.UseSqlServer(
                         configuration.GetConnectionString("StringConnection"),
                         b => b.MigrationsAssembly(typeof(SqlServerDBContext).Assembly.FullName)
-                            .CommandTimeout(30)
-                            .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-                    options.ConfigureWarnings(w =>
-                    {
-                        w.Ignore(RelationalEventId.PendingModelChangesWarning);
-                        w.Ignore(SqlServerEventId.SavepointsDisabledBecauseOfMARS);
-                    });
+                                .CommandTimeout(30)
+                                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+                    options.ConfigureWarnings(
+                        w =>
+                        {
+                            w.Ignore(RelationalEventId.PendingModelChangesWarning);
+                            w.Ignore(SqlServerEventId.SavepointsDisabledBecauseOfMARS);
+                        });
                 });
         }
-
         services.AddIdentity<ApplicationUser, ApplicationRole>(
             options =>
             {
@@ -86,7 +84,6 @@ public static class DependencyInjection
             })
             .AddEntityFrameworkStores<ApplicationDBContext>()
             .AddDefaultTokenProviders();
-
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IUserStreamService, UserStreamService>();
         services.AddSingleton<INotificationService, NotificationService>();

@@ -2,9 +2,9 @@ namespace Domain.Constants.Permission;
 
 public static partial class Permissions
 {
-    public static partial class Marketing 
+    public static partial class Marketing
     {
-        public static class BannerManagement 
+        public static class BannerManagement
         {
             public const string View = "Permissions.Marketing.BannerManagement.View";
             public const string Create = "Permissions.Marketing.BannerManagement.Create";

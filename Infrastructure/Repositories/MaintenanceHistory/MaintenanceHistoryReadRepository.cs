@@ -2,16 +2,14 @@ using Application.Interfaces.Repositories;
 using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
-using MaintenanceHistoryEntity = global::Domain.Entities.MaintenanceHistory;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using System.Linq.Expressions;
+using MaintenanceHistoryEntity = global::Domain.Entities.MaintenanceHistory;
 
 namespace Infrastructure.Repositories.MaintenanceHistory;
 
-public class MaintenanceHistoryReadRepository(
-    ApplicationDBContext context,
-    ISievePaginator paginator) : IMaintenanceHistoryReadRepository
+public class MaintenanceHistoryReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IMaintenanceHistoryReadRepository
 {
     public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
@@ -20,7 +18,8 @@ public class MaintenanceHistoryReadRepository(
         CancellationToken cancellationToken = default)
     {
         var query = GetQueryable(mode);
-        if (filter != null) query = query.Where(filter);
+        if (filter != null)
+            query = query.Where(filter);
         return paginator.ApplyAsync<MaintenanceHistoryEntity, TResponse>(query, sieveModel, mode, cancellationToken);
     }
 
@@ -38,7 +37,8 @@ public class MaintenanceHistoryReadRepository(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return GetQueryable(mode).ToListAsync(cancellationToken)
+        return GetQueryable(mode)
+            .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<MaintenanceHistoryEntity>>(t => t.Result, cancellationToken);
     }
 

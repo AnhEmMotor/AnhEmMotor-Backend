@@ -1,6 +1,5 @@
 using Application.ApiContracts.Admin.Workshop.Responses;
 using Application.Common.Models;
-using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.RepairOrders.Queries;

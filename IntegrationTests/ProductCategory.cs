@@ -74,7 +74,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             for (int i = 1; i <= 15; i++)
             {
                 categories.Add(
-                    new ProductCategoryEntity { Name = $"Category_{uniqueId}_{i}",
+                    new ProductCategoryEntity
+                    {
+                        Name = $"Category_{uniqueId}_{i}",
                         Description = "Desc",
                         DeletedAt = null
                     });
@@ -125,7 +127,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             for (int i = 1; i <= 12; i++)
             {
                 categories.Add(
-                    new ProductCategoryEntity { Name = $"Category_{uniqueId}_{i}",
+                    new ProductCategoryEntity
+                    {
+                        Name = $"Category_{uniqueId}_{i}",
                         Description = "Desc",
                         DeletedAt = null
                     });
@@ -174,11 +178,15 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.ProductCategories
                 .AddRangeAsync(
-                    new ProductCategoryEntity { Name = $"SmartPhone_{uniqueId}",
+                    new ProductCategoryEntity
+                    {
+                        Name = $"SmartPhone_{uniqueId}",
                         Description = "Desc",
                         DeletedAt = null
                     },
-                    new ProductCategoryEntity { Name = $"Phone Case_{uniqueId}",
+                    new ProductCategoryEntity
+                    {
+                        Name = $"Phone Case_{uniqueId}",
                         Description = "Desc",
                         DeletedAt = null
                     },
@@ -313,7 +321,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             for (int i = 1; i <= 5; i++)
             {
                 categories.Add(
-                    new ProductCategoryEntity { Name = $"Manager_Cat_{uniqueId}_{i}",
+                    new ProductCategoryEntity
+                    {
+                        Name = $"Manager_Cat_{uniqueId}_{i}",
                         Description = "Desc",
                         DeletedAt = null
                     });
@@ -363,7 +373,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             for (int i = 1; i <= 5; i++)
             {
                 categories.Add(
-                    new ProductCategoryEntity { Name = $"Deleted_{uniqueId}_{i}",
+                    new ProductCategoryEntity
+                    {
+                        Name = $"Deleted_{uniqueId}_{i}",
                         Description = "Desc",
                         DeletedAt = DateTime.UtcNow
                     });
@@ -413,7 +425,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = new ProductCategoryEntity { Name = $"Detail_{uniqueId}",
+            var category = new ProductCategoryEntity
+            {
+                Name = $"Detail_{uniqueId}",
                 Description = "Desc",
                 DeletedAt = null
             };
@@ -485,7 +499,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = new ProductCategoryEntity { Name = $"Deleted_{uniqueId}",
+            var category = new ProductCategoryEntity
+            {
+                Name = $"Deleted_{uniqueId}",
                 Description = "Desc",
                 DeletedAt = DateTime.UtcNow
             };
@@ -563,7 +579,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = new ProductCategoryEntity { Name = $"Original_{uniqueId}",
+            var category = new ProductCategoryEntity
+            {
+                Name = $"Original_{uniqueId}",
                 Description = "Keep",
                 ManagementType = "vin_number"
             };
@@ -571,7 +589,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
-        var request = new UpdateProductCategoryCommand { NameVi = $"Updated_{uniqueId}", NameEn = $"Updated_{uniqueId}_En" };
+        var request = new UpdateProductCategoryCommand
+        {
+            NameVi = $"Updated_{uniqueId}",
+            NameEn = $"Updated_{uniqueId}_En"
+        };
         var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{categoryId}", request)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -608,7 +630,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = new ProductCategoryEntity { Name = $"Delete_{uniqueId}",
+            var category = new ProductCategoryEntity
+            {
+                Name = $"Delete_{uniqueId}",
                 Description = "Desc",
                 DeletedAt = null
             };
@@ -659,7 +683,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             for (int i = 0; i < 3; i++)
             {
-                var category = new ProductCategoryEntity { Name = $"DelMany_{uniqueId}_{i}",
+                var category = new ProductCategoryEntity
+                {
+                    Name = $"DelMany_{uniqueId}_{i}",
                     Description = "Desc",
                     DeletedAt = null
                 };
@@ -718,7 +744,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             for (int i = 0; i < 2; i++)
             {
-                var category = new ProductCategoryEntity { Name = $"InvalidDel_{uniqueId}_{i}",
+                var category = new ProductCategoryEntity
+                {
+                    Name = $"InvalidDel_{uniqueId}_{i}",
                     Description = "Desc",
                     DeletedAt = null
                 };
@@ -775,7 +803,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var cat1 = new ProductCategoryEntity { Name = $"Active_{uniqueId}", Description = "Desc", DeletedAt = null };
             await db.ProductCategories.AddAsync(cat1, CancellationToken.None).ConfigureAwait(true);
-            var cat2 = new ProductCategoryEntity { Name = $"AlreadyDel_{uniqueId}",
+            var cat2 = new ProductCategoryEntity
+            {
+                Name = $"AlreadyDel_{uniqueId}",
                 Description = "Desc",
                 DeletedAt = DateTime.UtcNow
             };
@@ -829,7 +859,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             for (int i = 0; i < 3; i++)
             {
-                var category = new ProductCategoryEntity { Name = $"Restore_{uniqueId}_{i}",
+                var category = new ProductCategoryEntity
+                {
+                    Name = $"Restore_{uniqueId}_{i}",
                     Description = "Desc",
                     DeletedAt = DateTime.UtcNow
                 };
@@ -881,7 +913,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var cat1 = new ProductCategoryEntity { Name = $"Deleted_{uniqueId}",
+            var cat1 = new ProductCategoryEntity
+            {
+                Name = $"Deleted_{uniqueId}",
                 Description = "Desc",
                 DeletedAt = DateTime.UtcNow
             };
@@ -983,18 +1017,24 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var oldParent = new ProductCategoryEntity { Name = $"OldParent {dataId}",
+            var oldParent = new ProductCategoryEntity
+            {
+                Name = $"OldParent {dataId}",
                 Slug = $"old-parent-{dataId}",
                 ManagementType = "vin_number"
             };
-            var newParent = new ProductCategoryEntity { Name = $"NewParent {dataId}",
+            var newParent = new ProductCategoryEntity
+            {
+                Name = $"NewParent {dataId}",
                 Slug = $"new-parent-{dataId}",
                 ManagementType = "vin_number"
             };
             db.ProductCategories.AddRange(oldParent, newParent);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             newParentId = newParent.Id;
-            var child = new ProductCategoryEntity { Name = $"Child {dataId}",
+            var child = new ProductCategoryEntity
+            {
+                Name = $"Child {dataId}",
                 ParentId = oldParent.Id,
                 Slug = $"child-{dataId}"
             };
@@ -1007,7 +1047,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             new
             {
                 id = childId,
-                nameVi = $"UpdatedChild{dataId}", nameEn = $"UpdatedChild{dataId}En",
+                nameVi = $"UpdatedChild{dataId}",
+                nameEn = $"UpdatedChild{dataId}En",
                 parentId = newParentId,
                 categoryGroup = "Product",
                 slug = $"child-updated-{dataId}",
@@ -1059,18 +1100,24 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var parentA = new ProductCategoryEntity { Name = $"ParentA{dataId}",
+            var parentA = new ProductCategoryEntity
+            {
+                Name = $"ParentA{dataId}",
                 Slug = $"pa-{dataId}",
                 ManagementType = "vin_number"
             };
-            var parentB = new ProductCategoryEntity { Name = $"ParentB{dataId}",
+            var parentB = new ProductCategoryEntity
+            {
+                Name = $"ParentB{dataId}",
                 Slug = $"pb-{dataId}",
                 ManagementType = "vin_number"
             };
             db.ProductCategories.AddRange(parentA, parentB);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             parentBId = parentB.Id;
-            var child = new ProductCategoryEntity { Name = $"Child{dataId}",
+            var child = new ProductCategoryEntity
+            {
+                Name = $"Child{dataId}",
                 ParentId = parentA.Id,
                 Slug = $"c-{dataId}"
             };
@@ -1083,7 +1130,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             new
             {
                 id = childId,
-                nameVi = $"ChildUpdated{dataId}", nameEn = $"ChildUpdated{dataId}En",
+                nameVi = $"ChildUpdated{dataId}",
+                nameEn = $"ChildUpdated{dataId}En",
                 parentId = parentBId,
                 categoryGroup = "Product",
                 slug = $"c-up-{dataId}",
@@ -1177,7 +1225,13 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             categoryId = category.Id;
         }
-        var request = new UpdateProductCategoryCommand { Id = categoryId, ParentId = categoryId, NameVi = "Test", NameEn = "TestEn" };
+        var request = new UpdateProductCategoryCommand
+        {
+            Id = categoryId,
+            ParentId = categoryId,
+            NameVi = "Test",
+            NameEn = "TestEn"
+        };
         var response = await HttpClientJsonExtensions.PutAsJsonAsync(
             _client,
             $"/api/v1/ProductCategory/{categoryId}",
@@ -1206,7 +1260,13 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             childId = child.Id;
         }
-        var request = new UpdateProductCategoryCommand { Id = parentId, ParentId = childId, NameVi = "Test", NameEn = "TestEn" };
+        var request = new UpdateProductCategoryCommand
+        {
+            Id = parentId,
+            ParentId = childId,
+            NameVi = "Test",
+            NameEn = "TestEn"
+        };
         var response = await HttpClientJsonExtensions.PutAsJsonAsync(
             _client,
             $"/api/v1/ProductCategory/{parentId}",

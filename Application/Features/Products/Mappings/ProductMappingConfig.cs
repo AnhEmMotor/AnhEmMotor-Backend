@@ -22,24 +22,28 @@ public class ProductMappingConfig : IRegister
 
     private static string? ResolveLocalizedText(string? json, string lang)
     {
-        if (string.IsNullOrWhiteSpace(json)) return null;
+        if (string.IsNullOrWhiteSpace(json))
+            return null;
         try
         {
             var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-            if (dict == null) return null;
+            if (dict == null)
+                return null;
             dict.TryGetValue(lang, out var value);
-            if (string.IsNullOrEmpty(value)) dict.TryGetValue("vi", out value);
+            if (string.IsNullOrEmpty(value))
+                dict.TryGetValue("vi", out value);
             return value;
+        } catch
+        {
+            return null;
         }
-        catch { return null; }
     }
 
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<ProductEntity, ProductDetailForManagerResponse>()
             .MapWith(src => MapProductToDetailForManagerResponse(src));
-        config.NewConfig<ProductEntity, ProductDetailResponse>()
-            .MapWith(src => MapProductToDetailResponse(src));
+        config.NewConfig<ProductEntity, ProductDetailResponse>().MapWith(src => MapProductToDetailResponse(src));
         config.NewConfig<ProductEntity, ProductListRow>()
             .Map(dest => dest.CategoryName, src => src.ProductCategory != null ? src.ProductCategory.Name : null)
             .Map(dest => dest.BrandName, src => src.Brand != null ? src.Brand.Name : null)
@@ -49,7 +53,9 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.Colors, src => MapVariantColors(src))
             .Map(
                 dest => dest.CoverImageUrl,
-                src => src.ProductVariantColors != null && src.ProductVariantColors.FirstOrDefault() != null && !string.IsNullOrWhiteSpace(src.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
+                src => src.ProductVariantColors != null &&
+                        src.ProductVariantColors.FirstOrDefault() != null &&
+                        !string.IsNullOrWhiteSpace(src.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
                     ? src.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
                     : src.CoverImageUrl)
             .Map(
@@ -60,10 +66,13 @@ public class ProductMappingConfig : IRegister
                 src => src.VariantOptionValues
                     .Select(
                         vov => new OptionPair
-                        {
-                            OptionName = vov.OptionValue != null && vov.OptionValue.Option != null ? vov.OptionValue.Option.Name : null,
-                            OptionValue = vov.OptionValue != null ? vov.OptionValue.Name : null
-                        })
+                            {
+                                OptionName =
+                                    vov.OptionValue != null && vov.OptionValue.Option != null
+                                                ? vov.OptionValue.Option.Name
+                                                : null,
+                                OptionValue = vov.OptionValue != null ? vov.OptionValue.Name : null
+                            })
                     .ToList())
             .Map(dest => dest.Stock, src => CalculateVariantStock(src))
             .Map(dest => dest.HasBeenBooked, src => (int)CalculateVariantBooked(src));
@@ -71,7 +80,9 @@ public class ProductMappingConfig : IRegister
             .Map(
                 dest => dest.OptionValues,
                 src => src.OptionPairs
-                    .Where(pair => !string.IsNullOrWhiteSpace(pair.OptionName) && !string.IsNullOrWhiteSpace(pair.OptionValue))
+                    .Where(
+                        pair => !string.IsNullOrWhiteSpace(pair.OptionName) &&
+                                !string.IsNullOrWhiteSpace(pair.OptionValue))
                     .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase))
             .Map(dest => dest.PhotoCollection, src => src.Photos);
@@ -79,7 +90,9 @@ public class ProductMappingConfig : IRegister
             .Map(
                 dest => dest.OptionValues,
                 src => src.OptionPairs
-                    .Where(pair => !string.IsNullOrWhiteSpace(pair.OptionName) && !string.IsNullOrWhiteSpace(pair.OptionValue))
+                    .Where(
+                        pair => !string.IsNullOrWhiteSpace(pair.OptionName) &&
+                                !string.IsNullOrWhiteSpace(pair.OptionValue))
                     .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase))
             .Map(dest => dest.PhotoCollection, src => src.Photos);
@@ -119,12 +132,22 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.EffectiveMax, src => GetEffectiveMaxPurchaseQuantity(src, null))
             .Map(
                 dest => dest.CoverImageUrl,
-                src => src.ProductVariantColors != null && src.ProductVariantColors.FirstOrDefault() != null && !string.IsNullOrWhiteSpace(src.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
+                src => src.ProductVariantColors != null &&
+                        src.ProductVariantColors.FirstOrDefault() != null &&
+                        !string.IsNullOrWhiteSpace(src.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
                     ? src.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
-                    : (!string.IsNullOrWhiteSpace(src.CoverImageUrl) ? src.CoverImageUrl : src.ProductCollectionPhotos.Where(p => !string.IsNullOrEmpty(p.ImageUrl)).Select(p => p.ImageUrl).FirstOrDefault()))
+                    : (!string.IsNullOrWhiteSpace(src.CoverImageUrl)
+                        ? src.CoverImageUrl
+                        : src.ProductCollectionPhotos
+                            .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
+                            .Select(p => p.ImageUrl)
+                            .FirstOrDefault()))
             .Map(
                 dest => dest.PhotoCollection,
-                src => src.ProductCollectionPhotos.Where(p => !string.IsNullOrEmpty(p.ImageUrl)).Select(p => p.ImageUrl!).ToList());
+                src => src.ProductCollectionPhotos
+                    .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
+                    .Select(p => p.ImageUrl!)
+                    .ToList());
         config.NewConfig<ProductVariantEntity, OtherVariantStoreResponse>()
             .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src, true))
             .Map(dest => dest.Colors, src => MapVariantColors(src));
@@ -135,7 +158,8 @@ public class ProductMappingConfig : IRegister
         return MapProductToDetailForManagerResponseWithAlertLevel(product);
     }
 
-    public static ProductDetailForManagerResponse MapProductToDetailForManagerResponseWithAlertLevel(ProductEntity product)
+    public static ProductDetailForManagerResponse MapProductToDetailForManagerResponseWithAlertLevel(
+        ProductEntity product)
     {
         var lang = GetCurrentLanguage();
         var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
@@ -153,10 +177,16 @@ public class ProductMappingConfig : IRegister
                         UrlSlug = row.UrlSlug,
                         Price = row.Price,
                         CoverImageUrl = coverImage,
-                        OptionValues = row.OptionPairs
-                            .Where(pair => !string.IsNullOrWhiteSpace(pair.OptionName) && !string.IsNullOrWhiteSpace(pair.OptionValue))
-                            .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
-                            .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase),
+                        OptionValues =
+                            row.OptionPairs
+                                    .Where(
+                                        pair => !string.IsNullOrWhiteSpace(pair.OptionName) &&
+                                                    !string.IsNullOrWhiteSpace(pair.OptionValue))
+                                    .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
+                                    .ToDictionary(
+                                        g => g.Key,
+                                        g => g.First().OptionValue!,
+                                        StringComparer.OrdinalIgnoreCase),
                         PhotoCollection = row.Photos,
                         VariantName = row.VariantName,
                         Colors = row.Colors,
@@ -190,8 +220,14 @@ public class ProductMappingConfig : IRegister
             Dimensions = product.Dimensions,
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
-            GroundClearance = decimal.TryParse(product.GroundClearance, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var gc) ? gc : null,
-            FuelCapacity = decimal.TryParse(product.FuelCapacity, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var fc) ? fc : null,
+            GroundClearance =
+                decimal.TryParse(product.GroundClearance, NumberStyles.Any, CultureInfo.InvariantCulture, out var gc)
+                    ? gc
+                    : null,
+            FuelCapacity =
+                decimal.TryParse(product.FuelCapacity, NumberStyles.Any, CultureInfo.InvariantCulture, out var fc)
+                    ? fc
+                    : null,
             TireSize = product.TireSize,
             FrontSuspension = product.FrontSuspension,
             RearSuspension = product.RearSuspension,
@@ -256,8 +292,14 @@ public class ProductMappingConfig : IRegister
             Dimensions = product.Dimensions,
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
-            GroundClearance = decimal.TryParse(product.GroundClearance, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var gc) ? gc : null,
-            FuelCapacity = decimal.TryParse(product.FuelCapacity, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var fc) ? fc : null,
+            GroundClearance =
+                decimal.TryParse(product.GroundClearance, NumberStyles.Any, CultureInfo.InvariantCulture, out var gc)
+                    ? gc
+                    : null,
+            FuelCapacity =
+                decimal.TryParse(product.FuelCapacity, NumberStyles.Any, CultureInfo.InvariantCulture, out var fc)
+                    ? fc
+                    : null,
             TireSize = product.TireSize,
             FrontSuspension = product.FrontSuspension,
             RearSuspension = product.RearSuspension,
@@ -302,13 +344,20 @@ public class ProductMappingConfig : IRegister
     private static ProductVariantLiteResponse BuildVariantLiteResponse(ProductVariantEntity variant)
     {
         var optionPairs = variant.VariantOptionValues
-            .Select(vov => new OptionPair { OptionName = vov.OptionValue?.Option?.Name, OptionValue = vov.OptionValue?.Name })
+            .Select(
+                vov => new OptionPair
+                {
+                    OptionName = vov.OptionValue?.Option?.Name,
+                    OptionValue = vov.OptionValue?.Name
+                })
             .ToList();
         var variantName = BuildVariantName(optionPairs);
         var extraParts = new List<string>();
         if (!string.IsNullOrWhiteSpace(variant.VariantName))
             extraParts.Add(variant.VariantName);
-        if (variant.ProductVariantColors != null && variant.ProductVariantColors.FirstOrDefault() != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.ColorName))
+        if (variant.ProductVariantColors != null &&
+            variant.ProductVariantColors.FirstOrDefault() != null &&
+            !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.ColorName))
             extraParts.Add(variant.ProductVariantColors.FirstOrDefault()!.ColorName!);
         if (extraParts.Count > 0)
         {
@@ -316,8 +365,10 @@ public class ProductMappingConfig : IRegister
             if (string.IsNullOrWhiteSpace(variantName))
             {
                 variantName = extra;
-            }
-            else if (!variantName.Contains(variant.VariantName ?? "NONE") && (variant.ProductVariantColors == null || variant.ProductVariantColors.FirstOrDefault() == null || !variantName.Contains(variant.ProductVariantColors.FirstOrDefault()!.ColorName ?? "NONE")))
+            } else if (!variantName.Contains(variant.VariantName ?? "NONE") &&
+                (variant.ProductVariantColors == null ||
+                    variant.ProductVariantColors.FirstOrDefault() == null ||
+                    !variantName.Contains(variant.ProductVariantColors.FirstOrDefault()!.ColorName ?? "NONE")))
             {
                 variantName = $"{variantName} - {extra}";
             }
@@ -327,8 +378,13 @@ public class ProductMappingConfig : IRegister
             ? productName ?? string.Empty
             : $"{productName} ({variantName})";
         var stock = (int)CalculateVariantStock(variant);
-        var photos = variant.ProductCollectionPhotos.Select(p => p.ImageUrl ?? string.Empty).Where(url => !string.IsNullOrWhiteSpace(url)).ToList();
-        var coverImage = variant.ProductVariantColors != null && variant.ProductVariantColors.FirstOrDefault() != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
+        var photos = variant.ProductCollectionPhotos
+            .Select(p => p.ImageUrl ?? string.Empty)
+            .Where(url => !string.IsNullOrWhiteSpace(url))
+            .ToList();
+        var coverImage = variant.ProductVariantColors != null &&
+                variant.ProductVariantColors.FirstOrDefault() != null &&
+                !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
             ? variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
             : (!string.IsNullOrWhiteSpace(variant.CoverImageUrl) ? variant.CoverImageUrl : photos.FirstOrDefault());
         return new ProductVariantLiteResponse
@@ -349,15 +405,25 @@ public class ProductMappingConfig : IRegister
 
     private static string BuildVariantName(List<OptionPair> optionPairs)
     {
-        if (optionPairs.Count == 0) return string.Empty;
-        var parts = optionPairs.Where(op => !string.IsNullOrWhiteSpace(op.OptionValue)).Select(op => op.OptionValue!).ToList();
+        if (optionPairs.Count == 0)
+            return string.Empty;
+        var parts = optionPairs.Where(op => !string.IsNullOrWhiteSpace(op.OptionValue))
+            .Select(op => op.OptionValue!)
+            .ToList();
         return string.Join(" - ", parts);
     }
 
-    public static ProductVariantLiteResponseForInventoryReceipt BuildVariantLiteResponseForInventoryReceipt(ProductVariantEntity variant, Dictionary<string, string>? translations)
+    public static ProductVariantLiteResponseForInventoryReceipt BuildVariantLiteResponseForInventoryReceipt(
+        ProductVariantEntity variant,
+        Dictionary<string, string>? translations)
     {
         var optionPairs = variant.VariantOptionValues
-            .Select(vov => new OptionPair { OptionName = vov.OptionValue?.Option?.Name, OptionValue = vov.OptionValue?.Name })
+            .Select(
+                vov => new OptionPair
+                {
+                    OptionName = vov.OptionValue?.Option?.Name,
+                    OptionValue = vov.OptionValue?.Name
+                })
             .ToList();
         var productName = variant.Product?.Name ?? string.Empty;
         var variantName = !string.IsNullOrWhiteSpace(variant.VariantName) ? variant.VariantName.Trim() : string.Empty;
@@ -365,20 +431,24 @@ public class ProductMappingConfig : IRegister
         if (!string.IsNullOrWhiteSpace(variantName))
         {
             displayName = $"{productName} ({variantName})";
-        }
-        else if (optionPairs.Count == 0 || optionPairs.All(op => string.IsNullOrWhiteSpace(op.OptionValue)))
+        } else if (optionPairs.Count == 0 || optionPairs.All(op => string.IsNullOrWhiteSpace(op.OptionValue)))
         {
             displayName = productName;
-        }
-        else
+        } else
         {
-            var parts = optionPairs.Select(op =>
-            {
-                var translatedKey = op.OptionName != null && translations != null && translations.TryGetValue(op.OptionName, out var translated)
-                    ? translated
-                    : (string.Compare(op.OptionName, "Color", StringComparison.OrdinalIgnoreCase) == 0 ? "Màu sắc" : op.OptionName ?? string.Empty);
-                return $"{translatedKey}: {op.OptionValue}";
-            }).ToList();
+            var parts = optionPairs.Select(
+                op =>
+                {
+                    var translatedKey = op.OptionName != null &&
+                                translations != null &&
+                                translations.TryGetValue(op.OptionName, out var translated)
+                        ? translated
+                        : (string.Compare(op.OptionName, "Color", StringComparison.OrdinalIgnoreCase) == 0
+                                ? "Màu sắc"
+                                : op.OptionName ?? string.Empty);
+                    return $"{translatedKey}: {op.OptionValue}";
+                })
+                .ToList();
             displayName = $"{productName} ({string.Join(", ", parts)})";
         }
         return new ProductVariantLiteResponseForInventoryReceipt
@@ -387,9 +457,12 @@ public class ProductMappingConfig : IRegister
             ProductId = variant.ProductId,
             DisplayName = displayName,
             Price = variant.Price,
-            CoverImageUrl = variant.ProductVariantColors != null && variant.ProductVariantColors.FirstOrDefault() != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
-                ? variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
-                : variant.CoverImageUrl,
+            CoverImageUrl =
+                variant.ProductVariantColors != null &&
+                        variant.ProductVariantColors.FirstOrDefault() != null &&
+                        !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
+                    ? variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
+                    : variant.CoverImageUrl,
             CategoryId = variant.Product?.CategoryId,
             ManagementType = variant.Product?.ProductCategory?.ManagementType,
             Colors = MapVariantColors(variant)
@@ -413,8 +486,10 @@ public class ProductMappingConfig : IRegister
 
     public static string CalculateInventoryStatus(long availableStock, long alertLevel)
     {
-        if (availableStock <= 0) return InventoryStatus.OutOfStock;
-        if (availableStock <= alertLevel) return InventoryStatus.LowStock;
+        if (availableStock <= 0)
+            return InventoryStatus.OutOfStock;
+        if (availableStock <= alertLevel)
+            return InventoryStatus.LowStock;
         return InventoryStatus.InStock;
     }
 
@@ -439,14 +514,23 @@ public class ProductMappingConfig : IRegister
     public static VariantCartDetailResponse BuildVariantCartDetailResponse(ProductVariantEntity variant)
     {
         var optionPairs = variant.VariantOptionValues
-            .Select(vov => new OptionPair { OptionName = vov.OptionValue?.Option?.Name, OptionValue = vov.OptionValue?.Name })
+            .Select(
+                vov => new OptionPair
+                {
+                    OptionName = vov.OptionValue?.Option?.Name,
+                    OptionValue = vov.OptionValue?.Name
+                })
             .ToList();
         var variantName = BuildVariantName(optionPairs);
         var productName = variant.Product?.Name ?? string.Empty;
         var displayName = string.IsNullOrWhiteSpace(variantName) ? productName : $"{productName} ({variantName})";
-        var coverImage = variant.ProductVariantColors != null && variant.ProductVariantColors.FirstOrDefault() != null && !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
+        var coverImage = variant.ProductVariantColors != null &&
+                variant.ProductVariantColors.FirstOrDefault() != null &&
+                !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
             ? variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
-            : (!string.IsNullOrWhiteSpace(variant.CoverImageUrl) ? variant.CoverImageUrl : variant.ProductCollectionPhotos.FirstOrDefault()?.ImageUrl);
+            : (!string.IsNullOrWhiteSpace(variant.CoverImageUrl)
+                ? variant.CoverImageUrl
+                : variant.ProductCollectionPhotos.FirstOrDefault()?.ImageUrl);
         var effectiveMax = GetEffectiveMaxPurchaseQuantity(variant, null);
         return new VariantCartDetailResponse
         {
@@ -460,10 +544,14 @@ public class ProductMappingConfig : IRegister
         };
     }
 
-    public static int? GetEffectiveMaxPurchaseQuantity(ProductVariantEntity variant, Domain.Entities.ProductVariantColor? color)
+    public static int? GetEffectiveMaxPurchaseQuantity(
+        ProductVariantEntity variant,
+        Domain.Entities.ProductVariantColor? color)
     {
-        if (color?.MaxPurchaseQuantity.HasValue == true) return color.MaxPurchaseQuantity.Value;
-        if (variant.MaxPurchaseQuantity.HasValue) return variant.MaxPurchaseQuantity.Value;
+        if (color?.MaxPurchaseQuantity.HasValue == true)
+            return color.MaxPurchaseQuantity.Value;
+        if (variant.MaxPurchaseQuantity.HasValue)
+            return variant.MaxPurchaseQuantity.Value;
         return GetEffectiveMaxPurchaseQuantity(variant.Product?.ProductCategory);
     }
 
@@ -477,7 +565,8 @@ public class ProductMappingConfig : IRegister
         var current = category;
         while (current != null)
         {
-            if (current.MaxPurchaseQuantity.HasValue) return current.MaxPurchaseQuantity.Value;
+            if (current.MaxPurchaseQuantity.HasValue)
+                return current.MaxPurchaseQuantity.Value;
             current = current.Parent;
         }
         return null;
@@ -486,7 +575,10 @@ public class ProductMappingConfig : IRegister
     public static string CalculateProductInventoryStatus(ProductEntity product, long alertLevel)
     {
         var statuses = product.ProductVariants
-            .Select(variant => CalculateInventoryStatus(CalculateVariantStock(variant) - CalculateVariantBooked(variant), alertLevel))
+            .Select(
+                variant => CalculateInventoryStatus(
+                    CalculateVariantStock(variant) - CalculateVariantBooked(variant),
+                    alertLevel))
             .ToList();
         return statuses.Count == 0 ? InventoryStatus.OutOfStock : statuses.MinBy(InventoryStatus.GetSeverity)!;
     }
@@ -501,16 +593,24 @@ public class ProductMappingConfig : IRegister
                 if (variant.InventoryReceiptInfos != null)
                 {
                     total += variant.InventoryReceiptInfos
-                        .Where(ii => ii.InventoryReceipt != null && InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId) && (ii.PurchaseRequestItem != null && ii.PurchaseRequestItem.ProductVariantColorId == c.Id))
-                        .Sum(ii => ii.RemainingCount) ?? 0;
+                            .Where(
+                                ii => ii.InventoryReceipt != null &&
+                                        InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId) &&
+                                        (ii.PurchaseRequestItem != null &&
+                                            ii.PurchaseRequestItem.ProductVariantColorId == c.Id))
+                            .Sum(ii => ii.RemainingCount) ??
+                        0;
                 }
             }
             return total;
         }
         return variant.InventoryReceiptInfos != null
             ? variant.InventoryReceiptInfos
-                .Where(ii => ii.InventoryReceipt != null && InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId))
-                .Sum(ii => ii.RemainingCount) ?? 0
+                    .Where(
+                        ii => ii.InventoryReceipt != null &&
+                                    InventoryReceiptStatus.IsFinished(ii.InventoryReceipt.StatusId))
+                    .Sum(ii => ii.RemainingCount) ??
+                0
             : 0;
     }
 
@@ -524,16 +624,21 @@ public class ProductMappingConfig : IRegister
                 if (variant.OutputInfos != null)
                 {
                     total += variant.OutputInfos
-                        .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId) && oi.ProductVariantColorId == c.Id)
-                        .Sum(oi => (long?)oi.Count) ?? 0;
+                            .Where(
+                                oi => oi.OutputOrder != null &&
+                                        OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId) &&
+                                        oi.ProductVariantColorId == c.Id)
+                            .Sum(oi => (long?)oi.Count) ??
+                        0;
                 }
             }
             return total;
         }
         return variant.OutputInfos != null
             ? variant.OutputInfos
-                .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
-                .Sum(oi => (long?)oi.Count) ?? 0
+                    .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
+                    .Sum(oi => (long?)oi.Count) ??
+                0
             : 0;
     }
 
@@ -544,20 +649,20 @@ public class ProductMappingConfig : IRegister
                 .OrderBy(t => t.DisplayOrder)
                 .Select(
                     t => new ProductTechnologyResponse
-                    {
-                        TechnologyId = t.TechnologyId,
-                        CustomTitle = t.CustomTitle,
-                        CustomDescription = t.CustomDescription,
-                        CustomImageUrl = t.CustomImageUrl,
-                        DisplayOrder = t.DisplayOrder,
-                        Title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? t.Technology?.Name,
-                        Description = t.CustomDescription ?? t.Technology?.DefaultDescription,
-                        ImageUrl = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl,
-                        DefaultTitle = t.Technology?.DefaultTitle,
-                        DefaultDescription = t.Technology?.DefaultDescription,
-                        DefaultImageUrl = t.Technology?.DefaultImageUrl,
-                        CategoryName = t.Technology?.Category?.Name ?? "TECHNOLOGY"
-                    })]
+                        {
+                            TechnologyId = t.TechnologyId,
+                            CustomTitle = t.CustomTitle,
+                            CustomDescription = t.CustomDescription,
+                            CustomImageUrl = t.CustomImageUrl,
+                            DisplayOrder = t.DisplayOrder,
+                            Title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? t.Technology?.Name,
+                            Description = t.CustomDescription ?? t.Technology?.DefaultDescription,
+                            ImageUrl = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl,
+                            DefaultTitle = t.Technology?.DefaultTitle,
+                            DefaultDescription = t.Technology?.DefaultDescription,
+                            DefaultImageUrl = t.Technology?.DefaultImageUrl,
+                            CategoryName = t.Technology?.Category?.Name ?? "TECHNOLOGY"
+                        })]
             : [];
     }
 
@@ -568,11 +673,15 @@ public class ProductMappingConfig : IRegister
         {
             return $"{variant.VariantName} - {colorName}";
         }
-        if (!string.IsNullOrWhiteSpace(variant.VariantName)) return variant.VariantName;
-        if (!string.IsNullOrWhiteSpace(colorName)) return colorName;
+        if (!string.IsNullOrWhiteSpace(variant.VariantName))
+            return variant.VariantName;
+        if (!string.IsNullOrWhiteSpace(colorName))
+            return colorName;
         if (!isOtherVariant && variant.VariantOptionValues.Count > 0)
         {
-            return string.Join(" - ", variant.VariantOptionValues.Where(vov => vov.OptionValue != null).Select(vov => vov.OptionValue!.Name));
+            return string.Join(
+                " - ",
+                variant.VariantOptionValues.Where(vov => vov.OptionValue != null).Select(vov => vov.OptionValue!.Name));
         }
         return string.Empty;
     }

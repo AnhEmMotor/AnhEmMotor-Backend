@@ -6,15 +6,12 @@ using MediatR;
 
 namespace Application.Features.WorkshopPayments.Commands;
 
-public class CreateWorkshopPaymentCommandHandler(
-    IWorkshopPaymentWriteRepository writeRepo,
-    IUnitOfWork uow) : IRequestHandler<CreateWorkshopPaymentCommand, Result<int>>
+public class CreateWorkshopPaymentCommandHandler(IWorkshopPaymentWriteRepository writeRepo, IUnitOfWork uow) : IRequestHandler<CreateWorkshopPaymentCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(CreateWorkshopPaymentCommand req, CancellationToken ct)
     {
         var dateStr = DateTimeOffset.UtcNow.ToString("yyyyMMdd");
         var number = $"WP-{dateStr}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
-
         var entity = new WorkshopPayment
         {
             PaymentNumber = number,
@@ -33,10 +30,8 @@ public class CreateWorkshopPaymentCommandHandler(
             Notes = req.Notes,
             CreatedAt = DateTimeOffset.UtcNow
         };
-
         writeRepo.Add(entity);
         await uow.SaveChangesAsync(ct);
-
         return Result<int>.Success(entity.Id);
     }
 }
