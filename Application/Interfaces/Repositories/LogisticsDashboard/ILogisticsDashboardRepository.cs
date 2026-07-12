@@ -5,5 +5,5 @@ namespace Application.Interfaces.Repositories.LogisticsDashboard;
 
 public interface ILogisticsDashboardRepository
 {
-    Task<LogisticsDashboardResponse> GetDashboardAsync(DateTime fromDate, CancellationToken cancellationToken);
+    public Task<LogisticsDashboardResponse> GetDashboardAsync(DateTime fromDate, CancellationToken cancellationToken);
 }

@@ -37,7 +37,7 @@ public interface IWarrantyClaimReadRepository
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<IEnumerable<WarrantyClaimEntity>> GetHistoryByVehicleIdAsync(
+    public Task<IEnumerable<WarrantyClaimEntity>> GetHistoryByVehicleIdAsync(
         int vehicleId,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);

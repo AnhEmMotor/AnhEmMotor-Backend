@@ -7,15 +7,15 @@ namespace Application.Interfaces.Repositories.Voucher;
 
 public interface IVoucherReadRepository
 {
-    Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
         SieveModel sieveModel,
         DataFetchMode mode = DataFetchMode.ActiveOnly,
         Expression<Func<Domain.Entities.Voucher, bool>>? filter = null,
         CancellationToken cancellationToken = default);
 
-    Task<Domain.Entities.Voucher?> GetByIdAsync(int id, CancellationToken cancellationToken);
+    public Task<Domain.Entities.Voucher?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<bool> ExistsByCodeAsync(string code, CancellationToken cancellationToken);
+    public Task<bool> ExistsByCodeAsync(string code, CancellationToken cancellationToken);
 
-    Task<bool> ExistsByCodeAsync(string code, int excludeId, CancellationToken cancellationToken);
+    public Task<bool> ExistsByCodeAsync(string code, int excludeId, CancellationToken cancellationToken);
 }

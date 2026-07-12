@@ -3,14 +3,14 @@ namespace Application.Interfaces.Repositories.Logistics.Shipment;
 
 public interface IShipmentReadRepository
 {
-    Task<Domain.Entities.Logistics.Shipment?> GetByOutputIdAsync(
+    public Task<Domain.Entities.Logistics.Shipment?> GetByOutputIdAsync(
         int outputId,
         CancellationToken cancellationToken = default);
 
-    Task<Domain.Entities.Logistics.Shipment?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    public Task<Domain.Entities.Logistics.Shipment?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
-    Task<List<Domain.Entities.Logistics.Shipment>> GetAllAsync(CancellationToken cancellationToken = default);
+    public Task<List<Domain.Entities.Logistics.Shipment>> GetAllAsync(CancellationToken cancellationToken = default);
 
-    Task<List<Domain.Entities.Logistics.Shipment>> GetActiveDeliveryShipmentsAsync(
+    public Task<List<Domain.Entities.Logistics.Shipment>> GetActiveDeliveryShipmentsAsync(
         CancellationToken cancellationToken = default);
 }
