@@ -8,7 +8,6 @@ namespace Application.Features.WorkshopPayments.Commands;
 
 public class CreateWorkshopPaymentCommandHandler(
     IWorkshopPaymentWriteRepository writeRepo,
-    IWorkshopPaymentReadRepository readRepo,
     IUnitOfWork uow) : IRequestHandler<CreateWorkshopPaymentCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(CreateWorkshopPaymentCommand req, CancellationToken ct)

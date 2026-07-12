@@ -18,7 +18,7 @@ public class GetRepairOrdersListQueryHandler(
     {
         var paged = await repo.GetPagedAsync<RepairOrderResponse>(req.Sieve, req.Mode, null, ct);
 
-        if (paged.Items.Any())
+        if (paged.Items?.Any() == true)
         {
             var vehicleIds = paged.Items.Select(x => x.VehicleId).Distinct().ToList();
             var vehicles = await vehicleRepo.GetByIdsAsync(vehicleIds, ct);

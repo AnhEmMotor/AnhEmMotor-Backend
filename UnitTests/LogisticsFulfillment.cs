@@ -28,8 +28,7 @@ namespace UnitTests
                 new()
                 {
                     Id = 1,
-                    TrackingNumber = "ORD-001",
-                    DeliveredAt = DateTimeOffset.UtcNow,
+                    TrackingNumber = "ORD-001", Status = Domain.Enums.ParcelDeliveryStatus.Completed, DeliveredAt = DateTimeOffset.UtcNow,
                     CreatedAt = DateTimeOffset.UtcNow.AddDays(-1)
                 },
                 new()
@@ -57,8 +56,7 @@ namespace UnitTests
                 new()
                 {
                     Id = 1,
-                    TrackingNumber = "ORD-001",
-                    DeliveredAt = DateTimeOffset.UtcNow,
+                    TrackingNumber = "ORD-001", Status = Domain.Enums.ParcelDeliveryStatus.Completed, DeliveredAt = DateTimeOffset.UtcNow,
                     CreatedAt = DateTimeOffset.UtcNow.AddDays(-1)
                 },
                 new()
@@ -77,3 +75,4 @@ namespace UnitTests
         }
     }
 }
+

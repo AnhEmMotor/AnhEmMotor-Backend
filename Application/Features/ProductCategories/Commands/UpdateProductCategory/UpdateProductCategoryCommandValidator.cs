@@ -13,10 +13,10 @@ public class UpdateProductCategoryCommandValidator : AbstractValidator<UpdatePro
 			.GreaterThan(0)
 			.WithMessage("ID danh mục phải là số dương.");
 		RuleFor(x => x.NameVi)
+			.NotEmpty()
+			.WithMessage("Tên danh mục (Tiếng Việt) không được để trống.")
 			.MaximumLength(255)
-			.WithMessage("Tên danh mục (Tiếng Việt) không được vượt quá 255 ký tự.")
-			.Must(name => string.IsNullOrWhiteSpace(name) || !string.IsNullOrWhiteSpace(name))
-			.When(x => !string.IsNullOrWhiteSpace(x.NameVi));
+			.WithMessage("Tên danh mục (Tiếng Việt) không được vượt quá 255 ký tự.");
 		RuleFor(x => x.NameEn)
 			.MaximumLength(255)
 			.WithMessage("Tên danh mục (English) không được vượt quá 255 ký tự.")

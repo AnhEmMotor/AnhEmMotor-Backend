@@ -12,7 +12,6 @@ namespace Application.Features.WarrantyClaims.Commands;
 public class CreateWarrantyClaimCommandHandler(
     IVehicleReadRepository vehicleRepo,
     IWarrantyClaimWriteRepository writeRepo,
-    IWarrantyClaimReadRepository readRepo,
     IUnitOfWork uow) : IRequestHandler<CreateWarrantyClaimCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(CreateWarrantyClaimCommand req, CancellationToken ct)

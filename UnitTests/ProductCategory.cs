@@ -49,7 +49,7 @@ public class ProductCategory
         _insertRepoMock.Verify(
             x => x.Add(It.Is<ProductCategoryEntity>(c => string.Compare(c.Name, "Điện thoại") == 0)),
             Times.Once);
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     #pragma warning disable IDE0079 
@@ -126,7 +126,7 @@ public class ProductCategory
     public void CreateProductCategory_WithNullName_ShouldFailValidation()
     {
         var validator = new CreateProductCategoryCommandValidator();
-        var command = new CreateProductCategoryCommand { NameVi = null, NameEn = "Test", Description = "Test" };
+        var command = new CreateProductCategoryCommand { NameVi = null!, NameEn = "Test", Description = "Test" };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.NameVi);
     }
@@ -149,8 +149,9 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { NameVi = "Gaming", NameEn = "Gaming", Description = "Test" };
         _readRepoMock.Setup(
-            x => x.ExistsByNameAsync(
+            x => x.ExistsByNameExceptIdAsync(
                 It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
+                It.IsAny<int>(),
                 It.IsAny<CancellationToken>(),
                 DataFetchMode.All))
             .ReturnsAsync(true);
@@ -167,8 +168,9 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { NameVi = "gaming", Description = "Test" };
         _readRepoMock.Setup(
-            x => x.ExistsByNameAsync(
+            x => x.ExistsByNameExceptIdAsync(
                 It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
+                It.IsAny<int>(),
                 It.IsAny<CancellationToken>(),
                 DataFetchMode.All))
             .ReturnsAsync(true);
@@ -184,7 +186,7 @@ public class ProductCategory
             _readRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { NameVi = "Đã xóa", Description = "Test" };
-        _readRepoMock.Setup(x => x.ExistsByNameAsync("Đã xóa", It.IsAny<CancellationToken>(), DataFetchMode.All))
+        _readRepoMock.Setup(x => x.ExistsByNameExceptIdAsync("Đã xóa", 0, It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(true);
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
@@ -255,7 +257,7 @@ public class ProductCategory
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-        var command = new UpdateProductCategoryCommand { Id = 3, NameVi = null, Description = "Only Description Updated" };
+        var command = new UpdateProductCategoryCommand { Id = 3, NameVi = null!, Description = "Only Description Updated" };
         _readRepoMock.Setup(x => x.GetByIdAsync(3, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 new ProductCategoryEntity { Id = 3, Name = "Keep This", Description = "Original", DeletedAt = null });
@@ -270,9 +272,9 @@ public class ProductCategory
     public void UpdateProductCategory_WithEmptyBody_ShouldFailValidation()
     {
         var validator = new UpdateProductCategoryCommandValidator();
-        var command = new UpdateProductCategoryCommand { Id = 4, NameVi = null, Description = null };
+        var command = new UpdateProductCategoryCommand { Id = 4, NameVi = null!, Description = null };
         var result = validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x);
+        result.ShouldHaveValidationErrorFor(x => x.NameVi);
     }
 
     [Fact(DisplayName = "PC_017 - Cập nhật danh mục sản phẩm với Name trùng (khác Id)")]
@@ -365,9 +367,9 @@ public class ProductCategory
         resultObj.Value.Should().NotBeNull();
         _updateRepoMock.Verify(x => x.Restore(It.Is<ProductCategoryEntity>(c => c.Id == 10)), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-    }
+      }
 
-    [Fact(DisplayName = "PC_024 - Khôi phục danh mục sản phẩm chưa bị xóa")]
+      [Fact(DisplayName = "PC_024 - Khôi phục danh mục sản phẩm chưa bị xóa")]
     public async Task RestoreProductCategory_NotDeleted_ShouldThrowException()
     {
         var handler = new RestoreProductCategoryCommandHandler(

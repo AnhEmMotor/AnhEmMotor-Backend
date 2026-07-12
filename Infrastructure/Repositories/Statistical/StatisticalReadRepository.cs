@@ -949,8 +949,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 x => string.Compare(x.i.StatusId, InventoryReceiptStatus.Approve) == 0 &&
                     x.ii.DeletedAt == null &&
                     x.i.DeletedAt == null &&
-                    x.ii.PurchaseRequestItem != null &&
-                    x.ii.PurchaseRequestItem.ProductVariantId != null)
+                    x.ii.PurchaseRequestItem != null)
             .Select(x => new
             {
                 VariantId = x.ii.PurchaseRequestItem!.ProductVariantId,
@@ -1364,7 +1363,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
       .GroupBy(d => d.CategoryName)
       .Select(g => new RevenueByCategoryResponse
       {
-        CategoryName = g.Key,
+        CategoryName = g.Key ?? "Unknown",
         Revenue = g.Sum(x => x.Revenue),
         Percentage = totalRevenue > 0 ? Math.Round(g.Sum(x => x.Revenue) / totalRevenue * 100, 1) : 0
       })
@@ -1403,7 +1402,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
       .Select(g => new DailyCategoryRevenueResponse
       {
         ReportDay = d.ToString("dd/MM"),
-        CategoryName = g.Key,
+        CategoryName = g.Key ?? "Unknown",
         Revenue = g.Sum(x => x.Revenue)
       })).ToList();
   }
@@ -1458,7 +1457,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
           .Include(o => o.CreatedByUser)
           .Include(o => o.OutputInfos)
           .ThenInclude(oi => oi.ProductVariant)
-          .ThenInclude(pv => pv.Product)
+          .ThenInclude(pv => pv!.Product)
           .OrderByDescending(o => o.CreatedAt)
           .Take(limit)
           .ToListAsync(cancellationToken)

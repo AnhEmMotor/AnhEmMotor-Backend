@@ -17,7 +17,7 @@ using Application.Features.Statistical.Queries.GetAdminProductReport;
 using Application.Features.Statistical.Queries.GetAdminWarehouseReport;
 using Application.Features.Statistical.Queries.GetRevenueByCategory;
 using Application.Features.Statistical.Queries.GetDailyCategoryRevenue;
-using Application.ApiContracts.Statistical.Responses;
+
 using Application.Features.Order.Queries.GetOrderStatistics;
 using Asp.Versioning;
 using Domain.Constants.Permission;
@@ -434,8 +434,8 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
             .IgnoreQueryFilters()
             .Include(o => o.OutputInfos)
             .ThenInclude(oi => oi.ProductVariant)
-            .ThenInclude(pv => pv.Product)
-            .ThenInclude(p => p.ProductCategory)
+            .ThenInclude(pv => pv!.Product)
+            .ThenInclude(p => p!.ProductCategory)
             .Where(o => o.CreatedAt >= start && o.CreatedAt <= end);
 
         var orders = await ordersQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -555,7 +555,7 @@ public class StatisticsController(IMediator mediator, IStatisticalReadRepository
     }
 
     /// <summary>
-    /// Thống kê hợp đồng tổng hợp (Bán xe & Nhà cung cấp).
+    /// Thống kê hợp đồng tổng hợp (Bán xe &amp; Nhà cung cấp).
     /// </summary>
     [HttpGet("contract-overview")]
     [RequiresAnyPermissions(

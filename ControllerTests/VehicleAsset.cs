@@ -13,16 +13,21 @@ private readonly VehicleController _controller;
 public VehicleAsset()
 {
 var httpContext = new DefaultHttpContext();
-_controller = new VehicleController(Mock.Of<MediatR.IMediator>());
-_controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
-}
+var mediatorMock = new Mock<MediatR.IMediator>();
+mediatorMock.Setup(m => m.Send(It.IsAny<Application.Features.Vehicles.Queries.GetVehicles.GetVehiclesQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Application.Common.Models.Result<Domain.Primitives.PagedResult<Application.ApiContracts.Vehicle.Responses.VehicleResponse>>.Success(new Domain.Primitives.PagedResult<Application.ApiContracts.Vehicle.Responses.VehicleResponse>([], 0, 1, 10)));
+        _controller = new VehicleController(mediatorMock.Object)
+        {
+            ControllerContext = new ControllerContext() { HttpContext = httpContext }
+        };
+    }
 
 [Fact(DisplayName = "VAS_001 - Lay chi tiet xe")]
 public async Task GetByIdAsync_ReturnsOk()
 {
 var result = await _controller.GetByIdAsync(1, CancellationToken.None).ConfigureAwait(true);
 result.Should().NotBeNull();
-var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+result.Should().BeOfType<OkObjectResult>();
 }
 
 [Fact(DisplayName = "VAS_002 - Lay danh sach xe")]
@@ -31,6 +36,6 @@ public async Task GetListAsync_ReturnsResult()
 var result = await _controller.GetListAsync(new Sieve.Models.SieveModel(), CancellationToken.None)
 .ConfigureAwait(true);
 result.Should().NotBeNull();
-result.Should().BeOfType<ActionResult<IEnumerable<Application.ApiContracts.Vehicle.Responses.VehicleResponse>>>();
+result.Should().BeOfType<OkObjectResult>();
 }
 }

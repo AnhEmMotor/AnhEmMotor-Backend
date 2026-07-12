@@ -138,7 +138,7 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
                     Role = e.JobTitle,
                     Sales = context.OutputOrders
                         .Where(
-                            o => o.CreatedBy == e.User.Id &&
+                            o => e.User != null && o.CreatedBy == e.User.Id &&
                                     o.CreatedAt >= start &&
                                     o.CreatedAt <= endOfDay &&
                                     o.StatusId == "Completed")

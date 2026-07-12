@@ -92,7 +92,7 @@ public class ProductCategoryReadRepository(
                    .Select(x => new
                    {
                        x.c,
-                       Name = EF.Property<string>(x.tVi, "Name") ?? EF.Property<string>(x.tEn, "Name"),
+                       Name = EF.Property<string>(x.tVi, "Name") ?? EF.Property<string>(x.tEn, "Name") ?? x.c.Name,
                        DescVi = EF.Property<string>(x.tVi, "Description"),
                        DescEn = EF.Property<string>(x.tEn, "Description")
                    })
@@ -121,38 +121,58 @@ public class ProductCategoryReadRepository(
             }
             var finalItems = allItems.Where(x => resultIds.Contains(x.c.Id)).ToList();
             var totalCount = finalItems.Count;
-            var pagedQuery = sieveProcessor.Apply(sieveModel, finalItems.AsQueryable(), applyFiltering: false);
+            
+            var entityItems = finalItems.Select(x => x.c).AsQueryable();
+            var pagedQuery = sieveProcessor.Apply(sieveModel, entityItems, applyFiltering: false);
             var paginated = pagedQuery.ToList();
-            var responseItems = paginated.Select(x => x.c.Adapt<ProductCategoryResponse>()).ToList();
-            SetLocalizedNames(responseItems, paginated.Select(x => new { x.Name, x.DescVi, x.DescEn }));
+            
+            var responseItems = paginated.Select(c => {
+                var response = c.Adapt<ProductCategoryResponse>();
+                var info = finalItems.First(x => x.c.Id == c.Id);
+                response.Name = info.Name ?? c.Name;
+                response.Description = !string.IsNullOrWhiteSpace(info.DescVi) ? info.DescVi : info.DescEn;
+                return response;
+            }).ToList();
             result = new PagedResult<ProductCategoryResponse>(responseItems, totalCount, sieveModel.Page ?? 1, sieveModel.PageSize ?? 10);
         }
         else
         {
-            var page = sieveModel.Page ?? 1;
-            var pageSize = sieveModel.PageSize ?? 10;
+            var pagedSieveQuery = sieveProcessor.Apply(sieveModel, context.GetQuery<CategoryEntity>(DataFetchMode.ActiveOnly));
+            
+            var totalCountAll = await sieveProcessor.Apply(sieveModel, context.GetQuery<CategoryEntity>(DataFetchMode.ActiveOnly), applyPagination: false).CountAsync(cancellationToken).ConfigureAwait(false);
 
-            var baseQuery = allQuery.Select(x => new
-            {
-                x.c,
-                NameVi = EF.Property<string>(x.tVi, "Name"),
-                DescVi = EF.Property<string>(x.tVi, "Description"),
-                NameEn = EF.Property<string>(x.tEn, "Name"),
-                DescEn = EF.Property<string>(x.tEn, "Description")
-            });
+            var pagedEntities = await pagedSieveQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
+            var entityIds = pagedEntities.Select(e => e.Id).ToList();
 
-            var totalCountAll = await baseQuery.CountAsync(cancellationToken).ConfigureAwait(false);
-
-            var pagedItems = await baseQuery
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+            var translations = await context.ProductCategoryTranslations
+                .Where(t => entityIds.Contains(t.ProductCategoryId) && t.DeletedAt == null)
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            var responseItems = pagedItems.Select(x => x.c.Adapt<ProductCategoryResponse>()).ToList();
-            SetLocalizedNames(responseItems, pagedItems.Select(x => new { x.NameVi, x.DescVi, x.NameEn, x.DescEn }));
+            var responseItems = pagedEntities.Select(c =>
+            {
+                var response = c.Adapt<ProductCategoryResponse>();
+                var tVi = translations.FirstOrDefault(t => t.ProductCategoryId == c.Id && t.LanguageCode == "vi");
+                var tEn = translations.FirstOrDefault(t => t.ProductCategoryId == c.Id && t.LanguageCode == "en");
 
-            result = new PagedResult<ProductCategoryResponse>(responseItems, totalCountAll, page, pageSize);
+                var name = c.Name;
+                var nameVi = tVi?.Name;
+                var nameEn = tEn?.Name;
+                
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    response.Name = name;
+                }
+                else
+                {
+                    response.Name = !string.IsNullOrWhiteSpace(nameVi) ? nameVi : nameEn;
+                }
+
+                response.Description = !string.IsNullOrWhiteSpace(tVi?.Description) ? tVi.Description : tEn?.Description;
+                return response;
+            }).ToList();
+
+            result = new PagedResult<ProductCategoryResponse>(responseItems, totalCountAll, sieveModel.Page ?? 1, sieveModel.PageSize ?? 10);
         }
 
         if (result.Items != null)
@@ -173,18 +193,28 @@ public class ProductCategoryReadRepository(
 
         foreach (var (response, data) in dict)
         {
+            var nameProp = data.GetType().GetProperty("Name");
             var nameViProp = data.GetType().GetProperty("NameVi");
             var nameEnProp = data.GetType().GetProperty("NameEn");
             var descViProp = data.GetType().GetProperty("DescVi");
             var descEnProp = data.GetType().GetProperty("DescEn");
 
+            var name = nameProp?.GetValue(data) as string;
             var nameVi = nameViProp?.GetValue(data) as string;
             var nameEn = nameEnProp?.GetValue(data) as string;
             var descVi = descViProp?.GetValue(data) as string;
             var descEn = descEnProp?.GetValue(data) as string;
 
-            response.Name = !string.IsNullOrWhiteSpace(nameVi) ? nameVi : nameEn;
-            response.Description = !string.IsNullOrWhiteSpace(descVi) ? descVi : descEn;
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                response!.Name = name;
+            }
+            else
+            {
+                response!.Name = !string.IsNullOrWhiteSpace(nameVi) ? nameVi : (nameEn ?? string.Empty);
+            }
+
+            response!.Description = !string.IsNullOrWhiteSpace(descVi) ? descVi : (descEn ?? string.Empty);
         }
     }
 

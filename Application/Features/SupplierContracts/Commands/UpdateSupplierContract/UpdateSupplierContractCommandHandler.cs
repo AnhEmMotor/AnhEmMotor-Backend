@@ -11,7 +11,6 @@ namespace Application.Features.SupplierContracts.Commands.UpdateSupplierContract
 
 public class UpdateSupplierContractCommandHandler(
     ISupplierContractReadRepository readRepo,
-    ISupplierContractUpdateRepository updateRepo,
     IUnitOfWork unitOfWork
 ) : IRequestHandler<UpdateSupplierContractCommand, Result<SupplierContractResponse>>
 {

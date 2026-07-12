@@ -37,7 +37,7 @@ public class Statistics
                     TotalRevenue = (i + 1) * 1000000
                 });
         }
-        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(7, It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -52,7 +52,7 @@ public class Statistics
         {
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now), TotalRevenue = 5000000 }
         };
-        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value.Should().HaveCount(1);
@@ -69,7 +69,7 @@ public class Statistics
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)), TotalRevenue = 2000000 },
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now), TotalRevenue = 1500000 }
         };
-        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(3, It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         var total = result.Value.Sum(x => x.TotalRevenue);
@@ -90,7 +90,7 @@ public class Statistics
                     TotalRevenue = 0
                 });
         }
-        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(5, It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value.Should().HaveCount(5);
@@ -106,7 +106,7 @@ public class Statistics
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)), TotalRevenue = 1234567.89m },
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now), TotalRevenue = 9876543.21m }
         };
-        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(2, It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value.First().TotalRevenue.Should().Be(1234567.89m);
@@ -117,17 +117,17 @@ public class Statistics
     public async Task Handle_Days10_CallsRepositoryWithCorrectParameter()
     {
         var query = new GetDailyRevenueQuery { Days = 10 };
-        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(10, It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync([]);
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
         await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-        _repositoryMock.Verify(r => r.GetDailyRevenueAsync(10, It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "STAT_047 - Unit - GetDailyRevenueQueryHandler với dữ liệu null")]
     public async Task Handle_NullData_ReturnsEmptyList()
     {
         var query = new GetDailyRevenueQuery { Days = 7 };
-        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(7, It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((IEnumerable<DailyRevenueResponse>)null!);
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
@@ -147,7 +147,7 @@ public class Statistics
             new() { ReportDay = date2, TotalRevenue = 2000000 },
             new() { ReportDay = date3, TotalRevenue = 3000000 }
         };
-        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(3, It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
+        _repositoryMock.Setup(r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedData);
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value.Should().HaveCount(3);
@@ -166,7 +166,7 @@ public class Statistics
             PendingOrdersCount = 10,
             NewCustomersCount = 25
         };
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -184,7 +184,7 @@ public class Statistics
             PendingOrdersCount = 5,
             NewCustomersCount = 10
         };
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value!.LastMonthProfit.Should().Be(12000000);
@@ -201,7 +201,7 @@ public class Statistics
             PendingOrdersCount = 15,
             NewCustomersCount = 20
         };
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value!.PendingOrdersCount.Should().Be(15);
@@ -218,7 +218,7 @@ public class Statistics
             PendingOrdersCount = 8,
             NewCustomersCount = 25
         };
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value!.NewCustomersCount.Should().Be(25);
@@ -235,7 +235,7 @@ public class Statistics
             PendingOrdersCount = 3,
             NewCustomersCount = 5
         };
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value!.LastMonthProfit.Should().Be(-5000000);
@@ -252,7 +252,7 @@ public class Statistics
             PendingOrdersCount = 0,
             NewCustomersCount = 0
         };
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value!.LastMonthRevenue.Should().Be(0);
@@ -265,11 +265,11 @@ public class Statistics
     public async Task Handle_DashboardStats_CallsRepositoryOnce()
     {
         var query = new GetDashboardStatsQuery();
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new DashboardStatsResponse());
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-        _repositoryMock.Verify(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "STAT_056 - Unit - GetMonthlyRevenueProfitQueryHandler với months = 12")]
@@ -818,7 +818,7 @@ public class Statistics
     {
         var query = new GetDashboardStatsQuery();
         var expectedStats = new DashboardStatsResponse { TodayRevenue = 100000000, TodayProfit = 20000000 };
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value!.TodayRevenue.Should().Be(100000000);
@@ -830,7 +830,7 @@ public class Statistics
     {
         var query = new GetDashboardStatsQuery();
         var expectedStats = new DashboardStatsResponse { RevenueChangePercentage = 20 };
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value!.RevenueChangePercentage.Should().Be(20);
@@ -841,7 +841,7 @@ public class Statistics
     {
         var query = new GetDashboardStatsQuery();
         var expectedStats = new DashboardStatsResponse { TotalSKUCount = 50 };
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value!.TotalSKUCount.Should().Be(50);
@@ -852,7 +852,7 @@ public class Statistics
     {
         var query = new GetDashboardStatsQuery();
         var expectedStats = new DashboardStatsResponse { BestDayDate = "2026-05-01", BestDayRevenue = 50000000 };
-        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Value!.BestDayDate.Should().Be("2026-05-01");
@@ -862,3 +862,4 @@ public class Statistics
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 }
+

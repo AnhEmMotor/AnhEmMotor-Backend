@@ -9,7 +9,6 @@ namespace Application.Features.RepairOrders.Commands;
 
 public class CreateRepairOrderCommandHandler(
     IMaintenanceHistoryWriteRepository writeRepo,
-    IMaintenanceHistoryReadRepository readRepo,
     IVehicleReadRepository vehicleRepo,
     IUnitOfWork uow) : IRequestHandler<CreateRepairOrderCommand, Result<int>>
 {

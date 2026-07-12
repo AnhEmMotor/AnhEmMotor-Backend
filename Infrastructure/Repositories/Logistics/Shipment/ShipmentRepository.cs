@@ -34,7 +34,7 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
         return await _context.Shipments
             .Include(s => s.Items)
             .ThenInclude(i => i.ProductVariant)
-            .ThenInclude(pv => pv.Product)
+            .ThenInclude(pv => pv!.Product)
             .Include(s => s.Items)
             .ThenInclude(i => i.ProductVariantColor)
             .FirstOrDefaultAsync(s => s.OutputId == outputId, cancellationToken);
@@ -47,7 +47,7 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
         return await _context.Shipments
             .Include(s => s.Items)
             .ThenInclude(i => i.ProductVariant)
-            .ThenInclude(pv => pv.Product)
+            .ThenInclude(pv => pv!.Product)
             .Include(s => s.Items)
             .ThenInclude(i => i.ProductVariantColor)
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
@@ -59,7 +59,7 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
         return await _context.Shipments
             .Include(s => s.Items)
             .ThenInclude(i => i.ProductVariant)
-            .ThenInclude(pv => pv.Product)
+            .ThenInclude(pv => pv!.Product)
             .Include(s => s.Items)
             .ThenInclude(i => i.ProductVariantColor)
             .ToListAsync(cancellationToken);

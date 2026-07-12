@@ -53,7 +53,7 @@ namespace Infrastructure.Repositories
                     var visits = ordersCount * 5 + 12; // Derived visits
                     return new Application.DTOs.Analytics.ChannelDataDto
                     {
-                        Name = g.Key,
+                        Name = g.Key ?? "Unknown",
                         Amount = g.Sum(x => x.Revenue),
                         Orders = ordersCount,
                         Visits = visits,

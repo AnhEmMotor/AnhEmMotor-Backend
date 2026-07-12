@@ -47,22 +47,28 @@ public class GetWarrantyClaimsListQueryHandler(
   {
    var isDesc = part.StartsWith("-");
    var field = (isDesc ? part[1..] : part).ToLowerInvariant();
-   ordered = first
-   ? field switch
+   
+   if (first || ordered == null)
    {
-    "id" => isDesc ? query.OrderByDescending(c => c.Id) : query.OrderBy(c => c.Id),
-    "createdat" => isDesc ? query.OrderByDescending(c => c.CreatedAt) : query.OrderBy(c => c.CreatedAt),
-    "status" => isDesc ? query.OrderByDescending(c => c.Status) : query.OrderBy(c => c.Status),
-    _ => query.OrderByDescending(c => c.CreatedAt)
+       ordered = field switch
+       {
+        "id" => isDesc ? query.OrderByDescending(c => c.Id) : query.OrderBy(c => c.Id),
+        "createdat" => isDesc ? query.OrderByDescending(c => c.CreatedAt) : query.OrderBy(c => c.CreatedAt),
+        "status" => isDesc ? query.OrderByDescending(c => c.Status) : query.OrderBy(c => c.Status),
+        _ => query.OrderByDescending(c => c.CreatedAt)
+       };
+       first = false;
    }
-   : field switch
+   else
    {
-    "id" => isDesc ? ordered.ThenByDescending(c => c.Id) : ordered.ThenBy(c => c.Id),
-    "createdat" => isDesc ? ordered.ThenByDescending(c => c.CreatedAt) : ordered.ThenBy(c => c.CreatedAt),
-    "status" => isDesc ? ordered.ThenByDescending(c => c.Status) : ordered.ThenBy(c => c.Status),
-    _ => ordered
-   };
-   first = false;
+       ordered = field switch
+       {
+        "id" => isDesc ? ordered.ThenByDescending(c => c.Id) : ordered.ThenBy(c => c.Id),
+        "createdat" => isDesc ? ordered.ThenByDescending(c => c.CreatedAt) : ordered.ThenBy(c => c.CreatedAt),
+        "status" => isDesc ? ordered.ThenByDescending(c => c.Status) : ordered.ThenBy(c => c.Status),
+        _ => ordered
+       };
+   }
   }
   return ordered ?? query.OrderByDescending(c => c.CreatedAt);
  }

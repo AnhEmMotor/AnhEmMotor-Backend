@@ -50,13 +50,13 @@ public class CreateProductCategoryCommandHandler(
 
 		var category = new ProductCategoryEntity
 		{
-			Name = nameVi,
+			Name = nameVi ?? string.Empty,
 			Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
 			IsActive = request.IsActive,
 			ParentId = request.ParentId,
-			ManagementType = request.ManagementType,
+			ManagementType = request.ManagementType ?? string.Empty,
 			MaxPurchaseQuantity = request.MaxPurchaseQuantity,
-			Slug = GenerateSlug(nameVi),
+			Slug = GenerateSlug(nameVi ?? string.Empty),
 		};
 
 		repository.Add(category);
@@ -67,7 +67,7 @@ public class CreateProductCategoryCommandHandler(
 			new()
 			{
 				LanguageCode = "vi",
-				Name = nameVi,
+				Name = nameVi ?? string.Empty,
 				Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
 				CreatedAt = DateTimeOffset.UtcNow,
 			},
