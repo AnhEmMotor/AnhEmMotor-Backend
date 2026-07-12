@@ -18,7 +18,11 @@ public record PayrollResponse
 
     public decimal PaidCommission { get; set; }
 
-    public decimal TotalActualReceived => BaseSalary + ConfirmedCommission;
+    public decimal TotalActualReceived => TotalNetPayable;
+
+    public decimal VolumeBonus { get; set; }
+
+    public decimal TotalNetPayable => BaseSalary + ConfirmedCommission + PaidCommission + VolumeBonus;
 }
 
 public record PayrollListItem

@@ -14,12 +14,18 @@ public class SupplierContractExpiryWorker(IServiceProvider serviceProvider) : Ba
         {
             try
             {
+                await Task.Delay(TimeSpan.FromHours(24), stoppingToken).ConfigureAwait(false);
+            } catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+            try
+            {
                 await UpdateExpiredContractsAsync(stoppingToken).ConfigureAwait(false);
                 await SendExpiryWarningsAsync(stoppingToken).ConfigureAwait(false);
             } catch
             {
             }
-            await Task.Delay(TimeSpan.FromHours(24), stoppingToken).ConfigureAwait(false);
         }
     }
 
@@ -88,7 +94,7 @@ public class SupplierContractExpiryWorker(IServiceProvider serviceProvider) : Ba
                             SupplierContractId = contract.Id,
                             Action = "ExpiryWarning",
                             Details =
-                                $"Hợp đồng {contract.ContractNumber} sắp hết hạn trong {(contract.ExpirationDate!.Value - now).Days} ngày.",
+                                $"Hop dong {contract.ContractNumber} sap het han trong {(contract.ExpirationDate!.Value - now).Days} ngay.",
                             ChangedBy = "System (Background Worker)"
                         });
             }

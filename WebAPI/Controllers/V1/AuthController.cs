@@ -1,12 +1,14 @@
 using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Features.Auth.Commands.FacebookLogin;
+using Application.Features.Auth.Commands.ForgotPassword;
 using Application.Features.Auth.Commands.GoogleLogin;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.LoginForManager;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
+using Application.Features.Auth.Commands.ResetPassword;
 using Application.Features.Auth.Queries.GetExternalAuthConfig;
 using Asp.Versioning;
 using Infrastructure.Authorization.Attribute;
@@ -128,6 +130,38 @@ public class AuthController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> LoginForManagerAsync(
         [FromBody] LoginForManagerCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Yêu cầu đặt lại mật khẩu qua email
+    /// </summary>
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    [EnableRateLimiting("public_api")]
+    [SwaggerOperation(Summary = "Quên mật khẩu", Description = "Gửi email chứa liên kết đặt lại mật khẩu")]
+    [ProducesResponseType(typeof(ForgotPasswordResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ForgotPasswordAsync(
+        [FromBody] ForgotPasswordCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Đặt lại mật khẩu bằng token nhận được qua email
+    /// </summary>
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    [EnableRateLimiting("public_api")]
+    [SwaggerOperation(Summary = "Đặt lại mật khẩu", Description = "Đặt mật khẩu mới bằng token từ email")]
+    [ProducesResponseType(typeof(ResetPasswordResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ResetPasswordAsync(
+        [FromBody] ResetPasswordCommand command,
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);

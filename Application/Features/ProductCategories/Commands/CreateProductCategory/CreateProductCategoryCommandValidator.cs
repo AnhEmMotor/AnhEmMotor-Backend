@@ -7,15 +7,24 @@ public class CreateProductCategoryCommandValidator : AbstractValidator<CreatePro
 {
     public CreateProductCategoryCommandValidator()
     {
-        RuleFor(x => x.Name)
+        RuleFor(x => x.NameVi)
             .NotEmpty()
-            .WithMessage("Tên danh mục không được để trống.")
-            .MaximumLength(100)
-            .WithMessage("Tên danh mục không được vượt quá 100 ký tự.");
+            .WithMessage("Tên danh mục (Tiếng Việt) không được để trống.")
+            .MaximumLength(255)
+            .WithMessage("Tên danh mục (Tiếng Việt) không được vượt quá 255 ký tự.");
+        RuleFor(x => x.NameEn)
+            .NotEmpty()
+            .WithMessage("Tên danh mục (English) không được để trống.")
+            .MaximumLength(255)
+            .WithMessage("Tên danh mục (English) không được vượt quá 255 ký tự.");
         RuleFor(x => x.Description)
             .MaximumLength(500)
-            .WithMessage("Mô tả không được vượt quá 500 ký tự.")
+            .WithMessage("Mô tả (Tiếng Việt) không được vượt quá 500 ký tự.")
             .When(x => !string.IsNullOrWhiteSpace(x.Description));
+        RuleFor(x => x.DescriptionEn)
+            .MaximumLength(500)
+            .WithMessage("Mô tả (English) không được vượt quá 500 ký tự.")
+            .When(x => !string.IsNullOrWhiteSpace(x.DescriptionEn));
         RuleFor(x => x.ManagementType)
             .NotEmpty()
             .Must(ProductManagementType.IsValid)

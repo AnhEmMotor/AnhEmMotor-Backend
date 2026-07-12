@@ -25,7 +25,12 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
         return paginator.ApplyAsync<Domain.Entities.Vehicle, TResponse>(query, sieveModel, mode, cancellationToken);
     }
 
-    internal IQueryable<Domain.Entities.Vehicle> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public IQueryable<Domain.Entities.Vehicle> GetQueryable()
+    {
+        return GetQueryable(DataFetchMode.ActiveOnly);
+    }
+
+    public IQueryable<Domain.Entities.Vehicle> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<Domain.Entities.Vehicle>(mode).Include(v => v.Lead);
     }
@@ -159,5 +164,29 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
             .ThenInclude(pv => pv!.Product)
             .ThenInclude(p => p!.Brand)
             .FirstOrDefaultAsync(v => string.Compare(v.LicensePlate, licensePlate) == 0, cancellationToken);
+    }
+
+    public Task<Domain.Entities.Vehicle?> GetVehicleForPortfolioAsync(
+        string query,
+        string queryType,
+        CancellationToken cancellationToken = default)
+    {
+        var baseQuery = context.Vehicles.AsQueryable();
+        IQueryable<Domain.Entities.Vehicle> vehicleQuery = queryType switch
+        {
+            "phone" => baseQuery.Where(v => v.Lead != null && v.Lead.PhoneNumber.Contains(query)),
+            "licensePlate" => baseQuery.Where(v => v.LicensePlate.Contains(query)),
+            "vin" => baseQuery.Where(v => v.VinNumber.Contains(query)),
+            _ => baseQuery.Where(
+                v => v.LicensePlate.Contains(query) ||
+                    v.VinNumber.Contains(query) ||
+                    (v.Lead != null && v.Lead.PhoneNumber.Contains(query)))
+        };
+        return vehicleQuery
+            .Include(v => v.Lead)
+            .Include(v => v.ProductVariant)
+            .ThenInclude(pv => pv!.Product)
+            .Include(v => v.ProductVariantColor)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

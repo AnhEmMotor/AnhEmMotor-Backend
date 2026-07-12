@@ -100,82 +100,6 @@ namespace Infrastructure.Seeders
                 };
                 context.OutputInfos.Add(outputInfo);
             }
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            if (!await context.RepairOrders.AnyAsync(cancellationToken).ConfigureAwait(false))
-            {
-                var technicians = await context.EmployeeProfiles.ToListAsync(cancellationToken).ConfigureAwait(false);
-                for (int i = 0; i < 4; i++)
-                {
-                    var ticketDate = now.AddHours(-random.Next(1, 12));
-                    var tech = technicians.Count > 0 ? technicians[random.Next(technicians.Count)] : null;
-                    var ro = new RepairOrder
-                    {
-                        CustomerName = $"Nguyễn Anh Tuấn {i + 1}",
-                        CustomerPhone = $"091{random.Next(1000000, 9999999)}",
-                        Description = "Kiểm tra định kỳ, thay dầu nhớt động cơ và vệ sinh bộ côn xe ga",
-                        Status = "InProgress",
-                        StartTime = ticketDate,
-                        ExpectedCompletionTime = now.AddHours(random.Next(1, 6)),
-                        LaborCost = 150000,
-                        PartsCost = 450000,
-                        TotalAmount = 600000,
-                        PaymentStatus = "Unpaid",
-                        TechnicianId = tech?.Id,
-                        CreatedAt = ticketDate,
-                        UpdatedAt = ticketDate
-                    };
-                    context.RepairOrders.Add(ro);
-                }
-                for (int i = 0; i < 20; i++)
-                {
-                    var ticketDate = now.AddDays(-random.Next(1, 30)).AddHours(random.Next(8, 18));
-                    var durationHours = random.Next(1, 4);
-                    var completionDate = ticketDate.AddHours(durationHours);
-                    var tech = technicians.Count > 0 ? technicians[random.Next(technicians.Count)] : null;
-                    var ro = new RepairOrder
-                    {
-                        CustomerName = $"Trần Thanh Sơn {i + 1}",
-                        CustomerPhone = $"093{random.Next(1000000, 9999999)}",
-                        Description = "Bảo dưỡng toàn bộ xe máy, thay lọc gió, bugi và cặp má phanh trước sau",
-                        Status = "Completed",
-                        StartTime = ticketDate,
-                        CompletedDate = completionDate,
-                        ExpectedCompletionTime = ticketDate.AddHours(3),
-                        LaborCost = 300000,
-                        PartsCost = 650000,
-                        TotalAmount = 950000,
-                        PaymentStatus = "Paid",
-                        PaymentMethod = "Banking",
-                        TechnicianId = tech?.Id,
-                        CreatedAt = ticketDate,
-                        UpdatedAt = completionDate
-                    };
-                    context.RepairOrders.Add(ro);
-                }
-                for (int i = 0; i < 3; i++)
-                {
-                    var ticketDate = now.AddHours(-15);
-                    var tech = technicians.Count > 0 ? technicians[random.Next(technicians.Count)] : null;
-                    var ro = new RepairOrder
-                    {
-                        CustomerName = $"Lê Minh Hoàng {i + 1}",
-                        CustomerPhone = $"098{random.Next(1000000, 9999999)}",
-                        Description = "Khắc phục lỗi xước xát nhựa sườn, căn chỉnh phuộc nhún trước",
-                        Status = "Pending",
-                        StartTime = ticketDate,
-                        ExpectedCompletionTime = now.AddHours(-2),
-                        LaborCost = 400000,
-                        PartsCost = 1500000,
-                        TotalAmount = 1900000,
-                        PaymentStatus = "Unpaid",
-                        TechnicianId = tech?.Id,
-                        CreatedAt = ticketDate,
-                        UpdatedAt = ticketDate
-                    };
-                    context.RepairOrders.Add(ro);
-                }
-                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
             if (!await context.Contacts.AnyAsync(cancellationToken).ConfigureAwait(false))
             {
                 var adminUser = await context.Users
@@ -271,6 +195,91 @@ namespace Infrastructure.Seeders
                 }
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+            if (!await context.Invoices.AnyAsync(cancellationToken).ConfigureAwait(false))
+            {
+                var salesUser = await context.Users
+                    .FirstOrDefaultAsync(u => u.Email == "tran.thi.b@anhemmotor.com", cancellationToken)
+                    .ConfigureAwait(false);
+                var userId = salesUser?.Id ?? context.Users.First().Id;
+                var invoices = new List<Invoice>
+                {
+                    new Invoice
+                    {
+                        InvoiceNumber = "HD-20260701-SH150",
+                        IssueDate = DateTime.Now.AddDays(-8),
+                        CustomerName = "Nguyễn Văn Hùng",
+                        CustomerIdCard = "031203004567",
+                        CustomerPhone = "0987654321",
+                        CustomerAddress = "123 Giải Phóng, Hà Nội",
+                        VehicleModel = "Honda SH 150i ABS",
+                        VehicleColor = "Đen bóng",
+                        ChassisNo = "RLHSH150I2026001",
+                        EngineNo = "KF12E-1002345",
+                        VehiclePrice = 102000000,
+                        RegistrationFee = 5000000,
+                        InsuranceFee = 1500000,
+                        TotalAmount = 108500000,
+                        PaymentMethod = "transfer",
+                        BankName = "Vietcombank",
+                        Status = "completed",
+                        SalesPerson = "Trần Thị B",
+                        DeliveryDate = DateTime.Now.AddDays(-6),
+                        UserId = userId,
+                        CreatedAt = DateTimeOffset.Now.AddDays(-8)
+                    },
+                    new Invoice
+                    {
+                        InvoiceNumber = "HD-20260703-W110",
+                        IssueDate = DateTime.Now.AddDays(-5),
+                        CustomerName = "Lê Thị Thảo",
+                        CustomerIdCard = "031203009999",
+                        CustomerPhone = "0912345678",
+                        CustomerAddress = "45 Cầu Giấy, Hà Nội",
+                        VehicleModel = "Honda Wave Alpha 110cc",
+                        VehicleColor = "Đỏ thẫm",
+                        ChassisNo = "RLHWAVE110202602",
+                        EngineNo = "HC11E-2003456",
+                        VehiclePrice = 18500000,
+                        RegistrationFee = 1500000,
+                        InsuranceFee = 500000,
+                        TotalAmount = 20500000,
+                        PaymentMethod = "cash",
+                        BankName = string.Empty,
+                        Status = "completed",
+                        SalesPerson = "Nguyễn Văn A",
+                        DeliveryDate = DateTime.Now.AddDays(-5),
+                        UserId = userId,
+                        CreatedAt = DateTimeOffset.Now.AddDays(-5)
+                    },
+                    new Invoice
+                    {
+                        InvoiceNumber = "HD-20260705-V125",
+                        IssueDate = DateTime.Now.AddDays(-2),
+                        CustomerName = "Phạm Minh Đức",
+                        CustomerIdCard = "031203008888",
+                        CustomerPhone = "0904567890",
+                        CustomerAddress = "78 Lê Lợi, Hải Phòng",
+                        VehicleModel = "Honda Vision 125cc",
+                        VehicleColor = "Xanh xi măng",
+                        ChassisNo = "RLHVISION202603",
+                        EngineNo = "JF58E-3004567",
+                        VehiclePrice = 33000000,
+                        RegistrationFee = 2500000,
+                        InsuranceFee = 800000,
+                        TotalAmount = 36300000,
+                        PaymentMethod = "installment",
+                        BankName = string.Empty,
+                        Status = "pending",
+                        SalesPerson = "Phạm Thị D",
+                        DeliveryDate = DateTime.Now.AddDays(3),
+                        UserId = userId,
+                        CreatedAt = DateTimeOffset.Now.AddDays(-2)
+                    }
+                };
+                context.Invoices.AddRange(invoices);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }
+

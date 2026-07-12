@@ -1,4 +1,4 @@
-using Infrastructure.DBContexts;
+﻿using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
@@ -53,6 +53,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("NormalizedEmail").HasMaxLength(256).HasColumnType("nvarchar(256)");
                     b.Property<string>("NormalizedUserName").HasMaxLength(256).HasColumnType("nvarchar(256)");
                     b.Property<string>("PasswordHash").HasColumnType("nvarchar(max)");
+                    b.Property<string>("PasswordResetToken").HasColumnType("nvarchar(max)");
+                    b.Property<DateTimeOffset?>("PasswordResetTokenExpiry").HasColumnType("datetimeoffset");
                     b.Property<string>("PhoneNumber").HasColumnType("nvarchar(max)");
                     b.Property<bool>("PhoneNumberConfirmed").HasColumnType("bit");
                     b.Property<string>("RefreshToken").HasColumnType("nvarchar(max)");
@@ -184,8 +186,12 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
                     b.Property<string>("Description").HasColumnType("nvarchar(MAX)").HasColumnName("Description");
+                    b.Property<string>("DescriptionJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DescriptionJson");
                     b.Property<string>("LogoUrl").HasColumnType("nvarchar(1000)").HasColumnName("LogoUrl");
                     b.Property<string>("Name").HasColumnType("nvarchar(100)").HasColumnName("Name");
+                    b.Property<string>("NameJson").HasColumnType("nvarchar(max)").HasColumnName("NameJson");
                     b.Property<string>("Origin").HasColumnType("nvarchar(100)").HasColumnName("Origin");
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -906,45 +912,74 @@ namespace Infrastructure.SqlServerMigrations
                     b.ToTable("ParcelDeliveryOrderItems");
                 });
             modelBuilder.Entity(
-                "Domain.Entities.MaintenanceHistory",
+                "Domain.Entities.Logistics.Shipment",
                 b =>
                 {
-                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Carrier").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<decimal>("CodAmount").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("CustomerName").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<string>("CustomerPhone").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeliveredAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("DestinationAddress").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<double?>("DestinationLatitude").HasColumnType("float");
+                    b.Property<double?>("DestinationLongitude").HasColumnType("float");
+                    b.Property<string>("OriginAddress").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<double?>("OriginLatitude").HasColumnType("float");
+                    b.Property<double?>("OriginLongitude").HasColumnType("float");
+                    b.Property<int?>("OutputId").HasColumnType("int");
+                    b.Property<decimal>("ShippingCost").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<int>("Status").HasColumnType("int");
+                    b.Property<string>("TrackingNumber").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<string>("Type").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.HasKey("Id");
+                    b.HasIndex("OutputId");
+                    b.ToTable("Shipments");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.Logistics.ShipmentItem",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
-                        .HasColumnName("Description");
-                    b.Property<decimal>("LaborCost")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)")
-                        .HasColumnName("LaborCost");
-                    b.Property<DateTimeOffset>("MaintenanceDate")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("MaintenanceDate");
-                    b.Property<string>("MaintenanceNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("MaintenanceNumber");
-                    b.Property<int>("Mileage").HasColumnType("int").HasColumnName("Mileage");
-                    b.Property<DateTimeOffset?>("NextMaintenanceDate")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("NextMaintenanceDate");
-                    b.Property<int?>("NextMaintenanceOdo").HasColumnType("int").HasColumnName("NextMaintenanceOdo");
-                    b.Property<decimal>("PartsCost")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)")
-                        .HasColumnName("PartsCost");
-                    b.Property<string>("PartsJson").HasColumnType("nvarchar(MAX)").HasColumnName("PartsJson");
-                    b.Property<int?>("TechnicianId").HasColumnType("int").HasColumnName("TechnicianId");
-                    b.Property<decimal>("TotalCost")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)")
-                        .HasColumnName("TotalCost");
+                    b.Property<int?>("ProductVariantColorId").HasColumnType("int");
+                    b.Property<int?>("ProductVariantId").HasColumnType("int");
+                    b.Property<int>("Quantity").HasColumnType("int");
+                    b.Property<int>("ShipmentId").HasColumnType("int");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
-                    b.Property<int>("VehicleId").HasColumnType("int").HasColumnName("VehicleId");
+                    b.HasKey("Id");
+                    b.HasIndex("ProductVariantColorId");
+                    b.HasIndex("ProductVariantId");
+                    b.HasIndex("ShipmentId");
+                    b.ToTable("ShipmentItems");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.MaintenanceHistory",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("Description").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<decimal>("LaborCost").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<DateTimeOffset>("MaintenanceDate").HasColumnType("datetimeoffset");
+                    b.Property<string>("MaintenanceNumber").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<int>("Mileage").HasColumnType("int");
+                    b.Property<DateTimeOffset?>("NextMaintenanceDate").HasColumnType("datetimeoffset");
+                    b.Property<int?>("NextMaintenanceOdo").HasColumnType("int");
+                    b.Property<decimal>("PartsCost").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<string>("PartsJson").HasColumnType("nvarchar(max)");
+                    b.Property<int?>("TechnicianId").HasColumnType("int");
+                    b.Property<decimal>("TotalCost").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<int>("VehicleId").HasColumnType("int");
                     b.HasKey("Id");
                     b.HasIndex("TechnicianId");
                     b.HasIndex("VehicleId");
@@ -1168,7 +1203,27 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("id");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("BudgetCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("BudgetCode");
                     b.Property<Guid?>("BuyerId").HasColumnType("uniqueidentifier").HasColumnName("BuyerId");
+                    b.Property<string>("CompanyAddress")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("CompanyAddress");
+                    b.Property<string>("CompanyEmail")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("CompanyEmail");
+                    b.Property<string>("CompanyName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("CompanyName");
+                    b.Property<string>("CompanyTaxCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("CompanyTaxCode");
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
                     b.Property<Guid?>("CreatedBy").HasColumnType("uniqueidentifier").HasColumnName("CreatedBy");
                     b.Property<string>("CustomerAddress")
@@ -1179,6 +1234,7 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
                     b.Property<int?>("DepositRatio").HasColumnType("int").HasColumnName("DepositRatio");
                     b.Property<Guid?>("FinishedBy").HasColumnType("uniqueidentifier").HasColumnName("FinishedBy");
+                    b.Property<bool>("IsCompanyInvoice").HasColumnType("bit").HasColumnName("IsCompanyInvoice");
                     b.Property<DateTimeOffset?>("LastStatusChangedAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("LastStatusChangedAt");
@@ -1285,50 +1341,6 @@ namespace Infrastructure.SqlServerMigrations
                     b.ToTable("Permissions", (string)null);
                 });
             modelBuilder.Entity(
-                "Domain.Entities.PlateDossier",
-                b =>
-                {
-                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-                    b.Property<decimal>("ActualCost").HasColumnType("decimal(18,2)").HasColumnName("ActualCost");
-                    b.Property<DateTimeOffset?>("CompletedDate")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("CompletedDate");
-                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("CustomerName");
-                    b.Property<string>("CustomerPhone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("CustomerPhone");
-                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("DossierNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("DossierNumber");
-                    b.Property<string>("LicensePlate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("LicensePlate");
-                    b.Property<string>("Notes").HasColumnType("nvarchar(MAX)").HasColumnName("Notes");
-                    b.Property<int?>("OutputId").HasColumnType("int").HasColumnName("OutputId");
-                    b.Property<decimal>("RegistrationFee")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("RegistrationFee");
-                    b.Property<decimal>("ServiceFee").HasColumnType("decimal(18,2)").HasColumnName("ServiceFee");
-                    b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(50)").HasColumnName("Status");
-                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("VinNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("VinNumber");
-                    b.HasKey("Id");
-                    b.HasIndex("OutputId");
-                    b.ToTable("PlateDossier");
-                });
-            modelBuilder.Entity(
                 "Domain.Entities.PredefinedOption",
                 b =>
                 {
@@ -1360,6 +1372,9 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("DashboardType").HasColumnType("nvarchar(100)").HasColumnName("DashboardType");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
                     b.Property<string>("Description").HasColumnType("nvarchar(MAX)").HasColumnName("Description");
+                    b.Property<string>("DescriptionJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DescriptionJson");
                     b.Property<string>("Dimensions").HasColumnType("nvarchar(35)").HasColumnName("Dimensions");
                     b.Property<string>("Displacement").HasColumnType("nvarchar(50)").HasColumnName("Displacement");
                     b.Property<string>("EngineType").HasColumnType("nvarchar(100)").HasColumnName("EngineType");
@@ -1381,8 +1396,13 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("MetaDescription")
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("MetaDescription");
+                    b.Property<string>("MetaDescriptionJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("MetaDescriptionJson");
                     b.Property<string>("MetaTitle").HasColumnType("nvarchar(100)").HasColumnName("MetaTitle");
+                    b.Property<string>("MetaTitleJson").HasColumnType("nvarchar(max)").HasColumnName("MetaTitleJson");
                     b.Property<string>("Name").HasColumnType("nvarchar(100)").HasColumnName("Name");
+                    b.Property<string>("NameJson").HasColumnType("nvarchar(max)").HasColumnName("NameJson");
                     b.Property<string>("OilCapacity").HasColumnType("nvarchar(250)").HasColumnName("OilCapacity");
                     b.Property<string>("Origin").HasColumnType("nvarchar(100)").HasColumnName("Origin");
                     b.Property<string>("OtherStandards").HasColumnType("nvarchar(255)").HasColumnName("OtherStandards");
@@ -1393,6 +1413,9 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("ShortDescription")
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("ShortDescription");
+                    b.Property<string>("ShortDescriptionJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ShortDescriptionJson");
                     b.Property<string>("StarterSystem").HasColumnType("nvarchar(30)").HasColumnName("StarterSystem");
                     b.Property<string>("StatusId").HasColumnType("nvarchar(450)").HasColumnName("StatusId");
                     b.Property<bool>("StdDot").HasColumnType("bit").HasColumnName("StdDot");
@@ -1438,6 +1461,23 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasIndex("ParentId");
                     b.ToTable("ProductCategory");
                     b.HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ProductCategoryTranslation",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("Description").HasColumnType("nvarchar(max)");
+                    b.Property<string>("LanguageCode").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<int>("ProductCategoryId").HasColumnType("int");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.HasKey("Id");
+                    b.HasIndex("ProductCategoryId");
+                    b.ToTable("ProductCategoryTranslations");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ProductCollectionPhoto",
@@ -1775,75 +1815,6 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasKey("Id");
                     b.HasIndex("PurchaseRequestItemId");
                     b.ToTable("PurchaseRequestItemAuditLog");
-                });
-            modelBuilder.Entity(
-                "Domain.Entities.RepairOrder",
-                b =>
-                {
-                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-                    b.Property<DateTimeOffset?>("CompletedDate")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("CompletedDate");
-                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("CustomerName");
-                    b.Property<string>("CustomerPhone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("CustomerPhone");
-                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
-                        .HasColumnName("Description");
-                    b.Property<DateTimeOffset?>("ExpectedCompletionTime")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("ExpectedCompletionTime");
-                    b.Property<decimal>("LaborCost").HasColumnType("decimal(18,2)").HasColumnName("LaborCost");
-                    b.Property<int>("Mileage").HasColumnType("int").HasColumnName("Mileage");
-                    b.Property<string>("Notes").HasColumnType("nvarchar(MAX)").HasColumnName("Notes");
-                    b.Property<decimal>("PartsCost").HasColumnType("decimal(18,2)").HasColumnName("PartsCost");
-                    b.Property<string>("PaymentMethod").HasColumnType("nvarchar(50)").HasColumnName("PaymentMethod");
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("PaymentStatus");
-                    b.Property<DateTimeOffset?>("StartTime").HasColumnType("datetimeoffset").HasColumnName("StartTime");
-                    b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(20)").HasColumnName("Status");
-                    b.Property<int?>("TechnicianId").HasColumnType("int").HasColumnName("TechnicianId");
-                    b.Property<decimal>("TotalAmount").HasColumnType("decimal(18,2)").HasColumnName("TotalAmount");
-                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
-                    b.Property<int?>("VehicleId").HasColumnType("int").HasColumnName("VehicleId");
-                    b.HasKey("Id");
-                    b.HasIndex("TechnicianId");
-                    b.HasIndex("VehicleId");
-                    b.ToTable("RepairOrder");
-                });
-            modelBuilder.Entity(
-                "Domain.Entities.RepairOrderDetail",
-                b =>
-                {
-                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-                    b.Property<int>("Count").HasColumnType("int").HasColumnName("Count");
-                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
-                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<decimal>("LaborCost").HasColumnType("decimal(18,2)").HasColumnName("LaborCost");
-                    b.Property<string>("Notes").HasColumnType("nvarchar(500)").HasColumnName("Notes");
-                    b.Property<decimal>("Price").HasColumnType("decimal(18,2)").HasColumnName("Price");
-                    b.Property<int?>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
-                    b.Property<int>("RepairOrderId").HasColumnType("int").HasColumnName("RepairOrderId");
-                    b.Property<int?>("ServiceId").HasColumnType("int").HasColumnName("ServiceId");
-                    b.Property<string>("Type").IsRequired().HasColumnType("nvarchar(20)").HasColumnName("Type");
-                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
-                    b.HasKey("Id");
-                    b.HasIndex("ProductVariantId");
-                    b.HasIndex("RepairOrderId");
-                    b.HasIndex("ServiceId");
-                    b.ToTable("RepairOrderDetail");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ReturnRequest",
@@ -2461,37 +2432,58 @@ namespace Infrastructure.SqlServerMigrations
                     b.ToTable("VehicleDocument");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.Voucher",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("ApplyFor").HasColumnType("int");
+                    b.Property<int>("Channel").HasColumnType("int");
+                    b.Property<string>("Code").IsRequired().HasColumnType("nvarchar(450)");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<int>("DiscountType").HasColumnType("int");
+                    b.Property<decimal>("DiscountValue").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("MaxDiscountAmount").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<int>("Type").HasColumnType("int");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("ValidFrom").HasColumnType("datetime2");
+                    b.Property<DateTime>("ValidTo").HasColumnType("datetime2");
+                    b.HasKey("Id");
+                    b.HasIndex("Code").IsUnique();
+                    b.ToTable("Vouchers");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.VoucherLead",
+                b =>
+                {
+                    b.Property<int>("VoucherId").HasColumnType("int");
+                    b.Property<int>("LeadId").HasColumnType("int");
+                    b.HasKey("VoucherId", "LeadId");
+                    b.HasIndex("LeadId");
+                    b.ToTable("VoucherLeads");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.WarrantyClaim",
                 b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-                    b.Property<string>("ClaimNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("ClaimNumber");
+                    b.Property<string>("ClaimNumber").IsRequired().HasColumnType("nvarchar(max)");
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<bool>("IsRecall").HasColumnType("bit").HasColumnName("IsRecall");
-                    b.Property<string>("IssueDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
-                        .HasColumnName("IssueDescription");
-                    b.Property<string>("ManufacturerClaimNumber")
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("ManufacturerClaimNumber");
-                    b.Property<string>("ManufacturerDecision")
-                        .HasColumnType("nvarchar(MAX)")
-                        .HasColumnName("ManufacturerDecision");
-                    b.Property<string>("MediaUrls").HasColumnType("nvarchar(MAX)").HasColumnName("MediaUrls");
-                    b.Property<string>("ServiceCenterName")
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("ServiceCenterName");
-                    b.Property<int>("Status").HasColumnType("int").HasColumnName("Status");
-                    b.Property<decimal>("TotalLaborCost").HasColumnType("decimal(18,2)").HasColumnName("TotalLaborCost");
-                    b.Property<decimal>("TotalPartsCost").HasColumnType("decimal(18,2)").HasColumnName("TotalPartsCost");
+                    b.Property<bool>("IsRecall").HasColumnType("bit");
+                    b.Property<string>("IssueDescription").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<string>("ManufacturerClaimNumber").HasColumnType("nvarchar(max)");
+                    b.Property<string>("ManufacturerDecision").HasColumnType("nvarchar(max)");
+                    b.Property<string>("MediaUrls").HasColumnType("nvarchar(max)");
+                    b.Property<string>("ServiceCenterName").HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status").HasColumnType("int");
+                    b.Property<decimal>("TotalLaborCost").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("TotalPartsCost").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
-                    b.Property<int>("VehicleId").HasColumnType("int").HasColumnName("VehicleId");
+                    b.Property<int>("VehicleId").HasColumnType("int");
                     b.HasKey("Id");
                     b.HasIndex("VehicleId");
                     b.ToTable("WarrantyClaim");
@@ -2504,12 +2496,12 @@ namespace Infrastructure.SqlServerMigrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("PartCode").IsRequired().HasColumnType("nvarchar(100)").HasColumnName("PartCode");
-                    b.Property<string>("PartName").IsRequired().HasColumnType("nvarchar(200)").HasColumnName("PartName");
-                    b.Property<int>("Status").HasColumnType("int").HasColumnName("Status");
-                    b.Property<decimal>("UnitPrice").HasColumnType("decimal(18,2)").HasColumnName("UnitPrice");
+                    b.Property<string>("PartCode").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<string>("PartName").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status").HasColumnType("int");
+                    b.Property<decimal>("UnitPrice").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
-                    b.Property<int>("WarrantyClaimId").HasColumnType("int").HasColumnName("WarrantyClaimId");
+                    b.Property<int>("WarrantyClaimId").HasColumnType("int");
                     b.HasKey("Id");
                     b.HasIndex("WarrantyClaimId");
                     b.ToTable("WarrantyClaimPart");
@@ -2521,46 +2513,24 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("CustomerName");
-                    b.Property<string>("CustomerPhone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("CustomerPhone");
+                    b.Property<string>("CustomerName").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<string>("CustomerPhone").IsRequired().HasColumnType("nvarchar(max)");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<decimal>("DiscountAmount").HasColumnType("decimal(18,2)").HasColumnName("DiscountAmount");
-                    b.Property<DateTimeOffset?>("InvoicePrintedAt")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("InvoicePrintedAt");
-                    b.Property<string>("Notes").HasColumnType("nvarchar(MAX)").HasColumnName("Notes");
-                    b.Property<DateTimeOffset?>("PaidAt").HasColumnType("datetimeoffset").HasColumnName("PaidAt");
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(30)")
-                        .HasColumnName("PaymentMethod");
-                    b.Property<string>("PaymentNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("PaymentNumber");
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(30)")
-                        .HasColumnName("PaymentStatus");
-                    b.Property<Guid?>("ReceivedById").HasColumnType("uniqueidentifier").HasColumnName("ReceivedById");
-                    b.Property<string>("ServiceDescription")
-                        .HasColumnType("nvarchar(MAX)")
-                        .HasColumnName("ServiceDescription");
-                    b.Property<int>("SourceId").HasColumnType("int").HasColumnName("SourceId");
-                    b.Property<string>("SourceType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(30)")
-                        .HasColumnName("SourceType");
-                    b.Property<decimal>("SubTotal").HasColumnType("decimal(18,2)").HasColumnName("SubTotal");
-                    b.Property<decimal>("TotalAmount").HasColumnType("decimal(18,2)").HasColumnName("TotalAmount");
+                    b.Property<decimal>("DiscountAmount").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<DateTimeOffset?>("InvoicePrintedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("Notes").HasColumnType("nvarchar(max)");
+                    b.Property<DateTimeOffset?>("PaidAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("PaymentMethod").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<string>("PaymentNumber").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<string>("PaymentStatus").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("ReceivedById").HasColumnType("uniqueidentifier");
+                    b.Property<string>("ServiceDescription").HasColumnType("nvarchar(max)");
+                    b.Property<int>("SourceId").HasColumnType("int");
+                    b.Property<string>("SourceType").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<decimal>("SubTotal").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("TotalAmount").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("VehicleInfo").HasColumnType("nvarchar(200)").HasColumnName("VehicleInfo");
+                    b.Property<string>("VehicleInfo").HasColumnType("nvarchar(max)");
                     b.HasKey("Id");
                     b.ToTable("WorkshopPayment");
                 });
@@ -2945,17 +2915,44 @@ namespace Infrastructure.SqlServerMigrations
                     b.Navigation("ParcelDeliveryOrder");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.Logistics.Shipment",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.Output", "Output").WithMany().HasForeignKey("OutputId");
+                    b.Navigation("Output");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.Logistics.ShipmentItem",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ProductVariantColor", "ProductVariantColor")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantColorId");
+                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId");
+                    b.HasOne("Domain.Entities.Logistics.Shipment", "Shipment")
+                        .WithMany("Items")
+                        .HasForeignKey("ShipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("ProductVariant");
+                    b.Navigation("ProductVariantColor");
+                    b.Navigation("Shipment");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.MaintenanceHistory",
                 b =>
                 {
-                    b.HasOne("Domain.Entities.EmployeeProfile", "Technician").WithMany().HasForeignKey("TechnicianId");
-                    b.HasOne("Domain.Entities.Vehicle", "Vehicle")
-                        .WithMany("MaintenanceHistories")
+                    b.HasOne("Domain.Entities.EmployeeProfile", null)
+                        .WithMany()
+                        .HasForeignKey("TechnicianId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Domain.Entities.Vehicle", null)
+                        .WithMany()
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                    b.Navigation("Technician");
-                    b.Navigation("Vehicle");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.News",
@@ -3109,13 +3106,6 @@ namespace Infrastructure.SqlServerMigrations
                     b.Navigation("EmployeeProfile");
                 });
             modelBuilder.Entity(
-                "Domain.Entities.PlateDossier",
-                b =>
-                {
-                    b.HasOne("Domain.Entities.Output", "Output").WithMany().HasForeignKey("OutputId");
-                    b.Navigation("Output");
-                });
-            modelBuilder.Entity(
                 "Domain.Entities.Product",
                 b =>
                 {
@@ -3138,6 +3128,17 @@ namespace Infrastructure.SqlServerMigrations
                         .WithMany("SubCategories")
                         .HasForeignKey("ParentId");
                     b.Navigation("Parent");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ProductCategoryTranslation",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ProductCategory", "ProductCategory")
+                        .WithMany("Translations")
+                        .HasForeignKey("ProductCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("ProductCategory");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ProductCollectionPhoto",
@@ -3322,32 +3323,6 @@ namespace Infrastructure.SqlServerMigrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                     b.Navigation("PurchaseRequestItem");
-                });
-            modelBuilder.Entity(
-                "Domain.Entities.RepairOrder",
-                b =>
-                {
-                    b.HasOne("Domain.Entities.EmployeeProfile", "Technician").WithMany().HasForeignKey("TechnicianId");
-                    b.HasOne("Domain.Entities.Vehicle", "Vehicle").WithMany().HasForeignKey("VehicleId");
-                    b.Navigation("Technician");
-                    b.Navigation("Vehicle");
-                });
-            modelBuilder.Entity(
-                "Domain.Entities.RepairOrderDetail",
-                b =>
-                {
-                    b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId");
-                    b.HasOne("Domain.Entities.RepairOrder", "RepairOrder")
-                        .WithMany("Details")
-                        .HasForeignKey("RepairOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                    b.HasOne("Domain.Entities.Service", "Service").WithMany().HasForeignKey("ServiceId");
-                    b.Navigation("ProductVariant");
-                    b.Navigation("RepairOrder");
-                    b.Navigation("Service");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ReturnRequest",
@@ -3691,6 +3666,23 @@ namespace Infrastructure.SqlServerMigrations
                     b.Navigation("Vehicle");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.VoucherLead",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.Lead", "Lead")
+                        .WithMany()
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.HasOne("Domain.Entities.Voucher", "Voucher")
+                        .WithMany("VoucherLeads")
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Lead");
+                    b.Navigation("Voucher");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.WarrantyClaim",
                 b =>
                 {
@@ -3706,7 +3698,7 @@ namespace Infrastructure.SqlServerMigrations
                 b =>
                 {
                     b.HasOne("Domain.Entities.WarrantyClaim", "WarrantyClaim")
-                        .WithMany("Parts")
+                        .WithMany("WarrantyClaimParts")
                         .HasForeignKey("WarrantyClaimId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3848,6 +3840,12 @@ namespace Infrastructure.SqlServerMigrations
                     b.Navigation("Items");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.Logistics.Shipment",
+                b =>
+                {
+                    b.Navigation("Items");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.News",
                 b =>
                 {
@@ -3920,6 +3918,7 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Navigation("Products");
                     b.Navigation("SubCategories");
+                    b.Navigation("Translations");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ProductStatus",
@@ -3956,12 +3955,6 @@ namespace Infrastructure.SqlServerMigrations
                 b =>
                 {
                     b.Navigation("InventoryReceiptInfos");
-                });
-            modelBuilder.Entity(
-                "Domain.Entities.RepairOrder",
-                b =>
-                {
-                    b.Navigation("Details");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ReturnRequest",
@@ -4026,13 +4019,18 @@ namespace Infrastructure.SqlServerMigrations
                 b =>
                 {
                     b.Navigation("Documents");
-                    b.Navigation("MaintenanceHistories");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.Voucher",
+                b =>
+                {
+                    b.Navigation("VoucherLeads");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.WarrantyClaim",
                 b =>
                 {
-                    b.Navigation("Parts");
+                    b.Navigation("WarrantyClaimParts");
                 });
             #pragma warning restore 612, 618
         }

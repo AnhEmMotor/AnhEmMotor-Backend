@@ -1,13 +1,11 @@
 using Application.ApiContracts.Logistics.Responses;
 using Application.Features.Logistics.Queries.GetLogisticsDashboard;
 using Application.Interfaces.Repositories.LogisticsDashboard;
+using Domain.Enums;
 using Infrastructure.DBContexts;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Data;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Linq;
 
 namespace Infrastructure.Repositories.LogisticsDashboard;
 
@@ -20,138 +18,96 @@ public class LogisticsDashboardRepository : ILogisticsDashboardRepository
         _context = context;
     }
 
-    public async Task<LogisticsDashboardResponse> GetDashboardAsync(DateTime fromDate, CancellationToken cancellationToken)
+    public async Task<LogisticsDashboardResponse> GetDashboardAsync(
+        DateTime fromDate,
+        CancellationToken cancellationToken)
     {
         var response = new LogisticsDashboardResponse();
-
-        var connection = _context.Database.GetDbConnection();
-        var wasClosed = connection.State == ConnectionState.Closed;
-
-        if (wasClosed)
+        var workload = await _context.Shipments
+            .Where(s => s.Status == ParcelDeliveryStatus.Shipping && s.DeliveredAt == null)
+            .CountAsync(cancellationToken);
+        var pendingCod = await _context.Shipments
+            .Where(s => s.Status == ParcelDeliveryStatus.Shipping && s.DeliveredAt == null)
+            .SumAsync(s => s.CodAmount, cancellationToken);
+        var completedShipments = await _context.Shipments
+            .Where(
+                s => (s.Status == ParcelDeliveryStatus.Completed ||
+                        (s.Status == ParcelDeliveryStatus.Shipping && s.DeliveredAt != null)) &&
+                    s.CreatedAt >= fromDate)
+            .CountAsync(cancellationToken);
+        var returnedShipments = await _context.Shipments
+            .Where(s => s.Status == ParcelDeliveryStatus.Returned && s.CreatedAt >= fromDate)
+            .CountAsync(cancellationToken);
+        var totalFinished = completedShipments + returnedShipments;
+        double otif = totalFinished > 0 ? (double)completedShipments / totalFinished : 0.0;
+        double returnRate = totalFinished > 0 ? (double)returnedShipments / totalFinished : 0.0;
+        response.Summary = new LogisticsDashboardSummaryResponse
         {
-            await connection.OpenAsync(cancellationToken);
-        }
-
-        try
-        {
-            using var command = connection.CreateCommand();
-            command.CommandText = "[dbo].[sp_LogisticsDashboard]";
-            command.CommandType = CommandType.StoredProcedure;
-
-            var param = command.CreateParameter();
-            param.ParameterName = "@FromDate";
-            param.Value = fromDate;
-            command.Parameters.Add(param);
-
-            using var reader = await command.ExecuteReaderAsync(cancellationToken);
-
-            // 1. Summary Cards
-            if (await reader.ReadAsync(cancellationToken))
-            {
-                response.Summary = new LogisticsDashboardSummaryResponse
+            FulfillmentWorkload = workload,
+            FulfillmentWorkloadIsOverload = workload > 50,
+            PendingUnreconciledCod = pendingCod,
+            OtifRate = otif,
+            ReturnsClaimsRate = returnRate
+        };
+        var allShipments = await _context.Shipments.Where(s => s.CreatedAt >= fromDate).ToListAsync(cancellationToken);
+        response.FulfillmentFunnel["total"] = allShipments.Count;
+        response.FulfillmentFunnel["shipping"] = allShipments.Count(s => s.Status == ParcelDeliveryStatus.Shipping);
+        response.FulfillmentFunnel["completed"] = allShipments.Count(s => s.Status == ParcelDeliveryStatus.Completed);
+        response.FulfillmentFunnel["returned"] = allShipments.Count(s => s.Status == ParcelDeliveryStatus.Returned);
+        var trends = allShipments
+            .Where(s => s.CreatedAt != null)
+            .GroupBy(s => s.CreatedAt!.Value.Date)
+            .OrderBy(g => g.Key)
+            .Select(
+                g => new LogisticsTrendPointResponse
                 {
-                    FulfillmentWorkload = reader.IsDBNull(0) ? 0 : reader.GetInt32(0),
-                    FulfillmentWorkloadIsOverload = reader.IsDBNull(1) ? false : reader.GetInt32(1) == 1,
-                    PendingUnreconciledCod = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2),
-                    OtifRate = reader.IsDBNull(3) ? 0.0 : reader.GetDouble(3),
-                    ReturnsClaimsRate = reader.IsDBNull(4) ? 0.0 : reader.GetDouble(4)
-                };
-            }
-
-            // 2. Fulfillment Funnel
-            if (await reader.NextResultAsync(cancellationToken))
-            {
-                while (await reader.ReadAsync(cancellationToken))
+                    DayLabel = g.Key.ToString("dd/MM"),
+                    DeliveredCount = g.Count(s => s.Status == ParcelDeliveryStatus.Completed || s.DeliveredAt != null),
+                    ShippingCost = g.Sum(s => s.ShippingCost)
+                })
+            .ToList();
+        response.Trends = trends;
+        var carrierGroups = allShipments
+            .Where(s => !string.IsNullOrEmpty(s.Carrier))
+            .GroupBy(s => s.Carrier)
+            .Select(
+                g =>
                 {
-                    var statusName = reader.GetString(0);
-                    var count = reader.GetInt32(1);
-                    response.FulfillmentFunnel[statusName] = count;
-                }
-            }
-
-            // 3. Trends (14 days)
-            if (await reader.NextResultAsync(cancellationToken))
-            {
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    response.Trends.Add(new LogisticsTrendPointResponse
+                    var delivered = g.Where(s => s.Status == ParcelDeliveryStatus.Completed || s.DeliveredAt != null)
+                        .ToList();
+                    var returned = g.Where(s => s.Status == ParcelDeliveryStatus.Returned).ToList();
+                    double avgDays = delivered.Any(d => d.DeliveredAt.HasValue && d.CreatedAt.HasValue)
+                        ? delivered.Where(d => d.DeliveredAt.HasValue && d.CreatedAt.HasValue)
+                                .Average(d => (d.DeliveredAt!.Value - d.CreatedAt!.Value).TotalDays)
+                        : 0;
+                    return new CarrierScoreRowResponse
                     {
-                        DayLabel = reader.GetString(0),
-                        DeliveredCount = reader.GetInt32(1),
-                        ShippingCost = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2)
-                    });
-                }
-            }
-
-            // 4. Carrier Scorecard
-            if (await reader.NextResultAsync(cancellationToken))
-            {
-                while (await reader.ReadAsync(cancellationToken))
+                        Carrier = g.Key,
+                        DeliveredCount = delivered.Count,
+                        AvgDeliveryDays = Math.Round(avgDays, 1),
+                        AvgShippingCostPerOrder = g.Any() ? g.Average(s => s.ShippingCost) : 0,
+                        ReturnsRatio = g.Any() ? (double)returned.Count / g.Count() : 0
+                    };
+                })
+            .ToList();
+        response.CarrierScorecard = carrierGroups;
+        var stuckOrders = allShipments
+            .Where(
+                s => s.Status == ParcelDeliveryStatus.Shipping &&
+                    s.CreatedAt.HasValue &&
+                    (DateTimeOffset.UtcNow - s.CreatedAt.Value).TotalDays > 3)
+            .Select(
+                s => new LogisticsExceptionRowResponse
                 {
-                    response.CarrierScorecard.Add(new CarrierScoreRowResponse
-                    {
-                        Carrier = reader.GetString(0),
-                        DeliveredCount = reader.GetInt32(1),
-                        AvgDeliveryDays = reader.GetDouble(2),
-                        AvgShippingCostPerOrder = reader.IsDBNull(3) ? 0 : reader.GetDecimal(3),
-                        ReturnsRatio = reader.GetDouble(4)
-                    });
-                }
-            }
-
-            // 5a. ngam_kho
-            if (await reader.NextResultAsync(cancellationToken))
-            {
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    response.Exceptions.Add(new LogisticsExceptionRowResponse
-                    {
-                        Type = reader.GetString(0),
-                        TrackingNumber = reader.GetString(1),
-                        Message = reader.GetString(2),
-                        CreatedAt = reader.GetDateTime(3)
-                    });
-                }
-            }
-
-            // 5b. giao_cham
-            if (await reader.NextResultAsync(cancellationToken))
-            {
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    response.Exceptions.Add(new LogisticsExceptionRowResponse
-                    {
-                        Type = reader.GetString(0),
-                        TrackingNumber = reader.GetString(1),
-                        Message = reader.GetString(2),
-                        CreatedAt = reader.GetDateTime(3)
-                    });
-                }
-            }
-
-            // 5c. hoan_cho_kiem_tra
-            if (await reader.NextResultAsync(cancellationToken))
-            {
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    response.Exceptions.Add(new LogisticsExceptionRowResponse
-                    {
-                        Type = reader.GetString(0),
-                        TrackingNumber = reader.GetString(1),
-                        Message = reader.GetString(2),
-                        CreatedAt = reader.GetDateTime(3)
-                    });
-                }
-            }
-        }
-        finally
-        {
-            if (wasClosed)
-            {
-                await connection.CloseAsync();
-            }
-        }
-
+                    Type = "Overdue",
+                    TrackingNumber = s.TrackingNumber ?? s.Id.ToString(),
+                    Message =
+                        $"Đơn hàng quá hạn giao ({Math.Round((DateTimeOffset.UtcNow - s.CreatedAt!.Value).TotalDays)} ngày)",
+                    CreatedAt = s.CreatedAt.Value.UtcDateTime
+                })
+            .Take(5)
+            .ToList();
+        response.Exceptions = stuckOrders;
         return response;
     }
 }

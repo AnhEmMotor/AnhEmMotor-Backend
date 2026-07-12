@@ -29,5 +29,7 @@ namespace Application.DTOs.Analytics
         public bool IsPendingAlert { get; set; }
 
         public bool IsStockAlert { get; set; }
+
+        public List<ChannelDataDto> ChannelData { get; set; } = new List<ChannelDataDto>();
     }
 }

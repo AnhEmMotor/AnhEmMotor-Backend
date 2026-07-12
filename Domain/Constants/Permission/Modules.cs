@@ -1,5 +1,7 @@
 namespace Domain.Constants.Permission;
-public static class Modules {
+
+public static class Modules
+{
     public const string Admin = "Permissions.Admin";
     public const string Marketing = "Permissions.Marketing";
     public const string Warehouse = "Permissions.Warehouse";

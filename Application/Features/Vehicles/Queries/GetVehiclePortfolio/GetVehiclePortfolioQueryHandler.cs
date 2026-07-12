@@ -1,124 +1,148 @@
-using Application.ApiContracts.RepairOrder.Responses;
 using Application.ApiContracts.Vehicle.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.RepairOrder;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
-using Domain.Entities;
 using MediatR;
-using Sieve.Models;
-using System.Linq.Expressions;
-using System.Text.RegularExpressions;
+using System.Text.Json;
+using MaintenanceHistoryEntity = Domain.Entities.MaintenanceHistory;
 
 namespace Application.Features.Vehicles.Queries.GetVehiclePortfolio;
 
-public partial class GetVehiclePortfolioQueryHandler(
-    IVehicleReadRepository vehicleRepository,
-    IRepairOrderReadRepository repairOrderRepository) : IRequestHandler<GetVehiclePortfolioQuery, Result<VehiclePortfolioResponse>>
+public class GetVehiclePortfolioQueryHandler(
+    IVehicleReadRepository vehicleRepo,
+    IMaintenanceHistoryReadRepository maintenanceRepo) : IRequestHandler<GetVehiclePortfolioQuery, Result<VehiclePortfolioResponse?>>
 {
-    public async Task<Result<VehiclePortfolioResponse>> Handle(
-        GetVehiclePortfolioQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<VehiclePortfolioResponse?>> Handle(GetVehiclePortfolioQuery req, CancellationToken ct)
     {
-        var query = request.Query.Trim();
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            return Result<VehiclePortfolioResponse>.Failure("Query cannot be empty.");
-        }
-        var queryType = NormalizeQueryType(query, request.QueryType);
-        Expression<Func<Vehicle, bool>>? filter = null;
-        if (string.Compare(queryType, VehiclePortfolio.QueryTypePhone) == 0)
-        {
-            filter = v => v.Lead!.PhoneNumber.Contains(query);
-        } else if (string.Compare(queryType, VehiclePortfolio.QueryTypeLicensePlate) == 0)
-        {
-            filter = v => v.LicensePlate.Contains(query);
-        } else if (string.Compare(queryType, VehiclePortfolio.QueryTypeVin) == 0)
-        {
-            filter = v => v.VinNumber.Contains(query);
-        }
-        var vehicles = await vehicleRepository.GetPagedAsync<VehicleResponse>(
-            new SieveModel { Filters = string.Empty },
-            DataFetchMode.ActiveOnly,
-            filter,
-            cancellationToken)
+        var q = req.Query.Trim();
+        if (string.IsNullOrEmpty(q))
+            return Result<VehiclePortfolioResponse?>.Failure([Error.Validation("Query cannot be empty.")]);
+        var vehicle = await vehicleRepo.GetVehicleForPortfolioAsync(q, req.QueryType, ct).ConfigureAwait(false);
+        if (vehicle is null)
+            return Result<VehiclePortfolioResponse?>.Failure([Error.NotFound("No vehicle found matching the query.")]);
+        var allHistory = await maintenanceRepo.GetByVehicleIdAsync(vehicle.Id, ct, DataFetchMode.All)
             .ConfigureAwait(false);
-        if (vehicles == null || vehicles.Items == null || vehicles.Items.Count == 0)
+        List<MaintenanceHistoryEntity> historyItems = req.PageSize > 0 && req.Page > 0
+            ? allHistory
+				.OrderByDescending(h => h.MaintenanceDate)
+                .Skip((req.Page - 1) * req.PageSize)
+                .Take(req.PageSize)
+                .ToList()
+            : allHistory.ToList();
+        int totalHistoryCount = allHistory.Count();
+        var vehicleResponse = new VehicleResponse
         {
-            return Result<VehiclePortfolioResponse>.Failure("No vehicle found matching the query.");
-        }
-        var vehicle = vehicles.Items.First();
-        var roFilter = new SieveModel
-        {
-            Sorts = $"-{nameof(RepairOrder.CreatedAt)}",
-            Filters = $"VehicleId={vehicle.Id}"
+            Id = vehicle.Id,
+            FullName = vehicle.Lead?.FullName ?? string.Empty,
+            PhoneNumber = vehicle.Lead?.PhoneNumber ?? string.Empty,
+            VinNumber = vehicle.VinNumber,
+            EngineNumber = vehicle.EngineNumber,
+            LicensePlate = vehicle.LicensePlate,
+            PurchaseDate = vehicle.PurchaseDate,
+            LeadId = vehicle.LeadId ?? 0,
+            ProductVariantId = vehicle.ProductVariantId,
+            ProductVariantColorId = vehicle.ProductVariantColorId,
+            VariantName = vehicle.ProductVariant?.VariantName,
+            ColorName = vehicle.ProductVariantColor?.ColorName,
+            BrandName = vehicle.Product != null && vehicle.Product.Brand != null ? vehicle.Product.Brand.Name : null,
+            WarrantyPeriod = vehicle.Product?.WarrantyPeriod,
+            IsActive = vehicle.IsActive,
+            Documents = new()
         };
-        var historyResult = await repairOrderRepository.GetPagedAsync<RepairOrderResponse>(
-            roFilter,
-            DataFetchMode.ActiveOnly,
-            null,
-            cancellationToken)
-            .ConfigureAwait(false);
-        var alerts = GenerateAlerts(historyResult?.Items);
-        return Result<VehiclePortfolioResponse>.Success(
-            new VehiclePortfolioResponse
+        var historyResponse = historyItems.Select(
+            h =>
             {
-                Vehicle = vehicle,
-                History = historyResult?.Items ?? [],
-                TotalHistoryCount = (int)(historyResult?.TotalCount ?? 0),
-                Alerts = alerts
-            });
-    }
-
-    private static string NormalizeQueryType(string q, string forcedType)
-    {
-        if (string.Compare(forcedType, VehiclePortfolio.QueryTypeAuto) != 0)
-            return forcedType;
-        var sanitized = q.Replace(" ", string.Empty);
-        if (PhoneRegex().IsMatch(sanitized))
-            return VehiclePortfolio.QueryTypePhone;
-        if (VinRegex().IsMatch(q))
-            return VehiclePortfolio.QueryTypeVin;
-        if (LicensePlateRegex().IsMatch(q))
-            return VehiclePortfolio.QueryTypeLicensePlate;
-        return VehiclePortfolio.QueryTypeVin;
-    }
-
-    private static List<MaintenanceAlertResponse> GenerateAlerts(List<RepairOrderResponse>? history)
-    {
-        var alerts = new List<MaintenanceAlertResponse>();
-        if (history == null || history.Count == 0)
-            return alerts;
-        var latest = history.First();
-        long mileage = latest.Mileage;
-        if (mileage >= 3000)
-        {
-            alerts.Add(
-                new MaintenanceAlertResponse
+                List<PortfolioPartItem> details = new();
+                try
                 {
-                    Title = "Nhắc bảo dưỡng định kỳ (mốc ODO)",
-                    Severity = VehiclePortfolio.AlertSeverityWarning,
-                    Type = mileage >= 5000 ? VehiclePortfolio.AlertTypeWarning : VehiclePortfolio.AlertTypeInfo,
-                    Description = "Hiện trạng ODO đang vượt mốc nhắc nhở theo chu kỳ gần nhất."
-                });
-        }
-        alerts.Add(
-            new MaintenanceAlertResponse
-            {
-                Title = "Nhắc thay phụ tùng theo chu kỳ",
-                Severity = VehiclePortfolio.AlertSeveritySuggestion,
-                Type = VehiclePortfolio.AlertTypeWarning,
-                Description = "Có thể cần kiểm tra/đề xuất thay thế phụ tùng theo tình trạng thực tế và ODO."
-            });
-        return alerts;
+                    var parsed = JsonSerializer.Deserialize<PartsJsonWrapper>(h.PartsJson ?? string.Empty);
+                    if (parsed?.Parts != null)
+                    {
+                        foreach (var p in parsed.Parts)
+                        {
+                            details.Add(
+                                new PortfolioPartItem
+                                {
+                                    Type = "Part",
+                                    VariantName = p.VariantName,
+                                    ProductCode = p.ProductCode,
+                                    Count = p.Count
+                                });
+                        }
+                    }
+                    if (parsed?.Services != null)
+                    {
+                        foreach (var s in parsed.Services)
+                        {
+                            details.Add(
+                                new PortfolioPartItem
+                                {
+                                    Type = "Service",
+                                    VariantName = s.VariantName,
+                                    ProductCode = null,
+                                    Count = 1
+                                });
+                        }
+                    }
+                } catch
+                {
+                    details = new();
+                }
+                return new VehiclePortfolioHistoryItem
+                {
+                    Id = h.Id,
+                    MaintenanceNumber = h.MaintenanceNumber,
+                    VehicleId = h.VehicleId,
+                    VehicleInfo = null,
+                    MaintenanceDate = h.MaintenanceDate,
+                    Description = h.Description,
+                    Mileage = h.Mileage,
+                    TechnicianName = null,
+                    PartsCost = h.PartsCost,
+                    LaborCost = h.LaborCost,
+                    TotalCost = h.TotalCost,
+                    NextMaintenanceDate = h.NextMaintenanceDate,
+                    NextMaintenanceOdo = h.NextMaintenanceOdo,
+                    CreatedAt = h.CreatedAt.GetValueOrDefault(),
+                    Status = "Completed",
+                    PartsJson = h.PartsJson,
+                    Details = details
+                };
+            })
+            .ToList();
+        var result = new VehiclePortfolioResponse
+        {
+            Vehicle = vehicleResponse,
+            History = historyResponse,
+            TotalHistoryCount = totalHistoryCount
+        };
+        return Result<VehiclePortfolioResponse?>.Success(result);
     }
-
-    [GeneratedRegex(@"^\d{10,}$", RegexOptions.CultureInvariant)]
-    private static partial Regex PhoneRegex();
-
-    [GeneratedRegex(@"^[A-HJ-NPR-Z0-9]{8,}$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
-    private static partial Regex VinRegex();
-
-    [GeneratedRegex(@"^[0-9]{2}[-A-Za-z]?[0-9A-Za-z.-]")]
-    private static partial Regex LicensePlateRegex();
 }
+
+public class PartsJsonWrapper
+{
+    public List<PartItemDto>? Parts { get; set; }
+
+    public List<ServiceItemDto>? Services { get; set; }
+}
+
+public class PartItemDto
+{
+    public string? VariantName { get; set; }
+
+    public string? ProductCode { get; set; }
+
+    public int Count { get; set; }
+}
+
+public class ServiceItemDto
+{
+    public string? VariantName { get; set; }
+
+    public string? ProductCode { get; set; }
+
+    public int Count { get; set; }
+}
+

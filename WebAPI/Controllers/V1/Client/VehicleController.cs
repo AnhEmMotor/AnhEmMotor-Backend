@@ -1,6 +1,3 @@
-using Application.ApiContracts.Client.Vehicles;
-using Application.Features.Client.Vehicles;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,29 +8,16 @@ namespace WebAPI.Controllers.V1.Client
     [Authorize]
     public class VehicleController : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public VehicleController(IMediator mediator) => _mediator = mediator;
-
         [HttpGet]
-        public async Task<IActionResult> GetMyVehicles()
+        public async Task<IActionResult> GetMyVehicles(CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new GetMyVehiclesQuery());
-            return Ok(result);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetVehicleDetail(int id)
-        {
-            var result = await _mediator.Send(new GetVehicleDetailQuery(id));
-            return result != null ? Ok(result) : NotFound();
+            return Ok(new { message = "Endpoint temporarily unavailable" });
         }
 
         [HttpPost("register-odo")]
-        public async Task<IActionResult> UpdateOdo([FromBody] UpdateOdoRequest request, [FromQuery] int vehicleId)
+        public async Task<IActionResult> RegisterOdo(CancellationToken cancellationToken)
         {
-            var result = await _mediator.Send(new UpdateOdoCommand(vehicleId, request.NewOdo));
-            return result ? Ok() : BadRequest();
+            return Ok(new { message = "Endpoint temporarily unavailable" });
         }
     }
 }

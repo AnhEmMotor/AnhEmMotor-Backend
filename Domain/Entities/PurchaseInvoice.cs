@@ -17,7 +17,7 @@ namespace Domain.Entities
         [ForeignKey("PurchaseRequest")]
         public int? PurchaseRequestId { get; set; }
 
-        public Domain.Entities.PurchaseRequest? PurchaseRequest { get; set; }
+        public PurchaseRequest? PurchaseRequest { get; set; }
 
         [Column("SupplierId")]
         [ForeignKey("Supplier")]

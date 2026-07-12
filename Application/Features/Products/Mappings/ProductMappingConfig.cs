@@ -5,7 +5,9 @@ using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
 using Domain.Constants.Product;
 using Mapster;
+using System.Globalization;
 using System.Reflection;
+using System.Text.Json;
 using ProductEntity = Domain.Entities.Product;
 using ProductVariantEntity = Domain.Entities.ProductVariant;
 
@@ -13,6 +15,30 @@ namespace Application.Features.Products.Mappings;
 
 public class ProductMappingConfig : IRegister
 {
+    private static string GetCurrentLanguage()
+    {
+        return CultureInfo.CurrentCulture.Name.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ? "vi" : "en";
+    }
+
+    private static string? ResolveLocalizedText(string? json, string lang)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+            return null;
+        try
+        {
+            var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+            if (dict == null)
+                return null;
+            dict.TryGetValue(lang, out var value);
+            if (string.IsNullOrEmpty(value))
+                dict.TryGetValue("vi", out value);
+            return value;
+        } catch
+        {
+            return null;
+        }
+    }
+
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<ProductEntity, ProductDetailForManagerResponse>()
@@ -49,7 +75,7 @@ public class ProductMappingConfig : IRegister
                             })
                     .ToList())
             .Map(dest => dest.Stock, src => CalculateVariantStock(src))
-            .Map(dest => dest.HasBeenBooked, src => CalculateVariantBooked(src));
+            .Map(dest => dest.HasBeenBooked, src => (int)CalculateVariantBooked(src));
         config.NewConfig<VariantRow, ProductVariantDetailForManagerResponse>()
             .Map(
                 dest => dest.OptionValues,
@@ -135,6 +161,7 @@ public class ProductMappingConfig : IRegister
     public static ProductDetailForManagerResponse MapProductToDetailForManagerResponseWithAlertLevel(
         ProductEntity product)
     {
+        var lang = GetCurrentLanguage();
         var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
         var variantResponses = variantRows
             .Select(
@@ -183,18 +210,24 @@ public class ProductMappingConfig : IRegister
         return new ProductDetailForManagerResponse
         {
             Id = product.Id,
-            Name = product.Name,
+            Name = ResolveLocalizedText(product.NameJson, lang) ?? product.Name,
             CategoryId = product.CategoryId,
             CategoryName = product.ProductCategory?.Name,
             BrandId = product.BrandId,
             BrandName = product.Brand?.Name,
-            Description = product.Description,
+            Description = ResolveLocalizedText(product.DescriptionJson, lang) ?? product.Description,
             Weight = product.Weight,
             Dimensions = product.Dimensions,
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
-            GroundClearance = product.GroundClearance,
-            FuelCapacity = product.FuelCapacity,
+            GroundClearance =
+                decimal.TryParse(product.GroundClearance, NumberStyles.Any, CultureInfo.InvariantCulture, out var gc)
+                    ? gc
+                    : null,
+            FuelCapacity =
+                decimal.TryParse(product.FuelCapacity, NumberStyles.Any, CultureInfo.InvariantCulture, out var fc)
+                    ? fc
+                    : null,
             TireSize = product.TireSize,
             FrontSuspension = product.FrontSuspension,
             RearSuspension = product.RearSuspension,
@@ -226,9 +259,9 @@ public class ProductMappingConfig : IRegister
             StdSnell = product.StdSnell,
             StdJis = product.StdJis,
             OtherStandards = product.OtherStandards,
-            ShortDescription = product.ShortDescription,
-            MetaTitle = product.MetaTitle,
-            MetaDescription = product.MetaDescription,
+            ShortDescription = ResolveLocalizedText(product.ShortDescriptionJson, lang) ?? product.ShortDescription,
+            MetaTitle = ResolveLocalizedText(product.MetaTitleJson, lang) ?? product.MetaTitle,
+            MetaDescription = ResolveLocalizedText(product.MetaDescriptionJson, lang) ?? product.MetaDescription,
             CompatibleVehicleModelIds = [.. product.CompatibleWith.Select(c => c.CompatibleVehicleModelId)],
             StatusId = product.StatusId,
             ProductTechnologies = MapProductTechnologiesList(product),
@@ -239,6 +272,7 @@ public class ProductMappingConfig : IRegister
 
     private static ProductDetailResponse MapProductToDetailResponse(ProductEntity product)
     {
+        var lang = GetCurrentLanguage();
         var variantRows = product.ProductVariants
             .Where(v => v.DeletedAt == null)
             .Select(variant => variant.Adapt<VariantRow>())
@@ -249,17 +283,23 @@ public class ProductMappingConfig : IRegister
         return new ProductDetailResponse
         {
             Id = product.Id,
-            Name = product.Name,
+            Name = ResolveLocalizedText(product.NameJson, lang) ?? product.Name,
             CategoryName = product.ProductCategory?.Name,
             BrandId = product.BrandId,
             BrandName = product.Brand?.Name,
-            Description = product.Description,
+            Description = ResolveLocalizedText(product.DescriptionJson, lang) ?? product.Description,
             Weight = product.Weight,
             Dimensions = product.Dimensions,
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
-            GroundClearance = product.GroundClearance,
-            FuelCapacity = product.FuelCapacity,
+            GroundClearance =
+                decimal.TryParse(product.GroundClearance, NumberStyles.Any, CultureInfo.InvariantCulture, out var gc)
+                    ? gc
+                    : null,
+            FuelCapacity =
+                decimal.TryParse(product.FuelCapacity, NumberStyles.Any, CultureInfo.InvariantCulture, out var fc)
+                    ? fc
+                    : null,
             TireSize = product.TireSize,
             FrontSuspension = product.FrontSuspension,
             RearSuspension = product.RearSuspension,
@@ -291,9 +331,9 @@ public class ProductMappingConfig : IRegister
             StdSnell = product.StdSnell,
             StdJis = product.StdJis,
             OtherStandards = product.OtherStandards,
-            ShortDescription = product.ShortDescription,
-            MetaTitle = product.MetaTitle,
-            MetaDescription = product.MetaDescription,
+            ShortDescription = ResolveLocalizedText(product.ShortDescriptionJson, lang) ?? product.ShortDescription,
+            MetaTitle = ResolveLocalizedText(product.MetaTitleJson, lang) ?? product.MetaTitle,
+            MetaDescription = ResolveLocalizedText(product.MetaDescriptionJson, lang) ?? product.MetaDescription,
             CompatibleVehicleModelIds = [.. product.CompatibleWith.Select(c => c.CompatibleVehicleModelId)],
             ProductTechnologies = MapProductTechnologiesList(product),
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
@@ -366,11 +406,8 @@ public class ProductMappingConfig : IRegister
     private static string BuildVariantName(List<OptionPair> optionPairs)
     {
         if (optionPairs.Count == 0)
-        {
             return string.Empty;
-        }
-        var parts = optionPairs
-            .Where(op => !string.IsNullOrWhiteSpace(op.OptionValue))
+        var parts = optionPairs.Where(op => !string.IsNullOrWhiteSpace(op.OptionValue))
             .Select(op => op.OptionValue!)
             .ToList();
         return string.Join(" - ", parts);
@@ -399,20 +436,18 @@ public class ProductMappingConfig : IRegister
             displayName = productName;
         } else
         {
-            var parts = optionPairs
-                .Where(op => !string.IsNullOrWhiteSpace(op.OptionValue))
-                .Select(
-                    op =>
-                    {
-                        var translatedKey = op.OptionName != null &&
-                                    translations != null &&
-                                    translations.TryGetValue(op.OptionName, out var translated)
-                            ? translated
-                            : (string.Compare(op.OptionName, "Color", StringComparison.OrdinalIgnoreCase) == 0
-                                    ? "Màu sắc"
-                                    : op.OptionName ?? string.Empty);
-                        return $"{translatedKey}: {op.OptionValue}";
-                    })
+            var parts = optionPairs.Select(
+                op =>
+                {
+                    var translatedKey = op.OptionName != null &&
+                                translations != null &&
+                                translations.TryGetValue(op.OptionName, out var translated)
+                        ? translated
+                        : (string.Compare(op.OptionName, "Color", StringComparison.OrdinalIgnoreCase) == 0
+                                ? "Màu sắc"
+                                : op.OptionName ?? string.Empty);
+                    return $"{translatedKey}: {op.OptionValue}";
+                })
                 .ToList();
             displayName = $"{productName} ({string.Join(", ", parts)})";
         }
@@ -436,7 +471,7 @@ public class ProductMappingConfig : IRegister
 
     public static List<ProductVariantColorLiteResponse> MapVariantColors(ProductVariantEntity variant)
     {
-        return[.. variant.ProductVariantColors
+        return variant.ProductVariantColors
             .Select(
                 c => new ProductVariantColorLiteResponse
                 {
@@ -445,19 +480,16 @@ public class ProductMappingConfig : IRegister
                     ColorCode = c.ColorCode,
                     CoverImageUrl = c.CoverImageUrl,
                     MaxPurchaseQuantity = c.MaxPurchaseQuantity
-                })];
+                })
+            .ToList();
     }
 
     public static string CalculateInventoryStatus(long availableStock, long alertLevel)
     {
         if (availableStock <= 0)
-        {
             return InventoryStatus.OutOfStock;
-        }
         if (availableStock <= alertLevel)
-        {
             return InventoryStatus.LowStock;
-        }
         return InventoryStatus.InStock;
     }
 
@@ -517,13 +549,9 @@ public class ProductMappingConfig : IRegister
         Domain.Entities.ProductVariantColor? color)
     {
         if (color?.MaxPurchaseQuantity.HasValue == true)
-        {
             return color.MaxPurchaseQuantity.Value;
-        }
         if (variant.MaxPurchaseQuantity.HasValue)
-        {
             return variant.MaxPurchaseQuantity.Value;
-        }
         return GetEffectiveMaxPurchaseQuantity(variant.Product?.ProductCategory);
     }
 
@@ -538,9 +566,7 @@ public class ProductMappingConfig : IRegister
         while (current != null)
         {
             if (current.MaxPurchaseQuantity.HasValue)
-            {
                 return current.MaxPurchaseQuantity.Value;
-            }
             current = current.Parent;
         }
         return null;
@@ -550,12 +576,9 @@ public class ProductMappingConfig : IRegister
     {
         var statuses = product.ProductVariants
             .Select(
-                variant =>
-                {
-                    var stock = CalculateVariantStock(variant);
-                    var booked = CalculateVariantBooked(variant);
-                    return CalculateInventoryStatus(stock - booked, alertLevel);
-                })
+                variant => CalculateInventoryStatus(
+                    CalculateVariantStock(variant) - CalculateVariantBooked(variant),
+                    alertLevel))
             .ToList();
         return statuses.Count == 0 ? InventoryStatus.OutOfStock : statuses.MinBy(InventoryStatus.GetSeverity)!;
     }
@@ -651,19 +674,15 @@ public class ProductMappingConfig : IRegister
             return $"{variant.VariantName} - {colorName}";
         }
         if (!string.IsNullOrWhiteSpace(variant.VariantName))
-        {
             return variant.VariantName;
-        }
         if (!string.IsNullOrWhiteSpace(colorName))
-        {
             return colorName;
-        }
         if (!isOtherVariant && variant.VariantOptionValues.Count > 0)
         {
             return string.Join(
                 " - ",
                 variant.VariantOptionValues.Where(vov => vov.OptionValue != null).Select(vov => vov.OptionValue!.Name));
         }
-        return "Tiêu chuẩn";
+        return string.Empty;
     }
 }

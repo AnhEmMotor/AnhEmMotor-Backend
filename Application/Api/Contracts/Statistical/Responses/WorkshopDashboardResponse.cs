@@ -11,6 +11,12 @@ public class WorkshopDashboardResponse
     public Analytics Analytics { get; set; } = new();
 
     public Productivity Productivity { get; set; } = new();
+
+    public int WarrantyRequestsCount { get; set; }
+
+    public int ComplaintsCount { get; set; }
+
+    public List<RecentItem> RecentItems { get; set; } = new();
 }
 
 public class KpiCards
@@ -56,6 +62,10 @@ public class Analytics
     public RevenueComparison RevenueComparison { get; set; } = new();
 
     public List<RevenueSourceDto> RevenueSources { get; set; } = new();
+
+    public RevenueTrendDto RevenueTrend { get; set; } = new();
+
+    public List<RepairOrderStatusCountDto> RepairOrderStatusCounts { get; set; } = new();
 }
 
 public class RevenueComparison
@@ -97,4 +107,31 @@ public class TechnicianRankingDto
     public decimal TotalRevenue { get; set; }
 
     public double ComplaintRate { get; set; }
+}
+
+public class RecentItem
+{
+    public string TicketId { get; set; } = string.Empty;
+
+    public string Type { get; set; } = string.Empty;
+
+    public string CustomerName { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
+}
+
+public class RevenueTrendDto
+{
+    public List<string> Labels { get; set; } = new();
+
+    public List<decimal> ServiceRevenue { get; set; } = new();
+
+    public List<decimal> RetailRevenue { get; set; } = new();
+}
+
+public class RepairOrderStatusCountDto
+{
+    public string Status { get; set; } = string.Empty;
+
+    public int Count { get; set; }
 }

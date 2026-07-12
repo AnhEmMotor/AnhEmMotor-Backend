@@ -58,8 +58,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
 
-    public virtual DbSet<WorkshopPayment> WorkshopPayments { get; set; }
-
     public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
 
     public virtual DbSet<ProductVariant> ProductVariants { get; set; }
@@ -140,17 +138,13 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<Booking> Bookings { get; set; }
 
-    public virtual DbSet<PlateDossier> PlateDossiers { get; set; }
+    public virtual DbSet<Shipment> Shipments { get; set; }
 
-    public DbSet<WarrantyClaim> WarrantyClaims => Set<WarrantyClaim>();
+    public virtual DbSet<ShipmentItem> ShipmentItems { get; set; }
 
-    public DbSet<WarrantyClaimPart> WarrantyClaimParts => Set<WarrantyClaimPart>();
-
-    public virtual DbSet<RepairOrder> RepairOrders { get; set; }
+    public virtual DbSet<ProductCategoryTranslation> ProductCategoryTranslations { get; set; }
 
     public virtual DbSet<PurchaseInvoice> PurchaseInvoices { get; set; }
-
-    public virtual DbSet<RepairOrderDetail> RepairOrderDetails { get; set; }
 
     public virtual DbSet<ServiceCategory> ServiceCategories { get; set; }
 
@@ -163,8 +157,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
     public virtual DbSet<VehicleDocument> VehicleDocuments { get; set; }
-
-    public virtual DbSet<MaintenanceHistory> MaintenanceHistories { get; set; }
 
     public virtual DbSet<EmployeeProfile> EmployeeProfiles { get; set; }
 
@@ -210,6 +202,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<InventoryReceiptAuditLog> InventoryReceiptAuditLogs { get; set; }
 
+    public virtual DbSet<Voucher> Vouchers { get; set; }
+
+    public virtual DbSet<VoucherLead> VoucherLeads { get; set; }
+
     public virtual DbSet<InventoryReceiptInfoAuditLog> InventoryReceiptInfoAuditLogs { get; set; }
 
     public virtual DbSet<VehicleAuditLog> VehicleAuditLogs { get; set; }
@@ -234,6 +230,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ConversionTool> ConversionTools { get; set; }
 
+    public virtual DbSet<MaintenanceHistory> MaintenanceHistory { get; set; } = null!;
+
+    public virtual DbSet<WarrantyClaim> WarrantyClaims { get; set; }
+
+    public virtual DbSet<WarrantyClaimPart> WarrantyClaimParts { get; set; }
+
+    public virtual DbSet<WorkshopPayment> WorkshopPayments { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -242,9 +246,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<Invoice>().Property(i => i.RegistrationFee).HasPrecision(18, 2);
         modelBuilder.Entity<Invoice>().Property(i => i.InsuranceFee).HasPrecision(18, 2);
         modelBuilder.Entity<Invoice>().Property(i => i.TotalAmount).HasPrecision(18, 2);
-        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.LaborCost).HasPrecision(18, 2);
-        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.PartsCost).HasPrecision(18, 2);
-        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.TotalCost).HasPrecision(18, 2);
         modelBuilder.Entity<SupplierFinance>().Property(e => e.CurrentDebt).HasPrecision(18, 2);
         modelBuilder.Entity<SupplierFinance>().Property(sf => sf.CurrentDebt).HasPrecision(18, 2);
         modelBuilder.Entity<CurrentUnreconciledCod>().Property(e => e.Value).HasPrecision(18, 2);
@@ -253,8 +254,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.RefundAmount).HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>().Property(e => e.ReturnShippingCost).HasPrecision(18, 2);
         modelBuilder.Entity<CarrierPartner>().Property(e => e.MaxParcelWeightKg).HasPrecision(18, 2);
+        modelBuilder.Entity<Shipment>().Property(e => e.CodAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<Shipment>().Property(e => e.ShippingCost).HasPrecision(18, 2);
         modelBuilder.Entity<SupplierDebtLog>().Property(l => l.AmountPaid).HasPrecision(18, 2);
         modelBuilder.Entity<SupplierDebtLog>().Property(l => l.RemainingDebt).HasPrecision(18, 2);
+        modelBuilder.Entity<Voucher>().Property(v => v.DiscountValue).HasPrecision(18, 2);
+        modelBuilder.Entity<Voucher>().Property(v => v.MaxDiscountAmount).HasPrecision(18, 2);
         modelBuilder.Entity<ParcelDeliveryOrder>()
             .HasMany(p => p.Items)
             .WithOne(i => i.ParcelDeliveryOrder)
@@ -479,11 +484,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(nc => nc.UserId)
             .OnDelete(DeleteBehavior.SetNull);
-        modelBuilder.Entity<MaintenanceHistory>()
-            .HasOne(mh => mh.Vehicle)
-            .WithMany(v => v.MaintenanceHistories)
-            .HasForeignKey(mh => mh.VehicleId)
-            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<VehicleDocument>()
             .HasOne(vd => vd.Vehicle)
             .WithMany(v => v.Documents)
@@ -509,6 +509,35 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(v => v.ProductVariantColorId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<WarrantyClaim>()
+            .HasOne(wc => wc.Vehicle)
+            .WithMany()
+            .HasForeignKey(wc => wc.VehicleId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<WarrantyClaimPart>()
+            .HasOne(x => x.WarrantyClaim)
+            .WithMany(wc => wc.WarrantyClaimParts)
+            .HasForeignKey(x => x.WarrantyClaimId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<WarrantyClaim>().Property(e => e.TotalPartsCost).HasPrecision(18, 2);
+        modelBuilder.Entity<WarrantyClaim>().Property(e => e.TotalLaborCost).HasPrecision(18, 2);
+        modelBuilder.Entity<WarrantyClaimPart>().Property(e => e.UnitPrice).HasPrecision(18, 2);
+        modelBuilder.Entity<MaintenanceHistory>()
+            .HasOne<Vehicle>()
+            .WithMany()
+            .HasForeignKey(x => x.VehicleId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<MaintenanceHistory>()
+            .HasOne<EmployeeProfile>()
+            .WithMany()
+            .HasForeignKey(x => x.TechnicianId)
+            .OnDelete(DeleteBehavior.SetNull);
+        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.PartsCost).HasPrecision(18, 2);
+        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.LaborCost).HasPrecision(18, 2);
+        modelBuilder.Entity<MaintenanceHistory>().Property(e => e.TotalCost).HasPrecision(18, 2);
+        modelBuilder.Entity<WorkshopPayment>().Property(p => p.SubTotal).HasPrecision(18, 2);
+        modelBuilder.Entity<WorkshopPayment>().Property(p => p.DiscountAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<WorkshopPayment>().Property(p => p.TotalAmount).HasPrecision(18, 2);
         modelBuilder.Entity<InventoryReceiptInfo>()
             .HasOne(ii => ii.PurchaseRequestItem)
             .WithMany(pri => pri.InventoryReceiptInfos)
@@ -635,6 +664,20 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                 }
             }
         }
+        modelBuilder.Entity<Voucher>().HasIndex(v => v.Code).IsUnique();
+        modelBuilder.Entity<VoucherLead>().HasKey(vl => new { vl.VoucherId, vl.LeadId });
+        modelBuilder.Entity<VoucherLead>()
+            .HasOne(vl => vl.Voucher)
+            .WithMany(v => v.VoucherLeads)
+            .HasForeignKey(vl => vl.VoucherId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<VoucherLead>()
+            .HasOne(vl => vl.Lead)
+            .WithMany()
+            .HasForeignKey(vl => vl.LeadId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<VoucherLead>()
+            .HasQueryFilter(vl => vl.Lead.DeletedAt == null && vl.Voucher.DeletedAt == null);
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))

@@ -1,33 +1,24 @@
-using Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Domain.Entities
+namespace Domain.Entities;
+
+[Table("WarrantyClaimPart")]
+public class WarrantyClaimPart : BaseEntity
 {
-    [Table("WarrantyClaimPart")]
-    public class WarrantyClaimPart : BaseEntity
-    {
-        [Key]
-        [Column("Id")]
-        public int Id { get; set; }
+    [Key]
+    [Column("Id")]
+    public int Id { get; set; }
 
-        [Column("WarrantyClaimId")]
-        [ForeignKey("WarrantyClaim")]
-        public int WarrantyClaimId { get; set; }
+    public int WarrantyClaimId { get; set; }
 
-        public WarrantyClaim? WarrantyClaim { get; set; }
+    public string PartName { get; set; } = string.Empty;
 
-        [Required]
-        [Column("PartName", TypeName = "nvarchar(200)")]
-        public string PartName { get; set; } = string.Empty;
+    public string PartCode { get; set; } = string.Empty;
 
-        [Column("PartCode", TypeName = "nvarchar(100)")]
-        public string PartCode { get; set; } = string.Empty;
+    public decimal UnitPrice { get; set; }
 
-        [Column("UnitPrice", TypeName = "decimal(18,2)")]
-        public decimal UnitPrice { get; set; }
+    public int Status { get; set; }
 
-        [Column("Status")]
-        public WarrantyPartStatus Status { get; set; } = WarrantyPartStatus.Pending;
-    }
+    public virtual WarrantyClaim WarrantyClaim { get; set; } = null!;
 }

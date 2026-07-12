@@ -19,6 +19,22 @@ public class ProductCategoryReadRepository(
     ISievePaginator paginator,
     ISieveProcessor sieveProcessor) : IProductCategoryReadRepository
 {
+    private static string GetCurrentLanguage()
+    {
+        var culture = CultureInfo.CurrentCulture.Name;
+        return culture.StartsWith("vi", StringComparison.OrdinalIgnoreCase) ? "vi" : "en";
+    }
+
+    private string BuildLocalizedNameSelect(string lang)
+    {
+        return lang == "vi" ? "t.Name" : "COALESCE(tEn.Name, tVi.Name)";
+    }
+
+    private string BuildLocalizedDescSelect(string lang)
+    {
+        return lang == "vi" ? "t.Description" : "COALESCE(tEn.Description, tVi.Description)";
+    }
+
     public async Task<ProductCategoryStatsResponse> GetStatisticsAsync(CancellationToken cancellationToken)
     {
         var query = context.GetQuery<CategoryEntity>(DataFetchMode.ActiveOnly);
@@ -52,40 +68,71 @@ public class ProductCategoryReadRepository(
         string? searchKeyword,
         CancellationToken cancellationToken)
     {
+        var lang = GetCurrentLanguage();
+        var nameField = lang == "vi" ? "tVi.Name" : "COALESCE(tEn.Name, tVi.Name)";
+        var descField = lang == "vi" ? "tVi.Description" : "COALESCE(tEn.Description, tVi.Description)";
         PagedResult<ProductCategoryResponse> result;
+        var allQuery = from c in context.GetQuery<CategoryEntity>(DataFetchMode.ActiveOnly)
+                        join tvi in context.ProductCategoryTranslations
+                            .Where(tr => tr.LanguageCode == "vi" && tr.DeletedAt == null)
+                            on c.Id equals tvi.ProductCategoryId into tviGroup
+            from tVi in tviGroup.DefaultIfEmpty()
+                        join tEn in context.ProductCategoryTranslations
+                            .Where(tr => tr.LanguageCode == "en" && tr.DeletedAt == null)
+                            on c.Id equals tEn.ProductCategoryId into tEnGroup
+            from tEn in tEnGroup.DefaultIfEmpty()
+            select new { c, tVi, tEn };
         if (!string.IsNullOrWhiteSpace(searchKeyword))
         {
-            var allCategories = await GetAllAsync(cancellationToken).ConfigureAwait(false);
-            var matchedCategories = allCategories.Where(
-                c => RemoveDiacritics(c.Name ?? string.Empty)
-                    .Contains(RemoveDiacritics(searchKeyword), StringComparison.OrdinalIgnoreCase))
+            var allItems = await allQuery
+                   .Select(
+                       x => new
+                       {
+                           x.c,
+                           Name = EF.Property<string>(x.tVi, "Name") ?? EF.Property<string>(x.tEn, "Name") ?? x.c.Name,
+                           DescVi = EF.Property<string>(x.tVi, "Description"),
+                           DescEn = EF.Property<string>(x.tEn, "Description")
+                       })
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+            var matched = allItems
+                .Where(
+                    x => RemoveDiacritics(x.Name ?? string.Empty)
+                        .Contains(RemoveDiacritics(searchKeyword), StringComparison.OrdinalIgnoreCase))
                 .ToList();
             var resultIds = new HashSet<int>();
-            foreach (var cat in matchedCategories)
+            foreach (var item in matched)
             {
-                resultIds.Add(cat.Id);
-                var parent = cat;
+                resultIds.Add(item.c.Id);
+                var parent = item.c;
                 while (parent.ParentId.HasValue)
                 {
                     var parentId = parent.ParentId.Value;
                     if (!resultIds.Add(parentId))
                         break;
-                    parent = allCategories.FirstOrDefault(c => c.Id == parentId);
+                    parent = allItems.FirstOrDefault(x => x.c.Id == parentId)?.c;
                     if (parent == null)
                         break;
                 }
-                var children = allCategories.Where(c => c.ParentId == cat.Id);
+                var children = matched.Where(x => x.c.ParentId == item.c.Id).Select(x => x.c);
                 foreach (var child in children)
-                {
                     resultIds.Add(child.Id);
-                }
             }
-            var finalCategories = allCategories.Where(c => resultIds.Contains(c.Id)).ToList();
-            var query = finalCategories.AsQueryable();
-            var totalCount = query.Count();
-            var pagedQuery = sieveProcessor.Apply(sieveModel, query, applyFiltering: false);
-            var paginatedCategories = pagedQuery.ToList();
-            var responseItems = paginatedCategories.Select(c => c.Adapt<ProductCategoryResponse>()).ToList();
+            var finalItems = allItems.Where(x => resultIds.Contains(x.c.Id)).ToList();
+            var totalCount = finalItems.Count;
+            var entityItems = finalItems.Select(x => x.c).AsQueryable();
+            var pagedQuery = sieveProcessor.Apply(sieveModel, entityItems, applyFiltering: false);
+            var paginated = pagedQuery.ToList();
+            var responseItems = paginated.Select(
+                c =>
+                {
+                    var response = c.Adapt<ProductCategoryResponse>();
+                    var info = finalItems.First(x => x.c.Id == c.Id);
+                    response.Name = info.Name ?? c.Name;
+                    response.Description = !string.IsNullOrWhiteSpace(info.DescVi) ? info.DescVi : info.DescEn;
+                    return response;
+                })
+                .ToList();
             result = new PagedResult<ProductCategoryResponse>(
                 responseItems,
                 totalCount,
@@ -93,14 +140,83 @@ public class ProductCategoryReadRepository(
                 sieveModel.PageSize ?? 10);
         } else
         {
-            result = await GetPagedAsync<ProductCategoryResponse>(sieveModel, cancellationToken: cancellationToken)
+            var pagedSieveQuery = sieveProcessor.Apply(
+                sieveModel,
+                context.GetQuery<CategoryEntity>(DataFetchMode.ActiveOnly));
+            var totalCountAll = await sieveProcessor.Apply(
+                sieveModel,
+                context.GetQuery<CategoryEntity>(DataFetchMode.ActiveOnly),
+                applyPagination: false)
+                .CountAsync(cancellationToken)
                 .ConfigureAwait(false);
+            var pagedEntities = await pagedSieveQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
+            var entityIds = pagedEntities.Select(e => e.Id).ToList();
+            var translations = await context.ProductCategoryTranslations
+                .Where(t => entityIds.Contains(t.ProductCategoryId) && t.DeletedAt == null)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+            var responseItems = pagedEntities.Select(
+                c =>
+                {
+                    var response = c.Adapt<ProductCategoryResponse>();
+                    var tVi = translations.FirstOrDefault(t => t.ProductCategoryId == c.Id && t.LanguageCode == "vi");
+                    var tEn = translations.FirstOrDefault(t => t.ProductCategoryId == c.Id && t.LanguageCode == "en");
+                    var name = c.Name;
+                    var nameVi = tVi?.Name;
+                    var nameEn = tEn?.Name;
+                    if (!string.IsNullOrWhiteSpace(name))
+                    {
+                        response.Name = name;
+                    } else
+                    {
+                        response.Name = !string.IsNullOrWhiteSpace(nameVi) ? nameVi : nameEn;
+                    }
+                    response.Description = !string.IsNullOrWhiteSpace(tVi?.Description)
+                        ? tVi.Description
+                        : tEn?.Description;
+                    return response;
+                })
+                .ToList();
+            result = new PagedResult<ProductCategoryResponse>(
+                responseItems,
+                totalCountAll,
+                sieveModel.Page ?? 1,
+                sieveModel.PageSize ?? 10);
         }
         if (result.Items != null)
         {
             await PopulateInventoryQtyAsync(result.Items, cancellationToken).ConfigureAwait(false);
         }
         return result;
+    }
+
+    private static void SetLocalizedNames(List<ProductCategoryResponse> responses, IEnumerable<object> localizedData)
+    {
+        var dict = localizedData
+            .Select((x, i) => (Response: responses.ElementAtOrDefault(i), Data: x))
+            .Where(x => x.Response != null)
+            .ToList();
+        foreach (var (response, data) in dict)
+        {
+            var nameProp = data.GetType().GetProperty("Name");
+            var nameViProp = data.GetType().GetProperty("NameVi");
+            var nameEnProp = data.GetType().GetProperty("NameEn");
+            var descViProp = data.GetType().GetProperty("DescVi");
+            var descEnProp = data.GetType().GetProperty("DescEn");
+            var name = nameProp?.GetValue(data) as string;
+            var nameVi = nameViProp?.GetValue(data) as string;
+            var nameEn = nameEnProp?.GetValue(data) as string;
+            var descVi = descViProp?.GetValue(data) as string;
+            var descEn = descEnProp?.GetValue(data) as string;
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                response!.Name = name;
+            } else
+            {
+                response!.Name = !string.IsNullOrWhiteSpace(nameVi) ? nameVi : (nameEn ?? string.Empty);
+            }
+            response!.Description = !string.IsNullOrWhiteSpace(descVi) ? descVi : (descEn ?? string.Empty);
+        }
     }
 
     private async Task PopulateInventoryQtyAsync(
@@ -129,25 +245,6 @@ public class ProductCategoryReadRepository(
                 item.InventoryQty = categoryInventory.GetValueOrDefault(item.Id.Value, 0);
             }
         }
-    }
-
-    public Task<bool> ExistsByNameAsync(
-        string name,
-        CancellationToken cancellationToken,
-        DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<CategoryEntity>(mode)
-            .AnyAsync(c => string.Compare(c.Name, name) == 0, cancellationToken);
-    }
-
-    public Task<bool> ExistsByNameExceptIdAsync(
-        string name,
-        int id,
-        CancellationToken cancellationToken,
-        DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<CategoryEntity>(mode)
-            .AnyAsync(x => string.Compare(x.Name, name) == 0 && x.Id != id, cancellationToken);
     }
 
     public Task<List<CategoryEntity>> GetAllAsync(
@@ -240,6 +337,23 @@ public class ProductCategoryReadRepository(
             .ConfigureAwait(false);
     }
 
+    public Task<bool> ExistsByNameAsync(
+        string name,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return context.GetQuery<CategoryEntity>(mode).AnyAsync(c => c.Name == name, cancellationToken);
+    }
+
+    public Task<bool> ExistsByNameExceptIdAsync(
+        string name,
+        int id,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return context.GetQuery<CategoryEntity>(mode).AnyAsync(c => c.Name == name && c.Id != id, cancellationToken);
+    }
+
     internal IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<CategoryEntity>(mode).Include(c => c.Products);
@@ -259,6 +373,10 @@ public class ProductCategoryReadRepository(
                 stringBuilder.Append(c);
             }
         }
-        return stringBuilder.ToString().Normalize(NormalizationForm.FormC).Replace('đ', 'd').Replace('Đ', 'D');
+        return stringBuilder
+            .ToString()
+            .Normalize(NormalizationForm.FormC)
+            .Replace('đ', 'd')
+            .Replace('Đ', 'D');
     }
 }

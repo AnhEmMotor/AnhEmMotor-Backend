@@ -3,6 +3,7 @@ using Application.Features.InventoryReceipts.Queries.GetInventoryReceiptsBySuppl
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
+using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
 using Moq;
@@ -35,7 +36,7 @@ public class InventoryReceiptsSupplierHistory
             x => x.GetPagedAsync<InventoryReceiptListResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Domain.Entities.InventoryReceipt, bool>>>(),
+                It.IsAny<Expression<Func<InventoryReceipt, bool>>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(paged);
         var handler = new GetInventoryReceiptsBySupplierIdQueryHandler(receiptRepoMock.Object, supplierRepoMock.Object);
@@ -63,7 +64,7 @@ public class InventoryReceiptsSupplierHistory
             x => x.GetPagedAsync<InventoryReceiptListResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Domain.Entities.InventoryReceipt, bool>>>(),
+                It.IsAny<Expression<Func<InventoryReceipt, bool>>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(paged);
         var handler = new GetInventoryReceiptsBySupplierIdQueryHandler(receiptRepoMock.Object, supplierRepoMock.Object);

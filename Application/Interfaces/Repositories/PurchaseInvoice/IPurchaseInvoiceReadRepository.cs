@@ -7,17 +7,17 @@ namespace Application.Interfaces.Repositories.PurchaseInvoice
 {
     public interface IPurchaseInvoiceReadRepository
     {
-        Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
             SieveModel sieveModel,
             DataFetchMode mode = DataFetchMode.ActiveOnly,
             CancellationToken cancellationToken = default);
 
-        Task<PurchaseInvoiceEntity?> GetByIdAsync(
+        public Task<PurchaseInvoiceEntity?> GetByIdAsync(
             int id,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<PurchaseInvoiceEntity?> GetByIdWithItemsAsync(
+        public Task<PurchaseInvoiceEntity?> GetByIdWithItemsAsync(
             int id,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
@@ -25,17 +25,17 @@ namespace Application.Interfaces.Repositories.PurchaseInvoice
 
     public interface IPurchaseInvoiceInsertRepository
     {
-        void Add(PurchaseInvoiceEntity purchaseInvoice);
+        public void Add(PurchaseInvoiceEntity purchaseInvoice);
     }
 
     public interface IPurchaseInvoiceUpdateRepository
     {
-        void Update(PurchaseInvoiceEntity purchaseInvoice);
+        public void Update(PurchaseInvoiceEntity purchaseInvoice);
     }
 
     public interface IPurchaseInvoiceDeleteRepository
     {
-        void Delete(PurchaseInvoiceEntity purchaseInvoice);
+        public void Delete(PurchaseInvoiceEntity purchaseInvoice);
     }
 }
 

@@ -538,7 +538,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var request = new CreateProductCategoryCommand
         {
-            Name = $"API_Test_{uniqueId}",
+            NameVi = $"API_Test_{uniqueId}",
+            NameEn = $"API_Test_{uniqueId}_En",
             Description = "Integration test",
             ManagementType = "vin_number"
         };
@@ -588,7 +589,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
-        var request = new UpdateProductCategoryCommand { Name = $"Updated_{uniqueId}" };
+        var request = new UpdateProductCategoryCommand
+        {
+            NameVi = $"Updated_{uniqueId}",
+            NameEn = $"Updated_{uniqueId}_En"
+        };
         var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{categoryId}", request)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1042,7 +1047,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             new
             {
                 id = childId,
-                name = $"UpdatedChild{dataId}",
+                nameVi = $"UpdatedChild{dataId}",
+                nameEn = $"UpdatedChild{dataId}En",
                 parentId = newParentId,
                 categoryGroup = "Product",
                 slug = $"child-updated-{dataId}",
@@ -1124,7 +1130,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             new
             {
                 id = childId,
-                name = $"ChildUpdated{dataId}",
+                nameVi = $"ChildUpdated{dataId}",
+                nameEn = $"ChildUpdated{dataId}En",
                 parentId = parentBId,
                 categoryGroup = "Product",
                 slug = $"c-up-{dataId}",
@@ -1218,7 +1225,13 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             categoryId = category.Id;
         }
-        var request = new UpdateProductCategoryCommand { Id = categoryId, ParentId = categoryId };
+        var request = new UpdateProductCategoryCommand
+        {
+            Id = categoryId,
+            ParentId = categoryId,
+            NameVi = "Test",
+            NameEn = "TestEn"
+        };
         var response = await HttpClientJsonExtensions.PutAsJsonAsync(
             _client,
             $"/api/v1/ProductCategory/{categoryId}",
@@ -1247,7 +1260,13 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             childId = child.Id;
         }
-        var request = new UpdateProductCategoryCommand { Id = parentId, ParentId = childId };
+        var request = new UpdateProductCategoryCommand
+        {
+            Id = parentId,
+            ParentId = childId,
+            NameVi = "Test",
+            NameEn = "TestEn"
+        };
         var response = await HttpClientJsonExtensions.PutAsJsonAsync(
             _client,
             $"/api/v1/ProductCategory/{parentId}",

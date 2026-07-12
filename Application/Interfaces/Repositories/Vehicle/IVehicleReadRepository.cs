@@ -7,6 +7,8 @@ namespace Application.Interfaces.Repositories.Vehicle
 {
     public interface IVehicleReadRepository
     {
+        public IQueryable<Domain.Entities.Vehicle> GetQueryable();
+
         public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
             SieveModel sieveModel,
             DataFetchMode mode = DataFetchMode.ActiveOnly,
@@ -60,6 +62,10 @@ namespace Application.Interfaces.Repositories.Vehicle
         public Task<Domain.Entities.Vehicle?> GetByLicensePlateAsync(
             string licensePlate,
             CancellationToken cancellationToken = default);
+
+        public Task<Domain.Entities.Vehicle?> GetVehicleForPortfolioAsync(
+            string query,
+            string queryType,
+            CancellationToken cancellationToken = default);
     }
 }
-

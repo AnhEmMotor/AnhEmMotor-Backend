@@ -1,4 +1,3 @@
-
 namespace Application.ApiContracts.Output.Responses;
 
 public class OrderDetailResponse
@@ -33,7 +32,11 @@ public class OrderDetailResponse
 
     public string? CompletedByUserName { get; set; }
 
+    public DateTimeOffset? CreatedAt { get; set; }
+
     public decimal? Total { get; set; }
+
+    public decimal? Subtotal { get; set; }
 
     public decimal? ShippingFee { get; set; }
 
@@ -42,6 +45,18 @@ public class OrderDetailResponse
     public decimal? DepositAmount { get; set; }
 
     public decimal? RemainingAmount { get; set; }
+
+    public bool IsCompanyInvoice { get; set; }
+
+    public string? CompanyName { get; set; }
+
+    public string? CompanyAddress { get; set; }
+
+    public string? CompanyTaxCode { get; set; }
+
+    public string? CompanyEmail { get; set; }
+
+    public string? BudgetCode { get; set; }
 
     public List<OutputInfoResponse> Products { get; set; } = [];
 }

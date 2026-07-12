@@ -11,7 +11,11 @@ public class GetAdminWarehouseReportQueryHandler(IStatisticalReadRepository repo
         GetAdminWarehouseReportQuery request,
         CancellationToken cancellationToken)
     {
-        var warehouseData = await repository.GetWarehouseTableDataAsync(cancellationToken).ConfigureAwait(false);
+        var _now = DateTimeOffset.UtcNow;
+        var end = request.EndDate ?? _now;
+        var start = request.StartDate ?? _now.AddDays(-30);
+        var warehouseData = await repository.GetWarehouseTableDataAsync(start, end, cancellationToken)
+            .ConfigureAwait(false);
         var tableDataList = warehouseData.ToList();
         var totalStock = tableDataList.Sum(x => x.TotalStock);
         var totalValue = tableDataList.Sum(x => x.Value);
@@ -28,12 +32,13 @@ public class GetAdminWarehouseReportQueryHandler(IStatisticalReadRepository repo
             x => new BrandStockResponse
             {
                 BrandName = x.BrandName,
-                InStock = x.TotalStock - x.LowStock - x.OutOfStock,
+                StockCount = x.TotalStock,
+                InStock = Math.Max(0, x.TotalStock - x.LowStock - x.OutOfStock),
                 LowStock = x.LowStock,
                 OutOfStock = x.OutOfStock
             })
             .ToList();
-        var safeCount = totalStock - lowStockCount - outOfStockCount;
+        var safeCount = Math.Max(0, totalStock - lowStockCount - outOfStockCount);
         var stockStatusRatio = new List<StockStatusRatioResponse>
         {
             new StockStatusRatioResponse { StatusLabel = "An toàn", Count = safeCount },

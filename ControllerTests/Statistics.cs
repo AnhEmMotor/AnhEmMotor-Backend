@@ -26,7 +26,7 @@ public class Statistics
     {
         _mediatorMock = new Mock<IMediator>();
         _repositoryMock = new Mock<IStatisticalReadRepository>();
-        _controller = new StatisticsController(_mediatorMock.Object, _repositoryMock.Object);
+        _controller = new StatisticsController(_mediatorMock.Object, _repositoryMock.Object, null!);
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }

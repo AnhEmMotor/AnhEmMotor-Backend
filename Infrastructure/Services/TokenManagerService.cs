@@ -118,4 +118,12 @@ public class TokenManagerService : ITokenManagerService
     public int GetRefreshTokenExpiryDays() => _refreshTokenExpiryDays;
 
     public int GetAccessTokenExpiryMinutes() => _accessTokenExpiryMinutes;
+
+    public string CreateRandomToken(int length = 32)
+    {
+        var bytes = new byte[length];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(bytes);
+        return Convert.ToBase64String(bytes);
+    }
 }

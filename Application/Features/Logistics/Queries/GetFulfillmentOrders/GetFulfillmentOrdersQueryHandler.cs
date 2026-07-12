@@ -1,22 +1,32 @@
 using Application.ApiContracts.Logistics.Responses;
-using Application.Interfaces.Repositories.ParcelDeliveryOrder;
+using Application.Interfaces.Repositories.Logistics.Shipment;
+using Domain.Enums;
 using MediatR;
 using System;
 using System.Linq;
 
 namespace Application.Features.Logistics.Queries.GetFulfillmentOrders
 {
-    public class GetFulfillmentOrdersQueryHandler(IParcelDeliveryOrderReadRepository parcelDeliveryOrderReadRepository) : IRequestHandler<GetFulfillmentOrdersQuery, List<FulfillmentOrderResponse>>
+    public class GetFulfillmentOrdersQueryHandler(IShipmentReadRepository shipmentReadRepository) : IRequestHandler<GetFulfillmentOrdersQuery, List<FulfillmentOrderResponse>>
     {
         public async Task<List<FulfillmentOrderResponse>> Handle(
             GetFulfillmentOrdersQuery request,
             CancellationToken cancellationToken)
         {
-            var parcels = await parcelDeliveryOrderReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-            var query = parcels.AsEnumerable();
+            var shipments = await shipmentReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
+            var query = shipments.AsEnumerable();
             if (request.Status.HasValue)
             {
-                query = query.Where(x => x.Status == request.Status.Value);
+                if (request.Status.Value == ParcelDeliveryStatus.Completed)
+                {
+                    query = query.Where(x => x.Status == ParcelDeliveryStatus.Completed);
+                } else if (request.Status.Value == ParcelDeliveryStatus.Shipping)
+                {
+                    query = query.Where(x => x.Status == ParcelDeliveryStatus.Shipping);
+                } else if (request.Status.Value == ParcelDeliveryStatus.Returned)
+                {
+                    query = query.Where(x => x.Status == ParcelDeliveryStatus.Returned);
+                }
             }
             if (!string.IsNullOrWhiteSpace(request.Carrier))
             {
@@ -37,17 +47,20 @@ namespace Application.Features.Logistics.Queries.GetFulfillmentOrders
                     {
                         Id = x.Id,
                         TrackingNumber = x.TrackingNumber ?? string.Empty,
-                        OriginalOrderCode = x.OriginalOrderCode ?? string.Empty,
+                        OriginalOrderCode = x.OutputId?.ToString() ?? string.Empty,
                         CustomerName = x.CustomerName ?? string.Empty,
                         CustomerPhone = x.CustomerPhone ?? string.Empty,
-                        CustomerAddress = x.CustomerAddress ?? string.Empty,
+                        CustomerAddress = x.DestinationAddress ?? string.Empty,
                         Carrier = x.Carrier ?? string.Empty,
-                        Status = x.Status,
+                        Status =
+                            x.Status == ParcelDeliveryStatus.Shipping && x.DeliveredAt.HasValue
+                                    ? ParcelDeliveryStatus.Completed
+                                    : x.Status,
                         CodAmount = x.CodAmount,
                         ShippingCost = x.ShippingCost,
-                        CreatedAt = x.CreatedAt,
-                        ExpectedAt = x.ExpectedAt,
-                        DeliveredAt = x.DeliveredAt
+                        CreatedAt = x.CreatedAt?.DateTime ?? DateTime.MinValue,
+                        ExpectedAt = null,
+                        DeliveredAt = x.DeliveredAt?.DateTime
                     })
                 .ToList();
         }

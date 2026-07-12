@@ -232,6 +232,54 @@ public class ProductReadRepository(
                     cancellationToken)
                 .ConfigureAwait(false);
         var query = context.Products.AsNoTracking();
+        var cleanFiltersList = new List<string>();
+        var versionFilters = new List<string>();
+        var colorFilters = new List<string>();
+        if (!string.IsNullOrWhiteSpace(filters))
+        {
+            var parts = filters.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var part in parts)
+            {
+                var trimmed = part.Trim();
+                if (trimmed.StartsWith("VariantName==", StringComparison.OrdinalIgnoreCase))
+                {
+                    var val = trimmed["VariantName==".Length..].Trim();
+                    versionFilters = val.Split('|', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(v => v.Trim())
+                        .Where(v => !string.IsNullOrEmpty(v))
+                        .ToList();
+                } else if (trimmed.StartsWith("ColorName==", StringComparison.OrdinalIgnoreCase))
+                {
+                    var val = trimmed["ColorName==".Length..].Trim();
+                    colorFilters = val.Split('|', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(v => v.Trim())
+                        .Where(v => !string.IsNullOrEmpty(v))
+                        .ToList();
+                } else
+                {
+                    cleanFiltersList.Add(trimmed);
+                }
+            }
+        }
+        if (versionFilters.Count > 0)
+        {
+            query = query.Where(
+                p => p.ProductVariants
+                    .Any(v => v.DeletedAt == null && v.VariantName != null && versionFilters.Contains(v.VariantName)));
+        }
+        if (colorFilters.Count > 0)
+        {
+            query = query.Where(
+                p => p.ProductVariants
+                    .Any(
+                        v => v.DeletedAt == null &&
+                                v.ProductVariantColors
+                                    .Any(
+                                        c => c.DeletedAt == null &&
+                                                        c.ColorName != null &&
+                                                        colorFilters.Contains(c.ColorName))));
+        }
+        var cleanFilters = cleanFiltersList.Count > 0 ? string.Join(",", cleanFiltersList) : null;
         if (searchPattern != null)
         {
             query = isExactVariantSearch
@@ -366,7 +414,7 @@ public class ProductReadRepository(
         }
         var sieveModel = new SieveModel
         {
-            Filters = filters,
+            Filters = cleanFilters,
             Sorts = sorts,
             Page = normalizedPage,
             PageSize = normalizedPageSize

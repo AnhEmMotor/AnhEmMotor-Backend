@@ -4,7 +4,7 @@ namespace Application.Interfaces.Repositories.Invoice;
 
 public interface IInvoiceWriteRepository
 {
-    void Update(InvoiceEntity invoice);
+    public void Update(InvoiceEntity invoice);
 
-    void Add(InvoiceEntity invoice);
+    public void Add(InvoiceEntity invoice);
 }

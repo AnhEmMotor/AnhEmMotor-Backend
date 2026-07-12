@@ -12,7 +12,9 @@ public class OutputMappingConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<Output, OrderDetailResponse>()
+            .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(dest => dest.Total, src => CalculateTotal(src))
+            .Map(dest => dest.Subtotal, src => CalculateSubtotal(src))
             .Map(dest => dest.ShippingFee, src => CalculateShippingFee(src))
             .Map(dest => dest.DepositAmount, src => CalculateDeposit(src))
             .Map(dest => dest.RemainingAmount, src => CalculateRemaining(src))
@@ -29,12 +31,20 @@ public class OutputMappingConfig : IRegister
             .Map(dest => dest.BuyerEmail, src => src.Buyer != null ? src.Buyer.Email : null)
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(dest => dest.StatusId, src => src.StatusId)
+            .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(dest => dest.Total, src => CalculateTotal(src))
             .Map(dest => dest.DepositAmount, src => CalculateDeposit(src))
-            .Map(dest => dest.RemainingAmount, src => CalculateRemaining(src));
+            .Map(dest => dest.RemainingAmount, src => CalculateRemaining(src))
+            .Map(
+                dest => dest.IsInventoryLocked,
+                src => src.StatusId != null &&
+                    src.StatusId != "pending" &&
+                    src.StatusId != "waiting_deposit" &&
+                    src.StatusId != "waiting_installment");
         config.NewConfig<Output, MyOrderResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(dest => dest.OutputInfos, src => src.OutputInfos)
+            .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(dest => dest.Total, src => CalculateTotal(src))
             .Map(dest => dest.DepositAmount, src => CalculateDeposit(src))
             .Map(dest => dest.RemainingAmount, src => CalculateRemaining(src));
@@ -75,6 +85,11 @@ public class OutputMappingConfig : IRegister
         return subtotal + shipping;
     }
 
+    private static decimal CalculateSubtotal(Output src)
+    {
+        return src.OutputInfos?.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) ?? 0;
+    }
+
     private static decimal CalculateShippingFee(Output src)
     {
         var subtotal = src.OutputInfos?.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) ?? 0;
@@ -104,7 +119,7 @@ public class OutputMappingConfig : IRegister
             return null;
         var productName = src.ProductVariant.Product.Name;
         var optionValues = src.ProductVariant.VariantOptionValues?
-            .Select(vov => vov.OptionValue?.Name).Where(name => !string.IsNullOrWhiteSpace(name)).ToList();
+ .Select(vov => vov.OptionValue?.Name).Where(name => !string.IsNullOrWhiteSpace(name)).ToList();
         if (optionValues is null || optionValues.Count == 0)
             return productName;
         return $"{productName} ({string.Join(" - ", optionValues)})";
@@ -120,13 +135,13 @@ public class OutputMappingConfig : IRegister
         if (!string.IsNullOrEmpty(variant.CoverImageUrl))
             return variant.CoverImageUrl;
         return variant.ProductCollectionPhotos?
-            .OrderBy(p => p.Id).Select(p => p.ImageUrl).FirstOrDefault();
+ .OrderBy(p => p.Id).Select(p => p.ImageUrl).FirstOrDefault();
     }
 
     private static List<VehicleAssignmentOptionResponse> MapAssignedVehicles(OutputInfo src)
     {
         return src.Vehicles?
-            .Select(
+ .Select(
                 v => new VehicleAssignmentOptionResponse
                 {
                     Id = v.Id,
@@ -138,3 +153,4 @@ public class OutputMappingConfig : IRegister
             [];
     }
 }
+

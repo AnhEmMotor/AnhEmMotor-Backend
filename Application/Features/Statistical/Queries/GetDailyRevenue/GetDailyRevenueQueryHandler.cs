@@ -11,7 +11,11 @@ public class GetDailyRevenueQueryHandler(IStatisticalReadRepository repository) 
         GetDailyRevenueQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await repository.GetDailyRevenueAsync(request.Days, cancellationToken).ConfigureAwait(false);
+        var _now = DateTimeOffset.UtcNow;
+        var end = _now;
+        var days = request.Days > 0 ? request.Days : 30;
+        var start = _now.AddDays(-days);
+        var result = await repository.GetDailyRevenueAsync(start, end, cancellationToken).ConfigureAwait(false);
         if (result == null)
         {
             return Result<IEnumerable<DailyRevenueResponse>>.Failure(Error.NotFound("Daily revenue not found"));

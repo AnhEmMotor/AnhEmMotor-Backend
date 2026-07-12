@@ -1,8 +1,10 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.LogisticsDashboard;
 using Application.Interfaces.Repositories.MediaFile.File;
-using Application.Interfaces.Repositories.WorkshopDashboard;
+using Application.Interfaces.Repositories.Statistical;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Logistics;
+using Application.Interfaces.Services.Shipping;
 using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
@@ -12,8 +14,9 @@ using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.LogisticsDashboard;
 using Infrastructure.Repositories.MediaFile.File;
-using Infrastructure.Repositories.WorkshopDashboard;
+using Infrastructure.Repositories.Statistical;
 using Infrastructure.Services;
+using Infrastructure.Services.Logistics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -61,7 +64,12 @@ public static class DependencyInjection
                         b => b.MigrationsAssembly(typeof(SqlServerDBContext).Assembly.FullName)
                                 .CommandTimeout(30)
                                 .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-                    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+                    options.ConfigureWarnings(
+                        w =>
+                        {
+                            w.Ignore(RelationalEventId.PendingModelChangesWarning);
+                            w.Ignore(SqlServerEventId.SavepointsDisabledBecauseOfMARS);
+                        });
                 });
         }
         services.AddIdentity<ApplicationUser, ApplicationRole>(
@@ -90,8 +98,8 @@ public static class DependencyInjection
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
         services.AddScoped<IFileReadService, FileReadService>();
         services.AddScoped<IFileInsertService, FileInsertService>();
-        services.AddScoped<IWorkshopDashboardRepository, WorkshopDashboardRepository>();
-services.AddScoped<ILogisticsDashboardRepository, LogisticsDashboardRepository>();
+        services.AddScoped<IStatisticalReadRepository, StatisticalReadRepository>();
+        services.AddScoped<ILogisticsDashboardRepository, LogisticsDashboardRepository>();
         services.AddScoped<IFileUpdateService, FileUpdateService>();
         services.AddScoped<IFileDeleteService, FileDeleteService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();
@@ -101,10 +109,16 @@ services.AddScoped<ILogisticsDashboardRepository, LogisticsDashboardRepository>(
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddHostedService<OrderCleanupService>();
-        services.AddHttpClient();
+        services.AddHttpClient<IShippingService, ShippingService>(
+            client =>
+            {
+                var baseAddress = configuration["GhtkSettings:BaseUrl"] ?? "https://services.ghtk.vn";
+                client.BaseAddress = new Uri(baseAddress);
+            });
+        services.AddHttpClient<IGeocodingService, GeocodingService>();
         services.Scan(
             scan => scan
-            .FromAssemblies(Assembly.GetExecutingAssembly())
+                .FromAssemblies(Assembly.GetExecutingAssembly())
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());

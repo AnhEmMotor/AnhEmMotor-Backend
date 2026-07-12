@@ -1,7 +1,6 @@
 using Application.ApiContracts.Vehicle.Responses;
 using Application.Features.Vehicles.Commands.CreateVehicle;
 using Application.Features.Vehicles.Commands.TransferOwnership;
-using Application.Features.Vehicles.Commands.UpdateLicensePlate;
 using Application.Features.Vehicles.Queries.GetVehiclePortfolio;
 using Application.Features.Vehicles.Queries.GetVehicles;
 using Asp.Versioning;
@@ -25,9 +24,6 @@ public class VehicleController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy chi tiết xe của khách hàng
     /// </summary>
-    /// <param name="id">The vehicle ID.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns></returns>
     [HttpGet("{id:int}")]
     [Authorize]
     [SwaggerOperation(Summary = "Lấy chi tiết xe của khách hàng")]
@@ -40,9 +36,6 @@ public class VehicleController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy danh sách xe của khách hàng
     /// </summary>
-    /// <param name="sieveModel">Sieve model for filtering, sorting and pagination.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>Danh sách xe</returns>
     [HttpGet]
     [Authorize]
     [SwaggerOperation(Summary = "Lấy danh sách xe của khách hàng")]
@@ -56,26 +49,8 @@ public class VehicleController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tra cứu portfolio xe
-    /// </summary>
-    /// <param name="request">The portfolio query.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    [HttpGet("portfolio")]
-    [Authorize]
-    [SwaggerOperation(Summary = "Tra cứu portfolio xe")]
-    public async Task<IActionResult> GetPortfolioAsync(
-        [FromQuery] GetVehiclePortfolioQuery request,
-        CancellationToken cancellationToken)
-    {
-        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
-        return HandleResult(result);
-    }
-
-    /// <summary>
     /// Tạo mới tài sản xe
     /// </summary>
-    /// <param name="command">The create vehicle command.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost]
     [Authorize]
     [ProducesResponseType(typeof(VehicleResponse), StatusCodes.Status201Created)]
@@ -88,29 +63,8 @@ public class VehicleController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật biển số xe
-    /// </summary>
-    /// <param name="id">The vehicle ID.</param>
-    /// <param name="command">The update license plate command.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    [HttpPatch("{id:int}/license-plate")]
-    [Authorize]
-    public async Task<IActionResult> UpdateLicensePlateAsync(
-        int id,
-        [FromBody] UpdateLicensePlateCommand command,
-        CancellationToken cancellationToken)
-    {
-        command.Id = id;
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return HandleResult(result);
-    }
-
-    /// <summary>
     /// Chuyển quyền sở hữu xe
     /// </summary>
-    /// <param name="id">The vehicle ID.</param>
-    /// <param name="command">The transfer ownership command.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost("{id:int}/transfer")]
     [Authorize]
     public async Task<IActionResult> TransferOwnershipAsync(
@@ -120,6 +74,26 @@ public class VehicleController(IMediator mediator) : ApiController
     {
         command.Id = id;
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tra cứu hồ sơ xe theo VIN, biển số, số điện thoại
+    /// </summary>
+    [HttpGet("portfolio")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Tra cứu hồ sơ xe")]
+    public async Task<IActionResult> GetPortfolioAsync(
+        [FromQuery] string query,
+        [FromQuery] string queryType,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(
+            new GetVehiclePortfolioQuery(query ?? string.Empty, queryType ?? "auto", page, pageSize),
+            cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 }

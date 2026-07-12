@@ -13,4 +13,6 @@ public interface ITokenManagerService
     public int GetRefreshTokenExpiryDays();
 
     public int GetAccessTokenExpiryMinutes();
+
+    public string CreateRandomToken(int length = 32);
 }

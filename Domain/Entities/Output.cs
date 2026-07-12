@@ -66,15 +66,38 @@ namespace Domain.Entities
         [Column("PaymentCode")]
         public string? PaymentCode { get; set; }
 
-[Column("PaymentExpiredAt")]
-public DateTimeOffset? PaymentExpiredAt { get; set; }
+        [Column("PaymentExpiredAt")]
+        public DateTimeOffset? PaymentExpiredAt { get; set; }
 
-[Column("LeadId")]
-public int? LeadId { get; set; }
+        [Column("LeadId")]
+        public int? LeadId { get; set; }
 
-public Lead? Lead { get; set; }
+        [Column("IsCompanyInvoice")]
+        public bool IsCompanyInvoice { get; set; } = false;
 
-public ApplicationUser? Buyer { get; set; }
+        [Column("CompanyName")]
+        [StringLength(200)]
+        public string? CompanyName { get; set; }
+
+        [Column("CompanyAddress")]
+        [StringLength(500)]
+        public string? CompanyAddress { get; set; }
+
+        [Column("CompanyTaxCode")]
+        [StringLength(50)]
+        public string? CompanyTaxCode { get; set; }
+
+        [Column("CompanyEmail")]
+        [StringLength(150)]
+        public string? CompanyEmail { get; set; }
+
+        [Column("BudgetCode")]
+        [StringLength(50)]
+        public string? BudgetCode { get; set; }
+
+        public Lead? Lead { get; set; }
+
+        public ApplicationUser? Buyer { get; set; }
 
         public ApplicationUser? CreatedByUser { get; set; }
 

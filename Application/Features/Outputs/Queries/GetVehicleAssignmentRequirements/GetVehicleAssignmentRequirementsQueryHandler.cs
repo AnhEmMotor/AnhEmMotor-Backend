@@ -50,6 +50,7 @@ public class GetVehicleAssignmentRequirementsQueryHandler(
             .ToList();
         if (vehicleManagedInfos.Count == 0)
         {
+            response.RequiresVehicleAssignment = false;
             return response;
         }
         var productVariantIds = vehicleManagedInfos

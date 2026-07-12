@@ -1,7 +1,10 @@
-
 namespace Application.Interfaces.Repositories.WorkshopPayment;
 
 public interface IWorkshopPaymentWriteRepository
 {
-    Task AddAsync(Domain.Entities.WorkshopPayment payment, CancellationToken cancellationToken);
+    public void Add(global::Domain.Entities.WorkshopPayment entity);
+
+    public void Update(global::Domain.Entities.WorkshopPayment entity);
+
+    public void Delete(global::Domain.Entities.WorkshopPayment entity);
 }

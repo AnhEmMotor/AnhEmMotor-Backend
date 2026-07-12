@@ -40,5 +40,7 @@ namespace Domain.Entities
         public string ManagementType { get; set; } = "sku";
 
         public ICollection<Product> Products { get; set; } = [];
+
+        public ICollection<ProductCategoryTranslation> Translations { get; set; } = [];
     }
 }

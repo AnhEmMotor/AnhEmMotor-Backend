@@ -37,8 +37,6 @@ public static class MvcExtensions
         services.Configure<RouteOptions>(
             options =>
             {
-                options.LowercaseUrls = true;
-                options.LowercaseQueryStrings = true;
             });
         services.AddApiVersioning(
             config =>
@@ -63,6 +61,8 @@ public static class MvcExtensions
                     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                    options.JsonSerializerOptions.Converters
+                        .Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper));
                     options.JsonSerializerOptions.Converters.Add(new EmptyStringConverter());
                     options.JsonSerializerOptions.Converters.Add(new NullableDecimalConverter());
                 });

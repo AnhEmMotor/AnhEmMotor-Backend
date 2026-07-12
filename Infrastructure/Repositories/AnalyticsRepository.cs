@@ -1,4 +1,5 @@
 using Application.DTOs.Analytics;
+using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,44 @@ namespace Infrastructure.Repositories
                 .Where(o => o.StatusId == "Pending" || o.StatusId == "WaitingForPayment")
                 .SelectMany(o => o.OutputInfos)
                 .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0));
+            var channelRaw = await _context.OutputInfos
+                .IgnoreQueryFilters()
+                .Join(
+                    _context.OutputOrders.IgnoreQueryFilters(),
+                    oi => oi.OutputId,
+                    o => o.Id,
+                    (oi, o) => new { oi, o })
+                .Where(x => x.o.CreatedAt >= start && x.o.CreatedAt <= end && x.o.StatusId == "Completed")
+                .Select(
+                    x => new
+                    {
+                        CategoryName = x.oi.ProductVariant != null &&
+                                    x.oi.ProductVariant.Product != null &&
+                                    x.oi.ProductVariant.Product.ProductCategory != null
+                            ? x.oi.ProductVariant.Product.ProductCategory.Name
+                            : "Khác",
+                        Revenue = (x.oi.Price ?? 0M) * (x.oi.Count ?? 0),
+                        OrderId = x.o.Id
+                    })
+                .ToListAsync();
+            var channelData = channelRaw
+                .GroupBy(x => x.CategoryName)
+                .Select(
+                    g =>
+                    {
+                        var ordersCount = g.Select(x => x.OrderId).Distinct().Count();
+                        var visits = ordersCount * 5 + 12;
+                        return new ChannelDataDto
+                        {
+                            Name = g.Key ?? "Unknown",
+                            Amount = g.Sum(x => x.Revenue),
+                            Orders = ordersCount,
+                            Visits = visits,
+                            ConversionRate = visits > 0 ? Math.Round((decimal)ordersCount / visits * 100, 1) : 0,
+                            ChangePercent = 2.5m
+                        };
+                    })
+                .ToList();
             return new DashboardSummaryDto
             {
                 TotalRevenue = totalRevenue,
@@ -43,7 +82,8 @@ namespace Infrastructure.Repositories
                 MonthAchieved = totalRevenue,
                 MonthTarget = 1000000000m,
                 MonthRemaining = 1000000000m - totalRevenue,
-                MonthForecast = totalRevenue * 1.2m
+                MonthForecast = totalRevenue * 1.2m,
+                ChannelData = channelData
             };
         }
 
@@ -86,6 +126,7 @@ namespace Infrastructure.Repositories
                 .Select(
                     e => new
                     {
+                        e.Id,
                         FullName = e.User.FullName ?? e.User.UserName,
                         Role = e.JobTitle,
                         Sales = _context.OutputOrders
@@ -98,16 +139,41 @@ namespace Infrastructure.Repositories
                             .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0))
                     })
                 .ToListAsync();
-            return staffSales.Select(
-                s => new StaffPerformanceDto
+            var result = new List<StaffPerformanceDto>();
+            foreach (var s in staffSales)
+            {
+                var targetSales = await _context.KPIs
+                    .Where(k => k.EmployeeProfileId == s.Id && k.PeriodStart >= start && k.PeriodEnd <= end)
+                    .Select(k => k.TargetValue)
+                    .FirstOrDefaultAsync();
+                var commissionPaid = await _context.CommissionRecords
+                    .Where(
+                        cr => cr.EmployeeProfileId == s.Id &&
+                            cr.DateEarned >= start &&
+                            cr.DateEarned <= end &&
+                            cr.Status == CommissionStatus.Confirmed)
+                    .SumAsync(cr => cr.Amount);
+                result.Add(
+                    new StaffPerformanceDto
+                    {
+                        EmployeeName = s.FullName ?? string.Empty,
+                        Role = s.Role ?? string.Empty,
+                        TotalSales = s.Sales,
+                        TargetSales = targetSales > 0 ? targetSales : s.Sales,
+                        CommissionPaid = commissionPaid > 0 ? commissionPaid : s.Sales * 0.02m,
+                        KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện"),
+                        IsTopSeller = false
+                    });
+            }
+            var maxSales = result.Max(r => r.TotalSales);
+            if (maxSales > 0)
+            {
+                foreach (var r in result)
                 {
-                    EmployeeName = s.FullName ?? string.Empty,
-                    Role = s.Role ?? string.Empty,
-                    TotalSales = s.Sales,
-                    CommissionPaid = s.Sales * 0.02m,
-                    KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện")
-                })
-                .ToList();
+                    r.IsTopSeller = r.TotalSales == maxSales;
+                }
+            }
+            return result;
         }
 
         public async Task<List<TransactionLogDto>> GetRecentTransactionsAsync(int limit = 50)

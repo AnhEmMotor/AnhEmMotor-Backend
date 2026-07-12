@@ -1,6 +1,3 @@
-using Application.ApiContracts.Leads.Responses;
-using System;
-
 namespace Application.ApiContracts.Customer.Responses;
 
 public class CustomerProfile360Response
@@ -9,151 +6,103 @@ public class CustomerProfile360Response
 
     public string FullName { get; set; } = string.Empty;
 
-    public string Email { get; set; } = string.Empty;
+    public string? PhoneNumber { get; set; }
 
-    public string PhoneNumber { get; set; } = string.Empty;
+    public string? Email { get; set; }
 
-    public int Score { get; set; }
+    public string? Address { get; set; }
 
-    public string Status { get; set; } = string.Empty;
+    public string? Cccd { get; set; }
 
-    public string Source { get; set; } = string.Empty;
+    public string MembershipGrade { get; set; } = string.Empty;
 
-    public string InterestedVehicle { get; set; } = string.Empty;
+    public int LoyaltyPoints { get; set; }
 
-    public string Address { get; set; } = string.Empty;
+    public string? DefaultRescueAddress { get; set; }
 
-    public string AddressDetail { get; set; } = string.Empty;
+    public string? EmergencyContactPhone { get; set; }
 
-    public string Ward { get; set; } = string.Empty;
+    public List<OwnedVehicleInfo> OwnedVehicles { get; set; } = new();
 
-    public string District { get; set; } = string.Empty;
+    public List<BookingSummary> RecentBookings { get; set; } = new();
 
-    public string Province { get; set; } = string.Empty;
+    public List<InvoiceSummary> RecentInvoices { get; set; } = new();
 
-    public string Gender { get; set; } = string.Empty;
+    public List<WarrantyClaimSummary> WarrantyClaims { get; set; } = new();
 
-    public DateTime? Birthday { get; set; }
+    public List<SupportTicketSummary> SupportTickets { get; set; } = new();
 
-    public string IdentificationNumber { get; set; } = string.Empty;
-
-    public DateTimeOffset? CreatedAt { get; set; }
-
-    public bool IsVerified { get; set; }
-
-    public string Tier { get; set; } = string.Empty;
-
-    public int Points { get; set; }
-
-    public Guid? AssignedToId { get; set; }
-
-    public string? AssignedToName { get; set; }
-
-    public List<LeadActivityResponse> Activities { get; set; } = [];
-
-    public List<CustomerOutputSummary> Outputs { get; set; } = [];
-
-    public List<CustomerVehicleSummary> Vehicles { get; set; } = [];
-
-    public List<CustomerCareReminder> CareReminders { get; set; } = [];
-
-    public List<CustomerTimelineEvent> TimelineEvents { get; set; } = [];
-
-    public Customer360Summary Summary { get; set; } = new();
+    public List<FeedbackSummary> Feedbacks { get; set; } = new();
 }
 
-public class CustomerOutputSummary
+public class OwnedVehicleInfo
 {
-    public int Id { get; set; }
+    public int VehicleId { get; set; }
 
-    public string? StatusId { get; set; }
-
-    public string? StatusDisplayName { get; set; }
-
-    public DateTimeOffset? CreatedAt { get; set; }
-
-    public DateTimeOffset? LastStatusChangedAt { get; set; }
-
-    public decimal? Total { get; set; }
-
-    public string? PaymentMethod { get; set; }
-
-    public string? PaymentStatus { get; set; }
-
-    public List<CustomerOutputItemSummary> Items { get; set; } = [];
-}
-
-public class CustomerOutputItemSummary
-{
-    public int? Id { get; set; }
-
-    public string? ProductName { get; set; }
-
-    public int? Count { get; set; }
-
-    public decimal? Price { get; set; }
-
-    public string? CoverImageUrl { get; set; }
-}
-
-public class CustomerVehicleSummary
-{
-    public int Id { get; set; }
+    public string? VinNumber { get; set; }
 
     public string? LicensePlate { get; set; }
 
-    public string VinNumber { get; set; } = string.Empty;
+    public string? VariantName { get; set; }
 
-    public string EngineNumber { get; set; } = string.Empty;
+    public string? ColorName { get; set; }
 
-    public DateTimeOffset PurchaseDate { get; set; }
+    public DateTimeOffset? PurchaseDate { get; set; }
+
+    public string? WarrantyStatus { get; set; }
+}
+
+public class BookingSummary
+{
+    public int BookingId { get; set; }
+
+    public string ServiceType { get; set; } = string.Empty;
+
+    public DateTimeOffset AppointmentDate { get; set; }
+
+    public string Status { get; set; } = string.Empty;
+}
+
+public class InvoiceSummary
+{
+    public int InvoiceId { get; set; }
+
+    public decimal TotalAmount { get; set; }
 
     public string Status { get; set; } = string.Empty;
 
-    public DateTime? LastMaintenanceDate { get; set; }
-
-    public DateTime? NextMaintenanceDate { get; set; }
-
-    public double? NextMaintenanceOdo { get; set; }
-
-    public double CurrentOdo { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }
 
-public class CustomerCareReminder
+public class WarrantyClaimSummary
 {
-    public string Type { get; set; } = string.Empty;
+    public int Id { get; set; }
 
-    public string Title { get; set; } = string.Empty;
+    public string ClaimNumber { get; set; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string StatusText { get; set; } = string.Empty;
 
-    public DateTime? DueDate { get; set; }
-
-    public string Priority { get; set; } = "normal";
+    public DateTimeOffset CreatedAt { get; set; }
 }
 
-public class CustomerTimelineEvent
+public class SupportTicketSummary
 {
-    public DateTimeOffset Date { get; set; }
+    public int Id { get; set; }
 
-    public string Type { get; set; } = string.Empty;
+    public string Subject { get; set; } = string.Empty;
 
-    public string Title { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
 
-    public string? Description { get; set; }
-
-    public string? Status { get; set; }
-
-    public int? RelatedId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }
 
-public class Customer360Summary
+public class FeedbackSummary
 {
-    public int ActiveOutputsCount { get; set; }
+    public int Id { get; set; }
 
-    public int OwnedVehiclesCount { get; set; }
+    public int Rating { get; set; }
 
-    public int OverdueRemindersCount { get; set; }
+    public string? Comment { get; set; }
 
-    public DateTimeOffset? LastInteractionDate { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }

@@ -1,5 +1,3 @@
-using System;
-
 namespace Application.ApiContracts.Output.Responses;
 
 public class OutputItemResponse
@@ -11,6 +9,8 @@ public class OutputItemResponse
     public string? BuyerId { get; set; }
 
     public string? BuyerEmail { get; set; }
+
+    public string? BuyerPhone { get; set; }
 
     public string? CustomerName { get; set; }
 
@@ -24,9 +24,13 @@ public class OutputItemResponse
 
     public string? PaymentMethod { get; set; }
 
+    public string? PaymentStatus { get; set; }
+
     public string? Notes { get; init; }
 
     public decimal Total { get; init; }
+
+    public bool IsInventoryLocked { get; set; }
 
     public int? DepositRatio { get; set; }
 
@@ -34,3 +38,4 @@ public class OutputItemResponse
 
     public decimal? RemainingAmount { get; set; }
 }
+

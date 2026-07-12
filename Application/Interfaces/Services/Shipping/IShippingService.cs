@@ -1,0 +1,18 @@
+using Application.Common.Models;
+using Domain.Entities;
+
+namespace Application.Interfaces.Services.Shipping;
+
+public interface IShippingService
+{
+    /// <summary>
+    /// Creates a shipping order with the integrated carrier (e.g., GHN). Returns the Tracking Order Code.
+    /// </summary>
+    public Task<Result<string>> CreateShippingOrderAsync(Output output, CancellationToken cancellationToken = default);
+
+    public Task<Result<string>> GetShippingOrderStatusAsync(string orderCode, CancellationToken cancellationToken = default);
+
+    public Task<Result<object>> GetProvincesAsync(CancellationToken cancellationToken = default);
+
+    public Task<Result<object>> GetWardsAsync(int provinceId, CancellationToken cancellationToken = default);
+}

@@ -34,7 +34,7 @@ public class ProductCategory
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-    #pragma warning disable IDE0079 
+    #pragma warning disable IDE0079
     #pragma warning disable CRR0035
     [Fact(DisplayName = "PC_043 - Kiểm tra phân quyền - Tạo danh mục sản phẩm không có quyền")]
     public async Task CreateProductCategory_WithoutPermission_ShouldThrowUnauthorized()
@@ -124,7 +124,7 @@ public class ProductCategory
     [Fact(DisplayName = "PC_052 - Xác thực dữ liệu - Tạo với Name quá dài (vượt max length)")]
     public async Task CreateProductCategory_WithTooLongName_ShouldFailValidation()
     {
-        var request = new CreateProductCategoryCommand { Name = new string('a', 300), Description = "Test" };
+        var request = new CreateProductCategoryCommand { NameVi = new string('a', 300), Description = "Test" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateProductCategoryCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("Name exceeds maximum length"));
         await Assert.ThrowsAsync<ValidationException>(
@@ -213,8 +213,8 @@ public class ProductCategory
     [Fact(DisplayName = "PC_060 - Kiểm tra concurrent update - Hai request cập nhật cùng lúc")]
     public async Task UpdateProductCategory_ConcurrentUpdate_ShouldHandleCorrectly()
     {
-        var request1 = new UpdateProductCategoryCommand { Name = "Update A" };
-        var request2 = new UpdateProductCategoryCommand { Name = "Update B" };
+        var request1 = new UpdateProductCategoryCommand { NameVi = "Update A" };
+        var request2 = new UpdateProductCategoryCommand { NameVi = "Update B" };
         var response1 = new ProductCategoryResponse { Id = 36, Name = "Update A", Description = "Desc" };
         var response2 = new ProductCategoryResponse { Id = 36, Name = "Update B", Description = "Desc" };
         _mediatorMock.SetupSequence(

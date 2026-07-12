@@ -12,8 +12,14 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await CancelExpiredOrdersAsync(stoppingToken).ConfigureAwait(false);
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken).ConfigureAwait(false);
+            try
+            {
+                await CancelExpiredOrdersAsync(stoppingToken).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken).ConfigureAwait(false);
+            } catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
         }
     }
 

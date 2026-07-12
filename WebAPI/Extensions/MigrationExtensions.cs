@@ -6,30 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Extensions;
 
-/// <summary>
-/// Provides extension methods for applying database migrations and seeding initial data to an ASP.NET Core application
-/// at startup.
-/// </summary>
-/// <remarks>
-/// These extensions are intended to be used during application startup to ensure the database schema is up to date and
-/// required seed data is present. The seeding operation is controlled by the configuration setting
-/// 'SeedingOptions:RunDataSeedingOnStartup'. If enabled, roles, users, permissions, and protected entities are seeded
-/// using the application's registered services. This class is typically used in the Program.cs file as part of the
-/// application's initialization pipeline.
-/// </remarks>
 public static class MigrationExtensions
 {
-    /// <summary>
-    /// Applies any pending database migrations and optionally seeds initial data during application startup.
-    /// </summary>
-    /// <remarks>
-    /// Data seeding is performed only if the configuration value 'SeedingOptions:RunDataSeedingOnStartup' is set to
-    /// <see langword="true" />. This method should be called during application startup to ensure the database schema
-    /// is up to date and required data is present.
-    /// </remarks>
-    /// <param name="app">The current <see cref="WebApplication" /> instance to which migrations and seeding will be applied.</param>
-    /// <param name="cancellationToken">A cancellation token that can be used to cancel the migration and seeding operations.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
     public static async Task ApplyMigrationsAndSeedAsync(this WebApplication app, CancellationToken cancellationToken)
     {
         using var scope = app.Services.CreateScope();
@@ -40,44 +18,43 @@ public static class MigrationExtensions
         {
             var dbContext = services.GetRequiredService<ApplicationDBContext>();
             await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
-            var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
-            if (shouldSeed)
-            {
-                var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-                await ProductCategorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
-                await InventoryReceiptStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await VehicleTypeAssignmentSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await NewsCategorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
-                    dbContext,
-                    roleManager,
-                    userManager,
-                    configuration,
-                    cancellationToken)
-                    .ConfigureAwait(false);
-                await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
-                await LeadSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
-                await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await SupplierContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await FinanceContractSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await SalesAndInventorySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await CarrierPartnerSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await LogisticsDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-                await WorkshopAndServiceSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
-            }
         } catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred during migration/seeding.");
-            throw;
+            logger.LogError(ex, "Migration phase encountered errors. App will continue with seeding.");
         }
+        var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
+        if (!shouldSeed)
+            return;
+        var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var dbContext2 = services.GetRequiredService<ApplicationDBContext>();
+        await ProductCategorySeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
+        await InventoryReceiptStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await OutputStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await SupplierStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await PredefinedOptionSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await ProductOptionSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await ProductStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await VehicleTypeAssignmentSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await SettingsSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await NewsCategorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await TechnologySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await PermissionDataSeeder.SeedPermissionsAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
+            dbContext2,
+            roleManager,
+            userManager,
+            configuration,
+            cancellationToken)
+            .ConfigureAwait(false);
+        await EmployeeSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
+        await LeadSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
+        await CommissionPolicySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await SupplierContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await FinanceContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await SalesAndInventorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await CarrierPartnerSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await LogisticsDataSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await WorkshopDataSeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
     }
 }

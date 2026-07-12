@@ -4,10 +4,8 @@ namespace Domain.Enums
 {
     public enum ParcelDeliveryStatus
     {
-        Pending = 0,
-        Packing = 1,
-        Shipping = 2,
-        Completed = 3,
-        Returned = 4
+        Shipping = 0,
+        Completed = 1,
+        Returned = 2
     }
 }

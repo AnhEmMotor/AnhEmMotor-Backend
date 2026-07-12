@@ -160,7 +160,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content!.Count.Should().Be(5);
+        content!.Count.Should().Be(6);
         content.First(x => x.ReportDay == DateOnly.FromDateTime(today)).TotalRevenue.Should().Be(1200000);
         content.First(x => x.ReportDay == DateOnly.FromDateTime(today.AddDays(-1))).TotalRevenue.Should().Be(3500000);
         content.First(x => x.ReportDay == DateOnly.FromDateTime(today.AddDays(-2))).TotalRevenue.Should().Be(2800000);
@@ -194,7 +194,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content!.First().TotalRevenue.Should().Be(2000000);
+        content!.Last().TotalRevenue.Should().Be(2000000);
     }
 
     [Fact(DisplayName = "STAT_023 - Lấy doanh thu với múi giờ UTC")]
@@ -251,7 +251,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content!.First().TotalRevenue.Should().Be(800000);
+        content!.Last().TotalRevenue.Should().Be(800000);
     }
 
     [Fact(DisplayName = "STAT_025 - Dashboard Stats Last Month")]
@@ -512,7 +512,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content!.First().TotalRevenue.Should().Be(3100000);
+        content!.Last().TotalRevenue.Should().Be(3100000);
     }
 
     [Fact(DisplayName = "STAT_037 - Lợi nhuận âm")]
@@ -641,7 +641,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content!.First().TotalRevenue.Should().Be(1000000);
+        content!.Last().TotalRevenue.Should().Be(1000000);
     }
 
     [Fact(DisplayName = "STAT_090 - Báo cáo doanh thu ngày hiện cờ Giá vốn bằng 0")]
@@ -709,7 +709,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response!.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content!.First().TotalRevenue.Should().Be(2000000);
+        content!.Last().TotalRevenue.Should().Be(2000000);
         content!.First().TotalProfit.Should().Be(2000000);
         content!.First().HasZeroCostPrice.Should().BeTrue();
     }

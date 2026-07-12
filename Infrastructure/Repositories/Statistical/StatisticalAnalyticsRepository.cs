@@ -13,8 +13,16 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
         DateTime end,
         CancellationToken cancellationToken)
     {
+        var timeSpan = end - start;
+        var prevStart = start.Subtract(timeSpan);
+        var prevEnd = start.AddTicks(-1);
         var totalRevenue = await context.OutputOrders
             .Where(o => o.CreatedAt >= start && o.CreatedAt <= end && o.StatusId == "Completed")
+            .SelectMany(o => o.OutputInfos)
+            .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0), cancellationToken)
+            .ConfigureAwait(false);
+        var prevRevenue = await context.OutputOrders
+            .Where(o => o.CreatedAt >= prevStart && o.CreatedAt <= prevEnd && o.StatusId == "Completed")
             .SelectMany(o => o.OutputInfos)
             .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0), cancellationToken)
             .ConfigureAwait(false);
@@ -22,35 +30,55 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
             .Where(e => e.ExpenseDate >= start && e.ExpenseDate <= end)
             .SumAsync(e => e.Amount, cancellationToken)
             .ConfigureAwait(false);
+        var prevExpenses = await context.Expenses
+            .Where(e => e.ExpenseDate >= prevStart && e.ExpenseDate <= prevEnd)
+            .SumAsync(e => e.Amount, cancellationToken)
+            .ConfigureAwait(false);
         var cogs = totalRevenue * 0.7m;
         var grossProfit = totalRevenue - cogs;
+        var netProfit = grossProfit - totalExpenses;
+        var prevCogs = prevRevenue * 0.7m;
+        var prevGrossProfit = prevRevenue - prevCogs;
+        var prevNetProfit = prevGrossProfit - prevExpenses;
+        decimal revChange = prevRevenue == 0
+            ? (totalRevenue > 0 ? 100 : 0)
+            : ((totalRevenue - prevRevenue) / prevRevenue * 100);
+        decimal profitChange = prevNetProfit == 0
+            ? (netProfit > 0 ? 100 : 0)
+            : ((netProfit - prevNetProfit) / Math.Abs(prevNetProfit) * 100);
         var pendingAmount = await context.OutputOrders
             .Where(o => o.StatusId == "Pending" || o.StatusId == "WaitingForPayment")
             .SelectMany(o => o.OutputInfos)
             .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0), cancellationToken)
             .ConfigureAwait(false);
-        var netProfit = grossProfit - totalExpenses;
+        var newComplaintsCount = await context.SupportTickets
+            .CountAsync(t => t.Status == "Open" || t.Status == "New", cancellationToken)
+            .ConfigureAwait(false);
+        var delayedLoansCount = 0; // TODO: Implement using a properly tracked table for installments/debts
+        var lowStockCount = await context.InventoryOnHands
+            .CountAsync(i => i.StockQty < 10, cancellationToken)
+            .ConfigureAwait(false);
         return new DashboardSummaryResponse
         {
             TotalRevenue = totalRevenue,
             TotalExpense = totalExpenses,
             GrossProfit = grossProfit,
             NetProfit = netProfit,
-            RevenueVsYesterdayPercentage = 12.5m,
+            RevenueVsYesterdayPercentage = Math.Round(revChange, 1),
             DailyTarget = 100000000m,
-            ProfitMargin = netProfit > 0 && totalRevenue > 0 ? (netProfit / totalRevenue * 100) : 0,
-            ProfitVsYesterdayPercentage = -3.0m,
+            ProfitMargin = netProfit > 0 && totalRevenue > 0 ? Math.Round((netProfit / totalRevenue * 100), 1) : 0,
+            ProfitVsYesterdayPercentage = Math.Round(profitChange, 1),
             PendingAmount = pendingAmount,
             DepositAmount = pendingAmount * 0.3m,
             LoanWaitAmount = pendingAmount * 0.7m,
-            AlertsCount = 6,
-            NewComplaintsCount = 2,
-            DelayedLoansCount = 1,
-            LowStockVehiclesCount = 3,
+            AlertsCount = newComplaintsCount + delayedLoansCount + lowStockCount,
+            NewComplaintsCount = newComplaintsCount,
+            DelayedLoansCount = delayedLoansCount,
+            LowStockVehiclesCount = lowStockCount,
             MissedAppointmentsCount = 0,
             MonthAchieved = totalRevenue,
             MonthTarget = 1000000000m,
-            MonthRemaining = 1000000000m - totalRevenue,
+            MonthRemaining = Math.Max(1000000000m - totalRevenue, 0),
             MonthForecast = totalRevenue * 1.2m
         };
     }
@@ -93,18 +121,20 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
         DateTime end,
         CancellationToken cancellationToken)
     {
+        var endOfDay = end.Date.AddDays(1).AddTicks(-1);
         var staffSales = await context.EmployeeProfiles
             .Include(e => e.User)
             .Select(
                 e => new
                 {
-                    FullName = e.User.UserName,
+                    FullName = e.User != null ? e.User.FullName : "N/A",
                     Role = e.JobTitle,
                     Sales = context.OutputOrders
                         .Where(
-                            o => o.FinishedBy == e.User.Id &&
+                            o => e.User != null &&
+                                    o.CreatedBy == e.User.Id &&
                                     o.CreatedAt >= start &&
-                                    o.CreatedAt <= end &&
+                                    o.CreatedAt <= endOfDay &&
                                     o.StatusId == "Completed")
                         .SelectMany(o => o.OutputInfos)
                         .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0))
