@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace Infrastructure.Services.Logistics
 {
-    public class GeocodingService(HttpClient httpClient, ILogger<GeocodingService> logger) : IGeocodingService
+    public class GeocodingService(HttpClient httpClient) : IGeocodingService
     {
         public async Task<(double Latitude, double Longitude)?> GetCoordinatesAsync(
             string address,

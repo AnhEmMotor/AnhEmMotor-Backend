@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace Infrastructure.Services;
 
-public class ShippingService(HttpClient httpClient, IConfiguration configuration, ILogger<ShippingService> logger) : IShippingService
+public class ShippingService(HttpClient httpClient, IConfiguration configuration) : IShippingService
 {
     public async Task<Result<string>> CreateShippingOrderAsync(
         Output output,

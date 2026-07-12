@@ -13,7 +13,6 @@ namespace WebAPI.Controllers;
 [ApiController]
 public class ShippingWebhookController(
     ISender sender,
-    ILogger<ShippingWebhookController> logger,
     IShipmentReadRepository shipmentReadRepository,
     IShipmentUpdateRepository shipmentUpdateRepository,
     IUnitOfWork unitOfWork) : ControllerBase
