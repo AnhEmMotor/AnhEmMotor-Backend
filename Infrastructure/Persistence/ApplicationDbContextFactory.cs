@@ -9,29 +9,20 @@ namespace Infrastructure.Persistence
     {
         public ApplicationDBContext CreateDbContext(string[] args)
         {
-            var basePath = Directory.GetCurrentDirectory();
-            var webApiPath = Path.Combine(basePath, "WebAPI");
-            if (Directory.Exists(webApiPath))
-            {
-                basePath = webApiPath;
-            } else if (Directory.Exists(Path.Combine(basePath, "../WebAPI")))
-            {
-                basePath = Path.Combine(basePath, "../WebAPI");
-            }
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(basePath)
-                .AddJsonFile("appsettings.json", optional: true)
-                .AddJsonFile($"appsettings.Development.json", optional: true)
-                .AddEnvironmentVariables()
-                .Build();
-            var connectionString = configuration.GetConnectionString("StringConnection");
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                throw new InvalidOperationException("Could not find ConnectionString 'StringConnection'.");
-            }
-            var builder = new DbContextOptionsBuilder<ApplicationDBContext>();
-            builder.UseSqlServer(connectionString, b => b.MigrationsAssembly("Infrastructure"));
-            return new ApplicationDBContext(builder.Options);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("=========================================================================================");
+            Console.WriteLine("CẢNH BÁO: Không được tạo migration trực tiếp bằng ApplicationDBContext!");
+            Console.WriteLine("Bạn bắt buộc phải sử dụng một trong các DbContext cụ thể sau:");
+            Console.WriteLine(" - SqlServerDBContext");
+            Console.WriteLine(" - MySqlDbContext");
+            Console.WriteLine(" - PostgreSqlDbContext");
+            Console.WriteLine();
+            Console.WriteLine("Ví dụ command:");
+            Console.WriteLine("dotnet ef migrations add <MigrationName> --context SqlServerDBContext --output-dir Migrations/SqlServerMigrations");
+            Console.WriteLine("=========================================================================================");
+            Console.ResetColor();
+
+            throw new InvalidOperationException("Cannot create migration using ApplicationDBContext. Please use a specific provider DbContext (SqlServerDBContext, MySqlDbContext, or PostgreSqlDbContext).");
         }
     }
 }
