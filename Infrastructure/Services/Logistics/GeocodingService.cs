@@ -19,7 +19,6 @@ namespace Infrastructure.Services.Logistics
                 var response = await httpClient.GetAsync(requestUri, cancellationToken);
                 if (!response.IsSuccessStatusCode)
                 {
-                    logger.LogWarning("Geocoding API failed with status code {StatusCode}", response.StatusCode);
                     return null;
                 }
                 var jsonString = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -49,9 +48,8 @@ namespace Infrastructure.Services.Logistics
                         return await GetCoordinatesAsync(fallbackAddress, cancellationToken);
                     }
                 }
-            } catch (Exception ex)
+            } catch (Exception)
             {
-                logger.LogError(ex, "Error occurred while fetching coordinates for address: {Address}", address);
             }
             return null;
         }

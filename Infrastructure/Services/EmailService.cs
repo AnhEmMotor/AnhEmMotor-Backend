@@ -24,7 +24,6 @@ public async Task SendEmailAsync(string to, string subject, string body, Cancell
 cancellationToken.ThrowIfCancellationRequested();
 if (string.IsNullOrWhiteSpace(_settings.Host))
 {
-_logger.LogWarning("SMTP not configured — email to {Recipient} skipped", to);
 return;
 }
 
@@ -47,11 +46,9 @@ if (!string.IsNullOrWhiteSpace(_settings.Username))
 await client.AuthenticateAsync(_settings.Username, _settings.Password ?? string.Empty, cancellationToken);
 }
 await client.SendAsync(message, cancellationToken);
-_logger.LogInformation("Email sent to {Recipient}: {Subject}", to, subject);
 }
-catch (Exception ex)
+catch (Exception)
 {
-_logger.LogError(ex, "Failed to send email to {Recipient}", to);
 throw;
 }
 finally

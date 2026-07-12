@@ -1,6 +1,6 @@
 namespace Domain.Entities
 {
-    public class ProductCategoryTranslation
+    public class ProductCategoryTranslation : BaseEntity
     {
         public int Id { get; set; }
 
@@ -13,11 +13,5 @@ namespace Domain.Entities
         public string? Description { get; set; }
 
         public ProductCategory ProductCategory { get; set; } = null!;
-
-        public DateTimeOffset? CreatedAt { get; set; }
-
-        public DateTimeOffset? UpdatedAt { get; set; }
-
-        public DateTimeOffset? DeletedAt { get; set; }
     }
 }

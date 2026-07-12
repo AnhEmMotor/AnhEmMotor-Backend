@@ -23,7 +23,6 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var baseUrl = configuration["GhnSettings:BaseUrl"]?.TrimEnd('/');
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(shopId) || string.IsNullOrEmpty(baseUrl))
             {
-                logger.LogWarning("GHN Settings are not configured properly.");
                 return Result<string>.Failure(Error.Failure("GHN configuration is missing."));
             }
             var requestUri = $"{baseUrl}/shiip/public-api/v2/shipping-order/create";
@@ -97,9 +96,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                 orderCode = orderCodeElement.GetString() ?? "Unknown";
             }
             return Result<string>.Success(orderCode);
-        } catch (Exception ex)
+        } catch (Exception)
         {
-            logger.LogError(ex, "Error creating shipping order for OutputId: {OutputId}", output.Id);
             return Result<string>.Failure(Error.Failure("An error occurred while creating the shipping order."));
         }
     }
@@ -142,9 +140,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                 return Result<string>.Success(statusElement.GetString() ?? "unknown");
             }
             return Result<string>.Failure(Error.Failure("Cannot parse status from GHN response."));
-        } catch (Exception ex)
+        } catch (Exception)
         {
-            logger.LogError(ex, "Error getting order status for GHN OrderCode: {OrderCode}", orderCode);
             return Result<string>.Failure(Error.Failure("An error occurred while getting order status."));
         }
     }
@@ -172,9 +169,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             }
             var jsonObject = JsonSerializer.Deserialize<object>(contentString);
             return Result<object>.Success(jsonObject!);
-        } catch (Exception ex)
+        } catch (Exception)
         {
-            logger.LogError(ex, "Error fetching provinces from GHN");
             return Result<object>.Failure(Error.Failure("An error occurred while fetching provinces."));
         }
     }
@@ -202,9 +198,8 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             }
             var jsonObject = JsonSerializer.Deserialize<object>(contentString);
             return Result<object>.Success(jsonObject!);
-        } catch (Exception ex)
+        } catch (Exception)
         {
-            logger.LogError(ex, "Error fetching wards from GHN");
             return Result<object>.Failure(Error.Failure("An error occurred while fetching wards."));
         }
     }

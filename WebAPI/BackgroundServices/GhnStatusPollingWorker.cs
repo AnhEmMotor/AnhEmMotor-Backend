@@ -39,10 +39,6 @@ public class GhnStatusPollingWorker : BackgroundService
             {
                 break;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred executing GHN status polling.");
-            }
         }
     }
 
@@ -64,7 +60,6 @@ public class GhnStatusPollingWorker : BackgroundService
             var statusResult = await shippingService.GetShippingOrderStatusAsync(shipment.TrackingNumber, stoppingToken);
             if (statusResult.IsFailure)
             {
-                _logger.LogWarning("Failed to get status for TrackingNumber: {TrackingNumber}. Error: {Error}", shipment.TrackingNumber, statusResult.Error);
                 continue;
             }
 
@@ -98,15 +93,7 @@ public class GhnStatusPollingWorker : BackgroundService
                     CurrentUserId = Guid.Empty
                 };
 
-                var result = await sender.Send(command, stoppingToken);
-                if (result.IsFailure)
-                {
-                    _logger.LogError("Failed to update order {OutputId} status via worker: {Error}", shipment.OutputId.Value, result.Error);
-                }
-                else
-                {
-                    _logger.LogInformation("Updated order {OutputId} to status {Status} based on GHN status {GhnStatus}", shipment.OutputId.Value, newStatus, ghnStatus);
-                }
+                await sender.Send(command, stoppingToken);
             }
         }
     }

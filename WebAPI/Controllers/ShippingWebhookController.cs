@@ -21,10 +21,6 @@ public class ShippingWebhookController(
     [HttpPost("ghn")]
     public async Task<IActionResult> HandleGhnWebhook([FromBody] GhnWebhookRequest request)
     {
-        logger.LogInformation(
-            "Received GHN webhook for OrderCode: {OrderCode}, Status: {Status}",
-            request.ClientOrderCode,
-            request.Status);
         if (string.IsNullOrEmpty(request.ClientOrderCode))
         {
             return BadRequest();
@@ -57,11 +53,7 @@ public class ShippingWebhookController(
                 StatusId = newStatus,
                 CurrentUserId = Guid.Empty
             };
-            var result = await sender.Send(command);
-            if (result.IsFailure)
-            {
-                logger.LogError("Failed to update order status via webhook: {Error}", result.Error);
-            }
+            await sender.Send(command);
         }
         return Ok();
     }
