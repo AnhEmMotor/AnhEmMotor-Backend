@@ -7,49 +7,70 @@ using System;
 
 namespace Infrastructure.SqlServerMigrations
 {
-	/// <inheritdoc />
-	public partial class AddSupplierTypeIdColumn : Migration
-	{
-		/// <inheritdoc />
-		protected override void Up(MigrationBuilder migrationBuilder)
-		{
-			migrationBuilder.Sql(@"
-				IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE name = 'PartnerTypeId' AND object_id = OBJECT_ID('Supplier'))
-				ALTER TABLE [Supplier] ADD [PartnerTypeId] nvarchar(50) NULL");
+    /// <inheritdoc />
+    public partial class AddSupplierTypeIdColumn : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "PartnerTypeId",
+                table: "Supplier",
+                type: "nvarchar(50)",
+                nullable: true);
+            migrationBuilder.CreateTable(
+                name: "PartnerType",
+                columns: table => new
+                {
+                    Key = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PartnerType", x => x.Key);
+                });
+            migrationBuilder.InsertData(
+                table: "PartnerType",
+                columns: new[] { "Key", "CreatedAt", "DeletedAt", "UpdatedAt" },
+                values: new object[,]
+                {
+                {
+                    "financial",
+                    null,
+                    null,
+                    null
+                },
+                {
+                    "insurance",
+                    null,
+                    null,
+                    null
+                },
+                {
+                    "supplier",
+                    null,
+                    null,
+                    null
+                }
+                });
+            migrationBuilder.CreateIndex(name: "IX_Supplier_PartnerTypeId", table: "Supplier", column: "PartnerTypeId");
+            migrationBuilder.AddForeignKey(
+                name: "FK_Supplier_PartnerType_PartnerTypeId",
+                table: "Supplier",
+                column: "PartnerTypeId",
+                principalTable: "PartnerType",
+                principalColumn: "Key");
+        }
 
-			migrationBuilder.Sql(@"
-				IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'PartnerType')
-				BEGIN
-				CREATE TABLE [PartnerType] (
-					[Key] nvarchar(50) NOT NULL,
-					[CreatedAt] datetimeoffset NULL,
-					[UpdatedAt] datetimeoffset NULL,
-					[DeletedAt] datetimeoffset NULL,
-					CONSTRAINT [PK_PartnerType] PRIMARY KEY ([Key])
-				);
-				INSERT INTO [PartnerType] ([Key], [CreatedAt], [DeletedAt], [UpdatedAt]) VALUES
-					('financial', NULL, NULL, NULL),
-					('insurance', NULL, NULL, NULL),
-					('supplier', NULL, NULL, NULL);
-				END");
-
-			migrationBuilder.Sql(@"
-				IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Supplier_PartnerTypeId' AND object_id = OBJECT_ID('Supplier'))
-				CREATE INDEX [IX_Supplier_PartnerTypeId] ON [Supplier] ([PartnerTypeId]);
-
-				IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Supplier_PartnerType_PartnerTypeId')
-				ALTER TABLE [Supplier] ADD CONSTRAINT [FK_Supplier_PartnerType_PartnerTypeId]
-					FOREIGN KEY ([PartnerTypeId]) REFERENCES [PartnerType] ([Key]);
-			");
-		}
-
-		/// <inheritdoc />
-		protected override void Down(MigrationBuilder migrationBuilder)
-		{
-			migrationBuilder.DropForeignKey(name: "FK_Supplier_PartnerType_PartnerTypeId", table: "Supplier");
-			migrationBuilder.DropTable(name: "PartnerType");
-			migrationBuilder.DropIndex(name: "IX_Supplier_PartnerTypeId", table: "Supplier");
-			migrationBuilder.DropColumn(name: "PartnerTypeId", table: "Supplier");
-		}
-	}
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(name: "FK_Supplier_PartnerType_PartnerTypeId", table: "Supplier");
+            migrationBuilder.DropTable(name: "PartnerType");
+            migrationBuilder.DropIndex(name: "IX_Supplier_PartnerTypeId", table: "Supplier");
+            migrationBuilder.DropColumn(name: "PartnerTypeId", table: "Supplier");
+        }
+    }
 }
