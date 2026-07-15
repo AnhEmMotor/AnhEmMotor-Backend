@@ -117,26 +117,36 @@ public class CreateOutputCommandHandler(
             }
         }
         var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
+        var thresholdSetting = settings.FirstOrDefault(
+            s => string.Equals(s.Key, SettingKeys.OrderValueExceeds, StringComparison.OrdinalIgnoreCase));
+        decimal threshold = 100000000;
+        if (thresholdSetting != null && decimal.TryParse(thresholdSetting.Value, out var parsedThreshold))
+        {
+            threshold = parsedThreshold;
+        }
+
         if (string.IsNullOrWhiteSpace(output.StatusId))
         {
-            var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
-            var thresholdSetting = settings.FirstOrDefault(
-                s => string.Equals(s.Key, SettingKeys.OrderValueExceeds, StringComparison.OrdinalIgnoreCase));
-            decimal threshold = 100000000;
-            if (thresholdSetting != null && decimal.TryParse(thresholdSetting.Value, out var parsedThreshold))
-            {
-                threshold = parsedThreshold;
-            }
             output.StatusId = totalPrice >= threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
         }
-        var ratioSetting = settings.FirstOrDefault(
-            s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
-        if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+
+        if (totalPrice >= threshold)
         {
-            output.DepositRatio = parsedRatio;
-        } else
+            var ratioSetting = settings.FirstOrDefault(
+                s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
+            if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+            {
+                output.DepositRatio = parsedRatio;
+            }
+            else
+            {
+                output.DepositRatio = 50;
+            }
+        }
+        else
         {
-            output.DepositRatio = 50;
+            output.DepositRatio = 0;
         }
         output.BuyerId = request.BuyerId;
         output.CreatedBy = request.BuyerId;
