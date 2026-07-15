@@ -32,5 +32,9 @@ public class MyOrderResponse
 
     public decimal? RemainingAmount { get; set; }
 
+    public string? ProvinceName { get; set; }
+
+    public string? WardName { get; set; }
+
     public List<MyOrderItemResponse> OutputInfos { get; set; } = [];
 }
