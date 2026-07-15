@@ -17,6 +17,7 @@ public class CreateOutputCommandHandler(
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
     ISettingRepository settingRepository,
+    Application.Interfaces.Services.Shipping.IShippingService shippingService,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -108,6 +109,16 @@ public class CreateOutputCommandHandler(
             return Result<OrderDetailResponse>.Failure(errors);
         }
         var output = request.Adapt<Output>();
+        
+        if (output.ProvinceId.HasValue)
+        {
+            output.ProvinceName = await shippingService.GetProvinceNameAsync(output.ProvinceId.Value, cancellationToken);
+            if (!string.IsNullOrEmpty(output.WardCode))
+            {
+                output.WardName = await shippingService.GetWardNameAsync(output.ProvinceId.Value, output.WardCode, cancellationToken);
+            }
+        }
+        
         foreach (var info in output.OutputInfos)
         {
             var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductVariantId);

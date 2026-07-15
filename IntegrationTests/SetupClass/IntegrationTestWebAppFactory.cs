@@ -217,6 +217,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IExternalAuthService, ExternalAuthService>();
                 services.AddScoped<IVNPayService, VNPayService>();
                 services.AddScoped<IPayOSService, PayOSService>();
+                services.AddSingleton<Application.Interfaces.Services.Shipping.IShippingService>(new FakeShippingService());
                 services.Scan(
                     scan => scan
                         .FromAssemblies(typeof(DependencyInjection).Assembly)
@@ -226,3 +227,4 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             });
     }
 }
+

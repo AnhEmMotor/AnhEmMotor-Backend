@@ -18,6 +18,7 @@ using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Shipping;
 using Domain.Constants.Order;
 using Domain.Primitives;
 using FluentAssertions;

@@ -26,6 +26,7 @@ using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentStatuses;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Shipping;
 using Asp.Versioning;
 using Domain.Constants.Order;
 using Domain.Constants.Permission;
@@ -473,6 +474,26 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     {
         var query = new GetOutputsListQuery { SieveModel = sieveModel, Search = search, StatusIds = statusIds };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách Tỉnh/Thành phố từ Giao Hàng Nhanh.
+    /// </summary>
+    [HttpGet("provinces")]
+    public async Task<IActionResult> GetProvinces(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new Application.Features.Outputs.Queries.GetProvinces.GetProvincesQuery(), cancellationToken);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách Quận/Huyện/Phường/Xã từ Giao Hàng Nhanh dựa trên ID Tỉnh/Thành phố.
+    /// </summary>
+    [HttpGet("wards/{provinceId}")]
+    public async Task<IActionResult> GetWards(int provinceId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new Application.Features.Outputs.Queries.GetWards.GetWardsQuery(provinceId), cancellationToken);
         return HandleResult(result);
     }
 }

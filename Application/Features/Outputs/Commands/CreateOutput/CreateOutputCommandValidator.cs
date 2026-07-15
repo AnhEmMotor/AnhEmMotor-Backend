@@ -21,6 +21,14 @@ namespace Application.Features.Outputs.Commands.CreateOutput
                 .WithMessage("Customer phone is required.")
                 .MustBeValidPhoneNumber()
                 .WithMessage("Invalid phone number format.");
+            RuleFor(x => x.ProvinceId)
+                .NotNull()
+                .WithMessage("Vui lòng chọn Tỉnh/Thành phố.")
+                .GreaterThan(0)
+                .WithMessage("Tỉnh/Thành phố không hợp lệ.");
+            RuleFor(x => x.WardCode)
+                .NotEmpty()
+                .WithMessage("Vui lòng chọn Phường/Xã.");
             RuleFor(x => x.CompanyName)
                 .NotEmpty()
                 .WithMessage("Tên công ty không được để trống.")

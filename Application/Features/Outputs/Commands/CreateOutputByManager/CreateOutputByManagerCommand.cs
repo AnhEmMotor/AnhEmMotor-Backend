@@ -24,6 +24,11 @@ public sealed record CreateOutputByManagerCommand : IRequest<Result<OrderDetailR
 
     public int? DepositRatio { get; init; }
 
+    public int? ProvinceId { get; init; }
+
+    public string? WardCode { get; init; }
+
     [JsonPropertyName("products")]
     public List<CreateOutputInfoRequest> OutputInfos { get; init; } = [];
 }
+

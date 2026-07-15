@@ -12,7 +12,11 @@ public interface IShippingService
 
     public Task<Result<string>> GetShippingOrderStatusAsync(string orderCode, CancellationToken cancellationToken = default);
 
-    public Task<Result<object>> GetProvincesAsync(CancellationToken cancellationToken = default);
+    public Task<Result<string>> GetProvincesAsync(CancellationToken cancellationToken = default);
 
-    public Task<Result<object>> GetWardsAsync(int provinceId, CancellationToken cancellationToken = default);
+    public Task<Result<string>> GetWardsAsync(int provinceId, CancellationToken cancellationToken = default);
+
+    public Task<string?> GetProvinceNameAsync(int provinceId, CancellationToken cancellationToken = default);
+    
+    public Task<string?> GetWardNameAsync(int provinceId, string wardCode, CancellationToken cancellationToken = default);
 }

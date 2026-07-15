@@ -146,7 +146,7 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
         }
     }
 
-    public async Task<Result<object>> GetProvincesAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<string>> GetProvincesAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -154,7 +154,7 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var baseUrl = configuration["GhnSettings:BaseUrl"]?.TrimEnd('/');
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(baseUrl))
             {
-                return Result<object>.Failure(Error.Failure("GHN configuration is missing."));
+                return Result<string>.Failure(Error.Failure("GHN configuration is missing."));
             }
             var requestUri = $"{baseUrl}/shiip/public-api/v3/master-data/province/all";
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
@@ -165,17 +165,16 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return Result<object>.Failure(Error.BadRequest("Failed to fetch provinces: " + contentString));
+                return Result<string>.Failure(Error.BadRequest("Failed to fetch provinces: " + contentString));
             }
-            var jsonObject = JsonSerializer.Deserialize<object>(contentString);
-            return Result<object>.Success(jsonObject!);
+            return Result<string>.Success(contentString);
         } catch (Exception)
         {
-            return Result<object>.Failure(Error.Failure("An error occurred while fetching provinces."));
+            return Result<string>.Failure(Error.Failure("An error occurred while fetching provinces."));
         }
     }
 
-    public async Task<Result<object>> GetWardsAsync(int provinceId, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> GetWardsAsync(int provinceId, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -183,7 +182,7 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var baseUrl = configuration["GhnSettings:BaseUrl"]?.TrimEnd('/');
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(baseUrl))
             {
-                return Result<object>.Failure(Error.Failure("GHN configuration is missing."));
+                return Result<string>.Failure(Error.Failure("GHN configuration is missing."));
             }
             var requestUri = $"{baseUrl}/shiip/public-api/v3/master-data/ward/all-by-province-id";
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
@@ -194,13 +193,56 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return Result<object>.Failure(Error.BadRequest("Failed to fetch wards: " + contentString));
+                return Result<string>.Failure(Error.BadRequest("Failed to fetch wards: " + contentString));
             }
-            var jsonObject = JsonSerializer.Deserialize<object>(contentString);
-            return Result<object>.Success(jsonObject!);
+            return Result<string>.Success(contentString);
         } catch (Exception)
         {
-            return Result<object>.Failure(Error.Failure("An error occurred while fetching wards."));
+            return Result<string>.Failure(Error.Failure("An error occurred while fetching wards."));
         }
+    }
+
+    public async Task<string?> GetProvinceNameAsync(int provinceId, CancellationToken cancellationToken = default)
+    {
+        var result = await GetProvincesAsync(cancellationToken);
+        if (!result.IsSuccess || string.IsNullOrEmpty(result.Value))
+            return null;
+            
+        try {
+            using var document = System.Text.Json.JsonDocument.Parse(result.Value);
+            if (document.RootElement.TryGetProperty("data", out var dataElement) && dataElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                foreach (var p in dataElement.EnumerateArray())
+                {
+                    if (p.TryGetProperty("_id", out var idProp) && idProp.GetInt32() == provinceId)
+                    {
+                        return p.TryGetProperty("name", out var nameProp) ? nameProp.GetString() : null;
+                    }
+                }
+            }
+        } catch { }
+        return null;
+    }
+
+    public async Task<string?> GetWardNameAsync(int provinceId, string wardCode, CancellationToken cancellationToken = default)
+    {
+        var result = await GetWardsAsync(provinceId, cancellationToken);
+        if (!result.IsSuccess || string.IsNullOrEmpty(result.Value))
+            return null;
+            
+        try {
+            using var document = System.Text.Json.JsonDocument.Parse(result.Value);
+            if (document.RootElement.TryGetProperty("data", out var dataElement) && dataElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                foreach (var w in dataElement.EnumerateArray())
+                {
+                    if (w.TryGetProperty("_id", out var codeProp) && codeProp.GetInt32().ToString() == wardCode)
+                    {
+                        return w.TryGetProperty("name", out var nameProp) ? nameProp.GetString() : null;
+                    }
+                }
+            }
+        } catch { }
+        return null;
     }
 }

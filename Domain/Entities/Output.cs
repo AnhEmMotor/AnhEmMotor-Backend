@@ -72,6 +72,18 @@ namespace Domain.Entities
         [Column("LeadId")]
         public int? LeadId { get; set; }
 
+        [Column("ProvinceId")]
+        public int? ProvinceId { get; set; }
+
+        [Column("ProvinceName")]
+        public string? ProvinceName { get; set; }
+
+        [Column("WardCode")]
+        public string? WardCode { get; set; }
+
+        [Column("WardName")]
+        public string? WardName { get; set; }
+
         [Column("IsCompanyInvoice")]
         public bool IsCompanyInvoice { get; set; } = false;
 
