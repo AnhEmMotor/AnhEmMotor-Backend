@@ -170,12 +170,9 @@ public class GetProductsListQueryHandler(IProductReadRepository readRepository) 
                                         var coverImage = string.IsNullOrWhiteSpace(coverImageUrl)
                                             ? photos.FirstOrDefault()
                                             : coverImageUrl;
-                                        var variantDisplayName = !string.IsNullOrWhiteSpace(v.VariantName) &&
-                                                            !string.IsNullOrWhiteSpace(colorName)
-                                            ? $"{v.VariantName} - {colorName}"
-                                            : (!string.IsNullOrWhiteSpace(v.VariantName)
-                                                            ? v.VariantName
-                                                            : (colorName ?? "Tiêu chuẩn"));
+                                        var variantDisplayName = !string.IsNullOrWhiteSpace(v.VariantName)
+                                            ? v.VariantName
+                                            : "Tiêu chuẩn";
                                         return new ProductVariantListStoreResponse
                                 {
                                     Id = v.Id,
