@@ -115,10 +115,16 @@ public class UpdateOutputStatusCommandHandler(
                 {
                     double? destLat = null;
                     double? destLon = null;
-                    if (geocodingService != null && !string.IsNullOrWhiteSpace(output.CustomerAddress))
+                    var addressParts = new List<string>();
+                    if (!string.IsNullOrWhiteSpace(output.CustomerAddress)) addressParts.Add(output.CustomerAddress.Trim());
+                    if (!string.IsNullOrWhiteSpace(output.WardName)) addressParts.Add(output.WardName.Trim());
+                    if (!string.IsNullOrWhiteSpace(output.ProvinceName)) addressParts.Add(output.ProvinceName.Trim());
+                    var fullAddress = string.Join(", ", addressParts);
+
+                    if (geocodingService != null && !string.IsNullOrWhiteSpace(fullAddress))
                     {
                         var coords = await geocodingService.GetCoordinatesAsync(
-                            output.CustomerAddress,
+                            fullAddress,
                             cancellationToken)
                             .ConfigureAwait(false);
                         if (coords.HasValue)
@@ -137,7 +143,7 @@ public class UpdateOutputStatusCommandHandler(
                         OriginAddress = "Kho AnhEmMotor",
                         OriginLatitude = LogisticsConstants.DefaultShowroomLatitude,
                         OriginLongitude = LogisticsConstants.DefaultShowroomLongitude,
-                        DestinationAddress = output.CustomerAddress ?? string.Empty,
+                        DestinationAddress = fullAddress,
                         DestinationLatitude = destLat,
                         DestinationLongitude = destLon,
                         Type = ShipmentType.OrderDelivery,
