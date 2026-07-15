@@ -27,8 +27,13 @@ namespace WebAPI.Controllers.V1;
 public class UserController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Lấy thông tin người dùng hiện tại từ JWT (Hỗ trợ SSE nếu Accept: text/event-stream)
+    /// Lấy thông tin người dùng hiện tại từ JWT (hỗ trợ SSE nếu header Accept: text/event-stream).
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin người dùng hiện tại.</returns>
+    /// <response code="200">Lấy thông tin thành công.</response>
+    /// <response code="401">Chưa đăng nhập hoặc token không hợp lệ.</response>
+    /// <response code="404">Không tìm thấy người dùng.</response>
     [HttpGet("me")]
     [Authorize]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
@@ -49,8 +54,15 @@ public class UserController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Đổi thông tin người dùng hiện tại từ JWT
+    /// Cập nhật thông tin cá nhân của người dùng hiện tại (họ tên, số điện thoại, địa chỉ, v.v.).
     /// </summary>
+    /// <param name="model">Thông tin cập nhật của người dùng.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin người dùng sau khi cập nhật.</returns>
+    /// <response code="200">Cập nhật thành công.</response>
+    /// <response code="400">Dữ liệu không hợp lệ.</response>
+    /// <response code="401">Chưa đăng nhập hoặc token không hợp lệ.</response>
+    /// <response code="404">Không tìm thấy người dùng.</response>
     [HttpPut("me")]
     [Authorize]
     [ProducesResponseType(typeof(UserDTOForManagerResponse), StatusCodes.Status200OK)]
@@ -66,8 +78,15 @@ public class UserController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Đổi mật khẩu người dùng hiện tại từ JWT
+    /// Đổi mật khẩu cho người dùng hiện tại (cần xác thực mật khẩu cũ).
     /// </summary>
+    /// <param name="model">Thông tin đổi mật khẩu (mật khẩu cũ, mật khẩu mới).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả đổi mật khẩu.</returns>
+    /// <response code="200">Đổi mật khẩu thành công.</response>
+    /// <response code="400">Mật khẩu cũ không đúng hoặc mật khẩu mới không hợp lệ.</response>
+    /// <response code="401">Chưa đăng nhập hoặc token không hợp lệ.</response>
+    /// <response code="404">Không tìm thấy người dùng.</response>
     [HttpPost("change-password")]
     [Authorize]
     [ProducesResponseType(typeof(ChangePasswordByUserResponse), StatusCodes.Status200OK)]
@@ -83,8 +102,14 @@ public class UserController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xóa tài khoản của người dùng từ JWT
+    /// Xóa tài khoản của người dùng hiện tại (yêu cầu xác thực mật khẩu).
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả xóa tài khoản.</returns>
+    /// <response code="200">Xóa tài khoản thành công.</response>
+    /// <response code="400">Không thể xóa tài khoản (có thể đang còn đơn hàng liên quan).</response>
+    /// <response code="401">Chưa đăng nhập hoặc token không hợp lệ.</response>
+    /// <response code="404">Không tìm thấy người dùng.</response>
     [HttpPost("delete-account")]
     [Authorize]
     [ProducesResponseType(typeof(DeleteAccountByUserReponse), StatusCodes.Status200OK)]
@@ -98,8 +123,14 @@ public class UserController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Khôi phục tài khoản người dùng
+    /// Khôi phục tài khoản người dùng đã bị xóa mềm (soft-delete) bằng token khôi phục.
     /// </summary>
+    /// <param name="userId">ID (GUID) của người dùng cần khôi phục.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả khôi phục tài khoản.</returns>
+    /// <response code="200">Khôi phục tài khoản thành công.</response>
+    /// <response code="400">Dữ liệu không hợp lệ hoặc tài khoản đã được khôi phục.</response>
+    /// <response code="404">Không tìm thấy người dùng hoặc token khôi phục không hợp lệ.</response>
     [HttpPost("{userId:guid}/restore")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(RestoreUserResponse), StatusCodes.Status200OK)]
@@ -113,8 +144,14 @@ public class UserController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tải lên ảnh đại diện cho người dùng hiện tại
+    /// Tải lên ảnh đại diện (avatar) cho người dùng hiện tại (hỗ trợ file JPEG, PNG).
     /// </summary>
+    /// <param name="file">Tệp hình ảnh cần tải lên.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>URL của ảnh đại diện đã tải lên.</returns>
+    /// <response code="200">Tải lên ảnh đại diện thành công.</response>
+    /// <response code="400">File rỗng hoặc định dạng không hợp lệ.</response>
+    /// <response code="401">Chưa đăng nhập hoặc token không hợp lệ.</response>
     [HttpPost("avatar")]
     [Authorize]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]

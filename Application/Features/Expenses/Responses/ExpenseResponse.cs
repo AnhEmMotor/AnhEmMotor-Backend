@@ -1,20 +1,22 @@
-﻿namespace Application.Features.Expenses.Responses;
+namespace Application.Features.Expenses.Responses;
 
 public class ExpenseResponse
 {
-    public int Id { get; set; }
+	public int Id { get; set; }
 
-    public string Name { get; set; } = string.Empty;
+	public string Name { get; set; } = string.Empty;
 
-    public decimal Amount { get; set; }
+	public decimal Amount { get; set; }
 
-    public DateTime ExpenseDate { get; set; }
+	public DateTime ExpenseDate { get; set; }
 
-    public int Category { get; set; }
+	public int Category { get; set; }
 
-    public string? Note { get; set; }
+	public string? Note { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+	public DateTime CreatedAt { get; set; }
 
-    public string CategoryText { get; set; } = string.Empty;
+	public DateTime? UpdatedAt { get; set; }
+
+	public string CategoryText { get; set; } = string.Empty;
 }

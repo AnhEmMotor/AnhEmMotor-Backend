@@ -1,4 +1,4 @@
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
 using Domain.Constants.InventoryReceipt;
@@ -140,6 +140,7 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         CancellationToken cancellationToken)
     {
         return GetQueryable()
+        .AsNoTracking()
             .Where(
                 o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
                     !string.IsNullOrEmpty(o.PaymentMethod) &&

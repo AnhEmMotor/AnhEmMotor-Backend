@@ -1,7 +1,7 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Application.Features.Expenses.Responses;
 using MediatR;
+using Sieve.Models;
+using Domain.Primitives;
 
-namespace Application.Features.Expenses.Queries.GetExpenses;
-
-public sealed record GetExpensesQuery : IRequest<Result<List<ExpenseResponse>>>;
+public sealed record GetExpensesQuery(SieveModel SieveModel) : IRequest<Result<PagedResult<ExpenseResponse>>>;

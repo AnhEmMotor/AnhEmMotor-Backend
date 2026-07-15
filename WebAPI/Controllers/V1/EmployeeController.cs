@@ -1,5 +1,7 @@
 using Application.ApiContracts.HR.Responses;
+using Application.Common.Models;
 using Application.Features.HR.Commands.CreateEmployee;
+using Application.Features.HR.Commands.DeleteEmployee;
 using Application.Features.HR.Commands.UpdateEmployee;
 using Application.Features.HR.Queries.GetEmployees;
 using Asp.Versioning;
@@ -73,6 +75,27 @@ public class EmployeeController(IMediator mediator) : ApiController
         var command = request.Adapt<UpdateEmployeeCommand>() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Deletes an employee profile.
+    /// </summary>
+    /// <param name="id">The employee ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the deletion.</returns>
+    [HttpDelete("{id}")]
+    [RequiresAnyPermissions(
+        Permissions.Admin.EmployeeManagement.Delete,
+        Permissions.Accountant.EmployeeManagement.Delete)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteEmployeeAsync(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeleteEmployeeCommand(id);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 }
 
