@@ -53,4 +53,3 @@ namespace Application.Features.Leads.Queries.GetLeadById
     }
 }
 
-

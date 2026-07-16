@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services.Shipping;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -20,7 +21,7 @@ public class CreateOutputByManagerCommandHandler(
     IProductVariantReadRepository variantRepository,
     IUserReadRepository userReadRepository,
     ISettingRepository settingRepository,
-    Application.Interfaces.Services.Shipping.IShippingService shippingService,
+    IShippingService shippingService,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputByManagerCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -70,16 +71,17 @@ public class CreateOutputByManagerCommandHandler(
             }
         }
         var output = request.Adapt<Output>();
-
         if (output.ProvinceId.HasValue)
         {
             output.ProvinceName = await shippingService.GetProvinceNameAsync(output.ProvinceId.Value, cancellationToken);
             if (!string.IsNullOrEmpty(output.WardCode))
             {
-                output.WardName = await shippingService.GetWardNameAsync(output.ProvinceId.Value, output.WardCode, cancellationToken);
+                output.WardName = await shippingService.GetWardNameAsync(
+                    output.ProvinceId.Value,
+                    output.WardCode,
+                    cancellationToken);
             }
         }
-
         foreach (var info in output.OutputInfos)
         {
             var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductVariantId);

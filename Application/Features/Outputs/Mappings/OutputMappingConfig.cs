@@ -53,8 +53,12 @@ public class OutputMappingConfig : IRegister
         config.NewConfig<OutputInfo, MyOrderItemResponse>()
             .Map(dest => dest.ProductName, src => MapProductName(src))
             .Map(dest => dest.VariantName, src => src.ProductVariant != null ? src.ProductVariant.VariantName : null)
-            .Map(dest => dest.ColorName, src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
-            .Map(dest => dest.ColorCode, src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorCode : null)
+            .Map(
+                dest => dest.ColorName,
+                src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
+            .Map(
+                dest => dest.ColorCode,
+                src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorCode : null)
             .Map(dest => dest.Count, src => src.Count)
             .Map(dest => dest.Price, src => src.Price)
             .Map(dest => dest.CoverImageUrl, src => MapCoverImageUrl(src));
@@ -63,8 +67,12 @@ public class OutputMappingConfig : IRegister
             .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId)
             .Map(dest => dest.ProductName, src => MapProductName(src))
             .Map(dest => dest.VariantName, src => src.ProductVariant != null ? src.ProductVariant.VariantName : null)
-            .Map(dest => dest.ColorName, src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
-            .Map(dest => dest.ColorCode, src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorCode : null)
+            .Map(
+                dest => dest.ColorName,
+                src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorName : null)
+            .Map(
+                dest => dest.ColorCode,
+                src => src.ProductVariantColor != null ? src.ProductVariantColor.ColorCode : null)
             .Map(dest => dest.CoverImageUrl, src => MapCoverImageUrl(src))
             .Map(dest => dest.AssignedVehicles, src => MapAssignedVehicles(src));
         config.NewConfig<CreateOutputInfoRequest, OutputInfo>()
@@ -122,14 +130,11 @@ public class OutputMappingConfig : IRegister
     {
         if (src.ProductVariant?.Product is null)
             return null;
-            
         var productName = src.ProductVariant.Product.Name;
         var optionValues = src.ProductVariant.VariantOptionValues?
             .Select(vov => vov.OptionValue?.Name).Where(name => !string.IsNullOrWhiteSpace(name)).ToList();
-            
         if (optionValues is null || optionValues.Count == 0)
             return productName;
-            
         return $"{productName} ({string.Join(" - ", optionValues)})";
     }
 
@@ -139,14 +144,11 @@ public class OutputMappingConfig : IRegister
         {
             return src.ProductVariantColor.CoverImageUrl;
         }
-
         var variant = src.ProductVariant;
         if (variant == null)
             return null;
-            
         if (!string.IsNullOrEmpty(variant.CoverImageUrl))
             return variant.CoverImageUrl;
-            
         return variant.ProductCollectionPhotos?
             .OrderBy(p => p.Id).Select(p => p.ImageUrl).FirstOrDefault();
     }

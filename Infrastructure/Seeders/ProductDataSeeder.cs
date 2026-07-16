@@ -276,7 +276,9 @@ public static class ProductDataSeeder
             existing.BrandId = p.BrandId;
             existing.ShortDescription = p.ShortDescription;
             existing.Weight = p.Weight;
-            existing.Length = p.Length; existing.Width = p.Width; existing.Height = p.Height;
+            existing.Length = p.Length;
+            existing.Width = p.Width;
+            existing.Height = p.Height;
             existing.Wheelbase = p.Wheelbase;
             existing.SeatHeight = p.SeatHeight;
             existing.GroundClearance = p.GroundClearance;

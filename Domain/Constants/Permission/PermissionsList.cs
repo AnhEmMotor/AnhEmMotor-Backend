@@ -4,7 +4,7 @@ namespace Domain.Constants.Permission;
 
 public static class PermissionsList
 {
-    public static readonly List<PermissionModuleMetadata> ModulesTree =[new PermissionModuleMetadata
+    public static readonly List<PermissionModuleMetadata> ModulesTree = [new PermissionModuleMetadata
     {
         Id = "Permissions.Admin",
         Name = "Ban Điều Hành & Chủ Showroom",

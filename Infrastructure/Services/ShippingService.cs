@@ -3,17 +3,19 @@ using Application.Interfaces.Services.Shipping;
 using Application.Interfaces.Services.Shipping.Models;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Infrastructure.Services;
 
 public class ShippingService(HttpClient httpClient, IConfiguration configuration) : IShippingService
 {
-    public async Task<Result<decimal>> CalculateShippingFeeAsync(CalculateShippingFeeRequest req, CancellationToken cancellationToken = default)
+    public async Task<Result<decimal>> CalculateShippingFeeAsync(
+        CalculateShippingFeeRequest req,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -28,22 +30,22 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             request.Headers.Add("Token", token);
             request.Headers.Add("ShopId", shopId);
-
-            var products = req.Items.Select(i => new
-            {
-                name = i.Name,
-                quantity = i.Quantity,
-                length = Math.Min(150, Math.Max(1, i.Length ?? 12)),
-                width = Math.Min(150, Math.Max(1, i.Width ?? 12)),
-                height = Math.Min(150, Math.Max(1, i.Height ?? 12)),
-                weight = Math.Min(30000, Math.Max(1, i.Weight ?? 1200))
-            }).ToList();
-
+            var products = req.Items
+                .Select(
+                    i => new
+                    {
+                        name = i.Name,
+                        quantity = i.Quantity,
+                        length = Math.Min(150, Math.Max(1, i.Length ?? 12)),
+                        width = Math.Min(150, Math.Max(1, i.Width ?? 12)),
+                        height = Math.Min(150, Math.Max(1, i.Height ?? 12)),
+                        weight = Math.Min(30000, Math.Max(1, i.Weight ?? 1200))
+                    })
+                .ToList();
             var totalWeight = Math.Min(30000, products.Sum(x => x.weight * x.quantity));
             var maxLength = products.Any() ? Math.Min(150, products.Max(x => x.length)) : 12;
             var maxWidth = products.Any() ? Math.Min(150, products.Max(x => x.width)) : 12;
             var totalHeight = Math.Min(150, products.Sum(x => x.height * x.quantity));
-
             var payload = new
             {
                 to_ward_id_v2 = req.ToWardIdV2,
@@ -57,35 +59,44 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                 height = totalHeight,
                 items = products
             };
-
-            var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull };
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = null,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
             request.Content = JsonContent.Create(payload, null, jsonOptions);
             var response = await httpClient.SendAsync(request, cancellationToken);
             var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                return Result<decimal>.Failure(Error.BadRequest("Failed to calculate shipping fee with GHN: " + contentString));
+                return Result<decimal>.Failure(
+                    Error.BadRequest("Failed to calculate shipping fee with GHN: " + contentString));
             }
             using var jsonDocument = JsonDocument.Parse(contentString);
             var root = jsonDocument.RootElement;
             if (root.TryGetProperty("code", out var codeElement) && codeElement.GetInt32() != 200)
             {
-                var message = root.TryGetProperty("message", out var msgElement) ? msgElement.GetString() : "Unknown error";
+                var message = root.TryGetProperty("message", out var msgElement)
+                    ? msgElement.GetString()
+                    : "Unknown error";
                 return Result<decimal>.Failure(Error.BadRequest("GHN Error: " + message));
             }
-            if (root.TryGetProperty("data", out var dataElement) && dataElement.TryGetProperty("total", out var totalElement))
+            if (root.TryGetProperty("data", out var dataElement) &&
+                dataElement.TryGetProperty("total", out var totalElement))
             {
                 return Result<decimal>.Success(totalElement.GetDecimal());
             }
             return Result<decimal>.Failure(Error.Failure("Cannot parse fee from GHN response."));
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
-            return Result<decimal>.Failure(Error.Failure("An error occurred while calculating shipping fee. " + ex.Message));
+            return Result<decimal>.Failure(
+                Error.Failure("An error occurred while calculating shipping fee. " + ex.Message));
         }
     }
 
-    public async Task<Result<string>> CreateShippingOrderAsync(Output output, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> CreateShippingOrderAsync(
+        Output output,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -100,7 +111,6 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             request.Headers.Add("Token", token);
             request.Headers.Add("ShopId", shopId);
-
             var products = output.OutputInfos
                 .Select(
                     oi =>
@@ -111,7 +121,6 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                         var width = v?.Width ?? p?.Width ?? 12;
                         var height = v?.Height ?? p?.Height ?? 12;
                         var weight = v?.Weight ?? p?.Weight ?? 1.2m;
-
                         return new
                         {
                             name = p?.Name ?? "Product",
@@ -125,12 +134,10 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                         };
                     })
                 .ToList();
-
             var totalWeight = Math.Min(30000, products.Sum(x => x.weight * x.quantity));
             var maxLength = products.Any() ? Math.Min(150, products.Max(x => x.length)) : 12;
             var maxWidth = products.Any() ? Math.Min(150, products.Max(x => x.width)) : 12;
             var totalHeight = Math.Min(150, products.Sum(x => x.height * x.quantity));
-
             var payload = new
             {
                 payment_type_id = 2,
@@ -158,7 +165,6 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                 service_type_id = 5,
                 items = products
             };
-
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null };
             request.Content = JsonContent.Create(payload, null, jsonOptions);
             var response = await httpClient.SendAsync(request, cancellationToken);
@@ -190,7 +196,9 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
         }
     }
 
-    public async Task<Result<string>> GetShippingOrderStatusAsync(string orderCode, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> GetShippingOrderStatusAsync(
+        string orderCode,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -293,10 +301,11 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
         var result = await GetProvincesAsync(cancellationToken);
         if (!result.IsSuccess || string.IsNullOrEmpty(result.Value))
             return null;
-            
-        try {
-            using var document = System.Text.Json.JsonDocument.Parse(result.Value);
-            if (document.RootElement.TryGetProperty("data", out var dataElement) && dataElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+        try
+        {
+            using var document = JsonDocument.Parse(result.Value);
+            if (document.RootElement.TryGetProperty("data", out var dataElement) &&
+                dataElement.ValueKind == JsonValueKind.Array)
             {
                 foreach (var p in dataElement.EnumerateArray())
                 {
@@ -306,19 +315,25 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                     }
                 }
             }
-        } catch { }
+        } catch
+        {
+        }
         return null;
     }
 
-    public async Task<string?> GetWardNameAsync(int provinceId, string wardCode, CancellationToken cancellationToken = default)
+    public async Task<string?> GetWardNameAsync(
+        int provinceId,
+        string wardCode,
+        CancellationToken cancellationToken = default)
     {
         var result = await GetWardsAsync(provinceId, cancellationToken);
         if (!result.IsSuccess || string.IsNullOrEmpty(result.Value))
             return null;
-            
-        try {
-            using var document = System.Text.Json.JsonDocument.Parse(result.Value);
-            if (document.RootElement.TryGetProperty("data", out var dataElement) && dataElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+        try
+        {
+            using var document = JsonDocument.Parse(result.Value);
+            if (document.RootElement.TryGetProperty("data", out var dataElement) &&
+                dataElement.ValueKind == JsonValueKind.Array)
             {
                 foreach (var w in dataElement.EnumerateArray())
                 {
@@ -328,14 +343,10 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                     }
                 }
             }
-        } catch { }
+        } catch
+        {
+        }
         return null;
     }
 }
-
-
-
-
-
-
 

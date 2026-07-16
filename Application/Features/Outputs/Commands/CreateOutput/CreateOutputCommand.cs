@@ -40,4 +40,3 @@ public sealed record CreateOutputCommand : IRequest<Result<OrderDetailResponse>>
     public List<CreateOutputInfoRequest> OutputInfos { get; init; } = [];
 }
 
-

@@ -26,9 +26,7 @@ namespace Application.Features.Outputs.Commands.CreateOutput
                 .WithMessage("Vui lòng chọn Tỉnh/Thành phố.")
                 .GreaterThan(0)
                 .WithMessage("Tỉnh/Thành phố không hợp lệ.");
-            RuleFor(x => x.WardCode)
-                .NotEmpty()
-                .WithMessage("Vui lòng chọn Phường/Xã.");
+            RuleFor(x => x.WardCode).NotEmpty().WithMessage("Vui lòng chọn Phường/Xã.");
             RuleFor(x => x.CompanyName)
                 .NotEmpty()
                 .WithMessage("Tên công ty không được để trống.")

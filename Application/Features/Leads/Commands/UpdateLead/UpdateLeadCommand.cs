@@ -38,4 +38,3 @@ public record UpdateLeadCommand : IRequest<Result<int>>
     public bool IsVerified { get; set; }
 }
 
-

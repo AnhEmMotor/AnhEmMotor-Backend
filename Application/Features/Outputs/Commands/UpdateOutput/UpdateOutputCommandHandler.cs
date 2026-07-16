@@ -2,6 +2,7 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Services.Shipping;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Mapster;
@@ -12,7 +13,7 @@ namespace Application.Features.Outputs.Commands.UpdateOutput;
 public class UpdateOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    Application.Interfaces.Services.Shipping.IShippingService shippingService,
+    IShippingService shippingService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -65,10 +66,15 @@ public class UpdateOutputCommandHandler(
             output.WardCode = request.WardCode;
             if (request.ProvinceId.HasValue)
             {
-                output.ProvinceName = await shippingService.GetProvinceNameAsync(request.ProvinceId.Value, cancellationToken);
+                output.ProvinceName = await shippingService.GetProvinceNameAsync(
+                    request.ProvinceId.Value,
+                    cancellationToken);
                 if (!string.IsNullOrEmpty(request.WardCode))
                 {
-                    output.WardName = await shippingService.GetWardNameAsync(request.ProvinceId.Value, request.WardCode, cancellationToken);
+                    output.WardName = await shippingService.GetWardNameAsync(
+                        request.ProvinceId.Value,
+                        request.WardCode,
+                        cancellationToken);
                 }
             }
         }

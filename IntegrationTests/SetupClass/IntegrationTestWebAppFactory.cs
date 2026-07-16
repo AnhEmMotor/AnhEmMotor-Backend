@@ -1,6 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Shipping;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Authorization;
@@ -217,7 +218,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IExternalAuthService, ExternalAuthService>();
                 services.AddScoped<IVNPayService, VNPayService>();
                 services.AddScoped<IPayOSService, PayOSService>();
-                services.AddSingleton<Application.Interfaces.Services.Shipping.IShippingService>(new FakeShippingService());
+                services.AddSingleton<IShippingService>(new FakeShippingService());
                 services.Scan(
                     scan => scan
                         .FromAssemblies(typeof(DependencyInjection).Assembly)

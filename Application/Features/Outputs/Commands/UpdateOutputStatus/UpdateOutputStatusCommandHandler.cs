@@ -116,16 +116,16 @@ public class UpdateOutputStatusCommandHandler(
                     double? destLat = null;
                     double? destLon = null;
                     var addressParts = new List<string>();
-                    if (!string.IsNullOrWhiteSpace(output.CustomerAddress)) addressParts.Add(output.CustomerAddress.Trim());
-                    if (!string.IsNullOrWhiteSpace(output.WardName)) addressParts.Add(output.WardName.Trim());
-                    if (!string.IsNullOrWhiteSpace(output.ProvinceName)) addressParts.Add(output.ProvinceName.Trim());
+                    if (!string.IsNullOrWhiteSpace(output.CustomerAddress))
+                        addressParts.Add(output.CustomerAddress.Trim());
+                    if (!string.IsNullOrWhiteSpace(output.WardName))
+                        addressParts.Add(output.WardName.Trim());
+                    if (!string.IsNullOrWhiteSpace(output.ProvinceName))
+                        addressParts.Add(output.ProvinceName.Trim());
                     var fullAddress = string.Join(", ", addressParts);
-
                     if (geocodingService != null && !string.IsNullOrWhiteSpace(fullAddress))
                     {
-                        var coords = await geocodingService.GetCoordinatesAsync(
-                            fullAddress,
-                            cancellationToken)
+                        var coords = await geocodingService.GetCoordinatesAsync(fullAddress, cancellationToken)
                             .ConfigureAwait(false);
                         if (coords.HasValue)
                         {
@@ -137,8 +137,8 @@ public class UpdateOutputStatusCommandHandler(
                     {
                         TrackingNumber = trackingNumber,
                         CustomerName = output.CustomerName ?? string.Empty,
-                          ShippingCost = output.ShippingFee ?? 0,
-                          CodAmount = output.Total - (output.PaidAmount ?? 0),
+                        ShippingCost = output.ShippingFee ?? 0,
+                        CodAmount = output.Total - (output.PaidAmount ?? 0),
                         CustomerPhone = output.CustomerPhone ?? string.Empty,
                         OriginAddress = "Kho AnhEmMotor",
                         OriginLatitude = LogisticsConstants.DefaultShowroomLatitude,

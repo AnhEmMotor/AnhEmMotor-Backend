@@ -1,4 +1,3 @@
-using Application.Features.Logistics.Queries.CalculateShippingFee;
 using Application.ApiContracts.Logistics.CarrierSettings.Requests;
 using Application.ApiContracts.Logistics.CarrierSettings.Responses;
 using Application.ApiContracts.Logistics.Responses;
@@ -8,6 +7,7 @@ using Application.Features.Logistics.Commands.ToggleItemPickCommand;
 using Application.Features.Logistics.Commands.UpdateCarrierPartner;
 using Application.Features.Logistics.Commands.UpdateParcelStatusCommand;
 using Application.Features.Logistics.Commands.UpdateTrackingNumberCommand;
+using Application.Features.Logistics.Queries.CalculateShippingFee;
 using Application.Features.Logistics.Queries.GetActiveShipments;
 using Application.Features.Logistics.Queries.GetCarriers;
 using Application.Features.Logistics.Queries.GetDeliveryStatuses;
@@ -221,7 +221,9 @@ public class LogisticsController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("calculate-fee")]
-    public async Task<IActionResult> CalculateFee([FromBody] CalculateShippingFeeQuery query, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CalculateFee(
+        [FromBody] CalculateShippingFeeQuery query,
+        CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess)

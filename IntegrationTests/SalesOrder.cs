@@ -1264,8 +1264,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             new
             {
                 customerName = "Khách hàng Test",
-                    provinceId = 1,
-                    wardCode = "01",
+                provinceId = 1,
+                wardCode = "01",
                 customerPhone = "0987654321",
                 customerAddress = "Hà Nội",
                 products = new[] { new { ProductVariantId = variantId, count = 3 } }
@@ -1290,20 +1290,24 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
     [Fact, Trait("TestID", "SO_119")]
     public async Task GetProvinces_ReturnsSuccess()
     {
-        var response = await _client.GetAsync("/api/v1/salesorders/provinces", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/salesorders/provinces", TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
-        var content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadAsStringAsync(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         content.Should().Contain("Mock Province");
     }
 
     [Fact, Trait("TestID", "SO_120")]
     public async Task GetWards_ReturnsSuccess()
     {
-        var response = await _client.GetAsync("/api/v1/salesorders/wards/1", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/salesorders/wards/1", TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
-        var content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadAsStringAsync(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         content.Should().Contain("Mock Ward");
     }
 }

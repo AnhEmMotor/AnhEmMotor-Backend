@@ -1,5 +1,5 @@
 using Application.Interfaces.Services.Logistics;
-using Microsoft.Extensions.Logging;
+using System.Globalization;
 using System.Text.Json;
 
 namespace Infrastructure.Services.Logistics
@@ -30,8 +30,16 @@ namespace Infrastructure.Services.Logistics
                     if (firstResult.TryGetProperty("lat", out var latProp) &&
                         firstResult.TryGetProperty("lon", out var lonProp))
                     {
-                        if (double.TryParse(latProp.GetString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var lat) &&
-                            double.TryParse(lonProp.GetString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var lon))
+                        if (double.TryParse(
+                                latProp.GetString(),
+                                NumberStyles.Any,
+                                CultureInfo.InvariantCulture,
+                                out var lat) &&
+                            double.TryParse(
+                                lonProp.GetString(),
+                                NumberStyles.Any,
+                                CultureInfo.InvariantCulture,
+                                out var lon))
                         {
                             return (lat, lon);
                         }

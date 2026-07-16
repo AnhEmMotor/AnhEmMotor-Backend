@@ -23,10 +23,11 @@ using Application.Features.Outputs.Queries.GetOutputsByUserIdForManager;
 using Application.Features.Outputs.Queries.GetOutputsForCurrentUser;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
+using Application.Features.Outputs.Queries.GetProvinces;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentRequirements;
 using Application.Features.Outputs.Queries.GetVehicleAssignmentStatuses;
+using Application.Features.Outputs.Queries.GetWards;
 using Application.Interfaces.Services;
-using Application.Interfaces.Services.Shipping;
 using Asp.Versioning;
 using Domain.Constants.Order;
 using Domain.Constants.Permission;
@@ -483,7 +484,7 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     [HttpGet("provinces")]
     public async Task<IActionResult> GetProvinces(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new Application.Features.Outputs.Queries.GetProvinces.GetProvincesQuery(), cancellationToken);
+        var result = await mediator.Send(new GetProvincesQuery(), cancellationToken);
         return HandleResult(result);
     }
 
@@ -493,7 +494,7 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     [HttpGet("wards/{provinceId}")]
     public async Task<IActionResult> GetWards(int provinceId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new Application.Features.Outputs.Queries.GetWards.GetWardsQuery(provinceId), cancellationToken);
+        var result = await mediator.Send(new GetWardsQuery(provinceId), cancellationToken);
         return HandleResult(result);
     }
 }

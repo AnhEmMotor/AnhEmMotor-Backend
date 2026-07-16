@@ -6,10 +6,10 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
 {
     public CreateProductCommandValidator()
     {
-
         RuleFor(v => v.Length).GreaterThan(0).When(v => v.Length.HasValue);
         RuleFor(v => v.Width).GreaterThan(0).When(v => v.Width.HasValue);
-        RuleFor(v => v.Height).GreaterThan(0).When(v => v.Height.HasValue);        RuleFor(x => x.Name)
+        RuleFor(v => v.Height).GreaterThan(0).When(v => v.Height.HasValue);
+        RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage("Tên sản phẩm không được để trống.")
             .MaximumLength(100)
@@ -112,5 +112,4 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
         return variant.Colors.Count > 0;
     }
 }
-
 
