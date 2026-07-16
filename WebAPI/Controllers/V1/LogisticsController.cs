@@ -1,3 +1,4 @@
+using Application.Features.Logistics.Queries.CalculateShippingFee;
 using Application.ApiContracts.Logistics.CarrierSettings.Requests;
 using Application.ApiContracts.Logistics.CarrierSettings.Responses;
 using Application.ApiContracts.Logistics.Responses;
@@ -218,4 +219,14 @@ public class LogisticsController(IMediator mediator) : ControllerBase
             return NotFound();
         return NoContent();
     }
+
+    [HttpPost("calculate-fee")]
+    public async Task<IActionResult> CalculateFee([FromBody] CalculateShippingFeeQuery query, CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        if (!result.IsSuccess)
+            return BadRequest(result.Errors);
+        return Ok(result.Value);
+    }
 }
+

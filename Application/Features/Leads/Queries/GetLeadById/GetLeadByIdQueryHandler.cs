@@ -27,7 +27,6 @@ namespace Application.Features.Leads.Queries.GetLeadById
                     Address = lead.Address,
                     AddressDetail = lead.AddressDetail,
                     Ward = lead.Ward,
-                    District = lead.District,
                     Province = lead.Province,
                     Gender = lead.Gender,
                     Birthday = lead.Birthday,
@@ -53,4 +52,5 @@ namespace Application.Features.Leads.Queries.GetLeadById
         }
     }
 }
+
 

@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.Interfaces.Services.Shipping;
+using Application.Interfaces.Services.Shipping.Models;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -12,9 +13,79 @@ namespace Infrastructure.Services;
 
 public class ShippingService(HttpClient httpClient, IConfiguration configuration) : IShippingService
 {
-    public async Task<Result<string>> CreateShippingOrderAsync(
-        Output output,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<decimal>> CalculateShippingFeeAsync(CalculateShippingFeeRequest req, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var token = configuration["GhnSettings:Token"];
+            var shopId = configuration["GhnSettings:ShopId"];
+            var baseUrl = configuration["GhnSettings:BaseUrl"]?.TrimEnd('/');
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(shopId) || string.IsNullOrEmpty(baseUrl))
+            {
+                return Result<decimal>.Failure(Error.Failure("GHN configuration is missing."));
+            }
+            var requestUri = $"{baseUrl}/shiip/public-api/v2/shipping-order/fee";
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Add("Token", token);
+            request.Headers.Add("ShopId", shopId);
+
+            var products = req.Items.Select(i => new
+            {
+                name = i.Name,
+                quantity = i.Quantity,
+                length = Math.Min(150, Math.Max(1, i.Length ?? 12)),
+                width = Math.Min(150, Math.Max(1, i.Width ?? 12)),
+                height = Math.Min(150, Math.Max(1, i.Height ?? 12)),
+                weight = Math.Min(30000, Math.Max(1, i.Weight ?? 1200))
+            }).ToList();
+
+            var totalWeight = Math.Min(30000, products.Sum(x => x.weight * x.quantity));
+            var maxLength = products.Any() ? Math.Min(150, products.Max(x => x.length)) : 12;
+            var maxWidth = products.Any() ? Math.Min(150, products.Max(x => x.width)) : 12;
+            var totalHeight = Math.Min(150, products.Sum(x => x.height * x.quantity));
+
+            var payload = new
+            {
+                to_ward_id_v2 = req.ToWardIdV2,
+                to_address_v2 = req.ToAddressV2,
+                is_new_to_address = req.IsNewToAddress,
+                to_ward_code = req.ToWardCode,
+                service_type_id = 5,
+                weight = totalWeight,
+                length = maxLength,
+                width = maxWidth,
+                height = totalHeight,
+                items = products
+            };
+
+            var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null, DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull };
+            request.Content = JsonContent.Create(payload, null, jsonOptions);
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return Result<decimal>.Failure(Error.BadRequest("Failed to calculate shipping fee with GHN: " + contentString));
+            }
+            using var jsonDocument = JsonDocument.Parse(contentString);
+            var root = jsonDocument.RootElement;
+            if (root.TryGetProperty("code", out var codeElement) && codeElement.GetInt32() != 200)
+            {
+                var message = root.TryGetProperty("message", out var msgElement) ? msgElement.GetString() : "Unknown error";
+                return Result<decimal>.Failure(Error.BadRequest("GHN Error: " + message));
+            }
+            if (root.TryGetProperty("data", out var dataElement) && dataElement.TryGetProperty("total", out var totalElement))
+            {
+                return Result<decimal>.Success(totalElement.GetDecimal());
+            }
+            return Result<decimal>.Failure(Error.Failure("Cannot parse fee from GHN response."));
+        }
+        catch (Exception ex)
+        {
+            return Result<decimal>.Failure(Error.Failure("An error occurred while calculating shipping fee. " + ex.Message));
+        }
+    }
+
+    public async Task<Result<string>> CreateShippingOrderAsync(Output output, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -29,24 +100,41 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             request.Headers.Add("Token", token);
             request.Headers.Add("ShopId", shopId);
+
             var products = output.OutputInfos
                 .Select(
-                    oi => new
+                    oi =>
                     {
-                        name = oi.ProductVariant?.Product?.Name ?? "Product",
-                        code = oi.ProductVariantId?.ToString() ?? oi.Id.ToString(),
-                        quantity = oi.Count ?? 1,
-                        price = (int)(oi.Price ?? 0),
-                        length = 12,
-                        width = 12,
-                        height = 12,
-                        weight = 1200
+                        var v = oi.ProductVariant;
+                        var p = v?.Product;
+                        var length = v?.Length ?? p?.Length ?? 12;
+                        var width = v?.Width ?? p?.Width ?? 12;
+                        var height = v?.Height ?? p?.Height ?? 12;
+                        var weight = v?.Weight ?? p?.Weight ?? 1.2m;
+
+                        return new
+                        {
+                            name = p?.Name ?? "Product",
+                            code = oi.ProductVariantId?.ToString() ?? oi.Id.ToString(),
+                            quantity = oi.Count ?? 1,
+                            price = (int)(oi.Price ?? 0),
+                            length = Math.Min(150, Math.Max(1, (int)length)),
+                            width = Math.Min(150, Math.Max(1, (int)width)),
+                            height = Math.Min(150, Math.Max(1, (int)height)),
+                            weight = Math.Min(30000, Math.Max(1, (int)(weight * 1000)))
+                        };
                     })
                 .ToList();
+
+            var totalWeight = Math.Min(30000, products.Sum(x => x.weight * x.quantity));
+            var maxLength = products.Any() ? Math.Min(150, products.Max(x => x.length)) : 12;
+            var maxWidth = products.Any() ? Math.Min(150, products.Max(x => x.width)) : 12;
+            var totalHeight = Math.Min(150, products.Sum(x => x.height * x.quantity));
+
             var payload = new
             {
                 payment_type_id = 2,
-                note = "Vui lòng gọi trước khi giao",
+                note = output.Notes ?? string.Empty,
                 required_note = "CHOXEMHANGKHONGTHU",
                 client_order_code = $"GHN-{output.Id}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}",
                 is_new_from_address = true,
@@ -62,17 +150,17 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
                 to_ward_name = !string.IsNullOrWhiteSpace(output.WardName) ? output.WardName : "Phường Phước Thắng",
                 to_province_name = !string.IsNullOrWhiteSpace(output.ProvinceName) ? output.ProvinceName : "Hồ Chí Minh",
                 cod_amount = (int)(output.Total - (output.PaidAmount ?? 0)),
-                weight = 1200,
-                length = 12,
-                width = 12,
-                height = 12,
+                weight = totalWeight,
+                length = maxLength,
+                width = maxWidth,
+                height = totalHeight,
                 insurance_value = (int)output.Total,
-                service_type_id = 2,
+                service_type_id = 5,
                 items = products
             };
+
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null };
             request.Content = JsonContent.Create(payload, null, jsonOptions);
-            var payloadString = JsonSerializer.Serialize(payload, jsonOptions);
             var response = await httpClient.SendAsync(request, cancellationToken);
             var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -102,9 +190,7 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
         }
     }
 
-    public async Task<Result<string>> GetShippingOrderStatusAsync(
-        string orderCode,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<string>> GetShippingOrderStatusAsync(string orderCode, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -246,3 +332,10 @@ public class ShippingService(HttpClient httpClient, IConfiguration configuration
         return null;
     }
 }
+
+
+
+
+
+
+

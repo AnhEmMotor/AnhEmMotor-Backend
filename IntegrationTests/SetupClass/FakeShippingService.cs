@@ -15,6 +15,7 @@ public class FakeShippingService : IShippingService
     
     public Task<Result<string>> GetWardsAsync(int provinceId, CancellationToken cancellationToken = default) => Task.FromResult(Result<string>.Success("{ \"data\": [ { \"_id\": 1, \"name\": \"Mock Ward\" } ] }"));
     
+    public Task<Result<decimal>> CalculateShippingFeeAsync(Application.Interfaces.Services.Shipping.Models.CalculateShippingFeeRequest req, CancellationToken cancellationToken = default) => Task.FromResult(Result<decimal>.Success(200000m));
     public Task<Result<string>> CreateShippingOrderAsync(Domain.Entities.Output output, CancellationToken cancellationToken = default) => Task.FromResult(Result<string>.Success("Mock"));
     
     public Task<Result<string>> GetShippingOrderStatusAsync(string trackingCode, CancellationToken cancellationToken = default) => Task.FromResult(Result<string>.Success("Mock"));

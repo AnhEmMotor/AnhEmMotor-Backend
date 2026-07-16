@@ -39,7 +39,7 @@ public class UpdateProductVariantRequest
     public decimal? Weight { get; set; }
 
     [JsonPropertyName("dimensions")]
-    public string? Dimensions { get; set; }
+    public decimal? Length { get; set; } public decimal? Width { get; set; } public decimal? Height { get; set; }
 
     [JsonPropertyName("wheelbase")]
     [JsonConverter(typeof(NullableDecimalConverter))]

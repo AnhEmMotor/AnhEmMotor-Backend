@@ -100,18 +100,15 @@ public class OutputMappingConfig : IRegister
 
     private static decimal CalculateShippingFee(Output src)
     {
-        var subtotal = src.OutputInfos?.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) ?? 0;
-        if (subtotal == 0)
-            return 0;
-        return subtotal > 10000000 ? 0 : 200000;
+        return src.ShippingFee ?? 0;
     }
 
     private static decimal? CalculateDeposit(Output src)
     {
         if (src.DepositRatio == null || src.DepositRatio == 0)
             return null;
-        var total = CalculateTotal(src);
-        return total * (src.DepositRatio.Value / 100m);
+        var subtotal = CalculateSubtotal(src);
+        return subtotal * (src.DepositRatio.Value / 100m);
     }
 
     private static decimal? CalculateRemaining(Output src)

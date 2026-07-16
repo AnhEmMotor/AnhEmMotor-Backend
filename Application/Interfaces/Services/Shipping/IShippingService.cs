@@ -1,10 +1,14 @@
 using Application.Common.Models;
 using Domain.Entities;
 
+using Application.Interfaces.Services.Shipping.Models;
+
 namespace Application.Interfaces.Services.Shipping;
 
 public interface IShippingService
 {
+    public Task<Result<decimal>> CalculateShippingFeeAsync(CalculateShippingFeeRequest request, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Creates a shipping order with the integrated carrier (e.g., GHN). Returns the Tracking Order Code.
     /// </summary>

@@ -1,6 +1,7 @@
 using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
+using Application.Common.Payments;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
@@ -1745,5 +1746,86 @@ public class SalesOrder
             x => x.Add(It.Is<Output>(o => string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0)),
             Times.Once);
     }
+
+    [Fact(DisplayName = "CALC_001 - Kiểm tra tính Subtotal")]
+    public void GetSubtotal_ReturnsCorrectSumOfOutputInfos()
+    {
+        // Arrange
+        var order = new Output
+        {
+            OutputInfos = new List<OutputInfo>
+            {
+                new OutputInfo { Price = 2000000m, Count = 1 },
+                new OutputInfo { Price = 1500000m, Count = 2 }
+            }
+        };
+
+        // Act
+        var subtotal = OrderPaymentAmountCalculator.GetSubtotal(order);
+
+        // Assert
+        subtotal.Should().Be(5000000m);
+    }
+
+    [Fact(DisplayName = "CALC_002 - Kiểm tra tính Total khi thêm phí ship (Subtotal <= 10tr)")]
+    public void GetTotal_WithShippingFee_WhenSubtotalUnder10M()
+    {
+        // Arrange
+        var order = new Output
+        {
+            OutputInfos = new List<OutputInfo>
+            {
+                new OutputInfo { Price = 5000000m, Count = 1 }
+            }
+        };
+
+        // Act
+        var total = OrderPaymentAmountCalculator.GetTotal(order);
+
+        // Assert
+        total.Should().Be(5200000m);
+    }
+
+    [Fact(DisplayName = "CALC_003 - Kiểm tra tính Total không thêm phí ship (Subtotal > 10tr)")]
+    public void GetTotal_WithoutShippingFee_WhenSubtotalOver10M()
+    {
+        // Arrange
+        var order = new Output
+        {
+            OutputInfos = new List<OutputInfo>
+            {
+                new OutputInfo { Price = 12000000m, Count = 1 }
+            }
+        };
+
+        // Act
+        var total = OrderPaymentAmountCalculator.GetTotal(order);
+
+        // Assert
+        total.Should().Be(12000000m);
+    }
+
+    [Fact(DisplayName = "CALC_004 - Kiểm tra tính DepositAmount dựa trên Subtotal")]
+    public void GetDepositAmount_BasedOnSubtotal_NotTotal()
+    {
+        // Arrange
+        var order = new Output
+        {
+            DepositRatio = 20,
+            OutputInfos = new List<OutputInfo>
+            {
+                new OutputInfo { Price = 5000000m, Count = 1 }
+            }
+        };
+        // Total would be 5,200,000 if shipping was added. Deposit 20% of 5,200,000 is 1,040,000.
+        // Deposit 20% of 5,000,000 is 1,000,000.
+
+        // Act
+        var depositAmount = OrderPaymentAmountCalculator.GetDepositAmount(order);
+
+        // Assert
+        depositAmount.Should().Be(1000000m);
+    }
 }
+
 

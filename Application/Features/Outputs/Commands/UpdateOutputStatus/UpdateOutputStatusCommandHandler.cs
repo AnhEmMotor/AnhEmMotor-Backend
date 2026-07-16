@@ -137,9 +137,9 @@ public class UpdateOutputStatusCommandHandler(
                     {
                         TrackingNumber = trackingNumber,
                         CustomerName = output.CustomerName ?? string.Empty,
+                          ShippingCost = output.ShippingFee ?? 0,
+                          CodAmount = output.Total - (output.PaidAmount ?? 0),
                         CustomerPhone = output.CustomerPhone ?? string.Empty,
-                        CodAmount = output.Total,
-                        ShippingCost = 0,
                         OriginAddress = "Kho AnhEmMotor",
                         OriginLatitude = LogisticsConstants.DefaultShowroomLatitude,
                         OriginLongitude = LogisticsConstants.DefaultShowroomLongitude,
