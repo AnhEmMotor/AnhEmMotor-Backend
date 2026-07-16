@@ -16,5 +16,10 @@ public sealed record UpdateOutputCommand : IRequest<Result<OrderDetailResponse>>
 
     public string? Notes { get; init; }
 
+    public int? ProvinceId { get; init; }
+
+    public string? WardCode { get; init; }
+
     public Guid? CurrentUserId { get; set; }
 }
+

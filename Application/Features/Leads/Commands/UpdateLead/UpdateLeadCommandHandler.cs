@@ -36,7 +36,6 @@ namespace Application.Features.Leads.Commands.UpdateLead
             lead.IdentificationNumber = request.IdentificationNumber;
             lead.AddressDetail = request.AddressDetail;
             lead.Ward = request.Ward;
-            lead.District = request.District;
             lead.Province = request.Province;
             if (!string.IsNullOrEmpty(request.Status))
             {
@@ -54,3 +53,4 @@ namespace Application.Features.Leads.Commands.UpdateLead
         }
     }
 }
+

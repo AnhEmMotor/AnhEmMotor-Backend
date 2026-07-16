@@ -9,5 +9,7 @@ public interface INewsCommentReadRepository
 
     public Task<Domain.Entities.NewsComment?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
-    public Task<List<Domain.Entities.NewsComment>> GetByNewsIdAsync(int newsId, CancellationToken cancellationToken = default);
+    public Task<List<Domain.Entities.NewsComment>> GetByNewsIdAsync(
+        int newsId,
+        CancellationToken cancellationToken = default);
 }

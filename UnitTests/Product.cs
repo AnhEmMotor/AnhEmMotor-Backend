@@ -93,6 +93,49 @@ public class Product
         new ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
+    [Fact(DisplayName = "PRODUCT_NEW_1 - Kiểm tra Dimensions hợp lệ")]
+    public void CreateProduct_ValidDimensions_ShouldPassValidation()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "Product 1",
+            CategoryId = 1,
+            BrandId = 1,
+            Length = 100,
+            Width = 50,
+            Height = 10,
+            Variants =
+                [new CreateProductVariantRequest
+                {
+                    UrlSlug = "v1",
+                    Price = 1000,
+                    VariantName = "1234",
+                    CoverImageUrl = "image.jpg"
+                }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "PRODUCT_NEW_2 - Kiểm tra Dimensions âm")]
+    public void CreateProduct_NegativeDimensions_ShouldFailValidation()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "Product 1",
+            CategoryId = 1,
+            Length = -10,
+            Width = 50,
+            Height = 10,
+            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000 }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(CreateProductCommand.Length));
+    }
+
     [Fact(DisplayName = "PRODUCT_184a - Kiểm tra định dạng kích thước lốp xe - Hợp lệ")]
     public void CreateProduct_ValidTireSize_ShouldPassValidation()
     {
@@ -1933,3 +1976,4 @@ public class Product
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
+

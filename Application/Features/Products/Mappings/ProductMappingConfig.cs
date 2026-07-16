@@ -192,7 +192,9 @@ public class ProductMappingConfig : IRegister
                         Colors = row.Colors,
                         SKU = row.SKU,
                         Weight = row.Weight,
-                        Dimensions = row.Dimensions,
+                        Length = row.Length,
+                        Width = row.Width,
+                        Height = row.Height,
                         Wheelbase = row.Wheelbase,
                         SeatHeight = row.SeatHeight,
                         GroundClearance = row.GroundClearance,
@@ -217,7 +219,9 @@ public class ProductMappingConfig : IRegister
             BrandName = product.Brand?.Name,
             Description = ResolveLocalizedText(product.DescriptionJson, lang) ?? product.Description,
             Weight = product.Weight,
-            Dimensions = product.Dimensions,
+            Length = product.Length,
+            Width = product.Width,
+            Height = product.Height,
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
             GroundClearance =
@@ -289,7 +293,9 @@ public class ProductMappingConfig : IRegister
             BrandName = product.Brand?.Name,
             Description = ResolveLocalizedText(product.DescriptionJson, lang) ?? product.Description,
             Weight = product.Weight,
-            Dimensions = product.Dimensions,
+            Length = product.Length,
+            Width = product.Width,
+            Height = product.Height,
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
             GroundClearance =
@@ -686,3 +692,4 @@ public class ProductMappingConfig : IRegister
         return string.Empty;
     }
 }
+

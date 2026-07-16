@@ -32,8 +32,14 @@ namespace Domain.Entities
         [Column("Weight", TypeName = "decimal(18, 2)")]
         public decimal? Weight { get; set; }
 
-        [Column("Dimensions", TypeName = "nvarchar(35)")]
-        public string? Dimensions { get; set; }
+        [Column("Length", TypeName = "decimal(18, 2)")]
+        public decimal? Length { get; set; }
+
+        [Column("Width", TypeName = "decimal(18, 2)")]
+        public decimal? Width { get; set; }
+
+        [Column("Height", TypeName = "decimal(18, 2)")]
+        public decimal? Height { get; set; }
 
         [Column("Wheelbase", TypeName = "decimal(18, 2)")]
         public decimal? Wheelbase { get; set; }

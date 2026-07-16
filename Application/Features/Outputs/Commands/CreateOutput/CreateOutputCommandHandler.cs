@@ -4,11 +4,14 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
+using Application.Interfaces.Services.Shipping;
+using Application.Interfaces.Services.Shipping.Models;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
 using Mapster;
 using MediatR;
+using System.Linq;
 
 namespace Application.Features.Outputs.Commands.CreateOutput;
 
@@ -17,6 +20,7 @@ public class CreateOutputCommandHandler(
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
     ISettingRepository settingRepository,
+    IShippingService shippingService,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -108,6 +112,17 @@ public class CreateOutputCommandHandler(
             return Result<OrderDetailResponse>.Failure(errors);
         }
         var output = request.Adapt<Output>();
+        if (output.ProvinceId.HasValue)
+        {
+            output.ProvinceName = await shippingService.GetProvinceNameAsync(output.ProvinceId.Value, cancellationToken);
+            if (!string.IsNullOrEmpty(output.WardCode))
+            {
+                output.WardName = await shippingService.GetWardNameAsync(
+                    output.ProvinceId.Value,
+                    output.WardCode,
+                    cancellationToken);
+            }
+        }
         foreach (var info in output.OutputInfos)
         {
             var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductVariantId);
@@ -115,6 +130,39 @@ public class CreateOutputCommandHandler(
             {
                 info.Price = matchingVariant.Price;
             }
+        }
+        if (output.ProvinceId.HasValue &&
+            !string.IsNullOrEmpty(output.WardCode) &&
+            !string.IsNullOrEmpty(output.CustomerAddress))
+        {
+            var feeRequest = new CalculateShippingFeeRequest
+            {
+                ToWardIdV2 = int.Parse(output.WardCode),
+                ToAddressV2 = output.CustomerAddress ?? string.Empty,
+                IsNewToAddress = true,
+                ToWardCode = output.WardCode,
+                Items =
+                    output.OutputInfos
+                        .Select(
+                            oi =>
+                            {
+                                var v = variantsList.FirstOrDefault(x => x.Id == oi.ProductVariantId);
+                                var p = v?.Product;
+                                return new ShippingItemDto
+                        {
+                            Name = p?.Name ?? "Product",
+                            Quantity = oi.Count ?? 1,
+                            Length = (int?)(v?.Length ?? p?.Length),
+                            Width = (int?)(v?.Width ?? p?.Width),
+                            Height = (int?)(v?.Height ?? p?.Height),
+                            Weight = (int?)((v?.Weight ?? p?.Weight) * 1000)
+                        };
+                            })
+                        .ToList()
+            };
+            var feeResult = await shippingService.CalculateShippingFeeAsync(feeRequest, cancellationToken);
+            if (feeResult.IsSuccess)
+                output.ShippingFee = feeResult.Value;
         }
         var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(output.StatusId))
@@ -204,3 +252,4 @@ public class CreateOutputCommandHandler(
         return null;
     }
 }
+

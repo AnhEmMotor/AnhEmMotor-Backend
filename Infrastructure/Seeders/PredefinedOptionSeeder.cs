@@ -7,12 +7,11 @@ namespace Infrastructure.Seeders;
 
 public static class PredefinedOptionSeeder
 {
-    private static readonly string[] ObsoleteColorKeys = ["Color", "Màu sắc"];
-
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
+        var validKeys = PredefinedOptions.Options.Keys.ToList();
         var obsoleteColorOptions = await context.Set<PredefinedOption>()
-            .Where(p => ObsoleteColorKeys.Contains(p.Key) || ObsoleteColorKeys.Contains(p.Value))
+            .Where(p => !validKeys.Contains(p.Key))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         if (obsoleteColorOptions.Count > 0)

@@ -662,7 +662,8 @@ To enable the automatic feature of pushing orders to GHN, you need to configure 
 2. **Get Shop ID**: Click on "Chủ cửa hàng" (Shop owner) in the sidebar. In the "Thông tin cá nhân" (Personal information) tab, there is an ID field. This ID is the value for the `GHN_SHOP_ID` secret (and in the `appsettings.*.json` file, it is GHNSettings -> ShopId).
 3. **Get API Token**: Also in the "Chủ cửa hàng" section, select the "Bảo mật" (Security) tab. On the "Token API & IP Tin cậy" line, click "Quản lý" (Manage). Another tab will open. In the "Token API" section, click the eye icon, verify your phone number, and a string will appear. This is the value for the `GHN_TOKEN` secret (and in the `appsettings.*.json` file, it is GHNSettings -> Token).
 4. **GHN URL**: Use `https://dev-online-gateway.ghn.vn` if you are in the Development environment. This is your `GHN_BASE_URL` (and in the `appsettings.*.json` file, it is GHNSettings -> BaseUrl).
-5. **Register Webhook**: If you want to use Webhooks to receive notifications when an order is completed, you need to send an email to api@ghn.vn with the following information: Company Name, Client ID, Requested Environment, Webhook URL (which is the Endpoint URL running this project). Then wait for their response.
+5. **Change shop location**: Go to "Quản lý cửa hàng" (Store management) in the Sidebar, you need to change/add the default store location right there.
+6. **Register Webhook**: If you want to use Webhooks to receive notifications when an order is completed, you need to send an email to api@ghn.vn with the following information: Company Name, Client ID, Requested Environment, Webhook URL (which is the Endpoint URL running this project). Then wait for their response.
 
 # 10. Troubleshooting
 
@@ -1387,7 +1388,8 @@ Cần setup các secrets sau trong GitHub repository:
 2. **Lấy Shop ID (Mã Cửa Hàng)**: Bạn sẽ nhấn vào chữ "Chủ cửa hàng" ở tại sidebar, Ở trong tab "Thông tin cá nhân", có 1 ô ID. ID này chính là giá trị cho bí mật `GHN_SHOP_ID` (và trong file appsettings.\*.json là GHNSettings -> ShopId).
 3. **Lấy API Token**: Cũng ở trong mục "Chủ cửa hàng", chọn tab "Bảo mật", trên dòng "Token API & IP Tin cậy", nhấn "Quản lý", 1 tab khác hiện ra, trong phần "Token API", bạn nhấn vào hình con mắt, xác thực số điện thoại và 1 chuỗi sẽ hiện ra. Đây chính là giá trị cho bí mật `GHN_TOKEN` (và trong file appsettings.\*.json là GHNSettings -> Token).
 4. **URL GHN**: Sử dụng https://dev-online-gateway.ghn.vn nếu bạn ở môi trường Development. Đây là GHN_BASE_URL của bạn (và trong file appsettings.\*.json là GHNSettings -> BaseUrl).
-5. **Đăng kí Webhook**: Nếu như bạn muốn sử dụng Webhook để nhận tin khi có đơn hàng đã hoàn tất, bạn sẽ cần gửi mail đến địa chỉ api@ghn.vn với các thông tin làTên công ty, Mã khách hàng (ClientID), Môi trường yêu cầu, URL Webhook (chính là URL Endpoint chạy dự án này). Rồi chờ họ phản hồi.
+5. **Thay đổi vị trí của hàng**: Vào phần "Quản lý cửa hàng" ở phần Sidebar, bạn cần thay đổi/thêm địa điểm của cửa hàng mặc định ngay trong đó.
+6. **Đăng kí Webhook**: Nếu như bạn muốn sử dụng Webhook để nhận tin khi có đơn hàng đã hoàn tất, bạn sẽ cần gửi mail đến địa chỉ api@ghn.vn với các thông tin làTên công ty, Mã khách hàng (ClientID), Môi trường yêu cầu, URL Webhook (chính là URL Endpoint chạy dự án này). Rồi chờ họ phản hồi.
 
 # 10. Troubleshooting
 

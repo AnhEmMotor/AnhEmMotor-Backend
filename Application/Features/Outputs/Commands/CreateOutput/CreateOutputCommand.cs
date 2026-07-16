@@ -32,6 +32,11 @@ public sealed record CreateOutputCommand : IRequest<Result<OrderDetailResponse>>
 
     public string? BudgetCode { get; init; }
 
+    public int? ProvinceId { get; init; }
+
+    public string? WardCode { get; init; }
+
     [JsonPropertyName("products")]
     public List<CreateOutputInfoRequest> OutputInfos { get; init; } = [];
 }
+
