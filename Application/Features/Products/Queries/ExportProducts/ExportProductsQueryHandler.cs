@@ -122,7 +122,11 @@ public class ExportProductsQueryHandler(IProductReadRepository repository) : IRe
                     worksheet.Cell(rowIndex, 4).Value = product.CategoryName ?? string.Empty;
                     worksheet.Cell(rowIndex, 5).Value = product.BrandName ?? string.Empty;
                     worksheet.Cell(rowIndex, 6).Value = product.EngineType ?? string.Empty;
+<<<<<<< Updated upstream
                     worksheet.Cell(rowIndex, 7).Value = $"{product.Length}x{product.Width}x{product.Height}";
+=======
+                    worksheet.Cell(rowIndex, 7).Value = (string.Join(" x ", new decimal?[] { product.Length, product.Width, product.Height }.Select(v => v.HasValue ? v.Value.ToString("0.##") : "-")) ?? "-");
+>>>>>>> Stashed changes
                     worksheet.Cell(rowIndex, 8).Value = product.MaxPower ?? string.Empty;
                     worksheet.Cell(rowIndex, 9).Value = product.MaxTorque ?? string.Empty;
                     worksheet.Cell(rowIndex, 10).Value = product.Displacement?.ToString("N0") ?? "0";
@@ -143,7 +147,11 @@ public class ExportProductsQueryHandler(IProductReadRepository repository) : IRe
                     var variantImages = string.Join(", ", variant.PhotoCollection.Take(5));
                     worksheet.Cell(rowIndex, 25).Value = variantImages;
                     worksheet.Cell(rowIndex, 26).Value = variant.Weight?.ToString("N0") ?? "0";
+<<<<<<< Updated upstream
                     worksheet.Cell(rowIndex, 27).Value = $"{variant.Length}x{variant.Width}x{variant.Height}";
+=======
+                    worksheet.Cell(rowIndex, 27).Value = $"{variant.Length} x {variant.Width} x {variant.Height}";
+>>>>>>> Stashed changes
                     worksheet.Cell(rowIndex, 28).Value = variant.SeatHeight?.ToString("N0") ?? "0";
                     worksheet.Cell(rowIndex, 29).Value = variant.TireSize ?? string.Empty;
                     worksheet.Cell(rowIndex, 30).Value = variant.FrontBrake ?? string.Empty;
@@ -165,7 +173,11 @@ public class ExportProductsQueryHandler(IProductReadRepository repository) : IRe
                 worksheet.Cell(rowIndex, 4).Value = product.CategoryName ?? string.Empty;
                 worksheet.Cell(rowIndex, 5).Value = product.BrandName ?? string.Empty;
                 worksheet.Cell(rowIndex, 6).Value = product.EngineType ?? string.Empty;
+<<<<<<< Updated upstream
                 worksheet.Cell(rowIndex, 7).Value = $"{product.Length}x{product.Width}x{product.Height}";
+=======
+                worksheet.Cell(rowIndex, 7).Value = (string.Join(" x ", new decimal?[] { product.Length, product.Width, product.Height }.Select(v => v.HasValue ? v.Value.ToString("0.##") : "-")) ?? "-");
+>>>>>>> Stashed changes
                 worksheet.Cell(rowIndex, 8).Value = product.MaxPower ?? string.Empty;
                 worksheet.Cell(rowIndex, 9).Value = product.MaxTorque ?? string.Empty;
                 worksheet.Cell(rowIndex, 10).Value = product.Displacement?.ToString("N0") ?? "0";
