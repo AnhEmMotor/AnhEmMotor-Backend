@@ -1,69 +1,78 @@
-using System;
 using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Responses
 {
-    public class ProductVariantDetailResponse
-    {
-        public int? Id { get; set; }
+public class ProductVariantDetailResponse
+{
+public int? Id { get; set; }
 
-        [JsonPropertyName("product_id")]
-        public int? ProductId { get; set; }
+[JsonPropertyName("product_id")]
+public int? ProductId { get; set; }
 
-        [JsonPropertyName("url_slug")]
-        public string? UrlSlug { get; set; }
+[JsonPropertyName("url_slug")]
+public string? UrlSlug { get; set; }
 
-        public decimal? Price { get; set; }
+public decimal? Price { get; set; }
 
-        [JsonPropertyName("cover_image_url")]
-        public string? CoverImageUrl { get; set; }
+[JsonPropertyName("cover_image_url")]
+public string? CoverImageUrl { get; set; }
 
-        [JsonPropertyName("optionValues")]
-        public Dictionary<string, string> OptionValues { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+[JsonPropertyName("optionValues")]
+public Dictionary<string, string> OptionValues { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
-        [JsonPropertyName("variant_name")]
-        public string? VariantName { get; set; }
+[JsonPropertyName("variant_name")]
+public string? VariantName { get; set; }
 
-        [JsonPropertyName("colors")]
-        public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
+[JsonPropertyName("colors")]
+public List<ProductVariantColorLiteResponse> Colors { get; set; } = [];
 
-        [JsonPropertyName("sku")]
-        public string? SKU { get; set; }
+[JsonPropertyName("sku")]
+public string? SKU { get; set; }
 
-        public decimal? Weight { get; set; }
+public decimal? Weight { get; set; }
 
-        public string? Dimensions { get; set; }
+<<<<<<< Updated upstream
+        public decimal? Length { get; set; }
 
-        public string? Wheelbase { get; set; }
+        public decimal? Width { get; set; }
 
-        [JsonPropertyName("seat_height")]
-        public decimal? SeatHeight { get; set; }
+        public decimal? Height { get; set; }
+=======
+public decimal? Length { get; set; }
+public decimal? Width { get; set; }
+public decimal? Height { get; set; }
+>>>>>>> Stashed changes
 
-        [JsonPropertyName("ground_clearance")]
-        public decimal? GroundClearance { get; set; }
+public string? Wheelbase { get; set; }
 
-        [JsonPropertyName("fuel_capacity")]
-        public decimal? FuelCapacity { get; set; }
+[JsonPropertyName("seat_height")]
+public decimal? SeatHeight { get; set; }
 
-        [JsonPropertyName("tire_size")]
-        public string? TireSize { get; set; }
+[JsonPropertyName("ground_clearance")]
+public decimal? GroundClearance { get; set; }
 
-        [JsonPropertyName("front_brake")]
-        public string? FrontBrake { get; set; }
+[JsonPropertyName("fuel_capacity")]
+public decimal? FuelCapacity { get; set; }
 
-        [JsonPropertyName("rear_brake")]
-        public string? RearBrake { get; set; }
+[JsonPropertyName("tire_size")]
+public string? TireSize { get; set; }
 
-        [JsonPropertyName("front_suspension")]
-        public string? FrontSuspension { get; set; }
+[JsonPropertyName("front_brake")]
+public string? FrontBrake { get; set; }
 
-        [JsonPropertyName("rear_suspension")]
-        public string? RearSuspension { get; set; }
+[JsonPropertyName("rear_brake")]
+public string? RearBrake { get; set; }
 
-        [JsonPropertyName("engine_type")]
-        public string? EngineType { get; set; }
+[JsonPropertyName("front_suspension")]
+public string? FrontSuspension { get; set; }
 
-        [JsonPropertyName("photo_collection")]
-        public List<string> PhotoCollection { get; set; } = [];
-    }
+[JsonPropertyName("rear_suspension")]
+public string? RearSuspension { get; set; }
+
+[JsonPropertyName("engine_type")]
+public string? EngineType { get; set; }
+
+[JsonPropertyName("photo_collection")]
+public List<string> PhotoCollection { get; set; } = [];
+}
 }

@@ -1446,3 +1446,4 @@ Nếu không được, thay đổi port trong file `WebAPI/Properties/launchSett
 ```json
 "applicationUrl": "https://localhost:7002;http://localhost:5001"
 ```
+

@@ -276,7 +276,14 @@ public static class ProductDataSeeder
             existing.BrandId = p.BrandId;
             existing.ShortDescription = p.ShortDescription;
             existing.Weight = p.Weight;
-            existing.Dimensions = p.Dimensions;
+            existing.Length = p.Length;
+<<<<<<< Updated upstream
+            existing.Width = p.Width;
+            existing.Height = p.Height;
+=======
+existing.Width = p.Width;
+existing.Height = p.Height;
+>>>>>>> Stashed changes
             existing.Wheelbase = p.Wheelbase;
             existing.SeatHeight = p.SeatHeight;
             existing.GroundClearance = p.GroundClearance;
