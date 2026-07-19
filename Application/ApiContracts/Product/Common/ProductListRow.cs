@@ -20,15 +20,10 @@ namespace Application.ApiContracts.Product.Common
         public decimal? Weight { get; set; }
 
         public decimal? Length { get; set; }
-<<<<<<< Updated upstream
 
         public decimal? Width { get; set; }
 
         public decimal? Height { get; set; }
-=======
-public decimal? Width { get; set; }
-public decimal? Height { get; set; }
->>>>>>> Stashed changes
 
         public string? Wheelbase { get; set; }
 

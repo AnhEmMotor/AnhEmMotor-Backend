@@ -32,7 +32,6 @@ namespace Domain.Entities
         [Column("Weight", TypeName = "decimal(18, 2)")]
         public decimal? Weight { get; set; }
 
-<<<<<<< Updated upstream
         [Column("Length", TypeName = "decimal(18, 2)")]
         public decimal? Length { get; set; }
 
@@ -40,15 +39,6 @@ namespace Domain.Entities
         public decimal? Width { get; set; }
 
         [Column("Height", TypeName = "decimal(18, 2)")]
-=======
-        [Column("Length", TypeName = "decimal(18,2)")]
-        public decimal? Length { get; set; }
-
-        [Column("Width", TypeName = "decimal(18,2)")]
-        public decimal? Width { get; set; }
-
-        [Column("Height", TypeName = "decimal(18,2)")]
->>>>>>> Stashed changes
         public decimal? Height { get; set; }
 
         [Column("Wheelbase", TypeName = "decimal(18, 2)")]
