@@ -2904,35 +2904,6 @@ namespace Infrastructure.MySqlMigrations
                     b.ToTable("OrderStatusHistory");
                 });
 
-            modelBuilder.Entity("Domain.Entities.OrderVoucher", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<long>("AppliedAt")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("AppliedBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("OutputId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VoucherId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OutputId");
-
-                    b.HasIndex("VoucherId");
-
-                    b.ToTable("OrderVoucher");
-                });
 
             modelBuilder.Entity("Domain.Entities.Output", b =>
                 {
@@ -6764,25 +6735,6 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("Output");
                 });
 
-            modelBuilder.Entity("Domain.Entities.OrderVoucher", b =>
-                {
-                    b.HasOne("Domain.Entities.Output", "Output")
-                        .WithMany("OrderVouchers")
-                        .HasForeignKey("OutputId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Voucher", "Voucher")
-                        .WithMany("OrderVouchers")
-                        .HasForeignKey("VoucherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Output");
-
-                    b.Navigation("Voucher");
-                });
-
             modelBuilder.Entity("Domain.Entities.Output", b =>
                 {
                     b.HasOne("Domain.Entities.ApplicationUser", "Buyer")
@@ -7724,8 +7676,6 @@ namespace Infrastructure.MySqlMigrations
 
             modelBuilder.Entity("Domain.Entities.Output", b =>
                 {
-                    b.Navigation("OrderVouchers");
-
                     b.Navigation("OutputInfos");
 
                     b.Navigation("Returns");
@@ -7872,8 +7822,6 @@ namespace Infrastructure.MySqlMigrations
 
             modelBuilder.Entity("Domain.Entities.Voucher", b =>
                 {
-                    b.Navigation("OrderVouchers");
-
                     b.Navigation("VoucherLeads");
                 });
 

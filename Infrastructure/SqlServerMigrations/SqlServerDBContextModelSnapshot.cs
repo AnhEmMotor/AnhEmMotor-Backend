@@ -2911,39 +2911,6 @@ namespace Infrastructure.SqlServerMigrations
                     b.ToTable("OrderStatusHistory");
                 });
 
-            modelBuilder.Entity("Domain.Entities.OrderVoucher", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset>("AppliedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("AppliedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("DiscountApplied")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("OutputId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VoucherId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OutputId");
-
-                    b.HasIndex("VoucherId");
-
-                    b.ToTable("OrderVoucher");
-                });
-
             modelBuilder.Entity("Domain.Entities.Output", b =>
                 {
                     b.Property<int>("Id")
@@ -6774,24 +6741,6 @@ namespace Infrastructure.SqlServerMigrations
                     b.Navigation("Output");
                 });
 
-            modelBuilder.Entity("Domain.Entities.OrderVoucher", b =>
-                {
-                    b.HasOne("Domain.Entities.Output", "Output")
-                        .WithMany("OrderVouchers")
-                        .HasForeignKey("OutputId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Voucher", "Voucher")
-                        .WithMany("OrderVouchers")
-                        .HasForeignKey("VoucherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Output");
-
-                    b.Navigation("Voucher");
-                });
 
             modelBuilder.Entity("Domain.Entities.Output", b =>
                 {
@@ -7734,7 +7683,6 @@ namespace Infrastructure.SqlServerMigrations
 
             modelBuilder.Entity("Domain.Entities.Output", b =>
                 {
-                    b.Navigation("OrderVouchers");
 
                     b.Navigation("OutputInfos");
 
@@ -7882,8 +7830,6 @@ namespace Infrastructure.SqlServerMigrations
 
             modelBuilder.Entity("Domain.Entities.Voucher", b =>
                 {
-                    b.Navigation("OrderVouchers");
-
                     b.Navigation("VoucherLeads");
                 });
 
