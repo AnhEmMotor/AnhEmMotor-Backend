@@ -16,6 +16,7 @@ using Infrastructure.Repositories.LogisticsDashboard;
 using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Repositories.Statistical;
 using Infrastructure.Services;
+using Infrastructure.Services.Ai;
 using Infrastructure.Services.Logistics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -116,6 +117,13 @@ public static class DependencyInjection
                 client.BaseAddress = new Uri(baseAddress);
             });
         services.AddHttpClient<IGeocodingService, GeocodingService>();
+        
+        services.AddSingleton<IPythonEnvService, PythonEnvService>();
+        services.AddSingleton<AiSidecarManager>();
+        services.AddSingleton<IAiSidecarManager>(provider => provider.GetRequiredService<AiSidecarManager>());
+        services.AddHostedService(provider => provider.GetRequiredService<AiSidecarManager>());
+        services.AddHttpClient<IAiAgentClient, AiAgentClient>();
+        
         services.Scan(
             scan => scan
                 .FromAssemblies(Assembly.GetExecutingAssembly())

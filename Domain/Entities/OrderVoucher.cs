@@ -6,7 +6,7 @@ namespace Domain.Entities;
 /// Bang trung gian lien ket Voucher voi Output (don hang).
 /// Dung de tracking viec ap dung voucher cho tung don hang cu the.
 /// </summary>
-public class OrderVoucher
+public class OrderVoucher : BaseEntity
 {
     public int Id { get; set; }
 
