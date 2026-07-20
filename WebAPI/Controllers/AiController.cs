@@ -1,4 +1,5 @@
-using Infrastructure.Services.Ai;
+using Application.Interfaces.Ai;
+using Application.ApiContracts.Ai;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,7 +14,8 @@ namespace WebAPI.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class AiController(
-    IAiAgentClient aiAgentClient,
+    IAiSearchClient aiSearchClient,
+    IAiTestRoleClient aiTestRoleClient,
     ApplicationDBContext dbContext,
     RoleManager<ApplicationRole> roleManager) : ControllerBase
 {
@@ -22,8 +24,59 @@ public class AiController(
     public async Task<IActionResult> Search([FromBody] AiSearchRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var response = await aiAgentClient.ChatSearchAsync(request.Keyword, userId);
-        return Ok(response);
+        var response = await aiSearchClient.ChatSearchAsync(request.Keyword, userId);
+
+        if (response.Result == null || response.Status != "success")
+        {
+            return BadRequest(new { Message = "Lỗi khi gọi AI Sidecar" });
+        }
+
+        var aiResult = response.Result;
+        
+        // Map Category
+        int? categoryId = null;
+        if (!string.IsNullOrEmpty(aiResult.Category))
+        {
+            var cat = await dbContext.ProductCategories
+                .FirstOrDefaultAsync(c => EF.Functions.Like(c.Name, $"%{aiResult.Category}%"));
+            if (cat != null) categoryId = cat.Id;
+        }
+
+        // Map Brand
+        int? brandId = null;
+        if (!string.IsNullOrEmpty(aiResult.Brand))
+        {
+            var brand = await dbContext.Brands
+                .FirstOrDefaultAsync(b => EF.Functions.Like(b.Name, $"%{aiResult.Brand}%"));
+            if (brand != null) brandId = brand.Id;
+        }
+
+        // Map VehicleType (OptionValues)
+        int? optionValueId = null;
+        if (!string.IsNullOrEmpty(aiResult.VehicleType))
+        {
+            var opt = await dbContext.OptionValues
+                .Include(ov => ov.Option)
+                .FirstOrDefaultAsync(ov => ov.Option != null && ov.Option.Name == "VehicleType" && EF.Functions.Like(ov.Name, $"%{aiResult.VehicleType}%"));
+            if (opt != null) optionValueId = opt.Id;
+        }
+
+        var queryParams = new Dictionary<string, object>();
+        
+        if (!string.IsNullOrEmpty(aiResult.Keyword)) queryParams["search"] = aiResult.Keyword;
+        if (categoryId.HasValue) queryParams["category_ids"] = categoryId.Value.ToString();
+        if (brandId.HasValue) queryParams["brand_ids"] = brandId.Value.ToString();
+        if (optionValueId.HasValue) queryParams["optionValueIds"] = optionValueId.Value.ToString();
+        if (aiResult.PriceMin > 0) queryParams["minPrice"] = aiResult.PriceMin;
+        if (aiResult.PriceMax > 0 && aiResult.PriceMax < 60000000) queryParams["maxPrice"] = aiResult.PriceMax;
+        if (aiResult.Colors != null && aiResult.Colors.Any()) queryParams["colors"] = string.Join(",", aiResult.Colors);
+
+        return Ok(new
+        {
+            IsSuccess = true,
+            RedirectUrl = "/products",
+            QueryParams = queryParams
+        });
     }
 
     /// <summary>
@@ -50,7 +103,7 @@ public class AiController(
             .Distinct()
             .ToListAsync();
         
-        var response = await aiAgentClient.TestRoleAsync(userId, permissions.ToArray());
+        var response = await aiTestRoleClient.TestRoleAsync(userId, permissions.ToArray());
         return Ok(response);
     }
 }

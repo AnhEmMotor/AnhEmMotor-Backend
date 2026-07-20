@@ -31,7 +31,7 @@ public sealed class UpdateFinanceContractCommandHandler(
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        if (allContracts.TotalCount > 0 && allContracts.Items.Any(x => x.Id != request.Id))
+        if (allContracts.TotalCount > 0 && allContracts.Items != null && allContracts.Items.Any(x => x.Id != request.Id))
             return Result<Guid>.Failure("Contract number already exists.");
 
         entity.ContractNumber = req.ContractNumber;

@@ -8,7 +8,6 @@ namespace Application.Features.Vouchers.Commands.RemoveVoucher;
 
 public class RemoveVoucherCommandHandler(
     IVoucherUsageRepository voucherUsageRepository,
-    IVoucherReadRepository voucherReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RemoveVoucherCommand, Result<RemoveVoucherResponse>>
 {
     public async Task<Result<RemoveVoucherResponse>> Handle(RemoveVoucherCommand request, CancellationToken cancellationToken)

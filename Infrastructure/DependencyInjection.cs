@@ -17,6 +17,8 @@ using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Repositories.Statistical;
 using Infrastructure.Services;
 using Infrastructure.Services.Ai;
+using Infrastructure.Services.Ai.Clients;
+using Application.Interfaces.Ai;
 using Infrastructure.Services.Logistics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -122,7 +124,8 @@ public static class DependencyInjection
         services.AddSingleton<AiSidecarManager>();
         services.AddSingleton<IAiSidecarManager>(provider => provider.GetRequiredService<AiSidecarManager>());
         services.AddHostedService(provider => provider.GetRequiredService<AiSidecarManager>());
-        services.AddHttpClient<IAiAgentClient, AiAgentClient>();
+        services.AddHttpClient<IAiSearchClient, AiSearchClient>();
+        services.AddHttpClient<IAiTestRoleClient, AiTestRoleClient>();
         
         services.Scan(
             scan => scan

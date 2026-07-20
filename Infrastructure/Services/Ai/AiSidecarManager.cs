@@ -44,7 +44,7 @@ public class AiSidecarManager(
             var checkDir = startPath;
             while(!string.IsNullOrEmpty(checkDir))
             {
-                var potential = Path.Combine(checkDir, "ai_sidecar");
+                var potential = Path.Combine(checkDir, "AISidecar");
                 if(Directory.Exists(potential))
                 {
                     sidecarDir = potential;
@@ -62,7 +62,7 @@ public class AiSidecarManager(
         if(sidecarDir == null)
         {
             logger.LogError(
-                "[AiSidecar] Không tìm thấy thư mục ai_sidecar tại {BaseDir} hoặc các thư mục cha.",
+                "[AiSidecar] Không tìm thấy thư mục AISidecar tại {BaseDir} hoặc các thư mục cha.",
                 AppContext.BaseDirectory);
             return;
         }
@@ -93,6 +93,18 @@ public class AiSidecarManager(
         startInfo.EnvironmentVariables["BACKEND_INTERNAL_SECRET"] = config["Jwt:Key"];
         startInfo.EnvironmentVariables["PORT"] = port.ToString();
         startInfo.EnvironmentVariables["PYTHONPATH"] = sidecarDir;
+        
+        var isLangSmithEnabled = config.GetValue<bool>("AISetup:LangSmithTracing");
+        if (isLangSmithEnabled)
+        {
+            startInfo.EnvironmentVariables["LANGCHAIN_TRACING_V2"] = "true";
+            startInfo.EnvironmentVariables["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com";
+            startInfo.EnvironmentVariables["LANGCHAIN_PROJECT"] = "AnhEmMotor";
+            startInfo.EnvironmentVariables["LANGCHAIN_API_KEY"] = config["AISetup:LangSmithApiKey"] ?? "";
+        }
+        
+        startInfo.EnvironmentVariables["GEMINI_API_KEY"] = config["AISetup:GeminiApiKey"] ?? "";
+        startInfo.EnvironmentVariables["GEMINI_MODEL"] = config["AISetup:GeminiModel"] ?? "gemini-3.5-flash";
 
         try
         {
@@ -121,7 +133,6 @@ public class AiSidecarManager(
     {
         if(_sidecarProcess != null && !_sidecarProcess.HasExited)
         {
-            logger.LogInformation("[AiSidecar] Đang đóng AI Sidecar...");
             try
             {
                 _sidecarProcess.Kill(true);

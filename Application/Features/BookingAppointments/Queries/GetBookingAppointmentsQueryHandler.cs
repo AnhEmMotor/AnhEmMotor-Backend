@@ -21,7 +21,7 @@ public class GetBookingAppointmentsQueryHandler(
 		{
 			var distinctUserIds = paged.Items
 				.Where(x => x.ConfirmedBy.HasValue)
-				.Select(x => x.ConfirmedBy.Value)
+				.Select(x => x.ConfirmedBy!.Value)
 				.Distinct()
 				.ToList();
 
