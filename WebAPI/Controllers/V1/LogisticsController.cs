@@ -174,7 +174,7 @@ public class LogisticsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetFulfillmentDetail(int id, CancellationToken cancellationToken = default)
     {
         var response = await mediator.Send(new GetFulfillmentDetailQuery { Id = id }, cancellationToken)
-        .ConfigureAwait(false);
+            .ConfigureAwait(false);
         if (response == null)
             return NotFound();
         return Ok(response);
@@ -249,12 +249,12 @@ public class LogisticsController(IMediator mediator) : ControllerBase
     {
         ReturnOrderStatus? parsedStatus = null;
         if (!string.IsNullOrWhiteSpace(status) &&
-        Enum.TryParse<ReturnOrderStatus>(status, ignoreCase: true, out var statusValue))
+            Enum.TryParse<ReturnOrderStatus>(status, ignoreCase: true, out var statusValue))
         {
             parsedStatus = statusValue;
         }
         var result = await mediator.Send(new GetReturnsQuery { Status = parsedStatus }, cancellationToken)
-        .ConfigureAwait(false);
+            .ConfigureAwait(false);
         return Ok(result);
     }
 
@@ -266,8 +266,7 @@ public class LogisticsController(IMediator mediator) : ControllerBase
     [HttpGet("returns/{id}")]
     public async Task<IActionResult> GetReturnDetail(int id, CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(new GetReturnDetailQuery { Id = id }, cancellationToken)
-        .ConfigureAwait(false);
+        var result = await mediator.Send(new GetReturnDetailQuery { Id = id }, cancellationToken).ConfigureAwait(false);
         if (result == null)
             return NotFound();
         return Ok(result);

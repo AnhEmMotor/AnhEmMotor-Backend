@@ -3,20 +3,22 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Domain.Entities;
 
 /// <summary>
-/// Bang trung gian lien ket Voucher voi Output (don hang).
-/// Dung de tracking viec ap dung voucher cho tung don hang cu the.
+/// Bang trung gian lien ket Voucher voi Output (don hang). Dung de tracking viec ap dung voucher cho tung don hang cu
+/// the.
 /// </summary>
 public class OrderVoucher : BaseEntity
 {
     public int Id { get; set; }
 
     public int VoucherId { get; set; }
+
     public virtual Voucher Voucher { get; set; } = null!;
 
     /// <summary>
     /// OutputId dai dien cho don hang (SalesContract -> Output).
     /// </summary>
     public int OutputId { get; set; }
+
     public virtual Output? Output { get; set; }
 
     /// <summary>

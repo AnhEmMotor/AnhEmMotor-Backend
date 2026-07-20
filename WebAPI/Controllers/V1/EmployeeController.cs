@@ -89,9 +89,7 @@ public class EmployeeController(IMediator mediator) : ApiController
         Permissions.Accountant.EmployeeManagement.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteEmployeeAsync(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteEmployeeAsync(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteEmployeeCommand(id);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);

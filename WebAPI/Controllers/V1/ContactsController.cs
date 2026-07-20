@@ -1,7 +1,6 @@
 using Application.ApiContracts.Contacts.Requests;
 using Application.ApiContracts.Contacts.Responses;
 using Application.Common.Models;
-using Domain.Primitives;
 using Application.Features.Contacts.Commands.AssignSupportRequest;
 using Application.Features.Contacts.Commands.CreateContact;
 using Application.Features.Contacts.Commands.CreateContactReply;
@@ -23,8 +22,8 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Controller quản lý liên hệ khách hàng — bao gồm yêu cầu hỗ trợ (Support), phản hồi (Feedback), ứng tuyển (Job Application).
-/// Cho phép khách hàng không đăng nhập tạo liên hệ, và nhân viên xử lý nội bộ khi đã đăng nhập.
+/// Controller quản lý liên hệ khách hàng — bao gồm yêu cầu hỗ trợ (Support), phản hồi (Feedback), ứng tuyển (Job
+/// Application). Cho phép khách hàng không đăng nhập tạo liên hệ, và nhân viên xử lý nội bộ khi đã đăng nhập.
 /// </summary>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý liên hệ khách hàng (CRM)")]
@@ -40,7 +39,7 @@ public class ContactsController(ISender sender) : ApiController
     /// <returns>Kết quả tạo yêu cầu liên hệ.</returns>
     [HttpPost]
     [AllowAnonymous]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAsync(CreateContactCommand command, CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
@@ -57,7 +56,9 @@ public class ContactsController(ISender sender) : ApiController
     [AllowAnonymous]
     [ProducesResponseType(typeof(Result<SupportRequestResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateSupportRequestAsync(CreateSupportRequestCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateSupportRequestAsync(
+        CreateSupportRequestCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
@@ -85,8 +86,10 @@ public class ContactsController(ISender sender) : ApiController
     /// <returns>Kết quả tạo phản hồi.</returns>
     [HttpPost("feedback")]
     [AllowAnonymous]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateFeedbackAsync(CreateFeedbackCommand command, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateFeedbackAsync(
+        CreateFeedbackCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -102,7 +105,9 @@ public class ContactsController(ISender sender) : ApiController
     [AllowAnonymous]
     [ProducesResponseType(typeof(Result<JobApplicationResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateJobApplicationAsync(CreateJobApplicationCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateJobApplicationAsync(
+        CreateJobApplicationCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -131,7 +136,8 @@ public class ContactsController(ISender sender) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách liên hệ phân trang — hỗ trợ lọc theo loại (Support/Feedback/JobApplication) và trạng thái. Yêu cầu đăng nhập.
+    /// Lấy danh sách liên hệ phân trang — hỗ trợ lọc theo loại (Support/Feedback/JobApplication) và trạng thái. Yêu cầu
+    /// đăng nhập.
     /// </summary>
     /// <param name="contactType">Loại liên hệ: "support", "feedback", "job-application".</param>
     /// <param name="status">Trạng thái lọc: "new", "in-progress", "resolved"...</param>
@@ -142,7 +148,7 @@ public class ContactsController(ISender sender) : ApiController
     /// <returns>Danh sách liên hệ phân trang.</returns>
     [HttpGet("paginated")]
     [Authorize]
-        public async Task<IActionResult> GetPaginatedAsync(
+    public async Task<IActionResult> GetPaginatedAsync(
         [FromQuery] string? contactType,
         [FromQuery] string? status,
         [FromQuery] Guid? assignedUserId,
@@ -190,7 +196,10 @@ public class ContactsController(ISender sender) : ApiController
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> AssignAsync(int id, AssignSupportRequestCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> AssignAsync(
+        int id,
+        AssignSupportRequestCommand command,
+        CancellationToken cancellationToken)
     {
         var cmd = command with { SupportRequestId = id };
         var result = await sender.Send(cmd, cancellationToken).ConfigureAwait(false);
@@ -223,7 +232,9 @@ public class ContactsController(ISender sender) : ApiController
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateInternalNoteAsync(UpdateInternalNoteCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateInternalNoteAsync(
+        UpdateInternalNoteCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);

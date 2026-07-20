@@ -1,8 +1,8 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using Application.ApiContracts.Ai;
 using Application.Interfaces.Ai;
 using Microsoft.Extensions.Configuration;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 namespace Infrastructure.Services.Ai.Clients;
 
@@ -23,7 +23,6 @@ public class AiSearchClient : IAiSearchClient
     {
         var sidecarUrl = _sidecarManager.SidecarUrl;
         var response = await _httpClient.PostAsJsonAsync($"{sidecarUrl}/search", new { keyword, userId });
-
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<AiAgentResponse<AiSearchResult>>() ??
             throw new Exception("Không nhận được phản hồi từ AI Sidecar.");

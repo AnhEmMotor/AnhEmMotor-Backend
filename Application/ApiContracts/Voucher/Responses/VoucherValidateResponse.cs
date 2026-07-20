@@ -11,8 +11,7 @@ public class VoucherValidateResponse
     public bool IsValid { get; set; }
 
     /// <summary>
-    /// Human-readable message explaining the result.
-    /// Empty when valid.
+    /// Human-readable message explaining the result. Empty when valid.
     /// </summary>
     public string? Message { get; set; }
 

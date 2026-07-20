@@ -1,8 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants.Order;
-using Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -18,8 +16,7 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
             {
                 await CancelExpiredOrdersAsync(stoppingToken).ConfigureAwait(false);
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            } catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
                 break;
             }

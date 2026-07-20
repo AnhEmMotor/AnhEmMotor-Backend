@@ -24,7 +24,8 @@ namespace WebAPI.Controllers.V1;
 public class SettingController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Cập nhật các cài đặt hệ thống (ví dụ: số lượng cảnh báo tồn kho, số lượng mua tối đa — valid keys được quy định sẵn).
+    /// Cập nhật các cài đặt hệ thống (ví dụ: số lượng cảnh báo tồn kho, số lượng mua tối đa — valid keys được quy định
+    /// sẵn).
     /// </summary>
     /// <param name="request">Từ điển các cài đặt cần cập nhật (key: tên setting, value: giá trị mới).</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>

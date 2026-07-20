@@ -29,7 +29,9 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
     }
 
     public async Task<Result<bool>> HandleInventoryTransactionAsync(
-        int outputId, bool commitDeduction, CancellationToken cancellationToken)
+        int outputId,
+        bool commitDeduction,
+        CancellationToken cancellationToken)
     {
         var outputInfos = await context.OutputInfos
             .Include(oi => oi.ProductVariant)
@@ -46,7 +48,9 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
                 continue;
             }
             var batches = await GetAvailableBatchesAsync(
-                outputInfo.ProductVariantId.Value, outputInfo.ProductVariantColorId, cancellationToken)
+                outputInfo.ProductVariantId.Value,
+                outputInfo.ProductVariantColorId,
+                cancellationToken)
                 .ConfigureAwait(false);
             var totalAvailable = batches.Sum(b => b.RemainingCount ?? 0);
             if (totalAvailable < outputInfo.Count.Value)
@@ -56,8 +60,7 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
                     Error.BadRequest(
                         $"Sản phẩm '{productName}' không đủ tồn kho. Hiện có: {totalAvailable}, cần: {outputInfo.Count.Value}",
                         "StatusId"));
-            }
-            else if (commitDeduction)
+            } else if (commitDeduction)
             {
                 transactions.Add((outputInfo, batches, outputInfo.Count.Value));
             }
@@ -74,7 +77,8 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
                 var remainingToDeduct = quantityNeeded;
                 foreach (var batch in batches)
                 {
-                    if (remainingToDeduct <= 0) break;
+                    if (remainingToDeduct <= 0)
+                        break;
                     var batchRemaining = batch.RemainingCount ?? 0;
                     var batchPrice = batch.PurchaseRequestItem?.UnitPrice ?? 0;
                     if (batchRemaining >= remainingToDeduct)
@@ -82,8 +86,7 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
                         totalCost += remainingToDeduct * batchPrice;
                         batch.RemainingCount = batchRemaining - remainingToDeduct;
                         remainingToDeduct = 0;
-                    }
-                    else
+                    } else
                     {
                         totalCost += batchRemaining * batchPrice;
                         remainingToDeduct -= batchRemaining;
@@ -97,21 +100,23 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
     }
 
     private Task<List<InventoryReceiptInfoEntity>> GetAvailableBatchesAsync(
-        int productId, int? colorId, CancellationToken cancellationToken)
+        int productId,
+        int? colorId,
+        CancellationToken cancellationToken)
     {
         var finishedStatuses = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.FinishInventoryReceiptValues;
         return context.InventoryReceiptInfos
             .Include(ii => ii.InventoryReceipt)
             .Include(ii => ii.PurchaseRequestItem)
             .Where(
-                ii => ii.PurchaseRequestItem != null
-                    && ii.PurchaseRequestItem.ProductVariantId == productId
-                    && ii.PurchaseRequestItem.ProductVariantColorId == colorId
-                    && ii.RemainingCount > 0
-                    && ii.DeletedAt == null
-                    && ii.InventoryReceipt != null
-                    && ii.InventoryReceipt.DeletedAt == null
-                    && finishedStatuses.Contains(ii.InventoryReceipt.StatusId))
+                ii => ii.PurchaseRequestItem != null &&
+                    ii.PurchaseRequestItem.ProductVariantId == productId &&
+                    ii.PurchaseRequestItem.ProductVariantColorId == colorId &&
+                    ii.RemainingCount > 0 &&
+                    ii.DeletedAt == null &&
+                    ii.InventoryReceipt != null &&
+                    ii.InventoryReceipt.DeletedAt == null &&
+                    finishedStatuses.Contains(ii.InventoryReceipt.StatusId))
             .OrderBy(ii => ii.CreatedAt)
             .ToListAsync(cancellationToken);
     }

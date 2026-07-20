@@ -234,7 +234,7 @@ public class StatisticsController(
         return HandleResult(result);
     }
 
-        /// <summary>
+    /// <summary>
     /// Lấy giá bán hiện tại và số lượng tồn kho của một biến thể sản phẩm cụ thể.
     /// </summary>
     /// <param name="variantId">ID của biến thể sản phẩm (ProductVariant) cần xem giá và tồn kho.</param>
@@ -371,9 +371,7 @@ public class StatisticsController(
     /// <returns>Báo cáo xưởng dịch vụ gồm KPI và danh sách phiếu sửa chữa trong kỳ.</returns>
     /// <response code="200">Trả về báo cáo xưởng dịch vụ thành công.</response>
     [HttpGet("workshop-overview")]
-    [RequiresAnyPermissions(
-        Permissions.Admin.DashboardManagement.View,
-        Permissions.Accountant.DashboardManagement.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View)]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetWorkshopOverviewAsync(
         [FromQuery] DateTimeOffset? start,
@@ -550,8 +548,7 @@ public class StatisticsController(
                     collectedCash += orderTotal;
                 else if (o.StatusId == OrderStatus.Delivering || o.PaymentMethod == "cod")
                     pendingTransit += orderTotal;
-            }
-            else
+            } else
             {
                 canceledAmount += orderTotal;
             }
@@ -647,9 +644,7 @@ public class StatisticsController(
     /// <returns>Báo cáo hợp đồng gồm KPI, xu hướng, trạng thái, top nhà cung cấp, danh sách hợp đồng.</returns>
     /// <response code="200">Trả về thống kê hợp đồng thành công.</response>
     [HttpGet("contract-overview")]
-    [RequiresAnyPermissions(
-        Permissions.Admin.DashboardManagement.View,
-        Permissions.Accountant.DashboardManagement.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View)]
     [ProducesResponseType(typeof(ContractOverviewResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetContractOverviewAsync(
         [FromQuery] string startDate,
@@ -759,9 +754,7 @@ public class StatisticsController(
     /// <returns>Danh sách doanh thu theo từng danh mục sản phẩm.</returns>
     /// <response code="200">Trả về doanh thu theo danh mục thành công.</response>
     [HttpGet("revenue-by-category")]
-    [RequiresAnyPermissions(
-        Permissions.Admin.DashboardManagement.View,
-        Permissions.Accountant.DashboardManagement.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View)]
     [ProducesResponseType(typeof(IEnumerable<RevenueByCategoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetRevenueByCategoryAsync(
         [FromQuery] DateTimeOffset start,

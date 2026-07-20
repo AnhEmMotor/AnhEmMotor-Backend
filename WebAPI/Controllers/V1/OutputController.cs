@@ -21,20 +21,15 @@ public class OutputController(ISender sender) : ApiController
 {
     [HttpGet]
     [SwaggerOperation(Summary = "Get Output List")]
-    public async Task<IActionResult> GetOutputs(
-        [FromQuery] SieveModel sieveModel,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOutputs([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(
-            new GetOutputsListQuery { SieveModel = sieveModel }, cancellationToken);
+        var result = await sender.Send(new GetOutputsListQuery { SieveModel = sieveModel }, cancellationToken);
         return HandleResult(result);
     }
 
     [HttpGet("{id:int}")]
     [SwaggerOperation(Summary = "Get Output Detail")]
-    public async Task<IActionResult> GetOutputDetail(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOutputDetail(int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetOutputByIdQuery { Id = id }, cancellationToken);
         return HandleResult(result);
@@ -47,9 +42,7 @@ public class OutputController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken);
-        return result.IsSuccess
-            ? Ok(result.Value)
-            : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     [HttpPut("{id:int}")]
@@ -66,9 +59,7 @@ public class OutputController(ISender sender) : ApiController
 
     [HttpDelete("{id:int}")]
     [SwaggerOperation(Summary = "Delete Output")]
-    public async Task<IActionResult> DeleteOutput(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteOutput(int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new DeleteOutputCommand { Id = id }, cancellationToken);
         return HandleResult(result);

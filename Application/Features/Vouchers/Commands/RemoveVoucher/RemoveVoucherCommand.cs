@@ -10,6 +10,7 @@ namespace Application.Features.Vouchers.Commands.RemoveVoucher;
 public class RemoveVoucherCommand : IRequest<Result<RemoveVoucherResponse>>
 {
     public int OrderVoucherId { get; set; }
+
     public Guid CurrentUserId { get; set; }
 
     public RemoveVoucherCommand(int orderVoucherId, Guid currentUserId)

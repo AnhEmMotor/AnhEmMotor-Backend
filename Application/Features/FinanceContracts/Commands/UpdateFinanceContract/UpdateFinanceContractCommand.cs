@@ -4,5 +4,4 @@ using MediatR;
 
 namespace Application.Features.FinanceContracts.Commands.UpdateFinanceContract;
 
-public sealed record UpdateFinanceContractCommand(Guid Id, UpdateFinanceContractRequest Request, Guid CurrentUserId)
-    : IRequest<Result<Guid>>;
+public sealed record UpdateFinanceContractCommand(Guid Id, UpdateFinanceContractRequest Request, Guid CurrentUserId) : IRequest<Result<Guid>>;

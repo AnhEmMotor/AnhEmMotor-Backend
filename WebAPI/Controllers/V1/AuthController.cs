@@ -64,9 +64,7 @@ public class AuthController(IMediator mediator) : ApiController
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> LoginAsync(
-        [FromBody] LoginCommand command,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);

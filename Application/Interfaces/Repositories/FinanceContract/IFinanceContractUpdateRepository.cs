@@ -1,3 +1,4 @@
+
 namespace Application.Interfaces.Repositories.FinanceContract;
 
 public interface IFinanceContractUpdateRepository

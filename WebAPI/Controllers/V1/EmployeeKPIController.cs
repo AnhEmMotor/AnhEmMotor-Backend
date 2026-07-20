@@ -1,4 +1,3 @@
-using Application.ApiContracts.HR.Responses;
 using Application.Common.Models;
 using Application.Features.HR.Queries.GetEmployeeKPIs;
 using Asp.Versioning;
