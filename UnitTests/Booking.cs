@@ -31,6 +31,8 @@ public class Booking
     public Booking()
     {
         _bookingReadRepoMock = new Mock<IBookingReadRepository>();
+        _bookingReadRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<BookingEntity>());
         _bookingInsertRepoMock = new Mock<IBookingInsertRepository>();
         _leadReadRepoMock = new Mock<ILeadReadRepository>();
         _leadInsertRepoMock = new Mock<ILeadInsertRepository>();
@@ -52,6 +54,7 @@ public class Booking
             .ReturnsAsync(new LeadEntity { Id = 1 });
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
+            _bookingReadRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
@@ -76,6 +79,7 @@ public class Booking
             .ReturnsAsync(new LeadEntity { Id = 1 });
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
+            _bookingReadRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
@@ -96,6 +100,7 @@ public class Booking
             .ReturnsAsync(new LeadEntity { Id = 1 });
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
+            _bookingReadRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
@@ -222,6 +227,7 @@ public class Booking
             .ReturnsAsync(new LeadEntity { Id = 1 });
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
+            _bookingReadRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
@@ -240,6 +246,7 @@ public class Booking
             .ReturnsAsync((LeadEntity?)null);
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
+            _bookingReadRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,

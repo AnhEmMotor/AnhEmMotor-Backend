@@ -13,6 +13,7 @@ namespace Application.Features.Bookings.Commands.CreateBooking;
 
 public class CreateBookingCommandHandler(
     IBookingInsertRepository bookingInsertRepository,
+    IBookingReadRepository bookingReadRepository,
     ILeadReadRepository leadReadRepository,
     ILeadInsertRepository leadInsertRepository,
     ILeadUpdateRepository leadUpdateRepository,
@@ -22,6 +23,14 @@ public class CreateBookingCommandHandler(
 {
     public async Task<Result<int>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
+        // Check for overlap: same PreferredDate, status is not Cancelled
+        var allBookings = await bookingReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var isOverlap = allBookings.Any(b => b.PreferredDate == request.PreferredDate && b.Status != BookingStatus.Cancelled);
+        if (isOverlap)
+        {
+            return Result<int>.Failure("Thời gian đặt lịch này đã bị trùng với lịch hẹn khác.");
+        }
+
         var lead = await leadReadRepository.GetByPhoneNumberAsync(request.PhoneNumber, cancellationToken)
             .ConfigureAwait(false);
         if (lead == null)
