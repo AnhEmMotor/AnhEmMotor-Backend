@@ -12,6 +12,8 @@ public class OrderDetailResponse
 
     public string? PaymentUrl { get; set; }
 
+    public DateTimeOffset? PaymentExpiredAt { get; set; }
+
     public string? Notes { get; set; }
 
     public Guid? BuyerId { get; set; }
