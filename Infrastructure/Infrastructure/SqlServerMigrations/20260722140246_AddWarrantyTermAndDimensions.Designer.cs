@@ -4,16 +4,19 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Infrastructure.SqlServerMigrations
+namespace Infrastructure.Infrastructure.SqlServerMigrations
 {
     [DbContext(typeof(SqlServerDBContext))]
-    partial class SqlServerDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260722140246_AddWarrantyTermAndDimensions")]
+    partial class AddWarrantyTermAndDimensions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
