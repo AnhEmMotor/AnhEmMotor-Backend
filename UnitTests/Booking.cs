@@ -54,7 +54,6 @@ public class Booking
             .ReturnsAsync(new LeadEntity { Id = 1 });
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
-            _bookingReadRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
@@ -79,7 +78,6 @@ public class Booking
             .ReturnsAsync(new LeadEntity { Id = 1 });
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
-            _bookingReadRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
@@ -100,7 +98,6 @@ public class Booking
             .ReturnsAsync(new LeadEntity { Id = 1 });
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
-            _bookingReadRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
@@ -119,14 +116,7 @@ public class Booking
         var command = new ConfirmBookingCommand { BookingId = 999 };
         _bookingReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((BookingEntity?)null);
-        var handler = new ConfirmBookingCommandHandler(
-            _bookingReadRepoMock.Object,
-            _bookingInsertRepoMock.Object,
-            _leadReadRepoMock.Object,
-            _leadUpdateRepoMock.Object,
-            _leadActivityInsertRepoMock.Object,
-            _unitOfWorkMock.Object,
-            _emailServiceMock.Object);
+        var handler = new ConfirmBookingCommandHandler(_bookingReadRepoMock.Object, _bookingInsertRepoMock.Object, _leadReadRepoMock.Object, _leadUpdateRepoMock.Object, _leadActivityInsertRepoMock.Object, _unitOfWorkMock.Object, _emailServiceMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().Contain(e => string.Compare(e.Message, "Lịch hẹn không tồn tại.") == 0);
@@ -151,14 +141,7 @@ public class Booking
         _bookingReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(booking);
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new LeadEntity { Id = 1 });
-        var handler = new ConfirmBookingCommandHandler(
-            _bookingReadRepoMock.Object,
-            _bookingInsertRepoMock.Object,
-            _leadReadRepoMock.Object,
-            _leadUpdateRepoMock.Object,
-            _leadActivityInsertRepoMock.Object,
-            _unitOfWorkMock.Object,
-            _emailServiceMock.Object);
+        var handler = new ConfirmBookingCommandHandler(_bookingReadRepoMock.Object, _bookingInsertRepoMock.Object, _leadReadRepoMock.Object, _leadUpdateRepoMock.Object, _leadActivityInsertRepoMock.Object, _unitOfWorkMock.Object, _emailServiceMock.Object);
         await handler.Handle(new ConfirmBookingCommand { BookingId = 1 }, CancellationToken.None).ConfigureAwait(true);
         _emailServiceMock.Verify(
             x => x.SendEmailAsync(
@@ -181,14 +164,7 @@ public class Booking
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Email service down"));
-        var handler = new ConfirmBookingCommandHandler(
-            _bookingReadRepoMock.Object,
-            _bookingInsertRepoMock.Object,
-            _leadReadRepoMock.Object,
-            _leadUpdateRepoMock.Object,
-            _leadActivityInsertRepoMock.Object,
-            _unitOfWorkMock.Object,
-            _emailServiceMock.Object);
+        var handler = new ConfirmBookingCommandHandler(_bookingReadRepoMock.Object, _bookingInsertRepoMock.Object, _leadReadRepoMock.Object, _leadUpdateRepoMock.Object, _leadActivityInsertRepoMock.Object, _unitOfWorkMock.Object, _emailServiceMock.Object);
         var result = await handler.Handle(new ConfirmBookingCommand { BookingId = 1 }, CancellationToken.None)
             .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -201,14 +177,7 @@ public class Booking
         var preferredDate = new DateTimeOffset(2026, 5, 20, 10, 30, 0, TimeSpan.Zero);
         var booking = new BookingEntity { Id = 1, PhoneNumber = "0909123456", PreferredDate = preferredDate };
         _bookingReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(booking);
-        var handler = new ConfirmBookingCommandHandler(
-            _bookingReadRepoMock.Object,
-            _bookingInsertRepoMock.Object,
-            _leadReadRepoMock.Object,
-            _leadUpdateRepoMock.Object,
-            _leadActivityInsertRepoMock.Object,
-            _unitOfWorkMock.Object,
-            _emailServiceMock.Object);
+        var handler = new ConfirmBookingCommandHandler(_bookingReadRepoMock.Object, _bookingInsertRepoMock.Object, _leadReadRepoMock.Object, _leadUpdateRepoMock.Object, _leadActivityInsertRepoMock.Object, _unitOfWorkMock.Object, _emailServiceMock.Object);
         await handler.Handle(new ConfirmBookingCommand { BookingId = 1 }, CancellationToken.None).ConfigureAwait(true);
         _emailServiceMock.Verify(
             x => x.SendEmailAsync(
@@ -227,7 +196,6 @@ public class Booking
             .ReturnsAsync(new LeadEntity { Id = 1 });
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
-            _bookingReadRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
@@ -246,7 +214,6 @@ public class Booking
             .ReturnsAsync((LeadEntity?)null);
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
-            _bookingReadRepoMock.Object,
             _leadReadRepoMock.Object,
             _leadInsertRepoMock.Object,
             _leadUpdateRepoMock.Object,
@@ -261,4 +228,7 @@ public class Booking
     #pragma warning restore IDE0079 
     #pragma warning restore CRR0035
 }
+
+
+
 
