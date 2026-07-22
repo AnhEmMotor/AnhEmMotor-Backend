@@ -5,6 +5,7 @@ using Application.Features.SalesContracts.Commands.CreateSalesContract;
 using Application.Features.SalesContracts.Commands.DeleteSalesContract;
 using Application.Features.SalesContracts.Commands.UpdateSalesContract;
 using Application.Features.SalesContracts.Commands.UpdateSalesContractStatus;
+using Application.Features.SalesContracts.Commands.UploadSalesContractScan;
 using Application.Features.SalesContracts.Queries.GetSalesContractById;
 using Application.Features.SalesContracts.Queries.GetSalesContractsList;
 using Application.Features.SalesContracts.Queries.GetSalesContractStatistics;
@@ -126,6 +127,29 @@ public class SalesContractsController(IMediator mediator) : ApiController
         var command = new UpdateSalesContractStatusCommand(id, request.Status);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
+    }
+
+    [HttpPost("{id:guid}/scanned-file")]
+    [HasPermission(Permissions.Order.OrderManagement.Edit)]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(11 * 1024 * 1024)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadSalesContractScanAsync(
+        Guid id,
+        [FromForm] IFormFile? file,
+        CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest(new { message = "File hợp đồng trống hoặc không hợp lệ." });
+
+        await using var stream = file.OpenReadStream();
+        var result = await mediator.Send(
+            new UploadSalesContractScanCommand(id, stream, file.FileName),
+            cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess
+            ? Ok(new { scannedFileUrl = result.Value })
+            : HandleResult(result);
     }
 
     /// <summary>

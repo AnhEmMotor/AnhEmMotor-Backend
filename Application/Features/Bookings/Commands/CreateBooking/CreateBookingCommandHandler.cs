@@ -22,6 +22,7 @@ public class CreateBookingCommandHandler(
 {
     public async Task<Result<int>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
+        var bookingTypeLabel = GetBookingTypeLabel(request.BookingType);
         var lead = await leadReadRepository.GetByPhoneNumberAsync(request.PhoneNumber, cancellationToken)
             .ConfigureAwait(false);
         if (lead == null)
@@ -42,7 +43,7 @@ public class CreateBookingCommandHandler(
                     Lead = lead,
                     ActivityType = LeadActivityType.Booking,
                     Description =
-                        $"Đăng ký {(string.Compare(request.BookingType, BookingType.TestDrive, StringComparison.Ordinal) == 0 ? "Lái thử" : request.BookingType)} mới tại {request.Location}. (Khách hàng mới)",
+                        $"Đăng ký {bookingTypeLabel} mới tại {request.Location}. (Khách hàng mới)",
                     CreatedAt = DateTimeOffset.UtcNow
                 });
         } else
@@ -55,7 +56,7 @@ public class CreateBookingCommandHandler(
                     LeadId = lead.Id,
                     ActivityType = LeadActivityType.Booking,
                     Description =
-                        $"Đăng ký {(string.Compare(request.BookingType, BookingType.TestDrive, StringComparison.Ordinal) == 0 ? "Lái thử" : request.BookingType)} mới tại {request.Location}.",
+                        $"Đăng ký {bookingTypeLabel} mới tại {request.Location}.",
                     CreatedAt = DateTimeOffset.UtcNow
                 });
         }
@@ -74,7 +75,20 @@ public class CreateBookingCommandHandler(
         bookingInsertRepository.Add(booking);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         notificationService.NotifyNewBooking(
-            $"Có yêu cầu lái thử mới từ khách hàng {request.FullName} ({request.PhoneNumber})");
+            $"Có yêu cầu {bookingTypeLabel} mới từ khách hàng {request.FullName} ({request.PhoneNumber})");
         return Result<int>.Success(booking.Id);
+    }
+
+    private static string GetBookingTypeLabel(string bookingType)
+    {
+        return bookingType switch
+        {
+            BookingType.TestDrive => "Lái thử",
+            BookingType.Maintenance => "Dịch vụ bảo dưỡng",
+            BookingType.RepairService => "Dịch vụ sửa chữa",
+            BookingType.WarrantyService => "Dịch vụ bảo hành",
+            BookingType.Consulting => "Tư vấn",
+            _ => "Đặt lịch"
+        };
     }
 }

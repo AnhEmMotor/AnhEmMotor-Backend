@@ -143,7 +143,8 @@ namespace Infrastructure.Repositories
             foreach (var s in staffSales)
             {
                 var targetSales = await _context.KPIs
-                    .Where(k => k.EmployeeProfileId == s.Id && k.PeriodStart >= start && k.PeriodEnd <= end)
+                    .Where(k => k.EmployeeProfileId == s.Id && k.PeriodStart <= end && k.PeriodEnd >= start)
+                    .OrderByDescending(k => k.PeriodStart)
                     .Select(k => k.TargetValue)
                     .FirstOrDefaultAsync();
                 var commissionPaid = await _context.CommissionRecords
@@ -159,13 +160,13 @@ namespace Infrastructure.Repositories
                         EmployeeName = s.FullName ?? string.Empty,
                         Role = s.Role ?? string.Empty,
                         TotalSales = s.Sales,
-                        TargetSales = targetSales > 0 ? targetSales : s.Sales,
-                        CommissionPaid = commissionPaid > 0 ? commissionPaid : s.Sales * 0.02m,
-                        KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện"),
+                        TargetSales = targetSales,
+                        CommissionPaid = commissionPaid,
+                        KpiStatus = GetKpiStatus(s.Sales, targetSales),
                         IsTopSeller = false
                     });
             }
-            var maxSales = result.Max(r => r.TotalSales);
+            var maxSales = result.Count > 0 ? result.Max(r => r.TotalSales) : 0;
             if (maxSales > 0)
             {
                 foreach (var r in result)
@@ -174,6 +175,21 @@ namespace Infrastructure.Repositories
                 }
             }
             return result;
+        }
+
+        private static string GetKpiStatus(decimal totalSales, decimal targetSales)
+        {
+            if (targetSales <= 0)
+            {
+                return "Chưa đặt KPI";
+            }
+
+            if (totalSales > targetSales)
+            {
+                return "Vượt KPI";
+            }
+
+            return totalSales == targetSales ? "Đạt" : "Cần cải thiện";
         }
 
         public async Task<List<TransactionLogDto>> GetRecentTransactionsAsync(int limit = 50)
