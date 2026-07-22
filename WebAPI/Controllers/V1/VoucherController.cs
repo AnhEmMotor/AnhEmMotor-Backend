@@ -1,6 +1,5 @@
 using Application.ApiContracts.Voucher.Requests;
 using Application.Common.Models;
-using Domain.Primitives;
 using Application.Features.Vouchers.Commands.ApplyVoucher;
 using Application.Features.Vouchers.Commands.CreateVoucher;
 using Application.Features.Vouchers.Commands.DeleteVoucher;
@@ -10,16 +9,19 @@ using Application.Features.Vouchers.Queries.GetVoucherById;
 using Application.Features.Vouchers.Queries.GetVoucherList;
 using Application.Features.Vouchers.Queries.ValidateVoucher;
 using Asp.Versioning;
+using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Quản lý voucher (mã giảm giá) — danh sách, tạo, cập nhật, xóa, kiểm tra hợp lệ, áp dụng vào đơn hàng và xóa voucher đã áp dụng.
+/// Quản lý voucher (mã giảm giá) — danh sách, tạo, cập nhật, xóa, kiểm tra hợp lệ, áp dụng vào đơn hàng và xóa voucher
+/// đã áp dụng.
 /// </summary>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý voucher")]
@@ -39,9 +41,12 @@ public class VoucherController(IMediator mediator) : ApiController
     [Authorize]
     [ProducesResponseType(typeof(PagedResult<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetVouchers([FromQuery] GetVouchersRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetVouchers(
+        [FromQuery] GetVouchersRequest request,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetVouchersQuery { Request = request }, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new GetVouchersQuery { Request = request }, cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -79,9 +84,12 @@ public class VoucherController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> CreateVoucher([FromBody] CreateVoucherRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateVoucher(
+        [FromBody] CreateVoucherRequest request,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new CreateVoucherCommand { Request = request }, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new CreateVoucherCommand { Request = request }, cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -102,10 +110,15 @@ public class VoucherController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> UpdateVoucher(int id, [FromBody] UpdateVoucherRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateVoucher(
+        int id,
+        [FromBody] UpdateVoucherRequest request,
+        CancellationToken cancellationToken)
     {
-        if (id != request.Id) return BadRequest("Id không hợp lệ");
-        var result = await mediator.Send(new UpdateVoucherCommand { Request = request }, cancellationToken).ConfigureAwait(false);
+        if (id != request.Id)
+            return BadRequest("Id không hợp lệ");
+        var result = await mediator.Send(new UpdateVoucherCommand { Request = request }, cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -141,9 +154,14 @@ public class VoucherController(IMediator mediator) : ApiController
     [Authorize]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> ValidateVoucher([FromBody] VoucherValidateRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ValidateVoucher(
+        [FromBody] VoucherValidateRequest request,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new VoucherValidateQuery(request.VoucherId, request.OutputId), cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(
+            new VoucherValidateQuery(request.VoucherId, request.OutputId),
+            cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -161,10 +179,20 @@ public class VoucherController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> ApplyVoucher([FromBody] ApplyVoucherRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ApplyVoucher(
+        [FromBody] ApplyVoucherRequest request,
+        CancellationToken cancellationToken)
     {
         var currentUserId = GetCurrentUserId();
-        var result = await mediator.Send(new ApplyVoucherCommand { VoucherId = request.VoucherId, OutputId = request.OutputId, CurrentUserId = currentUserId }, cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(
+            new ApplyVoucherCommand
+            {
+                VoucherId = request.VoucherId,
+                OutputId = request.OutputId,
+                CurrentUserId = currentUserId
+            },
+            cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -185,13 +213,14 @@ public class VoucherController(IMediator mediator) : ApiController
     public async Task<IActionResult> RemoveVoucher(int orderVoucherId, CancellationToken cancellationToken)
     {
         var currentUserId = GetCurrentUserId();
-        var result = await mediator.Send(new RemoveVoucherCommand(orderVoucherId, currentUserId), cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new RemoveVoucherCommand(orderVoucherId, currentUserId), cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
     private Guid GetCurrentUserId()
     {
-        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return string.IsNullOrEmpty(userIdStr) ? Guid.Empty : Guid.Parse(userIdStr);
     }
 }

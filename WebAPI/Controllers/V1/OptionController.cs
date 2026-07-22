@@ -40,7 +40,8 @@ public class OptionController(ISender sender) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách toàn bộ các thuộc tính (Options) và giá trị của chúng (dành cho Quản trị viên, có phân quyền chi tiết).
+    /// Lấy danh sách toàn bộ các thuộc tính (Options) và giá trị của chúng (dành cho Quản trị viên, có phân quyền chi
+    /// tiết).
     /// </summary>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách đầy đủ các tùy chọn và giá trị.</returns>

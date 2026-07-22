@@ -1,4 +1,5 @@
 using Application.ApiContracts.FinanceContract.Requests;
+using Application.Common.Models;
 using Application.Features.FinanceContracts.Commands.CreateFinanceContract;
 using Application.Features.FinanceContracts.Commands.DeleteFinanceContract;
 using Application.Features.FinanceContracts.Commands.UpdateCavetState;
@@ -7,7 +8,6 @@ using Application.Features.FinanceContracts.Commands.UpdateFinanceContract;
 using Application.Features.FinanceContracts.Commands.UploadDisbursementEvidence;
 using Application.Features.FinanceContracts.Queries.GetFinanceContractDetail;
 using Application.Features.FinanceContracts.Queries.GetFinanceContractsList;
-using Application.Common.Models;
 using Asp.Versioning;
 using Domain.Constants.Permission;
 using Domain.Primitives;
@@ -176,7 +176,9 @@ public class FinanceContractsController(ISender sender) : ApiController
         [FromBody] UpdateDisbursementPaymentRequest request,
         CancellationToken cancellationToken)
     {
-        await sender.Send(new UpdateDisbursementPaymentCommand(financeContractId, request, Guid.Empty), cancellationToken)
+        await sender.Send(
+            new UpdateDisbursementPaymentCommand(financeContractId, request, Guid.Empty),
+            cancellationToken)
             .ConfigureAwait(false);
         return Ok(new { success = true });
     }
@@ -235,7 +237,8 @@ public class FinanceContractsController(ISender sender) : ApiController
                 financeContractId,
                 new UploadDisbursementEvidenceRequest { FileContent = stream, FileName = form.File.FileName },
                 Guid.Empty),
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken)
+            .ConfigureAwait(false);
         return Ok(new { success = true });
     }
 }

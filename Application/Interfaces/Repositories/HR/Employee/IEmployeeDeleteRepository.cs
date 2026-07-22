@@ -4,6 +4,7 @@ namespace Application.Interfaces.Repositories.HR.Employee;
 
 public interface IEmployeeDeleteRepository
 {
-    void Delete(EmployeeProfile entity);
-    void Delete(IEnumerable<EmployeeProfile> entities);
+    public void Delete(EmployeeProfile entity);
+
+    public void Delete(IEnumerable<EmployeeProfile> entities);
 }

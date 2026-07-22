@@ -6,5 +6,6 @@ namespace Application.ApiContracts.Voucher.Responses;
 public class RemoveVoucherResponse
 {
     public int OrderVoucherId { get; set; }
+
     public decimal RefundedAmount { get; set; }
 }

@@ -10,20 +10,19 @@ public class VoucherUsageRepository(ApplicationDBContext context) : IVoucherUsag
     public Task<int> GetUserUsageCountAsync(int voucherId, Guid userId, CancellationToken cancellationToken = default)
     {
         return context.Set<OrderVoucher>()
-            .Where(ov => ov.VoucherId == voucherId
-                         && ov.Output != null
-                         && ov.Output.BuyerId == userId)
+            .Where(ov => ov.VoucherId == voucherId && ov.Output != null && ov.Output.BuyerId == userId)
             .CountAsync(cancellationToken);
     }
 
     public Task<int> GetTotalUsageCountAsync(int voucherId, CancellationToken cancellationToken = default)
     {
-        return context.Set<OrderVoucher>()
-            .Where(ov => ov.VoucherId == voucherId)
-            .CountAsync(cancellationToken);
+        return context.Set<OrderVoucher>().Where(ov => ov.VoucherId == voucherId).CountAsync(cancellationToken);
     }
 
-    public Task<OrderVoucher?> GetByVoucherAndOutputAsync(int voucherId, int outputId, CancellationToken cancellationToken = default)
+    public Task<OrderVoucher?> GetByVoucherAndOutputAsync(
+        int voucherId,
+        int outputId,
+        CancellationToken cancellationToken = default)
     {
         return context.Set<OrderVoucher>()
             .FirstOrDefaultAsync(ov => ov.VoucherId == voucherId && ov.OutputId == outputId, cancellationToken);
@@ -31,8 +30,7 @@ public class VoucherUsageRepository(ApplicationDBContext context) : IVoucherUsag
 
     public Task<OrderVoucher?> GetByIdAsync(int orderVoucherId, CancellationToken cancellationToken = default)
     {
-        return context.Set<OrderVoucher>()
-            .FirstOrDefaultAsync(ov => ov.Id == orderVoucherId, cancellationToken);
+        return context.Set<OrderVoucher>().FirstOrDefaultAsync(ov => ov.Id == orderVoucherId, cancellationToken);
     }
 
     public async Task AddAsync(OrderVoucher orderVoucher, CancellationToken cancellationToken = default)

@@ -108,7 +108,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetUserByIdQuery() { UserId = userId }, cancellationToken)
-        .ConfigureAwait(false);
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -215,14 +215,14 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(
-        new ChangeMultipleUsersStatusCommand()
-        {
-            Status = model.Status,
-            UserIds = model.UserIds,
-            CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
-        },
-        cancellationToken)
-        .ConfigureAwait(false);
+            new ChangeMultipleUsersStatusCommand()
+            {
+                Status = model.Status,
+                UserIds = model.UserIds,
+                CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            },
+            cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -236,14 +236,10 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteUserAsync(
-        Guid userId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteUserAsync(Guid userId, CancellationToken cancellationToken)
     {
         var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var currentUserId = string.IsNullOrEmpty(currentUserIdStr)
-        ? Guid.Empty
-        : Guid.Parse(currentUserIdStr);
+        var currentUserId = string.IsNullOrEmpty(currentUserIdStr) ? Guid.Empty : Guid.Parse(currentUserIdStr);
         var command = new DeleteUserByManagerCommand(userId, currentUserId);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);

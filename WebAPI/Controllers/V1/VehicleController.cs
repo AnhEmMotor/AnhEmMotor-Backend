@@ -1,11 +1,11 @@
-using Application.Common.Models;
 using Application.ApiContracts.Vehicle.Responses;
-using Domain.Primitives;
+using Application.Common.Models;
 using Application.Features.Vehicles.Commands.CreateVehicle;
 using Application.Features.Vehicles.Commands.TransferOwnership;
 using Application.Features.Vehicles.Queries.GetVehiclePortfolio;
 using Application.Features.Vehicles.Queries.GetVehicles;
 using Asp.Versioning;
+using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -146,7 +146,7 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         CancellationToken cancellationToken)
     {
         return GetQueryable()
-        .AsNoTracking()
+            .AsNoTracking()
             .Where(
                 o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit || o.StatusId == OrderStatus.WaitingInstallment) &&
                     !string.IsNullOrEmpty(o.PaymentMethod) &&

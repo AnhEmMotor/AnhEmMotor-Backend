@@ -1,7 +1,7 @@
 using Application.Common.Models;
 using Application.Features.Loyalty.Queries.GetLoyaltyMembers;
-using Domain.Primitives;
 using Asp.Versioning;
+using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

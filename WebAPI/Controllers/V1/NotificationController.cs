@@ -1,6 +1,5 @@
 using Application.Common.Models;
 using Application.Features.Notifications.Queries.GetNotificationStream;
-using Domain.Primitives;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -20,8 +19,8 @@ namespace WebAPI.Controllers.V1;
 public class NotificationController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Đăng ký nhận thông báo thời gian thực qua SSE (Server-Sent Events).
-    /// Dành cho vai trò Admin và Sale để nhận thông báo real-time về đơn hàng, hợp đồng, sự kiện hệ thống.
+    /// Đăng ký nhận thông báo thời gian thực qua SSE (Server-Sent Events). Dành cho vai trò Admin và Sale để nhận thông
+    /// báo real-time về đơn hàng, hợp đồng, sự kiện hệ thống.
     /// </summary>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>SSE stream với các thông báo thời gian thực.</returns>

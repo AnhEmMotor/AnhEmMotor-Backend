@@ -1,16 +1,15 @@
 using Application.Common.Models;
-using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.BookingAppointments.Commands;
 
 public record CreateBookingAppointmentCommand(
-	string FullName,
-	string Phone,
-	string? Email,
-	string? ServiceType,
-	DateTime? PreferredDate,
-	string? PreferredTimeSlot,
-	DateTimeOffset? AppointmentAt,
-	string? Showroom,
-	string? Notes) : IRequest<Result<int>>;
+    string FullName,
+    string Phone,
+    string? Email,
+    string? ServiceType,
+    DateTime? PreferredDate,
+    string? PreferredTimeSlot,
+    DateTimeOffset? AppointmentAt,
+    string? Showroom,
+    string? Notes) : IRequest<Result<int>>;

@@ -127,11 +127,7 @@ public class DebtPaymentsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(UploadDebtProofImageResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UploadDebtProofImageAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        var command = new UploadDebtProofImageCommand
-        {
-            FileContent = file.OpenReadStream(),
-            FileName = file.FileName
-        };
+        var command = new UploadDebtProofImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

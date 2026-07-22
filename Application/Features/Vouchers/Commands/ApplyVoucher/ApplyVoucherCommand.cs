@@ -8,7 +8,9 @@ namespace Application.Features.Vouchers.Commands.ApplyVoucher;
 /// </summary>
 public class ApplyVoucherCommand : IRequest<Result<ApplyVoucherResponse>>
 {
-	public int VoucherId { get; set; }
-	public int OutputId { get; set; }
-	public Guid CurrentUserId { get; set; }
+    public int VoucherId { get; set; }
+
+    public int OutputId { get; set; }
+
+    public Guid CurrentUserId { get; set; }
 }

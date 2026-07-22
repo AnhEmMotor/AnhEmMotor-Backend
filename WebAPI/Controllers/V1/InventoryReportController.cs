@@ -6,7 +6,6 @@ using Application.Features.InventoryReports.Queries.GetInventoryReportSummary;
 using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;

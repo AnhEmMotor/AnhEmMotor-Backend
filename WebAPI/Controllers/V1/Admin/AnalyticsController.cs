@@ -1,16 +1,14 @@
 using Application.Common.Models;
 using Application.Features.Admin.Analytics;
-using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace WebAPI.Controllers.V1.Admin;
 
 /// <summary>
-/// API phân tích dữ liệu dành riêng cho vai trò Quản trị viên (Admin).
-/// Cung cấp các chỉ số KPI và dữ liệu biểu đồ tổng hợp từ Dashboard.
+/// API phân tích dữ liệu dành riêng cho vai trò Quản trị viên (Admin). Cung cấp các chỉ số KPI và dữ liệu biểu đồ tổng
+/// hợp từ Dashboard.
 /// </summary>
 [ApiController]
 [Route("api/v1/admin/analytics")]
@@ -21,7 +19,7 @@ public class AnalyticsController : ControllerBase
     private readonly IMediator _mediator;
 
     /// <summary>
-    /// Khởi tạo <see cref="AnalyticsController"/> với MediatR mediator.
+    /// Khởi tạo <see cref="AnalyticsController" /> với MediatR mediator.
     /// </summary>
     /// <param name="mediator">MediatR mediator để gửi query xử lý phân tích.</param>
     public AnalyticsController(IMediator mediator) => _mediator = mediator;

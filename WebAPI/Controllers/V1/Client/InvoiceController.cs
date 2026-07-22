@@ -23,9 +23,9 @@ public class InvoiceController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetMyInvoices(CancellationToken cancellationToken)
     {
         var userIdStr = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
-        User.FindFirst("sub")?.Value ??
-        User.Identity?.Name ??
-        string.Empty;
+            User.FindFirst("sub")?.Value ??
+            User.Identity?.Name ??
+            string.Empty;
         if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
         {
             return BadRequest(new { message = "Invalid user identifier" });

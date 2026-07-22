@@ -2,7 +2,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants.Order;
 using Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -34,7 +33,7 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
 		var updateRepository = scope.ServiceProvider.GetRequiredService<IOutputUpdateRepository>();
 		var dbContext = scope.ServiceProvider.GetRequiredService<Infrastructure.DBContexts.ApplicationDBContext>();
 
-		var expirationThreshold = DateTimeOffset.UtcNow.AddHours(-24);
+		var expirationThreshold = DateTimeOffset.UtcNow.AddMinutes(-15);
 		var expiredOrders = await readRepository.GetExpiredOrdersAsync(expirationThreshold, cancellationToken)
 			.ConfigureAwait(false);
 		if (expiredOrders.Count > 0)
