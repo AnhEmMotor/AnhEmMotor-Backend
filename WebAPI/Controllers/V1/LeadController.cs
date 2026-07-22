@@ -1,7 +1,10 @@
+using Application.ApiContracts.Customer.Responses;
 using Application.ApiContracts.Leads.Responses;
+using Application.Features.Customer.Queries.GetCustomerProfile360;
 using Application.Features.Leads.Commands.AddLeadActivity;
 using Application.Features.Leads.Commands.AssignLead;
 using Application.Features.Leads.Commands.CreateLead;
+using Application.Features.Leads.Commands.DeleteLead;
 using Application.Features.Leads.Commands.ResetLeads;
 using Application.Features.Leads.Commands.UpdateLead;
 using Application.Features.Leads.Queries.GetLeadById;
@@ -60,6 +63,18 @@ public class LeadController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetLeadByIdAsync(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetLeadByIdQuery(id), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy thông tin chi tiết Customer Profile 360°
+    /// </summary>
+    [HttpGet("{id:int}/360")]
+    [Authorize]
+    [ProducesResponseType(typeof(CustomerProfile360Response), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetProfile360Async(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetCustomerProfile360Query(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -131,6 +146,18 @@ public class LeadController(IMediator mediator) : ApiController
     public async Task<IActionResult> ResetLeadsAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new ResetLeadsCommand(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Xóa một khách hàng tiềm năng theo ID
+    /// </summary>
+    [HttpDelete("{id:int}")]
+    [Authorize]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    public async Task<IActionResult> DeleteLeadAsync(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new DeleteLeadCommand(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

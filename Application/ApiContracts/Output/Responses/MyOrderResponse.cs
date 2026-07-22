@@ -22,6 +22,8 @@ public class MyOrderResponse
 
     public string? PaymentUrl { get; set; }
 
+    public DateTimeOffset? PaymentExpiredAt { get; set; }
+
     public string? Notes { get; init; }
 
     public decimal Total { get; init; }

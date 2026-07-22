@@ -192,6 +192,7 @@ public class UpdateOutputStatusCommandHandler(
         output.StatusId = request.StatusId;
         output.LastStatusChangedAt = DateTimeOffset.UtcNow;
         updateRepository.Update(output);
+        await SyncLeadStatusAsync(output, request.StatusId, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         if (isCompleting)
         {
@@ -364,5 +365,57 @@ public class UpdateOutputStatusCommandHandler(
         };
         await leadInsertRepository.AddAsync(lead, cancellationToken).ConfigureAwait(false);
         return lead;
+    }
+
+    private async Task SyncLeadStatusAsync(Output output, string orderStatusId, CancellationToken cancellationToken)
+    {
+        if (leadReadRepository == null || string.IsNullOrEmpty(output.CustomerPhone))
+        {
+            return;
+        }
+
+        var lead = output.Lead;
+        if (lead == null)
+        {
+            lead = await leadReadRepository.GetByPhoneNumberAsync(output.CustomerPhone.Trim(), cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        if (lead == null && output.LeadId.HasValue)
+        {
+            lead = await leadReadRepository.GetByIdAsync(output.LeadId.Value, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        if (lead == null)
+        {
+            return;
+        }
+
+        string? targetLeadStatus = null;
+        switch (orderStatusId)
+        {
+            case OrderStatus.Completed:
+                targetLeadStatus = LeadStatus.Delivered;
+                break;
+
+            case OrderStatus.Delivering:
+            case OrderStatus.WaitingPickup:
+                targetLeadStatus = LeadStatus.Paperwork;
+                break;
+
+            case OrderStatus.WaitingInstallment:
+            case OrderStatus.PaidProcessing:
+            case OrderStatus.ConfirmedCod:
+            case OrderStatus.DepositPaid:
+            case OrderStatus.InstallmentApproved:
+                targetLeadStatus = LeadStatus.Deposited;
+                break;
+        }
+
+        if (targetLeadStatus != null && lead.Status != targetLeadStatus)
+        {
+            lead.Status = targetLeadStatus;
+        }
     }
 }
