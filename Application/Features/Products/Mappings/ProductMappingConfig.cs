@@ -48,7 +48,8 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.CategoryName, src => src.ProductCategory != null ? src.ProductCategory.Name : null)
             .Map(dest => dest.BrandName, src => src.Brand != null ? src.Brand.Name : null)
             .Map(dest => dest.TotalStock, src => CalculateTotalStock(src))
-            .Map(dest => dest.TotalBooked, src => CalculateTotalBooked(src));
+            .Map(dest => dest.TotalBooked, src => CalculateTotalBooked(src))
+            .Map(dest => dest.CoverImageUrl, src => GetProductCoverImage(src));
         config.NewConfig<ProductVariantEntity, VariantRow>()
             .Map(dest => dest.Colors, src => MapVariantColors(src))
             .Map(
@@ -209,13 +210,8 @@ public class ProductMappingConfig : IRegister
                         SKU = row.SKU,
                         Weight = row.Weight,
                         Length = row.Length,
-<<<<<<< Updated upstream
-                        Width = row.Width,
-                        Height = row.Height,
-=======
 Width = row.Width,
 Height = row.Height,
->>>>>>> Stashed changes
                         Wheelbase = row.Wheelbase,
                         SeatHeight = row.SeatHeight,
                         GroundClearance = row.GroundClearance,
@@ -241,13 +237,8 @@ Height = row.Height,
             Description = ResolveLocalizedText(product.DescriptionJson, lang) ?? product.Description,
             Weight = product.Weight,
             Length = product.Length,
-<<<<<<< Updated upstream
-            Width = product.Width,
-            Height = product.Height,
-=======
 Width = product.Width,
 Height = product.Height,
->>>>>>> Stashed changes
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
             GroundClearance =
@@ -320,13 +311,8 @@ Height = product.Height,
             Description = ResolveLocalizedText(product.DescriptionJson, lang) ?? product.Description,
             Weight = product.Weight,
             Length = product.Length,
-<<<<<<< Updated upstream
             Width = product.Width,
             Height = product.Height,
-=======
-Width = product.Width,
-Height = product.Height,
->>>>>>> Stashed changes
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
             GroundClearance =
@@ -721,6 +707,22 @@ Height = product.Height,
                 variant.VariantOptionValues.Where(vov => vov.OptionValue != null).Select(vov => vov.OptionValue!.Name));
         }
         return string.Empty;
+    }
+
+    private static string? GetProductCoverImage(ProductEntity product)
+    {
+        var variant = product.ProductVariants?.FirstOrDefault(v => v.DeletedAt == null);
+        if (variant == null)
+            return null;
+
+        var color = variant.ProductVariantColors?.FirstOrDefault();
+        if (color != null && !string.IsNullOrWhiteSpace(color.CoverImageUrl))
+            return color.CoverImageUrl;
+
+        if (!string.IsNullOrWhiteSpace(variant.CoverImageUrl))
+            return variant.CoverImageUrl;
+
+        return variant.ProductCollectionPhotos?.FirstOrDefault(p => !string.IsNullOrEmpty(p.ImageUrl))?.ImageUrl;
     }
 }
 

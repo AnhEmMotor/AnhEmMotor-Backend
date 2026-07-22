@@ -35,6 +35,7 @@ public class FileReadService : IFileReadService
 
     public string GetPublicUrl(string storagePath)
     {
+        storagePath = storagePath.TrimStart('/', '\\');
         var request = _httpContextAccessor.HttpContext?.Request;
         if (request is null)
             return $"/api/v1/MediaFile/view-image/{storagePath}";
@@ -45,9 +46,40 @@ public class FileReadService : IFileReadService
         string storagePath,
         CancellationToken cancellationToken)
     {
+        // Remove leading slashes to prevent Path.Combine from treating it as an absolute path
+        storagePath = storagePath.TrimStart('/', '\\');
+
         var fullPath = Path.Combine(_uploadFolder, storagePath);
+        
+        // Fallback for old seeded data which was stored in wwwroot/uploads
+        // In the DB they are stored as /uploads/img_name.jpg
+        // So storagePath would be uploads/img_name.jpg
+        var env = _httpContextAccessor.HttpContext?.RequestServices.GetService(typeof(IWebHostEnvironment)) as IWebHostEnvironment;
+        var webRootPath = env != null && !string.IsNullOrEmpty(env.WebRootPath) ? Path.Combine(env.WebRootPath, storagePath) : "";
+        if (!System.IO.File.Exists(fullPath))
+        {
+            if (System.IO.File.Exists(webRootPath))
+            {
+                fullPath = webRootPath;
+            }
+            else
+            {
+                // Try fallback to current directory wwwroot
+                var fallbackPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", storagePath);
+                if (System.IO.File.Exists(fallbackPath))
+                {
+                    fullPath = fallbackPath;
+                }
+                else
+                {
+                    throw new Exception($"File not found. Tried _uploadFolder: {_uploadFolder}, fullPath: {fullPath}, webRootPath: {webRootPath}, fallbackPath: {fallbackPath}");
+                }
+            }
+        }
+
         if (!System.IO.File.Exists(fullPath))
             return null;
+
         var fileBytes = await System.IO.File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);
         var extension = Path.GetExtension(storagePath).ToLower();
         var contentType = extension switch

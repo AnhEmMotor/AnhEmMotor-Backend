@@ -385,21 +385,21 @@ public class StatisticsController(
         var periodEnd = end ?? now;
         var inProgressCount = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
-            .CountAsync(m => m.TotalCost >= 0, cancellationToken)
+            .CountAsync(m => m.TotalCost == 0, cancellationToken)
             .ConfigureAwait(false);
         var workshopRevenue = await dbContext.WorkshopPayments
             .IgnoreQueryFilters()
             .Where(p => p.CreatedAt >= periodStart && p.CreatedAt <= periodEnd)
             .SumAsync(p => p.TotalAmount, cancellationToken)
             .ConfigureAwait(false);
-        var twoHoursAgo = now.AddHours(-2);
+        var overdueCutoff = now.AddHours(-48);
         var overdueCount = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
-            .CountAsync(m => m.TotalCost >= 0 && m.CreatedAt <= twoHoursAgo, cancellationToken)
+            .CountAsync(m => m.TotalCost == 0 && m.CreatedAt <= overdueCutoff, cancellationToken)
             .ConfigureAwait(false);
         var activeOrders = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
-            .Where(m => m.TotalCost >= 0)
+            .Where(m => m.TotalCost == 0)
             .OrderByDescending(m => m.CreatedAt)
             .Take(20)
             .Select(

@@ -21,17 +21,11 @@ public string? Description { get; set; }
 
 public decimal? Weight { get; set; }
 
-<<<<<<< Updated upstream
         public decimal? Length { get; set; }
 
         public decimal? Width { get; set; }
 
         public decimal? Height { get; set; }
-=======
-public decimal? Length { get; set; }
-public decimal? Width { get; set; }
-public decimal? Height { get; set; }
->>>>>>> Stashed changes
 
 public string? Wheelbase { get; set; }
 

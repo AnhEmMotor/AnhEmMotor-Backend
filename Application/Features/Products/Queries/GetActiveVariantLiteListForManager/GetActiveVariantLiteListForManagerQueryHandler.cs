@@ -5,9 +5,11 @@ using Domain.Primitives;
 using Mapster;
 using MediatR;
 
+using Application.Interfaces.Repositories.MediaFile.File;
+
 namespace Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
 
-public class GetActiveVariantLiteListForManagerQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetActiveVariantLiteListForManagerQuery, Result<PagedResult<ProductVariantLiteResponse>>>
+public class GetActiveVariantLiteListForManagerQueryHandler(IProductVariantReadRepository repository, IFileReadService fileReadService) : IRequestHandler<GetActiveVariantLiteListForManagerQuery, Result<PagedResult<ProductVariantLiteResponse>>>
 {
     public async Task<Result<PagedResult<ProductVariantLiteResponse>>> Handle(
         GetActiveVariantLiteListForManagerQuery request,
@@ -24,6 +26,25 @@ public class GetActiveVariantLiteListForManagerQueryHandler(IProductVariantReadR
             search: request.Search)
             .ConfigureAwait(false);
         var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponse>()).ToList();
+
+        foreach (var response in responses)
+        {
+            if (!string.IsNullOrWhiteSpace(response.CoverImageUrl) && !response.CoverImageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                response.CoverImageUrl = fileReadService.GetPublicUrl(response.CoverImageUrl);
+            }
+            if (response.Photos != null)
+            {
+                for (int i = 0; i < response.Photos.Count; i++)
+                {
+                    if (!string.IsNullOrWhiteSpace(response.Photos[i]) && !response.Photos[i].StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    {
+                        response.Photos[i] = fileReadService.GetPublicUrl(response.Photos[i]);
+                    }
+                }
+            }
+        }
+
         return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, page, pageSize);
     }
 }

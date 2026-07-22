@@ -1,4 +1,5 @@
 using Application.ApiContracts.Product.Requests;
+using Application.Common.Converters;
 using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Common;
@@ -18,15 +19,10 @@ public abstract class ProductWriteRequestBase
     public decimal? Weight { get; set; }
 
     public decimal? Length { get; set; }
-<<<<<<< Updated upstream
 
     public decimal? Width { get; set; }
 
     public decimal? Height { get; set; }
-=======
-public decimal? Width { get; set; }
-public decimal? Height { get; set; }
->>>>>>> Stashed changes
 
     public string? Wheelbase { get; set; }
 

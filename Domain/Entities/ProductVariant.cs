@@ -3,100 +3,90 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
-    [Table("ProductVariant")]
-    public class ProductVariant : BaseEntity
-    {
-        [Key]
-        [Column("Id")]
-        public int Id { get; set; }
+[Table("ProductVariant")]
+public class ProductVariant : BaseEntity
+{
+[Key]
+[Column("Id")]
+public int Id { get; set; }
 
-        [Column("ProductId")]
-        [ForeignKey("Product")]
-        public int ProductId { get; set; }
+[Column("ProductId")]
+[ForeignKey("Product")]
+public int ProductId { get; set; }
 
-        [Column("UrlSlug", TypeName = "nvarchar(255)")]
-        public string? UrlSlug { get; set; }
+[Column("UrlSlug", TypeName = "nvarchar(255)")]
+public string? UrlSlug { get; set; }
 
-        [Column("Price", TypeName = "decimal(18, 2)")]
-        public decimal? Price { get; set; }
+[Column("Price", TypeName = "decimal(18, 2)")]
+public decimal? Price { get; set; }
 
-        [Column("CoverImageUrl", TypeName = "nvarchar(1000)")]
-        public string? CoverImageUrl { get; set; }
+[Column("CoverImageUrl", TypeName = "nvarchar(1000)")]
+public string? CoverImageUrl { get; set; }
 
-        [Column("VariantName", TypeName = "nvarchar(100)")]
-        public string? VariantName { get; set; }
+[Column("VariantName", TypeName = "nvarchar(100)")]
+public string? VariantName { get; set; }
 
-        [Column("SKU", TypeName = "nvarchar(50)")]
-        public string? SKU { get; set; }
+[Column("SKU", TypeName = "nvarchar(50)")]
+public string? SKU { get; set; }
 
-        [Column("Weight", TypeName = "decimal(18, 2)")]
-        public decimal? Weight { get; set; }
+[Column("Weight", TypeName = "decimal(18, 2)")]
+public decimal? Weight { get; set; }
 
-<<<<<<< Updated upstream
-        [Column("Length", TypeName = "decimal(18, 2)")]
-        public decimal? Length { get; set; }
+[Column("Length", TypeName = "decimal(18, 2)")]
+public decimal? Length { get; set; }
 
-        [Column("Width", TypeName = "decimal(18, 2)")]
-        public decimal? Width { get; set; }
+[Column("Width", TypeName = "decimal(18, 2)")]
+public decimal? Width { get; set; }
 
-        [Column("Height", TypeName = "decimal(18, 2)")]
-=======
-        [Column("Length", TypeName = "decimal(18,2)")]
-        public decimal? Length { get; set; }
+[Column("Height", TypeName = "decimal(18, 2)")]
+public decimal? Height { get; set; }
 
-        [Column("Width", TypeName = "decimal(18,2)")]
-        public decimal? Width { get; set; }
+[Column("Wheelbase", TypeName = "decimal(18, 2)")]
+public decimal? Wheelbase { get; set; }
 
-        [Column("Height", TypeName = "decimal(18,2)")]
->>>>>>> Stashed changes
-        public decimal? Height { get; set; }
+[Column("SeatHeight", TypeName = "decimal(18, 2)")]
+public decimal? SeatHeight { get; set; }
 
-        [Column("Wheelbase", TypeName = "decimal(18, 2)")]
-        public decimal? Wheelbase { get; set; }
+[Column("GroundClearance", TypeName = "decimal(18, 2)")]
+public decimal? GroundClearance { get; set; }
 
-        [Column("SeatHeight", TypeName = "decimal(18, 2)")]
-        public decimal? SeatHeight { get; set; }
+[Column("FuelCapacity", TypeName = "decimal(18, 2)")]
+public decimal? FuelCapacity { get; set; }
 
-        [Column("GroundClearance", TypeName = "decimal(18, 2)")]
-        public decimal? GroundClearance { get; set; }
+[Column("TireSize", TypeName = "nvarchar(100)")]
+public string? TireSize { get; set; }
 
-        [Column("FuelCapacity", TypeName = "decimal(18, 2)")]
-        public decimal? FuelCapacity { get; set; }
+[Column("FrontBrake", TypeName = "nvarchar(100)")]
+public string? FrontBrake { get; set; }
 
-        [Column("TireSize", TypeName = "nvarchar(100)")]
-        public string? TireSize { get; set; }
+[Column("RearBrake", TypeName = "nvarchar(100)")]
+public string? RearBrake { get; set; }
 
-        [Column("FrontBrake", TypeName = "nvarchar(100)")]
-        public string? FrontBrake { get; set; }
+[Column("FrontSuspension", TypeName = "nvarchar(255)")]
+public string? FrontSuspension { get; set; }
 
-        [Column("RearBrake", TypeName = "nvarchar(100)")]
-        public string? RearBrake { get; set; }
+[Column("RearSuspension", TypeName = "nvarchar(255)")]
+public string? RearSuspension { get; set; }
 
-        [Column("FrontSuspension", TypeName = "nvarchar(255)")]
-        public string? FrontSuspension { get; set; }
+[Column("EngineType", TypeName = "nvarchar(100)")]
+public string? EngineType { get; set; }
 
-        [Column("RearSuspension", TypeName = "nvarchar(255)")]
-        public string? RearSuspension { get; set; }
+public Product? Product { get; set; }
 
-        [Column("EngineType", TypeName = "nvarchar(100)")]
-        public string? EngineType { get; set; }
+public ICollection<ProductVariantColor> ProductVariantColors { get; set; } = [];
 
-        public Product? Product { get; set; }
+public ICollection<InventoryReceiptInfo> InventoryReceiptInfos { get; set; } = [];
 
-        public ICollection<ProductVariantColor> ProductVariantColors { get; set; } = [];
+public ICollection<OutputInfo> OutputInfos { get; set; } = [];
 
-        public ICollection<InventoryReceiptInfo> InventoryReceiptInfos { get; set; } = [];
+public ICollection<ProductCollectionPhoto> ProductCollectionPhotos { get; set; } = [];
 
-        public ICollection<OutputInfo> OutputInfos { get; set; } = [];
+public ICollection<VariantOptionValue> VariantOptionValues { get; set; } = [];
 
-        public ICollection<ProductCollectionPhoto> ProductCollectionPhotos { get; set; } = [];
+public int? MaxPurchaseQuantity { get; set; }
 
-        public ICollection<VariantOptionValue> VariantOptionValues { get; set; } = [];
+public ICollection<InventoryTransaction> InventoryTransactions { get; set; } = [];
 
-        public int? MaxPurchaseQuantity { get; set; }
-
-        public ICollection<InventoryTransaction> InventoryTransactions { get; set; } = [];
-
-        public ICollection<BookingAppointment> BookingAppointments { get; set; } = [];
-    }
+public ICollection<BookingAppointment> BookingAppointments { get; set; } = [];
+}
 }
