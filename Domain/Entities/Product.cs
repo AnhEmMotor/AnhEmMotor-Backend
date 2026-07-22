@@ -3,188 +3,188 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
-[Table("Product")]
-public class Product : BaseEntity
-{
-[Key]
-[Column("Id")]
-public int Id { get; set; }
+    [Table("Product")]
+    public class Product : BaseEntity
+    {
+        [Key]
+        [Column("Id")]
+        public int Id { get; set; }
 
-[Column("Name", TypeName = "nvarchar(100)")]
-public string? Name { get; set; }
+        [Column("Name", TypeName = "nvarchar(100)")]
+        public string? Name { get; set; }
 
-[Column("NameJson", TypeName = "nvarchar(max)")]
-public string? NameJson { get; set; }
+        [Column("NameJson", TypeName = "nvarchar(max)")]
+        public string? NameJson { get; set; }
 
-[Column("ShortDescription", TypeName = "nvarchar(255)")]
-public string? ShortDescription { get; set; }
+        [Column("ShortDescription", TypeName = "nvarchar(255)")]
+        public string? ShortDescription { get; set; }
 
-[Column("ShortDescriptionJson", TypeName = "nvarchar(max)")]
-public string? ShortDescriptionJson { get; set; }
+        [Column("ShortDescriptionJson", TypeName = "nvarchar(max)")]
+        public string? ShortDescriptionJson { get; set; }
 
-[Column("MetaTitle", TypeName = "nvarchar(100)")]
-public string? MetaTitle { get; set; }
+        [Column("MetaTitle", TypeName = "nvarchar(100)")]
+        public string? MetaTitle { get; set; }
 
-[Column("MetaTitleJson", TypeName = "nvarchar(max)")]
-public string? MetaTitleJson { get; set; }
+        [Column("MetaTitleJson", TypeName = "nvarchar(max)")]
+        public string? MetaTitleJson { get; set; }
 
-[Column("MetaDescription", TypeName = "nvarchar(255)")]
-public string? MetaDescription { get; set; }
+        [Column("MetaDescription", TypeName = "nvarchar(255)")]
+        public string? MetaDescription { get; set; }
 
-[Column("MetaDescriptionJson", TypeName = "nvarchar(max)")]
-public string? MetaDescriptionJson { get; set; }
+        [Column("MetaDescriptionJson", TypeName = "nvarchar(max)")]
+        public string? MetaDescriptionJson { get; set; }
 
-[Column("CategoryId")]
-[ForeignKey("ProductCategory")]
-public int? CategoryId { get; set; }
+        [Column("CategoryId")]
+        [ForeignKey("ProductCategory")]
+        public int? CategoryId { get; set; }
 
-[Column("StatusId")]
-[ForeignKey("ProductStatus")]
-public string? StatusId { get; set; }
+        [Column("StatusId")]
+        [ForeignKey("ProductStatus")]
+        public string? StatusId { get; set; }
 
-[Column("BrandId")]
-[ForeignKey("Brand")]
-public int? BrandId { get; set; }
+        [Column("BrandId")]
+        [ForeignKey("Brand")]
+        public int? BrandId { get; set; }
 
-public Brand? Brand { get; set; }
+        public Brand? Brand { get; set; }
 
-[Column("Weight", TypeName = "nvarchar(20)")]
-public decimal? Weight { get; set; }
+        [Column("Weight", TypeName = "nvarchar(20)")]
+        public decimal? Weight { get; set; }
 
-[Column("Length", TypeName = "decimal(18, 2)")]
-public decimal? Length { get; set; }
+        [Column("Length", TypeName = "decimal(18, 2)")]
+        public decimal? Length { get; set; }
 
-[Column("Width", TypeName = "decimal(18, 2)")]
-public decimal? Width { get; set; }
+        [Column("Width", TypeName = "decimal(18, 2)")]
+        public decimal? Width { get; set; }
 
-[Column("Height", TypeName = "decimal(18, 2)")]
-public decimal? Height { get; set; }
+        [Column("Height", TypeName = "decimal(18, 2)")]
+        public decimal? Height { get; set; }
 
-[Column("Wheelbase", TypeName = "nvarchar(20)")]
-public string? Wheelbase { get; set; }
+        [Column("Wheelbase", TypeName = "nvarchar(20)")]
+        public string? Wheelbase { get; set; }
 
-[Column("SeatHeight", TypeName = "nvarchar(20)")]
-public decimal? SeatHeight { get; set; }
+        [Column("SeatHeight", TypeName = "nvarchar(20)")]
+        public decimal? SeatHeight { get; set; }
 
-[Column("GroundClearance", TypeName = "nvarchar(20)")]
-public string? GroundClearance { get; set; }
+        [Column("GroundClearance", TypeName = "nvarchar(20)")]
+        public string? GroundClearance { get; set; }
 
-[Column("FuelCapacity", TypeName = "nvarchar(20)")]
-public string? FuelCapacity { get; set; }
+        [Column("FuelCapacity", TypeName = "nvarchar(20)")]
+        public string? FuelCapacity { get; set; }
 
-[Column("TireSize", TypeName = "nvarchar(100)")]
-public string? TireSize { get; set; }
+        [Column("TireSize", TypeName = "nvarchar(100)")]
+        public string? TireSize { get; set; }
 
-[Column("FrontSuspension", TypeName = "nvarchar(255)")]
-public string? FrontSuspension { get; set; }
+        [Column("FrontSuspension", TypeName = "nvarchar(255)")]
+        public string? FrontSuspension { get; set; }
 
-[Column("RearSuspension", TypeName = "nvarchar(255)")]
-public string? RearSuspension { get; set; }
+        [Column("RearSuspension", TypeName = "nvarchar(255)")]
+        public string? RearSuspension { get; set; }
 
-[Column("EngineType", TypeName = "nvarchar(100)")]
-public string? EngineType { get; set; }
+        [Column("EngineType", TypeName = "nvarchar(100)")]
+        public string? EngineType { get; set; }
 
-[Column("MaxPower", TypeName = "nvarchar(50)")]
-public string? MaxPower { get; set; }
+        [Column("MaxPower", TypeName = "nvarchar(50)")]
+        public string? MaxPower { get; set; }
 
-[Column("OilCapacity", TypeName = "nvarchar(250)")]
-public decimal? OilCapacity { get; set; }
+        [Column("OilCapacity", TypeName = "nvarchar(250)")]
+        public decimal? OilCapacity { get; set; }
 
-[Column("FuelConsumption", TypeName = "nvarchar(35)")]
-public string? FuelConsumption { get; set; }
+        [Column("FuelConsumption", TypeName = "nvarchar(35)")]
+        public string? FuelConsumption { get; set; }
 
-[Column("TransmissionType", TypeName = "nvarchar(100)")]
-public string? TransmissionType { get; set; }
+        [Column("TransmissionType", TypeName = "nvarchar(100)")]
+        public string? TransmissionType { get; set; }
 
-[Column("StarterSystem", TypeName = "nvarchar(30)")]
-public string? StarterSystem { get; set; }
+        [Column("StarterSystem", TypeName = "nvarchar(30)")]
+        public string? StarterSystem { get; set; }
 
-[Column("MaxTorque", TypeName = "nvarchar(50)")]
-public string? MaxTorque { get; set; }
+        [Column("MaxTorque", TypeName = "nvarchar(50)")]
+        public string? MaxTorque { get; set; }
 
-[Column("Displacement", TypeName = "nvarchar(50)")]
-public decimal? Displacement { get; set; }
+        [Column("Displacement", TypeName = "nvarchar(50)")]
+        public decimal? Displacement { get; set; }
 
-[Column("BoreStroke", TypeName = "nvarchar(30)")]
-public string? BoreStroke { get; set; }
+        [Column("BoreStroke", TypeName = "nvarchar(30)")]
+        public string? BoreStroke { get; set; }
 
-[Column("CompressionRatio", TypeName = "nvarchar(10)")]
-public string? CompressionRatio { get; set; }
+        [Column("CompressionRatio", TypeName = "nvarchar(10)")]
+        public string? CompressionRatio { get; set; }
 
-[Column("FuelSystem", TypeName = "nvarchar(100)")]
-public string? FuelSystem { get; set; }
+        [Column("FuelSystem", TypeName = "nvarchar(100)")]
+        public string? FuelSystem { get; set; }
 
-[Column("FrameType", TypeName = "nvarchar(100)")]
-public string? FrameType { get; set; }
+        [Column("FrameType", TypeName = "nvarchar(100)")]
+        public string? FrameType { get; set; }
 
-[Column("FrontTireSize", TypeName = "nvarchar(100)")]
-public string? FrontTireSize { get; set; }
+        [Column("FrontTireSize", TypeName = "nvarchar(100)")]
+        public string? FrontTireSize { get; set; }
 
-[Column("RearTireSize", TypeName = "nvarchar(100)")]
-public string? RearTireSize { get; set; }
+        [Column("RearTireSize", TypeName = "nvarchar(100)")]
+        public string? RearTireSize { get; set; }
 
-[Column("FrontBrake", TypeName = "nvarchar(100)")]
-public string? FrontBrake { get; set; }
+        [Column("FrontBrake", TypeName = "nvarchar(100)")]
+        public string? FrontBrake { get; set; }
 
-[Column("RearBrake", TypeName = "nvarchar(100)")]
-public string? RearBrake { get; set; }
+        [Column("RearBrake", TypeName = "nvarchar(100)")]
+        public string? RearBrake { get; set; }
 
-[Column("BatteryType", TypeName = "nvarchar(100)")]
-public string? BatteryType { get; set; }
+        [Column("BatteryType", TypeName = "nvarchar(100)")]
+        public string? BatteryType { get; set; }
 
-[Column("LightingSystem", TypeName = "nvarchar(100)")]
-public string? LightingSystem { get; set; }
+        [Column("LightingSystem", TypeName = "nvarchar(100)")]
+        public string? LightingSystem { get; set; }
 
-[Column("DashboardType", TypeName = "nvarchar(100)")]
-public string? DashboardType { get; set; }
+        [Column("DashboardType", TypeName = "nvarchar(100)")]
+        public string? DashboardType { get; set; }
 
-[Column("Material", TypeName = "nvarchar(100)")]
-public string? Material { get; set; }
+        [Column("Material", TypeName = "nvarchar(100)")]
+        public string? Material { get; set; }
 
-[Column("Origin", TypeName = "nvarchar(100)")]
-public string? Origin { get; set; }
+        [Column("Origin", TypeName = "nvarchar(100)")]
+        public string? Origin { get; set; }
 
-[Column("WarrantyPeriod", TypeName = "nvarchar(50)")]
-public string? WarrantyPeriod { get; set; }
+        [Column("WarrantyPeriod", TypeName = "nvarchar(50)")]
+        public string? WarrantyPeriod { get; set; }
 
-[Column("Unit", TypeName = "nvarchar(20)")]
-public string? Unit { get; set; }
+        [Column("Unit", TypeName = "nvarchar(20)")]
+        public string? Unit { get; set; }
 
-[Column("StdDot")]
-public bool StdDot { get; set; }
+        [Column("StdDot")]
+        public bool StdDot { get; set; }
 
-[Column("StdEce")]
-public bool StdEce { get; set; }
+        [Column("StdEce")]
+        public bool StdEce { get; set; }
 
-[Column("StdSnell")]
-public bool StdSnell { get; set; }
+        [Column("StdSnell")]
+        public bool StdSnell { get; set; }
 
-[Column("StdJis")]
-public bool StdJis { get; set; }
+        [Column("StdJis")]
+        public bool StdJis { get; set; }
 
-[Column("OtherStandards", TypeName = "nvarchar(255)")]
-public string? OtherStandards { get; set; }
+        [Column("OtherStandards", TypeName = "nvarchar(255)")]
+        public string? OtherStandards { get; set; }
 
-[Column("Description", TypeName = "nvarchar(MAX)")]
-public string? Description { get; set; }
+        [Column("Description", TypeName = "nvarchar(MAX)")]
+        public string? Description { get; set; }
 
-[Column("DescriptionJson", TypeName = "nvarchar(max)")]
-public string? DescriptionJson { get; set; }
+        [Column("DescriptionJson", TypeName = "nvarchar(max)")]
+        public string? DescriptionJson { get; set; }
 
-public int? MaxPurchaseQuantity { get; set; }
+        public int? MaxPurchaseQuantity { get; set; }
 
-public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
+        public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
 
-public ProductCategory? ProductCategory { get; set; }
+        public ProductCategory? ProductCategory { get; set; }
 
-public ProductStatus? ProductStatus { get; set; }
+        public ProductStatus? ProductStatus { get; set; }
 
-public ICollection<ProductVariant> ProductVariants { get; set; } = [];
+        public ICollection<ProductVariant> ProductVariants { get; set; } = [];
 
-[InverseProperty("BaseProduct")]
-public ICollection<ProductCompatibility> CompatibleWith { get; set; } = [];
+        [InverseProperty("BaseProduct")]
+        public ICollection<ProductCompatibility> CompatibleWith { get; set; } = [];
 
-[InverseProperty("CompatibleVehicleModel")]
-public ICollection<ProductCompatibility> SupportedBy { get; set; } = [];
-}
+        [InverseProperty("CompatibleVehicleModel")]
+        public ICollection<ProductCompatibility> SupportedBy { get; set; } = [];
+    }
 }

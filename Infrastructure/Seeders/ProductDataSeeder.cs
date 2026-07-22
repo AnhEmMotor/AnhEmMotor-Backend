@@ -279,8 +279,6 @@ public static class ProductDataSeeder
             existing.Length = p.Length;
             existing.Width = p.Width;
             existing.Height = p.Height;
-existing.Width = p.Width;
-existing.Height = p.Height;
             existing.Wheelbase = p.Wheelbase;
             existing.SeatHeight = p.SeatHeight;
             existing.GroundClearance = p.GroundClearance;
