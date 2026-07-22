@@ -260,13 +260,8 @@ public class CreateProductCommandHandler(
             Description = request.Description?.Trim(),
             Weight = request.Weight,
             Length = request.Length,
-<<<<<<< Updated upstream
             Width = request.Width,
             Height = request.Height,
-=======
-Width = request.Width,
-Height = request.Height,
->>>>>>> Stashed changes
             Wheelbase = request.Wheelbase,
             SeatHeight = request.SeatHeight,
             GroundClearance = request.GroundClearance?.ToString(),
@@ -347,13 +342,8 @@ Height = request.Height,
                     SKU = variantReq.SKU?.Trim(),
                     Weight = variantReq.Weight,
                     Length = variantReq.Length,
-<<<<<<< Updated upstream
                     Width = variantReq.Width,
                     Height = variantReq.Height,
-=======
-Width = variantReq.Width,
-Height = variantReq.Height,
->>>>>>> Stashed changes
                     Wheelbase = variantReq.Wheelbase,
                     SeatHeight = variantReq.SeatHeight,
                     GroundClearance = variantReq.GroundClearance,
@@ -433,13 +423,8 @@ Height = variantReq.Height,
                 }
                 variant.Weight = variantReq.Weight;
                 variant.Length = variantReq.Length;
-<<<<<<< Updated upstream
                 variant.Width = variantReq.Width;
                 variant.Height = variantReq.Height;
-=======
-variant.Width = variantReq.Width;
-variant.Height = variantReq.Height;
->>>>>>> Stashed changes
                 variant.Wheelbase = variantReq.Wheelbase;
                 variant.SeatHeight = variantReq.SeatHeight;
                 variant.GroundClearance = variantReq.GroundClearance;

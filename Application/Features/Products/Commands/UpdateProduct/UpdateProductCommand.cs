@@ -25,15 +25,10 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
     public decimal? Weight { get; init; }
 
     public decimal? Length { get; init; }
-<<<<<<< Updated upstream
 
     public decimal? Width { get; init; }
 
     public decimal? Height { get; init; }
-=======
-public decimal? Width { get; init; }
-public decimal? Height { get; init; }
->>>>>>> Stashed changes
 
     [JsonConverter(typeof(FlexibleStringConverter))]
     public string? Wheelbase { get; init; }

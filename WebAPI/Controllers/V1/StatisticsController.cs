@@ -639,7 +639,7 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Thống kê hợp đồng tổng hợp (Bán xe & Nhà cung cấp) trong khoảng thời gian.
+    /// Thống kê hợp đồng tổng hợp (Bán xe và Nhà cung cấp) trong khoảng thời gian.
     /// </summary>
     /// <param name="startDate">Ngày bắt đầu lọc (định dạng dd/MM/yyyy).</param>
     /// <param name="endDate">Ngày kết thúc lọc (định dạng dd/MM/yyyy).</param>

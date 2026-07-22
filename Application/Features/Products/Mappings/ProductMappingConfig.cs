@@ -209,13 +209,8 @@ public class ProductMappingConfig : IRegister
                         SKU = row.SKU,
                         Weight = row.Weight,
                         Length = row.Length,
-<<<<<<< Updated upstream
                         Width = row.Width,
                         Height = row.Height,
-=======
-Width = row.Width,
-Height = row.Height,
->>>>>>> Stashed changes
                         Wheelbase = row.Wheelbase,
                         SeatHeight = row.SeatHeight,
                         GroundClearance = row.GroundClearance,
@@ -241,13 +236,8 @@ Height = row.Height,
             Description = ResolveLocalizedText(product.DescriptionJson, lang) ?? product.Description,
             Weight = product.Weight,
             Length = product.Length,
-<<<<<<< Updated upstream
             Width = product.Width,
             Height = product.Height,
-=======
-Width = product.Width,
-Height = product.Height,
->>>>>>> Stashed changes
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
             GroundClearance =
@@ -320,13 +310,8 @@ Height = product.Height,
             Description = ResolveLocalizedText(product.DescriptionJson, lang) ?? product.Description,
             Weight = product.Weight,
             Length = product.Length,
-<<<<<<< Updated upstream
             Width = product.Width,
             Height = product.Height,
-=======
-Width = product.Width,
-Height = product.Height,
->>>>>>> Stashed changes
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
             GroundClearance =

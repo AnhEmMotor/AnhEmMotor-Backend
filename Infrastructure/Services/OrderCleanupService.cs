@@ -41,7 +41,7 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
             {
                 order.Buyer = null;
                 order.FinishedByUser = null;
-                order.OutputInfos = null;
+                order.OutputInfos = null!;
                 order.OutputStatus = null;
                 order.StatusId = OrderStatus.Cancelled;
                 updateRepository.Update(order);
