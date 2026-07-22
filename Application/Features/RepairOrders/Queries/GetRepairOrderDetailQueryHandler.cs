@@ -28,6 +28,8 @@ public class GetRepairOrderDetailQueryHandler(
             var emp = await employeeRepo.GetByIdAsync(entity.TechnicianId.Value, ct);
             technicianName = emp?.User?.FullName;
         }
+        string? customerName = vehicle?.Lead?.FullName;
+        string? customerPhone = vehicle?.Lead?.PhoneNumber;
         return Result<RepairOrderResponse>.Success(
             new RepairOrderResponse
             {
@@ -35,6 +37,8 @@ public class GetRepairOrderDetailQueryHandler(
                 MaintenanceNumber = entity.MaintenanceNumber,
                 VehicleId = entity.VehicleId,
                 VehicleInfo = vehicleInfo,
+                CustomerName = customerName,
+                CustomerPhone = customerPhone,
                 MaintenanceDate = entity.MaintenanceDate,
                 Description = entity.Description,
                 Mileage = entity.Mileage,

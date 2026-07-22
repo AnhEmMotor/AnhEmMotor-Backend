@@ -3056,6 +3056,18 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("nvarchar(MAX)")
                         .HasColumnName("PaymentUrl");
 
+                    b.Property<int?>("ProvinceId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProvinceId");
+
+                    b.Property<string>("ProvinceName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ProvinceName");
+
+                    b.Property<decimal?>("ShippingFee")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("ShippingFee");
+
                     b.Property<string>("StatusId")
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("StatusId");
@@ -3066,6 +3078,14 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("WardCode")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("WardCode");
+
+                    b.Property<string>("WardName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("WardName");
 
                     b.HasKey("Id");
 
@@ -3346,10 +3366,6 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("DescriptionJson");
 
-                    b.Property<string>("Dimensions")
-                        .HasColumnType("nvarchar(35)")
-                        .HasColumnName("Dimensions");
-
                     b.Property<string>("Displacement")
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("Displacement");
@@ -3389,6 +3405,14 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("GroundClearance")
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("GroundClearance");
+
+                    b.Property<decimal?>("Height")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Height");
+
+                    b.Property<decimal?>("Length")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Length");
 
                     b.Property<string>("LightingSystem")
                         .HasColumnType("nvarchar(100)")
@@ -3519,6 +3543,10 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("Wheelbase")
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("Wheelbase");
+
+                    b.Property<decimal?>("Width")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Width");
 
                     b.HasKey("Id");
 
@@ -3841,10 +3869,6 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Dimensions")
-                        .HasColumnType("nvarchar(35)")
-                        .HasColumnName("Dimensions");
-
                     b.Property<string>("EngineType")
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("EngineType");
@@ -3864,6 +3888,14 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<decimal?>("GroundClearance")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("GroundClearance");
+
+                    b.Property<decimal?>("Height")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Height");
+
+                    b.Property<decimal?>("Length")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Length");
 
                     b.Property<int?>("MaxPurchaseQuantity")
                         .HasColumnType("int");
@@ -3914,6 +3946,10 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<decimal?>("Wheelbase")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("Wheelbase");
+
+                    b.Property<decimal?>("Width")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Width");
 
                     b.HasKey("Id");
 
@@ -6046,6 +6082,92 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasIndex("WarrantyClaimId");
 
                     b.ToTable("WarrantyClaimPart");
+                });
+
+            modelBuilder.Entity("Domain.Entities.WarrantyTerm", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("int")
+                        .HasColumnName("BrandId");
+
+                    b.Property<string>("Coverage")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Coverage");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Description");
+
+                    b.Property<string>("DescriptionJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DescriptionJson");
+
+                    b.Property<int?>("DurationKm")
+                        .HasColumnType("int")
+                        .HasColumnName("DurationKm");
+
+                    b.Property<int?>("DurationMonths")
+                        .HasColumnType("int")
+                        .HasColumnName("DurationMonths");
+
+                    b.Property<DateTimeOffset?>("EffectiveDate")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("EffectiveDate");
+
+                    b.Property<string>("ErrorCategory")
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("ErrorCategory");
+
+                    b.Property<DateTimeOffset?>("ExpirationDate")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("ExpirationDate");
+
+                    b.Property<string>("MediaUrl")
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("MediaUrl");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
+                        .HasColumnName("RowVersion");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("Status");
+
+                    b.Property<string>("TermName")
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("TermName");
+
+                    b.Property<string>("TermNameJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("TermNameJson");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("VehicleType")
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("VehicleType");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WarrantyTerm");
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkshopPayment", b =>

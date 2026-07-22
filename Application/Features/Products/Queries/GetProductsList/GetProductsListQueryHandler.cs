@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductsList;
 
-public class GetProductsListQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductsListQuery, Result<PagedResult<ProductListStoreResponse>>>
+public class GetProductsListQueryHandler(IProductReadRepository readRepository, Application.Interfaces.Repositories.MediaFile.File.IFileReadService fileReadService) : IRequestHandler<GetProductsListQuery, Result<PagedResult<ProductListStoreResponse>>>
 {
     public async Task<Result<PagedResult<ProductListStoreResponse>>> Handle(
         GetProductsListQuery request,
@@ -170,9 +170,21 @@ public class GetProductsListQueryHandler(IProductReadRepository readRepository) 
                                         var coverImage = string.IsNullOrWhiteSpace(coverImageUrl)
                                             ? photos.FirstOrDefault()
                                             : coverImageUrl;
+                                        if (!string.IsNullOrWhiteSpace(coverImage))
+                                        {
+                                            coverImage = fileReadService.GetPublicUrl(coverImage);
+                                        }
                                         var variantDisplayName = !string.IsNullOrWhiteSpace(v.VariantName)
                                             ? v.VariantName
                                             : "Tiêu chuẩn";
+                                        var mappedColors = ProductMappingConfig.MapVariantColors(v);
+                                        foreach(var c in mappedColors)
+                                        {
+                                            if (!string.IsNullOrWhiteSpace(c.CoverImageUrl))
+                                            {
+                                                c.CoverImageUrl = fileReadService.GetPublicUrl(c.CoverImageUrl);
+                                            }
+                                        }
                                         return new ProductVariantListStoreResponse
                                 {
                                     Id = v.Id,
@@ -180,7 +192,7 @@ public class GetProductsListQueryHandler(IProductReadRepository readRepository) 
                                     Price = v.Price,
                                     CoverImageUrl = coverImage,
                                     OptionValuesText = variantDisplayName,
-                                    Colors = ProductMappingConfig.MapVariantColors(v),
+                                    Colors = mappedColors,
                                     ProductLimit = ProductMappingConfig.GetEffectiveMaxPurchaseQuantity(v, null),
                                     EffectiveMax = ProductMappingConfig.GetEffectiveMaxPurchaseQuantity(v, null)
                                 };

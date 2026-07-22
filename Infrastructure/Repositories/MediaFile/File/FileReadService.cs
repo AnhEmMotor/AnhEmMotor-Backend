@@ -72,7 +72,12 @@ public class FileReadService : IFileReadService
                 }
                 else
                 {
-                    throw new Exception($"File not found. Tried _uploadFolder: {_uploadFolder}, fullPath: {fullPath}, webRootPath: {webRootPath}, fallbackPath: {fallbackPath}");
+                    // Try fallback to current directory wwwroot/uploads
+                    var uploadsFallbackPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", storagePath);
+                    if (System.IO.File.Exists(uploadsFallbackPath))
+                    {
+                        fullPath = uploadsFallbackPath;
+                    }
                 }
             }
         }

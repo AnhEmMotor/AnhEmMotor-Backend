@@ -378,6 +378,10 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
+                    b.Property<string>("ServiceType")
+                        .HasColumnType("longtext")
+                        .HasColumnName("ServiceType");
+
                     b.Property<string>("Showroom")
                         .HasColumnType("longtext")
                         .HasColumnName("Showroom");
@@ -2919,6 +2923,9 @@ namespace Infrastructure.MySqlMigrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<decimal>("DiscountApplied")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("OutputId")
                         .HasColumnType("int");
 
@@ -3046,6 +3053,18 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("longtext")
                         .HasColumnName("PaymentUrl");
 
+                    b.Property<int?>("ProvinceId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProvinceId");
+
+                    b.Property<string>("ProvinceName")
+                        .HasColumnType("longtext")
+                        .HasColumnName("ProvinceName");
+
+                    b.Property<decimal?>("ShippingFee")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("ShippingFee");
+
                     b.Property<string>("StatusId")
                         .HasColumnType("varchar(255)")
                         .HasColumnName("StatusId");
@@ -3056,6 +3075,14 @@ namespace Infrastructure.MySqlMigrations
 
                     b.Property<long?>("UpdatedAt")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("WardCode")
+                        .HasColumnType("longtext")
+                        .HasColumnName("WardCode");
+
+                    b.Property<string>("WardName")
+                        .HasColumnType("longtext")
+                        .HasColumnName("WardName");
 
                     b.HasKey("Id");
 
@@ -3336,10 +3363,6 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("longtext")
                         .HasColumnName("DescriptionJson");
 
-                    b.Property<string>("Dimensions")
-                        .HasColumnType("longtext")
-                        .HasColumnName("Dimensions");
-
                     b.Property<decimal?>("Displacement")
                         .HasColumnType("decimal(65,30)")
                         .HasColumnName("Displacement");
@@ -3379,6 +3402,14 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<string>("GroundClearance")
                         .HasColumnType("longtext")
                         .HasColumnName("GroundClearance");
+
+                    b.Property<decimal?>("Height")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Height");
+
+                    b.Property<decimal?>("Length")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Length");
 
                     b.Property<string>("LightingSystem")
                         .HasColumnType("longtext")
@@ -3509,6 +3540,10 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<string>("Wheelbase")
                         .HasColumnType("longtext")
                         .HasColumnName("Wheelbase");
+
+                    b.Property<decimal?>("Width")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Width");
 
                     b.HasKey("Id");
 
@@ -3831,10 +3866,6 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<long?>("DeletedAt")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Dimensions")
-                        .HasColumnType("longtext")
-                        .HasColumnName("Dimensions");
-
                     b.Property<string>("EngineType")
                         .HasColumnType("longtext")
                         .HasColumnName("EngineType");
@@ -3854,6 +3885,14 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<decimal?>("GroundClearance")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("GroundClearance");
+
+                    b.Property<decimal?>("Height")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Height");
+
+                    b.Property<decimal?>("Length")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Length");
 
                     b.Property<int?>("MaxPurchaseQuantity")
                         .HasColumnType("int");
@@ -3904,6 +3943,10 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<decimal?>("Wheelbase")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("Wheelbase");
+
+                    b.Property<decimal?>("Width")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("Width");
 
                     b.HasKey("Id");
 
@@ -6036,6 +6079,92 @@ namespace Infrastructure.MySqlMigrations
                     b.HasIndex("WarrantyClaimId");
 
                     b.ToTable("WarrantyClaimPart");
+                });
+
+            modelBuilder.Entity("Domain.Entities.WarrantyTerm", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("int")
+                        .HasColumnName("BrandId");
+
+                    b.Property<string>("Coverage")
+                        .HasColumnType("longtext")
+                        .HasColumnName("Coverage");
+
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext")
+                        .HasColumnName("Description");
+
+                    b.Property<string>("DescriptionJson")
+                        .HasColumnType("longtext")
+                        .HasColumnName("DescriptionJson");
+
+                    b.Property<int?>("DurationKm")
+                        .HasColumnType("int")
+                        .HasColumnName("DurationKm");
+
+                    b.Property<int?>("DurationMonths")
+                        .HasColumnType("int")
+                        .HasColumnName("DurationMonths");
+
+                    b.Property<long?>("EffectiveDate")
+                        .HasColumnType("bigint")
+                        .HasColumnName("EffectiveDate");
+
+                    b.Property<string>("ErrorCategory")
+                        .HasColumnType("longtext")
+                        .HasColumnName("ErrorCategory");
+
+                    b.Property<long?>("ExpirationDate")
+                        .HasColumnType("bigint")
+                        .HasColumnName("ExpirationDate");
+
+                    b.Property<string>("MediaUrl")
+                        .HasColumnType("longtext")
+                        .HasColumnName("MediaUrl");
+
+                    b.Property<DateTime?>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp(6)")
+                        .HasColumnName("RowVersion");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("Status");
+
+                    b.Property<string>("TermName")
+                        .HasColumnType("longtext")
+                        .HasColumnName("TermName");
+
+                    b.Property<string>("TermNameJson")
+                        .HasColumnType("longtext")
+                        .HasColumnName("TermNameJson");
+
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("VehicleType")
+                        .HasColumnType("longtext")
+                        .HasColumnName("VehicleType");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WarrantyTerm");
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkshopPayment", b =>
