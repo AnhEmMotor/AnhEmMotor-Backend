@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Application.Features.HR.Commands.DeleteEmployee;
 
-public sealed record DeleteEmployeeCommand(int Id) : IRequest<Result>;
+public sealed record DeleteEmployeeCommand(int Id) : IRequest<Result<int>>;

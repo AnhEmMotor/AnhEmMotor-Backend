@@ -8,18 +8,19 @@ namespace Application.Features.HR.Commands.DeleteEmployee;
 public sealed class DeleteEmployeeCommandHandler(
     IEmployeeReadRepository employeeReadRepository,
     IEmployeeDeleteRepository employeeDeleteRepository,
-    IUnitOfWork unitOfWork
-) : IRequestHandler<DeleteEmployeeCommand, Result>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteEmployeeCommand, Result<int>>
 {
-    public async Task<Result> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
     {
-        var employee = await employeeReadRepository
-            .GetByIdAsync(request.Id, cancellationToken)
+        var employee = await employeeReadRepository.GetByIdAsync(request.Id, cancellationToken)
             .ConfigureAwait(false);
         if (employee is null)
-            return Result.Failure("Không tìm thấy hồ sơ nhân sự.");
+        {
+            return Result<int>.Failure("Không tìm thấy hồ sơ nhân viên.");
+        }
+
         employeeDeleteRepository.Delete(employee);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return Result.Success();
+        return Result<int>.Success(employee.Id);
     }
 }

@@ -4,15 +4,10 @@ using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.HR.Employee;
 
-public class EmployeeDeleteRepository(ApplicationDBContext context) : IEmployeeDeleteRepository
+public sealed class EmployeeDeleteRepository(ApplicationDBContext context) : IEmployeeDeleteRepository
 {
-    public void Delete(EmployeeProfile entity)
+    public void Delete(EmployeeProfile employee)
     {
-        context.EmployeeProfiles.Remove(entity);
-    }
-
-    public void Delete(IEnumerable<EmployeeProfile> entities)
-    {
-        context.EmployeeProfiles.RemoveRange(entities);
+        context.EmployeeProfiles.Remove(employee);
     }
 }
