@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -11,120 +11,73 @@ namespace Infrastructure.SqlServerMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Dimensions",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "Dimensions",
-                table: "Product");
-
+            migrationBuilder.DropColumn(name: "Dimensions", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "Dimensions", table: "Product");
             migrationBuilder.AddColumn<decimal>(
                 name: "MinOrderValue",
                 table: "Vouchers",
                 type: "decimal(18,2)",
                 nullable: false,
                 defaultValue: 0m);
-
             migrationBuilder.AddColumn<int>(
                 name: "TotalUsageLimit",
                 table: "Vouchers",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
-
             migrationBuilder.AddColumn<int>(
                 name: "UsageLimitPerUser",
                 table: "Vouchers",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
-
             migrationBuilder.AddColumn<int>(
                 name: "UsedCount",
                 table: "Vouchers",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
-
             migrationBuilder.AddColumn<decimal>(
                 name: "Height",
                 table: "ProductVariant",
                 type: "decimal(18,2)",
                 nullable: true);
-
             migrationBuilder.AddColumn<decimal>(
                 name: "Length",
                 table: "ProductVariant",
                 type: "decimal(18,2)",
                 nullable: true);
-
             migrationBuilder.AddColumn<decimal>(
                 name: "Width",
                 table: "ProductVariant",
                 type: "decimal(18,2)",
                 nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "Height",
-                table: "Product",
-                type: "decimal(18,2)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "Length",
-                table: "Product",
-                type: "decimal(18,2)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "Width",
-                table: "Product",
-                type: "decimal(18,2)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "ProvinceId",
-                table: "Output",
-                type: "int",
-                nullable: true);
-
+            migrationBuilder.AddColumn<decimal>(name: "Height", table: "Product", type: "decimal(18,2)", nullable: true);
+            migrationBuilder.AddColumn<decimal>(name: "Length", table: "Product", type: "decimal(18,2)", nullable: true);
+            migrationBuilder.AddColumn<decimal>(name: "Width", table: "Product", type: "decimal(18,2)", nullable: true);
+            migrationBuilder.AddColumn<int>(name: "ProvinceId", table: "Output", type: "int", nullable: true);
             migrationBuilder.AddColumn<string>(
                 name: "ProvinceName",
                 table: "Output",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<decimal>(
                 name: "ShippingFee",
                 table: "Output",
                 type: "decimal(18,2)",
                 nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "WardCode",
-                table: "Output",
-                type: "nvarchar(max)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "WardName",
-                table: "Output",
-                type: "nvarchar(max)",
-                nullable: true);
-
+            migrationBuilder.AddColumn<string>(name: "WardCode", table: "Output", type: "nvarchar(max)", nullable: true);
+            migrationBuilder.AddColumn<string>(name: "WardName", table: "Output", type: "nvarchar(max)", nullable: true);
             migrationBuilder.AddColumn<string>(
                 name: "ServiceType",
                 table: "BookingAppointment",
                 type: "nvarchar(30)",
                 nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "OrderVoucher",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     VoucherId = table.Column<int>(type: "int", nullable: false),
                     OutputId = table.Column<int>(type: "int", nullable: false),
                     DiscountApplied = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -150,13 +103,11 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "WarrantyTerm",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     BrandId = table.Column<int>(type: "int", nullable: false),
                     TermName = table.Column<string>(type: "nvarchar(200)", nullable: true),
                     TermNameJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -180,97 +131,36 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     table.PrimaryKey("PK_WarrantyTerm", x => x.Id);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderVoucher_OutputId",
-                table: "OrderVoucher",
-                column: "OutputId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderVoucher_VoucherId",
-                table: "OrderVoucher",
-                column: "VoucherId");
+            migrationBuilder.CreateIndex(name: "IX_OrderVoucher_OutputId", table: "OrderVoucher", column: "OutputId");
+            migrationBuilder.CreateIndex(name: "IX_OrderVoucher_VoucherId", table: "OrderVoucher", column: "VoucherId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "OrderVoucher");
-
-            migrationBuilder.DropTable(
-                name: "WarrantyTerm");
-
-            migrationBuilder.DropColumn(
-                name: "MinOrderValue",
-                table: "Vouchers");
-
-            migrationBuilder.DropColumn(
-                name: "TotalUsageLimit",
-                table: "Vouchers");
-
-            migrationBuilder.DropColumn(
-                name: "UsageLimitPerUser",
-                table: "Vouchers");
-
-            migrationBuilder.DropColumn(
-                name: "UsedCount",
-                table: "Vouchers");
-
-            migrationBuilder.DropColumn(
-                name: "Height",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "Length",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "Width",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "Height",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "Length",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "Width",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "ProvinceId",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "ProvinceName",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "ShippingFee",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "WardCode",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "WardName",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "ServiceType",
-                table: "BookingAppointment");
-
+            migrationBuilder.DropTable(name: "OrderVoucher");
+            migrationBuilder.DropTable(name: "WarrantyTerm");
+            migrationBuilder.DropColumn(name: "MinOrderValue", table: "Vouchers");
+            migrationBuilder.DropColumn(name: "TotalUsageLimit", table: "Vouchers");
+            migrationBuilder.DropColumn(name: "UsageLimitPerUser", table: "Vouchers");
+            migrationBuilder.DropColumn(name: "UsedCount", table: "Vouchers");
+            migrationBuilder.DropColumn(name: "Height", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "Length", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "Width", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "Height", table: "Product");
+            migrationBuilder.DropColumn(name: "Length", table: "Product");
+            migrationBuilder.DropColumn(name: "Width", table: "Product");
+            migrationBuilder.DropColumn(name: "ProvinceId", table: "Output");
+            migrationBuilder.DropColumn(name: "ProvinceName", table: "Output");
+            migrationBuilder.DropColumn(name: "ShippingFee", table: "Output");
+            migrationBuilder.DropColumn(name: "WardCode", table: "Output");
+            migrationBuilder.DropColumn(name: "WardName", table: "Output");
+            migrationBuilder.DropColumn(name: "ServiceType", table: "BookingAppointment");
             migrationBuilder.AddColumn<string>(
                 name: "Dimensions",
                 table: "ProductVariant",
                 type: "nvarchar(35)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "Dimensions",
                 table: "Product",
