@@ -28,7 +28,7 @@ namespace Domain.Entities
         [Column("DescriptionJson", TypeName = "nvarchar(max)")]
         public string? DescriptionJson { get; set; }
 
-        [Column("RowVersion", TypeName = "rowversion")]
+        [Column("RowVersion")]
         [Timestamp]
         public byte[]? RowVersion { get; set; }
 

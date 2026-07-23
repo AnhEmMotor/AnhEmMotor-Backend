@@ -207,6 +207,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<VoucherLead> VoucherLeads { get; set; }
 
+    public virtual DbSet<OrderVoucher> OrderVouchers { get; set; }
+
     public virtual DbSet<InventoryReceiptInfoAuditLog> InventoryReceiptInfoAuditLogs { get; set; }
 
     public virtual DbSet<VehicleAuditLog> VehicleAuditLogs { get; set; }
@@ -681,6 +683,13 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<VoucherLead>()
             .HasQueryFilter(vl => vl.Lead.DeletedAt == null && vl.Voucher.DeletedAt == null);
+
+        modelBuilder.Entity<OrderVoucher>()
+            .HasOne(ov => ov.Output)
+            .WithMany(o => o.OrderVouchers)
+            .HasForeignKey(ov => ov.OutputId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<OrderVoucher>().HasQueryFilter(ov => ov.Output!.DeletedAt == null);
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {

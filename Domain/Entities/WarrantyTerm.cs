@@ -46,16 +46,16 @@ public class WarrantyTerm : BaseEntity
 	[Column("Status", TypeName = "nvarchar(50)")]
 	public string Status { get; set; } = WarrantyTermStatus.Active;
 
-	[Column("EffectiveDate", TypeName = "datetime")]
+	[Column("EffectiveDate")]
 	public DateTime? EffectiveDate { get; set; }
 
-	[Column("ExpirationDate", TypeName = "datetime")]
+	[Column("ExpirationDate")]
 	public DateTime? ExpirationDate { get; set; }
 
 	[Column("MediaUrl", TypeName = "nvarchar(1000)")]
 	public string? MediaUrl { get; set; }
 
-	[Column("RowVersion", TypeName = "rowversion")]
+	[Column("RowVersion")]
 	[Timestamp]
 	public byte[]? RowVersion { get; set; }
 }
