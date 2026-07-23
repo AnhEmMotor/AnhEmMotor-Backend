@@ -36,8 +36,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<Brand> Brands { get; set; }
 
-public virtual DbSet<Domain.Entities.WarrantyTerm> WarrantyTerms { get; set; }
-
 
     public virtual DbSet<InventoryReceipt> InventoryReceipts { get; set; }
 
