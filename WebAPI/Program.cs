@@ -54,8 +54,8 @@ if (!string.IsNullOrWhiteSpace(customUploadPath))
     {
         Directory.CreateDirectory(absolutePath);
     }
-    environment.WebRootPath = absolutePath;
-    environment.WebRootFileProvider = new PhysicalFileProvider(absolutePath);
+    // environment.WebRootPath = absolutePath;
+    // environment.WebRootFileProvider = new PhysicalFileProvider(absolutePath);
 }
 builder.Services.AddApplicationServices();
 builder.Services.AddMemoryCache();
