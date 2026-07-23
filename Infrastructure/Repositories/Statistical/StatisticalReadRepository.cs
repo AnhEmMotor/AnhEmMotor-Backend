@@ -1571,10 +1571,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 
 		var cards = new List<CardItem>
 		{
-			new("Don hang moi",      orders,  Pct(orders, prevOrd),  "ri:file-list-3-line",   "don"),
-			new("Khach hang moi",    custs,   Pct(custs, prevCst),   "ri:user-add-line",       "nguoi"),
-			new("Lich hen trong ky", appts,   0,                      "ri:calendar-check-line", "lich"),
-			new("Don hang qua han",  pending, 0,                      "ri:alert-line",          "don"),
+			new("Đơn hàng mới",      orders,  Pct(orders, prevOrd),  "ri:file-list-3-line",   "don"),
+			new("Khách hàng mới",    custs,   Pct(custs, prevCst),   "ri:user-add-line",       "nguoi"),
+			new("Lịch hẹn trong kỳ", appts,   0,                      "ri:calendar-check-line", "lich"),
+			new("Đơn hàng quá hạn",  pending, 0,                      "ri:alert-line",          "don"),
 		};
 
 		var alerts = new AlertsSummary(
