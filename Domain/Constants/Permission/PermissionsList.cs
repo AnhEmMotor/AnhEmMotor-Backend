@@ -4,7 +4,7 @@ namespace Domain.Constants.Permission;
 
 public static class PermissionsList
 {
-    public static readonly List<PermissionModuleMetadata> ModulesTree =[new PermissionModuleMetadata
+    public static readonly List<PermissionModuleMetadata> ModulesTree = [new PermissionModuleMetadata
     {
         Id = "Permissions.Admin",
         Name = "Ban Điều Hành & Chủ Showroom",
@@ -399,6 +399,134 @@ public static class PermissionsList
                                 Id = Permissions.Marketing.BookingManagement.Delete,
                                 Name = "Xóa",
                                 Description = "Xóa quản lý đặt lịch (booking)"
+                            },
+                        }
+            }, new PermissionFeatureMetadata
+            {
+                Id = "Permissions.Marketing.ContactManagement",
+                Name = "Quản lý liên hệ",
+                Permissions =
+                    new()
+                        {
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.ContactManagement.View,
+                                Name = "Xem",
+                                Description = "Xem quản lý liên hệ"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.ContactManagement.Create,
+                                Name = "Tạo mới",
+                                Description = "Tạo mới quản lý liên hệ"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.ContactManagement.Edit,
+                                Name = "Chỉnh sửa",
+                                Description = "Chỉnh sửa quản lý liên hệ"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.ContactManagement.Delete,
+                                Name = "Xóa",
+                                Description = "Xóa quản lý liên hệ"
+                            },
+                        }
+            }, new PermissionFeatureMetadata
+            {
+                Id = "Permissions.Marketing.CustomerAssetManagement",
+                Name = "Tài sản khách hàng",
+                Permissions =
+                    new()
+                        {
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerAssetManagement.View,
+                                Name = "Xem",
+                                Description = "Xem tài sản khách hàng"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerAssetManagement.Create,
+                                Name = "Tạo mới",
+                                Description = "Tạo mới tài sản khách hàng"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerAssetManagement.Edit,
+                                Name = "Chỉnh sửa",
+                                Description = "Chỉnh sửa tài sản khách hàng"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerAssetManagement.Delete,
+                                Name = "Xóa",
+                                Description = "Xóa tài sản khách hàng"
+                            },
+                        }
+            }, new PermissionFeatureMetadata
+            {
+                Id = "Permissions.Marketing.CustomerCareManagement",
+                Name = "Chăm sóc khách hàng",
+                Permissions =
+                    new()
+                        {
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerCareManagement.View,
+                                Name = "Xem",
+                                Description = "Xem chăm sóc khách hàng"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerCareManagement.Create,
+                                Name = "Tạo mới",
+                                Description = "Tạo mới chăm sóc khách hàng"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerCareManagement.Edit,
+                                Name = "Chỉnh sửa",
+                                Description = "Chỉnh sửa chăm sóc khách hàng"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerCareManagement.Delete,
+                                Name = "Xóa",
+                                Description = "Xóa chăm sóc khách hàng"
+                            },
+                        }
+            }, new PermissionFeatureMetadata
+            {
+                Id = "Permissions.Marketing.CustomerVoucherManagement",
+                Name = "Quản lý voucher",
+                Permissions =
+                    new()
+                        {
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerVoucherManagement.View,
+                                Name = "Xem",
+                                Description = "Xem quản lý voucher"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerVoucherManagement.Create,
+                                Name = "Tạo mới",
+                                Description = "Tạo mới quản lý voucher"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerVoucherManagement.Edit,
+                                Name = "Chỉnh sửa",
+                                Description = "Chỉnh sửa quản lý voucher"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerVoucherManagement.Delete,
+                                Name = "Xóa",
+                                Description = "Xóa quản lý voucher"
                             },
                         }
             }]

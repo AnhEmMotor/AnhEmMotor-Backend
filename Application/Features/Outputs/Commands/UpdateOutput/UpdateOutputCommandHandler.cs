@@ -2,6 +2,7 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Services.Shipping;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Mapster;
@@ -12,6 +13,7 @@ namespace Application.Features.Outputs.Commands.UpdateOutput;
 public class UpdateOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
+    IShippingService shippingService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -39,7 +41,9 @@ public class UpdateOutputCommandHandler(
         {
             if (string.Compare(request.CustomerName, output.CustomerName) != 0 ||
                 string.Compare(request.CustomerPhone, output.CustomerPhone) != 0 ||
-                string.Compare(request.CustomerAddress, output.CustomerAddress) != 0)
+                string.Compare(request.CustomerAddress, output.CustomerAddress) != 0 ||
+                request.ProvinceId != output.ProvinceId ||
+                string.Compare(request.WardCode, output.WardCode) != 0)
             {
                 return Error.BadRequest(
                     "Trạng thái đơn hàng hiện tại không cho phép thay đổi thông tin giao hàng.",
@@ -56,6 +60,24 @@ public class UpdateOutputCommandHandler(
         output.CustomerName = request.CustomerName;
         output.CustomerPhone = request.CustomerPhone;
         output.CustomerAddress = request.CustomerAddress;
+        if (output.ProvinceId != request.ProvinceId || string.Compare(output.WardCode, request.WardCode) != 0)
+        {
+            output.ProvinceId = request.ProvinceId;
+            output.WardCode = request.WardCode;
+            if (request.ProvinceId.HasValue)
+            {
+                output.ProvinceName = await shippingService.GetProvinceNameAsync(
+                    request.ProvinceId.Value,
+                    cancellationToken);
+                if (!string.IsNullOrEmpty(request.WardCode))
+                {
+                    output.WardName = await shippingService.GetWardNameAsync(
+                        request.ProvinceId.Value,
+                        request.WardCode,
+                        cancellationToken);
+                }
+            }
+        }
         output.Notes = request.Notes;
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

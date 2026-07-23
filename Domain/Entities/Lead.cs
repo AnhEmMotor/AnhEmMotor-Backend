@@ -79,3 +79,4 @@ public class Lead : BaseEntity
 
     public ICollection<LeadActivity> Activities { get; set; } = [];
 }
+

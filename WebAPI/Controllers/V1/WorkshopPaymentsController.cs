@@ -14,12 +14,22 @@ using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
+/// <summary>
+/// Quản lý phiếu thu xưởng (Workshop Payment) — danh sách, thống kê và chi tiết các khoản thu từ xưởng sửa chữa.
+/// </summary>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý phiếu thu xưởng (Workshop Payment)")]
 [Route("api/v{version:apiVersion}/WorkshopPayments")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class WorkshopPaymentsController(IMediator mediator) : ApiController
 {
+    /// <summary>
+    /// Lấy danh sách phiếu thu xưởng với phân trang, lọc và sắp xếp.
+    /// </summary>
+    /// <param name="sieveModel">Tham số phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách phiếu thu xưởng đã phân trang.</returns>
+    /// <response code="200">Trả về danh sách phiếu thu xưởng thành công.</response>
     [HttpGet]
     [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
     [ProducesResponseType(typeof(PagedResult<WorkshopPaymentResponse>), StatusCodes.Status200OK)]
@@ -32,6 +42,12 @@ public class WorkshopPaymentsController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Lấy thống kê tổng hợp về phiếu thu xưởng (tổng số phiếu, tổng doanh thu, v.v.).
+    /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu thống kê phiếu thu xưởng.</returns>
+    /// <response code="200">Trả về thống kê thành công.</response>
     [HttpGet("stats")]
     [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
     [ProducesResponseType(typeof(WorkshopPaymentStatisticsResponse), StatusCodes.Status200OK)]
@@ -42,6 +58,14 @@ public class WorkshopPaymentsController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Lấy thông tin chi tiết của một phiếu thu xưởng theo ID.
+    /// </summary>
+    /// <param name="id">ID của phiếu thu xưởng cần xem chi tiết.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin chi tiết phiếu thu xưởng.</returns>
+    /// <response code="200">Trả về chi tiết phiếu thu xưởng thành công.</response>
+    /// <response code="404">Không tìm thấy phiếu thu xưởng với ID đã cho.</response>
     [HttpGet("{id:int}")]
     [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
     [ProducesResponseType(typeof(WorkshopPaymentResponse), StatusCodes.Status200OK)]

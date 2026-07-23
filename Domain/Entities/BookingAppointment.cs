@@ -19,6 +19,9 @@ namespace Domain.Entities
         [Column("Email", TypeName = "nvarchar(150)")]
         public string? Email { get; set; }
 
+        [Column("ServiceType", TypeName = "nvarchar(30)")]
+        public string? ServiceType { get; set; }
+
         [Column("ProductVariantId")]
         [ForeignKey("ProductVariant")]
         public int? ProductVariantId { get; set; }

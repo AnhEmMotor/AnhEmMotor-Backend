@@ -31,8 +31,13 @@ namespace WebAPI.Controllers.V1;
 public class AuthController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Đăng ký tài khoản mới
+    /// Đăng ký tài khoản mới với email và mật khẩu.
     /// </summary>
+    /// <param name="command">Thông tin đăng ký (email, password, họ tên, v.v.).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả đăng ký — thông tin tài khoản mới tạo.</returns>
+    /// <response code="200">Đăng ký thành công.</response>
+    /// <response code="400">Dữ liệu không hợp lệ hoặc email đã tồn tại.</response>
     [HttpPost("register")]
     [AnonymousOnly]
     [EnableRateLimiting("public_api")]
@@ -48,8 +53,13 @@ public class AuthController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Đăng nhập bằng Username/Email và Password
+    /// Đăng nhập bằng tên đăng nhập (username/email) và mật khẩu.
     /// </summary>
+    /// <param name="command">Thông tin đăng nhập (username/email, password).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả đăng nhập — access token, refresh token, thông tin người dùng.</returns>
+    /// <response code="200">Đăng nhập thành công.</response>
+    /// <response code="401">Thông tin đăng nhập không chính xác.</response>
     [HttpPost("login")]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
@@ -61,8 +71,13 @@ public class AuthController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Làm mới Access Token bằng Refresh Token
+    /// Làm mới Access Token bằng Refresh Token hợp lệ.
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Access token mới và thông tin refresh token.</returns>
+    /// <response code="200">Làm mới token thành công.</response>
+    /// <response code="401">Refresh token không hợp lệ hoặc đã hết hạn.</response>
+    /// <response code="403">Refresh token bị thu hồi.</response>
     [HttpPost("refresh-token")]
     [AllowAnonymous]
     [EnableRateLimiting("public_api")]
@@ -76,8 +91,11 @@ public class AuthController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Đăng xuất
+    /// Đăng xuất tài khoản hiện tại — vô hiệu hóa refresh token.
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả đăng xuất.</returns>
+    /// <response code="200">Đăng xuất thành công.</response>
     [HttpPost("logout")]
     [ProducesResponseType(typeof(LogoutResponse), StatusCodes.Status200OK)]
     [Authorize]
@@ -88,8 +106,13 @@ public class AuthController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Đăng nhập bằng Google
+    /// Đăng nhập bằng tài khoản Google (Social Login).
     /// </summary>
+    /// <param name="command">Token xác thực từ Google.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả đăng nhập — access token, refresh token, thông tin người dùng.</returns>
+    /// <response code="200">Đăng nhập Google thành công.</response>
+    /// <response code="401">Token Google không hợp lệ.</response>
     [HttpPost("google")]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
@@ -103,8 +126,13 @@ public class AuthController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Đăng nhập bằng Facebook
+    /// Đăng nhập bằng tài khoản Facebook (Social Login).
     /// </summary>
+    /// <param name="command">Token xác thực từ Facebook.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả đăng nhập — access token, refresh token, thông tin người dùng.</returns>
+    /// <response code="200">Đăng nhập Facebook thành công.</response>
+    /// <response code="401">Token Facebook không hợp lệ.</response>
     [HttpPost("facebook")]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
@@ -118,8 +146,14 @@ public class AuthController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Đăng nhập bằng Username/Email và Password - Dành cho quản lý
+    /// Đăng nhập dành riêng cho quản lý — yêu cầu người dùng có ít nhất một quyền trong hệ thống.
     /// </summary>
+    /// <param name="command">Thông tin đăng nhập (username/email, password).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả đăng nhập — access token, refresh token, thông tin người dùng với danh sách quyền.</returns>
+    /// <response code="200">Đăng nhập quản lý thành công.</response>
+    /// <response code="401">Thông tin đăng nhập không chính xác.</response>
+    /// <response code="403">Người dùng không có quyền truy cập hệ thống quản lý.</response>
     [HttpPost("login/for-manager")]
     [EnableRateLimiting("public_api")]
     [SwaggerOperation(
@@ -137,8 +171,12 @@ public class AuthController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Yêu cầu đặt lại mật khẩu qua email
+    /// Gửi email chứa liên kết đặt lại mật khẩu cho người dùng.
     /// </summary>
+    /// <param name="command">Địa chỉ email của tài khoản cần đặt lại mật khẩu.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả yêu cầu đặt lại mật khẩu.</returns>
+    /// <response code="200">Email đặt lại mật khẩu đã được gửi (nếu email tồn tại).</response>
     [HttpPost("forgot-password")]
     [AllowAnonymous]
     [EnableRateLimiting("public_api")]
@@ -153,8 +191,12 @@ public class AuthController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Đặt lại mật khẩu bằng token nhận được qua email
+    /// Đặt lại mật khẩu bằng token nhận được qua email.
     /// </summary>
+    /// <param name="command">Token đặt lại mật khẩu và mật khẩu mới.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả đặt lại mật khẩu.</returns>
+    /// <response code="200">Đặt lại mật khẩu thành công.</response>
     [HttpPost("reset-password")]
     [AllowAnonymous]
     [EnableRateLimiting("public_api")]
@@ -169,8 +211,11 @@ public class AuthController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy cấu hình các dịch vụ xác thực bên ngoài
+    /// Lấy cấu hình các dịch vụ xác thực bên ngoài (Social Login).
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Cấu hình Social Login — Google Client ID và Facebook App ID.</returns>
+    /// <response code="200">Trả về cấu hình thành công.</response>
     [HttpGet("external-config")]
     [AllowAnonymous]
     [SwaggerOperation(Summary = "Lấy cấu hình Social Login", Description = "Lấy Google Client ID và Facebook App ID")]

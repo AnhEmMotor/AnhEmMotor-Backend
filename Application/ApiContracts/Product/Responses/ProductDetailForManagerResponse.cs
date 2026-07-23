@@ -24,7 +24,11 @@ public class ProductDetailForManagerResponse
 
     public decimal? Weight { get; set; }
 
-    public string? Dimensions { get; set; }
+    public decimal? Length { get; set; }
+
+    public decimal? Width { get; set; }
+
+    public decimal? Height { get; set; }
 
     public string? Wheelbase { get; set; }
 
@@ -109,6 +113,15 @@ public class ProductDetailForManagerResponse
     [JsonPropertyName("warranty_period")]
     public string? WarrantyPeriod { get; set; }
 
+    [JsonPropertyName("short_description")]
+    public string? ShortDescription { get; set; }
+
+    [JsonPropertyName("meta_title")]
+    public string? MetaTitle { get; set; }
+
+    [JsonPropertyName("meta_description")]
+    public string? MetaDescription { get; set; }
+
     public string? Unit { get; set; }
 
     [JsonPropertyName("std_dot")]
@@ -126,15 +139,6 @@ public class ProductDetailForManagerResponse
     [JsonPropertyName("other_standards")]
     public string? OtherStandards { get; set; }
 
-    [JsonPropertyName("short_description")]
-    public string? ShortDescription { get; set; }
-
-    [JsonPropertyName("meta_title")]
-    public string? MetaTitle { get; set; }
-
-    [JsonPropertyName("meta_description")]
-    public string? MetaDescription { get; set; }
-
     [JsonPropertyName("status_id")]
     public string? StatusId { get; set; }
 
@@ -149,4 +153,3 @@ public class ProductDetailForManagerResponse
 
     public List<ProductVariantDetailForManagerResponse> Variants { get; set; } = [];
 }
-

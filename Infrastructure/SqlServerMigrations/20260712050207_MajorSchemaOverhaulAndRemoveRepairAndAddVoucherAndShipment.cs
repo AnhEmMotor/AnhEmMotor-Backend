@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
 #nullable disable
@@ -143,84 +143,77 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Users', 'PasswordResetToken') IS NULL
-                BEGIN
-                    ALTER TABLE [Users] ADD [PasswordResetToken] nvarchar(max) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Users', 'PasswordResetTokenExpiry') IS NULL
-                BEGIN
-                    ALTER TABLE [Users] ADD [PasswordResetTokenExpiry] datetimeoffset NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Product', 'DescriptionJson') IS NULL
-                BEGIN
-                    ALTER TABLE [Product] ADD [DescriptionJson] nvarchar(max) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Product', 'MetaDescriptionJson') IS NULL
-                BEGIN
-                    ALTER TABLE [Product] ADD [MetaDescriptionJson] nvarchar(max) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Product', 'MetaTitleJson') IS NULL
-                BEGIN
-                    ALTER TABLE [Product] ADD [MetaTitleJson] nvarchar(max) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Product', 'NameJson') IS NULL
-                BEGIN
-                    ALTER TABLE [Product] ADD [NameJson] nvarchar(max) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Product', 'ShortDescriptionJson') IS NULL
-                BEGIN
-                    ALTER TABLE [Product] ADD [ShortDescriptionJson] nvarchar(max) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'BudgetCode') IS NULL
-                BEGIN
-                    ALTER TABLE [Output] ADD [BudgetCode] nvarchar(50) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'CompanyAddress') IS NULL
-                BEGIN
-                    ALTER TABLE [Output] ADD [CompanyAddress] nvarchar(500) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'CompanyEmail') IS NULL
-                BEGIN
-                    ALTER TABLE [Output] ADD [CompanyEmail] nvarchar(150) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'CompanyName') IS NULL
-                BEGIN
-                    ALTER TABLE [Output] ADD [CompanyName] nvarchar(200) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'CompanyTaxCode') IS NULL
-                BEGIN
-                    ALTER TABLE [Output] ADD [CompanyTaxCode] nvarchar(50) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'IsCompanyInvoice') IS NULL
-                BEGIN
-                    ALTER TABLE [Output] ADD [IsCompanyInvoice] bit NOT NULL DEFAULT 0;
-                END
-            ");
+            migrationBuilder.AddColumn<string>(
+                name: "PasswordResetToken",
+                table: "Users",
+                type: "nvarchar(max)",
+                nullable: true);
+            migrationBuilder.AddColumn<DateTimeOffset>(
+                name: "PasswordResetTokenExpiry",
+                table: "Users",
+                type: "datetimeoffset",
+                nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "DescriptionJson",
+                table: "Product",
+                type: "nvarchar(max)",
+                nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "MetaDescriptionJson",
+                table: "Product",
+                type: "nvarchar(max)",
+                nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "MetaTitleJson",
+                table: "Product",
+                type: "nvarchar(max)",
+                nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "NameJson",
+                table: "Product",
+                type: "nvarchar(max)",
+                nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "ShortDescriptionJson",
+                table: "Product",
+                type: "nvarchar(max)",
+                nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "BudgetCode",
+                table: "Output",
+                type: "nvarchar(50)",
+                maxLength: 50,
+                nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "CompanyAddress",
+                table: "Output",
+                type: "nvarchar(500)",
+                maxLength: 500,
+                nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "CompanyEmail",
+                table: "Output",
+                type: "nvarchar(150)",
+                maxLength: 150,
+                nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "CompanyName",
+                table: "Output",
+                type: "nvarchar(200)",
+                maxLength: 200,
+                nullable: true);
+            migrationBuilder.AddColumn<string>(
+                name: "CompanyTaxCode",
+                table: "Output",
+                type: "nvarchar(50)",
+                maxLength: 50,
+                nullable: true);
+            migrationBuilder.AddColumn<bool>(
+                name: "IsCompanyInvoice",
+                table: "Output",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
             migrationBuilder.AlterColumn<string>(
                 name: "PartsJson",
                 table: "MaintenanceHistory",
@@ -243,135 +236,186 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Brand', 'DescriptionJson') IS NULL
-                BEGIN
-                    ALTER TABLE [Brand] ADD [DescriptionJson] nvarchar(max) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Brand', 'NameJson') IS NULL
-                BEGIN
-                    ALTER TABLE [Brand] ADD [NameJson] nvarchar(max) NULL;
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF OBJECT_ID('ProductCategoryTranslations', 'U') IS NULL
-                BEGIN
-                    CREATE TABLE [ProductCategoryTranslations] (
-                        [Id] int NOT NULL IDENTITY,
-                        [ProductCategoryId] int NOT NULL,
-                        [LanguageCode] nvarchar(max) NOT NULL,
-                        [Name] nvarchar(max) NOT NULL,
-                        [Description] nvarchar(max) NULL,
-                        [CreatedAt] datetimeoffset NULL,
-                        [UpdatedAt] datetimeoffset NULL,
-                        [DeletedAt] datetimeoffset NULL,
-                        CONSTRAINT [PK_ProductCategoryTranslations] PRIMARY KEY ([Id]),
-                        CONSTRAINT [FK_ProductCategoryTranslations_ProductCategory_ProductCategoryId] FOREIGN KEY ([ProductCategoryId]) REFERENCES [ProductCategory] ([Id]) ON DELETE CASCADE
-                    );
-                    CREATE INDEX [IX_ProductCategoryTranslations_ProductCategoryId] ON [ProductCategoryTranslations] ([ProductCategoryId]);
-                END
-            ");
-
-            migrationBuilder.Sql(@"
-                IF OBJECT_ID('Shipments', 'U') IS NULL
-                BEGIN
-                    CREATE TABLE [Shipments] (
-                        [Id] int NOT NULL IDENTITY,
-                        [Status] int NOT NULL,
-                        [TrackingNumber] nvarchar(max) NOT NULL,
-                        [Carrier] nvarchar(max) NOT NULL,
-                        [CustomerName] nvarchar(max) NOT NULL,
-                        [CustomerPhone] nvarchar(max) NOT NULL,
-                        [CodAmount] decimal(18,2) NOT NULL,
-                        [ShippingCost] decimal(18,2) NOT NULL,
-                        [DeliveredAt] datetimeoffset NULL,
-                        [OriginAddress] nvarchar(max) NOT NULL,
-                        [DestinationAddress] nvarchar(max) NOT NULL,
-                        [OriginLatitude] float NULL,
-                        [OriginLongitude] float NULL,
-                        [DestinationLatitude] float NULL,
-                        [DestinationLongitude] float NULL,
-                        [Type] nvarchar(max) NOT NULL,
-                        [OutputId] int NULL,
-                        [CreatedAt] datetimeoffset NULL,
-                        [UpdatedAt] datetimeoffset NULL,
-                        [DeletedAt] datetimeoffset NULL,
-                        CONSTRAINT [PK_Shipments] PRIMARY KEY ([Id]),
-                        CONSTRAINT [FK_Shipments_Output_OutputId] FOREIGN KEY ([OutputId]) REFERENCES [Output] ([id])
-                    );
-                    CREATE INDEX [IX_Shipments_OutputId] ON [Shipments] ([OutputId]);
-                END
-            ");
-
-            migrationBuilder.Sql(@"
-                IF OBJECT_ID('Vouchers', 'U') IS NULL
-                BEGIN
-                    CREATE TABLE [Vouchers] (
-                        [Id] int NOT NULL IDENTITY,
-                        [Code] nvarchar(450) NOT NULL,
-                        [Name] nvarchar(max) NOT NULL,
-                        [ApplyFor] int NOT NULL,
-                        [Channel] int NOT NULL,
-                        [Type] int NOT NULL,
-                        [DiscountType] int NOT NULL,
-                        [DiscountValue] decimal(18,2) NOT NULL,
-                        [MaxDiscountAmount] decimal(18,2) NULL,
-                        [ValidFrom] datetime2 NOT NULL,
-                        [ValidTo] datetime2 NOT NULL,
-                        [CreatedAt] datetimeoffset NULL,
-                        [UpdatedAt] datetimeoffset NULL,
-                        [DeletedAt] datetimeoffset NULL,
-                        CONSTRAINT [PK_Vouchers] PRIMARY KEY ([Id])
-                    );
-                    CREATE UNIQUE INDEX [IX_Vouchers_Code] ON [Vouchers] ([Code]);
-                END
-            ");
-
-            migrationBuilder.Sql(@"
-                IF OBJECT_ID('ShipmentItems', 'U') IS NULL
-                BEGIN
-                    CREATE TABLE [ShipmentItems] (
-                        [Id] int NOT NULL IDENTITY,
-                        [ShipmentId] int NOT NULL,
-                        [ProductVariantId] int NULL,
-                        [ProductVariantColorId] int NULL,
-                        [Quantity] int NOT NULL,
-                        [CreatedAt] datetimeoffset NULL,
-                        [UpdatedAt] datetimeoffset NULL,
-                        [DeletedAt] datetimeoffset NULL,
-                        CONSTRAINT [PK_ShipmentItems] PRIMARY KEY ([Id]),
-                        CONSTRAINT [FK_ShipmentItems_ProductVariantColor_ProductVariantColorId] FOREIGN KEY ([ProductVariantColorId]) REFERENCES [ProductVariantColor] ([Id]),
-                        CONSTRAINT [FK_ShipmentItems_ProductVariant_ProductVariantId] FOREIGN KEY ([ProductVariantId]) REFERENCES [ProductVariant] ([Id]),
-                        CONSTRAINT [FK_ShipmentItems_Shipments_ShipmentId] FOREIGN KEY ([ShipmentId]) REFERENCES [Shipments] ([Id]) ON DELETE CASCADE
-                    );
-                    CREATE INDEX [IX_ShipmentItems_ProductVariantColorId] ON [ShipmentItems] ([ProductVariantColorId]);
-                    CREATE INDEX [IX_ShipmentItems_ProductVariantId] ON [ShipmentItems] ([ProductVariantId]);
-                    CREATE INDEX [IX_ShipmentItems_ShipmentId] ON [ShipmentItems] ([ShipmentId]);
-                END
-            ");
-
-            migrationBuilder.Sql(@"
-                IF OBJECT_ID('VoucherLeads', 'U') IS NULL
-                BEGIN
-                    CREATE TABLE [VoucherLeads] (
-                        [VoucherId] int NOT NULL,
-                        [LeadId] int NOT NULL,
-                        CONSTRAINT [PK_VoucherLeads] PRIMARY KEY ([VoucherId], [LeadId]),
-                        CONSTRAINT [FK_VoucherLeads_Lead_LeadId] FOREIGN KEY ([LeadId]) REFERENCES [Lead] ([Id]) ON DELETE CASCADE,
-                        CONSTRAINT [FK_VoucherLeads_Vouchers_VoucherId] FOREIGN KEY ([VoucherId]) REFERENCES [Vouchers] ([Id]) ON DELETE CASCADE
-                    );
-                    CREATE INDEX [IX_VoucherLeads_LeadId] ON [VoucherLeads] ([LeadId]);
-                END
-            ");
-
-            migrationBuilder.Sql(@"
-                IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_MaintenanceHistory_EmployeeProfile_TechnicianId' AND parent_object_id = OBJECT_ID('MaintenanceHistory'))
-                BEGIN
-                    ALTER TABLE [MaintenanceHistory] ADD CONSTRAINT [FK_MaintenanceHistory_EmployeeProfile_TechnicianId] FOREIGN KEY ([TechnicianId]) REFERENCES [EmployeeProfile] ([Id]) ON DELETE SET NULL;
-                END
-            ");
+            migrationBuilder.AddColumn<string>(
+                name: "DescriptionJson",
+                table: "Brand",
+                type: "nvarchar(max)",
+                nullable: true);
+            migrationBuilder.AddColumn<string>(name: "NameJson", table: "Brand", type: "nvarchar(max)", nullable: true);
+            migrationBuilder.CreateTable(
+                name: "ProductCategoryTranslations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
+                    ProductCategoryId = table.Column<int>(type: "int", nullable: false),
+                    LanguageCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductCategoryTranslations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductCategoryTranslations_ProductCategory_ProductCategoryId",
+                        column: x => x.ProductCategoryId,
+                        principalTable: "ProductCategory",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+            migrationBuilder.CreateTable(
+                name: "Shipments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    TrackingNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Carrier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerPhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CodAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    ShippingCost = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
+                    DeliveredAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    OriginAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DestinationAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OriginLatitude = table.Column<double>(type: "float", nullable: true),
+                    OriginLongitude = table.Column<double>(type: "float", nullable: true),
+                    DestinationLatitude = table.Column<double>(type: "float", nullable: true),
+                    DestinationLongitude = table.Column<double>(type: "float", nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OutputId = table.Column<int>(type: "int", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Shipments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Shipments_Output_OutputId",
+                        column: x => x.OutputId,
+                        principalTable: "Output",
+                        principalColumn: "id");
+                });
+            migrationBuilder.CreateTable(
+                name: "Vouchers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
+                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApplyFor = table.Column<int>(type: "int", nullable: false),
+                    Channel = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    DiscountType = table.Column<int>(type: "int", nullable: false),
+                    DiscountValue = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: false),
+                    MaxDiscountAmount = table.Column<decimal>(
+                        type: "decimal(18,2)",
+                        precision: 18,
+                        scale: 2,
+                        nullable: true),
+                    ValidFrom = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ValidTo = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Vouchers", x => x.Id);
+                });
+            migrationBuilder.CreateTable(
+                name: "ShipmentItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
+                    ShipmentId = table.Column<int>(type: "int", nullable: false),
+                    ProductVariantId = table.Column<int>(type: "int", nullable: true),
+                    ProductVariantColorId = table.Column<int>(type: "int", nullable: true),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShipmentItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShipmentItems_ProductVariantColor_ProductVariantColorId",
+                        column: x => x.ProductVariantColorId,
+                        principalTable: "ProductVariantColor",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ShipmentItems_ProductVariant_ProductVariantId",
+                        column: x => x.ProductVariantId,
+                        principalTable: "ProductVariant",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ShipmentItems_Shipments_ShipmentId",
+                        column: x => x.ShipmentId,
+                        principalTable: "Shipments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+            migrationBuilder.CreateTable(
+                name: "VoucherLeads",
+                columns: table => new
+                {
+                    VoucherId = table.Column<int>(type: "int", nullable: false),
+                    LeadId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VoucherLeads", x => new { x.VoucherId, x.LeadId });
+                    table.ForeignKey(
+                        name: "FK_VoucherLeads_Lead_LeadId",
+                        column: x => x.LeadId,
+                        principalTable: "Lead",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VoucherLeads_Vouchers_VoucherId",
+                        column: x => x.VoucherId,
+                        principalTable: "Vouchers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductCategoryTranslations_ProductCategoryId",
+                table: "ProductCategoryTranslations",
+                column: "ProductCategoryId");
+            migrationBuilder.CreateIndex(
+                name: "IX_ShipmentItems_ProductVariantColorId",
+                table: "ShipmentItems",
+                column: "ProductVariantColorId");
+            migrationBuilder.CreateIndex(
+                name: "IX_ShipmentItems_ProductVariantId",
+                table: "ShipmentItems",
+                column: "ProductVariantId");
+            migrationBuilder.CreateIndex(
+                name: "IX_ShipmentItems_ShipmentId",
+                table: "ShipmentItems",
+                column: "ShipmentId");
+            migrationBuilder.CreateIndex(name: "IX_Shipments_OutputId", table: "Shipments", column: "OutputId");
+            migrationBuilder.CreateIndex(name: "IX_VoucherLeads_LeadId", table: "VoucherLeads", column: "LeadId");
+            migrationBuilder.CreateIndex(name: "IX_Vouchers_Code", table: "Vouchers", column: "Code", unique: true);
+            migrationBuilder.AddForeignKey(
+                name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
+                table: "MaintenanceHistory",
+                column: "TechnicianId",
+                principalTable: "EmployeeProfile",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
@@ -380,103 +424,26 @@ namespace Infrastructure.SqlServerMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_MaintenanceHistory_EmployeeProfile_TechnicianId",
                 table: "MaintenanceHistory");
-            migrationBuilder.Sql(@"
-                IF OBJECT_ID('VoucherLeads', 'U') IS NOT NULL DROP TABLE [VoucherLeads];
-                IF OBJECT_ID('ShipmentItems', 'U') IS NOT NULL DROP TABLE [ShipmentItems];
-                IF OBJECT_ID('Shipments', 'U') IS NOT NULL DROP TABLE [Shipments];
-                IF OBJECT_ID('Vouchers', 'U') IS NOT NULL DROP TABLE [Vouchers];
-                IF OBJECT_ID('ProductCategoryTranslations', 'U') IS NOT NULL DROP TABLE [ProductCategoryTranslations];
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Users', 'PasswordResetToken') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Users] DROP COLUMN [PasswordResetToken];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Users', 'PasswordResetTokenExpiry') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Users] DROP COLUMN [PasswordResetTokenExpiry];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Product', 'DescriptionJson') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Product] DROP COLUMN [DescriptionJson];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Product', 'MetaDescriptionJson') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Product] DROP COLUMN [MetaDescriptionJson];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Product', 'MetaTitleJson') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Product] DROP COLUMN [MetaTitleJson];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Product', 'NameJson') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Product] DROP COLUMN [NameJson];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Product', 'ShortDescriptionJson') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Product] DROP COLUMN [ShortDescriptionJson];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'BudgetCode') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Output] DROP COLUMN [BudgetCode];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'CompanyAddress') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Output] DROP COLUMN [CompanyAddress];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'CompanyEmail') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Output] DROP COLUMN [CompanyEmail];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'CompanyName') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Output] DROP COLUMN [CompanyName];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'CompanyTaxCode') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Output] DROP COLUMN [CompanyTaxCode];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Output', 'IsCompanyInvoice') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Output] DROP COLUMN [IsCompanyInvoice];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Brand', 'DescriptionJson') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Brand] DROP COLUMN [DescriptionJson];
-                END
-            ");
-            migrationBuilder.Sql(@"
-                IF COL_LENGTH('Brand', 'NameJson') IS NOT NULL
-                BEGIN
-                    ALTER TABLE [Brand] DROP COLUMN [NameJson];
-                END
-            ");
+            migrationBuilder.DropTable(name: "ProductCategoryTranslations");
+            migrationBuilder.DropTable(name: "ShipmentItems");
+            migrationBuilder.DropTable(name: "VoucherLeads");
+            migrationBuilder.DropTable(name: "Shipments");
+            migrationBuilder.DropTable(name: "Vouchers");
+            migrationBuilder.DropColumn(name: "PasswordResetToken", table: "Users");
+            migrationBuilder.DropColumn(name: "PasswordResetTokenExpiry", table: "Users");
+            migrationBuilder.DropColumn(name: "DescriptionJson", table: "Product");
+            migrationBuilder.DropColumn(name: "MetaDescriptionJson", table: "Product");
+            migrationBuilder.DropColumn(name: "MetaTitleJson", table: "Product");
+            migrationBuilder.DropColumn(name: "NameJson", table: "Product");
+            migrationBuilder.DropColumn(name: "ShortDescriptionJson", table: "Product");
+            migrationBuilder.DropColumn(name: "BudgetCode", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyAddress", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyEmail", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyName", table: "Output");
+            migrationBuilder.DropColumn(name: "CompanyTaxCode", table: "Output");
+            migrationBuilder.DropColumn(name: "IsCompanyInvoice", table: "Output");
+            migrationBuilder.DropColumn(name: "DescriptionJson", table: "Brand");
+            migrationBuilder.DropColumn(name: "NameJson", table: "Brand");
             migrationBuilder.AlterColumn<string>(
                 name: "VehicleInfo",
                 table: "WorkshopPayment",

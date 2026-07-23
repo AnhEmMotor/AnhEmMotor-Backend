@@ -27,13 +27,15 @@ public class SalesContractScan
         _readRepository.Setup(repository => repository.GetByIdAsync(contractId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(contract);
         _fileInsertService
-            .Setup(service => service.SaveFileAsIsAsync(
-                fileContent,
-                "signed-contract.pdf",
-                It.IsAny<CancellationToken>(),
-                $"sales-contracts/{contractId}"))
-            .ReturnsAsync(Result<FileUpload>.Success(
-                new FileUpload($"sales-contracts/{contractId}/signed-contract.pdf", ".pdf", fileContent.Length)));
+            .Setup(
+                service => service.SaveFileAsIsAsync(
+                    fileContent,
+                    "signed-contract.pdf",
+                    It.IsAny<CancellationToken>(),
+                    $"sales-contracts/{contractId}"))
+            .ReturnsAsync(
+                Result<FileUpload>.Success(
+                    new FileUpload($"sales-contracts/{contractId}/signed-contract.pdf", ".pdf", fileContent.Length)));
         _fileReadService
             .Setup(service => service.GetPublicUrl($"sales-contracts/{contractId}/signed-contract.pdf"))
             .Returns($"/api/v1/MediaFile/view-image/sales-contracts/{contractId}/signed-contract.pdf");
@@ -42,11 +44,10 @@ public class SalesContractScan
             _fileInsertService.Object,
             _fileReadService.Object,
             _unitOfWork.Object);
-
         var result = await handler.Handle(
             new UploadSalesContractScanCommand(contractId, fileContent, "signed-contract.pdf"),
-            CancellationToken.None).ConfigureAwait(true);
-
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         contract.ScannedFileUrl.Should().Be(result.Value);
         contract.Status.Should().Be(SalesContractStatus.Signed);
@@ -63,11 +64,10 @@ public class SalesContractScan
             _fileInsertService.Object,
             _fileReadService.Object,
             _unitOfWork.Object);
-
         var result = await handler.Handle(
             new UploadSalesContractScanCommand(Guid.NewGuid(), fileContent, "signed-contract.exe"),
-            CancellationToken.None).ConfigureAwait(true);
-
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         _fileInsertService.VerifyNoOtherCalls();
         _unitOfWork.VerifyNoOtherCalls();

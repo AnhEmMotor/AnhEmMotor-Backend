@@ -12,13 +12,11 @@ public sealed class DeleteEmployeeCommandHandler(
 {
     public async Task<Result<int>> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
     {
-        var employee = await employeeReadRepository.GetByIdAsync(request.Id, cancellationToken)
-            .ConfigureAwait(false);
+        var employee = await employeeReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (employee is null)
         {
             return Result<int>.Failure("Không tìm thấy hồ sơ nhân viên.");
         }
-
         employeeDeleteRepository.Delete(employee);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(employee.Id);

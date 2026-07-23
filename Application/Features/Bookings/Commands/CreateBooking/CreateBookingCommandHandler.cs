@@ -42,8 +42,7 @@ public class CreateBookingCommandHandler(
                 {
                     Lead = lead,
                     ActivityType = LeadActivityType.Booking,
-                    Description =
-                        $"Đăng ký {bookingTypeLabel} mới tại {request.Location}. (Khách hàng mới)",
+                    Description = $"Đăng ký {bookingTypeLabel} mới tại {request.Location}. (Khách hàng mới)",
                     CreatedAt = DateTimeOffset.UtcNow
                 });
         } else
@@ -55,8 +54,7 @@ public class CreateBookingCommandHandler(
                 {
                     LeadId = lead.Id,
                     ActivityType = LeadActivityType.Booking,
-                    Description =
-                        $"Đăng ký {bookingTypeLabel} mới tại {request.Location}.",
+                    Description = $"Đăng ký {bookingTypeLabel} mới tại {request.Location}.",
                     CreatedAt = DateTimeOffset.UtcNow
                 });
         }

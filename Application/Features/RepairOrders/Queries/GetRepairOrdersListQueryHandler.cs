@@ -22,15 +22,22 @@ public class GetRepairOrdersListQueryHandler(
         {
             var vehicleIds = paged.Items.Select(x => x.VehicleId).Distinct().ToList();
             var vehicles = await vehicleRepo.GetByIdsAsync(vehicleIds, ct);
-            var vehicleDict = vehicles.ToDictionary(
-                v => v.Id,
-                v => !string.IsNullOrEmpty(v.LicensePlate) ? v.LicensePlate : v.VinNumber);
+            var vehicleDict = vehicles.ToDictionary(v => v.Id, v => v);
             var employees = await employeeRepo.GetAllWithUsersAsync(ct);
             var empDict = employees.ToDictionary(e => e.Id, e => e.User?.FullName);
             foreach (var item in paged.Items)
             {
-                if (vehicleDict.TryGetValue(item.VehicleId, out var vInfo))
-                    item.VehicleInfo = vInfo;
+                if (vehicleDict.TryGetValue(item.VehicleId, out var vehicle))
+                {
+                    item.VehicleInfo = !string.IsNullOrEmpty(vehicle.LicensePlate)
+                        ? vehicle.LicensePlate
+                        : vehicle.VinNumber;
+                    if (vehicle.Lead != null)
+                    {
+                        item.CustomerName = vehicle.Lead.FullName;
+                        item.CustomerPhone = vehicle.Lead.PhoneNumber;
+                    }
+                }
                 if (item.TechnicianId.HasValue && empDict.TryGetValue(item.TechnicianId.Value, out var tName))
                     item.TechnicianName = tName;
             }

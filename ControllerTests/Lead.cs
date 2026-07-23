@@ -139,7 +139,6 @@ public class Lead
             FullName = "Test",
             AddressDetail = "123 Street",
             Ward = "Ward A",
-            District = "District B",
             Province = "Province C"
         };
         _mediatorMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(Result<int>.Success(1));
@@ -166,3 +165,4 @@ public class Lead
         result.Should().BeOfType<OkObjectResult>();
     }
 }
+

@@ -52,6 +52,10 @@ jobs:
           GHN_TOKEN: ${{ secrets.GHN_TOKEN }}
           GHN_SHOP_ID: ${{ secrets.GHN_SHOP_ID }}
           GHN_BASE_URL: ${{ secrets.GHN_BASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-3.5-flash' }}
+          LANGSMITH_TRACING: ${{ secrets.LANGSMITH_TRACING || 'false' }}
+          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
         run: >
           jq '
             .Provider = "PostgreSql" |
@@ -84,7 +88,11 @@ jobs:
             .LocalFileStorage.UploadPath = env.UPLOAD_PATH |
             .GhnSettings.Token = env.GHN_TOKEN |
             .GhnSettings.ShopId = env.GHN_SHOP_ID |
-            .GhnSettings.BaseUrl = env.GHN_BASE_URL
+            .GhnSettings.BaseUrl = env.GHN_BASE_URL |
+            .AISetup.GeminiApiKey = env.GEMINI_API_KEY |
+            .AISetup.GeminiModel = env.GEMINI_MODEL |
+            .AISetup.LangSmithTracing = (env.LANGSMITH_TRACING | fromjson) |
+            .AISetup.LangSmithApiKey = env.LANGSMITH_API_KEY
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
       - name: Restore dependencies
         run: dotnet restore
@@ -121,7 +129,7 @@ jobs:
           port: 22
           script: |
             # Xoá tất cả trừ thư mục uploads để tránh mất ảnh khi deploy
-            find /var/www/anhemmotor/backend -mindepth 1 -maxdepth 1 -not -name 'uploads' -exec rm -rf {} +
+            find /var/www/anhemmotor/backend -mindepth 1 -maxdepth 1 -not -name 'wwwroot' -exec rm -rf {} +
       - name: Copy Files via SCP
         uses: appleboy/scp-action@master
         with:
@@ -147,4 +155,6 @@ jobs:
             fi
 
             sudo systemctl restart anhemmotor.service
+
+
 

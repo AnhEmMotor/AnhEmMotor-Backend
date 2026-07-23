@@ -168,6 +168,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("PreferredTimeSlot");
                     b.Property<int?>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
+                    b.Property<string>("ServiceType").HasColumnType("nvarchar(30)").HasColumnName("ServiceType");
                     b.Property<string>("Showroom").HasColumnType("nvarchar(150)").HasColumnName("Showroom");
                     b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(30)").HasColumnName("Status");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
@@ -1198,6 +1199,25 @@ namespace Infrastructure.SqlServerMigrations
                     b.ToTable("OrderStatusHistory");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.OrderVoucher",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<DateTimeOffset>("AppliedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("AppliedBy").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<decimal>("DiscountApplied").HasColumnType("decimal(18,2)");
+                    b.Property<int>("OutputId").HasColumnType("int");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<int>("VoucherId").HasColumnType("int");
+                    b.HasKey("Id");
+                    b.HasIndex("OutputId");
+                    b.HasIndex("VoucherId");
+                    b.ToTable("OrderVoucher");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.Output",
                 b =>
                 {
@@ -1249,9 +1269,14 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("PaymentMethod").HasColumnType("nvarchar(max)").HasColumnName("PaymentMethod");
                     b.Property<string>("PaymentStatus").HasColumnType("nvarchar(max)").HasColumnName("PaymentStatus");
                     b.Property<string>("PaymentUrl").HasColumnType("nvarchar(MAX)").HasColumnName("PaymentUrl");
+                    b.Property<int?>("ProvinceId").HasColumnType("int").HasColumnName("ProvinceId");
+                    b.Property<string>("ProvinceName").HasColumnType("nvarchar(max)").HasColumnName("ProvinceName");
+                    b.Property<decimal?>("ShippingFee").HasColumnType("decimal(18, 2)").HasColumnName("ShippingFee");
                     b.Property<string>("StatusId").HasColumnType("nvarchar(450)").HasColumnName("StatusId");
                     b.Property<string>("TransactionId").HasColumnType("nvarchar(max)").HasColumnName("TransactionId");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("WardCode").HasColumnType("nvarchar(max)").HasColumnName("WardCode");
+                    b.Property<string>("WardName").HasColumnType("nvarchar(max)").HasColumnName("WardName");
                     b.HasKey("Id");
                     b.HasIndex("BuyerId");
                     b.HasIndex("CreatedBy");
@@ -1375,7 +1400,6 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("DescriptionJson")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("DescriptionJson");
-                    b.Property<string>("Dimensions").HasColumnType("nvarchar(35)").HasColumnName("Dimensions");
                     b.Property<string>("Displacement").HasColumnType("nvarchar(50)").HasColumnName("Displacement");
                     b.Property<string>("EngineType").HasColumnType("nvarchar(100)").HasColumnName("EngineType");
                     b.Property<string>("FrameType").HasColumnType("nvarchar(100)").HasColumnName("FrameType");
@@ -1388,6 +1412,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("FuelConsumption").HasColumnType("nvarchar(35)").HasColumnName("FuelConsumption");
                     b.Property<string>("FuelSystem").HasColumnType("nvarchar(100)").HasColumnName("FuelSystem");
                     b.Property<string>("GroundClearance").HasColumnType("nvarchar(20)").HasColumnName("GroundClearance");
+                    b.Property<decimal?>("Height").HasColumnType("decimal(18, 2)").HasColumnName("Height");
+                    b.Property<decimal?>("Length").HasColumnType("decimal(18, 2)").HasColumnName("Length");
                     b.Property<string>("LightingSystem").HasColumnType("nvarchar(100)").HasColumnName("LightingSystem");
                     b.Property<string>("Material").HasColumnType("nvarchar(100)").HasColumnName("Material");
                     b.Property<string>("MaxPower").HasColumnType("nvarchar(50)").HasColumnName("MaxPower");
@@ -1431,6 +1457,7 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("WarrantyPeriod").HasColumnType("nvarchar(50)").HasColumnName("WarrantyPeriod");
                     b.Property<string>("Weight").HasColumnType("nvarchar(20)").HasColumnName("Weight");
                     b.Property<string>("Wheelbase").HasColumnType("nvarchar(20)").HasColumnName("Wheelbase");
+                    b.Property<decimal?>("Width").HasColumnType("decimal(18, 2)").HasColumnName("Width");
                     b.HasKey("Id");
                     b.HasIndex("BrandId");
                     b.HasIndex("CategoryId");
@@ -1575,7 +1602,6 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("CoverImageUrl").HasColumnType("nvarchar(1000)").HasColumnName("CoverImageUrl");
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("Dimensions").HasColumnType("nvarchar(35)").HasColumnName("Dimensions");
                     b.Property<string>("EngineType").HasColumnType("nvarchar(100)").HasColumnName("EngineType");
                     b.Property<string>("FrontBrake").HasColumnType("nvarchar(100)").HasColumnName("FrontBrake");
                     b.Property<string>("FrontSuspension")
@@ -1585,6 +1611,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<decimal?>("GroundClearance")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("GroundClearance");
+                    b.Property<decimal?>("Height").HasColumnType("decimal(18, 2)").HasColumnName("Height");
+                    b.Property<decimal?>("Length").HasColumnType("decimal(18, 2)").HasColumnName("Length");
                     b.Property<int?>("MaxPurchaseQuantity").HasColumnType("int");
                     b.Property<decimal?>("Price").HasColumnType("decimal(18, 2)").HasColumnName("Price");
                     b.Property<int>("ProductId").HasColumnType("int").HasColumnName("ProductId");
@@ -1598,6 +1626,7 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("VariantName").HasColumnType("nvarchar(100)").HasColumnName("VariantName");
                     b.Property<decimal?>("Weight").HasColumnType("decimal(18, 2)").HasColumnName("Weight");
                     b.Property<decimal?>("Wheelbase").HasColumnType("decimal(18, 2)").HasColumnName("Wheelbase");
+                    b.Property<decimal?>("Width").HasColumnType("decimal(18, 2)").HasColumnName("Width");
                     b.HasKey("Id");
                     b.HasIndex("ProductId");
                     b.ToTable("ProductVariant");
@@ -2445,9 +2474,13 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("DiscountType").HasColumnType("int");
                     b.Property<decimal>("DiscountValue").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
                     b.Property<decimal?>("MaxDiscountAmount").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("MinOrderValue").HasColumnType("decimal(18,2)");
                     b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<int>("TotalUsageLimit").HasColumnType("int");
                     b.Property<int>("Type").HasColumnType("int");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<int>("UsageLimitPerUser").HasColumnType("int");
+                    b.Property<int>("UsedCount").HasColumnType("int");
                     b.Property<DateTime>("ValidFrom").HasColumnType("datetime2");
                     b.Property<DateTime>("ValidTo").HasColumnType("datetime2");
                     b.HasKey("Id");
@@ -2505,6 +2538,39 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasKey("Id");
                     b.HasIndex("WarrantyClaimId");
                     b.ToTable("WarrantyClaimPart");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.WarrantyTerm",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("BrandId").HasColumnType("int").HasColumnName("BrandId");
+                    b.Property<string>("Coverage").HasColumnType("nvarchar(max)").HasColumnName("Coverage");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("Description").HasColumnType("nvarchar(max)").HasColumnName("Description");
+                    b.Property<string>("DescriptionJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DescriptionJson");
+                    b.Property<int?>("DurationKm").HasColumnType("int").HasColumnName("DurationKm");
+                    b.Property<int?>("DurationMonths").HasColumnType("int").HasColumnName("DurationMonths");
+                    b.Property<DateTime?>("EffectiveDate").HasColumnType("datetime2").HasColumnName("EffectiveDate");
+                    b.Property<string>("ErrorCategory").HasColumnType("nvarchar(200)").HasColumnName("ErrorCategory");
+                    b.Property<DateTime?>("ExpirationDate").HasColumnType("datetime2").HasColumnName("ExpirationDate");
+                    b.Property<string>("MediaUrl").HasColumnType("nvarchar(500)").HasColumnName("MediaUrl");
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
+                        .HasColumnName("RowVersion");
+                    b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(20)").HasColumnName("Status");
+                    b.Property<string>("TermName").HasColumnType("nvarchar(200)").HasColumnName("TermName");
+                    b.Property<string>("TermNameJson").HasColumnType("nvarchar(max)").HasColumnName("TermNameJson");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("VehicleType").HasColumnType("nvarchar(200)").HasColumnName("VehicleType");
+                    b.HasKey("Id");
+                    b.ToTable("WarrantyTerm");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.WorkshopPayment",
@@ -3053,6 +3119,23 @@ namespace Infrastructure.SqlServerMigrations
                         .IsRequired();
                     b.Navigation("ChangedByUser");
                     b.Navigation("Output");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.OrderVoucher",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.Output", "Output")
+                        .WithMany("OrderVouchers")
+                        .HasForeignKey("OutputId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.HasOne("Domain.Entities.Voucher", "Voucher")
+                        .WithMany("OrderVouchers")
+                        .HasForeignKey("VoucherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Output");
+                    b.Navigation("Voucher");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Output",
@@ -3874,6 +3957,7 @@ namespace Infrastructure.SqlServerMigrations
                 "Domain.Entities.Output",
                 b =>
                 {
+                    b.Navigation("OrderVouchers");
                     b.Navigation("OutputInfos");
                     b.Navigation("Returns");
                     b.Navigation("StatusHistories");
@@ -4024,6 +4108,7 @@ namespace Infrastructure.SqlServerMigrations
                 "Domain.Entities.Voucher",
                 b =>
                 {
+                    b.Navigation("OrderVouchers");
                     b.Navigation("VoucherLeads");
                 });
             modelBuilder.Entity(

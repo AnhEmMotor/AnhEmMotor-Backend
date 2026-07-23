@@ -1,4 +1,4 @@
-﻿namespace Application.Features.Expenses.Responses;
+namespace Application.Features.Expenses.Responses;
 
 public class ExpenseResponse
 {
@@ -15,6 +15,8 @@ public class ExpenseResponse
     public string? Note { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
 
     public string CategoryText { get; set; } = string.Empty;
 }

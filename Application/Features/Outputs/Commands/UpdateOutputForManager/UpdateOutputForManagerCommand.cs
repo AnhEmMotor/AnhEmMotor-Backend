@@ -26,6 +26,11 @@ public sealed record UpdateOutputForManagerCommand : IRequest<Result<OrderDetail
 
     public int? DepositRatio { get; init; }
 
+    public int? ProvinceId { get; init; }
+
+    public string? WardCode { get; init; }
+
     [JsonPropertyName("products")]
     public ICollection<UpdateOutputInfoRequest> OutputInfos { get; init; } = [];
 }
+

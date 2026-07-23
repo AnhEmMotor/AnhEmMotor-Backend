@@ -31,6 +31,8 @@ public class Booking
     public Booking()
     {
         _bookingReadRepoMock = new Mock<IBookingReadRepository>();
+        _bookingReadRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<BookingEntity>());
         _bookingInsertRepoMock = new Mock<IBookingInsertRepository>();
         _leadReadRepoMock = new Mock<ILeadReadRepository>();
         _leadInsertRepoMock = new Mock<ILeadInsertRepository>();

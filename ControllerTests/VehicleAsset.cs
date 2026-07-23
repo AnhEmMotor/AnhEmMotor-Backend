@@ -1,3 +1,4 @@
+using Application.ApiContracts.Vehicle.Responses;
 using Application.Common.Models;
 using Application.Features.Vehicles.Queries.GetVehicles;
 using Domain.Primitives;
@@ -20,9 +21,7 @@ public class VehicleAsset
         var httpContext = new DefaultHttpContext();
         var mediatorMock = new Mock<IMediator>();
         mediatorMock.Setup(m => m.Send(It.IsAny<GetVehiclesQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                Result<PagedResult<Application.ApiContracts.Vehicle.Responses.VehicleResponse>>.Success(
-                    new PagedResult<Application.ApiContracts.Vehicle.Responses.VehicleResponse>([], 0, 1, 10)));
+            .ReturnsAsync(Result<PagedResult<VehicleResponse>>.Success(new PagedResult<VehicleResponse>([], 0, 1, 10)));
         _controller = new VehicleController(mediatorMock.Object)
         {
             ControllerContext = new ControllerContext() { HttpContext = httpContext }
@@ -40,8 +39,7 @@ public class VehicleAsset
     [Fact(DisplayName = "VAS_002 - Lay danh sach xe")]
     public async Task GetListAsync_ReturnsResult()
     {
-        var result = await _controller.GetListAsync(new SieveModel(), CancellationToken.None)
-            .ConfigureAwait(true);
+        var result = await _controller.GetListAsync(new SieveModel(), CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.Should().BeOfType<OkObjectResult>();
     }

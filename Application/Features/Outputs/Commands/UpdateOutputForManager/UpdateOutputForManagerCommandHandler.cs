@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories.HR.Commission;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services.Shipping;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -20,6 +21,7 @@ public class UpdateOutputForManagerCommandHandler(
     IProductVariantReadRepository variantRepository,
     IUserReadRepository userReadRepository,
     ICommissionUpdateRepository commissionUpdateRepository,
+    IShippingService shippingService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputForManagerCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -119,7 +121,25 @@ public class UpdateOutputForManagerCommandHandler(
                 "Trạng thái đơn hàng hiện tại không cho phép thay đổi tỷ lệ đặt cọc.",
                 "DepositRatio");
         }
+        var oldProvinceId = output.ProvinceId;
+        var oldWardCode = output.WardCode;
         request.Adapt(output);
+        if (output.ProvinceId != oldProvinceId || string.Compare(output.WardCode, oldWardCode) != 0)
+        {
+            if (output.ProvinceId.HasValue)
+            {
+                output.ProvinceName = await shippingService.GetProvinceNameAsync(
+                    output.ProvinceId.Value,
+                    cancellationToken);
+                if (!string.IsNullOrEmpty(output.WardCode))
+                {
+                    output.WardName = await shippingService.GetWardNameAsync(
+                        output.ProvinceId.Value,
+                        output.WardCode,
+                        cancellationToken);
+                }
+            }
+        }
         if (request.DepositRatio.HasValue)
         {
             output.DepositRatio = request.DepositRatio.Value;

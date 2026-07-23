@@ -1,4 +1,4 @@
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
 using Domain.Constants.InventoryReceipt;
@@ -46,6 +46,12 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
             .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.ProductCollectionPhotos)
+            .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
+            .ThenInclude(x => x.ProductVariant)
+            .ThenInclude(pv => pv!.VariantOptionValues)
+            .ThenInclude(vov => vov.OptionValue)
+            .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
+            .ThenInclude(x => x.ProductVariantColor)
             .Include(x => x.OutputStatus)
             .Include(x => x.Buyer)
             .Include(x => x.FinishedByUser)
@@ -140,8 +146,11 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         CancellationToken cancellationToken)
     {
         return GetQueryable()
+            .AsNoTracking()
             .Where(
-                o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
+                o => (o.StatusId == OrderStatus.Pending ||
+                        o.StatusId == OrderStatus.WaitingDeposit ||
+                        o.StatusId == OrderStatus.WaitingInstallment) &&
                     !string.IsNullOrEmpty(o.PaymentMethod) &&
                     o.PaymentMethod != PaymentMethod.COD &&
                     (o.PaymentExpiredAt.HasValue

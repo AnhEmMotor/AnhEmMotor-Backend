@@ -24,39 +24,37 @@ public class SupplierContractFileUpload
         var contract = new SupplierContract { Id = contractId, Status = "Draft" };
         await using var fileContent = new MemoryStream([1, 2, 3]);
         _readRepository
-            .Setup(repository => repository.GetByIdAsync(
-                contractId,
-                It.IsAny<CancellationToken>(),
-                It.IsAny<DataFetchMode>()))
+            .Setup(
+                repository => repository.GetByIdAsync(
+                    contractId,
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<DataFetchMode>()))
             .ReturnsAsync(contract);
         _fileInsertService
-            .Setup(service => service.SaveFileAsIsAsync(
-                fileContent,
-                "supplier-contract.docx",
-                It.IsAny<CancellationToken>(),
-                $"supplier-contracts/{contractId}"))
-            .ReturnsAsync(Result<FileUpload>.Success(
-                new FileUpload(
-                    $"supplier-contracts/{contractId}/supplier-contract.docx",
-                    ".docx",
-                    fileContent.Length)));
+            .Setup(
+                service => service.SaveFileAsIsAsync(
+                    fileContent,
+                    "supplier-contract.docx",
+                    It.IsAny<CancellationToken>(),
+                    $"supplier-contracts/{contractId}"))
+            .ReturnsAsync(
+                Result<FileUpload>.Success(
+                    new FileUpload(
+                        $"supplier-contracts/{contractId}/supplier-contract.docx",
+                        ".docx",
+                        fileContent.Length)));
         _fileReadService
-            .Setup(service => service.GetPublicUrl(
-                $"supplier-contracts/{contractId}/supplier-contract.docx"))
+            .Setup(service => service.GetPublicUrl($"supplier-contracts/{contractId}/supplier-contract.docx"))
             .Returns($"/api/v1/MediaFile/view-image/supplier-contracts/{contractId}/supplier-contract.docx");
         var handler = new UploadSupplierContractFileCommandHandler(
             _readRepository.Object,
             _fileInsertService.Object,
             _fileReadService.Object,
             _unitOfWork.Object);
-
         var result = await handler.Handle(
-            new UploadSupplierContractFileCommand(
-                contractId,
-                fileContent,
-                "supplier-contract.docx"),
-            CancellationToken.None).ConfigureAwait(true);
-
+            new UploadSupplierContractFileCommand(contractId, fileContent, "supplier-contract.docx"),
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         contract.ContractFilePath.Should().Be(result.Value);
         contract.UpdatedAt.Should().NotBeNull();
@@ -72,14 +70,10 @@ public class SupplierContractFileUpload
             _fileInsertService.Object,
             _fileReadService.Object,
             _unitOfWork.Object);
-
         var result = await handler.Handle(
-            new UploadSupplierContractFileCommand(
-                Guid.NewGuid(),
-                fileContent,
-                "supplier-contract.exe"),
-            CancellationToken.None).ConfigureAwait(true);
-
+            new UploadSupplierContractFileCommand(Guid.NewGuid(), fileContent, "supplier-contract.exe"),
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         _fileInsertService.VerifyNoOtherCalls();
         _unitOfWork.VerifyNoOtherCalls();

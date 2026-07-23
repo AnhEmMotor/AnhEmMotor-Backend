@@ -28,11 +28,9 @@ public sealed class UploadSalesContractScanCommandHandler(
             return Result<string>.Failure("File hợp đồng trống hoặc không hợp lệ.");
         if (request.FileContent.Length > MaxFileSize)
             return Result<string>.Failure("File hợp đồng không được vượt quá 10MB.");
-
         var extension = Path.GetExtension(request.FileName);
         if (string.IsNullOrWhiteSpace(extension) || !AllowedExtensions.Contains(extension))
             return Result<string>.Failure("Chỉ hỗ trợ file PDF, JPG, JPEG hoặc PNG.");
-
         var contract = await readRepository.GetByIdAsync(request.ContractId, cancellationToken).ConfigureAwait(false);
         if (contract is null)
             return Result<string>.Failure("Không tìm thấy hợp đồng.");
@@ -43,23 +41,20 @@ public sealed class UploadSalesContractScanCommandHandler(
         if (!string.Equals(contract.Status, SalesContractStatus.Approved, StringComparison.Ordinal) &&
             !string.Equals(contract.Status, SalesContractStatus.Signed, StringComparison.Ordinal))
             return Result<string>.Failure("Trạng thái hợp đồng không cho phép tải bản quét đã ký.");
-
         var uploadResult = await fileInsertService.SaveFileAsIsAsync(
             request.FileContent,
             request.FileName,
             cancellationToken,
-            $"sales-contracts/{request.ContractId}").ConfigureAwait(false);
+            $"sales-contracts/{request.ContractId}")
+            .ConfigureAwait(false);
         if (uploadResult.IsFailure)
             return Result<string>.Failure(uploadResult.Error?.Message ?? "Không thể lưu file hợp đồng.");
-
         var scannedFileUrl = fileReadService.GetPublicUrl(uploadResult.Value.StoragePath);
         contract.ScannedFileUrl = scannedFileUrl;
         contract.Status = SalesContractStatus.Signed;
         contract.SignedDate ??= DateTimeOffset.UtcNow;
         contract.UpdatedAt = DateTimeOffset.UtcNow;
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result<string>.Success(scannedFileUrl);
     }
 }

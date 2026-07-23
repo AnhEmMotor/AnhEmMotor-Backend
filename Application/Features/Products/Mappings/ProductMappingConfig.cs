@@ -112,7 +112,7 @@ public class ProductMappingConfig : IRegister
                 (src, dest) =>
                 {
                     var specProperties = typeof(ProductEntity)
-                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                         .Where(p => !ProductAttributeLabels.IsInternalProperty(p.Name));
                     foreach (var prop in specProperties)
                     {
@@ -123,6 +123,24 @@ public class ProductMappingConfig : IRegister
                                 continue;
                             dest.Specifications[prop.Name] = value;
                         }
+                    }
+                    if (dest.Specifications.ContainsKey("Length") ||
+                        dest.Specifications.ContainsKey("Width") ||
+                        dest.Specifications.ContainsKey("Height"))
+                    {
+                        var len = src.Length;
+                        var wid = src.Width;
+                        var hei = src.Height;
+                        if (len.HasValue || wid.HasValue || hei.HasValue)
+                        {
+                            var lenStr = len.HasValue ? len.Value.ToString("0.##") : "-";
+                            var widStr = wid.HasValue ? wid.Value.ToString("0.##") : "-";
+                            var heiStr = hei.HasValue ? hei.Value.ToString("0.##") : "-";
+                            dest.Specifications["Dimensions"] = $"{lenStr} x {widStr} x {heiStr}";
+                        }
+                        dest.Specifications.Remove("Length");
+                        dest.Specifications.Remove("Width");
+                        dest.Specifications.Remove("Height");
                     }
                 });
         config.NewConfig<ProductVariantEntity, CurrentVariantStoreResponse>()
@@ -192,7 +210,9 @@ public class ProductMappingConfig : IRegister
                         Colors = row.Colors,
                         SKU = row.SKU,
                         Weight = row.Weight,
-                        Dimensions = row.Dimensions,
+                        Length = row.Length,
+                        Width = row.Width,
+                        Height = row.Height,
                         Wheelbase = row.Wheelbase,
                         SeatHeight = row.SeatHeight,
                         GroundClearance = row.GroundClearance,
@@ -217,7 +237,9 @@ public class ProductMappingConfig : IRegister
             BrandName = product.Brand?.Name,
             Description = ResolveLocalizedText(product.DescriptionJson, lang) ?? product.Description,
             Weight = product.Weight,
-            Dimensions = product.Dimensions,
+            Length = product.Length,
+            Width = product.Width,
+            Height = product.Height,
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
             GroundClearance =
@@ -289,7 +311,9 @@ public class ProductMappingConfig : IRegister
             BrandName = product.Brand?.Name,
             Description = ResolveLocalizedText(product.DescriptionJson, lang) ?? product.Description,
             Weight = product.Weight,
-            Dimensions = product.Dimensions,
+            Length = product.Length,
+            Width = product.Width,
+            Height = product.Height,
             Wheelbase = product.Wheelbase,
             SeatHeight = product.SeatHeight,
             GroundClearance =
@@ -686,3 +710,4 @@ public class ProductMappingConfig : IRegister
         return string.Empty;
     }
 }
+

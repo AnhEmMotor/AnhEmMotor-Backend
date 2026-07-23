@@ -5,6 +5,7 @@ using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.CreateUserByManager;
+using Application.Features.UserManager.Commands.DeleteUserByManager;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.UserManager.Commands.UploadAvatarForAdmin;
 using Application.Features.UserManager.Queries.GetUserById;
@@ -24,7 +25,7 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)
+/// Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây).
 /// </summary>
 /// <remarks>
 /// This controller enforces business rules to prevent modification or deletion of protected users and roles, such as
@@ -41,8 +42,10 @@ namespace WebAPI.Controllers.V1;
 public class UserManagerController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Tạo người dùng mới (Admin)
+    /// Tạo người dùng mới (Admin).
     /// </summary>
+    /// <param name="model">Thông tin người dùng mới (họ tên, email, mật khẩu, roles).</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost]
     [HasPermission(Permissions.Admin.UserManagement.Create)]
     [ProducesResponseType(typeof(UserDTOForManagerResponse), StatusCodes.Status200OK)]
@@ -56,11 +59,10 @@ public class UserManagerController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền xem danh
-    /// sách người dùng).
+    /// Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp — Sieve).
     /// </summary>
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet]
     [RequiresAnyPermissions(Permissions.Admin.UserManagement.View)]
     [ProducesResponseType(typeof(PagedResult<UserDTOForManagerResponse>), StatusCodes.Status200OK)]
@@ -78,7 +80,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     /// Dành cho nhân viên có quyền tạo hoặc sửa phiếu bán hàng hoặc xem danh sách người dùng.
     /// </summary>
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet("for-output")]
     [RequiresAnyPermissions(
         Permissions.Order.OrderManagement.Edit,
@@ -95,8 +97,10 @@ public class UserManagerController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy thông tin người dùng theo ID
+    /// Lấy thông tin người dùng theo ID.
     /// </summary>
+    /// <param name="userId">ID (Guid) của người dùng cần xem.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet("{userId:guid}")]
     [HasPermission(Permissions.Admin.UserManagement.View)]
     [ProducesResponseType(typeof(UserDTOForManagerResponse), StatusCodes.Status200OK)]
@@ -109,8 +113,11 @@ public class UserManagerController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Cập nhật thông tin người dùng
+    /// Cập nhật thông tin người dùng.
     /// </summary>
+    /// <param name="userId">ID (Guid) của người dùng cần cập nhật.</param>
+    /// <param name="model">Thông tin mới của người dùng.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPut("{userId:guid}")]
     [HasPermission(Permissions.Admin.UserManagement.Edit)]
     [ProducesResponseType(typeof(UserDTOForManagerResponse), StatusCodes.Status200OK)]
@@ -127,8 +134,11 @@ public class UserManagerController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Đổi mật khẩu người dùng theo ID (đang đăng nhập)
+    /// Đổi mật khẩu người dùng theo ID (đang đăng nhập).
     /// </summary>
+    /// <param name="userId">ID (Guid) của người dùng cần đổi mật khẩu.</param>
+    /// <param name="model">Thông tin mật khẩu mới.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost("{userId:guid}/change-password")]
     [HasPermission(Permissions.Admin.UserManagement.ChangePassword)]
     [ProducesResponseType(typeof(ChangePasswordByManagerResponse), StatusCodes.Status200OK)]
@@ -147,8 +157,11 @@ public class UserManagerController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Gán roles cho người dùng
+    /// Gán roles cho người dùng (thêm/xóa vai trò).
     /// </summary>
+    /// <param name="userId">ID (Guid) của người dùng cần gán role.</param>
+    /// <param name="model">Danh sách role IDs cần gán.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost("{userId:guid}/assign-roles")]
     [ProducesResponseType(typeof(AssignRoleResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -167,8 +180,11 @@ public class UserManagerController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Thay đổi trạng thái của người dùng
+    /// Thay đổi trạng thái (active/inactive) của một người dùng.
     /// </summary>
+    /// <param name="userId">ID (Guid) của người dùng cần đổi trạng thái.</param>
+    /// <param name="model">Trạng thái mới (isActive: true/false).</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPatch("{userId:guid}/status")]
     [HasPermission(Permissions.Admin.UserManagement.Edit)]
     [ProducesResponseType(typeof(ChangeStatusUserByManagerResponse), StatusCodes.Status200OK)]
@@ -185,8 +201,10 @@ public class UserManagerController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Thay đổi trạng thái của nhiều người dùng
+    /// Thay đổi trạng thái của nhiều người dùng cùng lúc (batch update).
     /// </summary>
+    /// <param name="model">Danh sách userIds và trạng thái mới cần áp dụng.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPatch("status")]
     [ProducesResponseType(typeof(ChangeStatusMultiUserByManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -209,8 +227,30 @@ public class UserManagerController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tải lên ảnh đại diện cho người dùng theo Id (Admin)
+    /// Xóa người dùng (soft delete).
     /// </summary>
+    /// <param name="userId">ID (Guid) của người dùng cần xóa.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    [HttpDelete("{userId:guid}")]
+    [HasPermission(Permissions.Admin.UserManagement.Delete)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeleteUserAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = string.IsNullOrEmpty(currentUserIdStr) ? Guid.Empty : Guid.Parse(currentUserIdStr);
+        var command = new DeleteUserByManagerCommand(userId, currentUserId);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Tải lên ảnh đại diện cho người dùng theo Id (Admin).
+    /// </summary>
+    /// <param name="userId">ID (Guid) của người dùng cần upload avatar.</param>
+    /// <param name="file">File ảnh đại diện.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost("{userId:guid}/avatar")]
     [HasPermission(Permissions.Admin.UserManagement.Edit)]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -232,4 +272,3 @@ public class UserManagerController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-

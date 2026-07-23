@@ -2,6 +2,7 @@ using Application.ApiContracts.Admin.Invoices;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Invoice;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
 
@@ -12,6 +13,7 @@ public record CreateAdminInvoiceCommand(CreateAdminInvoiceRequest Request) : IRe
 public class CreateAdminInvoiceHandler(
     IInvoiceWriteRepository writeRepo,
     IInvoiceReadRepository readRepo,
+    ICurrentUserContext currentUserContext,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateAdminInvoiceCommand, Result<AdminInvoiceDetailResponse>>
 {
     public async Task<Result<AdminInvoiceDetailResponse>> Handle(
@@ -20,10 +22,12 @@ public class CreateAdminInvoiceHandler(
     {
         var req = request.Request;
         var invoiceNumber = GenerateInvoiceNumber();
+        var userId = currentUserContext.GetUserId();
         var invoice = new Invoice
         {
             InvoiceNumber = invoiceNumber,
             IssueDate = DateTime.Now,
+            UserId = userId,
             CustomerName = req.CustomerName,
             CustomerPhone = req.CustomerPhone,
             CustomerIdCard = req.CustomerIdCard,

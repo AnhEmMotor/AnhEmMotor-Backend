@@ -183,12 +183,10 @@ namespace Infrastructure.Repositories
             {
                 return "Chưa đặt KPI";
             }
-
             if (totalSales > targetSales)
             {
                 return "Vượt KPI";
             }
-
             return totalSales == targetSales ? "Đạt" : "Cần cải thiện";
         }
 
