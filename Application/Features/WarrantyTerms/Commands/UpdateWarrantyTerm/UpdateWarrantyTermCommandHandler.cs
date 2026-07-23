@@ -1,8 +1,8 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.WarrantyTerm;
-using MediatR;
 using Mapster;
+using MediatR;
 
 namespace Application.Features.WarrantyTerms.Commands.UpdateWarrantyTerm;
 
@@ -16,7 +16,6 @@ public class UpdateWarrantyTermCommandHandler(
         var warrantyTerm = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (warrantyTerm == null)
             return Error.NotFound("Warranty term not found.");
-
         request.Adapt(warrantyTerm);
         updateRepository.Update(warrantyTerm);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

@@ -21,7 +21,6 @@ namespace Application.Features.HR.Commands.UpdateEmployee
             {
                 return Result<int>.Failure("Không tìm thấy hồ sơ nhân sự.");
             }
-
             employee.User.FullName = request.FullName.Trim();
             employee.User.Email = request.Email.Trim();
             employee.User.UserName = request.Email.Trim();
@@ -33,14 +32,12 @@ namespace Application.Features.HR.Commands.UpdateEmployee
             employee.JobTitle = request.JobTitle.Trim();
             employee.BaseSalary = request.BaseSalary;
             employeeUpdateRepository.Update(employee);
-
             var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(employee.User, cancellationToken)
                 .ConfigureAwait(false);
             if (!succeeded)
             {
                 return Result<int>.Failure($"Không thể cập nhật tài khoản nhân viên: {string.Join(", ", errors)}");
             }
-
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result<int>.Success(employee.Id);
         }

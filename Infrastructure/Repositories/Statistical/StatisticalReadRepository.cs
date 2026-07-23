@@ -1,6 +1,5 @@
 using Application.Api.Contracts.Statistical.Responses;
 using Application.ApiContracts.Statistical.Responses;
-using System.Text.Json;
 using Application.Interfaces.Repositories.Statistical;
 using Domain.Constants.InventoryReceipt;
 using Domain.Constants.Order;
@@ -8,6 +7,7 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Data.Common;
+using System.Text.Json;
 using WorkshopRevenueComparison = Application.Api.Contracts.Statistical.Responses.RevenueComparison;
 
 namespace Infrastructure.Repositories.Statistical;
@@ -95,73 +95,81 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 .SumAsync(x => (x.oi.Price ?? 0) * (x.oi.Count ?? 0), cancellationToken);
             revenueTrend.RetailRevenue.Add(monthRetail);
         }
-var overdueCutoff = fromDate.AddHours(-48);
-var overdueInProgress = repairOrders.Where(r => r.TotalCost == 0 && r.CreatedAt <= overdueCutoff).ToList();
-var vehicleIdsForOverdue = overdueInProgress.Select(r => r.VehicleId).Distinct().ToList();
-var vehicleOverdueDict = new Dictionary<int, string>();
-if (vehicleIdsForOverdue.Any())
-{
-    var vList = await context.Vehicles
-        .Where(v => vehicleIdsForOverdue.Contains(v.Id))
-        .Select(v => new { v.Id, CustomerName = v.User != null ? v.User.FullName : "-" })
-        .ToListAsync(cancellationToken);
-    vehicleOverdueDict = vList.ToDictionary(x => x.Id, x => x.CustomerName);
-}
-var overdueTickets = overdueInProgress.Select(r => new OverdueTicketDto
-{
-    TicketId = r.Id,
-    CustomerName = vehicleOverdueDict.TryGetValue(r.VehicleId, out var cn) ? cn : "-",
-    ExpectedCompletionTime = (r.CreatedAt ?? DateTimeOffset.UtcNow).AddHours(48),
-    Status = "Dang sua chua"
-}).ToList();
-
-var partShortages = new List<PartShortageDto>();
-foreach (var order in repairOrders.Where(r => !string.IsNullOrEmpty(r.PartsJson)))
-{
-    try
-    {
-        var partsData = JsonSerializer.Deserialize<PartsJsonDto>(order.PartsJson);
-        if (partsData?.Parts == null) continue;
-        foreach (var part in partsData.Parts)
+        var overdueCutoff = fromDate.AddHours(-48);
+        var overdueInProgress = repairOrders.Where(r => r.TotalCost == 0 && r.CreatedAt <= overdueCutoff).ToList();
+        var vehicleIdsForOverdue = overdueInProgress.Select(r => r.VehicleId).Distinct().ToList();
+        var vehicleOverdueDict = new Dictionary<int, string>();
+        if (vehicleIdsForOverdue.Any())
         {
-            if (string.IsNullOrWhiteSpace(part.Name)) continue;
-            var availQty = await context.InventoryOnHands
-                .Where(h => h.ProductVariant != null && h.ProductVariant.UrlSlug != null && EF.Functions.Like(h.ProductVariant.UrlSlug ?? "", "%" + part.Name + "%"))
-                .SumAsync(h => (int?)h.StockQty, cancellationToken) ?? 0;
-            if (availQty < part.Qty)
+            var vList = await context.Vehicles
+                .Where(v => vehicleIdsForOverdue.Contains(v.Id))
+                .Select(v => new { v.Id, CustomerName = v.User != null ? v.User.FullName : "-" })
+                .ToListAsync(cancellationToken);
+            vehicleOverdueDict = vList.ToDictionary(x => x.Id, x => x.CustomerName);
+        }
+        var overdueTickets = overdueInProgress.Select(
+            r => new OverdueTicketDto
             {
-                partShortages.Add(new PartShortageDto
+                TicketId = r.Id,
+                CustomerName = vehicleOverdueDict.TryGetValue(r.VehicleId, out var cn) ? cn : "-",
+                ExpectedCompletionTime = (r.CreatedAt ?? DateTimeOffset.UtcNow).AddHours(48),
+                Status = "Dang sua chua"
+            })
+            .ToList();
+        var partShortages = new List<PartShortageDto>();
+        foreach (var order in repairOrders.Where(r => !string.IsNullOrEmpty(r.PartsJson)))
+        {
+            try
+            {
+                var partsData = JsonSerializer.Deserialize<PartsJsonDto>(order.PartsJson!);
+                if (partsData?.Parts == null)
+                    continue;
+                foreach (var part in partsData.Parts)
                 {
-                    TicketId = order.Id,
-                    PartName = part.Name,
-                    RequiredQuantity = part.Qty,
-                    AvailableQuantity = availQty
-                });
+                    if (string.IsNullOrWhiteSpace(part.Name))
+                        continue;
+                    var availQty = await context.InventoryOnHands
+                            .Where(
+                                h => h.ProductVariant != null &&
+                                        h.ProductVariant.UrlSlug != null &&
+                                        EF.Functions
+                                            .Like(h.ProductVariant.UrlSlug ?? string.Empty, "%" + part.Name + "%"))
+                            .SumAsync(h => (int?)h.StockQty, cancellationToken) ??
+                        0;
+                    if (availQty < part.Qty)
+                    {
+                        partShortages.Add(
+                            new PartShortageDto
+                            {
+                                TicketId = order.Id,
+                                PartName = part.Name,
+                                RequiredQuantity = part.Qty,
+                                AvailableQuantity = availQty
+                            });
+                    }
+                }
+            } catch
+            {
             }
         }
-    }
-    catch { }
-}
-
-var paymentMethodGroups = workshopPayments
+        var paymentMethodGroups = workshopPayments
     .GroupBy(p => string.IsNullOrEmpty(p.PaymentMethod) ? "Khac" : p.PaymentMethod)
-    .Select(g => new RevenueSourceDto { Source = g.Key, Amount = g.Sum(p => p.TotalAmount) })
-    .ToList();
-if (!paymentMethodGroups.Any())
-{
-    paymentMethodGroups = new List<RevenueSourceDto> { new RevenueSourceDto { Source = "Khac", Amount = 0 } };
-}
-
-var repairOrderStatusCounts = new List<RepairOrderStatusCountDto>();
-var pendingCount = repairOrders.Count(r => r.TotalCost == 0);
-repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Cho sua chua", Count = pendingCount });
-repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Dang sua chua", Count = inProgressCount - pendingCount });
-repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Cho nghiem thu", Count = 0 });
-repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Da hoan thanh", Count = completedOrders.Count });
-repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Da huy phieu", Count = 0 });
-
-
-return new WorkshopDashboardResponse
+            .Select(g => new RevenueSourceDto { Source = g.Key, Amount = g.Sum(p => p.TotalAmount) })
+            .ToList();
+        if (!paymentMethodGroups.Any())
+        {
+            paymentMethodGroups = new List<RevenueSourceDto> { new RevenueSourceDto { Source = "Khac", Amount = 0 } };
+        }
+        var repairOrderStatusCounts = new List<RepairOrderStatusCountDto>();
+        var pendingCount = repairOrders.Count(r => r.TotalCost == 0);
+        repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Cho sua chua", Count = pendingCount });
+        repairOrderStatusCounts.Add(
+            new RepairOrderStatusCountDto { Status = "Dang sua chua", Count = inProgressCount - pendingCount });
+        repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Cho nghiem thu", Count = 0 });
+        repairOrderStatusCounts.Add(
+            new RepairOrderStatusCountDto { Status = "Da hoan thanh", Count = completedOrders.Count });
+        repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Da huy phieu", Count = 0 });
+        return new WorkshopDashboardResponse
         {
             KpiCards =
                 new KpiCards
@@ -170,47 +178,45 @@ return new WorkshopDashboardResponse
                     AvgCompletionHours = Math.Round(avgHours, 1),
                     CumulativeRevenue = workshopRevenue
                 },
- Alerts = new UrgentAlerts
-{
-    OverdueTickets = overdueTickets,
-    PartShortages = partShortages
-},
-Analytics = new Analytics
-{
-    RevenueComparison = new WorkshopRevenueComparison
+            Alerts = new UrgentAlerts { OverdueTickets = overdueTickets, PartShortages = partShortages },
+            Analytics =
+                new Analytics
+                {
+                    RevenueComparison =
+                        new WorkshopRevenueComparison
+                            {
+                                WorkshopRevenue = workshopRevenue,
+                                RetailRevenue = retailRevenue
+                            },
+                    RevenueSources = paymentMethodGroups,
+                    RevenueTrend = revenueTrend,
+                    RepairOrderStatusCounts = repairOrderStatusCounts
+                },
+            Productivity =
+                new Productivity
+                {
+                    TechnicianStatuses = new List<TechnicianStatusDto>(),
+                    TechnicianRankings = techRankings
+                },
+            WarrantyRequestsCount = warrantyCount,
+            ComplaintsCount = complaintsCount,
+            RecentItems = new List<RecentItem>()
+        };
+    }
+
+    private sealed record PartsJsonDto
     {
-        WorkshopRevenue = workshopRevenue,
-        RetailRevenue = retailRevenue
-    },
-    RevenueSources = paymentMethodGroups,
-    RevenueTrend = revenueTrend,
-    RepairOrderStatusCounts = repairOrderStatusCounts
-},
-Productivity = new Productivity
-{
-    TechnicianStatuses = new List<TechnicianStatusDto>(),
-    TechnicianRankings = techRankings
-},
-WarrantyRequestsCount = warrantyCount,
-ComplaintsCount = complaintsCount,
-RecentItems = new List<RecentItem>()
-};
-}
+        public List<PartItemDto>? Parts { get; set; }
+    }
 
+    private sealed record PartItemDto
+    {
+        public string Name { get; set; } = string.Empty;
 
+        public int Qty { get; set; }
 
-private sealed record PartsJsonDto
-{
-    public List<PartItemDto>? Parts { get; set; }
-}
-
-private sealed record PartItemDto
-{
-    public string Name { get; set; } = string.Empty;
-    public int Qty { get; set; }
-    public decimal Price { get; set; }
-}
-
+        public decimal Price { get; set; }
+    }
 
     public Task<List<RecentOrderResponse>> GetRecentOrdersAsync(int count, CancellationToken cancellationToken)
     {

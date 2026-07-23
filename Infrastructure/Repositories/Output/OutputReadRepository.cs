@@ -148,7 +148,9 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         return GetQueryable()
             .AsNoTracking()
             .Where(
-                o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit || o.StatusId == OrderStatus.WaitingInstallment) &&
+                o => (o.StatusId == OrderStatus.Pending ||
+                        o.StatusId == OrderStatus.WaitingDeposit ||
+                        o.StatusId == OrderStatus.WaitingInstallment) &&
                     !string.IsNullOrEmpty(o.PaymentMethod) &&
                     o.PaymentMethod != PaymentMethod.COD &&
                     (o.PaymentExpiredAt.HasValue

@@ -5,8 +5,6 @@ using Application.Features.WarrantyTerms.Queries.GetWarrantyTermById;
 using Application.Features.WarrantyTerms.Queries.GetWarrantyTermsList;
 using Application.Features.WarrantyTerms.Queries.GetWarrantyTermStatistics;
 using Asp.Versioning;
-using Domain.Constants.Permission;
-using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -21,7 +19,9 @@ public class WarrantyTermsController(ISender sender) : ApiController
 {
     [HttpGet]
     [SwaggerOperation(Summary = "L?y danh sách di?u kho?n b?o hành")]
-    public async Task<IActionResult> GetListAsync([FromQuery] GetWarrantyTermsListQuery query, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetListAsync(
+        [FromQuery] GetWarrantyTermsListQuery query,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -44,26 +44,31 @@ public class WarrantyTermsController(ISender sender) : ApiController
     }
 
     [HttpPost]
-     // Using Admin permission for now as placeholder
     [SwaggerOperation(Summary = "Thêm m?i di?u kho?n b?o hành")]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateWarrantyTermCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateWarrantyTermCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     [HttpPut("{id}")]
-    
+
     [SwaggerOperation(Summary = "C?p nh?t di?u kho?n b?o hành")]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateWarrantyTermCommand request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateAsync(
+        int id,
+        [FromBody] UpdateWarrantyTermCommand request,
+        CancellationToken cancellationToken)
     {
-        request.Id = id; var command = request;
+        request.Id = id;
+        var command = request;
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
     [HttpDelete("{id}")]
-    
+
     [SwaggerOperation(Summary = "Xóa di?u kho?n b?o hành")]
     public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {

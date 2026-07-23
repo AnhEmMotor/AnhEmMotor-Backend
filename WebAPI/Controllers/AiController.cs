@@ -1,4 +1,4 @@
-using Application.Interfaces.Ai;
+using Application.Interfaces.Repositories.Ai;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Authorization;

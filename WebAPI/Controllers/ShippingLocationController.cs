@@ -1,5 +1,4 @@
 using Application.Interfaces.Services.Shipping;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;

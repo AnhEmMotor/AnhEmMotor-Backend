@@ -168,7 +168,6 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("PreferredTimeSlot");
                     b.Property<int?>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
-                    b.Property<string>("ServiceType").HasColumnType("nvarchar(30)").HasColumnName("ServiceType");
                     b.Property<string>("Showroom").HasColumnType("nvarchar(150)").HasColumnName("Showroom");
                     b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(30)").HasColumnName("Status");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
@@ -2446,13 +2445,9 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("DiscountType").HasColumnType("int");
                     b.Property<decimal>("DiscountValue").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
                     b.Property<decimal?>("MaxDiscountAmount").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
-                    b.Property<decimal>("MinOrderValue").HasColumnType("decimal(18,2)");
                     b.Property<string>("Name").IsRequired().HasColumnType("nvarchar(max)");
-                    b.Property<int>("TotalUsageLimit").HasColumnType("int");
                     b.Property<int>("Type").HasColumnType("int");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
-                    b.Property<int>("UsageLimitPerUser").HasColumnType("int");
-                    b.Property<int>("UsedCount").HasColumnType("int");
                     b.Property<DateTime>("ValidFrom").HasColumnType("datetime2");
                     b.Property<DateTime>("ValidTo").HasColumnType("datetime2");
                     b.HasKey("Id");

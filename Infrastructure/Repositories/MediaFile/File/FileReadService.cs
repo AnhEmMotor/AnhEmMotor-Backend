@@ -46,34 +46,30 @@ public class FileReadService : IFileReadService
         string storagePath,
         CancellationToken cancellationToken)
     {
-        // Remove leading slashes to prevent Path.Combine from treating it as an absolute path
         storagePath = storagePath.TrimStart('/', '\\');
-
         var fullPath = Path.Combine(_uploadFolder, storagePath);
-        
-        // Fallback for old seeded data which was stored in wwwroot/uploads
-        // In the DB they are stored as /uploads/img_name.jpg
-        // So storagePath would be uploads/img_name.jpg
         var env = _httpContextAccessor.HttpContext?.RequestServices.GetService(typeof(IWebHostEnvironment)) as IWebHostEnvironment;
-        var webRootPath = env != null && !string.IsNullOrEmpty(env.WebRootPath) ? Path.Combine(env.WebRootPath, storagePath) : "";
+        var webRootPath = env != null && !string.IsNullOrEmpty(env.WebRootPath)
+            ? Path.Combine(env.WebRootPath, storagePath)
+            : string.Empty;
         if (!System.IO.File.Exists(fullPath))
         {
             if (System.IO.File.Exists(webRootPath))
             {
                 fullPath = webRootPath;
-            }
-            else
+            } else
             {
-                // Try fallback to current directory wwwroot
                 var fallbackPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", storagePath);
                 if (System.IO.File.Exists(fallbackPath))
                 {
                     fullPath = fallbackPath;
-                }
-                else
+                } else
                 {
-                    // Try fallback to current directory wwwroot/uploads
-                    var uploadsFallbackPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", storagePath);
+                    var uploadsFallbackPath = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot",
+                        "uploads",
+                        storagePath);
                     if (System.IO.File.Exists(uploadsFallbackPath))
                     {
                         fullPath = uploadsFallbackPath;
@@ -81,10 +77,8 @@ public class FileReadService : IFileReadService
                 }
             }
         }
-
         if (!System.IO.File.Exists(fullPath))
             return null;
-
         var fileBytes = await System.IO.File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);
         var extension = Path.GetExtension(storagePath).ToLower();
         var contentType = extension switch

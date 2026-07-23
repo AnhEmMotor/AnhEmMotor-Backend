@@ -1,5 +1,5 @@
-using Application.Interfaces.Ai;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Ai;
 using Application.Interfaces.Repositories.LogisticsDashboard;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Statistical;

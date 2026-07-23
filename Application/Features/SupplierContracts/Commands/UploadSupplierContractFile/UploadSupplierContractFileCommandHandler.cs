@@ -27,29 +27,25 @@ public sealed class UploadSupplierContractFileCommandHandler(
             return Result<string>.Failure("File hợp đồng trống hoặc không hợp lệ.");
         if (request.FileContent.Length > MaxFileSize)
             return Result<string>.Failure("File hợp đồng không được vượt quá 10MB.");
-
         var extension = Path.GetExtension(request.FileName);
         if (string.IsNullOrWhiteSpace(extension) || !AllowedExtensions.Contains(extension))
             return Result<string>.Failure("Chỉ hỗ trợ file PDF, Word, JPG, JPEG hoặc PNG.");
-
         var contract = await readRepository
             .GetByIdAsync(request.ContractId, cancellationToken)
             .ConfigureAwait(false);
         if (contract is null)
             return Result<string>.Failure("Không tìm thấy hợp đồng nhà cung cấp.");
-
         var uploadResult = await fileInsertService.SaveFileAsIsAsync(
             request.FileContent,
             request.FileName,
             cancellationToken,
-            $"supplier-contracts/{request.ContractId}").ConfigureAwait(false);
+            $"supplier-contracts/{request.ContractId}")
+            .ConfigureAwait(false);
         if (uploadResult.IsFailure)
             return Result<string>.Failure(uploadResult.Error?.Message ?? "Không thể lưu file hợp đồng.");
-
         var publicUrl = fileReadService.GetPublicUrl(uploadResult.Value.StoragePath);
         contract.ContractFilePath = publicUrl;
         contract.UpdatedAt = DateTimeOffset.UtcNow;
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<string>.Success(publicUrl);
     }

@@ -1,6 +1,6 @@
 using Application.ApiContracts.Ai;
 
-namespace Application.Interfaces.Ai;
+namespace Application.Interfaces.Repositories.Ai;
 
 public interface IAiSearchClient
 {

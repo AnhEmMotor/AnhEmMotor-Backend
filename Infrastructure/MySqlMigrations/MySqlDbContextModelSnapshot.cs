@@ -2361,13 +2361,9 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<int>("DiscountType").HasColumnType("int");
                     b.Property<decimal>("DiscountValue").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
                     b.Property<decimal?>("MaxDiscountAmount").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
-                    b.Property<decimal>("MinOrderValue").HasColumnType("decimal(18,2)");
                     b.Property<string>("Name").IsRequired().HasColumnType("longtext");
-                    b.Property<int>("TotalUsageLimit").HasColumnType("int");
                     b.Property<int>("Type").HasColumnType("int");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
-                    b.Property<int>("UsageLimitPerUser").HasColumnType("int");
-                    b.Property<int>("UsedCount").HasColumnType("int");
                     b.Property<DateTime>("ValidFrom").HasColumnType("datetime(6)");
                     b.Property<DateTime>("ValidTo").HasColumnType("datetime(6)");
                     b.HasKey("Id");

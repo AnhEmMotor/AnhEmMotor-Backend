@@ -108,39 +108,41 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.ProductLimit, src => GetEffectiveMaxPurchaseQuantity(src))
             .Map(dest => dest.EffectiveMax, src => GetEffectiveMaxPurchaseQuantity(src))
             .Map(dest => dest.ProductTechnologies, src => MapProductTechnologiesList(src))
-        .AfterMapping(
-        (src, dest) =>
-        {
-            var specProperties = typeof(ProductEntity)
+            .AfterMapping(
+                (src, dest) =>
+                {
+                    var specProperties = typeof(ProductEntity)
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => !ProductAttributeLabels.IsInternalProperty(p.Name));
-            foreach (var prop in specProperties)
-            {
-                var value = prop.GetValue(src);
-                if (value is not null)
-                {
-                    if (value is decimal d && d == 0)
-                        continue;
-                    dest.Specifications[prop.Name] = value;
-                }
-            }
-            if (dest.Specifications.ContainsKey("Length") || dest.Specifications.ContainsKey("Width") || dest.Specifications.ContainsKey("Height"))
-            {
-                var len = src.Length;
-                var wid = src.Width;
-                var hei = src.Height;
-                if (len.HasValue || wid.HasValue || hei.HasValue)
-                {
-                    var lenStr = len.HasValue ? len.Value.ToString("0.##") : "-";
-                    var widStr = wid.HasValue ? wid.Value.ToString("0.##") : "-";
-                    var heiStr = hei.HasValue ? hei.Value.ToString("0.##") : "-";
-                    dest.Specifications["Dimensions"] = $"{lenStr} x {widStr} x {heiStr}";
-                }
-                dest.Specifications.Remove("Length");
-                dest.Specifications.Remove("Width");
-                dest.Specifications.Remove("Height");
-            }
-        });
+                        .Where(p => !ProductAttributeLabels.IsInternalProperty(p.Name));
+                    foreach (var prop in specProperties)
+                    {
+                        var value = prop.GetValue(src);
+                        if (value is not null)
+                        {
+                            if (value is decimal d && d == 0)
+                                continue;
+                            dest.Specifications[prop.Name] = value;
+                        }
+                    }
+                    if (dest.Specifications.ContainsKey("Length") ||
+                        dest.Specifications.ContainsKey("Width") ||
+                        dest.Specifications.ContainsKey("Height"))
+                    {
+                        var len = src.Length;
+                        var wid = src.Width;
+                        var hei = src.Height;
+                        if (len.HasValue || wid.HasValue || hei.HasValue)
+                        {
+                            var lenStr = len.HasValue ? len.Value.ToString("0.##") : "-";
+                            var widStr = wid.HasValue ? wid.Value.ToString("0.##") : "-";
+                            var heiStr = hei.HasValue ? hei.Value.ToString("0.##") : "-";
+                            dest.Specifications["Dimensions"] = $"{lenStr} x {widStr} x {heiStr}";
+                        }
+                        dest.Specifications.Remove("Length");
+                        dest.Specifications.Remove("Width");
+                        dest.Specifications.Remove("Height");
+                    }
+                });
         config.NewConfig<ProductVariantEntity, CurrentVariantStoreResponse>()
             .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src))
             .Map(dest => dest.Colors, src => MapVariantColors(src))

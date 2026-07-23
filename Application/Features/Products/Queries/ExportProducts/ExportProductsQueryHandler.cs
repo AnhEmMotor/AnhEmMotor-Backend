@@ -122,7 +122,11 @@ public class ExportProductsQueryHandler(IProductReadRepository repository) : IRe
                     worksheet.Cell(rowIndex, 4).Value = product.CategoryName ?? string.Empty;
                     worksheet.Cell(rowIndex, 5).Value = product.BrandName ?? string.Empty;
                     worksheet.Cell(rowIndex, 6).Value = product.EngineType ?? string.Empty;
-                    worksheet.Cell(rowIndex, 7).Value = (string.Join(" x ", new decimal?[] { product.Length, product.Width, product.Height }.Select(v => v.HasValue ? v.Value.ToString("0.##") : "-")) ?? "-");
+                    worksheet.Cell(rowIndex, 7).Value = (string.Join(
+                            " x ",
+                            new decimal?[] { product.Length, product.Width, product.Height }.Select(
+                                v => v.HasValue ? v.Value.ToString("0.##") : "-")) ??
+                        "-");
                     worksheet.Cell(rowIndex, 8).Value = product.MaxPower ?? string.Empty;
                     worksheet.Cell(rowIndex, 9).Value = product.MaxTorque ?? string.Empty;
                     worksheet.Cell(rowIndex, 10).Value = product.Displacement?.ToString("N0") ?? "0";
@@ -165,7 +169,11 @@ public class ExportProductsQueryHandler(IProductReadRepository repository) : IRe
                 worksheet.Cell(rowIndex, 4).Value = product.CategoryName ?? string.Empty;
                 worksheet.Cell(rowIndex, 5).Value = product.BrandName ?? string.Empty;
                 worksheet.Cell(rowIndex, 6).Value = product.EngineType ?? string.Empty;
-                worksheet.Cell(rowIndex, 7).Value = (string.Join(" x ", new decimal?[] { product.Length, product.Width, product.Height }.Select(v => v.HasValue ? v.Value.ToString("0.##") : "-")) ?? "-");
+                worksheet.Cell(rowIndex, 7).Value = (string.Join(
+                        " x ",
+                        new decimal?[] { product.Length, product.Width, product.Height }.Select(
+                            v => v.HasValue ? v.Value.ToString("0.##") : "-")) ??
+                    "-");
                 worksheet.Cell(rowIndex, 8).Value = product.MaxPower ?? string.Empty;
                 worksheet.Cell(rowIndex, 9).Value = product.MaxTorque ?? string.Empty;
                 worksheet.Cell(rowIndex, 10).Value = product.Displacement?.ToString("N0") ?? "0";

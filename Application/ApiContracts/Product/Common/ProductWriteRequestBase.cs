@@ -1,5 +1,4 @@
 using Application.ApiContracts.Product.Requests;
-using Application.Common.Converters;
 using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Common;

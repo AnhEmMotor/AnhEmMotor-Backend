@@ -156,14 +156,12 @@ public class SupplierContractsController(IMediator mediator) : ApiController
     {
         if (file is null || file.Length == 0)
             return BadRequest(new { message = "File hợp đồng trống hoặc không hợp lệ." });
-
         await using var stream = file.OpenReadStream();
         var result = await mediator.Send(
             new UploadSupplierContractFileCommand(id, stream, file.FileName),
-            cancellationToken).ConfigureAwait(false);
-        return result.IsSuccess
-            ? Ok(new { contractFilePath = result.Value })
-            : HandleResult(result);
+            cancellationToken)
+            .ConfigureAwait(false);
+        return result.IsSuccess ? Ok(new { contractFilePath = result.Value }) : HandleResult(result);
     }
 
     /// <summary>

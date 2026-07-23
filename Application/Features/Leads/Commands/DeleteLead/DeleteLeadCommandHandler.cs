@@ -3,8 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead.Lead;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Leads.Commands.DeleteLead
 {
@@ -22,13 +20,10 @@ namespace Application.Features.Leads.Commands.DeleteLead
                 {
                     return Result<bool>.Failure("Khách hàng tiềm năng không tồn tại.");
                 }
-
                 await leadDeleteRepository.DeleteByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
                 return Result<bool>.Success(true);
-            }
-            catch (Exception ex)
+            } catch (Exception ex)
             {
                 return Result<bool>.Failure($"Lỗi khi xóa khách hàng tiềm năng: {ex.Message}");
             }

@@ -234,7 +234,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<WarrantyTerm> WarrantyTerms { get; set; }
 
-public virtual DbSet<WarrantyClaim> WarrantyClaims { get; set; }
+    public virtual DbSet<WarrantyClaim> WarrantyClaims { get; set; }
 
     public virtual DbSet<WarrantyClaimPart> WarrantyClaimParts { get; set; }
 
@@ -680,7 +680,7 @@ public virtual DbSet<WarrantyClaim> WarrantyClaims { get; set; }
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<VoucherLead>()
             .HasQueryFilter(vl => vl.Lead.DeletedAt == null && vl.Voucher.DeletedAt == null);
-modelBuilder.Entity<OrderVoucher>().HasQueryFilter(ov => ov.Output.DeletedAt == null);
+        modelBuilder.Entity<OrderVoucher>().HasQueryFilter(ov => ov.Output!.DeletedAt == null);
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))

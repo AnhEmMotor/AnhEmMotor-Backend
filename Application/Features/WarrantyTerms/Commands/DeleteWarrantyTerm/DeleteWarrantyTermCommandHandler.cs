@@ -15,7 +15,6 @@ public class DeleteWarrantyTermCommandHandler(
         var warrantyTerm = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (warrantyTerm == null)
             return Error.NotFound("Warranty term not found.");
-
         deleteRepository.Delete(warrantyTerm);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(warrantyTerm.Id);

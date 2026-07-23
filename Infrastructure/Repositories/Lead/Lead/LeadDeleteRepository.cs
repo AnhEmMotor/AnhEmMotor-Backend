@@ -22,16 +22,12 @@ public class LeadDeleteRepository(ApplicationDBContext context) : ILeadDeleteRep
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         context.VoucherLeads.RemoveRange(voucherLeads);
-
         var activities = await context.LeadActivities
             .Where(la => la.LeadId == id)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         context.LeadActivities.RemoveRange(activities);
-
-        var lead = await context.Leads
-            .FirstOrDefaultAsync(l => l.Id == id, cancellationToken)
-            .ConfigureAwait(false);
+        var lead = await context.Leads.FirstOrDefaultAsync(l => l.Id == id, cancellationToken).ConfigureAwait(false);
         if (lead != null)
         {
             context.Leads.Remove(lead);

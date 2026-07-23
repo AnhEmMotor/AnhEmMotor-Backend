@@ -32,7 +32,6 @@ public class EmployeeCrud
             _updateRepository.Object,
             _userUpdateRepository.Object,
             _unitOfWork.Object);
-
         var result = await handler.Handle(
             new UpdateEmployeeCommand
             {
@@ -47,8 +46,8 @@ public class EmployeeCrud
                 JobTitle = "Kỹ thuật viên",
                 BaseSalary = 15_000_000m
             },
-            CancellationToken.None).ConfigureAwait(true);
-
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         employee.User.FullName.Should().Be("Nguyễn Văn An");
         employee.User.Email.Should().Be("an.nguyen@anhemmotor.com");
@@ -66,10 +65,7 @@ public class EmployeeCrud
         _readRepository.Setup(repository => repository.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(employee);
         var handler = new GetEmployeeByIdQueryHandler(_readRepository.Object);
-
-        var result = await handler.Handle(new GetEmployeeByIdQuery(1), CancellationToken.None)
-            .ConfigureAwait(true);
-
+        var result = await handler.Handle(new GetEmployeeByIdQuery(1), CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.FullName.Should().Be(employee.User.FullName);
         result.Value.Email.Should().Be(employee.User.Email);
@@ -86,10 +82,7 @@ public class EmployeeCrud
             _readRepository.Object,
             _deleteRepository.Object,
             _unitOfWork.Object);
-
-        var result = await handler.Handle(new DeleteEmployeeCommand(1), CancellationToken.None)
-            .ConfigureAwait(true);
-
+        var result = await handler.Handle(new DeleteEmployeeCommand(1), CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(1);
         _deleteRepository.Verify(repository => repository.Delete(employee), Times.Once);
@@ -102,12 +95,13 @@ public class EmployeeCrud
         {
             Id = 1,
             UserId = Guid.NewGuid(),
-            User = new ApplicationUser
-            {
-                FullName = "Nhân viên cũ",
-                Email = "old@anhemmotor.com",
-                UserName = "old@anhemmotor.com"
-            },
+            User =
+                new ApplicationUser
+                {
+                    FullName = "Nhân viên cũ",
+                    Email = "old@anhemmotor.com",
+                    UserName = "old@anhemmotor.com"
+                },
             IdentityNumber = "001200012345",
             Address = "TP.HCM",
             ContractDate = new DateTime(2025, 1, 1),

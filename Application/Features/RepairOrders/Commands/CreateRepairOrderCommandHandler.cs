@@ -1,10 +1,10 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.MaintenanceHistory;
 using Application.Interfaces.Repositories.Vehicle;
-using Application.Interfaces.Repositories.Lead.Lead;
-using Domain.Entities;
 using Domain.Constants.Order;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.RepairOrders.Commands;
@@ -20,21 +20,16 @@ public class CreateRepairOrderCommandHandler(
     public async Task<Result<int>> Handle(CreateRepairOrderCommand req, CancellationToken ct)
     {
         int vehicleId = 0;
-
         if (req.VehicleId.HasValue && req.VehicleId.Value > 0)
         {
             var vehicle = await vehicleRepo.GetByIdAsync(req.VehicleId.Value, ct);
             if (vehicle is null)
                 return Result<int>.Failure([Error.BadRequest("Xe không tồn tại.", "VehicleId")]);
-            
             vehicleId = vehicle.Id;
-        }
-        else
+        } else
         {
             if (string.IsNullOrWhiteSpace(req.CustomerPhone))
                 return Result<int>.Failure([Error.BadRequest("Số điện thoại không được để trống.", "CustomerPhone")]);
-
-            // Tìm hoặc tạo Khách hàng
             var lead = await leadReadRepo.GetByPhoneNumberAsync(req.CustomerPhone, ct);
             if (lead == null)
             {
@@ -47,8 +42,6 @@ public class CreateRepairOrderCommandHandler(
                 await leadInsertRepo.AddAsync(lead, ct);
                 await uow.SaveChangesAsync(ct);
             }
-
-            // Tạo xe mới
             var vehicle = new Vehicle
             {
                 LeadId = lead.Id,
@@ -57,12 +50,10 @@ public class CreateRepairOrderCommandHandler(
                 Status = VehicleStatus.Available,
                 PurchaseDate = DateTimeOffset.UtcNow
             };
-            
             vehicleUpdateRepo.Add(vehicle);
             await uow.SaveChangesAsync(ct);
             vehicleId = vehicle.Id;
         }
-
         var totalCost = req.PartsCost + req.LaborCost;
         var dateStr = DateTimeOffset.UtcNow.ToString("yyyyMMdd");
         var number = $"RO-{dateStr}-{Guid.NewGuid().ToString()[..6].ToUpper()}";

@@ -18,10 +18,11 @@ namespace Application.Features.Bookings.Commands.UpdateBooking
             {
                 return Result<bool>.Failure(Error.NotFound("Lịch hẹn không tồn tại."));
             }
-
-            // Check for overlap: same PreferredDate, status is not Cancelled, and not this booking itself
             var allBookings = await bookingReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-            var isOverlap = allBookings.Any(b => b.PreferredDate == request.PreferredDate && b.Status != BookingStatus.Cancelled && b.Id != request.Id);
+            var isOverlap = allBookings.Any(
+                b => b.PreferredDate == request.PreferredDate &&
+                    b.Status != BookingStatus.Cancelled &&
+                    b.Id != request.Id);
             if (isOverlap)
             {
                 return Result<bool>.Failure("Thời gian đặt lịch này đã bị trùng với lịch hẹn khác.");

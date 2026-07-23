@@ -173,12 +173,10 @@ public class CreateOutputCommandHandler(
         {
             threshold = parsedThreshold;
         }
-
         if (string.IsNullOrWhiteSpace(output.StatusId))
         {
             output.StatusId = totalPrice >= threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
         }
-
         if (totalPrice >= threshold)
         {
             var ratioSetting = settings.FirstOrDefault(
@@ -186,13 +184,11 @@ public class CreateOutputCommandHandler(
             if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
             {
                 output.DepositRatio = parsedRatio;
-            }
-            else
+            } else
             {
                 output.DepositRatio = 50;
             }
-        }
-        else
+        } else
         {
             output.DepositRatio = 0;
         }

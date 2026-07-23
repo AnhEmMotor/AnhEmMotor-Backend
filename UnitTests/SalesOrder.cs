@@ -24,6 +24,7 @@ using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services.Shipping;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -108,7 +109,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -138,7 +139,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -178,7 +179,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -217,7 +218,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -263,7 +264,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -526,7 +527,7 @@ public class SalesOrder
             _variantRepoMock.Object,
             _userRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputByManagerCommand
         {
@@ -564,7 +565,7 @@ public class SalesOrder
             _variantRepoMock.Object,
             _userRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputByManagerCommand
         {
@@ -637,7 +638,7 @@ public class SalesOrder
             _variantRepoMock.Object,
             _userRepoMock.Object,
             _commissionUpdateRepositoryMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -685,7 +686,7 @@ public class SalesOrder
             _variantRepoMock.Object,
             _userRepoMock.Object,
             _commissionUpdateRepositoryMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -701,7 +702,7 @@ public class SalesOrder
         var handler = new UpdateOutputCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputCommand { Id = 1, CurrentUserId = userId, CustomerName = "New Customer Name" };
         var existingOutput = new Output
@@ -1042,7 +1043,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -1093,7 +1094,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -1109,7 +1110,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1128,7 +1129,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1148,7 +1149,7 @@ public class SalesOrder
         var handler = new UpdateOutputCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputCommand { Id = 1, CustomerName = "New Name" };
         var completedOutput = new Output { Id = 1, StatusId = "completed" };
@@ -1164,7 +1165,7 @@ public class SalesOrder
         var handler = new UpdateOutputCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputCommand { Id = 1, CustomerName = "New Name" };
         var deletedOutput = new Output { Id = 1, DeletedAt = DateTime.UtcNow };
@@ -1252,7 +1253,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -1297,7 +1298,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1429,7 +1430,7 @@ public class SalesOrder
             _variantRepoMock.Object,
             _userRepoMock.Object,
             _commissionUpdateRepositoryMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputForManagerCommand
         {
@@ -1454,7 +1455,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1528,7 +1529,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -1545,7 +1546,7 @@ public class SalesOrder
         var handler = new UpdateOutputCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var command = new UpdateOutputCommand
         {
@@ -1660,7 +1661,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -1692,7 +1693,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -1723,7 +1724,7 @@ public class SalesOrder
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -1764,7 +1765,7 @@ public class SalesOrder
             _variantRepoMock.Object,
             _userRepoMock.Object,
             _settingRepoMock.Object,
-            new Mock<Application.Interfaces.Services.Shipping.IShippingService>().Object,
+            new Mock<IShippingService>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();

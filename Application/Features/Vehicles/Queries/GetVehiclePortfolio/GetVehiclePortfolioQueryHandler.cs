@@ -20,12 +20,13 @@ public class GetVehiclePortfolioQueryHandler(
             return Result<VehiclePortfolioResponse?>.Failure([Error.Validation("Query cannot be empty.")]);
         var vehicle = await vehicleRepo.GetVehicleForPortfolioAsync(q, req.QueryType, ct).ConfigureAwait(false);
         if (vehicle is null)
-            return Result<VehiclePortfolioResponse?>.Success(new VehiclePortfolioResponse
-            {
-                Vehicle = null,
-                History = new List<VehiclePortfolioHistoryItem>(),
-                TotalHistoryCount = 0
-            });
+            return Result<VehiclePortfolioResponse?>.Success(
+                new VehiclePortfolioResponse
+                {
+                    Vehicle = null!,
+                    History = new List<VehiclePortfolioHistoryItem>(),
+                    TotalHistoryCount = 0
+                });
         var allHistory = await maintenanceRepo.GetByVehicleIdAsync(vehicle.Id, ct, DataFetchMode.All)
             .ConfigureAwait(false);
         List<MaintenanceHistoryEntity> historyItems = req.PageSize > 0 && req.Page > 0
