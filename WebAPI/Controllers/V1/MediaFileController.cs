@@ -27,7 +27,7 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Quản lý tệp media (ảnh, video, tài liệu).
+/// Quản lý tệp media (ảnh, video, tài liệu) — tải lên, xóa, khôi phục, xem ảnh với resize.
 /// </summary>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý tệp media")]
@@ -36,8 +36,12 @@ namespace WebAPI.Controllers.V1;
 public class MediaFileController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Lấy danh sách tệp media (có phân trang, lọc, sắp xếp).
+    /// Lấy danh sách tệp media (có phân trang, lọc, sắp xếp theo quy tắc Sieve).
     /// </summary>
+    /// <param name="sieveModel">Tham số phân trang, lọc, sắp xếp.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách tệp media đã phân trang.</returns>
+    /// <response code="200">Trả về danh sách tệp media thành công.</response>
     [HttpGet]
     [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.View, Permissions.Order.ProductManagement.View)]
     [ProducesResponseType(typeof(PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
@@ -53,6 +57,10 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy danh sách tệp media đã bị xoá (có phân trang, lọc, sắp xếp).
     /// </summary>
+    /// <param name="sieveModel">Tham số phân trang, lọc, sắp xếp.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách tệp media đã bị xoá đã phân trang.</returns>
+    /// <response code="200">Trả về danh sách tệp đã xoá thành công.</response>
     [HttpGet("deleted")]
     [RequiresAnyPermissions(Permissions.Warehouse.ProductManagement.View, Permissions.Order.ProductManagement.View)]
     [ProducesResponseType(typeof(PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
@@ -66,8 +74,13 @@ public class MediaFileController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy thông tin của tệp media được chọn.
+    /// Lấy thông tin chi tiết của một tệp media theo ID.
     /// </summary>
+    /// <param name="id">ID của tệp media cần xem.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin chi tiết của tệp media.</returns>
+    /// <response code="200">Trả về thông tin tệp media thành công.</response>
+    /// <response code="404">Không tìm thấy tệp media với ID đã cho.</response>
     [HttpGet("{id:int}", Name = MediaFile.GetById)]
     [RequiresAnyPermissions(
         Permissions.Warehouse.ProductManagement.Edit,
@@ -86,6 +99,11 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// <summary>
     /// Tải lên một tệp ảnh cho sản phẩm.
     /// </summary>
+    /// <param name="file">Tệp ảnh (JPEG, PNG) cần tải lên.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin tệp media đã tải lên thành công.</returns>
+    /// <response code="201">Tải lên ảnh sản phẩm thành công.</response>
+    /// <response code="400">File rỗng hoặc định dạng không hợp lệ.</response>
     [HttpPost("product/upload")]
     [RequiresAnyPermissions(
         Permissions.Warehouse.ProductManagement.Edit,
@@ -105,6 +123,11 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// <summary>
     /// Tải lên một tệp ảnh cho bài viết/tin tức.
     /// </summary>
+    /// <param name="file">Tệp ảnh (JPEG, PNG) cần tải lên.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin tệp media đã tải lên thành công.</returns>
+    /// <response code="201">Tải lên ảnh bài viết thành công.</response>
+    /// <response code="400">File rỗng hoặc định dạng không hợp lệ.</response>
     [HttpPost("news/upload")]
     [RequiresAnyPermissions(
         Permissions.Warehouse.ProductManagement.Edit,
@@ -122,8 +145,13 @@ public class MediaFileController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tải lên một tệp ảnh cho banner.
+    /// Tải lên một tệp ảnh cho banner (slider trang chủ).
     /// </summary>
+    /// <param name="file">Tệp ảnh banner (JPEG, PNG) cần tải lên.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin tệp media đã tải lên thành công.</returns>
+    /// <response code="201">Tải lên ảnh banner thành công.</response>
+    /// <response code="400">File rỗng hoặc định dạng không hợp lệ.</response>
     [HttpPost("banner/upload")]
     [RequiresAnyPermissions(
         Permissions.Warehouse.ProductManagement.Edit,
@@ -141,8 +169,13 @@ public class MediaFileController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tải lên nhiều ảnh sản phẩm cùng lúc.
+    /// Tải lên nhiều ảnh sản phẩm cùng lúc (hỗ trợ upload nhóm).
     /// </summary>
+    /// <param name="files">Danh sách tệp ảnh cần tải lên.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách thông tin tệp media đã tải lên thành công.</returns>
+    /// <response code="201">Tải lên nhiều ảnh thành công.</response>
+    /// <response code="400">File rỗng hoặc định dạng không hợp lệ.</response>
     [HttpPost("product/upload-many")]
     [RequiresAnyPermissions(
         Permissions.Warehouse.ProductManagement.Edit,
@@ -165,8 +198,13 @@ public class MediaFileController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xoá tệp media sản phẩm theo tên file.
+    /// Xoá tệp media sản phẩm theo đường dẫn lưu trữ (storage path).
     /// </summary>
+    /// <param name="storagePath">Đường dẫn lưu trữ của tệp (catch-all route).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả xoá tệp (204 No Content nếu thành công).</returns>
+    /// <response code="204">Xoá tệp thành công.</response>
+    /// <response code="404">Không tìm thấy tệp media.</response>
     [HttpDelete("product/{**storagePath}")]
     [RequiresAnyPermissions(
         Permissions.Warehouse.ProductManagement.Edit,
@@ -183,8 +221,13 @@ public class MediaFileController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xoá nhiều tệp media cùng lúc.
+    /// Xoá nhiều tệp media cùng lúc theo danh sách đường dẫn.
     /// </summary>
+    /// <param name="request">Yêu cầu chứa danh sách đường dẫn tệp cần xoá.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả xoá nhiều tệp.</returns>
+    /// <response code="204">Xoá nhiều tệp thành công.</response>
+    /// <response code="400">Danh sách tệp không hợp lệ.</response>
     [HttpDelete("delete-many")]
     [RequiresAnyPermissions(
         Permissions.Warehouse.ProductManagement.Edit,
@@ -202,8 +245,13 @@ public class MediaFileController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Khôi phục lại tệp media đã xoá theo tên file.
+    /// Khôi phục lại tệp media đã bị xoá mềm (soft-delete) theo đường dẫn lưu trữ.
     /// </summary>
+    /// <param name="storagePath">Đường dẫn lưu trữ của tệp cần khôi phục (catch-all route).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin tệp media đã khôi phục.</returns>
+    /// <response code="200">Khôi phục tệp thành công.</response>
+    /// <response code="404">Không tìm thấy tệp media đã xoá.</response>
     [HttpPost("restore/{**storagePath}")]
     [RequiresAnyPermissions(
         Permissions.Warehouse.ProductManagement.Edit,
@@ -220,8 +268,13 @@ public class MediaFileController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Khôi phục nhiều tệp media đã xoá cùng lúc.
+    /// Khôi phục nhiều tệp media đã bị xoá cùng lúc theo danh sách đường dẫn.
     /// </summary>
+    /// <param name="request">Yêu cầu chứa danh sách đường dẫn tệp cần khôi phục.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách thông tin tệp media đã khôi phục.</returns>
+    /// <response code="200">Khôi phục nhiều tệp thành công.</response>
+    /// <response code="400">Danh sách tệp không hợp lệ.</response>
     [HttpPost("restore-many")]
     [RequiresAnyPermissions(
         Permissions.Warehouse.ProductManagement.Edit,
@@ -239,8 +292,16 @@ public class MediaFileController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Xem ảnh với khả năng resize theo kích thước mong muốn.
+    /// Xem ảnh với khả năng resize theo kích thước mong muốn (dùng cho thumbnail/preview).
     /// </summary>
+    /// <param name="storagePath">Đường dẫn lưu trữ của ảnh (catch-all route).</param>
+    /// <param name="width">Chiều rộng mong muốn sau resize (tuỳ chọn — null trả về kích thước gốc).</param>
+    /// <param name="download">Nếu true, trả về file để tải về thay vì hiển thị trực tiếp.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Ảnh đã được resize (nếu có width) hoặc ảnh gốc (content-type: image/*).</returns>
+    /// <response code="200">Trả về ảnh thành công.</response>
+    /// <response code="404">Không tìm thấy ảnh.</response>
+    /// <response code="400">Tham số width không hợp lệ.</response>
     [HttpGet("view-image/{**storagePath}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -256,4 +317,3 @@ public class MediaFileController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-

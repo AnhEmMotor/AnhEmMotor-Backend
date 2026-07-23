@@ -296,10 +296,17 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Nhập danh sách phiếu nhập hàng từ file Excel.
+    /// </summary>
+    /// <param name="command">Dữ liệu nhập từ form (file Excel).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả nhập (số bản ghi thành công, thất bại, bản ghi lỗi).</returns>
     [HttpPost("import")]
     [HasPermission(Permissions.Warehouse.ReceiptManagement.Create)]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(Result<ImportInventoryReceiptsResult>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ImportInventoryReceiptsAsync(
         [FromForm] ImportInventoryReceiptsCommand command,
         CancellationToken cancellationToken)
@@ -308,9 +315,16 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Tải xuống file mẫu Excel để nhập phiếu nhập kho.
+    /// </summary>
+    /// <param name="purchaseRequestId">ID của phiếu đề xuất mua hàng muốn nhập (tùy chọn).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>File Excel mẫu (.xlsx) để người dùng điền thông tin.</returns>
     [HttpGet("import-template")]
     [HasPermission(Permissions.Warehouse.ReceiptManagement.Create)]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetImportTemplateAsync(
         [FromQuery] int purchaseRequestId,
         CancellationToken cancellationToken)
@@ -327,6 +341,12 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Xuất danh sách phiếu nhập hàng ra file Excel.
+    /// </summary>
+    /// <param name="sieveModel">Thông tin phân trang, lọc, sắp xếp.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>File Excel chứa danh sách phiếu nhập kho.</returns>
     [HttpGet("export")]
     [HasPermission(Permissions.Warehouse.ReceiptManagement.View)]
     [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]

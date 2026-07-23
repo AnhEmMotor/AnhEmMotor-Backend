@@ -259,7 +259,9 @@ public class CreateProductCommandHandler(
             BrandId = request.BrandId,
             Description = request.Description?.Trim(),
             Weight = request.Weight,
-            Dimensions = request.Dimensions?.Trim(),
+            Length = request.Length,
+            Width = request.Width,
+            Height = request.Height,
             Wheelbase = request.Wheelbase,
             SeatHeight = request.SeatHeight,
             GroundClearance = request.GroundClearance?.ToString(),
@@ -339,7 +341,9 @@ public class CreateProductCommandHandler(
                     VariantName = variantReq.VariantName?.Trim(),
                     SKU = variantReq.SKU?.Trim(),
                     Weight = variantReq.Weight,
-                    Dimensions = variantReq.Dimensions?.Trim(),
+                    Length = variantReq.Length,
+                    Width = variantReq.Width,
+                    Height = variantReq.Height,
                     Wheelbase = variantReq.Wheelbase,
                     SeatHeight = variantReq.SeatHeight,
                     GroundClearance = variantReq.GroundClearance,
@@ -418,7 +422,9 @@ public class CreateProductCommandHandler(
                     }
                 }
                 variant.Weight = variantReq.Weight;
-                variant.Dimensions = variantReq.Dimensions?.Trim();
+                variant.Length = variantReq.Length;
+                variant.Width = variantReq.Width;
+                variant.Height = variantReq.Height;
                 variant.Wheelbase = variantReq.Wheelbase;
                 variant.SeatHeight = variantReq.SeatHeight;
                 variant.GroundClearance = variantReq.GroundClearance;
@@ -677,3 +683,4 @@ public class CreateProductCommandHandler(
         return null;
     }
 }
+

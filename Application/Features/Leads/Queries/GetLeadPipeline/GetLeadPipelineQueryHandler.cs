@@ -45,7 +45,6 @@ namespace Application.Features.Leads.Queries.GetLeadPipeline
                                     Address = l.Address,
                                     AddressDetail = l.AddressDetail,
                                     Ward = l.Ward,
-                                    District = l.District,
                                     Province = l.Province,
                                     Gender = l.Gender,
                                     Birthday = l.Birthday,
@@ -58,3 +57,4 @@ namespace Application.Features.Leads.Queries.GetLeadPipeline
         }
     }
 }
+

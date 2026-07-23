@@ -10,6 +10,10 @@ public class RepairOrderResponse
 
     public string? VehicleInfo { get; set; }
 
+    public string? CustomerName { get; set; }
+
+    public string? CustomerPhone { get; set; }
+
     public DateTimeOffset MaintenanceDate { get; set; }
 
     public string Description { get; set; } = string.Empty;

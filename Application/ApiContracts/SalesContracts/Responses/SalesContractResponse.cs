@@ -46,11 +46,15 @@ public class SalesContractResponse
 
     public string CustomerPhone { get; set; } = string.Empty;
 
+    public string? CustomerName => CustomerFullName;
+
     public string VehicleModel { get; set; } = string.Empty;
 
     public string? VehicleVersion { get; set; }
 
     public string? VehicleColor { get; set; }
+
+    public string? Vehicle => !string.IsNullOrEmpty(VehicleVersion) ? $"{VehicleModel} {VehicleVersion}" : VehicleModel;
 
     public string FrameNumber { get; set; } = string.Empty;
 
@@ -63,4 +67,6 @@ public class SalesContractResponse
     public decimal RemainingAmount { get; set; }
 
     public DateTimeOffset? FinalPaymentDeadline { get; set; }
+
+    public DateTimeOffset? DeliveryDeadline => FinalPaymentDeadline;
 }

@@ -5,6 +5,7 @@ using Application.Features.SupplierContracts.Commands.CreateSupplierContract;
 using Application.Features.SupplierContracts.Commands.DeleteSupplierContract;
 using Application.Features.SupplierContracts.Commands.RestoreSupplierContract;
 using Application.Features.SupplierContracts.Commands.UpdateSupplierContract;
+using Application.Features.SupplierContracts.Commands.UploadSupplierContractFile;
 using Application.Features.SupplierContracts.Queries.GetDeletedSupplierContractsList;
 using Application.Features.SupplierContracts.Queries.GetSupplierContractAuditLogs;
 using Application.Features.SupplierContracts.Queries.GetSupplierContractById;
@@ -135,6 +136,32 @@ public class SupplierContractsController(IMediator mediator) : ApiController
         var command = new UpdateSupplierContractCommand(id, request);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tải lên file gốc của hợp đồng nhà cung cấp.
+    /// </summary>
+    [HttpPost("{id:guid}/file")]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.SupplierManagement.Edit,
+        Permissions.Accountant.SupplierContractManagement.Edit)]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(11 * 1024 * 1024)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadSupplierContractFileAsync(
+        Guid id,
+        [FromForm] IFormFile? file,
+        CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest(new { message = "File hợp đồng trống hoặc không hợp lệ." });
+        await using var stream = file.OpenReadStream();
+        var result = await mediator.Send(
+            new UploadSupplierContractFileCommand(id, stream, file.FileName),
+            cancellationToken)
+            .ConfigureAwait(false);
+        return result.IsSuccess ? Ok(new { contractFilePath = result.Value }) : HandleResult(result);
     }
 
     /// <summary>

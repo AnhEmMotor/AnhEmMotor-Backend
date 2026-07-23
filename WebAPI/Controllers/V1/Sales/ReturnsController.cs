@@ -6,6 +6,9 @@ using Sieve.Models;
 
 namespace WebAPI.Controllers.V1.Sales;
 
+/// <summary>
+/// Quản lý yêu cầu đổi trả hàng bán.
+/// </summary>
 [ApiController]
 [Route("api/v1/sales/returns")]
 public class ReturnsController : ControllerBase
@@ -17,6 +20,11 @@ public class ReturnsController : ControllerBase
         _mediator = mediator;
     }
 
+    /// <summary>
+    /// Lấy danh sách yêu cầu đổi trả hàng (có phân trang, lọc, sắp xếp — Sieve).
+    /// </summary>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp của Sieve.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet]
     public async Task<IActionResult> GetReturnRequests(
         [FromQuery] SieveModel sieveModel,
@@ -31,6 +39,11 @@ public class ReturnsController : ControllerBase
         return BadRequest(result.Error);
     }
 
+    /// <summary>
+    /// Lấy chi tiết một yêu cầu đổi trả hàng theo ID.
+    /// </summary>
+    /// <param name="id">ID của yêu cầu đổi trả.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetReturnRequestDetail(int id, CancellationToken cancellationToken)
     {

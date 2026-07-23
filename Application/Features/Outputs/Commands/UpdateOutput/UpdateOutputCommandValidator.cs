@@ -14,5 +14,11 @@ public class UpdateOutputCommandValidator : AbstractValidator<UpdateOutputComman
             .WithMessage("Số điện thoại không được để trống.")
             .MustBeValidPhoneNumber()
             .WithMessage("Định dạng số điện thoại Việt Nam không hợp lệ.");
+        RuleFor(x => x.ProvinceId)
+            .NotNull()
+            .WithMessage("Vui lòng chọn Tỉnh/Thành phố.")
+            .GreaterThan(0)
+            .WithMessage("Tỉnh/Thành phố không hợp lệ.");
+        RuleFor(x => x.WardCode).NotEmpty().WithMessage("Vui lòng chọn Phường/Xã.");
     }
 }

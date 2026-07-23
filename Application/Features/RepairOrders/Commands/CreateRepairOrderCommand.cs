@@ -4,7 +4,13 @@ using MediatR;
 namespace Application.Features.RepairOrders.Commands;
 
 public record CreateRepairOrderCommand(
-    int VehicleId,
+    int? VehicleId,
+    string? CustomerName,
+    string? CustomerPhone,
+    string? VinNumber,
+    string? LicensePlate,
+    string? VehicleName,
+    string? VehicleColor,
     DateTimeOffset MaintenanceDate,
     string Description,
     int Mileage,

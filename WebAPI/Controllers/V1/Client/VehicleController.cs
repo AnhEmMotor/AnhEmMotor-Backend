@@ -1,23 +1,32 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WebAPI.Controllers.V1.Client
-{
-    [ApiController]
-    [Route("api/v1/client/vehicles")]
-    [Authorize]
-    public class VehicleController : ControllerBase
-    {
-        [HttpGet]
-        public async Task<IActionResult> GetMyVehicles(CancellationToken cancellationToken)
-        {
-            return Ok(new { message = "Endpoint temporarily unavailable" });
-        }
+namespace WebAPI.Controllers.V1.Client;
 
-        [HttpPost("register-odo")]
-        public async Task<IActionResult> RegisterOdo(CancellationToken cancellationToken)
-        {
-            return Ok(new { message = "Endpoint temporarily unavailable" });
-        }
+/// <summary>
+/// Quản lý xe của khách hàng (Client Portal).
+/// </summary>
+[ApiController]
+[Route("api/v1/client/vehicles")]
+[Authorize]
+public class VehicleController : ControllerBase
+{
+    /// <summary>
+    /// Lấy danh sách xe đã đăng ký của khách hàng đang đăng nhập.
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetMyVehicles(CancellationToken cancellationToken)
+    {
+        return Ok(new { message = "Endpoint temporarily unavailable" });
+    }
+
+    /// <summary>
+    /// Đăng ký số km odometer cho xe của khách hàng.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    [HttpPost("register-odo")]
+    public async Task<IActionResult> RegisterOdo(CancellationToken cancellationToken)
+    {
+        return Ok(new { message = "Endpoint temporarily unavailable" });
     }
 }

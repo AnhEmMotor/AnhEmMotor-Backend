@@ -758,6 +758,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
             var deletedLead = await db.Leads
                 .IgnoreQueryFilters()
+                .AsNoTracking()
                 .FirstOrDefaultAsync(l => l.Id == lead.Id, TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             deletedLead!.DeletedAt.Should().NotBeNull();

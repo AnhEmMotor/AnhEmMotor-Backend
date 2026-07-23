@@ -12,6 +12,8 @@ public class OrderDetailResponse
 
     public string? PaymentUrl { get; set; }
 
+    public DateTimeOffset? PaymentExpiredAt { get; set; }
+
     public string? Notes { get; set; }
 
     public Guid? BuyerId { get; set; }
@@ -57,6 +59,14 @@ public class OrderDetailResponse
     public string? CompanyEmail { get; set; }
 
     public string? BudgetCode { get; set; }
+
+    public int? ProvinceId { get; set; }
+
+    public string? ProvinceName { get; set; }
+
+    public string? WardCode { get; set; }
+
+    public string? WardName { get; set; }
 
     public List<OutputInfoResponse> Products { get; set; } = [];
 }

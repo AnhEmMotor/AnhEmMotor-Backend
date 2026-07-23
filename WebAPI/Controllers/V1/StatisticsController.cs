@@ -31,7 +31,7 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Thống kê và báo cáo.
+/// Thống kê và báo cáo — cung cấp dữ liệu tổng hợp, biểu đồ và phân tích cho các phân hệ Admin, Accountant, Factory.
 /// </summary>
 [ApiVersion("1.0")]
 [SwaggerTag("Thống kê và báo cáo")]
@@ -45,6 +45,10 @@ public class StatisticsController(
     /// <summary>
     /// Lấy doanh thu theo ngày trong khoảng thời gian xác định.
     /// </summary>
+    /// <param name="days">Số ngày lấy dữ liệu doanh thu trở lại (mặc định: 7 ngày).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách doanh thu theo từng ngày.</returns>
+    /// <response code="200">Trả về danh sách doanh thu hàng ngày thành công.</response>
     [HttpGet("daily-revenue")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -61,8 +65,13 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy chi tiết sản phẩm và nhân viên bán trong một ngày cụ thể.
+    /// Lấy chi tiết sản phẩm và nhân viên bán hàng trong một ngày cụ thể.
     /// </summary>
+    /// <param name="reportDay">Ngày báo cáo (định dạng dd/MM/yyyy hoặc ISO).</param>
+    /// <param name="days">Số ngày lùi về để lấy bối cảnh doanh thu (mặc định: 7 ngày).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Chi tiết doanh thu theo ngày gồm sản phẩm và nhân viên bán hàng.</returns>
+    /// <response code="200">Trả về chi tiết doanh thu thành công.</response>
     [HttpGet("daily-revenue/detail")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -80,8 +89,11 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy các chỉ số tổng hợp cho Dashboard.
+    /// Lấy các chỉ số tổng hợp cho Dashboard (tổng đơn hàng, doanh thu, khách hàng mới).
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu tổng hợp Dashboard.</returns>
+    /// <response code="200">Trả về dữ liệu tổng hợp Dashboard thành công.</response>
     [HttpGet("dashboard-stats")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -96,8 +108,12 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy doanh thu và lợi nhuận theo tháng.
+    /// Lấy doanh thu và lợi nhuận theo tháng (biểu đồ xu hướng).
     /// </summary>
+    /// <param name="months">Số tháng lấy dữ liệu xu hướng doanh thu (mặc định: 12 tháng).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách doanh thu và lợi nhuận theo từng tháng.</returns>
+    /// <response code="200">Trả về doanh thu theo tháng thành công.</response>
     [HttpGet("monthly-revenue-profit")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -114,8 +130,11 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy số lượng đơn hàng theo từng trạng thái
+    /// Lấy số lượng đơn hàng theo từng trạng thái (để biểu đồ tròn / donut chart).
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách số lượng đơn hàng theo từng trạng thái.</returns>
+    /// <response code="200">Trả về số lượng đơn hàng theo trạng thái thành công.</response>
     [HttpGet("order-status-counts")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -130,8 +149,11 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy báo cáo sản phẩm của tháng trước.
+    /// Lấy báo cáo sản phẩm bán chạy của tháng trước (top sản phẩm, doanh số, tồn kho).
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách sản phẩm bán chạy của tháng trước.</returns>
+    /// <response code="200">Trả về báo cáo sản phẩm tháng trước thành công.</response>
     [HttpGet("product-report-last-month")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -148,6 +170,9 @@ public class StatisticsController(
     /// <summary>
     /// Lấy báo cáo sản phẩm tổng hợp (doanh số, tồn kho, phân bố thương hiệu).
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Báo cáo tổng hợp về sản phẩm.</returns>
+    /// <response code="200">Trả về báo cáo sản phẩm thành công.</response>
     [HttpGet("product-report")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -162,8 +187,13 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy báo cáo tổng quan kho (tồn kho, giá vốn, cảnh báo).
+    /// Lấy báo cáo tổng quan kho (tồn kho hiện tại, giá vốn, cảnh báo sản phẩm sắp hết).
     /// </summary>
+    /// <param name="startDate">Ngày bắt đầu lọc dữ liệu (tuỳ chọn, ISO 8601).</param>
+    /// <param name="endDate">Ngày kết thúc lọc dữ liệu (tuỳ chọn, ISO 8601).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Báo cáo tổng quan kho hàng.</returns>
+    /// <response code="200">Trả về báo cáo kho thành công.</response>
     [HttpGet("warehouse-report")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -181,8 +211,13 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy phân tích doanh thu chi tiết (theo kênh, khu vực, nhân viên).
+    /// Lấy phân tích doanh thu chi tiết theo kênh bán (online/offline), khu vực và nhân viên.
     /// </summary>
+    /// <param name="startDate">Ngày bắt đầu phân tích (tuỳ chọn, ISO 8601).</param>
+    /// <param name="endDate">Ngày kết thúc phân tích (tuỳ chọn, ISO 8601).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu phân tích doanh thu chi tiết.</returns>
+    /// <response code="200">Trả về phân tích doanh thu thành công.</response>
     [HttpGet("revenue-analysis")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -200,8 +235,13 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy giá và tồn kho của một sản phẩm cụ thể.
+    /// Lấy giá bán hiện tại và số lượng tồn kho của một biến thể sản phẩm cụ thể.
     /// </summary>
+    /// <param name="variantId">ID của biến thể sản phẩm (ProductVariant) cần xem giá và tồn kho.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin giá và tồn kho của biến thể sản phẩm.</returns>
+    /// <response code="200">Trả về thông tin giá và tồn kho thành công.</response>
+    /// <response code="404">Không tìm thấy biến thể sản phẩm.</response>
     [HttpGet("product-stock-price/{variantId:int}")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -217,8 +257,11 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy phân tích khách hàng.
+    /// Lấy phân tích khách hàng (tỷ lệ giữ chân, LTV, phân bố nguồn khách).
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu phân tích khách hàng.</returns>
+    /// <response code="200">Trả về phân tích khách hàng thành công.</response>
     [HttpGet("customer-analytics")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -232,8 +275,11 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy báo cáo chăm sóc khách hàng.
+    /// Lấy báo cáo chăm sóc khách hàng (tốc độ phản hồi, tỷ lệ giải quyết, đánh giá).
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu báo cáo chăm sóc khách hàng.</returns>
+    /// <response code="200">Trả về báo cáo chăm sóc khách hàng thành công.</response>
     [HttpGet("customer-service-analytics")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -249,6 +295,9 @@ public class StatisticsController(
     /// <summary>
     /// Lấy thống kê tổng quan về đơn hàng (hàng đợi, SLA, lỗi, ngoại lệ).
     /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu thống kê đơn hàng chi tiết.</returns>
+    /// <response code="200">Trả về thống kê đơn hàng thành công.</response>
     [HttpGet("order-statistics")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -263,8 +312,13 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy dữ liệu tổng quan Dashboard kế toán (summary, doanh thu, đơn hàng gần đây).
+    /// Lấy dữ liệu tổng quan Dashboard dành cho Kế toán (summary, doanh thu, đơn hàng gần đây).
     /// </summary>
+    /// <param name="startDate">Ngày bắt đầu phân tích (tuỳ chọn, ISO 8601).</param>
+    /// <param name="endDate">Ngày kết thúc phân tích (tuỳ chọn, ISO 8601).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu tổng quan Dashboard cho Kế toán.</returns>
+    /// <response code="200">Trả về tổng quan Dashboard thành công.</response>
     [HttpGet("dashboard-overview")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -282,8 +336,13 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy dữ liệu tổng quan Dashboard xưởng dịch vụ (KPI, cảnh báo, analytics).
+    /// Lấy dữ liệu tổng quan Dashboard xưởng dịch vụ (KPI, cảnh báo, doanh thu xưởng so với bán lẻ).
     /// </summary>
+    /// <param name="from">Thời điểm bắt đầu phân tích (chuỗi ngày tháng, tuỳ chọn, để trống lấy đầu tháng hiện tại).</param>
+    /// <param name="to">Thời điểm kết thúc phân tích (chuỗi ngày tháng, tuỳ chọn, để trống lấy thời điểm hiện tại).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Dữ liệu tổng quan Dashboard xưởng dịch vụ (KPI, biểu đồ, danh sách phiếu sửa chữa đang xử lý).</returns>
+    /// <response code="200">Trả về tổng quan xưởng dịch vụ thành công.</response>
     [HttpGet("workshop-dashboard-overview")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -304,10 +363,16 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy dữ liệu báo cáo xưởng dịch vụ cho phân hệ Kế toán (KPI + phiếu đang sửa chữa).
+    /// Lấy dữ liệu báo cáo xưởng dịch vụ dành cho phân hệ Kế toán (KPI, phiếu đang sửa chữa).
     /// </summary>
+    /// <param name="start">Thời điểm bắt đầu lọc dữ liệu (ISO 8601, tuỳ chọn).</param>
+    /// <param name="end">Thời điểm kết thúc lọc dữ liệu (ISO 8601, tuỳ chọn).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Báo cáo xưởng dịch vụ gồm KPI và danh sách phiếu sửa chữa trong kỳ.</returns>
+    /// <response code="200">Trả về báo cáo xưởng dịch vụ thành công.</response>
     [HttpGet("workshop-overview")]
     [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetWorkshopOverviewAsync(
         [FromQuery] DateTimeOffset? start,
         [FromQuery] DateTimeOffset? end,
@@ -318,21 +383,21 @@ public class StatisticsController(
         var periodEnd = end ?? now;
         var inProgressCount = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
-            .CountAsync(m => m.TotalCost >= 0, cancellationToken)
+            .CountAsync(m => m.TotalCost == 0, cancellationToken)
             .ConfigureAwait(false);
         var workshopRevenue = await dbContext.WorkshopPayments
             .IgnoreQueryFilters()
             .Where(p => p.CreatedAt >= periodStart && p.CreatedAt <= periodEnd)
             .SumAsync(p => p.TotalAmount, cancellationToken)
             .ConfigureAwait(false);
-        var twoHoursAgo = now.AddHours(-2);
+        var overdueCutoff = now.AddHours(-48);
         var overdueCount = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
-            .CountAsync(m => m.TotalCost >= 0 && m.CreatedAt <= twoHoursAgo, cancellationToken)
+            .CountAsync(m => m.TotalCost == 0 && m.CreatedAt <= overdueCutoff, cancellationToken)
             .ConfigureAwait(false);
         var activeOrders = await dbContext.MaintenanceHistory
             .IgnoreQueryFilters()
-            .Where(m => m.TotalCost >= 0)
+            .Where(m => m.TotalCost == 0)
             .OrderByDescending(m => m.CreatedAt)
             .Take(20)
             .Select(
@@ -433,8 +498,13 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Thống kê chi tiết các loại hóa đơn trong đơn hàng (OutputOrders).
+    /// Thống kê chi tiết các loại hóa đơn trong đơn hàng (kênh online/offline, phương thức thanh toán, danh mục).
     /// </summary>
+    /// <param name="startDate">Ngày bắt đầu lọc (định dạng dd/MM/yyyy).</param>
+    /// <param name="endDate">Ngày kết thúc lọc (định dạng dd/MM/yyyy).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Báo cáo tổng quan hóa đơn gồm KPI, xu hướng, phân bố sản phẩm và danh sách hóa đơn.</returns>
+    /// <response code="200">Trả về thống kê hóa đơn thành công.</response>
     [HttpGet("invoice-overview")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
@@ -551,8 +621,8 @@ public class StatisticsController(
                         "-",
                         items)));
         }
-        var trendDataList = trendDataDict.Select(
-            kvp => new InvoiceTrendData(kvp.Key, kvp.Value.Offline, kvp.Value.Online))
+        var trendDataList = trendDataDict
+            .Select(kvp => new InvoiceTrendData(kvp.Key, kvp.Value.Offline, kvp.Value.Online))
             .ToList();
         var productDataList = productDataDict.Select(kvp => new InvoiceProductData(kvp.Key, kvp.Value)).ToList();
         var paymentDataList = paymentDataDict.Select(kvp => new InvoicePaymentData(kvp.Key, kvp.Value)).ToList();
@@ -566,8 +636,13 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Thống kê hợp đồng tổng hợp (Bán xe &amp; Nhà cung cấp).
+    /// Thống kê hợp đồng tổng hợp (Bán xe và Nhà cung cấp) trong khoảng thời gian.
     /// </summary>
+    /// <param name="startDate">Ngày bắt đầu lọc (định dạng dd/MM/yyyy).</param>
+    /// <param name="endDate">Ngày kết thúc lọc (định dạng dd/MM/yyyy).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Báo cáo hợp đồng gồm KPI, xu hướng, trạng thái, top nhà cung cấp, danh sách hợp đồng.</returns>
+    /// <response code="200">Trả về thống kê hợp đồng thành công.</response>
     [HttpGet("contract-overview")]
     [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View)]
     [ProducesResponseType(typeof(ContractOverviewResponse), StatusCodes.Status200OK)]
@@ -652,11 +727,12 @@ public class StatisticsController(
                     statusName,
                     supc.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? string.Empty));
         }
-        var trendDataList = trendDataDict.Select(
-            kvp => new ContractTrendData(kvp.Key, kvp.Value.Sales, kvp.Value.Supplier))
+        var trendDataList = trendDataDict
+            .Select(kvp => new ContractTrendData(kvp.Key, kvp.Value.Sales, kvp.Value.Supplier))
             .ToList();
         var statusDataList = statusDataDict.Select(kvp => new ContractStatusData(kvp.Key, kvp.Value)).ToList();
-        var topSuppliersList = topSupplierDict.OrderByDescending(x => x.Value)
+        var topSuppliersList = topSupplierDict
+            .OrderByDescending(x => x.Value)
             .Take(5)
             .Select(kvp => new ContractTopSupplierData(kvp.Key, kvp.Value))
             .ToList();
@@ -670,8 +746,13 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy doanh thu phân theo danh mục sản phẩm.
+    /// Lấy doanh thu phân theo danh mục sản phẩm trong khoảng thời gian.
     /// </summary>
+    /// <param name="start">Thời điểm bắt đầu (ISO 8601).</param>
+    /// <param name="end">Thời điểm kết thúc (ISO 8601).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Danh sách doanh thu theo từng danh mục sản phẩm.</returns>
+    /// <response code="200">Trả về doanh thu theo danh mục thành công.</response>
     [HttpGet("revenue-by-category")]
     [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View)]
     [ProducesResponseType(typeof(IEnumerable<RevenueByCategoryResponse>), StatusCodes.Status200OK)]
@@ -686,8 +767,12 @@ public class StatisticsController(
     }
 
     /// <summary>
-    /// Lấy doanh thu theo ngày và danh mục (multi-series cho biểu đồ).
+    /// Lấy doanh thu theo ngày và danh mục sản phẩm (multi-series cho biểu đồ).
     /// </summary>
+    /// <param name="days">Số ngày lấy dữ liệu xu hướng (mặc định: 7 ngày).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Doanh thu theo ngày và danh mục sản phẩm (multi-series).</returns>
+    /// <response code="200">Trả về doanh thu theo ngày và danh mục thành công.</response>
     [HttpGet("daily-category-revenue")]
     [RequiresAnyPermissions(
         Permissions.Admin.DashboardManagement.View,
