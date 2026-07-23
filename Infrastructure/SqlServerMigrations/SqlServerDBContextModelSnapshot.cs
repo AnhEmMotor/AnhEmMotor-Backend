@@ -1215,7 +1215,7 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasKey("Id");
                     b.HasIndex("OutputId");
                     b.HasIndex("VoucherId");
-                    b.ToTable("OrderVoucher");
+                    b.ToTable("OrderVouchers");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Output",
@@ -2546,30 +2546,37 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
                     b.Property<int>("BrandId").HasColumnType("int").HasColumnName("BrandId");
-                    b.Property<string>("Coverage").HasColumnType("nvarchar(max)").HasColumnName("Coverage");
+                    b.Property<string>("Coverage").HasColumnType("nvarchar(200)").HasColumnName("Coverage");
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("Description").HasColumnType("nvarchar(max)").HasColumnName("Description");
+                    b.Property<string>("Description").HasColumnType("nvarchar(MAX)").HasColumnName("Description");
                     b.Property<string>("DescriptionJson")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("DescriptionJson");
                     b.Property<int?>("DurationKm").HasColumnType("int").HasColumnName("DurationKm");
                     b.Property<int?>("DurationMonths").HasColumnType("int").HasColumnName("DurationMonths");
                     b.Property<DateTime?>("EffectiveDate").HasColumnType("datetime2").HasColumnName("EffectiveDate");
-                    b.Property<string>("ErrorCategory").HasColumnType("nvarchar(200)").HasColumnName("ErrorCategory");
+                    b.Property<string>("ErrorCategory")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("ErrorCategory");
                     b.Property<DateTime?>("ExpirationDate").HasColumnType("datetime2").HasColumnName("ExpirationDate");
-                    b.Property<string>("MediaUrl").HasColumnType("nvarchar(500)").HasColumnName("MediaUrl");
+                    b.Property<string>("MediaUrl").HasColumnType("nvarchar(1000)").HasColumnName("MediaUrl");
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion")
                         .HasColumnName("RowVersion");
-                    b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(20)").HasColumnName("Status");
-                    b.Property<string>("TermName").HasColumnType("nvarchar(200)").HasColumnName("TermName");
+                    b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(50)").HasColumnName("Status");
+                    b.Property<string>("TermName").IsRequired().HasColumnType("nvarchar(200)").HasColumnName("TermName");
                     b.Property<string>("TermNameJson").HasColumnType("nvarchar(max)").HasColumnName("TermNameJson");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("VehicleType").HasColumnType("nvarchar(200)").HasColumnName("VehicleType");
+                    b.Property<string>("VehicleType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("VehicleType");
                     b.HasKey("Id");
+                    b.HasIndex("BrandId");
                     b.ToTable("WarrantyTerm");
                 });
             modelBuilder.Entity(
@@ -3786,6 +3793,17 @@ namespace Infrastructure.SqlServerMigrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                     b.Navigation("WarrantyClaim");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.WarrantyTerm",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Brand");
                 });
             modelBuilder.Entity(
                 "Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>",

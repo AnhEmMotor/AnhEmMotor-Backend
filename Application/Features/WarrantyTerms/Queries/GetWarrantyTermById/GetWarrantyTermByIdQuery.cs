@@ -1,7 +1,10 @@
-using Application.ApiContracts.WarrantyTerms.Responses;
+using Application.ApiContracts.Admin.Warranty;
 using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.WarrantyTerms.Queries.GetWarrantyTermById;
 
-public sealed record GetWarrantyTermByIdQuery(int Id) : IRequest<Result<WarrantyTermResponse>>;
+public sealed record GetWarrantyTermByIdQuery : IRequest<Result<WarrantyTermResponse?>>
+{
+    public int Id { get; init; }
+}

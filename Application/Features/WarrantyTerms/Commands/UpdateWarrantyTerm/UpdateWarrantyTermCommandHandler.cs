@@ -1,24 +1,38 @@
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.WarrantyTerm;
-using Mapster;
 using MediatR;
 
 namespace Application.Features.WarrantyTerms.Commands.UpdateWarrantyTerm;
 
 public class UpdateWarrantyTermCommandHandler(
     IWarrantyTermReadRepository readRepository,
-    IWarrantyTermUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateWarrantyTermCommand, Result<int>>
+    IWarrantyTermWriteRepository writeRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateWarrantyTermCommand, Result<bool>>
 {
-    public async Task<Result<int>> Handle(UpdateWarrantyTermCommand request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(UpdateWarrantyTermCommand request, CancellationToken cancellationToken)
     {
-        var warrantyTerm = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-        if (warrantyTerm == null)
-            return Error.NotFound("Warranty term not found.");
-        request.Adapt(warrantyTerm);
-        updateRepository.Update(warrantyTerm);
+        var term = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        if (term == null)
+        {
+            return Result<bool>.Failure(Error.NotFound($"Warranty term with Id {request.Id} not found.", "Id"));
+        }
+        term.TermName = request.TermName.Trim();
+        term.TermNameJson = request.TermNameJson?.Trim();
+        term.BrandId = request.BrandId;
+        term.VehicleType = request.VehicleType.Trim();
+        term.ErrorCategory = request.ErrorCategory.Trim();
+        term.Description = request.Description?.Trim();
+        term.DescriptionJson = request.DescriptionJson?.Trim();
+        term.DurationMonths = request.DurationMonths;
+        term.DurationKm = request.DurationKm;
+        term.Coverage = request.Coverage?.Trim();
+        term.Status = request.Status;
+        term.EffectiveDate = request.EffectiveDate;
+        term.ExpirationDate = request.ExpirationDate;
+        term.MediaUrl = request.MediaUrl?.Trim();
+        await writeRepository.UpdateAsync(term, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return Result<int>.Success(warrantyTerm.Id);
+        return Result<bool>.Success(true);
     }
 }

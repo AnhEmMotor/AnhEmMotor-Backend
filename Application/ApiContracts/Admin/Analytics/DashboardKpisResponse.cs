@@ -1,12 +1,27 @@
 namespace Application.ApiContracts.Admin.Analytics
 {
     public record DashboardKpisResponse(
-        decimal TotalRevenue,
-        int VehiclesSold,
-        int NewLeadsToday,
-        double TestDriveFillRate,
-        decimal PendingPipelineValue,
-        double MonthlyTargetProgress);
+        string Period,
+        string StartDate,
+        string EndDate,
+        List<CardItem> Cards,
+        AlertsSummary Alerts);
+
+    public record CardItem(string Label, decimal Value, double Change, string Icon, string Unit);
+
+    public record AlertsSummary(
+        FinancialAlerts Financial,
+        InventoryAlerts Inventory,
+        CustomerAlerts Customer,
+        OperationsAlerts Operations);
+
+    public record FinancialAlerts(int DelayedLoans, bool LowRevenue);
+
+    public record InventoryAlerts(int LowStockVehicles, int LowStockParts);
+
+    public record CustomerAlerts(int NewComplaints, int MissedAppointments);
+
+    public record OperationsAlerts(int PendingOrders);
 
     public record CustomerFunnelDto(string Stage, int Count);
 

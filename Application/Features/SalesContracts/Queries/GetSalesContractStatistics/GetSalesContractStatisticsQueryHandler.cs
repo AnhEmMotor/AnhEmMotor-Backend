@@ -15,15 +15,15 @@ public class GetSalesContractStatisticsQueryHandler(ISalesContractReadRepository
             .ConfigureAwait(false);
         var signedCount = await readRepo.CountByStatusAsync(SalesContractStatus.Signed, cancellationToken)
             .ConfigureAwait(false);
-        var total = await readRepo.CountAsync(cancellationToken).ConfigureAwait(false);
-        var fulfilledCount = total - draftCount - signedCount;
+        var fulfilledCount = await readRepo.CountByStatusAsync(SalesContractStatus.Fulfilled, cancellationToken)
+            .ConfigureAwait(false);
         var overdueCount = await readRepo.CountOverdueAsync(cancellationToken).ConfigureAwait(false);
         return Result<SalesContractStatisticsResponse>.Success(
             new SalesContractStatisticsResponse
             {
                 DraftCount = draftCount,
                 SignedCount = signedCount,
-                FulfilledCount = Math.Max(0, fulfilledCount),
+                FulfilledCount = fulfilledCount,
                 OverdueCount = overdueCount,
             });
     }

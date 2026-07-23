@@ -682,7 +682,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var salesId = staffUser.Id;
-        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/assign", (Guid?)salesId)
+        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/assign", new { UserId = (Guid?)salesId })
             .ConfigureAwait(true);
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }

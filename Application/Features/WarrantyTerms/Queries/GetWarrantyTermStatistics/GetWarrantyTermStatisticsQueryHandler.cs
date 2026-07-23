@@ -1,4 +1,4 @@
-using Application.ApiContracts.WarrantyTerms.Responses;
+using Application.ApiContracts.Admin.Warranty;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.WarrantyTerm;
 using MediatR;
@@ -11,16 +11,7 @@ public class GetWarrantyTermStatisticsQueryHandler(IWarrantyTermReadRepository r
         GetWarrantyTermStatisticsQuery request,
         CancellationToken cancellationToken)
     {
-        var terms = await readRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        var totalCount = terms.Count;
-        var activeCount = terms.Count(x => x.Status == "Active");
-        var expiredCount = totalCount - activeCount;
-        return Result<WarrantyTermStatisticsResponse>.Success(
-            new WarrantyTermStatisticsResponse
-            {
-                TotalCount = totalCount,
-                ActiveCount = activeCount,
-                ExpiredCount = expiredCount
-            });
+        var stats = await readRepository.GetStatisticsAsync(cancellationToken).ConfigureAwait(false);
+        return stats;
     }
 }

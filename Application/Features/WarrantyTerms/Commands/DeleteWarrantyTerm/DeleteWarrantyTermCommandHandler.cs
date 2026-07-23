@@ -7,16 +7,18 @@ namespace Application.Features.WarrantyTerms.Commands.DeleteWarrantyTerm;
 
 public class DeleteWarrantyTermCommandHandler(
     IWarrantyTermReadRepository readRepository,
-    IWarrantyTermDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteWarrantyTermCommand, Result<int>>
+    IWarrantyTermWriteRepository writeRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteWarrantyTermCommand, Result>
 {
-    public async Task<Result<int>> Handle(DeleteWarrantyTermCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteWarrantyTermCommand request, CancellationToken cancellationToken)
     {
-        var warrantyTerm = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-        if (warrantyTerm == null)
-            return Error.NotFound("Warranty term not found.");
-        deleteRepository.Delete(warrantyTerm);
+        var term = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        if (term == null)
+        {
+            return Result.Failure(Error.NotFound($"Warranty term with Id {request.Id} not found.", "Id"));
+        }
+        await writeRepository.DeleteAsync(request.Id, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return Result<int>.Success(warrantyTerm.Id);
+        return Result.Success();
     }
 }

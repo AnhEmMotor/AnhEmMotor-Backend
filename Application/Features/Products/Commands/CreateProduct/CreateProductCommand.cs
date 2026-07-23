@@ -28,16 +28,11 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Weight { get; init; }
 
-    [JsonPropertyName("length")]
-    [JsonConverter(typeof(NullableDecimalConverter))]
+    [JsonPropertyName("dimensions")]
     public decimal? Length { get; init; }
 
-    [JsonPropertyName("width")]
-    [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Width { get; init; }
 
-    [JsonPropertyName("height")]
-    [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Height { get; init; }
 
     [JsonPropertyName("wheelbase")]

@@ -1,13 +1,12 @@
-using Application.ApiContracts.WarrantyTerms.Responses;
+using Application.ApiContracts.Admin.Warranty;
 using Application.Common.Models;
 using Domain.Primitives;
 using MediatR;
+using Sieve.Models;
 
 namespace Application.Features.WarrantyTerms.Queries.GetWarrantyTermsList;
 
 public sealed record GetWarrantyTermsListQuery : IRequest<Result<PagedResult<WarrantyTermResponse>>>
 {
-    public int Page { get; init; } = 1;
-
-    public int PageSize { get; init; } = 10;
+    public SieveModel? SieveModel { get; init; }
 }

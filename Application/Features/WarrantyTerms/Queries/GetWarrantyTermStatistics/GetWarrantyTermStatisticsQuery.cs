@@ -1,4 +1,4 @@
-using Application.ApiContracts.WarrantyTerms.Responses;
+using Application.ApiContracts.Admin.Warranty;
 using Application.Common.Models;
 using MediatR;
 

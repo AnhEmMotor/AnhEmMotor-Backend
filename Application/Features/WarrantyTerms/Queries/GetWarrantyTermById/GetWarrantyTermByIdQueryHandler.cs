@@ -1,20 +1,46 @@
-using Application.ApiContracts.WarrantyTerms.Responses;
+using Application.ApiContracts.Admin.Warranty;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.WarrantyTerm;
-using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.WarrantyTerms.Queries.GetWarrantyTermById;
 
-public class GetWarrantyTermByIdQueryHandler(IWarrantyTermReadRepository readRepository) : IRequestHandler<GetWarrantyTermByIdQuery, Result<WarrantyTermResponse>>
+public class GetWarrantyTermByIdQueryHandler(IWarrantyTermReadRepository readRepository) : IRequestHandler<GetWarrantyTermByIdQuery, Result<WarrantyTermResponse?>>
 {
-    public async Task<Result<WarrantyTermResponse>> Handle(
+    public async Task<Result<WarrantyTermResponse?>> Handle(
         GetWarrantyTermByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var term = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var term = await readRepository.GetByIdAsync(
+            request.Id,
+            cancellationToken,
+            include: q => q.Include(t => t.Brand))
+            .ConfigureAwait(false);
         if (term == null)
-            return Error.NotFound("Warranty term not found.");
-        return Result<WarrantyTermResponse>.Success(term.Adapt<WarrantyTermResponse>());
+        {
+            return Result<WarrantyTermResponse?>.Failure(
+                Error.NotFound($"Warranty term with Id {request.Id} not found.", "Id"));
+        }
+        var response = new WarrantyTermResponse
+        {
+            Id = term.Id,
+            BrandId = term.BrandId,
+            BrandName = term.Brand?.Name ?? string.Empty,
+            TermName = term.TermName,
+            TermNameJson = term.TermNameJson,
+            VehicleType = term.VehicleType,
+            ErrorCategory = term.ErrorCategory,
+            Description = term.Description,
+            DescriptionJson = term.DescriptionJson,
+            DurationMonths = term.DurationMonths,
+            DurationKm = term.DurationKm,
+            Coverage = term.Coverage,
+            Status = term.Status,
+            EffectiveDate = term.EffectiveDate,
+            ExpirationDate = term.ExpirationDate,
+            MediaUrl = term.MediaUrl
+        };
+        return Result<WarrantyTermResponse?>.Success(response);
     }
 }

@@ -1179,7 +1179,7 @@ namespace Infrastructure.MySqlMigrations
                     b.HasKey("Id");
                     b.HasIndex("OutputId");
                     b.HasIndex("VoucherId");
-                    b.ToTable("OrderVoucher");
+                    b.ToTable("OrderVouchers");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Output",
@@ -2470,7 +2470,10 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<int?>("DurationKm").HasColumnType("int").HasColumnName("DurationKm");
                     b.Property<int?>("DurationMonths").HasColumnType("int").HasColumnName("DurationMonths");
                     b.Property<DateTime?>("EffectiveDate").HasColumnType("datetime(6)").HasColumnName("EffectiveDate");
-                    b.Property<string>("ErrorCategory").HasColumnType("longtext").HasColumnName("ErrorCategory");
+                    b.Property<string>("ErrorCategory")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("ErrorCategory");
                     b.Property<DateTime?>("ExpirationDate").HasColumnType("datetime(6)").HasColumnName("ExpirationDate");
                     b.Property<string>("MediaUrl").HasColumnType("longtext").HasColumnName("MediaUrl");
                     b.Property<DateTime?>("RowVersion")
@@ -2479,11 +2482,15 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("timestamp(6)")
                         .HasColumnName("RowVersion");
                     b.Property<string>("Status").IsRequired().HasColumnType("longtext").HasColumnName("Status");
-                    b.Property<string>("TermName").HasColumnType("longtext").HasColumnName("TermName");
+                    b.Property<string>("TermName").IsRequired().HasColumnType("longtext").HasColumnName("TermName");
                     b.Property<string>("TermNameJson").HasColumnType("longtext").HasColumnName("TermNameJson");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
-                    b.Property<string>("VehicleType").HasColumnType("longtext").HasColumnName("VehicleType");
+                    b.Property<string>("VehicleType")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("VehicleType");
                     b.HasKey("Id");
+                    b.HasIndex("BrandId");
                     b.ToTable("WarrantyTerm");
                 });
             modelBuilder.Entity(
@@ -3700,6 +3707,17 @@ namespace Infrastructure.MySqlMigrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                     b.Navigation("WarrantyClaim");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.WarrantyTerm",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Brand");
                 });
             modelBuilder.Entity(
                 "Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>",

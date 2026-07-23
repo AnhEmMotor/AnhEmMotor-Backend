@@ -34,8 +34,13 @@ public sealed class UploadSalesContractScanCommandHandler(
         var contract = await readRepository.GetByIdAsync(request.ContractId, cancellationToken).ConfigureAwait(false);
         if (contract is null)
             return Result<string>.Failure("Không tìm thấy hợp đồng.");
+        if (string.Equals(contract.Status, SalesContractStatus.Draft, StringComparison.Ordinal))
+            return Result<string>.Failure("Hợp đồng phải được Admin duyệt trước khi tải bản quét đã ký.");
         if (string.Equals(contract.Status, SalesContractStatus.Fulfilled, StringComparison.Ordinal))
             return Result<string>.Failure("Hợp đồng đã hoàn tất nên không thể thay đổi bản quét.");
+        if (!string.Equals(contract.Status, SalesContractStatus.Approved, StringComparison.Ordinal) &&
+            !string.Equals(contract.Status, SalesContractStatus.Signed, StringComparison.Ordinal))
+            return Result<string>.Failure("Trạng thái hợp đồng không cho phép tải bản quét đã ký.");
         var uploadResult = await fileInsertService.SaveFileAsIsAsync(
             request.FileContent,
             request.FileName,

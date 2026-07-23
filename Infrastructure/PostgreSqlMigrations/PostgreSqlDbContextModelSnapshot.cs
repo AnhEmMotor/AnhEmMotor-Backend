@@ -1172,7 +1172,7 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasKey("Id");
                     b.HasIndex("OutputId");
                     b.HasIndex("VoucherId");
-                    b.ToTable("OrderVoucher");
+                    b.ToTable("OrderVouchers");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Output",
@@ -2470,18 +2470,21 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("Id");
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    b.Property<int>("BrandId").HasColumnType("int").HasColumnName("BrandId");
+                    b.Property<int>("BrandId").HasColumnType("integer").HasColumnName("BrandId");
                     b.Property<string>("Coverage").HasColumnType("text").HasColumnName("Coverage");
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
                     b.Property<string>("Description").HasColumnType("text").HasColumnName("Description");
                     b.Property<string>("DescriptionJson").HasColumnType("text").HasColumnName("DescriptionJson");
-                    b.Property<int?>("DurationKm").HasColumnType("int").HasColumnName("DurationKm");
-                    b.Property<int?>("DurationMonths").HasColumnType("int").HasColumnName("DurationMonths");
+                    b.Property<int?>("DurationKm").HasColumnType("integer").HasColumnName("DurationKm");
+                    b.Property<int?>("DurationMonths").HasColumnType("integer").HasColumnName("DurationMonths");
                     b.Property<DateTime?>("EffectiveDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("EffectiveDate");
-                    b.Property<string>("ErrorCategory").HasColumnType("text").HasColumnName("ErrorCategory");
+                    b.Property<string>("ErrorCategory")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ErrorCategory");
                     b.Property<DateTime?>("ExpirationDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("ExpirationDate");
@@ -2492,11 +2495,12 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("bytea")
                         .HasColumnName("RowVersion");
                     b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("Status");
-                    b.Property<string>("TermName").HasColumnType("text").HasColumnName("TermName");
+                    b.Property<string>("TermName").IsRequired().HasColumnType("text").HasColumnName("TermName");
                     b.Property<string>("TermNameJson").HasColumnType("text").HasColumnName("TermNameJson");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
-                    b.Property<string>("VehicleType").HasColumnType("text").HasColumnName("VehicleType");
+                    b.Property<string>("VehicleType").IsRequired().HasColumnType("text").HasColumnName("VehicleType");
                     b.HasKey("Id");
+                    b.HasIndex("BrandId");
                     b.ToTable("WarrantyTerm");
                 });
             modelBuilder.Entity(
@@ -3713,6 +3717,17 @@ namespace Infrastructure.PostgreSqlMigrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                     b.Navigation("WarrantyClaim");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.WarrantyTerm",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Brand");
                 });
             modelBuilder.Entity(
                 "Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>",

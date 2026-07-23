@@ -1,4 +1,5 @@
 using Application.Api.Contracts.Statistical.Responses;
+using Application.ApiContracts.Admin.Analytics;
 using Application.ApiContracts.Statistical.Responses;
 using Application.Interfaces.Repositories.Statistical;
 using Domain.Constants.InventoryReceipt;
@@ -1577,5 +1578,104 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ToList();
         return orders;
     }
-}
 
+    private static (DateTimeOffset Start, DateTimeOffset End) KpiRange(string period)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var p = period.ToLower();
+        if (p == "today")
+            return (now.Date, now.Date.AddDays(1).AddTicks(-1));
+        if (p == "week")
+        {
+            var d = (int)now.DayOfWeek;
+            var mon = now.Date.AddDays(d == 0 ? -6 : 1 - d);
+            return (mon, mon.AddDays(7).AddTicks(-1));
+        }
+        if (p == "year")
+            return (new DateTimeOffset(now.Year, 1, 1, 0, 0, 0, TimeSpan.Zero),
+			         new DateTimeOffset(now.Year, 12, 31, 23, 59, 59, 999, TimeSpan.Zero));
+        return (new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero),
+		        new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero).AddMonths(1).AddTicks(-1));
+    }
+
+    private static (DateTimeOffset Start, DateTimeOffset End) KpiPrev(string period, DateTimeOffset s, DateTimeOffset e)
+    {
+        var p = period.ToLower();
+        return p switch
+        {
+            "today" => (s.AddDays(-1), e.AddDays(-1)),
+            "week" => (s.AddDays(-7), e.AddDays(-7)),
+            "year" => (s.AddYears(-1), e.AddYears(-1)),
+            _ => (s.AddMonths(-1), e.AddMonths(-1))
+        };
+    }
+
+    private static double Pct(int c, int pv) => pv > 0 ? Math.Round((double)(c - pv) / pv * 100, 1) : 0;
+
+    public async Task<DashboardKpisResponse> GetDashboardKpisAsync(string period, CancellationToken cancellationToken)
+    {
+        var (s, e) = KpiRange(period);
+        var (ps, pe) = KpiPrev(period, s, e);
+        var lbl = period.ToLower() switch
+        {
+            "today" => "Hom nay",
+            "week" => "Tuan nay",
+            "year" => "Nam nay",
+            _ => "Thang nay"
+        };
+        var orders = await context.OutputOrders
+            .IgnoreQueryFilters()
+            .Where(o => o.CreatedAt >= s && o.CreatedAt <= e)
+            .CountAsync(cancellationToken);
+        var prevOrd = await context.OutputOrders
+            .IgnoreQueryFilters()
+            .Where(o => o.CreatedAt >= ps && o.CreatedAt <= pe)
+            .CountAsync(cancellationToken);
+        var custs = await context.CustomerContacts
+            .IgnoreQueryFilters()
+            .Where(c => c.CreatedAt >= s && c.CreatedAt <= e)
+            .CountAsync(cancellationToken);
+        var prevCst = await context.CustomerContacts
+            .IgnoreQueryFilters()
+            .Where(c => c.CreatedAt >= ps && c.CreatedAt <= pe)
+            .CountAsync(cancellationToken);
+        var appts = await context.BookingAppointments
+            .IgnoreQueryFilters()
+            .Where(a => a.AppointmentAt >= s && a.AppointmentAt <= e)
+            .CountAsync(cancellationToken);
+        var pending = await context.OutputOrders
+            .IgnoreQueryFilters()
+            .Where(
+                o => o.StatusId == "pending" || o.StatusId == "waiting_deposit" || o.StatusId == "waiting_installment")
+            .CountAsync(cancellationToken);
+        var overdue = await context.FinanceContracts
+            .IgnoreQueryFilters()
+            .CountAsync(f => f.DisbursementStatus == "default" || f.DisbursementStatus == "overdue", cancellationToken);
+        var lowV = await context.Vehicles.IgnoreQueryFilters().Where(v => v.IsActive).CountAsync(cancellationToken);
+        var lowP = await context.InventoryOnHands
+            .IgnoreQueryFilters()
+            .Where(i => i.StockQty < 10)
+            .CountAsync(cancellationToken);
+        var comp = await context.Set<Domain.Entities.CustomerFeedback>()
+            .IgnoreQueryFilters()
+            .Where(f => f.CreatedAt >= s && f.CreatedAt <= e)
+            .CountAsync(cancellationToken);
+        var missed = await context.Set<Domain.Entities.BookingAppointment>()
+            .IgnoreQueryFilters()
+            .Where(a => a.Status == "no_show" && a.AppointmentAt >= s && a.AppointmentAt <= e)
+            .CountAsync(cancellationToken);
+        var cards = new List<CardItem>
+        {
+            new("Đơn hàng mới", orders, Pct(orders, prevOrd), "ri:file-list-3-line", "don"),
+            new("Khách hàng mới", custs, Pct(custs, prevCst), "ri:user-add-line", "nguoi"),
+            new("Lịch hẹn trong kỳ", appts, 0, "ri:calendar-check-line", "lich"),
+            new("Đơn hàng quá hạn", pending, 0, "ri:alert-line", "don"),
+        };
+        var alerts = new AlertsSummary(
+            new FinancialAlerts(overdue, false),
+            new InventoryAlerts(lowV, lowP),
+            new CustomerAlerts(comp, missed),
+            new OperationsAlerts(pending));
+        return new DashboardKpisResponse(lbl, s.ToString("dd/MM/yyyy"), e.ToString("dd/MM/yyyy"), cards, alerts);
+    }
+}

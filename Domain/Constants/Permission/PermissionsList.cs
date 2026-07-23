@@ -313,6 +313,48 @@ public static class PermissionsList
                         }
             }, new PermissionFeatureMetadata
             {
+                Id = "Permissions.Marketing.CustomerAssetManagement",
+                Name = "Quản lý tài sản khách hàng",
+                Permissions =
+                    new()
+                        {
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerAssetManagement.View,
+                                Name = "Xem",
+                                Description = "Xem tài sản khách hàng"
+                            }
+                        }
+            }, new PermissionFeatureMetadata
+            {
+                Id = "Permissions.Marketing.CustomerCareManagement",
+                Name = "Chăm sóc khách hàng",
+                Permissions =
+                    new()
+                        {
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerCareManagement.View,
+                                Name = "Xem",
+                                Description = "Xem chăm sóc khách hàng"
+                            }
+                        }
+            }, new PermissionFeatureMetadata
+            {
+                Id = "Permissions.Marketing.CustomerVoucherManagement",
+                Name = "Quản lý voucher khách hàng",
+                Permissions =
+                    new()
+                        {
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.CustomerVoucherManagement.View,
+                                Name = "Xem",
+                                Description = "Xem voucher khách hàng"
+                            }
+                        }
+            }, new PermissionFeatureMetadata
+            {
                 Id = "Permissions.Marketing.LeadManagement",
                 Name = "Quản lý KH tiềm năng",
                 Permissions =
