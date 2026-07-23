@@ -193,7 +193,7 @@ public class ProductReadRepository(
             .ThenInclude(oi => oi.OutputOrder);
         if (string.IsNullOrWhiteSpace(sorts))
         {
-            dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt);
+            dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt).ThenBy(p => p.Id);
         }
         var items = await dbQuery
             .Skip((normalizedPage - 1) * normalizedPageSize)
@@ -435,7 +435,7 @@ public class ProductReadRepository(
             .ThenInclude(ov => ov!.Option);
         if (string.IsNullOrWhiteSpace(sorts))
         {
-            dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt);
+            dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt).ThenBy(p => p.Id);
         }
         var entities = await dbQuery
             .Skip((normalizedPage - 1) * normalizedPageSize)
@@ -456,7 +456,7 @@ public class ProductReadRepository(
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Max(pageSize, 1);
         var query = context.Products.Where(p => p.DeletedAt == null).AsNoTracking();
-        var effectiveSorts = string.IsNullOrWhiteSpace(sorts) ? "-CreatedAt" : sorts;
+        var effectiveSorts = string.IsNullOrWhiteSpace(sorts) ? "-CreatedAt,id" : sorts;
         var sieveModel = new SieveModel
         {
             Filters = filters,
