@@ -122,6 +122,8 @@ public class LeadController(IMediator mediator) : ApiController
         return Ok(result);
     }
 
+    public record AssignLeadRequest(Guid? UserId);
+
     /// <summary>
     /// Giao việc cho nhân viên
     /// </summary>
@@ -130,10 +132,10 @@ public class LeadController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> AssignLeadAsync(
         int id,
-        [FromBody] Guid? userId,
+        [FromBody] AssignLeadRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new AssignLeadCommand(id, userId), cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new AssignLeadCommand(id, request.UserId), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
