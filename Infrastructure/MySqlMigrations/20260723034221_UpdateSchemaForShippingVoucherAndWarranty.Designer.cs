@@ -4,51 +4,53 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Infrastructure.SqlServerMigrations
+namespace Infrastructure.MySqlMigrations
 {
-    [DbContext(typeof(SqlServerDBContext))]
-    partial class SqlServerDBContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MySqlDbContext))]
+    [Migration("20260723034221_UpdateSchemaForShippingVoucherAndWarranty")]
+    partial class UpdateSchemaForShippingVoucherAndWarranty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.9")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("Domain.Entities.ApplicationRole", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("Roles", (string)null);
                 });
@@ -57,90 +59,90 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Gender")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("LockoutEnd")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PasswordResetToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("PasswordResetTokenExpiry")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("PasswordResetTokenExpiry")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("RefreshTokenExpiryTime")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long>("RefreshTokenExpiryTime")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
 
@@ -149,8 +151,7 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("Users", (string)null);
                 });
@@ -162,46 +163,46 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CtaLabel")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CtaLabel");
 
                     b.Property<string>("CtaLink")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CtaLink");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("DesktopImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("DesktopImageUrl");
 
                     b.Property<string>("MobileImageUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MobileImageUrl");
 
                     b.Property<string>("Placement")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Placement");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Title");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -215,11 +216,11 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Action");
 
                     b.Property<int>("BannerId")
@@ -228,21 +229,21 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("ChangedBy")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ChangedBy");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Details");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -258,46 +259,46 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BookingType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("BookingType");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("Location")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Location");
 
                     b.Property<string>("Note")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Note");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
 
-                    b.Property<DateTimeOffset>("PreferredDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long>("PreferredDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("PreferredDate");
 
                     b.Property<int?>("ProductVariantId")
@@ -306,11 +307,11 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -326,54 +327,54 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("AppointmentAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("AppointmentAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("AppointmentAt");
 
                     b.Property<string>("CancelReason")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CancelReason");
 
-                    b.Property<DateTimeOffset?>("ConfirmedAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("ConfirmedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("ConfirmedAt");
 
                     b.Property<Guid?>("ConfirmedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ConfirmedBy");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Phone");
 
                     b.Property<DateTime?>("PreferredDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("PreferredDate");
 
                     b.Property<string>("PreferredTimeSlot")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PreferredTimeSlot");
 
                     b.Property<int?>("ProductVariantId")
@@ -381,20 +382,20 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("ProductVariantId");
 
                     b.Property<string>("ServiceType")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ServiceType");
 
                     b.Property<string>("Showroom")
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Showroom");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -414,46 +415,46 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("DescriptionJson")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("DescriptionJson");
 
                     b.Property<string>("LogoUrl")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("longtext")
                         .HasColumnName("LogoUrl");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("NameJson")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("NameJson");
 
                     b.Property<string>("Origin")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Origin");
 
-                    b.Property<byte[]>("RowVersion")
+                    b.Property<DateTime?>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion")
+                        .HasColumnType("timestamp(6)")
                         .HasColumnName("RowVersion");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -466,48 +467,48 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset>("EffectiveDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long>("EffectiveDate")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("EmployeeId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<string>("TargetGroup")
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Unit")
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("decimal(18,2)");
@@ -527,42 +528,42 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("ChangedByName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("ChangedByUserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("NewValueSnapshot")
-                        .HasColumnType("nvarchar(MAX)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldValueSnapshot")
-                        .HasColumnType("nvarchar(MAX)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("PolicyId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -577,40 +578,40 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("DateEarned")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("EmployeeProfileId")
                         .HasColumnType("int");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("OutputId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("PolicySnapshot")
-                        .HasColumnType("nvarchar(MAX)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -628,36 +629,36 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("InternalNote")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("InternalNote");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Message");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<int?>("Rating")
@@ -666,16 +667,16 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Subject");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -689,33 +690,33 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContactId")
                         .HasColumnType("int")
                         .HasColumnName("ContactId");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsInternal")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsInternal");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Message");
 
                     b.Property<Guid?>("RepliedById")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("RepliedById");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -733,32 +734,32 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Clicks")
                         .HasColumnType("int")
                         .HasColumnName("Clicks");
 
                     b.Property<string>("Content")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("DelaySeconds")
                         .HasColumnType("int")
                         .HasColumnName("DelaySeconds");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsActive");
 
                     b.Property<int>("Leads")
@@ -767,27 +768,27 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("Pages")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Pages");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Type");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Url")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Url");
 
                     b.Property<int>("Views")
@@ -806,64 +807,64 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("InternalNote")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("InternalNote");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Message");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Phone");
 
-                    b.Property<DateTimeOffset?>("ProcessedAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("ProcessedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("ProcessedAt");
 
                     b.Property<Guid?>("ProcessedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ProcessedBy");
 
-                    b.Property<DateTimeOffset?>("RepliedAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("RepliedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("RepliedAt");
 
                     b.Property<string>("Source")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Source");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Status");
 
                     b.Property<string>("Subject")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Subject");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -881,40 +882,40 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContactId")
                         .HasColumnType("int")
                         .HasColumnName("ContactId");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsInternal")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsInternal");
 
                     b.Property<Guid?>("RepliedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("RepliedBy");
 
                     b.Property<string>("ReplyContent")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ReplyContent");
 
-                    b.Property<DateTimeOffset?>("SentAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("SentAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("SentAt");
 
                     b.Property<int?>("SupportTicketId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -934,7 +935,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ContactId")
                         .HasColumnType("int")
@@ -942,28 +943,28 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerName");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("FeedbackArea")
                         .IsRequired()
-                        .HasColumnType("nvarchar(250)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FeedbackArea");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<int>("Rating")
@@ -972,11 +973,11 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -991,45 +992,45 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("BankAccountNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("BankName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("BaseSalary")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("ContractDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("IdentityNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("JobTitle")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -1044,7 +1045,7 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
@@ -1054,21 +1055,21 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("ExpenseDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -1079,32 +1080,32 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("BankName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CavetLocation")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ContractNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DisbursementStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("InterestRate")
                         .HasColumnType("decimal(18,2)");
@@ -1113,13 +1114,13 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("SignedDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("TermMonths")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1133,17 +1134,17 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DocumentCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("DocumentCode");
 
                     b.Property<int>("ExportQty")
@@ -1155,7 +1156,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("ImportQty");
 
                     b.Property<string>("PartnerName")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PartnerName");
 
                     b.Property<int?>("ProductVariantColorId")
@@ -1174,21 +1175,21 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("TotalAmount");
 
-                    b.Property<DateTimeOffset>("TransactionDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long>("TransactionDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("TransactionDate");
 
                     b.Property<string>("TransactionType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("TransactionType");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("UnitPrice");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1206,17 +1207,17 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BeginningQty")
                         .HasColumnType("int")
                         .HasColumnName("BeginningQty");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ExportedQty")
                         .HasColumnType("int")
@@ -1246,8 +1247,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("StockQty");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Year")
                         .HasColumnType("int")
@@ -1260,8 +1261,7 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasIndex("ProductVariantId");
 
                     b.HasIndex("ProductVariantId", "ProductVariantColorId", "Month", "Year")
-                        .IsUnique()
-                        .HasFilter("[ProductVariantColorId] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("InventoryOnHand");
                 });
@@ -1273,32 +1273,32 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("ApprovedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ApprovedBy");
 
                     b.Property<Guid?>("ConfirmedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ConfirmedBy");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CreatedBy");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("InventoryReceiptDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("InventoryReceiptDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("InventoryReceiptDate");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<int?>("PurchaseRequestId")
@@ -1306,11 +1306,11 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("PurchaseRequestId");
 
                     b.Property<Guid?>("RejectedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("RejectedBy");
 
                     b.Property<Guid?>("SentBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("SentBy");
 
                     b.Property<int?>("SourceOrderId")
@@ -1318,11 +1318,11 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("SourceOrderId");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("StatusId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1351,41 +1351,41 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long>("ChangedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("ChangedById")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("InventoryReceiptId")
                         .HasColumnType("int");
 
                     b.Property<string>("NewNotes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("NewStatusId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldNotes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldStatusId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1403,17 +1403,17 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("Count")
                         .HasColumnType("int")
                         .HasColumnName("Count");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("InventoryReceiptId")
                         .HasColumnType("int")
@@ -1434,8 +1434,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("RemainingCount");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1456,17 +1456,17 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("InventoryReceiptInfoId")
                         .HasColumnType("int");
@@ -1477,8 +1477,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int?>("OldQuantity")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1490,17 +1490,17 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Domain.Entities.InventoryReceiptStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Key");
 
@@ -1514,24 +1514,24 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Note");
 
-                    b.Property<DateTimeOffset?>("PerformedAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("PerformedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("PerformedAt");
 
                     b.Property<Guid?>("PerformedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("PerformedBy");
 
                     b.Property<int>("ProductVariantId")
@@ -1547,7 +1547,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("ReferenceId");
 
                     b.Property<string>("ReferenceType")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ReferenceType");
 
                     b.Property<int>("StockAfter")
@@ -1560,11 +1560,11 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("TransactionType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("longtext")
                         .HasColumnName("TransactionType");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1582,43 +1582,43 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BankName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ChassisNo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerAddress")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerIdCard")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DeliveryDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("EngineNo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("InsuranceFee")
                         .HasPrecision(18, 2)
@@ -1626,20 +1626,20 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("IssueDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("ProcessedBy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("RegistrationFee")
                         .HasPrecision(18, 2)
@@ -1647,11 +1647,11 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("SalesPerson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 2)
@@ -1659,21 +1659,21 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("VehicleColor")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("VehicleModel")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("VehiclePrice")
                         .HasPrecision(18, 2)
@@ -1693,11 +1693,11 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AppliedPosition")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("AppliedPosition");
 
                     b.Property<int>("ContactId")
@@ -1705,42 +1705,42 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("ContactId");
 
                     b.Property<string>("CoverLetter")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CoverLetter");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CvFileUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CvFileUrl");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1755,38 +1755,38 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("ActualValue")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(MAX)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("EmployeeProfileId")
                         .HasColumnType("int");
 
                     b.Property<string>("MetricName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("PeriodEnd")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("PeriodStart")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("TargetValue")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1802,74 +1802,74 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Address");
 
                     b.Property<string>("AddressDetail")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("AddressDetail");
 
                     b.Property<Guid?>("AssignedToId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("AssignedToId");
 
                     b.Property<DateTime?>("Birthday")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("Birthday");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("District")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("District");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FullName");
 
                     b.Property<string>("Gender")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Gender");
 
                     b.Property<string>("IdentificationNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("IdentificationNumber");
 
                     b.Property<string>("InterestedVehicle")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("InterestedVehicle");
 
                     b.Property<bool>("IsVerified")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsVerified");
 
                     b.Property<string>("Notes")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PhoneNumber");
 
                     b.Property<int>("Points")
@@ -1878,12 +1878,12 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Priority")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Priority");
 
                     b.Property<string>("Province")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Province");
 
                     b.Property<int>("Score")
@@ -1892,25 +1892,25 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Source")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Source");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<string>("Tier")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Tier");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Ward")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Ward");
 
                     b.HasKey("Id");
@@ -1927,30 +1927,30 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ActivityType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ActivityType");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<int>("LeadId")
                         .HasColumnType("int")
                         .HasColumnName("LeadId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -1965,38 +1965,38 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("AllowLiquidCargo")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("AllowOversizeCargo")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("ApiBaseUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ApiToken")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("AutoSyncPricing")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("CarrierCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Environment")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<decimal>("MaxParcelWeightKg")
                         .HasPrecision(18, 2)
@@ -2004,24 +2004,24 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PricingRulesJson")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("SlaJson")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("WebhookEndpointUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("WebhookSecret")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -2034,10 +2034,10 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("Value")
                         .HasPrecision(18, 2)
@@ -2054,68 +2054,68 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BoxCondition")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Carrier")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("CodAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("CustomerAddress")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("DeliveredAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("ExpectedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("InspectedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("OriginalOrderCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ProductCondition")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal?>("RefundAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("RejectionReason")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReturnAction")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReturnInternalNote")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReturnProofImage")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReturnReason")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal?>("ReturnShippingCost")
                         .HasPrecision(18, 2)
@@ -2130,7 +2130,7 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("TrackingNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -2143,16 +2143,16 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsOutOfStock")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsPicked")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsRestricted")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("ParcelDeliveryOrderId")
                         .HasColumnType("int");
@@ -2162,21 +2162,21 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<string>("ShelfLocation")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Sku")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ThumbnailUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -2191,52 +2191,52 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Carrier")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("CodAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeliveredAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeliveredAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DestinationAddress")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<double?>("DestinationLatitude")
-                        .HasColumnType("float");
+                        .HasColumnType("double");
 
                     b.Property<double?>("DestinationLongitude")
-                        .HasColumnType("float");
+                        .HasColumnType("double");
 
                     b.Property<string>("OriginAddress")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<double?>("OriginLatitude")
-                        .HasColumnType("float");
+                        .HasColumnType("double");
 
                     b.Property<double?>("OriginLongitude")
-                        .HasColumnType("float");
+                        .HasColumnType("double");
 
                     b.Property<int?>("OutputId")
                         .HasColumnType("int");
@@ -2250,14 +2250,14 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("TrackingNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2272,13 +2272,13 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("ProductVariantColorId")
                         .HasColumnType("int");
@@ -2292,8 +2292,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("ShipmentId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2312,34 +2312,34 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("LaborCost")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset>("MaintenanceDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long>("MaintenanceDate")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("MaintenanceNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Mileage")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("NextMaintenanceDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("NextMaintenanceDate")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("NextMaintenanceOdo")
                         .HasColumnType("int");
@@ -2349,7 +2349,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PartsJson")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("TechnicianId")
                         .HasColumnType("int");
@@ -2358,8 +2358,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
@@ -2379,40 +2379,40 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ContentType")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("FileExtension")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<long?>("FileSize")
                         .HasColumnType("bigint");
 
                     b.Property<string>("OriginalFileName")
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("StoragePath")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("StorageType")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("varchar(50)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2426,14 +2426,14 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("AuthorId");
 
                     b.Property<string>("AuthorName")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("AuthorName");
 
                     b.Property<int?>("CategoryId")
@@ -2441,37 +2441,37 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("CategoryId");
 
                     b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CoverImageUrl");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsPublished")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsPublished");
 
                     b.Property<string>("MetaDescription")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaDescription");
 
                     b.Property<string>("MetaKeywords")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaKeywords");
 
                     b.Property<string>("MetaTitle")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaTitle");
 
-                    b.Property<DateTimeOffset?>("PublishedDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("PublishedDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("PublishedDate");
 
                     b.Property<string>("Slug")
@@ -2481,11 +2481,11 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Title");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2503,71 +2503,71 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AuthorId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("AuthorId");
 
                     b.Property<string>("Content")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CoverImageUrl");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Excerpt")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Excerpt");
 
                     b.Property<bool>("IsFeatured")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsFeatured");
 
-                    b.Property<DateTimeOffset?>("PublishedAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("PublishedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("PublishedAt");
 
                     b.Property<Guid?>("PublishedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("PublishedBy");
 
                     b.Property<string>("SeoDescription")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("SeoDescription");
 
                     b.Property<string>("SeoKeywords")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("SeoKeywords");
 
                     b.Property<string>("SeoTitle")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("SeoTitle");
 
                     b.Property<string>("Slug")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Slug");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Status");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Title");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ViewCount")
                         .HasColumnType("int")
@@ -2594,21 +2594,21 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsActive");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("Slug")
@@ -2616,8 +2616,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("Slug");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2631,40 +2631,40 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AuthorEmail")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("AuthorEmail");
 
                     b.Property<string>("AuthorName")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("AuthorName");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsApproved")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsApproved");
 
                     b.Property<int>("NewsId")
                         .HasColumnType("int")
                         .HasColumnName("NewsId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("UserId");
 
                     b.HasKey("Id");
@@ -2683,13 +2683,13 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("NewsId")
                         .HasColumnType("int")
@@ -2703,8 +2703,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2724,20 +2724,20 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Name");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2753,32 +2753,32 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ColorCode")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ColorCode");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsActive");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<int?>("OptionId")
@@ -2786,15 +2786,15 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("OptionId");
 
                     b.Property<string>("SeoDescription")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("SeoDescription");
 
                     b.Property<string>("SeoTitle")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("SeoTitle");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2810,49 +2810,49 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BottleneckDescription")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<double>("CurrentLat")
-                        .HasColumnType("float");
+                        .HasColumnType("double");
 
                     b.Property<double>("CurrentLng")
-                        .HasColumnType("float");
+                        .HasColumnType("double");
 
                     b.Property<int>("CurrentStage")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DriverName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("DriverPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("EstimatedArrivalTime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsBottleneck")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2866,28 +2866,28 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("ChangedAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("ChangedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("ChangedAt");
 
                     b.Property<Guid?>("ChangedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ChangedBy");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("FromStatus")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FromStatus");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Note");
 
                     b.Property<int>("OutputId")
@@ -2896,11 +2896,11 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("ToStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ToStatus");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -2917,20 +2917,20 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset>("AppliedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long>("AppliedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("AppliedBy")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("DiscountApplied")
                         .HasColumnType("decimal(18,2)");
@@ -2938,8 +2938,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("OutputId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VoucherId")
                         .HasColumnType("int");
@@ -2960,73 +2960,73 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BudgetCode")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("BudgetCode");
 
                     b.Property<Guid?>("BuyerId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("BuyerId");
 
                     b.Property<string>("CompanyAddress")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("varchar(500)")
                         .HasColumnName("CompanyAddress");
 
                     b.Property<string>("CompanyEmail")
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("varchar(150)")
                         .HasColumnName("CompanyEmail");
 
                     b.Property<string>("CompanyName")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("CompanyName");
 
                     b.Property<string>("CompanyTaxCode")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("CompanyTaxCode");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CreatedBy");
 
                     b.Property<string>("CustomerAddress")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerAddress");
 
                     b.Property<string>("CustomerName")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerName");
 
                     b.Property<string>("CustomerPhone")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerPhone");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("DepositRatio")
                         .HasColumnType("int")
                         .HasColumnName("DepositRatio");
 
                     b.Property<Guid?>("FinishedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("FinishedBy");
 
                     b.Property<bool>("IsCompanyInvoice")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsCompanyInvoice");
 
-                    b.Property<DateTimeOffset?>("LastStatusChangedAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("LastStatusChangedAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("LastStatusChangedAt");
 
                     b.Property<int?>("LeadId")
@@ -3034,35 +3034,35 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("LeadId");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<decimal?>("PaidAmount")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("PaidAmount");
 
-                    b.Property<DateTimeOffset?>("PaidAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("PaidAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("PaidAt");
 
                     b.Property<string>("PaymentCode")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentCode");
 
-                    b.Property<DateTimeOffset?>("PaymentExpiredAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("PaymentExpiredAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("PaymentExpiredAt");
 
                     b.Property<string>("PaymentMethod")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentMethod");
 
                     b.Property<string>("PaymentStatus")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentStatus");
 
                     b.Property<string>("PaymentUrl")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentUrl");
 
                     b.Property<int?>("ProvinceId")
@@ -3070,7 +3070,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("ProvinceId");
 
                     b.Property<string>("ProvinceName")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ProvinceName");
 
                     b.Property<decimal?>("ShippingFee")
@@ -3078,22 +3078,22 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("ShippingFee");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("StatusId");
 
                     b.Property<string>("TransactionId")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("TransactionId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("WardCode")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("WardCode");
 
                     b.Property<string>("WardName")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("WardName");
 
                     b.HasKey("Id");
@@ -3118,7 +3118,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal?>("CostPrice")
                         .HasColumnType("decimal(18, 2)")
@@ -3128,11 +3128,11 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Count");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("OutputId")
                         .HasColumnType("int")
@@ -3150,8 +3150,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3167,17 +3167,17 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Domain.Entities.OutputStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Key");
 
@@ -3187,17 +3187,17 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Domain.Entities.PartnerType", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Key");
 
@@ -3224,13 +3224,13 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<Guid?>("ApprovedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<decimal>("BaseSalary")
                         .HasColumnType("decimal(18,2)");
@@ -3238,17 +3238,17 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<decimal>("Bonus")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("EmployeeProfileId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("Month")
                         .HasColumnType("int");
@@ -3262,8 +3262,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<decimal>("TotalSalary")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Year")
                         .HasColumnType("int");
@@ -3281,11 +3281,11 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -3299,25 +3299,25 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Value");
 
                     b.HasKey("Id");
@@ -3335,14 +3335,14 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BatteryType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("BatteryType");
 
                     b.Property<string>("BoreStroke")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("longtext")
                         .HasColumnName("BoreStroke");
 
                     b.Property<int?>("BrandId")
@@ -3354,65 +3354,65 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("CategoryId");
 
                     b.Property<string>("CompressionRatio")
-                        .HasColumnType("nvarchar(10)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CompressionRatio");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DashboardType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("DashboardType");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("DescriptionJson")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("DescriptionJson");
 
-                    b.Property<string>("Displacement")
-                        .HasColumnType("nvarchar(50)")
+                    b.Property<decimal?>("Displacement")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("Displacement");
 
                     b.Property<string>("EngineType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("EngineType");
 
                     b.Property<string>("FrameType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrameType");
 
                     b.Property<string>("FrontBrake")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrontBrake");
 
                     b.Property<string>("FrontSuspension")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrontSuspension");
 
                     b.Property<string>("FrontTireSize")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrontTireSize");
 
                     b.Property<string>("FuelCapacity")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FuelCapacity");
 
                     b.Property<string>("FuelConsumption")
-                        .HasColumnType("nvarchar(35)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FuelConsumption");
 
                     b.Property<string>("FuelSystem")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FuelSystem");
 
                     b.Property<string>("GroundClearance")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("GroundClearance");
 
                     b.Property<decimal?>("Height")
@@ -3424,133 +3424,133 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("Length");
 
                     b.Property<string>("LightingSystem")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("LightingSystem");
 
                     b.Property<string>("Material")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Material");
 
                     b.Property<string>("MaxPower")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MaxPower");
 
                     b.Property<int?>("MaxPurchaseQuantity")
                         .HasColumnType("int");
 
                     b.Property<string>("MaxTorque")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MaxTorque");
 
                     b.Property<string>("MetaDescription")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaDescription");
 
                     b.Property<string>("MetaDescriptionJson")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaDescriptionJson");
 
                     b.Property<string>("MetaTitle")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaTitle");
 
                     b.Property<string>("MetaTitleJson")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MetaTitleJson");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("NameJson")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("NameJson");
 
-                    b.Property<string>("OilCapacity")
-                        .HasColumnType("nvarchar(250)")
+                    b.Property<decimal?>("OilCapacity")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("OilCapacity");
 
                     b.Property<string>("Origin")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Origin");
 
                     b.Property<string>("OtherStandards")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("OtherStandards");
 
                     b.Property<string>("RearBrake")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("RearBrake");
 
                     b.Property<string>("RearSuspension")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("RearSuspension");
 
                     b.Property<string>("RearTireSize")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("RearTireSize");
 
-                    b.Property<string>("SeatHeight")
-                        .HasColumnType("nvarchar(20)")
+                    b.Property<decimal?>("SeatHeight")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("SeatHeight");
 
                     b.Property<string>("ShortDescription")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ShortDescription");
 
                     b.Property<string>("ShortDescriptionJson")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ShortDescriptionJson");
 
                     b.Property<string>("StarterSystem")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("longtext")
                         .HasColumnName("StarterSystem");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("StatusId");
 
                     b.Property<bool>("StdDot")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("StdDot");
 
                     b.Property<bool>("StdEce")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("StdEce");
 
                     b.Property<bool>("StdJis")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("StdJis");
 
                     b.Property<bool>("StdSnell")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("StdSnell");
 
                     b.Property<string>("TireSize")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("TireSize");
 
                     b.Property<string>("TransmissionType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("TransmissionType");
 
                     b.Property<string>("Unit")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Unit");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("WarrantyPeriod")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("WarrantyPeriod");
 
-                    b.Property<string>("Weight")
-                        .HasColumnType("nvarchar(20)")
+                    b.Property<decimal?>("Weight")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("Weight");
 
                     b.Property<string>("Wheelbase")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Wheelbase");
 
                     b.Property<decimal?>("Width")
@@ -3575,29 +3575,29 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsActive");
 
                     b.Property<string>("ManagementType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ManagementType");
 
                     b.Property<int?>("MaxPurchaseQuantity")
@@ -3605,7 +3605,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("MaxPurchaseQuantity");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<int?>("ParentId")
@@ -3613,11 +3613,11 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("ParentId");
 
                     b.Property<string>("Slug")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Slug");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3625,7 +3625,7 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.ToTable("ProductCategory");
 
-                    b.HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
+                    MySqlEntityTypeBuilderExtensions.UseCollation(b, "utf8mb4_unicode_ci");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCategoryTranslation", b =>
@@ -3634,30 +3634,30 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("LanguageCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("ProductCategoryId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3673,24 +3673,24 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<int>("ProductVariantId")
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3706,7 +3706,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BaseProductId")
                         .HasColumnType("int")
@@ -3716,18 +3716,18 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("CompatibleVehicleModelId");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3745,10 +3745,10 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Note");
 
                     b.Property<int?>("ProductVariantColorId")
@@ -3781,17 +3781,17 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Domain.Entities.ProductStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Key");
 
@@ -3815,25 +3815,25 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomDescription")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomDescription");
 
                     b.Property<string>("CustomImageUrl")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomImageUrl");
 
                     b.Property<string>("CustomTitle")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomTitle");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int")
@@ -3847,8 +3847,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("TechnologyId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -3866,28 +3866,28 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CoverImageUrl");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("EngineType")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("EngineType");
 
                     b.Property<string>("FrontBrake")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrontBrake");
 
                     b.Property<string>("FrontSuspension")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FrontSuspension");
 
                     b.Property<decimal?>("FuelCapacity")
@@ -3918,15 +3918,15 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("ProductId");
 
                     b.Property<string>("RearBrake")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("RearBrake");
 
                     b.Property<string>("RearSuspension")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("RearSuspension");
 
                     b.Property<string>("SKU")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("SKU");
 
                     b.Property<decimal?>("SeatHeight")
@@ -3934,18 +3934,18 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("SeatHeight");
 
                     b.Property<string>("TireSize")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("TireSize");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("UrlSlug")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("UrlSlug");
 
                     b.Property<string>("VariantName")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("VariantName");
 
                     b.Property<decimal?>("Weight")
@@ -3974,25 +3974,25 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ColorCode")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ColorCode");
 
                     b.Property<string>("ColorName")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ColorName");
 
                     b.Property<string>("CoverImageUrl")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CoverImageUrl");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("MaxPurchaseQuantity")
                         .HasColumnType("int");
@@ -4001,8 +4001,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4018,56 +4018,56 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CreatedBy");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
-                    b.Property<DateTimeOffset>("EndDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long>("EndDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("EndDate");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsEnabled");
 
                     b.Property<string>("LinkUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("LinkUrl");
 
                     b.Property<int>("SortOrder")
                         .HasColumnType("int")
                         .HasColumnName("SortOrder");
 
-                    b.Property<DateTimeOffset>("StartDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long>("StartDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("StartDate");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(150)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Title");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("UpdatedBy");
 
                     b.HasKey("Id");
@@ -4088,61 +4088,61 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CreatedByUserId");
 
                     b.Property<string>("CustomerAddress")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerAddress");
 
                     b.Property<string>("CustomerIdCard")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerIdCard");
 
                     b.Property<string>("CustomerName")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerName");
 
                     b.Property<string>("CustomerPhone")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerPhone");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DueDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("DueDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("DueDate");
 
-                    b.Property<DateTimeOffset>("InvoiceDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long>("InvoiceDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("InvoiceDate");
 
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("InvoiceNumber");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
-                    b.Property<DateTimeOffset?>("PaidAt")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("PaidAt")
+                        .HasColumnType("bigint")
                         .HasColumnName("PaidAt");
 
                     b.Property<string>("PaymentMethod")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentMethod");
 
                     b.Property<string>("PaymentStatus")
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentStatus");
 
                     b.Property<int?>("PurchaseRequestId")
@@ -4151,7 +4151,7 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(30)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<decimal>("SubTotal")
@@ -4159,7 +4159,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("SubTotal");
 
                     b.Property<string>("SupplierAddress")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("SupplierAddress");
 
                     b.Property<int?>("SupplierId")
@@ -4167,15 +4167,15 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("SupplierId");
 
                     b.Property<string>("SupplierName")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("SupplierName");
 
                     b.Property<string>("SupplierPhone")
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("SupplierPhone");
 
                     b.Property<string>("SupplierTaxCode")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("SupplierTaxCode");
 
                     b.Property<decimal>("TaxAmount")
@@ -4186,8 +4186,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("TotalAmount");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4205,20 +4205,20 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ColorName")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ColorName");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ProductName")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ProductName");
 
                     b.Property<int?>("ProductVariantColorId")
@@ -4257,11 +4257,11 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("UnitPrice");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("VariantName")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("VariantName");
 
                     b.HasKey("Id");
@@ -4278,32 +4278,32 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("ApprovedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("ApprovedBy");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CreatedBy");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Note");
 
                     b.Property<Guid?>("RejectedBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("RejectedBy");
 
                     b.Property<Guid?>("SentBy")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("SentBy");
 
                     b.Property<string>("Status")
@@ -4311,8 +4311,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("varchar(30)")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4333,41 +4333,41 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long>("ChangedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("ChangedById")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("NewNotes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("NewStatusId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldNotes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldStatusId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("PurchaseRequestId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4385,13 +4385,13 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("ProductQuotationId")
                         .HasColumnType("int")
@@ -4421,8 +4421,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("UnitPrice");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4445,17 +4445,17 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("NewProductVariantColorId")
                         .HasColumnType("int");
@@ -4467,7 +4467,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int");
 
                     b.Property<string>("NewSupplierName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal?>("NewUnitPrice")
                         .HasColumnType("decimal(18, 2)");
@@ -4482,7 +4482,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int");
 
                     b.Property<string>("OldSupplierName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal?>("OldUnitPrice")
                         .HasColumnType("decimal(18, 2)");
@@ -4490,8 +4490,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("PurchaseRequestItemId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4507,69 +4507,69 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CancelReason")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Carrier")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("EvidenceImagesJson")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("InspectedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("InspectedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OrderCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
                     b.Property<string>("OriginalTrackingNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Reason")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("RejectionReason")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReturnAction")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4585,20 +4585,20 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -4611,16 +4611,16 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Sku")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ThumbnailUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4634,7 +4634,7 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
                 {
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<int>("PermissionId")
                         .HasColumnType("int");
@@ -4650,7 +4650,7 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<decimal>("ActualSalePrice")
                         .HasColumnType("decimal(18, 2)");
@@ -4658,43 +4658,43 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("ContractNumber")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerAddress")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerCCCD")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerFullName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("CustomerPhone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("DepositAmount")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("EngineNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("FinalPaymentDeadline")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("FinalPaymentDeadline")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("FrameNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("OutputId")
                         .HasColumnType("int");
@@ -4703,47 +4703,47 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<string>("ScannedFileUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ShowroomAddress")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ShowroomName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ShowroomRepresentative")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ShowroomTaxCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("SignedDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("SignedDate")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("SpecialTerms")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("VehicleColor")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("VehicleModel")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("VehicleVersion")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("WarrantyPeriod")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("WarrantyScope")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -4760,7 +4760,7 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("BasePrice")
                         .HasColumnType("decimal(18,2)");
@@ -4768,27 +4768,27 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("EstimatedDurationMinutes")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4804,33 +4804,33 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CancelledDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("CancelledDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("CancelledDate");
 
                     b.Property<string>("CancelledReason")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CancelledReason");
 
-                    b.Property<DateTimeOffset?>("CompletedDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long?>("CompletedDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("CompletedDate");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("CustomerId");
 
                     b.Property<string>("CustomerNotes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("CustomerNotes");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal?>("DepositAmount")
                         .HasColumnType("decimal(18,2)")
@@ -4841,12 +4841,12 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("EstimatedDurationMinutes");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("PaymentStatus");
 
                     b.Property<int?>("Rating")
@@ -4854,11 +4854,11 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("Rating");
 
                     b.Property<string>("Review")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Review");
 
-                    b.Property<DateTimeOffset>("ScheduledDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long>("ScheduledDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("ScheduledDate");
 
                     b.Property<int>("ServiceId")
@@ -4867,7 +4867,7 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<int?>("TechnicianId")
@@ -4875,15 +4875,15 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("TechnicianId");
 
                     b.Property<string>("TechnicianNotes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("TechnicianNotes");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("TotalAmount");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("VehicleId")
                         .HasColumnType("int")
@@ -4908,23 +4908,23 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -4934,20 +4934,20 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Domain.Entities.Setting", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Value");
 
                     b.HasKey("Key");
@@ -4962,48 +4962,48 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Address");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
                     b.Property<string>("PartnerTypeId")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("PartnerTypeId");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(15)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Phone");
 
                     b.Property<string>("StatusId")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("StatusId");
 
                     b.Property<string>("TaxIdentificationNumber")
                         .HasColumnType("varchar(20)")
                         .HasColumnName("TaxIdentificationNumber");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5021,36 +5021,36 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CitizenID")
                         .HasColumnType("varchar(20)")
                         .HasColumnName("CitizenID");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(15)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Phone");
 
                     b.Property<int?>("SupplierId")
                         .HasColumnType("int")
                         .HasColumnName("SupplierId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5063,55 +5063,55 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("BankAccountNumber")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("BankName")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("ContractFilePath")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("ContractNumber")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<decimal>("ContractValue")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal?>("CreditLimit")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal?>("DiscountRate")
                         .HasColumnType("decimal(5, 2)");
 
                     b.Property<DateTime>("EffectiveDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int?>("MinimumVolumePerMonth")
                         .HasColumnType("int");
 
                     b.Property<string>("Note")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("varchar(1000)");
 
                     b.Property<Guid?>("ParentContractId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<int?>("PaymentWindowDays")
                         .HasColumnType("int");
@@ -5119,17 +5119,17 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int?>("SupplierId")
                         .HasColumnType("int");
 
                     b.Property<string>("Terms")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("varchar(500)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5144,44 +5144,44 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Action")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("ChangedBy")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("varchar(100)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Details")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("NewValue")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("OldValue")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("varchar(200)");
 
                     b.Property<Guid>("SupplierContractId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5194,22 +5194,22 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("ProductVariantId")
                         .HasColumnType("int");
 
                     b.Property<Guid>("SupplierContractId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("WholesalePrice")
                         .HasColumnType("decimal(18, 2)");
@@ -5230,13 +5230,13 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("InventoryReceiptId")
                         .HasColumnType("int")
@@ -5254,8 +5254,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("TotalAmount");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5272,23 +5272,23 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("AmountPaid")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CreatedById")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset>("PaymentDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long>("PaymentDate")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("RemainingDebt")
                         .HasPrecision(18, 2)
@@ -5297,8 +5297,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5315,24 +5315,24 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("varchar(2000)");
 
                     b.Property<int>("SupplierDebtLogId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5345,32 +5345,32 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("EvidenceUrl")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("PaymentDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long>("PaymentDate")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5384,18 +5384,18 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("CurrentDebt")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("SupplierId");
 
@@ -5405,17 +5405,17 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Domain.Entities.SupplierStatus", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Key");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Key");
 
@@ -5429,15 +5429,15 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AssignedUserId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("AssignedUserId");
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Category");
 
                     b.Property<int>("ContactId")
@@ -5446,36 +5446,36 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Content");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Email");
 
                     b.Property<string>("OrderCode")
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("OrderCode");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Subject");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5493,43 +5493,43 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("AssignedAdminId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Priority")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("SLADeadline")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Subject")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5546,7 +5546,7 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("BrandId")
                         .HasColumnType("int");
@@ -5554,31 +5554,31 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("DefaultDescription")
-                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnType("longtext")
                         .HasColumnName("DefaultDescription");
 
                     b.Property<string>("DefaultImageUrl")
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("longtext")
                         .HasColumnName("DefaultImageUrl");
 
                     b.Property<string>("DefaultTitle")
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("DefaultTitle");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5595,21 +5595,21 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Name");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5622,17 +5622,17 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ImageUrl");
 
                     b.Property<int>("TechnologyId")
@@ -5640,11 +5640,11 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Type");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -5660,20 +5660,20 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("OptionValueId")
                         .HasColumnType("int")
                         .HasColumnName("OptionValueId");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VariantId")
                         .HasColumnType("int")
@@ -5695,26 +5695,26 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<double>("CurrentOdo")
-                        .HasColumnType("float")
+                        .HasColumnType("double")
                         .HasColumnName("CurrentOdo");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ElectronicWarrantyQrCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ElectronicWarrantyQrCode");
 
                     b.Property<string>("EngineNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("EngineNumber");
 
                     b.Property<decimal>("ImportPrice")
@@ -5726,11 +5726,11 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("InventoryReceiptInfoId");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("IsActive");
 
                     b.Property<DateTime?>("LastMaintenanceDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("LastMaintenanceDate");
 
                     b.Property<int?>("LeadId")
@@ -5739,15 +5739,15 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("LicensePlate")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("LicensePlate");
 
                     b.Property<DateTime?>("NextMaintenanceDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("NextMaintenanceDate");
 
                     b.Property<double?>("NextMaintenanceOdo")
-                        .HasColumnType("float")
+                        .HasColumnType("double")
                         .HasColumnName("NextMaintenanceOdo");
 
                     b.Property<int?>("OutputInfoId")
@@ -5766,25 +5766,25 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
-                    b.Property<DateTimeOffset>("PurchaseDate")
-                        .HasColumnType("datetimeoffset")
+                    b.Property<long>("PurchaseDate")
+                        .HasColumnType("bigint")
                         .HasColumnName("PurchaseDate");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("char(36)")
                         .HasColumnName("UserId");
 
                     b.Property<string>("VinNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
+                        .HasColumnType("longtext")
                         .HasColumnName("VinNumber");
 
                     b.HasKey("Id");
@@ -5812,38 +5812,38 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset>("ChangedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long>("ChangedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid?>("ChangedById")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("NewEngineNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("NewVinNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldEngineNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("OldVinNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
@@ -5864,31 +5864,31 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("DocumentType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(50)")
+                        .HasColumnType("longtext")
                         .HasColumnName("DocumentType");
 
                     b.Property<string>("FileUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("FileUrl");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int")
@@ -5908,7 +5908,7 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ApplyFor")
                         .HasColumnType("int");
@@ -5918,13 +5918,13 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("DiscountType")
                         .HasColumnType("int");
@@ -5942,7 +5942,7 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("TotalUsageLimit")
                         .HasColumnType("int");
@@ -5950,8 +5950,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("UsageLimitPerUser")
                         .HasColumnType("int");
@@ -5960,10 +5960,10 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ValidFrom")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("ValidTo")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -5995,36 +5995,36 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsRecall")
-                        .HasColumnType("bit");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("IssueDescription")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ManufacturerClaimNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ManufacturerDecision")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("MediaUrls")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ServiceCenterName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -6037,8 +6037,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
@@ -6057,21 +6057,21 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("PartCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PartName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -6080,8 +6080,8 @@ namespace Infrastructure.SqlServerMigrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("WarrantyClaimId")
                         .HasColumnType("int");
@@ -6100,28 +6100,28 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BrandId")
                         .HasColumnType("int")
                         .HasColumnName("BrandId");
 
                     b.Property<string>("Coverage")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Coverage");
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Description");
 
                     b.Property<string>("DescriptionJson")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("DescriptionJson");
 
                     b.Property<int?>("DurationKm")
@@ -6133,45 +6133,45 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnName("DurationMonths");
 
                     b.Property<DateTime?>("EffectiveDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("EffectiveDate");
 
                     b.Property<string>("ErrorCategory")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("ErrorCategory");
 
                     b.Property<DateTime?>("ExpirationDate")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("ExpirationDate");
 
                     b.Property<string>("MediaUrl")
-                        .HasColumnType("nvarchar(500)")
+                        .HasColumnType("longtext")
                         .HasColumnName("MediaUrl");
 
-                    b.Property<byte[]>("RowVersion")
+                    b.Property<DateTime?>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion")
+                        .HasColumnType("timestamp(6)")
                         .HasColumnName("RowVersion");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(20)")
+                        .HasColumnType("longtext")
                         .HasColumnName("Status");
 
                     b.Property<string>("TermName")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("TermName");
 
                     b.Property<string>("TermNameJson")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("longtext")
                         .HasColumnName("TermNameJson");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("VehicleType")
-                        .HasColumnType("nvarchar(200)")
+                        .HasColumnType("longtext")
                         .HasColumnName("VehicleType");
 
                     b.HasKey("Id");
@@ -6186,59 +6186,59 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("DiscountAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("InvoicePrintedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("InvoicePrintedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTimeOffset?>("PaidAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("PaidAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PaymentNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid?>("ReceivedById")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("ServiceDescription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("SourceId")
                         .HasColumnType("int");
 
                     b.Property<string>("SourceType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("SubTotal")
                         .HasPrecision(18, 2)
@@ -6248,11 +6248,11 @@ namespace Infrastructure.SqlServerMigrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("VehicleInfo")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -6265,16 +6265,16 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -6289,16 +6289,16 @@ namespace Infrastructure.SqlServerMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -6310,16 +6310,16 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -6331,13 +6331,13 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -6351,16 +6351,16 @@ namespace Infrastructure.SqlServerMigrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
