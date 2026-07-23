@@ -13,6 +13,7 @@ public class WarrantyTerm : BaseEntity
 	[Column("BrandId")]
 	public int BrandId { get; set; }
 
+	[ForeignKey("BrandId")]
 	public virtual Brand? Brand { get; set; }
 
 	[Column("TermName", TypeName = "nvarchar(200)")]

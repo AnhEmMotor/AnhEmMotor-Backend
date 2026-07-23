@@ -85,4 +85,5 @@ public class WarrantyTermReadRepository(
 			BrandsCovered = brandsCovered
 		};
 	}
+	}
 }
