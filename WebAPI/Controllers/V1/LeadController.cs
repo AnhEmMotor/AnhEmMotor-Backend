@@ -154,11 +154,11 @@ public class LeadController(IMediator mediator) : ApiController
     /// </summary>
     [HttpDelete("{id:int}")]
     [Authorize]
-    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteLeadAsync(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new DeleteLeadCommand(id), cancellationToken).ConfigureAwait(false);
-        return HandleResult(result);
+        return result.Succeeded ? NoContent() : HandleResult(result);
     }
 
     /// <summary>

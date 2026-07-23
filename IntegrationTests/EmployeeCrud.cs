@@ -54,7 +54,7 @@ public class EmployeeCrud : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
             {
                 FullName = "Nhân viên kiểm thử",
                 Email = $"employee_{suffix}@example.com",
-                IdentityNumber = $"079{suffix}",
+                IdentityNumber = $"079{suffix.Substring(suffix.Length - 10)}",
                 Address = "TP.HCM",
                 ContractDate = new DateTime(2026, 7, 1),
                 BankName = "Vietcombank",
