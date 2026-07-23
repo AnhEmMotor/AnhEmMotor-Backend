@@ -54,9 +54,9 @@ public class EmployeeCrud : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
             {
                 FullName = "Nhân viên kiểm thử",
                 Email = $"employee_{suffix}@example.com",
-                IdentityNumber = $"079{suffix.Substring(suffix.Length - 10)}",
+                IdentityNumber = $"079{suffix}",
                 Address = "TP.HCM",
-                ContractDate = new DateTime(2026, 7, 1),
+                ContractDate = new DateTime(2026, 7, 1, 0, 0, 0, DateTimeKind.Utc),
                 BankName = "Vietcombank",
                 BankAccountNumber = $"123{suffix}",
                 JobTitle = "Kỹ thuật viên",
@@ -64,6 +64,10 @@ public class EmployeeCrud : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
             },
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
+        if (createResponse.StatusCode != HttpStatusCode.OK) {
+            var body = await createResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+            throw new Exception("500 Error details: " + body);
+        }
         createResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var employeeId = await createResponse.Content
             .ReadFromJsonAsync<int>(TestContext.Current.CancellationToken)
@@ -83,7 +87,7 @@ public class EmployeeCrud : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
                 Email = $"employee_updated_{suffix}@example.com",
                 IdentityNumber = $"079{suffix}",
                 Address = "Quận 7, TP.HCM",
-                ContractDate = new DateTime(2026, 7, 2),
+                ContractDate = new DateTime(2026, 7, 2, 0, 0, 0, DateTimeKind.Utc),
                 BankName = "ACB",
                 BankAccountNumber = $"456{suffix}",
                 JobTitle = "Trưởng nhóm kỹ thuật",
