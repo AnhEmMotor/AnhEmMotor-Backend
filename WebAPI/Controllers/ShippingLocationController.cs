@@ -1,12 +1,10 @@
 using Application.Interfaces.Services.Shipping;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
 
 [Route("api/shipping-location")]
 [ApiController]
-[Authorize]
 public class ShippingLocationController(IShippingService shippingService) : ControllerBase
 {
     /// <summary>

@@ -683,3 +683,4 @@ public class CreateProductCommandHandler(
         return null;
     }
 }
+

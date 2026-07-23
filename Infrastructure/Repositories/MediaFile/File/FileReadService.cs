@@ -35,6 +35,7 @@ public class FileReadService : IFileReadService
 
     public string GetPublicUrl(string storagePath)
     {
+        storagePath = storagePath.TrimStart('/', '\\');
         var request = _httpContextAccessor.HttpContext?.Request;
         if (request is null)
             return $"/api/v1/MediaFile/view-image/{storagePath}";
@@ -45,7 +46,37 @@ public class FileReadService : IFileReadService
         string storagePath,
         CancellationToken cancellationToken)
     {
+        storagePath = storagePath.TrimStart('/', '\\');
         var fullPath = Path.Combine(_uploadFolder, storagePath);
+        var env = _httpContextAccessor.HttpContext?.RequestServices.GetService(typeof(IWebHostEnvironment)) as IWebHostEnvironment;
+        var webRootPath = env != null && !string.IsNullOrEmpty(env.WebRootPath)
+            ? Path.Combine(env.WebRootPath, storagePath)
+            : string.Empty;
+        if (!System.IO.File.Exists(fullPath))
+        {
+            if (System.IO.File.Exists(webRootPath))
+            {
+                fullPath = webRootPath;
+            } else
+            {
+                var fallbackPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", storagePath);
+                if (System.IO.File.Exists(fallbackPath))
+                {
+                    fullPath = fallbackPath;
+                } else
+                {
+                    var uploadsFallbackPath = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot",
+                        "uploads",
+                        storagePath);
+                    if (System.IO.File.Exists(uploadsFallbackPath))
+                    {
+                        fullPath = uploadsFallbackPath;
+                    }
+                }
+            }
+        }
         if (!System.IO.File.Exists(fullPath))
             return null;
         var fileBytes = await System.IO.File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);

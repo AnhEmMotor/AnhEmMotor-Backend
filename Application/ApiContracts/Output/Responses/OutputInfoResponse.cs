@@ -19,5 +19,11 @@ public class OutputInfoResponse
 
     public string? CoverImageUrl { get; set; }
 
+    public string? VariantName { get; set; }
+
+    public string? ColorName { get; set; }
+
+    public string? ColorCode { get; set; }
+
     public List<VehicleAssignmentOptionResponse> AssignedVehicles { get; set; } = [];
 }

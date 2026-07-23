@@ -4,7 +4,7 @@ Chạy câu lệnh sau để cập nhật thư viện. Nếu chưa có cài sudo
 
 ```
 apt update && apt upgrade -y
-apt install -y sudo curl git unzip libicu-dev build-essential
+apt install -y sudo curl git unzip libicu-dev build-essential python3 python3-venv python3-pip
 ```
 
 # Bước 2: Tạo người dùng riêng biệt

@@ -7771,6 +7771,7 @@ namespace Infrastructure.SqlServerMigrations
 
             modelBuilder.Entity("Domain.Entities.Output", b =>
                 {
+                    b.Navigation("OrderVouchers");
                     b.Navigation("OutputInfos");
 
                     b.Navigation("Returns");
@@ -7917,6 +7918,7 @@ namespace Infrastructure.SqlServerMigrations
 
             modelBuilder.Entity("Domain.Entities.Voucher", b =>
                 {
+                    b.Navigation("OrderVouchers");
                     b.Navigation("VoucherLeads");
                 });
 

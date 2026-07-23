@@ -36,6 +36,10 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
         {
             foreach (var order in expiredOrders)
             {
+                order.Buyer = null;
+                order.FinishedByUser = null;
+                order.OutputInfos = null!;
+                order.OutputStatus = null;
                 order.StatusId = OrderStatus.Cancelled;
                 updateRepository.Update(order);
             }

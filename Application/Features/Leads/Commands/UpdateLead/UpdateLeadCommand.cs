@@ -25,8 +25,6 @@ public record UpdateLeadCommand : IRequest<Result<int>>
 
     public string Ward { get; set; } = string.Empty;
 
-    public string District { get; set; } = LeadAddressDefaults.District;
-
     public string Province { get; set; } = LeadAddressDefaults.Province;
 
     public string Status { get; set; } = string.Empty;

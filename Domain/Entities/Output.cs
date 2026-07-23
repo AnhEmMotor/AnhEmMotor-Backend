@@ -51,6 +51,9 @@ namespace Domain.Entities
         [Column("PaidAmount", TypeName = "decimal(18, 2)")]
         public decimal? PaidAmount { get; set; }
 
+        [Column("ShippingFee", TypeName = "decimal(18, 2)")]
+        public decimal? ShippingFee { get; set; }
+
         [Column("PaidAt")]
         public DateTimeOffset? PaidAt { get; set; }
 
@@ -71,6 +74,18 @@ namespace Domain.Entities
 
         [Column("LeadId")]
         public int? LeadId { get; set; }
+
+        [Column("ProvinceId")]
+        public int? ProvinceId { get; set; }
+
+        [Column("ProvinceName")]
+        public string? ProvinceName { get; set; }
+
+        [Column("WardCode")]
+        public string? WardCode { get; set; }
+
+        [Column("WardName")]
+        public string? WardName { get; set; }
 
         [Column("IsCompanyInvoice")]
         public bool IsCompanyInvoice { get; set; } = false;
@@ -112,8 +127,10 @@ namespace Domain.Entities
 
         public ICollection<OrderStatusHistory> StatusHistories { get; set; } = [];
 
+        public ICollection<OrderVoucher> OrderVouchers { get; set; } = [];
+
         [NotMapped]
-        public decimal Total => OutputInfos?.Sum(x => (x.Price ?? 0) * (x.Count ?? 0)) ?? 0;
+        public decimal Total => (OutputInfos?.Sum(x => (x.Price ?? 0) * (x.Count ?? 0)) ?? 0) + (ShippingFee ?? 0);
 
         [NotMapped]
         public decimal DepositAmount => Total * (DepositRatio ?? 0) / 100;

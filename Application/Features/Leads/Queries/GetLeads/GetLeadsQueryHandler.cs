@@ -24,7 +24,6 @@ public class GetLeadsQueryHandler(ILeadReadRepository leadReadRepository) : IReq
                 Address = l.Address,
                 AddressDetail = l.AddressDetail,
                 Ward = l.Ward,
-                District = l.District,
                 Province = l.Province,
                 Gender = l.Gender,
                 Birthday = l.Birthday,
@@ -48,3 +47,4 @@ public class GetLeadsQueryHandler(ILeadReadRepository leadReadRepository) : IReq
             })];
     }
 }
+

@@ -708,3 +708,4 @@ public class ProductMappingConfig : IRegister
         return string.Empty;
     }
 }
+

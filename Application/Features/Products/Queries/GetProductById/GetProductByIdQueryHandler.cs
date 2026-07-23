@@ -1,17 +1,20 @@
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
+using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductQuotations;
 using Domain.Entities;
 using Mapster;
 using MediatR;
+
 using System.Linq;
 
 namespace Application.Features.Products.Queries.GetProductById;
 
 public class GetProductByIdQueryHandler(
     IProductReadRepository readRepository,
+    IFileReadService fileReadService,
     IProductQuotationReadRepository? ProductQuotationReadRepository = null) : IRequestHandler<GetProductByIdQuery, Result<ProductDetailForManagerResponse?>>
 {
     public async Task<Result<ProductDetailForManagerResponse?>> Handle(
@@ -26,6 +29,44 @@ public class GetProductByIdQueryHandler(
         var response = product.Adapt<ProductDetailForManagerResponse>();
         if (response != null)
         {
+            if (!string.IsNullOrWhiteSpace(response.CoverImageUrl) &&
+                !response.CoverImageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                response.CoverImageUrl = fileReadService.GetPublicUrl(response.CoverImageUrl);
+            }
+            if (response.Variants != null)
+            {
+                foreach (var variant in response.Variants)
+                {
+                    if (!string.IsNullOrWhiteSpace(variant.CoverImageUrl) &&
+                        !variant.CoverImageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    {
+                        variant.CoverImageUrl = fileReadService.GetPublicUrl(variant.CoverImageUrl);
+                    }
+                    if (variant.PhotoCollection != null)
+                    {
+                        for (int i = 0; i < variant.PhotoCollection.Count; i++)
+                        {
+                            if (!string.IsNullOrWhiteSpace(variant.PhotoCollection[i]) &&
+                                !variant.PhotoCollection[i].StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                            {
+                                variant.PhotoCollection[i] = fileReadService.GetPublicUrl(variant.PhotoCollection[i]);
+                            }
+                        }
+                    }
+                    if (variant.Colors != null)
+                    {
+                        foreach (var color in variant.Colors)
+                        {
+                            if (!string.IsNullOrWhiteSpace(color.CoverImageUrl) &&
+                                !color.CoverImageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                            {
+                                color.CoverImageUrl = fileReadService.GetPublicUrl(color.CoverImageUrl);
+                            }
+                        }
+                    }
+                }
+            }
             await PopulateSupplierPricesAsync(response, product, cancellationToken).ConfigureAwait(false);
         }
         return response;

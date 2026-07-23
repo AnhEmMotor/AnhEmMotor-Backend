@@ -15,21 +15,23 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...
+/// Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, và các thông số tùy chỉnh khác.
 /// </summary>
-/// <param name="mediator"></param>
-[SwaggerTag("Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...")]
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý cài đặt hệ thống")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SettingController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Sửa các cài đặt hệ thống (cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
+    /// Cập nhật các cài đặt hệ thống (ví dụ: số lượng cảnh báo tồn kho, số lượng mua tối đa — valid keys được quy định
+    /// sẵn).
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="request">Từ điển các cài đặt cần cập nhật (key: tên setting, value: giá trị mới).</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả cập nhật cài đặt hệ thống.</returns>
+    /// <response code="200">Cập nhật cài đặt thành công.</response>
+    /// <response code="400">Danh sách key không hợp lệ hoặc giá trị không đúng định dạng.</response>
     [HttpPut]
     [HasPermission(Permissions.Admin.SettingManagement.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, string?>), StatusCodes.Status200OK)]
@@ -44,10 +46,11 @@ public class SettingController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy các thông số cài đặt hệ thống (số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
+    /// Lấy tất cả các cài đặt hệ thống hiện tại (với đầy đủ thông số dạng key-value).
     /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Từ điển cài đặt hệ thống (key: tên setting, value: giá trị hiện tại).</returns>
+    /// <response code="200">Trả về danh sách cài đặt thành công.</response>
     [HttpGet(Name = Settings.GetAllSettings)]
     [HasPermission(Permissions.Admin.SettingManagement.View)]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
@@ -59,10 +62,11 @@ public class SettingController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy các thông số cài đặt công khai cho Store
+    /// Lấy các cài đặt công khai dành cho Storefront (không cần quyền Admin — được dùng ở frontend).
     /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Các cài đặt công khai (ví dụ: số lượng tối đa mua, giá tối thiểu).</returns>
+    /// <response code="200">Trả về cài đặt công khai thành công.</response>
     [HttpGet("store")]
     [ProducesResponseType(typeof(Dictionary<string, string?>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStoreSettingsAsync(CancellationToken cancellationToken)
@@ -72,4 +76,3 @@ public class SettingController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 }
-

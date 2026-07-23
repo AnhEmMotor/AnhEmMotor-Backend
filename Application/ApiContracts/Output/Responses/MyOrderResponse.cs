@@ -22,6 +22,8 @@ public class MyOrderResponse
 
     public string? PaymentUrl { get; set; }
 
+    public DateTimeOffset? PaymentExpiredAt { get; set; }
+
     public string? Notes { get; init; }
 
     public decimal Total { get; init; }
@@ -31,6 +33,14 @@ public class MyOrderResponse
     public decimal? DepositAmount { get; set; }
 
     public decimal? RemainingAmount { get; set; }
+
+    public int? ProvinceId { get; set; }
+
+    public string? ProvinceName { get; set; }
+
+    public string? WardCode { get; set; }
+
+    public string? WardName { get; set; }
 
     public List<MyOrderItemResponse> OutputInfos { get; set; } = [];
 }

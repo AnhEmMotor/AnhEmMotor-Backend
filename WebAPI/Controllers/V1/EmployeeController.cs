@@ -1,6 +1,8 @@
 using Application.ApiContracts.HR.Responses;
 using Application.Features.HR.Commands.CreateEmployee;
+using Application.Features.HR.Commands.DeleteEmployee;
 using Application.Features.HR.Commands.UpdateEmployee;
+using Application.Features.HR.Queries.GetEmployeeById;
 using Application.Features.HR.Queries.GetEmployees;
 using Asp.Versioning;
 using Domain.Constants.Permission;
@@ -33,6 +35,21 @@ public class EmployeeController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetEmployeesAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetEmployeesQuery(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Gets an employee profile by ID.
+    /// </summary>
+    /// <param name="id">The employee ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The requested employee profile.</returns>
+    [HttpGet("{id}")]
+    [RequiresAnyPermissions(Permissions.Admin.EmployeeManagement.View, Permissions.Accountant.EmployeeManagement.View)]
+    [ProducesResponseType(typeof(EmployeeResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetEmployeeByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetEmployeeByIdQuery(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -72,6 +89,23 @@ public class EmployeeController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<UpdateEmployeeCommand>() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Deletes an employee profile.
+    /// </summary>
+    /// <param name="id">The employee ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The deleted employee ID.</returns>
+    [HttpDelete("{id}")]
+    [RequiresAnyPermissions(
+        Permissions.Admin.EmployeeManagement.Delete,
+        Permissions.Accountant.EmployeeManagement.Delete)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> DeleteEmployeeAsync(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new DeleteEmployeeCommand(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }
