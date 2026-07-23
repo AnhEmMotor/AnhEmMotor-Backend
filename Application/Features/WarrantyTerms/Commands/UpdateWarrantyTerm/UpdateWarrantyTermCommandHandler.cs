@@ -1,8 +1,6 @@
-﻿using Application.ApiContracts.Admin.Warranty;
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.WarrantyTerm;
-using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.WarrantyTerms.Commands.UpdateWarrantyTerm;
@@ -17,10 +15,8 @@ public class UpdateWarrantyTermCommandHandler(
         var term = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (term == null)
         {
-            return Result<bool>.Failure(
-                Error.NotFound($"Warranty term with Id {request.Id} not found.", "Id"));
+            return Result<bool>.Failure(Error.NotFound($"Warranty term with Id {request.Id} not found.", "Id"));
         }
-
         term.TermName = request.TermName.Trim();
         term.TermNameJson = request.TermNameJson?.Trim();
         term.BrandId = request.BrandId;
@@ -35,10 +31,8 @@ public class UpdateWarrantyTermCommandHandler(
         term.EffectiveDate = request.EffectiveDate;
         term.ExpirationDate = request.ExpirationDate;
         term.MediaUrl = request.MediaUrl?.Trim();
-
         await writeRepository.UpdateAsync(term, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result<bool>.Success(true);
     }
 }

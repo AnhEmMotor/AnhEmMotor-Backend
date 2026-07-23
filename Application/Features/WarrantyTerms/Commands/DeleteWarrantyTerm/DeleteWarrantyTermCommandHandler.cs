@@ -15,13 +15,10 @@ public class DeleteWarrantyTermCommandHandler(
         var term = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (term == null)
         {
-            return Result.Failure(
-                Error.NotFound($"Warranty term with Id {request.Id} not found.", "Id"));
+            return Result.Failure(Error.NotFound($"Warranty term with Id {request.Id} not found.", "Id"));
         }
-
         await writeRepository.DeleteAsync(request.Id, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result.Success();
     }
 }

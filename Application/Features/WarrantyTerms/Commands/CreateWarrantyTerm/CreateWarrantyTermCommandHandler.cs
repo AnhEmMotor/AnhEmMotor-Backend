@@ -1,5 +1,4 @@
-﻿using Application.ApiContracts.Admin.Warranty;
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.WarrantyTerm;
 using Domain.Entities;
@@ -7,9 +6,7 @@ using MediatR;
 
 namespace Application.Features.WarrantyTerms.Commands.CreateWarrantyTerm;
 
-public class CreateWarrantyTermCommandHandler(
-    IWarrantyTermWriteRepository writeRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateWarrantyTermCommand, Result<int>>
+public class CreateWarrantyTermCommandHandler(IWarrantyTermWriteRepository writeRepository, IUnitOfWork unitOfWork) : IRequestHandler<CreateWarrantyTermCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(CreateWarrantyTermCommand request, CancellationToken cancellationToken)
     {
@@ -30,10 +27,8 @@ public class CreateWarrantyTermCommandHandler(
             ExpirationDate = request.ExpirationDate,
             MediaUrl = request.MediaUrl?.Trim()
         };
-
         await writeRepository.AddAsync(term, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result<int>.Success(term.Id);
     }
 }

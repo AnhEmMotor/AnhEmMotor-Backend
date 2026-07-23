@@ -17,24 +17,20 @@ public class UpdateSalesContractStatusCommandHandler(ISalesContractReadRepositor
         var contract = await readRepo.GetByIdAsync(request.ContractId, cancellationToken).ConfigureAwait(false);
         if (contract == null)
             return Result<SalesContractResponse>.Failure("Không tìm thấy hợp đồng.");
-
         if (!SalesContractStatus.IsValid(request.Status))
             return Result<SalesContractResponse>.Failure("Trạng thái hợp đồng không hợp lệ.");
-
-        var normalizedStatus = SalesContractStatus.All.First(status =>
-            string.Equals(status, request.Status, StringComparison.OrdinalIgnoreCase));
+        var normalizedStatus = SalesContractStatus.All
+            .First(status => string.Equals(status, request.Status, StringComparison.OrdinalIgnoreCase));
         var isSameStatus = string.Equals(contract.Status, normalizedStatus, StringComparison.OrdinalIgnoreCase);
         var isAllowedTransition =
             isSameStatus ||
             (string.Equals(contract.Status, SalesContractStatus.Draft, StringComparison.OrdinalIgnoreCase) &&
-             string.Equals(normalizedStatus, SalesContractStatus.Approved, StringComparison.OrdinalIgnoreCase)) ||
+                string.Equals(normalizedStatus, SalesContractStatus.Approved, StringComparison.OrdinalIgnoreCase)) ||
             (string.Equals(contract.Status, SalesContractStatus.Signed, StringComparison.OrdinalIgnoreCase) &&
-             string.Equals(normalizedStatus, SalesContractStatus.Fulfilled, StringComparison.OrdinalIgnoreCase));
-
+                string.Equals(normalizedStatus, SalesContractStatus.Fulfilled, StringComparison.OrdinalIgnoreCase));
         if (!isAllowedTransition)
             return Result<SalesContractResponse>.Failure(
                 $"Không thể chuyển hợp đồng từ {contract.Status} sang {normalizedStatus}.");
-
         contract.Status = normalizedStatus;
         contract.UpdatedAt = DateTimeOffset.UtcNow;
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

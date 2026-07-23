@@ -1,7 +1,6 @@
 using Application;
 using Asp.Versioning.ApiExplorer;
 using Infrastructure;
-using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -54,8 +53,6 @@ if (!string.IsNullOrWhiteSpace(customUploadPath))
     {
         Directory.CreateDirectory(absolutePath);
     }
-    // environment.WebRootPath = absolutePath;
-    // environment.WebRootFileProvider = new PhysicalFileProvider(absolutePath);
 }
 builder.Services.AddApplicationServices();
 builder.Services.AddMemoryCache();

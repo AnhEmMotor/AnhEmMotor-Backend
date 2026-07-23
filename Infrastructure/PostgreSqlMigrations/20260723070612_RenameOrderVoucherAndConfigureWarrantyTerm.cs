@@ -10,62 +10,45 @@ namespace Infrastructure.PostgreSqlMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_OrderVoucher_Output_OutputId",
-                table: "OrderVoucher");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_OrderVoucher_Vouchers_VoucherId",
-                table: "OrderVoucher");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_OrderVoucher",
-                table: "OrderVoucher");
-
-            migrationBuilder.RenameTable(
-                name: "OrderVoucher",
-                newName: "OrderVouchers");
-
+            migrationBuilder.DropForeignKey(name: "FK_OrderVoucher_Output_OutputId", table: "OrderVoucher");
+            migrationBuilder.DropForeignKey(name: "FK_OrderVoucher_Vouchers_VoucherId", table: "OrderVoucher");
+            migrationBuilder.DropPrimaryKey(name: "PK_OrderVoucher", table: "OrderVoucher");
+            migrationBuilder.RenameTable(name: "OrderVoucher", newName: "OrderVouchers");
             migrationBuilder.RenameIndex(
                 name: "IX_OrderVoucher_VoucherId",
                 table: "OrderVouchers",
                 newName: "IX_OrderVouchers_VoucherId");
-
             migrationBuilder.RenameIndex(
                 name: "IX_OrderVoucher_OutputId",
                 table: "OrderVouchers",
                 newName: "IX_OrderVouchers_OutputId");
-
             migrationBuilder.AlterColumn<string>(
                 name: "VehicleType",
                 table: "WarrantyTerm",
                 type: "text",
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "text",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "TermName",
                 table: "WarrantyTerm",
                 type: "text",
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "text",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "ErrorCategory",
                 table: "WarrantyTerm",
                 type: "text",
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "text",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<int>(
                 name: "DurationMonths",
                 table: "WarrantyTerm",
@@ -74,7 +57,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<int>(
                 name: "DurationKm",
                 table: "WarrantyTerm",
@@ -83,7 +65,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<int>(
                 name: "BrandId",
                 table: "WarrantyTerm",
@@ -91,17 +72,8 @@ namespace Infrastructure.PostgreSqlMigrations
                 nullable: false,
                 oldClrType: typeof(int),
                 oldType: "int");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_OrderVouchers",
-                table: "OrderVouchers",
-                column: "Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WarrantyTerm_BrandId",
-                table: "WarrantyTerm",
-                column: "BrandId");
-
+            migrationBuilder.AddPrimaryKey(name: "PK_OrderVouchers", table: "OrderVouchers", column: "Id");
+            migrationBuilder.CreateIndex(name: "IX_WarrantyTerm_BrandId", table: "WarrantyTerm", column: "BrandId");
             migrationBuilder.AddForeignKey(
                 name: "FK_OrderVouchers_Output_OutputId",
                 table: "OrderVouchers",
@@ -109,7 +81,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 principalTable: "Output",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_OrderVouchers_Vouchers_VoucherId",
                 table: "OrderVouchers",
@@ -117,7 +88,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 principalTable: "Vouchers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_WarrantyTerm_Brand_BrandId",
                 table: "WarrantyTerm",
@@ -130,40 +100,20 @@ namespace Infrastructure.PostgreSqlMigrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_OrderVouchers_Output_OutputId",
-                table: "OrderVouchers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_OrderVouchers_Vouchers_VoucherId",
-                table: "OrderVouchers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_WarrantyTerm_Brand_BrandId",
-                table: "WarrantyTerm");
-
-            migrationBuilder.DropIndex(
-                name: "IX_WarrantyTerm_BrandId",
-                table: "WarrantyTerm");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_OrderVouchers",
-                table: "OrderVouchers");
-
-            migrationBuilder.RenameTable(
-                name: "OrderVouchers",
-                newName: "OrderVoucher");
-
+            migrationBuilder.DropForeignKey(name: "FK_OrderVouchers_Output_OutputId", table: "OrderVouchers");
+            migrationBuilder.DropForeignKey(name: "FK_OrderVouchers_Vouchers_VoucherId", table: "OrderVouchers");
+            migrationBuilder.DropForeignKey(name: "FK_WarrantyTerm_Brand_BrandId", table: "WarrantyTerm");
+            migrationBuilder.DropIndex(name: "IX_WarrantyTerm_BrandId", table: "WarrantyTerm");
+            migrationBuilder.DropPrimaryKey(name: "PK_OrderVouchers", table: "OrderVouchers");
+            migrationBuilder.RenameTable(name: "OrderVouchers", newName: "OrderVoucher");
             migrationBuilder.RenameIndex(
                 name: "IX_OrderVouchers_VoucherId",
                 table: "OrderVoucher",
                 newName: "IX_OrderVoucher_VoucherId");
-
             migrationBuilder.RenameIndex(
                 name: "IX_OrderVouchers_OutputId",
                 table: "OrderVoucher",
                 newName: "IX_OrderVoucher_OutputId");
-
             migrationBuilder.AlterColumn<string>(
                 name: "VehicleType",
                 table: "WarrantyTerm",
@@ -171,7 +121,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text");
-
             migrationBuilder.AlterColumn<string>(
                 name: "TermName",
                 table: "WarrantyTerm",
@@ -179,7 +128,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text");
-
             migrationBuilder.AlterColumn<string>(
                 name: "ErrorCategory",
                 table: "WarrantyTerm",
@@ -187,7 +135,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "text");
-
             migrationBuilder.AlterColumn<int>(
                 name: "DurationMonths",
                 table: "WarrantyTerm",
@@ -196,7 +143,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 oldClrType: typeof(int),
                 oldType: "integer",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<int>(
                 name: "DurationKm",
                 table: "WarrantyTerm",
@@ -205,7 +151,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 oldClrType: typeof(int),
                 oldType: "integer",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<int>(
                 name: "BrandId",
                 table: "WarrantyTerm",
@@ -213,12 +158,7 @@ namespace Infrastructure.PostgreSqlMigrations
                 nullable: false,
                 oldClrType: typeof(int),
                 oldType: "integer");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_OrderVoucher",
-                table: "OrderVoucher",
-                column: "Id");
-
+            migrationBuilder.AddPrimaryKey(name: "PK_OrderVoucher", table: "OrderVoucher", column: "Id");
             migrationBuilder.AddForeignKey(
                 name: "FK_OrderVoucher_Output_OutputId",
                 table: "OrderVoucher",
@@ -226,7 +166,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 principalTable: "Output",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_OrderVoucher_Vouchers_VoucherId",
                 table: "OrderVoucher",

@@ -1,6 +1,6 @@
 using Application.Common.Models;
-using Application.Features.SalesContracts.Commands.UploadSalesContractScan;
 using Application.Features.SalesContracts.Commands.UpdateSalesContractStatus;
+using Application.Features.SalesContracts.Commands.UploadSalesContractScan;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.SalesContract;
@@ -86,11 +86,10 @@ public class SalesContractScan
             _fileInsertService.Object,
             _fileReadService.Object,
             _unitOfWork.Object);
-
         var result = await handler.Handle(
             new UploadSalesContractScanCommand(contractId, fileContent, "signed-contract.pdf"),
-            CancellationToken.None).ConfigureAwait(true);
-
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Contain("duyệt");
         _fileInsertService.VerifyNoOtherCalls();
@@ -104,14 +103,11 @@ public class SalesContractScan
         var contract = new SalesContract { Id = contractId, Status = SalesContractStatus.Draft };
         _readRepository.Setup(repository => repository.GetByIdAsync(contractId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(contract);
-        var handler = new UpdateSalesContractStatusCommandHandler(
-            _readRepository.Object,
-            _unitOfWork.Object);
-
+        var handler = new UpdateSalesContractStatusCommandHandler(_readRepository.Object, _unitOfWork.Object);
         var result = await handler.Handle(
             new UpdateSalesContractStatusCommand(contractId, SalesContractStatus.Approved),
-            CancellationToken.None).ConfigureAwait(true);
-
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         contract.Status.Should().Be(SalesContractStatus.Approved);
         contract.SignedDate.Should().BeNull();
@@ -125,14 +121,11 @@ public class SalesContractScan
         var contract = new SalesContract { Id = contractId, Status = SalesContractStatus.Draft };
         _readRepository.Setup(repository => repository.GetByIdAsync(contractId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(contract);
-        var handler = new UpdateSalesContractStatusCommandHandler(
-            _readRepository.Object,
-            _unitOfWork.Object);
-
+        var handler = new UpdateSalesContractStatusCommandHandler(_readRepository.Object, _unitOfWork.Object);
         var result = await handler.Handle(
             new UpdateSalesContractStatusCommand(contractId, SalesContractStatus.Fulfilled),
-            CancellationToken.None).ConfigureAwait(true);
-
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         contract.Status.Should().Be(SalesContractStatus.Draft);
         _unitOfWork.VerifyNoOtherCalls();

@@ -4,8 +4,8 @@ using Application.Features.WarrantyTerms.Commands.CreateWarrantyTerm;
 using Application.Features.WarrantyTerms.Commands.DeleteWarrantyTerm;
 using Application.Features.WarrantyTerms.Commands.UpdateWarrantyTerm;
 using Application.Features.WarrantyTerms.Queries.GetWarrantyTermById;
-using Application.Features.WarrantyTerms.Queries.GetWarrantyTermStatistics;
 using Application.Features.WarrantyTerms.Queries.GetWarrantyTermsList;
+using Application.Features.WarrantyTerms.Queries.GetWarrantyTermStatistics;
 using Asp.Versioning;
 using Domain.Constants.Permission;
 using Domain.Primitives;
@@ -29,10 +29,7 @@ public class WarrantyTermsController(ISender sender) : ApiController
     [ProducesResponseType(typeof(PagedResult<WarrantyTermResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetListAsync([FromQuery] SieveModel sieve, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetWarrantyTermsListQuery
-        {
-            SieveModel = sieve
-        }, cancellationToken);
+        var result = await sender.Send(new GetWarrantyTermsListQuery { SieveModel = sieve }, cancellationToken);
         return HandleResult(result);
     }
 
@@ -57,17 +54,23 @@ public class WarrantyTermsController(ISender sender) : ApiController
     [HttpPost]
     [HasPermission(Permissions.Factory.RepairOrderManagement.Create)]
     [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateWarrantyTermCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateWarrantyTermCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken);
-        if (!result.IsSuccess) return HandleResult(result);
+        if (!result.IsSuccess)
+            return HandleResult(result);
         return CreatedAtAction("GetDetail", new { id = result.Value, version = "1.0" }, result.Value);
     }
 
     [HttpPut("{id:int}")]
     [HasPermission(Permissions.Factory.RepairOrderManagement.AssignTechnician)]
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateWarrantyTermCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateAsync(
+        int id,
+        [FromBody] UpdateWarrantyTermCommand command,
+        CancellationToken cancellationToken)
     {
         var merged = command with { Id = id };
         var result = await sender.Send(merged, cancellationToken);

@@ -1,4 +1,4 @@
-namespace Domain.Entities;
+namespace Domain.Constants;
 
 public static class WarrantyTermStatus
 {

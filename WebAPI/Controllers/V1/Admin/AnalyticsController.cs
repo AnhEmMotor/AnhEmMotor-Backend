@@ -73,18 +73,19 @@ public class AnalyticsController : ControllerBase
             .Where(h => h.ChangedAt >= cutoff)
             .OrderByDescending(h => h.ChangedAt)
             .Take(limit)
-            .Select(h => new
-            {
-                timestamp = h.ChangedAt,
-                category = "order",
-                action = "updated",
-                actorId = (Guid?)h.ChangedBy,
-                actorName = h.ChangedByUser != null ? h.ChangedByUser.FullName : "System",
-                targetType = "Order",
-                targetId = h.OutputId,
-                targetName = string.Empty,
-                details = h.Note ?? string.Empty
-            })
+            .Select(
+                h => new
+                {
+                    timestamp = h.ChangedAt,
+                    category = "order",
+                    action = "updated",
+                    actorId = h.ChangedBy,
+                    actorName = h.ChangedByUser != null ? h.ChangedByUser.FullName : "System",
+                    targetType = "Order",
+                    targetId = h.OutputId,
+                    targetName = string.Empty,
+                    details = h.Note ?? string.Empty
+                })
             .ToListAsync(ct);
         return Ok(logs);
     }

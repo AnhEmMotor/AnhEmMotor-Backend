@@ -135,7 +135,8 @@ public class LeadController(IMediator mediator) : ApiController
         [FromBody] AssignLeadRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new AssignLeadCommand(id, request.UserId), cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new AssignLeadCommand(id, request.UserId), cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 

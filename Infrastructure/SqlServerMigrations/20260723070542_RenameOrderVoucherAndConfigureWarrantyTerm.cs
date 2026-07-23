@@ -10,52 +10,36 @@ namespace Infrastructure.SqlServerMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_OrderVoucher_Output_OutputId",
-                table: "OrderVoucher");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_OrderVoucher_Vouchers_VoucherId",
-                table: "OrderVoucher");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_OrderVoucher",
-                table: "OrderVoucher");
-
-            migrationBuilder.RenameTable(
-                name: "OrderVoucher",
-                newName: "OrderVouchers");
-
+            migrationBuilder.DropForeignKey(name: "FK_OrderVoucher_Output_OutputId", table: "OrderVoucher");
+            migrationBuilder.DropForeignKey(name: "FK_OrderVoucher_Vouchers_VoucherId", table: "OrderVoucher");
+            migrationBuilder.DropPrimaryKey(name: "PK_OrderVoucher", table: "OrderVoucher");
+            migrationBuilder.RenameTable(name: "OrderVoucher", newName: "OrderVouchers");
             migrationBuilder.RenameIndex(
                 name: "IX_OrderVoucher_VoucherId",
                 table: "OrderVouchers",
                 newName: "IX_OrderVouchers_VoucherId");
-
             migrationBuilder.RenameIndex(
                 name: "IX_OrderVoucher_OutputId",
                 table: "OrderVouchers",
                 newName: "IX_OrderVouchers_OutputId");
-
             migrationBuilder.AlterColumn<string>(
                 name: "VehicleType",
                 table: "WarrantyTerm",
                 type: "nvarchar(100)",
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(200)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "TermName",
                 table: "WarrantyTerm",
                 type: "nvarchar(200)",
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(200)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "WarrantyTerm",
@@ -63,7 +47,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(20)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "MediaUrl",
                 table: "WarrantyTerm",
@@ -72,17 +55,15 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(500)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "ErrorCategory",
                 table: "WarrantyTerm",
                 type: "nvarchar(200)",
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(200)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
                 table: "WarrantyTerm",
@@ -91,7 +72,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "Coverage",
                 table: "WarrantyTerm",
@@ -100,17 +80,8 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_OrderVouchers",
-                table: "OrderVouchers",
-                column: "Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WarrantyTerm_BrandId",
-                table: "WarrantyTerm",
-                column: "BrandId");
-
+            migrationBuilder.AddPrimaryKey(name: "PK_OrderVouchers", table: "OrderVouchers", column: "Id");
+            migrationBuilder.CreateIndex(name: "IX_WarrantyTerm_BrandId", table: "WarrantyTerm", column: "BrandId");
             migrationBuilder.AddForeignKey(
                 name: "FK_OrderVouchers_Output_OutputId",
                 table: "OrderVouchers",
@@ -118,7 +89,6 @@ namespace Infrastructure.SqlServerMigrations
                 principalTable: "Output",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_OrderVouchers_Vouchers_VoucherId",
                 table: "OrderVouchers",
@@ -126,7 +96,6 @@ namespace Infrastructure.SqlServerMigrations
                 principalTable: "Vouchers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_WarrantyTerm_Brand_BrandId",
                 table: "WarrantyTerm",
@@ -139,40 +108,20 @@ namespace Infrastructure.SqlServerMigrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_OrderVouchers_Output_OutputId",
-                table: "OrderVouchers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_OrderVouchers_Vouchers_VoucherId",
-                table: "OrderVouchers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_WarrantyTerm_Brand_BrandId",
-                table: "WarrantyTerm");
-
-            migrationBuilder.DropIndex(
-                name: "IX_WarrantyTerm_BrandId",
-                table: "WarrantyTerm");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_OrderVouchers",
-                table: "OrderVouchers");
-
-            migrationBuilder.RenameTable(
-                name: "OrderVouchers",
-                newName: "OrderVoucher");
-
+            migrationBuilder.DropForeignKey(name: "FK_OrderVouchers_Output_OutputId", table: "OrderVouchers");
+            migrationBuilder.DropForeignKey(name: "FK_OrderVouchers_Vouchers_VoucherId", table: "OrderVouchers");
+            migrationBuilder.DropForeignKey(name: "FK_WarrantyTerm_Brand_BrandId", table: "WarrantyTerm");
+            migrationBuilder.DropIndex(name: "IX_WarrantyTerm_BrandId", table: "WarrantyTerm");
+            migrationBuilder.DropPrimaryKey(name: "PK_OrderVouchers", table: "OrderVouchers");
+            migrationBuilder.RenameTable(name: "OrderVouchers", newName: "OrderVoucher");
             migrationBuilder.RenameIndex(
                 name: "IX_OrderVouchers_VoucherId",
                 table: "OrderVoucher",
                 newName: "IX_OrderVoucher_VoucherId");
-
             migrationBuilder.RenameIndex(
                 name: "IX_OrderVouchers_OutputId",
                 table: "OrderVoucher",
                 newName: "IX_OrderVoucher_OutputId");
-
             migrationBuilder.AlterColumn<string>(
                 name: "VehicleType",
                 table: "WarrantyTerm",
@@ -180,7 +129,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "TermName",
                 table: "WarrantyTerm",
@@ -188,7 +136,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(200)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "Status",
                 table: "WarrantyTerm",
@@ -196,7 +143,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(50)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "MediaUrl",
                 table: "WarrantyTerm",
@@ -205,7 +151,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(1000)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "ErrorCategory",
                 table: "WarrantyTerm",
@@ -213,7 +158,6 @@ namespace Infrastructure.SqlServerMigrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(200)");
-
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
                 table: "WarrantyTerm",
@@ -222,7 +166,6 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(MAX)",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "Coverage",
                 table: "WarrantyTerm",
@@ -231,12 +174,7 @@ namespace Infrastructure.SqlServerMigrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(200)",
                 oldNullable: true);
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_OrderVoucher",
-                table: "OrderVoucher",
-                column: "Id");
-
+            migrationBuilder.AddPrimaryKey(name: "PK_OrderVoucher", table: "OrderVoucher", column: "Id");
             migrationBuilder.AddForeignKey(
                 name: "FK_OrderVoucher_Output_OutputId",
                 table: "OrderVoucher",
@@ -244,7 +182,6 @@ namespace Infrastructure.SqlServerMigrations
                 principalTable: "Output",
                 principalColumn: "id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_OrderVoucher_Vouchers_VoucherId",
                 table: "OrderVoucher",
