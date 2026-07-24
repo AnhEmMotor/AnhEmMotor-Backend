@@ -19,9 +19,10 @@ public static class TechnologySeeder
             }
         }
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var categories = await context.TechnologyCategories
-            .ToDictionaryAsync(c => c.Name!.Trim(), c => c.Id, StringComparer.OrdinalIgnoreCase, cancellationToken)
-            .ConfigureAwait(false);
+        var categoryList = await context.TechnologyCategories.ToListAsync(cancellationToken).ConfigureAwait(false);
+        var categories = categoryList
+            .GroupBy(c => c.Name!.Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase);
         var honda = await context.Brands
             .FirstOrDefaultAsync(
                 b => b.Name != null && string.Compare(b.Name.ToLower(), "honda") == 0,
