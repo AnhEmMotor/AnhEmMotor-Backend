@@ -58,11 +58,9 @@ public class PythonEnvService(ILogger<PythonEnvService> logger) : IPythonEnvServ
                 await process.WaitForExitAsync();
                 if (process.ExitCode != 0)
                 {
-                    logger.LogWarning(
-                        "[PythonEnv] Lệnh '{Cmd} {Args}' kết thúc với mã lỗi {Code}",
-                        fileName,
-                        args,
-                        process.ExitCode);
+                    var msg = $"[PythonEnv] Lệnh '{fileName} {args}' kết thúc với mã lỗi {process.ExitCode}";
+                    logger.LogError("{Msg}", msg);
+                    throw new Exception(msg);
                 }
             }
         } catch (Exception ex)
