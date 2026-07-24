@@ -58,6 +58,8 @@ Trong psql gõ như sau:
 CREATE DATABASE target_project_db;
 CREATE USER project_manager_user WITH PASSWORD 'StrongPassword2026';
 ALTER DATABASE target_project_db OWNER TO project_manager_user;
+\c target_project_db
+GRANT ALL ON SCHEMA public TO project_manager_user;
 \q
 ```
 
