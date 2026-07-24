@@ -38,6 +38,7 @@ public static class MigrationExtensions
         await VehicleTypeAssignmentSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await SettingsSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await NewsCategorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+        await NewsSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await TechnologySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await PermissionDataSeeder.SeedPermissionsAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(

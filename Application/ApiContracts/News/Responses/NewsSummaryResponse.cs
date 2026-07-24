@@ -14,7 +14,15 @@ public sealed record NewsSummaryResponse
 
     public string? CoverImageUrl { get; init; }
 
+    public string? AuthorName { get; init; }
+
+    public string? MetaDescription { get; init; }
+
     public DateTimeOffset? PublishedDate { get; init; }
+
+    public DateTimeOffset? CreatedAt { get; init; }
+
+    public DateTimeOffset? UpdatedAt { get; init; }
 
     public bool IsPublished { get; init; }
 }
