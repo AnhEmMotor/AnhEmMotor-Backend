@@ -1,5 +1,6 @@
 name: AnhEmMotor Backend - Deploy
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -157,6 +158,3 @@ jobs:
             fi
 
             sudo systemctl restart anhemmotor.service
-
-
-
