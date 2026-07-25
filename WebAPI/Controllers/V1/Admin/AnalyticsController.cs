@@ -1,5 +1,7 @@
 using Application.Common.Models;
 using Application.Features.Admin.Analytics;
+using Domain.Constants.Permission;
+using Infrastructure.Authorization.Attribute;
 using Infrastructure.DBContexts;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +16,7 @@ namespace WebAPI.Controllers.V1.Admin;
 /// </summary>
 [ApiController]
 [Route("api/v1/admin/analytics")]
-[Authorize(Roles = "Admin")]
+[HasPermission(Permissions.Admin.DashboardManagement.View)]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class AnalyticsController : ControllerBase
 {

@@ -62,33 +62,22 @@ public class GetVehiclePortfolioQueryHandler(
                 List<PortfolioPartItem> details = new();
                 try
                 {
-                    var parsed = JsonSerializer.Deserialize<PartsJsonWrapper>(h.PartsJson ?? string.Empty);
-                    if (parsed?.Parts != null)
+                    if (!string.IsNullOrWhiteSpace(h.PartsJson))
                     {
-                        foreach (var p in parsed.Parts)
+                        var parsedList = JsonSerializer.Deserialize<List<MaintenanceHistoryItemDto>>(h.PartsJson);
+                        if (parsedList != null)
                         {
-                            details.Add(
-                                new PortfolioPartItem
-                                {
-                                    Type = "Part",
-                                    VariantName = p.VariantName,
-                                    ProductCode = p.ProductCode,
-                                    Count = p.Count
-                                });
-                        }
-                    }
-                    if (parsed?.Services != null)
-                    {
-                        foreach (var s in parsed.Services)
-                        {
-                            details.Add(
-                                new PortfolioPartItem
-                                {
-                                    Type = "Service",
-                                    VariantName = s.VariantName,
-                                    ProductCode = null,
-                                    Count = 1
-                                });
+                            foreach (var p in parsedList)
+                            {
+                                details.Add(
+                                    new PortfolioPartItem
+                                    {
+                                        Type = p.Type == "Product" ? "Part" : "Service",
+                                        VariantName = p.Name,
+                                        ProductCode = null,
+                                        Count = p.Count
+                                    });
+                            }
                         }
                     }
                 } catch
@@ -127,28 +116,10 @@ public class GetVehiclePortfolioQueryHandler(
     }
 }
 
-public class PartsJsonWrapper
+public class MaintenanceHistoryItemDto
 {
-    public List<PartItemDto>? Parts { get; set; }
-
-    public List<ServiceItemDto>? Services { get; set; }
-}
-
-public class PartItemDto
-{
-    public string? VariantName { get; set; }
-
-    public string? ProductCode { get; set; }
-
-    public int Count { get; set; }
-}
-
-public class ServiceItemDto
-{
-    public string? VariantName { get; set; }
-
-    public string? ProductCode { get; set; }
-
+    public string? Type { get; set; }
+    public string? Name { get; set; }
     public int Count { get; set; }
 }
 

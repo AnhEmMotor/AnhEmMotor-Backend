@@ -6,13 +6,13 @@ using MediatR;
 
 namespace Application.Features.WarrantyClaims.Queries;
 
-public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository repo) : IRequestHandler<GetWarrantyClaimDetailQuery, Result<WarrantyClaimResponse?>>
+public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository repo) : IRequestHandler<GetWarrantyClaimDetailQuery, Result<WarrantyClaimDetailResponse?>>
 {
-    public async Task<Result<WarrantyClaimResponse?>> Handle(GetWarrantyClaimDetailQuery req, CancellationToken ct)
+    public async Task<Result<WarrantyClaimDetailResponse?>> Handle(GetWarrantyClaimDetailQuery req, CancellationToken ct)
     {
         var claim = await repo.GetDetailByIdAsync(req.Id, ct, DataFetchMode.All).ConfigureAwait(false);
         if (claim is null)
-            return Result<WarrantyClaimResponse?>.Failure(
+            return Result<WarrantyClaimDetailResponse?>.Failure(
                 [Error.NotFound($"Không tìm thấy khiếu nại bảo hành id={req.Id}", "Id")]);
         var vehicle = claim.Vehicle;
         var lead = vehicle?.Lead;
@@ -29,7 +29,7 @@ public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository rep
         var variantColor = vehicle?.ProductVariantColor;
         string? vehicleColor = variantColor?.ColorName ?? variantColor?.ColorCode;
         string? vehicleYear = vehicle?.PurchaseDate.Year.ToString();
-        var response = new WarrantyClaimResponse
+        var response = new WarrantyClaimDetailResponse
         {
             Id = claim.Id,
             ClaimNumber = claim.ClaimNumber,
@@ -42,7 +42,9 @@ public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository rep
             StatusText = WarrantyClaimStatus.GetLabel(claim.Status),
             VehicleVin = vehicle?.VinNumber,
             IssueDescription = claim.IssueDescription,
-            MediaUrls = claim.MediaUrls,
+            MediaUrls = string.IsNullOrWhiteSpace(claim.MediaUrls)
+                ? new List<string>()
+                : claim.MediaUrls.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
             ServiceCenterName = claim.ServiceCenterName,
             ManufacturerClaimNumber = claim.ManufacturerClaimNumber,
             Status = claim.Status,
@@ -64,10 +66,12 @@ public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository rep
                         Status = p.Status
                     })
                     .ToList(),
+            VehicleColor = vehicleColor,
+            VehicleYear = vehicleYear,
+            WarrantyRemaining = null,
             CreatedAt = claim.CreatedAt,
-            UpdatedAt = claim.UpdatedAt,
-            IsDeleted = claim.DeletedAt != null
+            UpdatedAt = claim.UpdatedAt
         };
-        return Result<WarrantyClaimResponse?>.Success(response);
+        return Result<WarrantyClaimDetailResponse?>.Success(response);
     }
 }

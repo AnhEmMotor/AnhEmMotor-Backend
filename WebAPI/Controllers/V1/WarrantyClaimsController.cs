@@ -31,7 +31,7 @@ public class WarrantyClaimsController(ISender sender) : ApiController
 
     [HttpGet("{id:int}")]
     [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
-    [ProducesResponseType(typeof(WarrantyClaimResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(WarrantyClaimDetailResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDetailAsync(int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetWarrantyClaimDetailQuery { Id = id }, cancellationToken);

@@ -129,7 +129,10 @@ public class UpdateSupplierContractCommandHandler(
             entity.ParentContractId = request.Request.ParentContractId;
         if (request.Request.ContractItems != null && (!isCurrentlyActive || statusBeingChanged))
         {
-            entity.ContractItems.Clear();
+            foreach (var item in entity.ContractItems)
+            {
+                item.DeletedAt = DateTimeOffset.UtcNow;
+            }
             foreach (var item in request.Request.ContractItems)
             {
                 entity.ContractItems
