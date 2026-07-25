@@ -10,14 +10,17 @@ public class FileReadService : IFileReadService
 {
     private readonly string _uploadFolder;
     private readonly IFileUpdateService _fileUpdateService;
+  private readonly IHttpContextAccessor _httpContextAccessor;
 
     public FileReadService(
         IWebHostEnvironment environment,
         IOptions<LocalFileStorageOptions> options,
-        IFileUpdateService fileUpdateService)
+        IFileUpdateService fileUpdateService,
+    IHttpContextAccessor httpContextAccessor)
     {
         _fileUpdateService = fileUpdateService;
-        _uploadFolder = LocalFileStoragePathResolver.Resolve(environment, options);
+        _httpContextAccessor = httpContextAccessor;
+    _uploadFolder = LocalFileStoragePathResolver.Resolve(environment, options);
     }
 
     public string GetPublicUrl(string storagePath)

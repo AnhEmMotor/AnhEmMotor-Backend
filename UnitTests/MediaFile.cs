@@ -586,10 +586,13 @@ public class MediaFile
         var environment = new Mock<IWebHostEnvironment>();
         environment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
         environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(Path.GetTempPath(), "wwwroot"));
-        var service = new FileReadService(
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+httpContextAccessor.Setup(x => x.HttpContext).Returns((HttpContext)null);
+var service = new FileReadService(
             environment.Object,
             Options.Create(new LocalFileStorageOptions()),
-            _fileUpdateServiceMock.Object);
+            _fileUpdateServiceMock.Object,
+  httpContextAccessor.Object);
 
         var publicUrl = service.GetPublicUrl("banners/banner.webp");
 
@@ -611,7 +614,8 @@ public class MediaFile
             var service = new FileInsertService(
                 environment.Object,
                 Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
-                _fileUpdateServiceMock.Object);
+                _fileUpdateServiceMock.Object);,
+  httpContextAccessor.Object);
             await using var imageStream = new MemoryStream();
             using (var image = new Image<Rgba32>(2, 2))
             {

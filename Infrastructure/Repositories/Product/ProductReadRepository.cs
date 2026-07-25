@@ -191,10 +191,7 @@ public class ProductReadRepository(
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder);
-        if (string.IsNullOrWhiteSpace(sorts))
-        {
-            dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt).ThenBy(p => p.Id);
-        }
+dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt).ThenBy(p => p.Id);
         var items = await dbQuery
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)
@@ -433,10 +430,8 @@ public class ProductReadRepository(
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option);
-        if (string.IsNullOrWhiteSpace(sorts))
-        {
             dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt).ThenBy(p => p.Id);
-        }
+
         var entities = await dbQuery
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)
@@ -568,3 +563,4 @@ public class ProductReadRepository(
             .FirstOrDefaultAsync(cancellationToken);
     }
 }
+
