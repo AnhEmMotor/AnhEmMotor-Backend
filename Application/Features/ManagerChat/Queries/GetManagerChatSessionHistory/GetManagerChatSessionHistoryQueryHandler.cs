@@ -11,9 +11,9 @@ public class GetManagerChatSessionHistoryQueryHandler(
     IChatReadRepository chatReadRepository,
     IPermissionReadRepository permissionReadRepository,
     ICurrentUserContext currentUserContext)
-    : IRequestHandler<GetManagerChatSessionHistoryQuery, Result<List<ChatMessage>>>
+    : IRequestHandler<GetManagerChatSessionHistoryQuery, Result<List<ManagerChatMessageDto>>>
 {
-    public async Task<Result<List<ChatMessage>>> Handle(GetManagerChatSessionHistoryQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<ManagerChatMessageDto>>> Handle(GetManagerChatSessionHistoryQuery request, CancellationToken cancellationToken)
     {
         var userId = currentUserContext.GetUserId();
         bool hasPermission = await permissionReadRepository.HasAnyPermissionAsync(userId, cancellationToken);
@@ -29,6 +29,16 @@ public class GetManagerChatSessionHistoryQueryHandler(
         }
 
         var messages = await chatReadRepository.GetMessagesBySessionIdAsync(request.SessionId, cancellationToken);
-        return messages;
+        
+        var dtos = messages
+            .OrderBy(m => m.CreatedAt)
+            .Select(m => new ManagerChatMessageDto
+            {
+                Role = m.Role.ToString(),
+                Message = m.Message,
+                CreatedAt = m.CreatedAt
+            }).ToList();
+
+        return dtos;
     }
 }
