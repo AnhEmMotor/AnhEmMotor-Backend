@@ -16,6 +16,7 @@ using FluentAssertions;
 using Infrastructure.Configurations.Options;
 using Infrastructure.Repositories.MediaFile.File;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Moq;
 using SixLabors.ImageSharp;
@@ -592,7 +593,7 @@ var service = new FileReadService(
             environment.Object,
             Options.Create(new LocalFileStorageOptions()),
             _fileUpdateServiceMock.Object,
-  httpContextAccessor.Object);
+    httpContextAccessor.Object);
 
         var publicUrl = service.GetPublicUrl("banners/banner.webp");
 
@@ -611,11 +612,10 @@ var service = new FileReadService(
             var environment = new Mock<IWebHostEnvironment>();
             environment.SetupGet(x => x.ContentRootPath).Returns(contentRoot);
             environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(contentRoot, "wwwroot"));
-            var service = new FileInsertService(
-                environment.Object,
-                Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
-                _fileUpdateServiceMock.Object);,
-  httpContextAccessor.Object);
+ var service = new FileInsertService(
+     environment.Object,
+     Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
+     _fileUpdateServiceMock.Object);
             await using var imageStream = new MemoryStream();
             using (var image = new Image<Rgba32>(2, 2))
             {
