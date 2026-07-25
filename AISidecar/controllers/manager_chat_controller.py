@@ -4,6 +4,8 @@ import asyncio
 import httpx
 import json
 from schemas.chat_schemas import ChatRequest, GenerateTitleRequest
+from services.llm_factory import get_llm
+from langchain_core.messages import SystemMessage, HumanMessage
 
 router = APIRouter()
 
@@ -34,10 +36,25 @@ async def handle_chat(request: Request, chat_req: ChatRequest):
                 context = response.json()
     except Exception:
         pass
-    reply = json.dumps(context, ensure_ascii=False, indent=2)
+        
+    llm = get_llm(temperature=0.7)
+    
+    system_prompt = f"Bạn là trợ lý AI cho ứng dụng AnhEmMotor. Hãy trả lời câu hỏi của người dùng một cách thân thiện và chính xác dựa trên ngữ cảnh được cung cấp."
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=chat_req.message)
+    ]
+    
     async def stream_generator():
-        words = reply.split(" ")
-        for i, word in enumerate(words):
-            yield word + (" " if i < len(words) - 1 else "")
-            await asyncio.sleep(0.01)
+        try:
+            async for chunk in llm.astream(messages):
+                if isinstance(chunk, str):
+                    yield chunk
+                elif hasattr(chunk, "content"):
+                    yield chunk.content
+                else:
+                    yield str(chunk)
+        except Exception as e:
+            yield f"\n[Lỗi kết nối tới AI Provider: {str(e)}]"
+            
     return StreamingResponse(stream_generator(), media_type="text/plain")

@@ -90,8 +90,10 @@ jobs:
             .GhnSettings.Token = env.GHN_TOKEN |
             .GhnSettings.ShopId = env.GHN_SHOP_ID |
             .GhnSettings.BaseUrl = env.GHN_BASE_URL |
-            .AISetup.GeminiApiKey = env.GEMINI_API_KEY |
-            .AISetup.GeminiModel = env.GEMINI_MODEL |
+            .AISetup.AiProvider = env.AI_PROVIDER |
+            .AISetup.AiApiEndpoint = env.AI_API_ENDPOINT |
+            .AISetup.ApiKey = env.API_KEY |
+            .AISetup.Model = env.MODEL |
             .AISetup.LangSmithTracing = (env.LANGSMITH_TRACING | fromjson) |
             .AISetup.LangSmithApiKey = env.LANGSMITH_API_KEY
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json

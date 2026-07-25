@@ -92,8 +92,10 @@ public class AiSidecarManager(
             startInfo.EnvironmentVariables["LANGCHAIN_PROJECT"] = "AnhEmMotor";
             startInfo.EnvironmentVariables["LANGCHAIN_API_KEY"] = config["AISetup:LangSmithApiKey"] ?? string.Empty;
         }
-        startInfo.EnvironmentVariables["GEMINI_API_KEY"] = config["AISetup:GeminiApiKey"] ?? string.Empty;
-        startInfo.EnvironmentVariables["GEMINI_MODEL"] = config["AISetup:GeminiModel"] ?? "gemini-3.5-flash";
+        startInfo.EnvironmentVariables["AI_PROVIDER"] = config["AISetup:AiProvider"] ?? "Gemini";
+        startInfo.EnvironmentVariables["AI_API_ENDPOINT"] = config["AISetup:AiApiEndpoint"] ?? string.Empty;
+        startInfo.EnvironmentVariables["API_KEY"] = config["AISetup:ApiKey"] ?? string.Empty;
+        startInfo.EnvironmentVariables["MODEL"] = config["AISetup:Model"] ?? "gemini-3.5-flash";
         try
         {
             _sidecarProcess = new Process { StartInfo = startInfo };

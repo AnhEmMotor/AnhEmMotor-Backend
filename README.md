@@ -62,7 +62,7 @@ See the [LICENSE](LICENSE) file for details.
 - [7. GitHub Secrets Configuration (For Production Deploy)](#7-github-secrets-configuration-for-production-deploy)
 - [8. Online Payment Configuration (English)](#8-online-payment-configuration-english)
 - [9. GHN (Giao Hàng Nhanh) Configuration (English)](#9-GHN-giao-hàng-tiết-kiệm-configuration-english)
-- [10. AI Sidecar Configuration (Gemini & LangSmith)](#10-ai-sidecar-configuration-gemini--langsmith)
+- [10. AI Sidecar Configuration (AI Provider & LangSmith)](#10-ai-sidecar-configuration-ai-provider--langsmith)
 - [11. Troubleshooting](#11-troubleshooting)
 
 # 1. System Requirements
@@ -574,8 +574,8 @@ The following secrets need to be set up in the GitHub repository:
 | `GHN_TOKEN`                        | GHN API Token                            | `a1b2c3d4e5f6g7h8...`                                                                                    |
 | `GHN_SHOP_ID`                      | GHN Shop ID                              | `012345`                                                                                                 |
 | `GHN_BASE_URL`                     | GHN API Base URL                         | `https://dev-online-gateway.ghn.vn`                                                                      |
-| `GEMINI_API_KEY`                   | Google Gemini API Key                    | `AIzaSyB...`                                                                                             |
-| `GEMINI_MODEL`                     | Google Gemini Model Name                 | `gemini-3.5-flash`                                                                                       |
+| `API_KEY`                          | AI Provider API Key                      | `AIzaSyB...` / `sk-...`                                                                                  |
+| `MODEL`                            | AI Model Name                            | `gemini-3.5-flash` / `gpt-3.5-turbo`                                                                     |
 | `LANGSMITH_TRACING`                | Enable LangSmith tracing (true/false)    | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                        | `lsv2_pt_...`                                                                                            |
 
@@ -670,16 +670,23 @@ To enable the automatic feature of pushing orders to GHN, you need to configure 
 5. **Change shop location**: Go to "Quản lý cửa hàng" (Store management) in the Sidebar, you need to change/add the default store location right there.
 6. **Register Webhook**: If you want to use Webhooks to receive notifications when an order is completed, you need to send an email to api@ghn.vn with the following information: Company Name, Client ID, Requested Environment, Webhook URL (which is the Endpoint URL running this project). Then wait for their response.
 
-# 10. AI Sidecar Configuration (Gemini & LangSmith)
+# 10. AI Sidecar Configuration (LLM & LangSmith)
 
-To enable the AI capabilities (e.g. smart search), you need a Gemini API Key and optionally LangSmith for tracing.
+To enable the AI capabilities (e.g. smart search, manager chat), you need to configure an AI Provider (Gemini or OpenAI-compatible Endpoint) and optionally LangSmith for tracing.
 
-### 1. Get Gemini API Key
+### 1. Configure AI Provider
 
-1. Go to [Google AI Studio](https://aistudio.google.com/app/api-keys).
-2. Sign in with your Google account.
-3. Click "Create API key" in a new or existing project.
-4. Copy the generated API key and put it into `AISetup -> GeminiApiKey` in your `appsettings.json`.
+You can choose between `Gemini` or `ApiEndpoint` by setting `AISetup -> AiProvider` in your `appsettings.json`.
+
+**Option A: Gemini**
+1. Set `AiProvider` to `"Gemini"`.
+2. Go to [Google AI Studio](https://aistudio.google.com/app/api-keys).
+3. Generate an API Key and put it into `AISetup -> ApiKey` in your `appsettings.json`.
+
+**Option B: OpenAI-compatible API Endpoint**
+1. Set `AiProvider` to `"ApiEndpoint"`.
+2. Provide your endpoint in `AISetup -> AiApiEndpoint` (e.g. `"https://api.openai.com/v1"`).
+3. Put your API Key in `AISetup -> ApiKey`.
 
 ### 2. Get LangSmith API Key (Optional for Tracing)
 
@@ -806,7 +813,7 @@ Xem tệp [LICENSE](LICENSE) để biết chi tiết.
 - [7. GitHub Secrets Configuration (Cho Production Deploy)](#7-github-secrets-configuration-cho-production-deploy)
 - [8. Hướng dẫn Cấu hình Thanh toán Online](#8-hướng-dẫn-cấu-hình-thanh-toán-online)
 - [9. Hướng dẫn Cấu hình Giao Hàng Nhanh (GHN)](#9-hướng-dẫn-cấu-hình-giao-hàng-tiết-kiệm-GHN)
-- [10. Hướng dẫn Cấu hình AI Sidecar (Gemini & LangSmith)](#10-hướng-dẫn-cấu-hình-ai-sidecar-gemini--langsmith)
+- [10. Hướng dẫn Cấu hình AI Sidecar (AI Provider & LangSmith)](#10-hướng-dẫn-cấu-hình-ai-sidecar-ai-provider--langsmith)
 - [11. Troubleshooting](#11-troubleshooting-1)
 
 # 1. Yêu cầu hệ thống
@@ -1324,8 +1331,8 @@ Cần setup các secrets sau trong GitHub repository:
 | `GHN_TOKEN`                        | Mã API Token từ GHN                       | `a1b2c3d4e5f6g7h8...`                                                                                    |
 | `GHN_SHOP_ID`                      | Mã cửa hàng (Shop ID) trên GHN            | `012345`                                                                                                 |
 | `GHN_BASE_URL`                     | Địa chỉ API của GHN                       | `https://dev-online-gateway.ghn.vn`                                                                      |
-| `GEMINI_API_KEY`                   | Google Gemini API Key                     | `AIzaSyB...`                                                                                             |
-| `GEMINI_MODEL`                     | Tên mô hình Gemini                        | `gemini-3.5-flash`                                                                                       |
+| `API_KEY`                          | AI Provider API Key                       | `AIzaSyB...` / `sk-...`                                                                                  |
+| `MODEL`                            | Tên mô hình AI                            | `gemini-3.5-flash` / `gpt-3.5-turbo`                                                                     |
 | `LANGSMITH_TRACING`                | Bật LangSmith tracing (true/false)        | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                         | `lsv2_pt_...`                                                                                            |
 
@@ -1420,16 +1427,23 @@ Cần setup các secrets sau trong GitHub repository:
 5. **Thay đổi vị trí của hàng**: Vào phần "Quản lý cửa hàng" ở phần Sidebar, bạn cần thay đổi/thêm địa điểm của cửa hàng mặc định ngay trong đó.
 6. **Đăng kí Webhook**: Nếu như bạn muốn sử dụng Webhook để nhận tin khi có đơn hàng đã hoàn tất, bạn sẽ cần gửi mail đến địa chỉ api@ghn.vn với các thông tin làTên công ty, Mã khách hàng (ClientID), Môi trường yêu cầu, URL Webhook (chính là URL Endpoint chạy dự án này). Rồi chờ họ phản hồi.
 
-# 10. Hướng dẫn Cấu hình AI Sidecar (Gemini & LangSmith)
+# 10. Hướng dẫn Cấu hình AI Sidecar (AI Provider & LangSmith)
 
-Để sử dụng được các tính năng AI (ví dụ: tìm kiếm thông minh), bạn cần lấy Gemini API Key và tùy chọn lấy thêm LangSmith API Key để theo dõi (tracing).
+Để sử dụng được các tính năng AI (ví dụ: tìm kiếm thông minh, Manager Chat), bạn cần lấy cấu hình API Key (từ Gemini hoặc OpenAI) và tùy chọn lấy thêm LangSmith API Key để theo dõi (tracing).
 
-### 1. Cách lấy Gemini API Key
+### 1. Cách thiết lập AI Provider
 
-1. Truy cập [Google AI Studio](https://aistudio.google.com/app/api-keys).
-2. Đăng nhập bằng tài khoản Google của bạn.
-3. Nhấn "Create API key" trong dự án hiện có hoặc tạo mới.
-4. Copy API key vừa tạo và dán vào `AISetup -> GeminiApiKey` trong file `appsettings.json`.
+Bạn có thể chọn giữa `Gemini` hoặc `ApiEndpoint` (chuẩn OpenAI) bằng cách cấu hình `AISetup` trong file `appsettings.json`.
+
+**Lựa chọn A: Gemini**
+1. Đặt `AiProvider` là `"Gemini"`.
+2. Lấy Gemini API Key từ [Google AI Studio](https://aistudio.google.com/app/api-keys).
+3. Đặt API key đó vào `ApiKey` và điền tên mô hình (vd `"gemini-3.5-flash"`) vào `Model`.
+
+**Lựa chọn B: API Endpoint (Tương thích OpenAI, ví dụ qua LangChain/LangGraph)**
+1. Đặt `AiProvider` là `"ApiEndpoint"`.
+2. Lấy API Key từ nhà cung cấp của bạn.
+3. Cập nhật `ApiKey`, `AiApiEndpoint` (vd `"https://api.openai.com/v1"`), và `Model` tương ứng.
 
 ### 2. Cách lấy LangSmith API Key (Tùy chọn Tracing)
 

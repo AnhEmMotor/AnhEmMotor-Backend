@@ -14,31 +14,6 @@ using WebAPI.Middleware;
 using WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
-if (builder.Environment.IsDevelopment())
-{
-    try
-    {
-        using var httpListener = new HttpListener();
-        httpListener.Prefixes.Add("http://127.0.0.1:5000/");
-        httpListener.Start();
-        httpListener.Stop();
-    } catch (HttpListenerException)
-    {
-        try
-        {
-            Process.GetProcessesByName("dotnet").ToList().ForEach(p => p.Kill(true));
-        } catch
-        {
-        }
-        try
-        {
-            Process.GetProcessesByName("WebAPI").ToList().ForEach(p => p.Kill(true));
-        } catch
-        {
-        }
-        Thread.Sleep(500);
-    }
-}
 builder.Host.UseSerilog();
 builder.Host
     .ConfigureHostOptions(opts => opts.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore);

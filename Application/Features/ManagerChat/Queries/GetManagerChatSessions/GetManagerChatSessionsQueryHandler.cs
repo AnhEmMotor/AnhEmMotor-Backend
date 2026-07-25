@@ -11,18 +11,28 @@ public class GetManagerChatSessionsQueryHandler(
     IChatReadRepository chatReadRepository,
     IPermissionReadRepository permissionReadRepository,
     ICurrentUserContext currentUserContext)
-    : IRequestHandler<GetManagerChatSessionsQuery, Result<List<ChatSession>>>
+    : IRequestHandler<GetManagerChatSessionsQuery, Result<List<ManagerChatSessionDto>>>
 {
-    public async Task<Result<List<ChatSession>>> Handle(GetManagerChatSessionsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<ManagerChatSessionDto>>> Handle(GetManagerChatSessionsQuery request, CancellationToken cancellationToken)
     {
         var userId = currentUserContext.GetUserId();
         bool hasPermission = await permissionReadRepository.HasAnyPermissionAsync(userId, cancellationToken);
         if (!hasPermission)
         {
-            return Result<List<ChatSession>>.Failure(Error.Forbidden());
+            return Result<List<ManagerChatSessionDto>>.Failure(Error.Forbidden());
         }
 
         var sessions = await chatReadRepository.GetSessionsByUserIdAsync(userId, cancellationToken);
-        return Result<List<ChatSession>>.Success(sessions);
+        
+        var dtos = sessions
+            .OrderByDescending(s => s.CreatedAt)
+            .Select(s => new ManagerChatSessionDto
+            {
+                Id = s.Id,
+                Title = s.Title
+            })
+            .ToList();
+
+        return Result<List<ManagerChatSessionDto>>.Success(dtos);
     }
 }
