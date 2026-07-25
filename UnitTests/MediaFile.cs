@@ -1,4 +1,4 @@
-using Application.ApiContracts.File.Requests;
+﻿using Application.ApiContracts.File.Requests;
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
@@ -15,6 +15,7 @@ using Domain.Constants;
 using FluentAssertions;
 using Infrastructure.Configurations.Options;
 using Infrastructure.Repositories.MediaFile.File;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -31,6 +32,7 @@ public class MediaFile
     private readonly Mock<IFileReadService> _fileReadServiceMock;
     private readonly Mock<IFileInsertService> _fileInsertServiceMock;
     private readonly Mock<IFileUpdateService> _fileUpdateServiceMock;
+private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly Mock<IFileDeleteService> _fileDeleteServiceMock;
     private readonly Mock<IMediaFileInsertRepository> _insertRepositoryMock;
     private readonly Mock<IMediaFileReadRepository> _readRepositoryMock;
@@ -43,7 +45,8 @@ public class MediaFile
         _fileReadServiceMock = new Mock<IFileReadService>();
         _fileInsertServiceMock = new Mock<IFileInsertService>();
         _fileUpdateServiceMock = new Mock<IFileUpdateService>();
-        _fileDeleteServiceMock = new Mock<IFileDeleteService>();
+_httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+_fileDeleteServiceMock = new Mock<IFileDeleteService>();
         _insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         _readRepositoryMock = new Mock<IMediaFileReadRepository>();
         _updateRepositoryMock = new Mock<IMediaFileUpdateRepository>();
@@ -586,10 +589,10 @@ public class MediaFile
         var environment = new Mock<IWebHostEnvironment>();
         environment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
         environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(Path.GetTempPath(), "wwwroot"));
-        var service = new FileReadService(
-            environment.Object,
+        var service = new FileReadService(environment.Object,
             Options.Create(new LocalFileStorageOptions()),
-            _fileUpdateServiceMock.Object);
+            _fileUpdateServiceMock.Object,
+            _httpContextAccessorMock.Object);
 
         var publicUrl = service.GetPublicUrl("banners/banner.webp");
 
