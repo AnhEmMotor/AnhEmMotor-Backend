@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Application.ApiContracts.File.Requests;
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
@@ -614,8 +615,7 @@ var service = new FileReadService(
             var service = new FileInsertService(
                 environment.Object,
                 Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
-                _fileUpdateServiceMock.Object);,
-  httpContextAccessor.Object);
+                _fileUpdateServiceMock.Object);
             await using var imageStream = new MemoryStream();
             using (var image = new Image<Rgba32>(2, 2))
             {

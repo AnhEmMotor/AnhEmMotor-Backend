@@ -1,4 +1,5 @@
 using Application.ApiContracts.Ai;
+using Application.Interfaces.Services;
 using Application.Interfaces.Repositories.Ai;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
@@ -9,19 +10,19 @@ namespace Infrastructure.Services.Ai.Clients;
 public class AiTestRoleClient : IAiTestRoleClient
 {
     private readonly HttpClient _httpClient;
-    private readonly IAiSidecarManager _sidecarManager;
+    private readonly IAiSidecarUrlProvider _sidecarUrlProvider;
 
-    public AiTestRoleClient(HttpClient httpClient, IAiSidecarManager sidecarManager, IConfiguration config)
+    public AiTestRoleClient(HttpClient httpClient, IAiSidecarUrlProvider sidecarUrlProvider, IConfiguration config)
     {
         _httpClient = httpClient;
-        _sidecarManager = sidecarManager;
+        _sidecarUrlProvider = sidecarUrlProvider;
         var secret = config["Jwt:Key"] ?? string.Empty;
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", secret);
     }
 
     public async Task<AiAgentResponse<string>> TestRoleAsync(string? userId, string[] roles)
     {
-        var sidecarUrl = _sidecarManager.SidecarUrl;
+        var sidecarUrl = _sidecarUrlProvider.GetSidecarUrl();
         var response = await _httpClient.PostAsJsonAsync($"{sidecarUrl}/test-role", new { userId, roles });
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<AiAgentResponse<string>>() ??

@@ -1,3 +1,4 @@
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
@@ -9,21 +10,18 @@ using System.Net.Sockets;
 
 namespace Infrastructure.Services.Ai;
 
-public interface IAiSidecarManager
-{
-    public string SidecarUrl { get; }
-}
-
 public class AiSidecarManager(
     IPythonEnvService pythonEnv,
     IConfiguration config,
     ILogger<AiSidecarManager> logger,
     IServer server,
-    IHostApplicationLifetime lifetime) : IHostedService, IAiSidecarManager
+    IHostApplicationLifetime lifetime) : IHostedService, IAiSidecarUrlProvider
 {
     private Process? _sidecarProcess;
 
-    public string SidecarUrl { get; private set; } = "http://localhost:8000";
+    private string _sidecarUrl = "http://localhost:8000";
+
+    public string GetSidecarUrl() => _sidecarUrl;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -34,7 +32,7 @@ public class AiSidecarManager(
     private async Task StartSidecarProcessAsync()
     {
         var port = GetFreePort();
-        SidecarUrl = $"http://localhost:{port}";
+        _sidecarUrl = $"http://localhost:{port}";
         var searchPaths = new[] { AppContext.BaseDirectory, Directory.GetCurrentDirectory() };
         string? sidecarDir = null;
         foreach (var startPath in searchPaths)
@@ -85,6 +83,7 @@ public class AiSidecarManager(
         startInfo.EnvironmentVariables["BACKEND_INTERNAL_SECRET"] = config["Jwt:Key"];
         startInfo.EnvironmentVariables["PORT"] = port.ToString();
         startInfo.EnvironmentVariables["PYTHONPATH"] = sidecarDir;
+        startInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";
         var isLangSmithEnabled = config.GetValue<bool>("AISetup:LangSmithTracing");
         if (isLangSmithEnabled)
         {

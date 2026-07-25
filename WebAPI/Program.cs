@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Net;
 using WebAPI.BackgroundServices;
 using WebAPI.Extensions;
+using WebAPI.Hubs;
 using WebAPI.Middleware;
 using WebAPI.StartupExtensions;
 
@@ -95,6 +96,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 builder.Services.AddHostedService<GhnStatusPollingWorker>();
+builder.Services.AddSignalR();
 var app = builder.Build();
 app.UseMiddleware<LogContextMiddleware>();
 app.UseSerilogRequestLogging(
@@ -155,6 +157,7 @@ if (!app.Environment.IsEnvironment("Test"))
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ManagerChatHub>("/hubs/manager-chat");
 if (!app.Environment.IsEnvironment("Test"))
 {
     await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);
