@@ -13,8 +13,13 @@ using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Domain.Constants;
 using FluentAssertions;
+using Infrastructure.Configurations.Options;
+using Infrastructure.Repositories.MediaFile.File;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Options;
 using Moq;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace UnitTests;
@@ -573,6 +578,79 @@ public class MediaFile
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Contain("Filename");
+    }
+
+    [Fact(DisplayName = "MF_051 - URL file công khai không gắn cứng host lúc upload")]
+    public void GetPublicUrl_ShouldReturnHostIndependentApiPath()
+    {
+        var environment = new Mock<IWebHostEnvironment>();
+        environment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
+        environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(Path.GetTempPath(), "wwwroot"));
+        var service = new FileReadService(
+            environment.Object,
+            Options.Create(new LocalFileStorageOptions()),
+            _fileUpdateServiceMock.Object);
+
+        var publicUrl = service.GetPublicUrl("banners/banner.webp");
+
+        publicUrl.Should().Be("/api/v1/MediaFile/view-image/banners/banner.webp");
+    }
+
+    [Fact(DisplayName = "MF_052 - Đường dẫn tương đối luôn nằm dưới content root của WebAPI")]
+    public async Task SaveFile_RelativeUploadPath_ShouldResolveFromContentRoot()
+    {
+        var contentRoot = Path.Combine(Path.GetTempPath(), $"anhem-banner-{Guid.NewGuid():N}");
+        var configuredUploadPath = Path.Combine("wwwroot", "uploads");
+        var expectedUploadRoot = Path.Combine(contentRoot, configuredUploadPath);
+        Directory.CreateDirectory(contentRoot);
+        try
+        {
+            var environment = new Mock<IWebHostEnvironment>();
+            environment.SetupGet(x => x.ContentRootPath).Returns(contentRoot);
+            environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(contentRoot, "wwwroot"));
+            var service = new FileInsertService(
+                environment.Object,
+                Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
+                _fileUpdateServiceMock.Object);
+            await using var imageStream = new MemoryStream();
+            using (var image = new Image<Rgba32>(2, 2))
+            {
+                await image.SaveAsPngAsync(imageStream, TestContext.Current.CancellationToken)
+                    .ConfigureAwait(true);
+            }
+            imageStream.Position = 0;
+            _fileUpdateServiceMock
+                .Setup(
+                    x => x.CompressImageAsync(
+                        It.IsAny<Stream>(),
+                        It.IsAny<int>(),
+                        It.IsAny<int?>(),
+                        It.IsAny<CancellationToken>()))
+                .ReturnsAsync(
+                    () =>
+                    {
+                        imageStream.Position = 0;
+                        return new MemoryStream(imageStream.ToArray());
+                    });
+
+            var result = await service.SaveFileAsync(
+                    imageStream,
+                    TestContext.Current.CancellationToken,
+                    "banners")
+                .ConfigureAwait(true);
+
+            result.IsSuccess.Should().BeTrue();
+            var expectedFile = Path.Combine(
+                expectedUploadRoot,
+                result.Value.StoragePath.Replace('/', Path.DirectorySeparatorChar));
+            System.IO.File.Exists(expectedFile).Should().BeTrue();
+        } finally
+        {
+            if (Directory.Exists(contentRoot))
+            {
+                Directory.Delete(contentRoot, true);
+            }
+        }
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

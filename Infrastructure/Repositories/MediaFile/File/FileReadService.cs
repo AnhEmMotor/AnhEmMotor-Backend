@@ -9,28 +9,15 @@ namespace Infrastructure.Repositories.MediaFile.File;
 public class FileReadService : IFileReadService
 {
     private readonly string _uploadFolder;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IFileUpdateService _fileUpdateService;
 
     public FileReadService(
         IWebHostEnvironment environment,
-        IHttpContextAccessor httpContextAccessor,
         IOptions<LocalFileStorageOptions> options,
         IFileUpdateService fileUpdateService)
     {
-        _httpContextAccessor = httpContextAccessor;
         _fileUpdateService = fileUpdateService;
-        var configPath = options.Value.UploadPath;
-        if (!string.IsNullOrEmpty(configPath))
-        {
-            _uploadFolder = configPath;
-        } else if (string.IsNullOrEmpty(environment.WebRootPath))
-        {
-            _uploadFolder = Path.Combine(Path.GetTempPath(), "AnhEmMotor_Uploads");
-        } else
-        {
-            _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
-        }
+        _uploadFolder = LocalFileStoragePathResolver.Resolve(environment, options);
     }
 
     public string GetPublicUrl(string storagePath)
