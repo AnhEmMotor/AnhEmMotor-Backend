@@ -1,3 +1,4 @@
+using System.Linq;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories.Voucher;
@@ -8,7 +9,10 @@ public interface IVoucherUsageRepository
 
     public Task<int> GetTotalUsageCountAsync(int voucherId, CancellationToken cancellationToken = default);
 
-    public Task<OrderVoucher?> GetByVoucherAndOutputAsync(
+    public Task<IEnumerable<OrderVoucher>> GetByOutputIdAsync(
+ int outputId, CancellationToken cancellationToken = default);
+
+ public Task<OrderVoucher?> GetByVoucherAndOutputAsync(
         int voucherId,
         int outputId,
         CancellationToken cancellationToken = default);

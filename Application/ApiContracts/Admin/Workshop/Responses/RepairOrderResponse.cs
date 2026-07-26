@@ -41,4 +41,10 @@ public class RepairOrderResponse
     public DateTimeOffset? UpdatedAt { get; set; }
 
     public bool IsDeleted { get; set; }
+
+ public string? VoucherCode { get; set; }
+
+ public decimal? VoucherDiscount { get; set; }
+
+ public decimal? VoucherFinalTotal { get; set; }
 }
