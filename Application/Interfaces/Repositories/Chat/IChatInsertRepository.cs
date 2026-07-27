@@ -6,4 +6,5 @@ public interface IChatInsertRepository
 {
     public void AddSession(ChatSession session);
     public void AddMessage(ChatMessage message);
+    public void AddRun(ChatRun run);
 }

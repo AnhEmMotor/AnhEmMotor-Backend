@@ -1,7 +1,7 @@
 import pytest
 
 PROTECTED_ENDPOINTS = [
-    ("/manager-chat", {"session_id": "s1", "message": "xin chào"}),
+    ("/manager-chat", {"run_id": "r1", "session_id": "s1", "message": "xin chào"}),
     ("/manager-chat/generate-title", {"message": "xin chào"}),
 ]
 
@@ -32,7 +32,7 @@ def test_internal_secret_rong_tra_403(client, path, payload):
 
 def test_thieu_authorization_tra_401(client, internal_secret):
     resp = client.post("/manager-chat",
-                       json={"session_id": "s1", "message": "xin chào"},
+                       json={"run_id": "r1", "session_id": "s1", "message": "xin chào"},
                        headers={"X-Internal-Secret": internal_secret})
     assert resp.status_code == 401
 

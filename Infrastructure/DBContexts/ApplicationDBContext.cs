@@ -152,6 +152,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ChatMessage> ChatMessages { get; set; }
 
+    public virtual DbSet<ChatRun> ChatRuns { get; set; }
+
+    public virtual DbSet<ChatRunEvent> ChatRunEvents { get; set; }
+
     public virtual DbSet<Service> Services { get; set; }
 
     public virtual DbSet<Lead> Leads { get; set; }
@@ -697,6 +701,23 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<ChatSession>().HasIndex(c => c.UpdatedAt);
         modelBuilder.Entity<ChatMessage>().HasIndex(c => c.SessionId);
         modelBuilder.Entity<ChatMessage>().HasIndex(c => c.CreatedAt);
+
+        modelBuilder.Entity<ChatRun>().HasIndex(r => new { r.SessionId, r.Status });
+        modelBuilder.Entity<ChatRun>()
+            .HasOne(r => r.Session)
+            .WithMany()
+            .HasForeignKey(r => r.SessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ChatRunEvent>()
+            .HasIndex(e => new { e.RunId, e.Seq })
+            .IsUnique();
+        modelBuilder.Entity<ChatRunEvent>()
+            .HasOne(e => e.Run)
+            .WithMany(r => r.Events)
+            .HasForeignKey(e => e.RunId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ChatRunEvent>().HasQueryFilter(e => e.Run!.DeletedAt == null);
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {

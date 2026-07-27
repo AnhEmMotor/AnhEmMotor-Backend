@@ -2,6 +2,7 @@ using Application.ApiContracts.ManagerChat.Requests;
 using Application.Features.ManagerChat.Commands.CreateManagerChatSession;
 using Application.Features.ManagerChat.Commands.DeleteManagerChatSession;
 using Application.Features.ManagerChat.Commands.UpdateManagerChatSession;
+using Application.Features.ManagerChat.Queries.GetActiveChatRun;
 using Application.Features.ManagerChat.Queries.GetManagerChatSessionHistory;
 using Application.Features.ManagerChat.Queries.GetManagerChatSessions;
 using Asp.Versioning;
@@ -61,6 +62,15 @@ public class ManagerChatController(ISender sender) : ApiController
     public async Task<IActionResult> GetSessionHistory(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetManagerChatSessionHistoryQuery(id);
+        var result = await sender.Send(query, cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpGet("sessions/{id}/active-run")]
+    [SwaggerOperation(Summary = "Lấy run đang chạy (nếu có) của phiên chat, dùng để khôi phục khi mở lại")]
+    public async Task<IActionResult> GetActiveRun(Guid id, CancellationToken cancellationToken)
+    {
+        var query = new GetActiveChatRunQuery(id);
         var result = await sender.Send(query, cancellationToken);
         return HandleResult(result);
     }

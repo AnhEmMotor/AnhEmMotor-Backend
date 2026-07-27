@@ -1,3 +1,5 @@
+import asyncio
+import json
 import logging
 
 from fastapi import APIRouter, Depends, Request, HTTPException
@@ -14,11 +16,25 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+_cancel_events: dict[str, asyncio.Event] = {}
+
 
 @router.post("/manager-chat/generate-title")
 async def generate_title(req: GenerateTitleRequest, _: str = Depends(verify_internal_secret)):
     title = req.message[:30].strip() + ("..." if len(req.message) > 30 else "")
     return {"title": title}
+
+
+@router.post("/manager-chat/{run_id}/cancel")
+async def cancel_chat(run_id: str, _: str = Depends(verify_internal_secret)):
+    event = _cancel_events.get(run_id)
+    if event:
+        event.set()
+    return {"cancelled": True}
+
+
+def _event(type_: str, payload: str = "") -> str:
+    return json.dumps({"type": type_, "payload": payload}) + "\n"
 
 
 @router.post("/manager-chat")
@@ -42,17 +58,25 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
 
     llm = get_llm(temperature=0.7)
 
+    cancel_event = asyncio.Event()
+    _cancel_events[chat_req.run_id] = cancel_event
+
     async def stream_generator():
         try:
             async for chunk in llm.astream(messages):
+                if cancel_event.is_set():
+                    return
                 if isinstance(chunk, str):
-                    yield chunk
-                elif hasattr(chunk, "content"):
-                    yield chunk.content
+                    content = chunk
                 else:
-                    yield str(chunk)
+                    content = getattr(chunk, "content", "") or ""
+                if content:
+                    yield _event("text_delta", content)
+            yield _event("done")
         except Exception as e:
-            logger.error("LLM streaming error for session %s: %s", chat_req.session_id, str(e))
-            yield "\n[Đã có lỗi xảy ra khi kết nối tới AI. Vui lòng thử lại.]"
+            logger.error("LLM streaming error for run %s: %s", chat_req.run_id, str(e))
+            yield _event("error", "Đã có lỗi xảy ra khi kết nối tới AI. Vui lòng thử lại.")
+        finally:
+            _cancel_events.pop(chat_req.run_id, None)
 
-    return StreamingResponse(stream_generator(), media_type="text/plain")
+    return StreamingResponse(stream_generator(), media_type="application/x-ndjson")

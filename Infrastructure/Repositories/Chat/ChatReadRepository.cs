@@ -28,4 +28,27 @@ public class ChatReadRepository(ApplicationDBContext context) : IChatReadReposit
             .OrderBy(m => m.CreatedAt)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<ChatRun?> GetActiveRunForUserAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await context.ChatRuns
+            .Include(r => r.Session)
+            .Where(r => r.Session!.UserId == userId && (r.Status == Domain.Constants.ChatRunStatus.Pending || r.Status == Domain.Constants.ChatRunStatus.Running))
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<ChatRun?> GetRunByIdAsync(Guid runId, CancellationToken cancellationToken = default)
+    {
+        return await context.ChatRuns
+            .Include(r => r.Session)
+            .FirstOrDefaultAsync(r => r.Id == runId, cancellationToken);
+    }
+
+    public async Task<List<ChatRunEvent>> GetRunEventsAsync(Guid runId, long afterSeq, CancellationToken cancellationToken = default)
+    {
+        return await context.ChatRunEvents
+            .Where(e => e.RunId == runId && e.Seq > afterSeq)
+            .OrderBy(e => e.Seq)
+            .ToListAsync(cancellationToken);
+    }
 }

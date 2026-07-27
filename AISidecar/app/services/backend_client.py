@@ -7,7 +7,6 @@ from app.core.errors import BackendError, ForbiddenError
 
 logger = logging.getLogger(__name__)
 
-
 class BackendClient:
     def __init__(self, auth_header: str):
         self._settings = get_settings()

@@ -15,4 +15,9 @@ public class ChatInsertRepository(ApplicationDBContext context) : IChatInsertRep
     {
         context.ChatMessages.Add(message);
     }
+
+    public void AddRun(ChatRun run)
+    {
+        context.ChatRuns.Add(run);
+    }
 }

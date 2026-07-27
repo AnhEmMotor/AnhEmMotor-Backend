@@ -18,6 +18,7 @@ using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Repositories.Statistical;
 using Infrastructure.Services;
 using Infrastructure.Services.Ai;
+using Infrastructure.Services.Ai.Runs;
 using Infrastructure.Services.Ai.Clients;
 using Infrastructure.Services.Logistics;
 using Microsoft.AspNetCore.Authorization;
@@ -125,6 +126,15 @@ public static class DependencyInjection
         services.AddHostedService(provider => provider.GetRequiredService<AiSidecarManager>());
         services.AddHttpClient<IAiSearchClient, AiSearchClient>();
         services.AddHttpClient<IAiTestRoleClient, AiTestRoleClient>();
+        services.AddSingleton<IChatRunQueue, ChatRunQueue>();
+        services.AddSingleton<IChatRunEventBus, ChatRunEventBus>();
+        services.AddSingleton<IChatRunCancellationRegistry, ChatRunCancellationRegistry>();
+        services.AddSingleton<IChatRunTokenStore, ChatRunTokenStore>();
+        services.AddScoped<IChatRunWriter, ChatRunWriter>();
+        services.AddScoped<ISidecarStreamClient, SidecarStreamClient>();
+        services.AddHostedService<ChatRunExecutor>();
+        services.AddHostedService<OrphanedRunCleaner>();
+        services.AddHostedService<ChatRunEventCleanupJob>();
         services.Scan(
             scan => scan
                 .FromAssemblies(Assembly.GetExecutingAssembly())
