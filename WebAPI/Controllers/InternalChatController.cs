@@ -33,10 +33,17 @@ public class InternalChatController(
         var user = await userManager.FindByIdAsync(userIdString);
         if (user == null) return NotFound("User not found");
 
+        var session = await dbContext.ChatSessions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == request.SessionId && s.UserId == userId, cancellationToken);
+
+        if (session == null)
+            return NotFound("Session không tồn tại hoặc không thuộc quyền sở hữu.");
+
         var roles = await userManager.GetRolesAsync(user);
-        
+
         var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? new List<string>();
-        
+
         List<string> rolePermissions;
         if (roles.Any(r => superRoles.Contains(r)))
         {
@@ -56,6 +63,17 @@ public class InternalChatController(
                 .ToListAsync(cancellationToken);
         }
 
+        var limit = Math.Clamp(request.HistoryLimit, 1, 50);
+
+        var history = await dbContext.ChatMessages
+            .AsNoTracking()
+            .Where(m => m.SessionId == request.SessionId)
+            .OrderByDescending(m => m.CreatedAt)
+            .Take(limit)
+            .OrderBy(m => m.CreatedAt)
+            .Select(m => new { m.Role, m.Message, m.CreatedAt })
+            .ToListAsync(cancellationToken);
+
         return Ok(new
         {
             User = new
@@ -67,8 +85,8 @@ public class InternalChatController(
             },
             Roles = roles,
             Permissions = rolePermissions,
-            Claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList(),
-            SessionId = request.SessionId
+            SessionId = request.SessionId,
+            History = history
         });
     }
 }
@@ -77,4 +95,5 @@ public class ContextRequest
 {
     public Guid SessionId { get; set; }
     public string Message { get; set; } = string.Empty;
+    public int HistoryLimit { get; set; } = 20;
 }

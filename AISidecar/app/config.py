@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     def _empty_model_uses_default(cls, v):
         return v or "gemini-3.5-flash"
 
+    @field_validator("ai_provider", mode="before")
+    @classmethod
+    def _lower_ai_provider(cls, v):
+        return v.lower() if isinstance(v, str) else v
+
     port: int = 8000
     request_timeout_seconds: float = 15.0
 

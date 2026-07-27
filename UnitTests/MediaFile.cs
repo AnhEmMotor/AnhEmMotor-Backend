@@ -588,7 +588,7 @@ public class MediaFile
         environment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
         environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(Path.GetTempPath(), "wwwroot"));
         var httpContextAccessor = new Mock<IHttpContextAccessor>();
-httpContextAccessor.Setup(x => x.HttpContext).Returns((HttpContext)null);
+httpContextAccessor.Setup(x => x.HttpContext).Returns((HttpContext?)null);
 var service = new FileReadService(
             environment.Object,
             Options.Create(new LocalFileStorageOptions()),

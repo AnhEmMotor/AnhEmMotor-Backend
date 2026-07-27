@@ -14,9 +14,10 @@ def test_render_thay_placeholder():
     assert "xin chào" in result
 
 
-def test_render_khong_co_placeholder():
-    result = render("system_manager_chat")
+def test_render_system_manager_chat():
+    result = render("system_manager_chat", full_name="Nguyễn Văn A")
     assert "AnhEmMotor" in result
+    assert "Nguyễn Văn A" in result
 
 
 def test_thieu_file_raise_file_not_found():
