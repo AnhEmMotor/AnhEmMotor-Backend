@@ -2,15 +2,16 @@ using Application.ApiContracts.Admin.Workshop.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Employee;
-using Application.Interfaces.Repositories.Vehicle;
 using Domain.Primitives;
+using Infrastructure.DBContexts;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.RepairOrders.Queries;
 
 public class GetRepairOrdersListQueryHandler(
     IMaintenanceHistoryReadRepository repo,
-    IVehicleReadRepository vehicleRepo,
+    ApplicationDBContext dbContext,
     IEmployeeReadRepository employeeRepo) : IRequestHandler<GetRepairOrdersListQuery, Result<PagedResult<RepairOrderResponse>>>
 {
     public async Task<Result<PagedResult<RepairOrderResponse>>> Handle(
@@ -21,7 +22,11 @@ public class GetRepairOrdersListQueryHandler(
         if (paged.Items?.Any() == true)
         {
             var vehicleIds = paged.Items.Select(x => x.VehicleId).Distinct().ToList();
-            var vehicles = await vehicleRepo.GetByIdsAsync(vehicleIds, ct);
+            var vehicles = await dbContext.Vehicles
+                .IgnoreQueryFilters()
+                .Include(v => v.Lead)
+                .Where(v => vehicleIds.Contains(v.Id))
+                .ToListAsync(ct);
             var vehicleDict = vehicles.ToDictionary(v => v.Id, v => v);
             var employees = await employeeRepo.GetAllWithUsersAsync(ct);
             var empDict = employees.ToDictionary(e => e.Id, e => e.User?.FullName);
