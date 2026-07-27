@@ -2,7 +2,6 @@ using Application.ApiContracts.Ai;
 using Application.Interfaces.Services;
 using Application.Interfaces.Repositories.Ai;
 using Microsoft.Extensions.Configuration;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 
@@ -20,7 +19,7 @@ public class AiSearchClient : IAiSearchClient
         _sidecarUrlProvider = sidecarUrlProvider;
         _logger = logger;
         var secret = config["Jwt:Key"] ?? string.Empty;
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", secret);
+        _httpClient.DefaultRequestHeaders.Add("X-Internal-Secret", secret);
     }
 
     public async Task<AiAgentResponse<AiSearchResult>> ChatSearchAsync(string keyword, string? userId)

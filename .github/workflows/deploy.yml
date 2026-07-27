@@ -53,8 +53,10 @@ jobs:
           GHN_TOKEN: ${{ secrets.GHN_TOKEN }}
           GHN_SHOP_ID: ${{ secrets.GHN_SHOP_ID }}
           GHN_BASE_URL: ${{ secrets.GHN_BASE_URL }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-3.5-flash' }}
+          AI_PROVIDER: ${{ secrets.AI_PROVIDER }}
+          AI_API_ENDPOINT: ${{ secrets.AI_API_ENDPOINT }}
+          API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          MODEL: ${{ secrets.GEMINI_MODEL }}
           LANGSMITH_TRACING: ${{ secrets.LANGSMITH_TRACING || 'false' }}
           LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
         run: >
@@ -90,10 +92,10 @@ jobs:
             .GhnSettings.Token = env.GHN_TOKEN |
             .GhnSettings.ShopId = env.GHN_SHOP_ID |
             .GhnSettings.BaseUrl = env.GHN_BASE_URL |
-            .AISetup.AiProvider = env.AI_PROVIDER |
-            .AISetup.AiApiEndpoint = env.AI_API_ENDPOINT |
+            .AISetup.Provider = (if env.AI_PROVIDER == "" then .AISetup.Provider else env.AI_PROVIDER end) |
+            .AISetup.ApiEndpoint = env.AI_API_ENDPOINT |
             .AISetup.ApiKey = env.API_KEY |
-            .AISetup.Model = env.MODEL |
+            .AISetup.Model = (if env.MODEL == "" then .AISetup.Model else env.MODEL end) |
             .AISetup.LangSmithTracing = (env.LANGSMITH_TRACING | fromjson) |
             .AISetup.LangSmithApiKey = env.LANGSMITH_API_KEY
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json

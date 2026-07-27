@@ -19,7 +19,7 @@ public class AiSidecarManager(
 {
     private Process? _sidecarProcess;
 
-    private string _sidecarUrl = "http://localhost:8000";
+    private string _sidecarUrl = "http://127.0.0.1:8000";
 
     public string GetSidecarUrl() => _sidecarUrl;
 
@@ -32,7 +32,9 @@ public class AiSidecarManager(
     private async Task StartSidecarProcessAsync()
     {
         var port = GetFreePort();
-        _sidecarUrl = $"http://localhost:{port}";
+        // Dùng thẳng 127.0.0.1 thay vì "localhost" để khớp với địa chỉ uvicorn bind (tránh việc
+        // "localhost" phân giải ra ::1 rồi không kết nối được).
+        _sidecarUrl = $"http://127.0.0.1:{port}";
         var searchPaths = new[] { AppContext.BaseDirectory, Directory.GetCurrentDirectory() };
         string? sidecarDir = null;
         foreach (var startPath in searchPaths)
@@ -71,7 +73,8 @@ public class AiSidecarManager(
         var startInfo = new ProcessStartInfo
         {
             FileName = pythonExe,
-            Arguments = $"-m uvicorn main:app --host 0.0.0.0 --port {port} --log-level warning",
+            // Sidecar chỉ được gọi nội bộ từ backend nên chỉ lắng nghe trên loopback.
+            Arguments = $"-m uvicorn main:app --host 127.0.0.1 --port {port} --log-level warning",
             WorkingDirectory = sidecarDir,
             UseShellExecute = false,
             CreateNoWindow = true,
@@ -80,7 +83,7 @@ public class AiSidecarManager(
         };
         var backendUrl = GetInternalBackendUrl();
         startInfo.EnvironmentVariables["BACKEND_URL"] = $"{backendUrl}/api";
-        startInfo.EnvironmentVariables["BACKEND_INTERNAL_SECRET"] = config["Jwt:Key"];
+        startInfo.EnvironmentVariables["BACKEND_INTERNAL_SECRET"] = config["Jwt:Key"] ?? string.Empty;
         startInfo.EnvironmentVariables["PORT"] = port.ToString();
         startInfo.EnvironmentVariables["PYTHONPATH"] = sidecarDir;
         startInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";
@@ -92,10 +95,11 @@ public class AiSidecarManager(
             startInfo.EnvironmentVariables["LANGCHAIN_PROJECT"] = "AnhEmMotor";
             startInfo.EnvironmentVariables["LANGCHAIN_API_KEY"] = config["AISetup:LangSmithApiKey"] ?? string.Empty;
         }
-        startInfo.EnvironmentVariables["AI_PROVIDER"] = config["AISetup:AiProvider"] ?? "Gemini";
-        startInfo.EnvironmentVariables["AI_API_ENDPOINT"] = config["AISetup:AiApiEndpoint"] ?? string.Empty;
+        startInfo.EnvironmentVariables["AI_PROVIDER"] = config["AISetup:Provider"] ?? "Gemini";
+        startInfo.EnvironmentVariables["AI_API_ENDPOINT"] = config["AISetup:ApiEndpoint"] ?? string.Empty;
         startInfo.EnvironmentVariables["API_KEY"] = config["AISetup:ApiKey"] ?? string.Empty;
-        startInfo.EnvironmentVariables["MODEL"] = config["AISetup:Model"] ?? "gemini-3.5-flash";
+        // Không hard-code tên model ở đây: để trống thì llm_factory.py dùng fallback của nó.
+        startInfo.EnvironmentVariables["MODEL"] = config["AISetup:Model"] ?? string.Empty;
         try
         {
             _sidecarProcess = new Process { StartInfo = startInfo };

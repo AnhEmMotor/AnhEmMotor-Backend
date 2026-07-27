@@ -574,8 +574,10 @@ The following secrets need to be set up in the GitHub repository:
 | `GHN_TOKEN`                        | GHN API Token                            | `a1b2c3d4e5f6g7h8...`                                                                                    |
 | `GHN_SHOP_ID`                      | GHN Shop ID                              | `012345`                                                                                                 |
 | `GHN_BASE_URL`                     | GHN API Base URL                         | `https://dev-online-gateway.ghn.vn`                                                                      |
-| `API_KEY`                          | AI Provider API Key                      | `AIzaSyB...` / `sk-...`                                                                                  |
-| `MODEL`                            | AI Model Name                            | `gemini-3.5-flash` / `gpt-3.5-turbo`                                                                     |
+| `AI_PROVIDER`                      | AI Provider (`Gemini` or `ApiEndpoint`)  | `Gemini`                                                                                                 |
+| `API_KEY` (`GEMINI_API_KEY`)       | AI Provider API Key (Gemini only)        | `AIzaSyB...`                                                                                             |
+| `MODEL` (`GEMINI_MODEL`)           | AI Model Name                            | `gemini-3.5-flash` / `qwen2.5:7b`                                                                        |
+| `AI_API_ENDPOINT`                  | Ollama base URL (no `/v1`)               | `http://127.0.0.1:11434`                                                                                 |
 | `LANGSMITH_TRACING`                | Enable LangSmith tracing (true/false)    | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                        | `lsv2_pt_...`                                                                                            |
 
@@ -672,21 +674,28 @@ To enable the automatic feature of pushing orders to GHN, you need to configure 
 
 # 10. AI Sidecar Configuration (LLM & LangSmith)
 
-To enable the AI capabilities (e.g. smart search, manager chat), you need to configure an AI Provider (Gemini or OpenAI-compatible Endpoint) and optionally LangSmith for tracing.
+To enable the AI capabilities (e.g. smart search, manager chat), you need to configure an AI Provider (Gemini via cloud, or Ollama via a self-hosted endpoint) and optionally LangSmith for tracing.
 
 ### 1. Configure AI Provider
 
-You can choose between `Gemini` or `ApiEndpoint` by setting `AISetup -> AiProvider` in your `appsettings.json`.
+You can choose between `Gemini` or `ApiEndpoint` by setting `AISetup -> Provider` in your `appsettings.json`.
 
 **Option A: Gemini**
-1. Set `AiProvider` to `"Gemini"`.
+
+1. Set `Provider` to `"Gemini"`.
 2. Go to [Google AI Studio](https://aistudio.google.com/app/api-keys).
 3. Generate an API Key and put it into `AISetup -> ApiKey` in your `appsettings.json`.
+4. Set `Model` to a Gemini model, e.g. `"gemini-3.5-flash"`.
 
-**Option B: OpenAI-compatible API Endpoint**
-1. Set `AiProvider` to `"ApiEndpoint"`.
-2. Provide your endpoint in `AISetup -> AiApiEndpoint` (e.g. `"https://api.openai.com/v1"`).
-3. Put your API Key in `AISetup -> ApiKey`.
+**Option B: Ollama (self-hosted)**
+
+The sidecar uses `ChatOllama` from `langchain-ollama` and calls Ollama's native API (`/api/chat`).
+
+1. Install and run [Ollama](https://ollama.com/) locally, then pull a model: `ollama pull qwen2.5:7b`.
+2. Set `Provider` to `"ApiEndpoint"`.
+3. Set `ApiEndpoint` to your Ollama base URL, e.g. `"http://127.0.0.1:11434"` — **do NOT append `/v1`**.
+4. Leave `ApiKey` empty.
+5. Set `Model` to the tag you pulled, e.g. `"qwen2.5:7b"`.
 
 ### 2. Get LangSmith API Key (Optional for Tracing)
 
@@ -1331,8 +1340,10 @@ Cần setup các secrets sau trong GitHub repository:
 | `GHN_TOKEN`                        | Mã API Token từ GHN                       | `a1b2c3d4e5f6g7h8...`                                                                                    |
 | `GHN_SHOP_ID`                      | Mã cửa hàng (Shop ID) trên GHN            | `012345`                                                                                                 |
 | `GHN_BASE_URL`                     | Địa chỉ API của GHN                       | `https://dev-online-gateway.ghn.vn`                                                                      |
-| `API_KEY`                          | AI Provider API Key                       | `AIzaSyB...` / `sk-...`                                                                                  |
-| `MODEL`                            | Tên mô hình AI                            | `gemini-3.5-flash` / `gpt-3.5-turbo`                                                                     |
+| `AI_PROVIDER`                      | Nhà cung cấp AI (`Gemini` hoặc `ApiEndpoint`) | `Gemini`                                                                                             |
+| `API_KEY` (`GEMINI_API_KEY`)       | API Key AI Provider (chỉ dùng cho Gemini) | `AIzaSyB...`                                                                                             |
+| `MODEL` (`GEMINI_MODEL`)           | Tên mô hình AI                            | `gemini-3.5-flash` / `qwen2.5:7b`                                                                        |
+| `AI_API_ENDPOINT`                  | Base URL Ollama (không kèm `/v1`)         | `http://127.0.0.1:11434`                                                                                 |
 | `LANGSMITH_TRACING`                | Bật LangSmith tracing (true/false)        | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                         | `lsv2_pt_...`                                                                                            |
 
@@ -1429,21 +1440,27 @@ Cần setup các secrets sau trong GitHub repository:
 
 # 10. Hướng dẫn Cấu hình AI Sidecar (AI Provider & LangSmith)
 
-Để sử dụng được các tính năng AI (ví dụ: tìm kiếm thông minh, Manager Chat), bạn cần lấy cấu hình API Key (từ Gemini hoặc OpenAI) và tùy chọn lấy thêm LangSmith API Key để theo dõi (tracing).
+Để sử dụng được các tính năng AI (ví dụ: tìm kiếm thông minh, Manager Chat), bạn cần cấu hình một trong hai nhà cung cấp: Gemini (đám mây) hoặc Ollama (tự host). Tùy chọn cấu hình thêm LangSmith để tracing.
 
 ### 1. Cách thiết lập AI Provider
 
-Bạn có thể chọn giữa `Gemini` hoặc `ApiEndpoint` (chuẩn OpenAI) bằng cách cấu hình `AISetup` trong file `appsettings.json`.
+Bạn có thể chọn giữa `Gemini` hoặc `ApiEndpoint` bằng cách cấu hình `AISetup -> Provider` trong file `appsettings.json`.
 
 **Lựa chọn A: Gemini**
-1. Đặt `AiProvider` là `"Gemini"`.
+
+1. Đặt `Provider` là `"Gemini"`.
 2. Lấy Gemini API Key từ [Google AI Studio](https://aistudio.google.com/app/api-keys).
 3. Đặt API key đó vào `ApiKey` và điền tên mô hình (vd `"gemini-3.5-flash"`) vào `Model`.
 
-**Lựa chọn B: API Endpoint (Tương thích OpenAI, ví dụ qua LangChain/LangGraph)**
-1. Đặt `AiProvider` là `"ApiEndpoint"`.
-2. Lấy API Key từ nhà cung cấp của bạn.
-3. Cập nhật `ApiKey`, `AiApiEndpoint` (vd `"https://api.openai.com/v1"`), và `Model` tương ứng.
+**Lựa chọn B: Ollama (tự host)**
+
+Sidecar dùng `ChatOllama` từ `langchain-ollama`, gọi API native của Ollama (`/api/chat`).
+
+1. Cài và chạy [Ollama](https://ollama.com/) trên máy chủ, kéo model: `ollama pull qwen2.5:7b`.
+2. Đặt `Provider` là `"ApiEndpoint"`.
+3. Đặt `ApiEndpoint` là base URL của Ollama, ví dụ `"http://127.0.0.1:11434"` — **KHÔNG kèm `/v1`**.
+4. Để trống `ApiKey`.
+5. Đặt `Model` đúng tag đã pull, ví dụ `"qwen2.5:7b"`.
 
 ### 2. Cách lấy LangSmith API Key (Tùy chọn Tracing)
 
@@ -1510,4 +1527,3 @@ Nếu không được, thay đổi port trong file `WebAPI/Properties/launchSett
 ```json
 "applicationUrl": "https://localhost:7002;http://localhost:5001"
 ```
-

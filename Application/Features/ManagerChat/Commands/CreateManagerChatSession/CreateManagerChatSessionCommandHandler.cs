@@ -15,12 +15,13 @@ public class CreateManagerChatSessionCommandHandler(
     IChatInsertRepository chatInsertRepository,
     IPermissionReadRepository permissionReadRepository,
     ICurrentUserContext currentUserContext,
+    IConfiguration configuration,
     IAiSidecarUrlProvider sidecarUrlProvider,
     IHttpClientFactory httpClientFactory,
     IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateManagerChatSessionCommand, Result<ChatSession>>
+    : IRequestHandler<CreateManagerChatSessionCommand, Result<CreateManagerChatSessionResponse>>
 {
-    public async Task<Result<ChatSession>> Handle(CreateManagerChatSessionCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreateManagerChatSessionResponse>> Handle(CreateManagerChatSessionCommand request, CancellationToken cancellationToken)
     {
         var userId = currentUserContext.GetUserId();
         bool hasPermission = await permissionReadRepository.HasAnyPermissionAsync(userId, cancellationToken);
@@ -49,7 +50,14 @@ public class CreateManagerChatSessionCommandHandler(
         chatInsertRepository.AddSession(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return session;
+        return new CreateManagerChatSessionResponse
+        {
+            Id = session.Id,
+            Title = session.Title,
+            CreatedAt = session.CreatedAt,
+            UserId = session.UserId,
+            Messages = []
+        };
     }
 
     private async Task<string> GenerateTitleFromSidecar(string message, CancellationToken cancellationToken)
@@ -61,8 +69,19 @@ public class CreateManagerChatSessionCommandHandler(
             
             var requestBody = new { message = message };
             var requestContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-            
-            var response = await client.PostAsync($"{sidecarUrl}/manager-chat/generate-title", requestContent, cancellationToken);
+
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{sidecarUrl}/manager-chat/generate-title")
+            {
+                Content = requestContent
+            };
+
+            var internalSecret = configuration["Jwt:Key"];
+            if (!string.IsNullOrEmpty(internalSecret))
+            {
+                httpRequest.Headers.Add("X-Internal-Secret", internalSecret);
+            }
+
+            using var response = await client.SendAsync(httpRequest, cancellationToken);
             if (response.IsSuccessStatusCode)
             {
                 var contentString = await response.Content.ReadAsStringAsync(cancellationToken);

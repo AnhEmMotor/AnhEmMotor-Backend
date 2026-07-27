@@ -2,7 +2,6 @@ using Application.ApiContracts.ManagerChat.Requests;
 using Application.Features.ManagerChat.Commands.CreateManagerChatSession;
 using Application.Features.ManagerChat.Commands.DeleteManagerChatSession;
 using Application.Features.ManagerChat.Commands.UpdateManagerChatSession;
-using Application.Features.ManagerChat.Commands.SendManagerChatMessage;
 using Application.Features.ManagerChat.Queries.GetManagerChatSessionHistory;
 using Application.Features.ManagerChat.Queries.GetManagerChatSessions;
 using Asp.Versioning;
@@ -63,15 +62,6 @@ public class ManagerChatController(ISender sender) : ApiController
     {
         var query = new GetManagerChatSessionHistoryQuery(id);
         var result = await sender.Send(query, cancellationToken);
-        return HandleResult(result);
-    }
-
-    [HttpPost("sessions/{id}/message")]
-    [SwaggerOperation(Summary = "Gửi tin nhắn trong phiên chat")]
-    public async Task<IActionResult> SendMessage(Guid id, [FromBody] SendManagerChatMessageRequest request, CancellationToken cancellationToken)
-    {
-        var command = new SendManagerChatMessageCommand(id, request.Content);
-        var result = await sender.Send(command, cancellationToken);
         return HandleResult(result);
     }
 }

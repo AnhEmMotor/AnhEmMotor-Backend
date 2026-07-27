@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Chat;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Services;
+using Domain.Constants;
 using Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +18,8 @@ public class StreamManagerChatMessageCommandHandler(
     IPermissionReadRepository permissionReadRepository,
     IAiSidecarUrlProvider sidecarUrlProvider,
     IUnitOfWork unitOfWork,
-    IHttpClientFactory httpClientFactory) : IStreamRequestHandler<StreamManagerChatMessageCommand, string>
+    IHttpClientFactory httpClientFactory,
+    IConfiguration configuration) : IStreamRequestHandler<StreamManagerChatMessageCommand, string>
 {
     public async IAsyncEnumerable<string> Handle(StreamManagerChatMessageCommand request, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -37,7 +39,7 @@ public class StreamManagerChatMessageCommandHandler(
         {
             Id = Guid.NewGuid(),
             SessionId = request.SessionId,
-            Role = "User",
+            Role = ChatRole.User,
             Message = request.Content,
             CreatedAt = DateTime.UtcNow
         };
@@ -60,6 +62,12 @@ public class StreamManagerChatMessageCommandHandler(
             Content = requestContent
         };
         
+        var internalSecret = configuration["Jwt:Key"];
+        if (!string.IsNullOrEmpty(internalSecret))
+        {
+            httpRequest.Headers.Add("X-Internal-Secret", internalSecret);
+        }
+
         if (!string.IsNullOrEmpty(request.Token))
         {
             httpRequest.Headers.Add("Authorization", $"Bearer {request.Token}");
@@ -89,7 +97,7 @@ public class StreamManagerChatMessageCommandHandler(
         {
             Id = Guid.NewGuid(),
             SessionId = request.SessionId,
-            Role = "AI",
+            Role = ChatRole.Ai,
             Message = fullReply.ToString(),
             CreatedAt = DateTime.UtcNow
         };

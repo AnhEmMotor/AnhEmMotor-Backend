@@ -1,11 +1,9 @@
-import os
-import json
 from fastapi import APIRouter, Depends
-from dependencies import verify_internal_token
-from langchain_google_genai import ChatGoogleGenerativeAI
+from dependencies import verify_internal_secret
 from langchain_core.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 from langchain_core.output_parsers import PydanticOutputParser
+from services.llm_factory import get_llm
 from typing import List, Optional
 
 router = APIRouter()
@@ -20,10 +18,6 @@ class SearchIntent(BaseModel):
 	colors: List[str] = Field(description="Danh sách màu sắc nếu có, ví dụ: Đỏ, Đen, Xanh", default=[])
 	intent: str = Field(description="Ý định người dùng (search, unknown)", default="search")
 
-from services.llm_factory import get_llm
-
-llm = get_llm(temperature=0.1)
-
 parser = PydanticOutputParser(pydantic_object=SearchIntent)
 
 prompt_template = PromptTemplate(
@@ -36,20 +30,24 @@ prompt_template = PromptTemplate(
 	partial_variables={"format_instructions": parser.get_format_instructions()},
 )
 
-chain = prompt_template | llm | parser
+_chain = None
+
+def _get_chain():
+	global _chain
+	if _chain is None:
+		_chain = prompt_template | get_llm(temperature=0.1) | parser
+	return _chain
 
 @router.post("/search")
-def search(request_data: dict, token: str = Depends(verify_internal_token)):
+def search(request_data: dict, _: str = Depends(verify_internal_secret)):
 	keyword = request_data.get("keyword", "")
 	user_id = request_data.get("userId", None)
-
 	try:
 		if not keyword.strip():
-			return {"result": SearchIntent().dict(), "status": "success"}
-
-		result = chain.invoke({"query": keyword})
-		return {"result": result.dict(), "status": "success"}
+			return {"result": SearchIntent().model_dump(), "status": "success"}
+		result = _get_chain().invoke({"query": keyword})
+		return {"result": result.model_dump(), "status": "success"}
 	except Exception as e:
 		print(f"Error calling LLM: {e}")
-		fallback = SearchIntent(keyword=keyword, intent="search").dict()
+		fallback = SearchIntent(keyword=keyword, intent="search").model_dump()
 		return {"result": fallback, "status": "error"}

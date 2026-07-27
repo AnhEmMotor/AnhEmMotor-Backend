@@ -430,8 +430,10 @@ dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt).ThenBy(p => p.Id);
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option);
+        if (string.IsNullOrWhiteSpace(sorts))
+        {
             dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt).ThenBy(p => p.Id);
-
+        }
         var entities = await dbQuery
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)

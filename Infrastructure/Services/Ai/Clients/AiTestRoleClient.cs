@@ -2,7 +2,6 @@ using Application.ApiContracts.Ai;
 using Application.Interfaces.Services;
 using Application.Interfaces.Repositories.Ai;
 using Microsoft.Extensions.Configuration;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace Infrastructure.Services.Ai.Clients;
@@ -17,7 +16,7 @@ public class AiTestRoleClient : IAiTestRoleClient
         _httpClient = httpClient;
         _sidecarUrlProvider = sidecarUrlProvider;
         var secret = config["Jwt:Key"] ?? string.Empty;
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", secret);
+        _httpClient.DefaultRequestHeaders.Add("X-Internal-Secret", secret);
     }
 
     public async Task<AiAgentResponse<string>> TestRoleAsync(string? userId, string[] roles)

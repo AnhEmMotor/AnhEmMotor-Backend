@@ -214,4 +214,5 @@ Spec
 nul
 *.txt
 !requirements.txt
+!requirements-dev.txt
 api.xml
