@@ -30,6 +30,17 @@ public class SidecarConfigGuard
         mainPy.Should().Contain("host=\"127.0.0.1\"");
     }
 
+    [Fact(DisplayName = "GUARD_03 - AiSidecarManager trỏ đúng entrypoint app.main:app")]
+    public void AiSidecarManager_TroDung_Entrypoint()
+    {
+        var path = Path.Combine(RepoRoot(), "Infrastructure", "Services", "Ai", "AiSidecarManager.cs");
+        var content = File.ReadAllText(path);
+
+        content.Should().Contain("app.main:app",
+            "sau Stage 7, entrypoint là app/main.py chứ không phải main.py ở gốc");
+        content.Should().NotContain("uvicorn main:app");
+    }
+
     [Fact(DisplayName = "GUARD_02 - Không commit secret thật trong appsettings.json")]
     public void Appsettings_KhongChuaSecretThat()
     {

@@ -207,7 +207,7 @@ async def fill_slots(template: dict, question: str, server_date: str) -> dict:
                     question=question,
                     slots=json.dumps(template["slots"], ensure_ascii=False),
                     today=server_date)          # server_date từ backend — Stage 16.2
-    llm = get_llm(model=settings.fast_model, temperature=0, max_output_tokens=200)
+    llm = get_llm(model=settings.model, temperature=0, max_output_tokens=200)
     return await (llm.with_structured_output(schema)).ainvoke(prompt)
 ```
 
@@ -235,7 +235,7 @@ Tra cache: IntentHash → Qdrant
    ↓
 ┌─ HIT ──────────────────────────────────────┐
 │ 1. Kiểm tra hiệu lực (19.6)                │
-│ 2. Điền slot bằng FastModel               │
+│ 2. Điền slot bằng Model (max_tokens thấp)  │
 │ 3. Hiện plan card, ghi nhãn "kế hoạch có sẵn"│
 │ 4. User duyệt / sửa / huỷ  ← VẪN BẮT BUỘC  │
 │ 5. Thực thi                                │
@@ -358,13 +358,11 @@ Ghi `planCacheHit: bool` và `templateId` vào metadata LangSmith (Stage 6.6) v�
 | Template lỗi thời sau khi đổi tool | **Cao** | 6 điều kiện vô hiệu ở 19.6, gắn với fingerprint của Stage 17 |
 | Template chứa dữ liệu của user khác | **Cao** | Tham số hoá + test bắt buộc (19.8) |
 | Plan cứng nhắc, không thích nghi ngữ cảnh mới | Trung bình | User sửa được; học từ sửa đổi (19.7) |
-| Tăng độ phức tạp hệ thống | Trung bình | Cờ `AISetup:PlanCacheEnabled` để tắt hoàn toàn |
+| Tăng độ phức tạp hệ thống | Trung bình | Mặc định bật; tắt bằng env `PLAN_CACHE_ENABLED=false` khi cần |
 | Chuẩn hoá quá mạnh → gộp hai ý định khác nhau | Trung bình | Review thủ công template có `UseCount` cao; eval riêng |
 
-**Cờ tắt khẩn cấp** giống Stage 16.8:
-```jsonc
-"AISetup": { "PlanCacheEnabled": false }
-```
+**Cờ tắt khẩn cấp:** đặt env `PLAN_CACHE_ENABLED=false` trên sidecar.
+Mặc định bật khi feature có mặt — không cần khai trong `appsettings.json`.
 Tắt → về đúng hành vi Stage 10, không mất tính năng gì.
 
 ---
@@ -375,7 +373,7 @@ Tắt → về đúng hành vi Stage 10, không mất tính năng gì.
 - [ ] Collection Qdrant `plan_templates` tạo được, có payload index theo `module` và `status`.
 - [ ] `intent_hash` chuẩn hoá đúng: "doanh thu tháng 7" và "doanh thu tháng 6" cho **cùng** hash.
 - [ ] Hỏi cùng một loại câu hỏi lần 2 → cache hit, thời gian lập plan < 0.5s.
-- [ ] Slot được điền đúng bằng `FastModel`, dùng `server_date` từ backend (không tự tính).
+- [ ] Slot được điền đúng bằng `Model` (max_output_tokens thấp), dùng `server_date` từ backend (không tự tính).
 - [ ] Plan tái dùng **vẫn hiện ra và vẫn cần duyệt**, có nhãn "kế hoạch có sẵn".
 - [ ] Chế độ tự duyệt chỉ áp cho template đủ điều kiện **và toàn bộ tool chỉ-đọc**.
 - [ ] Gỡ một tool → template dùng tool đó chuyển `stale`, lần hỏi sau lập plan mới.
@@ -385,5 +383,5 @@ Tắt → về đúng hành vi Stage 10, không mất tính năng gì.
 - [ ] Plan bị user huỷ hoặc run thất bại → **không** được lưu thành template.
 - [ ] Cùng một sửa đổi lặp 3 lần từ ≥ 2 user → sinh template phiên bản mới.
 - [ ] `planCacheHit` và `templateId` ghi vào log và LangSmith.
-- [ ] `PlanCacheEnabled=false` → hệ thống về đúng hành vi Stage 10.
+- [ ] Env `PLAN_CACHE_ENABLED=false` → hệ thống về đúng hành vi Stage 10.
 - [ ] Hit rate ≥ 40% sau 1 tháng chạy thật.

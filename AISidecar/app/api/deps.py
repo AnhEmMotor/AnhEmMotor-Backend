@@ -1,9 +1,8 @@
-import os
 from fastapi import Header, HTTPException
-
+from app.config import get_settings
 
 def verify_internal_secret(x_internal_secret: str | None = Header(None)):
-    expected = os.environ.get("BACKEND_INTERNAL_SECRET", "")
+    expected = get_settings().backend_internal_secret
     if not expected or x_internal_secret != expected:
         raise HTTPException(status_code=403, detail="Invalid internal secret")
     return x_internal_secret

@@ -1,6 +1,6 @@
-from services.llm_factory import get_llm
+from app.core.llm import get_llm
 
-DEFAULT_MODEL = "gemini-3.5-flash"      
+DEFAULT_MODEL = "gemini-3.5-flash"
 
 
 def test_khong_co_api_key_tra_fake_llm(monkeypatch):

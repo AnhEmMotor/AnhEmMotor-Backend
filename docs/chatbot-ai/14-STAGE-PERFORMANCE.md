@@ -159,26 +159,20 @@ System prompt được gửi lại **mỗi lượt**. Prompt 2000 token × 20 l�
 
 ## 14.4. Chọn model theo việc
 
-Hiện chỉ có một khoá `AISetup:Model`. Tách thành:
+Dùng **một** khoá `AISetup:Model` cho mọi tác vụ. Tối ưu bằng **tham số gọi**, không tách model:
 
-```jsonc
-"AISetup": {
-    "Model": "gemini-3.5-flash",        // agent chính — GIỮ NGUYÊN
-    "FastModel": "gemini-3.5-flash",    // router, phân loại steering, sinh title
-    "EmbeddingModel": "text-embedding-004"
-}
-```
-
-| Việc | Model | Cấu hình |
-|---|---|---|
-| Router phân nhóm (13.3) | `FastModel` | `temperature=0`, `max_output_tokens=16` |
-| Phân loại steering (9.4) | `FastModel` | `temperature=0`, `max_output_tokens=8` |
-| Sinh tiêu đề (Stage 4.1) | `FastModel` | `temperature=0.3`, `max_output_tokens=32` |
-| Agent chính | `Model` | `temperature=0.7` |
-| Tổng hợp cuối | `Model` | `temperature=0.5` |
+| Việc | Cấu hình gọi |
+|---|---|
+| Router phân nhóm (13.3) | `temperature=0`, `max_output_tokens=16` |
+| Phân loại steering (9.4) | `temperature=0`, `max_output_tokens=8` |
+| Sinh tiêu đề (Stage 4.1) | `temperature=0.3`, `max_output_tokens=32` |
+| Agent chính | `temperature=0.7` |
+| Tổng hợp cuối | `temperature=0.5` |
 
 **`max_output_tokens` thấp cho tác vụ phân loại là tối ưu bị bỏ quên nhiều nhất** — model
 dừng sớm thay vì sinh giải thích dài dòng không ai đọc.
+
+> Nếu sau này muốn tách model riêng (ví dụ model rẻ cho routing), thêm khoá lúc đó — không khai trước.
 
 ### Prompt caching
 Nếu provider hỗ trợ, đánh dấu phần tĩnh của system prompt (hướng dẫn chung, mô tả tool) là
@@ -292,5 +286,5 @@ Và ghi `ChatRunEvent` không được chặn stream — dùng batching như Sta
 - [ ] Context được cache và **có cơ chế invalidate khi đổi permission** (có test).
 - [ ] Cache kết quả tool key theo `user_id` (có test chứng minh user A không thấy dữ liệu user B).
 - [ ] `httpx.AsyncClient` dùng chung theo vòng đời app.
-- [ ] Router dùng `FastModel` với `max_output_tokens` thấp.
+- [ ] Router dùng `Model` với `max_output_tokens` thấp.
 - [ ] Bộ eval ở Stage 13 vẫn pass sau tối ưu — **tốc độ không được đổi bằng độ chính xác**.

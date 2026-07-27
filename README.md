@@ -580,6 +580,9 @@ The following secrets need to be set up in the GitHub repository:
 | `AI_API_ENDPOINT`                  | Ollama base URL (no `/v1`)               | `http://127.0.0.1:11434`                                                                                 |
 | `LANGSMITH_TRACING`                | Enable LangSmith tracing (true/false)    | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                        | `lsv2_pt_...`                                                                                            |
+| `EMBEDDING_MODEL`                  | AI Embedding Model Name                  | `text-embedding-004` / `nomic-embed-text`                                                                |
+| `QDRANT_URL`                       | Qdrant Database URL                      | `https://xyz.qdrant.tech:6333`                                                                           |
+| `QDRANT_API_KEY`                   | Qdrant API Key                           | `your-qdrant-api-key`                                                                                    |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -1346,6 +1349,9 @@ Cần setup các secrets sau trong GitHub repository:
 | `AI_API_ENDPOINT`                  | Base URL Ollama (không kèm `/v1`)         | `http://127.0.0.1:11434`                                                                                 |
 | `LANGSMITH_TRACING`                | Bật LangSmith tracing (true/false)        | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                         | `lsv2_pt_...`                                                                                            |
+| `EMBEDDING_MODEL`                  | Tên mô hình AI Embedding                  | `text-embedding-004` / `nomic-embed-text`                                                                |
+| `QDRANT_URL`                       | Qdrant Database URL                       | `https://xyz.qdrant.tech:6333`                                                                           |
+| `QDRANT_API_KEY`                   | Qdrant API Key                            | `your-qdrant-api-key`                                                                                    |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 

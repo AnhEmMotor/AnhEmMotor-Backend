@@ -58,14 +58,14 @@ volumes:
     // ... các khoá hiện có, KHÔNG đổi Model
     "QdrantUrl": "",              // ví dụ http://localhost:6333
     "QdrantApiKey": "",
-    "EmbeddingModel": "text-embedding-004",
-    "RagEnabled": false           // cờ bật/tắt để rollback nhanh
+    "EmbeddingModel": "text-embedding-004"
 }
 ```
 `AiSidecarManager.cs` truyền xuống env (đã liệt kê ở Stage 7.3).
 
-> **Cờ `RagEnabled`:** nếu Qdrant chết, đặt `false` → tool knowledge bị gỡ khỏi registry,
-> chatbot vẫn hoạt động bình thường bằng SQL. Không để Qdrant thành điểm chết đơn lẻ.
+> **Mặc định RAG bật** khi `QdrantUrl` có giá trị. Nếu Qdrant chết hoặc không cấu hình URL,
+> tool knowledge tự gỡ khỏi registry — chatbot vẫn hoạt động bình thường bằng SQL.
+> Không để Qdrant thành điểm chết đơn lẻ. Tắt khẩn cấp bằng env `RAG_ENABLED=false` trên sidecar.
 
 ---
 
@@ -355,8 +355,8 @@ async def test_gia_va_ton_kho_lay_lai_tu_sql():
 
 
 async def test_rag_tat_thi_khong_co_tool_knowledge():
-    """RagEnabled=false → chatbot vẫn chạy, chỉ mất tool semantic (12.2)."""
-    settings.rag_enabled = False
+    """QdrantUrl rỗng hoặc RAG_ENABLED=false → chatbot vẫn chạy, chỉ mất tool semantic (12.2)."""
+    settings.qdrant_url = ""
     names = {t.name for t in build_tools(admin_context())}
     assert "search_knowledge" not in names
     assert "semantic_product_search" not in names
@@ -424,7 +424,7 @@ def test_build_product_text_khong_nhet_json():
 - [ ] Hỏi "xe ga tiết kiệm xăng cho nữ" → trả về sản phẩm hợp lý, kèm **giá và tồn kho lấy từ SQL**.
 - [ ] Hỏi "chính sách đổi trả" → trả lời từ knowledge base, **có trích dẫn nguồn**.
 - [ ] Hỏi câu vô nghĩa → trả rỗng, AI nói không tìm thấy, **không bịa**.
-- [ ] `RagEnabled=false` → chatbot vẫn chạy bình thường bằng SQL.
+- [ ] `QdrantUrl` rỗng hoặc env `RAG_ENABLED=false` → chatbot vẫn chạy bình thường bằng SQL.
 - [ ] `tests/test_qdrant.py` — 7 test ở 12.8b pass (không cần Qdrant thật, dùng `respx`).
 - [ ] `UnitTests/ChatIndexing.cs` — CRUD → notification → gom lô → gọi sidecar.
 - [ ] Bộ eval RAG chạy được, Recall@5 ≥ 80% trên tập câu hỏi mẫu.

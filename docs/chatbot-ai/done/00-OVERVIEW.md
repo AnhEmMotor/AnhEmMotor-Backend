@@ -191,7 +191,7 @@ Số hiệu file là ID cố định. Thứ tự làm việc như sau:
 | 7 | Embedding model (đổi = reindex toàn bộ) | 12.3 | `text-embedding-004` |
 | 8 | Có bật tool ghi dữ liệu không | 13.5, 15-P3 | **Không** ở bản đầu |
 | 9 | Có đưa tool lương/hoa hồng vào chatbot không | 15-G4/G5 | **Cân nhắc loại bỏ** |
-| 10 | Mức hiển thị tool ở Production | 11.2 | `Summary` |
+| 10 | Mức hiển thị tool ở Production | 11.2 | **Full** (mặc định) |
 | 11 | **Chốt định nghĩa nghiệp vụ** (doanh thu, số đơn, tồn kho...) với người phụ trách | 16.4 | **Chưa chốt — cần làm trước tool tài chính** |
 | 12 | Múi giờ: backend trả `serverDate` GMT+7 hay sidecar tự tính | 16.2 | **Backend trả** — sidecar không tự tính |
 | 13 | **Token cho run nền**: run token riêng / refresh token / rút timeout plan | 17.9 | **Run token riêng (phương án A)** — cần chốt trước khi làm Stage 10 |

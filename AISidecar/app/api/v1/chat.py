@@ -1,47 +1,46 @@
+import logging
+
 from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import StreamingResponse
-import httpx
-from dependencies import verify_internal_secret
-from schemas.chat_schemas import ChatRequest, GenerateTitleRequest
-from services.llm_factory import get_llm
 from langchain_core.messages import SystemMessage, HumanMessage
-import os
 
+from app.api.deps import verify_internal_secret
+from app.core.llm import get_llm
+from app.prompts.loader import render
+from app.schemas.chat import ChatRequest, GenerateTitleRequest
+from app.services.backend_client import BackendClient
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
 
 @router.post("/manager-chat/generate-title")
 async def generate_title(req: GenerateTitleRequest, _: str = Depends(verify_internal_secret)):
     title = req.message[:30].strip() + ("..." if len(req.message) > 30 else "")
     return {"title": title}
 
+
 @router.post("/manager-chat")
 async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(verify_internal_secret)):
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         raise HTTPException(status_code=401, detail="Missing Authorization header")
+
     context = {}
     try:
-        async with httpx.AsyncClient() as client:
-            headers = {"Authorization": auth_header}
-            payload = {
-                "sessionId": chat_req.session_id,
-                "message": chat_req.message
-            }
-            backend_base_url = os.environ.get("BACKEND_URL", "http://localhost:5000/api")
-            base_url = backend_base_url.rstrip('/').replace('/api', '')
-            final_url = f"{base_url}/internal/chat/context"
-            response = await client.post(final_url, json=payload, headers=headers)
-            if response.status_code == 200:
-                context = response.json()
+        client = BackendClient(auth_header)
+        context = await client.get_context(chat_req.session_id, chat_req.message)
     except Exception:
-        pass
+        logger.exception("Failed to fetch context for session %s", chat_req.session_id)
+
     llm = get_llm(temperature=0.7)
-    system_prompt = f"Bạn là trợ lý AI cho ứng dụng AnhEmMotor. Hãy trả lời câu hỏi của người dùng một cách thân thiện và chính xác dựa trên ngữ cảnh được cung cấp."
+    system_prompt = render("system_manager_chat")
     messages = [
         SystemMessage(content=system_prompt),
         HumanMessage(content=chat_req.message)
     ]
+
     async def stream_generator():
         try:
             async for chunk in llm.astream(messages):
@@ -51,6 +50,8 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
                     yield chunk.content
                 else:
                     yield str(chunk)
-        except Exception as e:
-            yield f"\n[Lỗi kết nối tới AI Provider: {str(e)}]"
+        except Exception:
+            logger.exception("LLM streaming error for session %s", chat_req.session_id)
+            yield "\n[Đã có lỗi xảy ra khi kết nối tới AI. Vui lòng thử lại.]"
+
     return StreamingResponse(stream_generator(), media_type="text/plain")

@@ -44,12 +44,10 @@ Người dùng thường chỉ cần câu trả lời; phần suy nghĩ là đ�
 
 ## 11.2. Ba mức độ hiển thị
 
-Cấu hình qua `AISetup:ToolDetailLevel` → env `TOOL_DETAIL_LEVEL` → `Settings.tool_detail_level`
-(Stage 7.3).
+Mặc định **Full** — hiển thị đầy đủ suy nghĩ, tool, tham số và kết quả.
+Khi cần che bớt ở Production, sidecar tự áp mức thấp hơn trong code (không cần config riêng).
 
-> ⚠️ **Phải là enum 3 giá trị, không phải bool.** Một cờ `bool` chỉ biểu diễn được 2 mức, khiến
-> `Minimal` không bao giờ đạt tới và nhánh xử lý nó thành dead code.
-> `Literal["Full", "Summary", "Minimal"]`, mặc định `Summary` ở Production.
+Ba mức để code xử lý nội bộ (không phải config từ bên ngoài):
 
 | Mức | Môi trường | Suy nghĩ | Tên tool | Tham số | Kết quả |
 |---|---|---|---|---|---|

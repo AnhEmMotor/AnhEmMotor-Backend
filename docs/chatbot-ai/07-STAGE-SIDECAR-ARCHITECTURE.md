@@ -151,29 +151,19 @@ class Settings(BaseSettings):
     ai_api_endpoint: str = ""
     model: str = "gemini-3.5-flash"           # GIỮ NGUYÊN — xem Stage 1.2
 
-    fast_model: str = "gemini-3.5-flash"      # Stage 14.4 — router, phân loại, sinh title
-
     # --- Vận hành ---
     port: int = 8000
     environment: Literal["Development", "Staging", "Production"] = "Development"
     enable_test_endpoints: bool = False
     request_timeout_seconds: float = 15.0
 
-    # --- Hiển thị suy nghĩ (Stage 11) ---
-    # BA mức, không phải bool — xem Stage 11.2
-    tool_detail_level: Literal["Full", "Summary", "Minimal"] = "Full"
-
     # --- Qdrant (Stage 12) ---
     qdrant_url: str = ""
     qdrant_api_key: str = ""
     embedding_model: str = "text-embedding-004"
-    rag_enabled: bool = False                 # Stage 12.2 — tắt là chatbot vẫn chạy bằng SQL
 
     # --- Checkpointer LangGraph (Stage 10.6) ---
     postgres_url: str = ""                    # rỗng → dùng MemorySaver
-
-    # --- Cache plan (Stage 19) ---
-    plan_cache_enabled: bool = False
 
     # --- Cờ tool (Stage 16.8, 17.6) ---
     # {"get_pnl_report": "canary", "get_payroll_summary": "off"}
@@ -200,14 +190,9 @@ def get_settings() -> Settings:
 ```csharp
 startInfo.EnvironmentVariables["ENVIRONMENT"] = env.EnvironmentName;
 startInfo.EnvironmentVariables["ENABLE_TEST_ENDPOINTS"] = env.IsDevelopment() ? "true" : "false";
-startInfo.EnvironmentVariables["FAST_MODEL"] = config["AISetup:FastModel"] ?? "";
-// BA mức, không phải bool — mặc định Summary ở Production (Stage 11.2)
-startInfo.EnvironmentVariables["TOOL_DETAIL_LEVEL"] =
-    config["AISetup:ToolDetailLevel"] ?? (env.IsProduction() ? "Summary" : "Full");
+startInfo.EnvironmentVariables["EMBEDDING_MODEL"] = config["AISetup:EmbeddingModel"] ?? "text-embedding-004";
 startInfo.EnvironmentVariables["QDRANT_URL"] = config["AISetup:QdrantUrl"] ?? "";
 startInfo.EnvironmentVariables["QDRANT_API_KEY"] = config["AISetup:QdrantApiKey"] ?? "";
-startInfo.EnvironmentVariables["RAG_ENABLED"] = config["AISetup:RagEnabled"] ?? "false";
-startInfo.EnvironmentVariables["PLAN_CACHE_ENABLED"] = config["AISetup:PlanCacheEnabled"] ?? "false";
 startInfo.EnvironmentVariables["POSTGRES_URL"] = config.GetConnectionString("PostgreSql") ?? "";
 startInfo.EnvironmentVariables["TOOL_FLAGS"] =
     JsonSerializer.Serialize(config.GetSection("AISetup:ToolFlags").Get<Dictionary<string, string>>() ?? new());
@@ -222,16 +207,15 @@ startInfo.EnvironmentVariables["TOOL_FLAGS"] =
     "AiApiEndpoint": "",
     "ApiKey": "",
     "Model": "gemini-3.5-flash",       // GIỮ NGUYÊN — Stage 1.2
-    "FastModel": "gemini-3.5-flash",   // Stage 14.4
     "EmbeddingModel": "text-embedding-004",
-    "ToolDetailLevel": "Summary",      // Full | Summary | Minimal — Stage 11.2
     "QdrantUrl": "",
     "QdrantApiKey": "",
-    "RagEnabled": false,               // Stage 12.2
-    "PlanCacheEnabled": false,         // Stage 19.10
-    "ToolFlags": {},                   // Stage 16.8
+    "ToolFlags": {},                    // Stage 16.8
     "LangSmithTracing": true,
     "LangSmithApiKey": ""
+    // FastModel, ToolDetailLevel, RagEnabled, PlanCacheEnabled — KHÔNG khai ở đây.
+    // Dùng Model cho mọi tác vụ LLM. ToolDetailLevel mặc định Full.
+    // RAG và Plan Cache mặc định bật khi feature có mặt, không cần cờ.
 }
 ```
 
@@ -608,8 +592,7 @@ public void AiSidecarManager_TroDung_Entrypoint()
 - [ ] Không còn `except Exception: pass` nào trong toàn bộ sidecar.
 - [ ] Không còn khởi tạo LLM / chain ở module level.
 - [ ] Prompt nằm trong file `.md`, sửa prompt không cần đụng file `.py`.
-- [ ] `Settings` có đủ field cho **mọi** Stage sau: `fast_model`, `tool_detail_level`,
-      `rag_enabled`, `plan_cache_enabled`, `postgres_url`, `tool_flags`, `tool_kill_switch`.
+- [ ] `Settings` có đủ field cho **mọi** Stage sau: `postgres_url`, `tool_flags`, `tool_kill_switch`.
 - [ ] Không tự viết vòng lặp tool / retry / message history — dùng `ToolNode`,
       `with_retry`, `add_messages` của LangGraph (mục 7.8b).
 - [ ] Log của sidecar (JSON) xuất hiện trong log của backend .NET.

@@ -5,8 +5,6 @@ from pathlib import Path
 
 import pytest
 
-MODEL_FALLBACK_RE = re.compile(r'os\.environ\.get\(\s*"MODEL"\s*(?:,\s*|\)\s*or\s*)"([^"]+)"')
-
 
 def _appsettings_candidates(backend_root: Path) -> list[Path]:
     return sorted((backend_root / "WebAPI").glob("appsettings*.json"))
@@ -49,7 +47,7 @@ def _load_jsonc(path: Path) -> dict:
     cleaned = _strip_jsonc_comments(path.read_text(encoding="utf-8-sig"))
     try:
         return json.loads(cleaned)
-    except json.JSONDecodeError as exc:  # pragma: no cover - chỉ chạy khi file hỏng
+    except json.JSONDecodeError as exc:
         raise AssertionError(f"Không parse được {path.name}: {exc}") from exc
 
 
@@ -65,16 +63,16 @@ def _read_appsettings_model(backend_root: Path) -> str:
     return _load_jsonc(path)["AISetup"]["Model"]
 
 
-def _read_factory_fallback(sidecar_root: Path) -> str:
-    src = (sidecar_root / "services" / "llm_factory.py").read_text(encoding="utf-8")
-    matches = MODEL_FALLBACK_RE.findall(src)
-    assert matches, "Không tìm thấy fallback của MODEL trong llm_factory.py"
-    return matches[-1]     
+def test_ten_model_khop_giua_appsettings_va_settings(backend_root):
+    from app.config import Settings
 
+    appsettings_model = _read_appsettings_model(backend_root)
+    default_model = Settings.model_fields["model"].default
 
-def test_ten_model_khop_giua_appsettings_va_sidecar(backend_root):
-    sidecar_root = backend_root / "AISidecar"
-    assert _read_appsettings_model(backend_root) == _read_factory_fallback(sidecar_root)
+    assert appsettings_model == default_model, (
+        f"appsettings.json có Model='{appsettings_model}' nhưng "
+        f"app/config.py mặc định '{default_model}'"
+    )
 
 
 def test_moi_file_appsettings_khai_cung_mot_model(backend_root):
@@ -90,8 +88,49 @@ def test_moi_file_appsettings_khai_cung_mot_model(backend_root):
     assert len(set(models.values())) == 1, f"Tên model lệch nhau giữa các file: {models}"
 
 
+AISETUP_TO_SETTINGS = {
+    "Provider": "ai_provider",
+    "ApiEndpoint": "ai_api_endpoint",
+    "ApiKey": "api_key",
+    "Model": "model",
+    "EmbeddingModel": "embedding_model",
+    "QdrantUrl": "qdrant_url",
+    "QdrantApiKey": "qdrant_api_key",
+}
+
+AISETUP_SKIP = {"LangSmithTracing", "LangSmithApiKey"}
+
+
+def test_hop_dong_config_appsettings_vs_settings(backend_root):
+    from app.config import Settings
+
+    web_api = backend_root / "WebAPI"
+    for name in ("appsettings.Template.json", "appsettings.json"):
+        path = web_api / name
+        if path.exists():
+            break
+    else:
+        pytest.skip("Không tìm thấy appsettings")
+
+    ai_setup = _load_jsonc(path).get("AISetup", {})
+    settings_fields = set(Settings.model_fields.keys())
+
+    missing_in_settings = []
+    for key in ai_setup:
+        if key in AISETUP_SKIP:
+            continue
+        expected_field = AISETUP_TO_SETTINGS.get(key)
+        if expected_field and expected_field not in settings_fields:
+            missing_in_settings.append(f"{key} → {expected_field}")
+
+    assert not missing_in_settings, (
+        f"AISetup keys thiếu field trong Settings: {missing_in_settings}"
+    )
+
+
 def test_khong_hard_code_ten_model_ngoai_vi_tri_cho_phep(backend_root):
     allowed = set(_appsettings_candidates(backend_root))
+    allowed.add(backend_root / "AISidecar" / "app" / "config.py")
     allowed.add(backend_root / "AISidecar" / "services" / "llm_factory.py")
     skip_dirs = {
         ".venv", "venv", "env", "node_modules", "obj", "bin", ".git",

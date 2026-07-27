@@ -289,7 +289,7 @@ Vì scope **suy ra** từ plan chứ không cache, sửa plan là scope tự the
 | Tool trong bước đã bị gỡ (17.8) | Bước → `invalid`, chờ duyệt lại |
 
 **`expectedTools` của bước user vừa sửa phải được tính lại**, vì user viết bằng tiếng Việt, không
-khai tool. Dùng `FastModel`, prompt ngắn, chỉ cho chọn trong danh sách tool user có quyền:
+khai tool. Dùng `Model` với `max_output_tokens` thấp, prompt ngắn, chỉ cho chọn trong danh sách tool user có quyền:
 
 ```python
 async def infer_step_tools(step_text: str, allowed: list[ToolSpec]) -> list[str]:
@@ -404,7 +404,7 @@ Bạn đã lưu ý đây là phạm trù khác — tôi tách riêng và **khôn
 
 | | LLM router theo module (đang chọn) | Qdrant tool retrieval |
 |---|---|---|
-| Độ trễ | ~300ms (1 lời gọi `FastModel`) | ~15ms + embedding câu hỏi |
+| Độ trễ | ~300ms (1 lời gọi `Model`) | ~15ms + embedding câu hỏi |
 | Chi phí | ~80 token | 1 embedding (cache được) |
 | Câu tiếp nối | Tốt — hiểu digest | **Kém** — vector của "còn màu đen không" gần như vô nghĩa |
 | Tool gần giống nhau | Tốt — `KHÔNG DÙNG KHI` trong mô tả có tác dụng | **Kém** — `list_orders` vs `get_order_statistics` rất gần nhau về vector |
