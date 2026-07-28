@@ -20,9 +20,15 @@ public record PayrollResponse
 
     public decimal TotalActualReceived => TotalNetPayable;
 
-    public decimal VolumeBonus { get; set; }
+    public decimal KpiBonus { get; set; }
 
-    public decimal TotalNetPayable => BaseSalary + ConfirmedCommission + PaidCommission + VolumeBonus;
+    public decimal VolumeBonus
+    {
+        get => KpiBonus;
+        set => KpiBonus = value;
+    }
+
+    public decimal TotalNetPayable => BaseSalary + ConfirmedCommission + PaidCommission + KpiBonus;
 }
 
 public record PayrollListItem

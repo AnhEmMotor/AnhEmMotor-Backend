@@ -4,6 +4,8 @@ public class SalesContractStatisticsResponse
 {
     public int DraftCount { get; set; }
 
+    public int PendingApprovalCount { get; set; }
+
     public int SignedCount { get; set; }
 
     public int FulfilledCount { get; set; }

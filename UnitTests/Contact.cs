@@ -1,6 +1,8 @@
+using Application.ApiContracts.Contacts.Requests;
 using Application.Features.Contacts.Commands.AssignSupportRequest;
 using Application.Features.Contacts.Commands.CreateContact;
 using Application.Features.Contacts.Commands.CreateContactReply;
+using Application.Features.Contacts.Commands.CreateSupportRequest;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Contact;
@@ -43,6 +45,39 @@ public class Contact
         var handler = new CreateContactCommandHandler(_contactInsertRepoMock.Object, _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "CONT_003 - Yêu cầu hỗ trợ lưu đúng danh tính khách hàng")]
+    public async Task CreateSupportRequest_WithCustomerIdentity_PersistsContactIdentity()
+    {
+        var supportRequestRepoMock = new Mock<ISupportRequestRepository>();
+        var request = new CreateSupportRequestRequest
+        {
+            FullName = "Nguyễn Minh Anh",
+            PhoneNumber = "0901234567",
+            Email = "minhanh@example.com",
+            Subject = "Hỗ trợ bảo dưỡng",
+            Category = "AfterSales",
+            Content = "Cần kiểm tra lịch bảo dưỡng gần nhất"
+        };
+        var handler = new CreateSupportRequestCommandHandler(
+            supportRequestRepoMock.Object,
+            _contactInsertRepoMock.Object,
+            _unitOfWorkMock.Object);
+
+        var result = await handler
+            .Handle(new CreateSupportRequestCommand(request), CancellationToken.None)
+            .ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        _contactInsertRepoMock.Verify(
+            repository => repository.Add(
+                It.Is<Domain.Entities.Contact>(
+                    contact =>
+                        contact.FullName == request.FullName &&
+                        contact.PhoneNumber == request.PhoneNumber &&
+                        contact.Email == request.Email)),
+            Times.Once);
     }
 
     [Fact(DisplayName = "CONT_005 - Tự động chuyển trạng thái liên hệ sang 'Đã xử lý'")]
