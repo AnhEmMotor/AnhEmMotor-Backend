@@ -180,11 +180,6 @@ public class SalesContractScan
             new UpdateSalesContractStatusCommand(contractId, SalesContractStatus.Approved),
             CancellationToken.None)
             .ConfigureAwait(true);
-        result.IsSuccess.Should().BeTrue();
-        contract.Status.Should().Be(SalesContractStatus.Approved);
-        contract.SignedDate.Should().BeNull();
-        _unitOfWork.Verify(repository => repository.SaveChangesAsync(CancellationToken.None), Times.Once);
-            CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
         contract.Status.Should().Be(SalesContractStatus.Draft);
