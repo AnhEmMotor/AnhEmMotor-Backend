@@ -8,37 +8,20 @@ namespace Infrastructure.Repositories.MediaFile.File;
 
 public class FileReadService : IFileReadService
 {
-<<<<<<< HEAD
-    private readonly string _uploadFolder;
-    private readonly IFileUpdateService _fileUpdateService;
-  private readonly IHttpContextAccessor _httpContextAccessor;
+	private readonly string _uploadFolder;
+	private readonly IFileUpdateService _fileUpdateService;
+	private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public FileReadService(
-        IWebHostEnvironment environment,
-        IOptions<LocalFileStorageOptions> options,
-        IFileUpdateService fileUpdateService,
-    IHttpContextAccessor httpContextAccessor)
-    {
-        _fileUpdateService = fileUpdateService;
-        _httpContextAccessor = httpContextAccessor;
-    _uploadFolder = LocalFileStoragePathResolver.Resolve(environment, options);
-    }
-=======
-   private readonly string _uploadFolder;
-   private readonly IFileUpdateService _fileUpdateService;
-   private readonly IHttpContextAccessor _httpContextAccessor;
-
-   public FileReadService(
-   IWebHostEnvironment environment,
-   IOptions<LocalFileStorageOptions> options,
-   IFileUpdateService fileUpdateService,
-   IHttpContextAccessor httpContextAccessor)
-   {
-      _fileUpdateService = fileUpdateService;
-      _httpContextAccessor = httpContextAccessor;
-      _uploadFolder = LocalFileStoragePathResolver.Resolve(environment, options);
-   }
->>>>>>> origin/minhuyen/fix/dashboard-audit-log
+	public FileReadService(
+		IWebHostEnvironment environment,
+		IOptions<LocalFileStorageOptions> options,
+		IFileUpdateService fileUpdateService,
+		IHttpContextAccessor httpContextAccessor)
+	{
+		_fileUpdateService = fileUpdateService;
+		_httpContextAccessor = httpContextAccessor;
+		_uploadFolder = LocalFileStoragePathResolver.Resolve(environment, options);
+	}
 
    public string GetPublicUrl(string storagePath)
    {
