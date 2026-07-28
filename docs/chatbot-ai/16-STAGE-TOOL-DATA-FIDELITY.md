@@ -4,6 +4,14 @@
 > Mục tiêu: tool gọi **đúng** rồi thì số trả về cũng phải **đúng** — khớp với báo cáo trên UI,
 > không lệch kỳ, không thiếu bộ lọc, không âm thầm cắt bớt.
 
+> **⚠️ Nợ từ Stage 18 (Consistency) — làm kèm khi xong Stage này:**
+> - **18.12** (trộn dữ liệu nhiều kỳ) — envelope tool cần trường `periodLabel`
+>   (`"Tháng 7/2026"`), prompt buộc AI ghi nhãn kỳ cạnh mỗi con số, output guard chặn câu trả lời
+>   có ≥ 2 số tiền mà thiếu nhãn kỳ. Ưu tiên hơn: tool trả sẵn `compare_with_previous` để chỉ có
+>   một nguồn số.
+>
+> Xem chi tiết: [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md), mục 18.12.
+
 ---
 
 ## 16.1. Khác gì với Stage 13?

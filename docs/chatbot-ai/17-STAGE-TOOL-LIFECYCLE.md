@@ -8,6 +8,13 @@ Gốc rễ của cả nhóm này là một sự thật đơn giản:
 > **Tool thay đổi liên tục. Lịch sử hội thoại, plan chờ duyệt, và checkpoint của agent
 > thì tồn tại lâu hơn tool.**
 
+> **⚠️ Nợ từ Stage 18 (Consistency) — làm kèm khi xong mục 17.4:**
+> - **18.8** (số liệu cũ trong lịch sử hội thoại) — khi sạch hoá lịch sử ở 17.4, tin nhắn cũ hơn
+>   15 phút phải được đóng dấu thời gian (`"(Số liệu trong tin nhắn này tính đến {timestamp})"`)
+>   và system prompt phải buộc AI tra cứu lại (không đọc số cũ) khi hỏi lại số liệu > 15 phút.
+>
+> Xem chi tiết: [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md), mục 18.8.
+
 Trong lộ trình 71 tool, mỗi tuần đều có tool được thêm, đổi schema, đổi tên, hoặc gỡ.
 Không có cơ chế phiên bản thì mỗi lần đổi là một đợt lỗi âm ỉ mà không ai truy được nguyên nhân.
 

@@ -3,6 +3,17 @@
 > Yêu cầu #5 (phần tốc độ) · Ưu tiên: 🟠 Trung bình · Ước lượng: 2–3 ngày · Phụ thuộc: **Stage 3, 13**
 > Mục tiêu: giảm thời gian chờ và giảm số vòng lặp của agent — vừa nhanh hơn vừa rẻ hơn.
 
+> **⚠️ Nợ từ Stage 18 (Consistency) — làm kèm khi xong Stage này:**
+> - **14.5 (Cache nhiều tầng):** thay TTL 60s bằng `RunSnapshot` (đã có ở
+>   `AISidecar/app/services/run_snapshot.py`, Stage 18.2) cho các tool đọc trong cùng một run —
+>   nhất quán hơn mà vẫn tiết kiệm y như cũ. Cache theo run tự động thoả điều kiện "key theo user"
+>   vì run đã gắn 1 user.
+> - **14.6 (Tóm tắt lịch sử hội thoại):** áp 3 quy tắc của Stage 18.9 — không tóm tắt số liệu,
+>   giữ nguyên văn 15 tin gần nhất, lưu `SummarizedUpToMessageId` vào `ChatSession` (cần migration
+>   MySQL + PostgreSQL).
+>
+> Xem chi tiết: [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md), mục 18.2, 18.9.
+
 ---
 
 ## 14.1. Đo trước, tối ưu sau

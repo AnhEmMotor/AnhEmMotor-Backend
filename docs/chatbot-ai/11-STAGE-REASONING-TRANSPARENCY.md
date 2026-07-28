@@ -6,6 +6,15 @@
 
 Hai mục tiêu này kéo ngược nhau, nên phần khó nhất của Stage này là lớp **redaction**.
 
+> **⚠️ Nợ từ Stage 18 (Consistency) — làm kèm khi xong Stage này:**
+> - **18.10** (`thinking` mâu thuẫn với câu trả lời) — cần panel suy nghĩ tồn tại trước.
+> - **18.11** (quy ước 2 đường dữ liệu: LLM nhận đầy đủ, chỉ FE nhận bản `***`) — cần lớp
+>   redaction của Stage này làm xong trước mới có cái để tách 2 đường. Nhớ thêm test
+>   "dữ liệu vào LLM không chứa `***`" như đã ghi ở `18-STAGE-CONSISTENCY.md`.
+>
+> Xem chi tiết: [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md#1810-thinking-mâu-thuẫn-với-câu-trả-lời-c6),
+> mục 18.10, 18.11.
+
 ---
 
 ## 11.1. Cái gì được hiển thị

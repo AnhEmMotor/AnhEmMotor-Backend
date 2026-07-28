@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 using Application.Interfaces.Repositories.Chat;
 using Application.Interfaces.Services;
@@ -15,6 +16,7 @@ public class ChatRunExecutor(
     ILogger<ChatRunExecutor> logger) : BackgroundService
 {
     private readonly SemaphoreSlim _semaphore = new(10); // 10 concurrent runs
+    private readonly ConcurrentDictionary<Guid, Task> _inFlightRuns = new();
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -22,7 +24,7 @@ public class ChatRunExecutor(
         {
             await _semaphore.WaitAsync(stoppingToken);
 
-            _ = Task.Run(async () =>
+            var runTask = Task.Run(async () =>
             {
                 try
                 {
@@ -37,7 +39,19 @@ public class ChatRunExecutor(
                     _semaphore.Release();
                 }
             }, stoppingToken);
+
+            _inFlightRuns[runId] = runTask;
+            _ = runTask.ContinueWith(_ => _inFlightRuns.TryRemove(runId, out _), TaskScheduler.Default);
         }
+    }
+
+    // Host gọi StopAsync khi app shutdown (ApplicationStopping) — đợi các run đang chạy
+    // huỷ + flush buffer (catch OperationCanceledException ở ProcessRunAsync) trước khi thoát,
+    // tránh mất tối đa 200ms nội dung đang trong chunkBuffer.
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await base.StopAsync(cancellationToken);
+        await Task.WhenAll(_inFlightRuns.Values);
     }
 
     private async Task ProcessRunAsync(Guid runId, CancellationToken stoppingToken)

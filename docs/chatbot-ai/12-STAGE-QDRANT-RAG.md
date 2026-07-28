@@ -4,6 +4,15 @@
 > Mục tiêu: AI tìm kiếm được theo **ngữ nghĩa** — hiểu "xe ga tiết kiệm xăng cho nữ" thay vì
 > chỉ khớp từ khoá, và trả lời được từ tài liệu nội bộ (bảo hành, chính sách, hướng dẫn).
 
+> **⚠️ Nợ từ Stage 18 (Consistency) — làm kèm khi xong Stage này:**
+> - **18.7** (trích dẫn RAG có mã `citationId`, kiểm chứng được) — chunk trả về từ Qdrant phải
+>   kèm `citationId`; prompt bắt buộc gắn mã `[c1]`; output guard chặn mã bịa.
+> - **18.3** (dọn checkpoint mồ côi) — nếu Stage này đổi checkpointer sang lưu bền (Postgres/Redis)
+>   thay cho `MemorySaver` hiện tại, tiện làm luôn job dọn checkpoint mồ côi + endpoint
+>   `POST /internal/chat/runs/exists`.
+>
+> Xem chi tiết: [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md), mục 18.3, 18.7.
+
 ---
 
 ## 12.1. Vì sao cần Qdrant khi đã có tool `search_products`

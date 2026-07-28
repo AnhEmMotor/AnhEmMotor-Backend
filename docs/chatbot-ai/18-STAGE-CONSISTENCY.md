@@ -2,8 +2,21 @@
 
 > Nhóm B (9 ca) + C2–C7 + D1–D2 · Ưu tiên: 🟠 Trung bình-cao · Ước lượng: 3–4 ngày
 > Phụ thuộc cứng: **Stage 8, 9** — làm được ngay ở đợt 2.
-> Ba mục sau cần Stage khác xong mới làm được, **bổ sung sau**:
-> 18.7 cần Stage 12 · 18.11 cần Stage 11 · 18.12 cần Stage 16.
+>
+> **Trạng thái (2026-07-28):** 18.1, 18.2, 18.4 (B6, B9), 18.5, 18.6 **đã xong**.
+> Các mục còn lại cần Stage khác xong mới làm được, **bổ sung sau**:
+> - **18.3 (phần dọn checkpoint mồ côi)** cần checkpointer bền (Postgres/Redis) — hiện sidecar
+>   dùng `MemorySaver` trong bộ nhớ, không có gì để dọn. Cần Stage 12 (hoặc bất kỳ Stage nào
+>   đổi checkpointer sang lưu bền) xong trước. *(Phần hoà giải huỷ 2 chiều của 18.3 đã xong ở
+>   Stage 8/9.)*
+> - **18.7** cần Stage 12 (Qdrant/RAG).
+> - **18.8** cần Stage 17.4 (làm sạch lịch sử khi nạp lại) — hiện chưa có bước sanitize/nạp lại
+>   lịch sử để gắn nhãn thời gian vào.
+> - **18.9** cần Stage 14.6 (tóm tắt hội thoại) — tính năng tóm tắt chưa tồn tại nên chưa có gì
+>   để áp quy tắc "không tóm tắt số liệu".
+> - **18.10** cần Stage 11 (Reasoning Transparency) — panel "suy nghĩ" chưa tồn tại.
+> - **18.11** cần Stage 11 — chưa có redaction ở đường ra FE nên chưa có gì để tách 2 đường dữ liệu.
+> - **18.12** cần Stage 16 (Data Fidelity).
 
 Hệ thống có **ba lớp giữ trạng thái độc lập**, và chúng sẽ lệch nhau:
 
@@ -137,6 +150,12 @@ Sidecar cũng chạy job dọn checkpoint mồ côi hằng ngày: `thread_id` kh
 POST /internal/chat/runs/exists   { runIds: [...] }  →  { alive: [...] }
 ```
 
+> **⚠️ Chưa làm được (2026-07-28):** `manager_agent.py` hiện dùng `MemorySaver()` — checkpoint
+> chỉ sống trong bộ nhớ tiến trình, mất khi restart, không có gì để job "dọn hằng ngày" quét.
+> Việc này chỉ có ý nghĩa sau khi đổi sang checkpointer bền (Postgres/Redis — dự kiến ở Stage 12
+> hoặc khi làm hạ tầng đó). Cần làm để **phù hợp với DoD Stage 18**: "Job dọn checkpoint mồ côi
+> chạy được, đối chiếu qua `/internal/chat/runs/exists`".
+
 **Ngoại lệ:** plan ở `AwaitingApproval` (Stage 10) **phải giữ** checkpoint tới 24h — job dọn
 phải loại trừ trạng thái này.
 
@@ -179,6 +198,10 @@ Tab B phải gọi `getActiveRun` **trước khi** cho gửi, để biết đang
 
 Nhẹ nhưng gây bối rối. Cách xử lý rẻ nhất: khi cửa sổ lấy lại focus (`visibilitychange`),
 FE tải lại danh sách session. Không cần realtime.
+
+> **✅ Đã làm (2026-07-28):** B6 — `sendMessage` (`ChatDrawer.vue`) gọi `getActiveRun` trước khi
+> tạo run mới nếu chưa tự thấy đang có stream, rồi resume + gửi dưới dạng steering. B9 —
+> `visibilitychange` listener gọi `loadSessions()`. B8 (heartbeat/watchdog) đã có sẵn từ Stage 8.
 
 ---
 
@@ -356,33 +379,40 @@ AI gọi `get_sales_summary` hai lần (tháng này, tháng trước) rồi tr�
 
 ## Definition of Done — Stage 18
 
-- [ ] Bảng nguồn sự thật (18.1) được ghi vào `RULES.md`.
-- [ ] `RunSnapshot` hoạt động; hai tool cùng run đọc cùng dữ liệu trả về **cùng một** giá trị.
-- [ ] Câu trả lời dùng `asOf` sớm nhất; lệch > 60s thì có `warnings` và AI nhắc lại.
+- [ ] Bảng nguồn sự thật (18.1) được ghi vào `RULES.md`. **⚠️ Chưa** — `RULES.md` ở root
+      backend hiện chỉ chứa quy chuẩn Git/code, không phải chỗ hợp cho quy tắc nghiệp vụ domain.
+      Cần chốt vị trí ghi (ví dụ `docs/chatbot-ai/RULES.md` riêng) trước khi tích ô này.
+- [x] `RunSnapshot` hoạt động; hai tool cùng run đọc cùng dữ liệu trả về **cùng một** giá trị.
+- [x] Câu trả lời dùng `asOf` sớm nhất; lệch > 60s thì có `warnings` và AI nhắc lại.
 - [ ] Bấm Dừng → sidecar **thực sự** dừng gọi LLM/tool (kiểm chứng bằng log token của provider).
-- [ ] Run kết thúc → checkpoint được dọn; plan `AwaitingApproval` **không** bị dọn.
-- [ ] Job dọn checkpoint mồ côi chạy được, đối chiếu qua `/internal/chat/runs/exists`.
+      *(Cơ chế cancel 2 chiều đã có từ Stage 8/9; phần kiểm chứng bằng log token nhà cung cấp
+      chưa làm.)*
+- [ ] Run kết thúc → checkpoint được dọn; plan `AwaitingApproval` **không** bị dọn. **⚠️ Chưa** —
+      xem ghi chú ở 18.3.
+- [ ] Job dọn checkpoint mồ côi chạy được, đối chiếu qua `/internal/chat/runs/exists`. **⚠️ Chưa**
+      — cần checkpointer bền trước (xem ghi chú ở 18.3).
 - [ ] Kill executor giữa run → FE phát hiện trong 45s và hiện thông báo gián đoạn (không quay mãi).
-- [ ] Hai tab: tab B thấy cùng stream; bấm gửi ở tab B thành steering, không tạo run thứ hai.
-- [ ] Flush buffer trước mọi event quan trọng và khi app shutdown.
-- [ ] Steering chờ > 20s → FE hiện trạng thái + nút Dừng và hỏi lại.
-- [ ] Trích dẫn RAG dùng mã `[c1]`; mã không tồn tại → bị guard chặn và viết lại.
-- [ ] FE render trích dẫn thành chip bấm mở được đoạn gốc.
-- [ ] Hỏi lại số liệu cũ hơn 15 phút → AI **tra cứu lại**, không đọc số cũ.
-- [ ] Tóm tắt hội thoại **không** chứa số liệu; `SummarizedUpToMessageId` được lưu.
-- [ ] Panel suy nghĩ có nhãn "diễn giải trong quá trình xử lý".
-- [ ] **Test: dữ liệu vào LLM không chứa `***`** — redaction chỉ áp cho đường ra FE.
-- [ ] Câu trả lời so sánh nhiều kỳ luôn có nhãn kỳ cạnh từng con số.
+      *(Watchdog 45s đã có từ Stage 8; chưa kiểm thử end-to-end kill thật.)*
+- [x] Hai tab: tab B thấy cùng stream; bấm gửi ở tab B thành steering, không tạo run thứ hai.
+- [x] Flush buffer trước mọi event quan trọng và khi app shutdown.
+- [x] Steering chờ > 20s → FE hiện trạng thái + nút Dừng và hỏi lại.
+- [ ] Trích dẫn RAG dùng mã `[c1]`; mã không tồn tại → bị guard chặn và viết lại. **Chờ Stage 12.**
+- [ ] FE render trích dẫn thành chip bấm mở được đoạn gốc. **Chờ Stage 12.**
+- [ ] Hỏi lại số liệu cũ hơn 15 phút → AI **tra cứu lại**, không đọc số cũ. **Chờ Stage 17.4.**
+- [ ] Tóm tắt hội thoại **không** chứa số liệu; `SummarizedUpToMessageId` được lưu. **Chờ Stage 14.6.**
+- [ ] Panel suy nghĩ có nhãn "diễn giải trong quá trình xử lý". **Chờ Stage 11.**
+- [ ] **Test: dữ liệu vào LLM không chứa `***`** — redaction chỉ áp cho đường ra FE. **Chờ Stage 11.**
+- [ ] Câu trả lời so sánh nhiều kỳ luôn có nhãn kỳ cạnh từng con số. **Chờ Stage 16.**
 
 ### Test
 
 `AISidecar/tests/test_consistency.py`:
-- [ ] `RunSnapshot.get` gọi 2 lần cùng `(tool, args)` → `fetcher` chỉ chạy **1 lần**.
-- [ ] `as_of` neo theo lần đọc **đầu tiên**, không đổi ở các lần sau.
-- [ ] Lệch `asOf` > 60s → sinh `warnings`.
-- [ ] **Dữ liệu vào LLM không chứa `***`** — redaction chỉ áp cho đường ra FE (18.11).
-- [ ] Mã trích dẫn `[c9]` không có trong kết quả → output guard yêu cầu viết lại.
-- [ ] Tin nhắn cũ > 15 phút được gắn nhãn thời điểm khi nạp lại lịch sử.
+- [x] `RunSnapshot.get` gọi 2 lần cùng `(tool, args)` → `fetcher` chỉ chạy **1 lần**.
+- [x] `as_of` neo theo lần đọc **đầu tiên**, không đổi ở các lần sau.
+- [x] Lệch `asOf` > 60s → sinh `warnings`.
+- [ ] **Dữ liệu vào LLM không chứa `***`** — redaction chỉ áp cho đường ra FE (18.11). **Chờ Stage 11.**
+- [ ] Mã trích dẫn `[c9]` không có trong kết quả → output guard yêu cầu viết lại. **Chờ Stage 12.**
+- [ ] Tin nhắn cũ > 15 phút được gắn nhãn thời điểm khi nạp lại lịch sử. **Chờ Stage 17.4.**
 
 `UnitTests/ManagerChatRun.cs`:
 - [ ] Cancel run → gọi endpoint `/manager-chat/{runId}/cancel` của sidecar (mock, verify).
