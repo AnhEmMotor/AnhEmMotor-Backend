@@ -68,6 +68,26 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
             .Where(v => ids.Contains(v.Id))
             .ToListAsync(cancellationToken);
     }
+public Task<List<Domain.Entities.Vehicle>> GetByIdsWithLeadAsync(
+        IEnumerable<int> ids,
+        CancellationToken cancellationToken = default)
+    {
+        return context.Vehicles
+            .IgnoreQueryFilters()
+            .Include(v => v.Lead)
+            .Where(v => ids.Contains(v.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Domain.Entities.Vehicle?> GetByIdWithLeadAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Vehicles
+            .IgnoreQueryFilters()
+            .Include(v => v.Lead)
+            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+    }
 
     public Task<List<Domain.Entities.Vehicle>> GetVehiclesForAssignmentAsync(
         IEnumerable<int> productVariantIds,

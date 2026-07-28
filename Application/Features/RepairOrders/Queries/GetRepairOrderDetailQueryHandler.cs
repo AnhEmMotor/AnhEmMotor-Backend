@@ -2,16 +2,15 @@ using Application.ApiContracts.Admin.Workshop.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Employee;
+using Application.Interfaces.Repositories.Vehicle;
 using Domain.Primitives;
-using Infrastructure.DBContexts;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.RepairOrders.Queries;
 
 public class GetRepairOrderDetailQueryHandler(
     IMaintenanceHistoryReadRepository repo,
-    ApplicationDBContext dbContext,
+    IVehicleReadRepository vehicleRepo,
     IEmployeeReadRepository employeeRepo) : IRequestHandler<GetRepairOrderDetailQuery, Result<RepairOrderResponse>>
 {
     public async Task<Result<RepairOrderResponse>> Handle(GetRepairOrderDetailQuery req, CancellationToken ct)
@@ -20,10 +19,7 @@ public class GetRepairOrderDetailQueryHandler(
         if (entity is null)
             return Result<RepairOrderResponse>.Failure(
                 [Error.NotFound($"Không tìm thấy lệnh sửa chữa id={req.Id}", "Id")]);
-        var vehicle = await dbContext.Vehicles
-            .IgnoreQueryFilters()
-            .Include(v => v.Lead)
-            .FirstOrDefaultAsync(v => v.Id == entity.VehicleId, ct);
+        var vehicle = await vehicleRepo.GetByIdWithLeadAsync(entity.VehicleId, ct);
         string? vehicleInfo = vehicle != null
             ? (!string.IsNullOrEmpty(vehicle.LicensePlate) ? vehicle.LicensePlate : vehicle.VinNumber)
             : null;
