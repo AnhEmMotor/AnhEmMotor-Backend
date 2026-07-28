@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import StreamingResponse
 from langchain_core.messages import HumanMessage
 
+from app.agents.manager_agent import get_graph
 from app.api.deps import verify_internal_secret
-from app.core.llm import get_llm
 from app.schemas.chat import ChatRequest, GenerateTitleRequest
 from app.services.backend_client import BackendClient
 from app.services.prompt_builder import build_system_message, build_history_messages
@@ -50,28 +50,30 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
     except Exception:
         logger.warning("Failed to fetch context for session %s", chat_req.session_id, exc_info=True)
 
-    messages = [
-        build_system_message(context),
-        *build_history_messages(context, chat_req.message),
-        HumanMessage(content=chat_req.message),
-    ]
-
-    llm = get_llm(temperature=0.7)
+    initial_state = {
+        "messages": [
+            build_system_message(context),
+            *build_history_messages(context, chat_req.message),
+            HumanMessage(content=chat_req.message),
+        ],
+        "run_id": chat_req.run_id,
+        "auth_header": auth_header,
+        "turns": 0,
+        "absorbed_count": 0,
+        "carried_steering": [],
+        "cancelled": False,
+    }
 
     cancel_event = asyncio.Event()
     _cancel_events[chat_req.run_id] = cancel_event
 
+    graph = get_graph()
+    config = {"configurable": {"thread_id": chat_req.run_id, "cancel_event": cancel_event}}
+
     async def stream_generator():
         try:
-            async for chunk in llm.astream(messages):
-                if cancel_event.is_set():
-                    return
-                if isinstance(chunk, str):
-                    content = chunk
-                else:
-                    content = getattr(chunk, "content", "") or ""
-                if content:
-                    yield _event("text_delta", content)
+            async for type_, payload in graph.astream(initial_state, config=config, stream_mode="custom"):
+                yield _event(type_, payload)
             yield _event("done")
         except Exception as e:
             logger.error("LLM streaming error for run %s: %s", chat_req.run_id, str(e))

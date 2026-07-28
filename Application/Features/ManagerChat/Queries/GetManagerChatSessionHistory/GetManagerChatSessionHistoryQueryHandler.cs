@@ -36,7 +36,8 @@ public class GetManagerChatSessionHistoryQueryHandler(
             {
                 Role = m.Role.ToString(),
                 Message = m.Message,
-                CreatedAt = m.CreatedAt
+                CreatedAt = m.CreatedAt,
+                IsSteering = m.IsSteering
             }).ToList();
 
         return dtos;

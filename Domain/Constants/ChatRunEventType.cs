@@ -8,4 +8,8 @@ public static class ChatRunEventType
     public const string RunCompleted = "run_completed";
     public const string RunCancelled = "run_cancelled";
     public const string RunHeartbeat = "run_heartbeat";
+    public const string SteeringReceived = "steering_received";
+    public const string SteeringApplied = "steering_applied";
+    public const string RunRedirected = "run_redirected";
+    public const string TurnBoundary = "turn_boundary";
 }

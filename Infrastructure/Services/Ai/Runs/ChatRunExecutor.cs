@@ -71,6 +71,7 @@ public class ChatRunExecutor(
 
             var lastFlush = DateTime.UtcNow;
             var lastHeartbeat = DateTime.UtcNow;
+            var segmentStartedAt = DateTime.UtcNow;
 
             await foreach (var evt in stream.WithCancellation(runCts.Token))
             {
@@ -103,7 +104,14 @@ public class ChatRunExecutor(
                         chunkBuffer.Clear();
                     }
 
-                    if (evt.Type != "done")
+                    if (evt.Type == ChatRunEventType.TurnBoundary)
+                    {
+                        await writer.AppendSegmentAsync(runId, fullOutput.ToString(), segmentStartedAt);
+                        fullOutput.Clear();
+                        await writer.FlushPartialOutputAsync(runId, "");
+                        segmentStartedAt = DateTime.UtcNow;
+                    }
+                    else if (evt.Type != "done")
                     {
                         await writer.AppendAsync(runId, evt.Type, evt.Payload);
                     }

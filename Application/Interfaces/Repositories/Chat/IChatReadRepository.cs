@@ -10,4 +10,5 @@ public interface IChatReadRepository
     public Task<ChatRun?> GetActiveRunForUserAsync(Guid userId, CancellationToken cancellationToken = default);
     public Task<ChatRun?> GetRunByIdAsync(Guid runId, CancellationToken cancellationToken = default);
     public Task<List<ChatRunEvent>> GetRunEventsAsync(Guid runId, long afterSeq, CancellationToken cancellationToken = default);
+    public Task<int> CountSteeringMessagesAsync(Guid runId, CancellationToken cancellationToken = default);
 }

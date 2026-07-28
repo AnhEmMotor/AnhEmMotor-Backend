@@ -23,4 +23,13 @@ public class ChatMessage : BaseEntity
     [Required]
     [Column("Message", TypeName = "nvarchar(max)")]
     public string Message { get; set; } = string.Empty;
+
+    /// <summary>Tin nhắn được gửi khi run đang chạy (steering).</summary>
+    public bool IsSteering { get; set; }
+
+    /// <summary>Run mà tin nhắn này gắn vào (null với tin nhắn khởi tạo run).</summary>
+    [Column("RunId")]
+    [ForeignKey("Run")]
+    public Guid? RunId { get; set; }
+    public ChatRun? Run { get; set; }
 }

@@ -51,4 +51,10 @@ public class ChatReadRepository(ApplicationDBContext context) : IChatReadReposit
             .OrderBy(e => e.Seq)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<int> CountSteeringMessagesAsync(Guid runId, CancellationToken cancellationToken = default)
+    {
+        return await context.ChatMessages
+            .CountAsync(m => m.RunId == runId && m.IsSteering, cancellationToken);
+    }
 }

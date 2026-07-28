@@ -18,7 +18,7 @@ class BackendClient:
             "X-Internal-Secret": self._settings.backend_internal_secret,
         }
 
-    async def _post(self, path: str, payload: dict) -> dict:
+    async def _post(self, path: str, payload: dict) -> dict | list:
         url = f"{self._settings.backend_base}{path}"
         timeout = self._settings.request_timeout_seconds
         async with httpx.AsyncClient(timeout=timeout) as client:
@@ -41,3 +41,7 @@ class BackendClient:
         return await self._post(
             f"/internal/chat/tools/{tool_path.lstrip('/')}", payload
         )
+
+    async def pull_pending_steering(self, run_id: str) -> list[dict]:
+        result = await self._post(f"/internal/chat/runs/{run_id}/pull-steering", {})
+        return result if isinstance(result, list) else []

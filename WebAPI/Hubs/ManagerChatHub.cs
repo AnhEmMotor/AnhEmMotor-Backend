@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using Application.DTOs.Chat;
 using Application.Features.ManagerChat.Commands.CancelChatRun;
+using Application.Features.ManagerChat.Commands.SendSteeringMessage;
 using Application.Features.ManagerChat.Commands.StartChatRun;
 using Application.Features.ManagerChat.Queries.GetChatRunEvents;
 using Application.Interfaces.Services;
@@ -20,6 +21,19 @@ public class ManagerChatHub(ISender sender, IChatRunEventBus bus) : Hub
         var token = ExtractToken();
         var command = new StartChatRunCommand(sessionId, content, userId, token);
         return await sender.Send(command);
+    }
+
+    /// <summary>Gửi tin nhắn khi có run đang chạy (steering).</summary>
+    public async Task<SteeringResultDto> SendSteering(Guid runId, string content)
+    {
+        var userId = ParseUserId();
+        var token = ExtractToken();
+        var result = await sender.Send(new SendSteeringMessageCommand(runId, content, userId, token));
+        if (result.IsFailure)
+        {
+            throw new HubException(result.Error!.Message);
+        }
+        return result.Value!;
     }
 
     public async IAsyncEnumerable<ChatRunEventDto> SubscribeRun(

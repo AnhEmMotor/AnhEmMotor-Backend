@@ -40,5 +40,9 @@ public class ChatRun : BaseEntity
 
     public DateTime? HeartbeatAt { get; set; }
 
+    /// <summary>Tin nhắn steering đang chờ được nạp vào agent, dạng JSON array.</summary>
+    [Column("PendingSteering", TypeName = "nvarchar(max)")]
+    public string PendingSteering { get; set; } = "[]";
+
     public ICollection<ChatRunEvent> Events { get; set; } = [];
 }

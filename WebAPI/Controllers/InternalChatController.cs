@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +20,7 @@ public class InternalChatController(
     UserManager<ApplicationUser> userManager,
     ApplicationDBContext dbContext,
     IConfiguration configuration,
+    IChatRunWriter chatRunWriter,
     ILogger<InternalChatController> logger) : ControllerBase
 {
     [HttpPost("context")]
@@ -88,6 +90,29 @@ public class InternalChatController(
             SessionId = request.SessionId,
             History = history
         });
+    }
+
+    [HttpPost("runs/{runId}/pull-steering")]
+    public async Task<IActionResult> PullSteering(Guid runId, CancellationToken cancellationToken)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userId))
+        {
+            return Unauthorized();
+        }
+
+        var run = await dbContext.ChatRuns
+            .AsNoTracking()
+            .Include(r => r.Session)
+            .FirstOrDefaultAsync(r => r.Id == runId, cancellationToken);
+
+        if (run == null || run.Session?.UserId != userId)
+        {
+            return NotFound("Run không tồn tại hoặc không thuộc quyền sở hữu.");
+        }
+
+        var items = await chatRunWriter.PullPendingSteeringAsync(runId);
+        return Ok(items);
     }
 }
 
