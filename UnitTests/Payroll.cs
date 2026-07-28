@@ -37,6 +37,24 @@ public class Payroll
     }
 
     [Fact]
+    public async Task GetPayrollSummary_ExposesVolumeRewardAsKpiBonusInTakeHomePay()
+    {
+        var period = new DateTime(2026, 7, 1);
+        var employee = CreateEmployee(1, 10_000_000m);
+        var records = CreateRecords(employee.Id, CommissionStatus.Confirmed, count: 10, amount: 500_000m, period);
+        var handler = CreateSummaryHandler([employee], records);
+
+        var result = await handler
+            .Handle(new GetPayrollSummaryQuery(7, 2026), CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var payroll = result.Value.Should().ContainSingle().Subject;
+        payroll.KpiBonus.Should().Be(1_500_000m);
+        payroll.TotalNetPayable.Should().Be(
+            payroll.BaseSalary + payroll.ConfirmedCommission + payroll.PaidCommission + payroll.KpiBonus);
+    }
+
+    [Fact]
     public async Task GetPayrollSummary_DoesNotApplyVolumeBonusBelowThreshold()
     {
         var period = new DateTime(2026, 7, 1);

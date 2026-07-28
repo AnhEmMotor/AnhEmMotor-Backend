@@ -13,6 +13,9 @@ public class GetSalesContractStatisticsQueryHandler(ISalesContractReadRepository
     {
         var draftCount = await readRepo.CountByStatusAsync(SalesContractStatus.Draft, cancellationToken)
             .ConfigureAwait(false);
+        var pendingApprovalCount = await readRepo
+            .CountByStatusAsync(SalesContractStatus.PendingApproval, cancellationToken)
+            .ConfigureAwait(false);
         var signedCount = await readRepo.CountByStatusAsync(SalesContractStatus.Signed, cancellationToken)
             .ConfigureAwait(false);
         var fulfilledCount = await readRepo.CountByStatusAsync(SalesContractStatus.Fulfilled, cancellationToken)
@@ -22,6 +25,7 @@ public class GetSalesContractStatisticsQueryHandler(ISalesContractReadRepository
             new SalesContractStatisticsResponse
             {
                 DraftCount = draftCount,
+                PendingApprovalCount = pendingApprovalCount,
                 SignedCount = signedCount,
                 FulfilledCount = fulfilledCount,
                 OverdueCount = overdueCount,

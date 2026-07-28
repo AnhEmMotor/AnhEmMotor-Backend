@@ -28,6 +28,14 @@ namespace Infrastructure.Repositories
 
         public string KpiStatus { get; set; } = string.Empty;
 
+        public bool HasSalesData { get; set; }
+
+        public bool HasKpiData { get; set; }
+
+        public bool HasCommissionData { get; set; }
+
+        public string SalesSource { get; set; } = string.Empty;
+
         public bool IsTopSeller { get; set; }
     }
 

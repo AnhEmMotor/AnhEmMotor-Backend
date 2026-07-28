@@ -16,9 +16,9 @@ public class CreateSupportRequestCommandHandler(
     {
         var contact = new Contact
         {
-            FullName = string.Empty,
+            FullName = request.Request.FullName ?? string.Empty,
             Email = request.Request.Email,
-            PhoneNumber = string.Empty,
+            PhoneNumber = request.Request.PhoneNumber ?? string.Empty,
             Subject = request.Request.Subject,
             Message = request.Request.Content,
             Status = "Pending"

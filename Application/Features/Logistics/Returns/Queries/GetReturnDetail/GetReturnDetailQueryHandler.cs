@@ -27,11 +27,13 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturnDetail
                 Reason = order.ReturnReason ?? "Khách bom hàng",
                 Status = GetReturnStatus(order),
                 CreatedAt = order.CreatedAt,
+                InspectedAt = order.InspectedAt,
                 BoxCondition = order.BoxCondition,
                 ProductCondition = order.ProductCondition,
                 ReturnProofImage = order.ReturnProofImage,
                 ReturnInternalNote = order.ReturnInternalNote,
                 ReturnAction = order.ReturnAction,
+                RejectionReason = order.RejectionReason,
                 RefundAmount = order.RefundAmount ?? 0,
                 ReturnShippingCost = order.ReturnShippingCost ?? 0,
                 CodAmount = order.CodAmount,
@@ -53,7 +55,9 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturnDetail
 
         private static string GetReturnStatus(ParcelDeliveryOrder order)
         {
-            if (order.ReturnAction != null)
+            if (string.Equals(order.ReturnAction, "rejected", StringComparison.OrdinalIgnoreCase))
+                return "rejected";
+            if (!string.IsNullOrWhiteSpace(order.ReturnAction))
                 return "completed";
             if (order.InspectedAt != null)
                 return "inspecting";
