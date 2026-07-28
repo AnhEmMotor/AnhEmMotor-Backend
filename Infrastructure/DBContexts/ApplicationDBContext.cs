@@ -148,6 +148,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ServiceCategory> ServiceCategories { get; set; }
 
+    public virtual DbSet<ChatSession> ChatSessions { get; set; }
+
+    public virtual DbSet<ChatMessage> ChatMessages { get; set; }
+
     public virtual DbSet<Service> Services { get; set; }
 
     public virtual DbSet<Lead> Leads { get; set; }
@@ -688,6 +692,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(ov => ov.OutputId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<OrderVoucher>().HasQueryFilter(ov => ov.Output!.DeletedAt == null);
+
+        modelBuilder.Entity<ChatSession>().HasIndex(c => c.UserId);
+        modelBuilder.Entity<ChatSession>().HasIndex(c => c.UpdatedAt);
+        modelBuilder.Entity<ChatMessage>().HasIndex(c => c.SessionId);
+        modelBuilder.Entity<ChatMessage>().HasIndex(c => c.CreatedAt);
+
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))

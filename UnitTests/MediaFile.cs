@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Application.ApiContracts.File.Requests;
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
@@ -612,10 +613,17 @@ var service = new FileReadService(
             var environment = new Mock<IWebHostEnvironment>();
             environment.SetupGet(x => x.ContentRootPath).Returns(contentRoot);
             environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(contentRoot, "wwwroot"));
+<<<<<<< HEAD
  var service = new FileInsertService(
      environment.Object,
      Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
      _fileUpdateServiceMock.Object);
+=======
+            var service = new FileInsertService(
+                environment.Object,
+                Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
+                _fileUpdateServiceMock.Object);
+>>>>>>> origin/thanhbinh/feat/create-chatbot-ai
             await using var imageStream = new MemoryStream();
             using (var image = new Image<Rgba32>(2, 2))
             {

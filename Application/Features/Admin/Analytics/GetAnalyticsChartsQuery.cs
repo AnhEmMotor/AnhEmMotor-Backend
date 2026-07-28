@@ -23,8 +23,8 @@ public class GetAnalyticsChartsHandler : IRequestHandler<GetAnalyticsChartsQuery
     public async Task<AnalyticsChartsResponse> Handle(GetAnalyticsChartsQuery req, CancellationToken ct)
     {
         var cacheKey = "analytics:charts";
-        if (_cache.TryGetValue(cacheKey, out AnalyticsChartsResponse cached))
-            return cached;
+        if (_cache.TryGetValue(cacheKey, out AnalyticsChartsResponse? cached))
+            return cached!;
         var funnel = new List<CustomerFunnelDto>
         {
             new("Khách truy cập", 0),

@@ -1,12 +1,9 @@
 import os
-from fastapi import HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Header, HTTPException
 
-security = HTTPBearer()
-BACKEND_INTERNAL_SECRET = os.environ.get("BACKEND_INTERNAL_SECRET", "default_secret_if_not_set")
 
-def verify_internal_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials
-    if token != BACKEND_INTERNAL_SECRET:
+def verify_internal_secret(x_internal_secret: str | None = Header(None)):
+    expected = os.environ.get("BACKEND_INTERNAL_SECRET", "")
+    if not expected or x_internal_secret != expected:
         raise HTTPException(status_code=403, detail="Invalid internal secret")
-    return token
+    return x_internal_secret

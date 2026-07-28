@@ -48,6 +48,10 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
       - name: Install dotnet-ef
         run: |
           dotnet tool install --global dotnet-ef
@@ -100,6 +104,21 @@ jobs:
         env:
           Logging__LogLevel__Default: "Warning"
           Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+      - name: Install AISidecar dev dependencies
+        if: always()
+        working-directory: AISidecar
+        run: pip install -r requirements-dev.txt
+      - name: Run AISidecar Tests
+        if: always()
+        working-directory: AISidecar
+        run: pytest --junitxml=pytest-results.xml
+      - name: Upload AISidecar test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: AISidecar/pytest-results.xml
+          if-no-files-found: ignore
       - name: Verify Migrations (SQL Server, MySQL, PostgreSql)
         shell: bash
         run: |

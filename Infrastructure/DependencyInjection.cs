@@ -121,7 +121,7 @@ public static class DependencyInjection
         services.AddHttpClient<IGeocodingService, GeocodingService>();
         services.AddSingleton<IPythonEnvService, PythonEnvService>();
         services.AddSingleton<AiSidecarManager>();
-        services.AddSingleton<IAiSidecarManager>(provider => provider.GetRequiredService<AiSidecarManager>());
+        services.AddSingleton<IAiSidecarUrlProvider>(provider => provider.GetRequiredService<AiSidecarManager>());
         services.AddHostedService(provider => provider.GetRequiredService<AiSidecarManager>());
         services.AddHttpClient<IAiSearchClient, AiSearchClient>();
         services.AddHttpClient<IAiTestRoleClient, AiTestRoleClient>();

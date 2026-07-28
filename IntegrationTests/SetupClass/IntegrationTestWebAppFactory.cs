@@ -219,6 +219,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IVNPayService, VNPayService>();
                 services.AddScoped<IPayOSService, PayOSService>();
                 services.AddSingleton<IShippingService>(new FakeShippingService());
+                services.AddSingleton<IAiSidecarUrlProvider>(new FakeAiSidecarUrlProvider());
+                services.AddHttpClient();
                 services.Scan(
                     scan => scan
                         .FromAssemblies(typeof(DependencyInjection).Assembly)
