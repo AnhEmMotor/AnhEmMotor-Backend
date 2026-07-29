@@ -90,8 +90,31 @@ public class InternalChatController(
             Roles = roles,
             Permissions = rolePermissions,
             SessionId = request.SessionId,
-            History = history
+            History = history,
+            RoutingContext = session.RoutingContext
         });
+    }
+
+    [HttpPost("sessions/{sessionId}/routing-context")]
+    public async Task<IActionResult> UpdateRoutingContext(Guid sessionId, [FromBody] UpdateRoutingContextRequest request, CancellationToken cancellationToken)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userId))
+        {
+            return Unauthorized();
+        }
+
+        var session = await dbContext.ChatSessions
+            .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == userId, cancellationToken);
+
+        if (session == null)
+        {
+            return NotFound("Session không tồn tại hoặc không thuộc quyền sở hữu.");
+        }
+
+        session.RoutingContext = request.RoutingContext;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Ok();
     }
 
     [HttpPost("runs/{runId}/pull-steering")]
@@ -123,4 +146,9 @@ public class ContextRequest
     public Guid SessionId { get; set; }
     public string Message { get; set; } = string.Empty;
     public int HistoryLimit { get; set; } = 20;
+}
+
+public class UpdateRoutingContextRequest
+{
+    public string RoutingContext { get; set; } = "{}";
 }

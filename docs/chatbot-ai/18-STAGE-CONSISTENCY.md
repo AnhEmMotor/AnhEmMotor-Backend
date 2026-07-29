@@ -207,14 +207,19 @@ FE tải lại danh sách session. Không cần realtime.
 
 ## 18.5. Flush an toàn cho `text_delta` (B2)
 
-Batch 200ms/100 ký tự (Stage 8.4) có cửa sổ mất dữ liệu nếu app chết đúng lúc.
+> **Cập nhật (2026-07-29):** Stage 8.4 đã bỏ batching 200ms/100 ký tự — xem
+> [08-STAGE-RUN-ENGINE.md](done/08-STAGE-RUN-ENGINE.md). Mỗi `text_delta` giờ flush
+> `PartialOutput` **ngay khi tới**, không còn buffer nào chờ trong bộ nhớ giữa hai lần ghi.
+> Cửa sổ mất dữ liệu ≤ 200ms nêu dưới đây **không còn tồn tại** cho `text_delta` — vẫn giữ
+> nguyên bảng này cho các event khác vốn đã luôn ghi ngay (`tool_start`, `error`...), và cho
+> `OrphanedRunCleaner` (8.7) vẫn cần để xử lý trường hợp instance chết hẳn giữa hai lần ghi
+> (khác với "buffer chưa flush" — đó là do timeout heartbeat, không phải do batching).
 
 | Lớp bảo vệ | Cách làm |
 |---|---|
-| Flush trước mọi event quan trọng | Gặp `tool_start`, `plan_*`, `error`, `run_completed` → flush buffer **trước** |
-| Cập nhật `PartialOutput` cùng nhịp flush | `OrphanedRunCleaner` (8.7) cứu được tối đa 200ms nội dung |
-| Flush khi app shutdown | Đăng ký `IHostApplicationLifetime.ApplicationStopping` → flush mọi buffer |
-| Chấp nhận mất ≤ 200ms | Ghi rõ trong tài liệu; đây là đánh đổi có ý thức với hiệu năng |
+| Flush ngay mỗi `text_delta` | Không batching — xem 08-STAGE-RUN-ENGINE.md §8.4 |
+| Flush trước mọi event quan trọng | Gặp `tool_start`, `plan_*`, `error`, `run_completed` → ghi ngay, không đổi |
+| Flush khi app shutdown | Đăng ký `IHostApplicationLifetime.ApplicationStopping` → không còn buffer nào cần flush thêm |
 
 ---
 

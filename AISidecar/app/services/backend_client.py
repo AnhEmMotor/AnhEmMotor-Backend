@@ -1,3 +1,4 @@
+import json
 import logging
 
 import httpx
@@ -33,6 +34,8 @@ class BackendClient:
             raise ForbiddenError(path)
         if resp.status_code >= 400:
             raise BackendError(path, resp.status_code)
+        if not resp.content:
+            return {}
         return resp.json()
 
     async def get_context(self, session_id: str, message: str,
@@ -52,3 +55,8 @@ class BackendClient:
     async def pull_pending_steering(self, run_id: str) -> list[dict]:
         result = await self._post(f"/internal/chat/runs/{run_id}/pull-steering", {})
         return result if isinstance(result, list) else []
+
+    async def update_routing_context(self, session_id: str, routing_context: dict) -> None:
+        await self._post(f"/internal/chat/sessions/{session_id}/routing-context", {
+            "routingContext": json.dumps(routing_context, ensure_ascii=False, default=str),
+        })

@@ -75,3 +75,12 @@ async def test_call_tool_doi_key_snake_case_sang_camel_case(backend_client):
     sent_body = route.calls[0].request.content
     import json
     assert json.loads(sent_body) == {"orderId": 1024, "fromDate": "2026-07-01"}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_update_routing_context_khong_loi_khi_response_rong(backend_client):
+    respx.post("http://testhost:5000/internal/chat/sessions/s1/routing-context").mock(
+        return_value=httpx.Response(200)
+    )
+    await backend_client.update_routing_context("s1", {"lastModules": ["sales"]})

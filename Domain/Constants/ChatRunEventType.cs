@@ -14,4 +14,5 @@ public static class ChatRunEventType
     public const string TurnBoundary = "turn_boundary";
     public const string ToolStart = "tool_start";
     public const string ToolEnd = "tool_end";
+    public const string MessageCorrection = "message_correction";
 }

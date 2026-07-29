@@ -11,12 +11,25 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from pydantic import ValidationError
 
+from app.core.errors import ForbiddenError
 from app.core.llm import get_llm
+from app.guardrails.tool_guard import (
+    DEFAULT_TOOL_BUDGET,
+    call_signature,
+    check_output,
+    check_tool_call,
+    sanitize_tool_result,
+    wrap_tool_result,
+)
 from app.services.backend_client import BackendClient
 from app.services.chat_tools import build_tools, describe_args
+from app.services.routing import resolve_modules
+from app.tools.registry import build_tool_scope
 
 STEERING_POLL_INTERVAL_SECONDS = 0.7
 MAX_TOOL_TURNS = 8
+
+GUARDRAIL_STATE_KEY = "permissions"
 
 
 class AgentState(TypedDict):
@@ -29,6 +42,25 @@ class AgentState(TypedDict):
     cancelled: bool
     tool_turns: int
     tool_limit_reached: bool
+    permissions: list[str]
+    allowed_tool_names: set[str]
+    tool_budget: int
+    tool_call_count: int
+    call_signatures: set[str]
+    had_forbidden_tool: bool
+    plan_approved: bool
+    history: list[dict]
+    routing_context: dict
+    scoped_modules: list[str]
+    expanded_modules: set[str]
+    current_plan_step: dict | None
+
+
+def _latest_human_text(messages) -> str:
+    for msg in reversed(messages or []):
+        if isinstance(msg, HumanMessage):
+            return msg.content
+    return ""
 
 
 def build_steering_message(item: dict) -> HumanMessage:
@@ -50,25 +82,55 @@ async def absorb_steering_node(state: AgentState) -> dict:
         client = BackendClient(state["auth_header"])
         pending = await client.pull_pending_steering(state["run_id"])
 
+    scoping = GUARDRAIL_STATE_KEY in state
+    routing_ctx = state.get("routing_context") or {}
+    history = state.get("history") or []
+    updates = {}
+
     if not pending:
-        return {"absorbed_count": 0, "carried_steering": []}
+        if scoping and state.get("scoped_modules") is None:
+            query = _latest_human_text(state.get("messages"))
+            updates["scoped_modules"] = await resolve_modules(query, routing_ctx, history)
+            updates["expanded_modules"] = set()
+        return {"absorbed_count": 0, "carried_steering": [], **updates}
 
     writer = get_stream_writer()
     writer(("turn_boundary", ""))
     new_messages = [build_steering_message(item) for item in pending]
+    modes = {item["mode"] for item in pending}
     for item in pending:
         if item["mode"] == "interrupt":
             writer(("run_redirected", "user_correction"))
 
-    return {"messages": new_messages, "absorbed_count": len(pending), "carried_steering": []}
+    if scoping:
+        if "interrupt" in modes:
+            updates["scoped_modules"] = await resolve_modules(pending[-1]["content"], routing_ctx, history)
+            updates["expanded_modules"] = set()
+        else:
+            extra = await resolve_modules(pending[-1]["content"], routing_ctx, history)
+            current = state.get("scoped_modules") or []
+            updates["scoped_modules"] = list(dict.fromkeys([*current, *extra]))[:3]
+
+    return {"messages": new_messages, "absorbed_count": len(pending), "carried_steering": [], **updates}
 
 
 async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
     writer = get_stream_writer()
     client = BackendClient(state["auth_header"])
     llm = get_llm(temperature=0.3)
+    updates = {}
+
+    all_tools = build_tools(client)
+    scoping = GUARDRAIL_STATE_KEY in state
+    if scoping:
+        allowed_names = {spec.name for spec in build_tool_scope(state)}
+        tools = [t for t in all_tools if t.name in allowed_names]
+        updates["allowed_tool_names"] = allowed_names
+    else:
+        tools = all_tools
+
     if hasattr(llm, "bind_tools"):
-        llm = llm.bind_tools(build_tools(client))
+        llm = llm.bind_tools(tools)
     cancel_event = config.get("configurable", {}).get("cancel_event")
 
     full = None
@@ -101,10 +163,26 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
     else:
         result_message = full
 
+    if scoping and not getattr(result_message, "tool_calls", None):
+        guard = check_output(result_message.content or "", {
+            "had_forbidden_tool": state.get("had_forbidden_tool", False),
+            "tool_call_count": state.get("tool_call_count", 0),
+        })
+        if guard.action == "block":
+            result_message = AIMessage(content="Không thể trả lời yêu cầu này.")
+            writer(("message_correction", result_message.content))
+        elif guard.action == "rewrite":
+            result_message = AIMessage(content=(
+                "Tôi không có đủ quyền hoặc công cụ để tra dữ liệu này. "
+                "Vui lòng liên hệ quản trị viên nếu bạn cần được cấp thêm quyền."
+            ))
+            writer(("message_correction", result_message.content))
+
     return {
         "turns": state.get("turns", 0) + 1,
         "carried_steering": carried,
         "messages": [result_message],
+        **updates,
     }
 
 
@@ -124,29 +202,74 @@ async def call_tools_node(state: AgentState) -> dict:
     client = BackendClient(state["auth_header"])
     tools_by_name = {tool.name: tool for tool in build_tools(client)}
 
+    guarding = "allowed_tool_names" in state
+    call_signatures = set(state.get("call_signatures") or set())
+    tool_call_count = state.get("tool_call_count", 0)
+    had_forbidden_tool = state.get("had_forbidden_tool", False)
+
     result_messages = []
     for tool_call in tool_calls:
-        summary = describe_args(tool_call["name"], tool_call["args"])
-        writer(("tool_start", json.dumps({"name": tool_call["name"], "summary": summary}, ensure_ascii=False)))
-        tool = tools_by_name.get(tool_call["name"])
+        name = tool_call["name"]
+        args = dict(tool_call["args"])
+        summary = describe_args(name, args)
+        writer(("tool_start", json.dumps({"name": name, "summary": summary}, ensure_ascii=False)))
+
+        if guarding:
+            guard = check_tool_call(name, args, {
+                "allowed_tool_names": state["allowed_tool_names"],
+                "tool_call_count": tool_call_count,
+                "tool_budget": state.get("tool_budget", DEFAULT_TOOL_BUDGET),
+                "call_signatures": call_signatures,
+                "is_write": False,
+                "plan_approved": state.get("plan_approved", False),
+            })
+            if guard.action != "allow":
+                result_messages.append(ToolMessage(
+                    content=json.dumps({"error": guard.message}, ensure_ascii=False),
+                    tool_call_id=tool_call["id"],
+                ))
+                writer(("tool_end", json.dumps({"name": name}, ensure_ascii=False)))
+                writer(("guardrail_blocked", json.dumps(
+                    {"tool": name, "reason": guard.message}, ensure_ascii=False)))
+                continue
+            args = guard.args
+            call_signatures.add(call_signature(name, args))
+            tool_call_count += 1
+
+        tool = tools_by_name.get(name)
         try:
             if tool is None:
-                raise ValueError(f"Unknown tool: {tool_call['name']}")
-            result = await tool.ainvoke(tool_call["args"])
+                raise ValueError(f"Unknown tool: {name}")
+            result = await tool.ainvoke(args)
+            if guarding:
+                result, flagged = sanitize_tool_result(result)
+                if flagged:
+                    writer(("guardrail_blocked", json.dumps(
+                        {"tool": name, "reason": "injection_detected"}, ensure_ascii=False)))
             content = result if isinstance(result, str) else json.dumps(result, ensure_ascii=False)
+            if guarding:
+                content = wrap_tool_result(name, content)
+        except ForbiddenError:
+            had_forbidden_tool = True
+            content = json.dumps({"error": "Bạn không có quyền truy cập dữ liệu này."}, ensure_ascii=False)
         except ValidationError as exc:
             bad_fields = ", ".join(e["loc"][0] for e in exc.errors() if e["loc"])
             content = json.dumps({
-                "error": f"Tham số truyền vào tool '{tool_call['name']}' sai kiểu dữ liệu ở field: {bad_fields}. "
+                "error": f"Tham số truyền vào tool '{name}' sai kiểu dữ liệu ở field: {bad_fields}. "
                          "Mỗi field phải là giá trị đơn giản (chuỗi/số), KHÔNG lồng object. Hãy gọi lại tool này "
                          "với đúng kiểu dữ liệu như mô tả tool.",
             }, ensure_ascii=False)
         except Exception as exc:
             content = json.dumps({"error": str(exc)}, ensure_ascii=False)
         result_messages.append(ToolMessage(content=content, tool_call_id=tool_call["id"]))
-        writer(("tool_end", json.dumps({"name": tool_call["name"]}, ensure_ascii=False)))
+        writer(("tool_end", json.dumps({"name": name}, ensure_ascii=False)))
 
-    return {"tool_turns": tool_turns, "tool_limit_reached": False, "messages": result_messages}
+    updates = {"tool_turns": tool_turns, "tool_limit_reached": False, "messages": result_messages}
+    if guarding:
+        updates["call_signatures"] = call_signatures
+        updates["tool_call_count"] = tool_call_count
+        updates["had_forbidden_tool"] = had_forbidden_tool
+    return updates
 
 
 def route_after_absorb(state: AgentState) -> str:

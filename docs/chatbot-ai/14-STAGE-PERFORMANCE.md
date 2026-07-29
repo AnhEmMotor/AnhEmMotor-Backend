@@ -249,7 +249,11 @@ var permsTask   = GetPermissionsAsync(...);
 await Task.WhenAll(contextTask, historyTask, permsTask);
 ```
 
-Và ghi `ChatRunEvent` không được chặn stream — dùng batching như Stage 8.4 đã nêu.
+Và ghi `ChatRunEvent` không được chặn stream. **Không dùng batching** (Stage 8.4 đã bỏ —
+quyết định 2026-07-29: batching làm chữ hiện "nhảy cục", ưu tiên tự nhiên hơn số lần ghi DB).
+Nếu tần suất ghi DB thật sự thành nút thắt, tối ưu đúng hướng là giảm chi phí mỗi lần ghi
+(batch insert phía driver, async fire-and-forget có kiểm soát...), **không phải** gộp nhiều
+`text_delta` thành một trước khi hiển thị cho user.
 
 ---
 

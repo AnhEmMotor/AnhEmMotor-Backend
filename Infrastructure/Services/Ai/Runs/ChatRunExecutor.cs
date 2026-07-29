@@ -15,11 +15,9 @@ public class ChatRunExecutor(
     IChatRunCancellationRegistry cancellationRegistry,
     ILogger<ChatRunExecutor> logger) : BackgroundService
 {
-    // Batching theo đúng thiết kế 08-STAGE-RUN-ENGINE.md mục "Cân nhắc hiệu năng": flush mỗi
-    // 100ms HOẶC 100 ký tự, tuỳ điều kiện nào tới trước — thiếu điều kiện ký tự sẽ khiến 1 lần
-    // flush gom quá nhiều chữ nếu sidecar đẩy dữ liệu nhanh, làm FE thấy "nhảy cục" thay vì mượt.
-    private const int FlushIntervalMs = 100;
-    private const int FlushCharThreshold = 100;
+    // Không batching text_delta — forward ngay từng chunk model sinh ra, nhanh nhất có thể tới
+    // FE, đúng tốc độ AI sinh token. Đánh đổi: nhiều lần ghi DB/SignalR hơn khi model trả chunk
+    // nhỏ; nếu cần tối ưu lại, đó là việc của Stage 14 (Performance), không phải chặn tự nhiên.
     private readonly SemaphoreSlim _semaphore = new(10); // 10 concurrent runs
     private readonly ConcurrentDictionary<Guid, Task> _inFlightRuns = new();
 
@@ -53,8 +51,8 @@ public class ChatRunExecutor(
     }
 
     // Host gọi StopAsync khi app shutdown (ApplicationStopping) — đợi các run đang chạy
-    // huỷ + flush buffer (catch OperationCanceledException ở ProcessRunAsync) trước khi thoát,
-    // tránh mất tối đa 200ms nội dung đang trong chunkBuffer.
+    // huỷ xong (catch OperationCanceledException ở ProcessRunAsync) trước khi thoát. Không còn
+    // buffer nội bộ để mất vì mỗi text_delta đã được ghi ngay khi tới.
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await base.StopAsync(cancellationToken);
@@ -76,7 +74,6 @@ public class ChatRunExecutor(
 
         // Khai báo ngoài try để catch (khi bị huỷ giữa chừng) vẫn lưu được phần đã sinh ra.
         var fullOutput = new StringBuilder();
-        var chunkBuffer = new StringBuilder();
         var segmentStartedAt = DateTime.UtcNow;
 
         try
@@ -91,7 +88,6 @@ public class ChatRunExecutor(
             var token = tokenStore.Take(runId);
             var stream = streamClient.StreamAsync(runId, run.SessionId, run.UserMessage, token, runCts.Token);
 
-            var lastFlush = DateTime.UtcNow;
             var lastHeartbeat = DateTime.UtcNow;
             segmentStartedAt = DateTime.UtcNow;
 
@@ -101,43 +97,30 @@ public class ChatRunExecutor(
 
                 if (evt.Type == ChatRunEventType.TextDelta)
                 {
-                    var content = evt.Payload;
-                    fullOutput.Append(content);
-                    chunkBuffer.Append(content);
-
-                    if (chunkBuffer.Length >= FlushCharThreshold
-                        || (DateTime.UtcNow - lastFlush).TotalMilliseconds >= FlushIntervalMs)
-                    {
-                        var chunkToFlush = chunkBuffer.ToString();
-                        if (!string.IsNullOrEmpty(chunkToFlush))
-                        {
-                            await writer.FlushPartialOutputAsync(runId, fullOutput.ToString());
-                            await writer.AppendAsync(runId, evt.Type, chunkToFlush);
-                            chunkBuffer.Clear();
-                        }
-                        lastFlush = DateTime.UtcNow;
-                    }
+                    fullOutput.Append(evt.Payload);
+                    await writer.FlushPartialOutputAsync(runId, fullOutput.ToString());
+                    await writer.AppendAsync(runId, evt.Type, evt.Payload);
                 }
-                else
+                else if (evt.Type == ChatRunEventType.TurnBoundary)
                 {
-                    if (chunkBuffer.Length > 0)
-                    {
-                        await writer.FlushPartialOutputAsync(runId, fullOutput.ToString());
-                        await writer.AppendAsync(runId, ChatRunEventType.TextDelta, chunkBuffer.ToString());
-                        chunkBuffer.Clear();
-                    }
-
-                    if (evt.Type == ChatRunEventType.TurnBoundary)
-                    {
-                        await writer.AppendSegmentAsync(runId, fullOutput.ToString(), segmentStartedAt);
-                        fullOutput.Clear();
-                        await writer.FlushPartialOutputAsync(runId, "");
-                        segmentStartedAt = DateTime.UtcNow;
-                    }
-                    else if (evt.Type != "done")
-                    {
-                        await writer.AppendAsync(runId, evt.Type, evt.Payload);
-                    }
+                    await writer.AppendSegmentAsync(runId, fullOutput.ToString(), segmentStartedAt);
+                    fullOutput.Clear();
+                    await writer.FlushPartialOutputAsync(runId, "");
+                    segmentStartedAt = DateTime.UtcNow;
+                }
+                else if (evt.Type == ChatRunEventType.MessageCorrection)
+                {
+                    // Guardrail (13.7) phát hiện câu trả lời đã stream sai sau khi sinh xong —
+                    // thay TOÀN BỘ nội dung đoạn hiện tại, không phải append, để cả lịch sử lưu
+                    // và FE hiển thị đều dùng bản đã sửa, không chỉ FE.
+                    fullOutput.Clear();
+                    fullOutput.Append(evt.Payload);
+                    await writer.FlushPartialOutputAsync(runId, fullOutput.ToString());
+                    await writer.AppendAsync(runId, evt.Type, evt.Payload);
+                }
+                else if (evt.Type != "done")
+                {
+                    await writer.AppendAsync(runId, evt.Type, evt.Payload);
                 }
 
                 if ((DateTime.UtcNow - lastHeartbeat).TotalSeconds >= 15)
@@ -145,12 +128,6 @@ public class ChatRunExecutor(
                     await writer.UpdateHeartbeatAsync(runId);
                     lastHeartbeat = DateTime.UtcNow;
                 }
-            }
-
-            if (chunkBuffer.Length > 0)
-            {
-                await writer.FlushPartialOutputAsync(runId, fullOutput.ToString());
-                await writer.AppendAsync(runId, ChatRunEventType.TextDelta, chunkBuffer.ToString());
             }
 
             if (runCts.Token.IsCancellationRequested)

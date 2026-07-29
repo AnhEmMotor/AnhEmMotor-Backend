@@ -23,7 +23,12 @@ def test_no_comments_or_docstrings_in_functions():
             source = f.read()
 
         tree = ast.parse(source)
-        functions = [n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+
+        if ast.get_docstring(tree):
+            errors.append(f"{filepath}: Module has a docstring at line 1")
+
+        functions = [n for n in ast.walk(tree)
+                     if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
 
         for func in functions:
             if ast.get_docstring(func):

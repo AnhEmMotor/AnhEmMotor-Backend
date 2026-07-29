@@ -291,16 +291,22 @@ public async Task<long> AppendAsync(Guid runId, string type, object payload)
 }
 ```
 
-> **Cân nhắc hiệu năng:** `text_delta` có thể phát sinh hàng trăm event/giây → ghi DB từng cái là
-> quá tải. **Giải pháp: batching.** Gom `text_delta` trong bộ đệm, flush xuống DB mỗi
-> **200ms hoặc 100 ký tự**, tuỳ điều kiện nào tới trước. Các event khác (`tool_start`,
-> `plan_draft`, `error`...) ghi ngay lập tức vì chúng hiếm và quan trọng.
-> Realtime vẫn publish từng chunk qua `IChatRunEventBus` để FE mượt — DB chỉ là nơi để tua lại.
+> **Quyết định lại (2026-07-29): KHÔNG batching `text_delta`.** Bản đầu có gom `text_delta`
+> trong bộ đệm, flush mỗi 200ms hoặc 100 ký tự để giảm tải ghi DB. Thực tế dùng cho thấy điều
+> này làm chữ hiện ra "nhảy cục" (một lúc cả chục ký tự) thay vì chạy tự nhiên theo đúng tốc độ
+> model sinh token — trải nghiệm tệ hơn phần hiệu năng tiết kiệm được.
+> **`ChatRunExecutor` giờ forward và flush NGAY từng `text_delta` model sinh ra**, không gom,
+> không delay nhân tạo. Các event khác (`tool_start`, `run_redirected`, `message_correction`...)
+> vẫn ghi ngay lập tức như cũ.
+> Đánh đổi: nhiều lần ghi DB/SignalR hơn nếu model trả chunk nhỏ (token-by-token). Nếu sau này
+> đo được đây là nút thắt hiệu năng thật (Stage 14), **giải pháp đúng không phải là quay lại
+> gom-theo-thời-gian** (làm mất tự nhiên) — cân nhắc giảm tần suất ghi DB mà vẫn giữ
+> `IChatRunEventBus` publish real-time mỗi chunk cho FE, tách hẳn "tốc độ ghi DB" khỏi
+> "tốc độ hiển thị".
 
-> ⚠️ **Batching tạo cửa sổ mất dữ liệu ≤ 200ms nếu app chết đúng lúc.**
-> Ba lớp bảo vệ bắt buộc — xem [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md) mục 18.5:
-> flush trước mọi event quan trọng, cập nhật `PartialOutput` cùng nhịp flush, và flush khi
-> `ApplicationStopping`.
+> **Vì không batching, cửa sổ mất dữ liệu khi app chết giữa chừng gần như bằng 0** — mỗi
+> `text_delta` đã ghi `PartialOutput` ngay khi tới, không còn gì "đang chờ flush" trong bộ nhớ.
+> Mục 18.5 ở [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md) đã cập nhật theo quyết định này.
 
 ---
 

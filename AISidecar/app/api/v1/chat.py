@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import StreamingResponse
@@ -11,6 +12,7 @@ from app.api.deps import verify_internal_secret
 from app.schemas.chat import ChatRequest, GenerateTitleRequest
 from app.services.backend_client import BackendClient
 from app.services.prompt_builder import build_system_message, build_history_messages
+from app.services.routing import expire_if_stale, extract_entities
 
 logger = logging.getLogger(__name__)
 
@@ -44,11 +46,19 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
         raise HTTPException(status_code=401, detail="Missing Authorization header")
 
     context = None
+    client = BackendClient(auth_header)
     try:
-        client = BackendClient(auth_header)
         context = await client.get_context(chat_req.session_id, chat_req.message)
     except Exception:
         logger.warning("Failed to fetch context for session %s", chat_req.session_id, exc_info=True)
+
+    routing_context = {}
+    if context:
+        try:
+            routing_context = json.loads(context.get("routingContext") or "{}")
+        except ValueError:
+            routing_context = {}
+        routing_context = expire_if_stale(routing_context, now=datetime.now().isoformat())
 
     initial_state = {
         "messages": [
@@ -63,6 +73,9 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
         "carried_steering": [],
         "cancelled": False,
         "tool_turns": 0,
+        "permissions": (context or {}).get("permissions") or [],
+        "history": (context or {}).get("history") or [],
+        "routing_context": routing_context,
     }
 
     cancel_event = asyncio.Event()
@@ -81,5 +94,30 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
             yield _event("error", "Đã có lỗi xảy ra khi kết nối tới AI. Vui lòng thử lại.")
         finally:
             _cancel_events.pop(chat_req.run_id, None)
+            await _persist_routing_context(client, graph, config, chat_req.session_id, routing_context)
 
     return StreamingResponse(stream_generator(), media_type="application/x-ndjson")
+
+
+async def _persist_routing_context(client: BackendClient, graph, config, session_id: str, previous: dict) -> None:
+    try:
+        final = graph.get_state(config).values
+    except Exception:
+        return
+    tool_calls_made = [
+        tc for m in (final.get("messages") or [])
+        for tc in (getattr(m, "tool_calls", None) or [])
+    ]
+    if not tool_calls_made and not final.get("scoped_modules"):
+        return
+    entities = {**(previous.get("entities") or {}), **extract_entities(tool_calls_made)}
+    updated = {
+        "entities": entities,
+        "lastModules": final.get("scoped_modules") or previous.get("lastModules") or [],
+        "updatedAt": datetime.now().isoformat(),
+        "turnCount": (previous.get("turnCount") or 0) + 1,
+    }
+    try:
+        await client.update_routing_context(session_id, updated)
+    except Exception:
+        logger.warning("Failed to persist routing context for session %s", session_id, exc_info=True)

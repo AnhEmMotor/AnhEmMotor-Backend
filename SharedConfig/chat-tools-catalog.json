@@ -3,6 +3,9 @@
     "name": "search_products",
     "path": "products/search",
     "label": "Tìm sản phẩm",
+    "module": "product",
+    "required_permissions": ["Permissions.Order.ProductManagement.View"],
+    "is_write": false,
     "description": "Tìm kiếm sản phẩm trong hệ thống theo từ khóa (có thể gồm tên thương hiệu/danh mục trong từ khóa). DÙNG KHI người dùng hỏi 'có sản phẩm nào...', 'tìm giúp tôi...', 'shop có bán... không'. KHÔNG dùng để tra tồn kho hay giá của MỘT sản phẩm cụ thể đã biết ID — dùng get_product_stock cho việc đó (kết quả search_products trả về product_id để dùng tiếp cho get_product_stock). Ví dụ: 'Shop có nhớt Motul không?', 'Tìm phụ tùng Honda Wave'.",
     "args": [
       { "name": "keyword", "type": "string", "required": false, "default": "", "label": "Từ khóa", "description": "Từ khóa tìm kiếm tên sản phẩm dạng CHUỖI VĂN BẢN đơn giản (không phải object), có thể gồm cả tên thương hiệu/danh mục trong câu, ví dụ 'nhớt Motul', 'lốp Michelin', 'phụ tùng Honda Wave'. Để trống '' nếu không lọc theo từ khóa." },
@@ -13,6 +16,9 @@
     "name": "get_product_stock",
     "path": "products/stock",
     "label": "Tra tồn kho",
+    "module": "inventory",
+    "required_permissions": ["Permissions.Warehouse.ProductManagement.View"],
+    "is_write": false,
     "description": "Tra số lượng tồn kho hiện tại của một sản phẩm cụ thể, theo product_id. DÙNG KHI người dùng hỏi 'còn hàng không', 'còn bao nhiêu cái', 'tồn kho sản phẩm X' VÀ đã biết product_id (nếu chưa biết, gọi search_products trước để tìm product_id rồi mới gọi tool này). KHÔNG dùng để tìm danh sách nhiều sản phẩm — dùng search_products cho việc đó. Ví dụ: 'Lốp Michelin còn tồn kho không?' → gọi search_products trước, rồi get_product_stock.",
     "args": [
       { "name": "product_id", "type": "integer", "required": true, "label": "Mã sản phẩm", "description": "ID sản phẩm cần tra tồn kho. Nếu chưa biết ID, gọi search_products trước để lấy product_id." }
@@ -22,6 +28,9 @@
     "name": "get_low_stock_products",
     "path": "products/low-stock",
     "label": "Tra sản phẩm sắp hết hàng",
+    "module": "inventory",
+    "required_permissions": ["Permissions.Warehouse.ProductManagement.View"],
+    "is_write": false,
     "description": "Lấy danh sách sản phẩm sắp hết hàng (tồn kho thấp) để cảnh báo nhập thêm hàng. DÙNG KHI người dùng hỏi 'sản phẩm nào sắp hết hàng', 'cần nhập thêm gì', 'kiểm tra hàng tồn thấp'. KHÔNG dùng khi người dùng hỏi tồn kho của MỘT sản phẩm cụ thể — dùng get_product_stock cho việc đó. Ví dụ: 'Có sản phẩm nào sắp hết hàng không?', 'Danh sách hàng cần nhập thêm'.",
     "args": [
       { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng sản phẩm tối đa muốn trả về. Ngưỡng 'sắp hết hàng' do hệ thống quyết định, không tự đặt được." }
@@ -31,6 +40,9 @@
     "name": "get_order_status",
     "path": "orders/status",
     "label": "Tra đơn hàng",
+    "module": "sales",
+    "required_permissions": ["Permissions.Order.OrderManagement.View"],
+    "is_write": false,
     "description": "Tra cứu trạng thái và thông tin của một đơn hàng theo ID đơn hàng (số nguyên). DÙNG KHI người dùng hỏi 'đơn hàng #1024 tới đâu rồi', 'đơn này đã giao chưa' VÀ có nhắc số ID đơn hàng. KHÔNG dùng cho câu hỏi về doanh thu hay thống kê nhiều đơn — dùng get_sales_summary cho việc đó. Ví dụ: 'Đơn hàng 1024 đang ở trạng thái nào?'.",
     "args": [
       { "name": "order_id", "type": "integer", "required": true, "label": "Mã đơn hàng", "description": "ID đơn hàng cần tra cứu trạng thái, ví dụ 1024." }
@@ -40,6 +52,9 @@
     "name": "get_sales_summary",
     "path": "analytics/sales",
     "label": "Tra doanh thu",
+    "module": "sales",
+    "required_permissions": ["Permissions.Admin.DashboardManagement.View"],
+    "is_write": false,
     "description": "Lấy tổng doanh thu và số lượng đơn hàng trong một khoảng thời gian. DÙNG KHI người dùng hỏi 'doanh thu tháng này', 'bán được bao nhiêu đơn trong tuần qua'. KHÔNG dùng để tra một đơn hàng cụ thể hoặc top sản phẩm bán chạy — dùng get_order_status hoặc get_top_selling cho việc đó. Ví dụ: 'Doanh thu từ 01/07 đến 28/07 là bao nhiêu?'.",
     "args": [
       { "name": "from_date", "type": "string", "required": true, "label": "Từ ngày", "description": "Ngày bắt đầu khoảng thời gian, dạng YYYY-MM-DD." },
@@ -50,6 +65,9 @@
     "name": "get_top_selling",
     "path": "analytics/top-selling",
     "label": "Tra sản phẩm bán chạy",
+    "module": "sales",
+    "required_permissions": ["Permissions.Admin.DashboardManagement.View"],
+    "is_write": false,
     "description": "Lấy danh sách các sản phẩm bán chạy nhất (top N) trong một khoảng thời gian. DÙNG KHI người dùng hỏi 'sản phẩm nào bán chạy nhất', 'top 5 sản phẩm bán tốt tháng này'. KHÔNG dùng cho tổng doanh thu chung — dùng get_sales_summary cho việc đó. Ví dụ: 'Top 5 sản phẩm bán chạy nhất tháng 7 là gì?'.",
     "args": [
       { "name": "from_date", "type": "string", "required": false, "default": "", "label": "Từ ngày", "description": "Ngày bắt đầu khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống '' để lấy 30 ngày gần nhất." },
