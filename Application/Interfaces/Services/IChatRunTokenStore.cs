@@ -2,6 +2,6 @@ namespace Application.Interfaces.Services;
 
 public interface IChatRunTokenStore
 {
-    void Store(Guid runId, string token);
-    string Take(Guid runId);
+    public void Store(Guid runId, string token);
+    public string Take(Guid runId);
 }

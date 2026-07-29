@@ -1,11 +1,11 @@
 using Application.Interfaces.Services.Shipping;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers;
 
 [Route("api/shipping-location")]
-[ApiController]
-public class ShippingLocationController(IShippingService shippingService) : ControllerBase
+public class ShippingLocationController(IShippingService shippingService) : ApiController
 {
     /// <summary>
     /// Lấy danh sách Tỉnh/Thành phố từ Giao Hàng Nhanh.
@@ -18,11 +18,7 @@ public class ShippingLocationController(IShippingService shippingService) : Cont
     public async Task<IActionResult> GetProvinces(CancellationToken cancellationToken)
     {
         var result = await shippingService.GetProvincesAsync(cancellationToken);
-        if (result.IsFailure)
-        {
-            return BadRequest(result.Error);
-        }
-        return Ok(result.Value);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -36,10 +32,6 @@ public class ShippingLocationController(IShippingService shippingService) : Cont
     public async Task<IActionResult> GetWards(int provinceId, CancellationToken cancellationToken)
     {
         var result = await shippingService.GetWardsAsync(provinceId, cancellationToken);
-        if (result.IsFailure)
-        {
-            return BadRequest(result.Error);
-        }
-        return Ok(result.Value);
+        return HandleResult(result);
     }
 }

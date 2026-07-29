@@ -130,6 +130,7 @@ public static class DependencyInjection
         services.AddSingleton<IChatRunEventBus, ChatRunEventBus>();
         services.AddSingleton<IChatRunCancellationRegistry, ChatRunCancellationRegistry>();
         services.AddSingleton<IChatRunTokenStore, ChatRunTokenStore>();
+        services.AddSingleton<IChatToolCatalogProvider, ChatToolCatalogProvider>();
         services.AddScoped<IChatRunWriter, ChatRunWriter>();
         services.AddScoped<ISidecarStreamClient, SidecarStreamClient>();
         services.AddHostedService<ChatRunExecutor>();

@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Application.Common.Models;
+using Application.DTOs.Chat;
 using Application.Interfaces.Repositories.Chat;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Services;
@@ -37,7 +39,10 @@ public class GetManagerChatSessionHistoryQueryHandler(
                 Role = m.Role.ToString(),
                 Message = m.Message,
                 CreatedAt = m.CreatedAt,
-                IsSteering = m.IsSteering
+                IsSteering = m.IsSteering,
+                ToolCalls = string.IsNullOrEmpty(m.ToolCallsJson)
+                    ? null
+                    : JsonSerializer.Deserialize<List<ChatMessageToolCallDto>>(m.ToolCallsJson)
             }).ToList();
 
         return dtos;

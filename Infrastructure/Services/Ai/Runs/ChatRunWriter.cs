@@ -10,8 +10,48 @@ namespace Infrastructure.Services.Ai.Runs;
 
 public class ChatRunWriter(
     ApplicationDBContext context,
-    IChatRunEventBus eventBus) : IChatRunWriter
+    IChatRunEventBus eventBus,
+    IChatToolCatalogProvider catalogProvider) : IChatRunWriter
 {
+    // Chặn trên bằng "bây giờ" — nếu không, tool_start của ĐOẠN KẾ TIẾP (chạy sau khi hàm này
+    // được gọi) sẽ vô tình bị gán nhầm vào ChatMessage của đoạn trước do điều kiện lọc hở phía trên.
+    private async Task<string?> BuildToolCallsJsonAsync(Guid runId, DateTime segmentStartedAt)
+    {
+        var segmentEndedAt = DateTime.UtcNow;
+        var payloads = await context.ChatRunEvents
+            .Where(e => e.RunId == runId && e.Type == ChatRunEventType.ToolStart
+                        && e.CreatedAt >= segmentStartedAt && e.CreatedAt <= segmentEndedAt)
+            .OrderBy(e => e.Seq)
+            .Select(e => e.Payload)
+            .ToListAsync();
+        if (payloads.Count == 0) return null;
+
+        var labelByName = catalogProvider.GetCatalog().ToDictionary(e => e.Name, e => e.Label);
+        var calls = payloads.Select(p =>
+        {
+            var (name, summary) = ParseToolStartPayload(p);
+            return new ChatMessageToolCallDto(name, labelByName.GetValueOrDefault(name, name), summary);
+        });
+        return JsonSerializer.Serialize(calls);
+    }
+
+    // tool_start payload là JSON {"name":..., "summary":...} — fallback về string thô làm tên
+    // tool nếu gặp payload cũ (trước khi bổ sung summary) hoặc payload không hợp lệ.
+    private static (string Name, string? Summary) ParseToolStartPayload(string payload)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(payload);
+            var name = doc.RootElement.TryGetProperty("name", out var n) ? n.GetString() ?? payload : payload;
+            var summary = doc.RootElement.TryGetProperty("summary", out var s) ? s.GetString() : null;
+            return (name, string.IsNullOrEmpty(summary) ? null : summary);
+        }
+        catch (JsonException)
+        {
+            return (payload, null);
+        }
+    }
+
     public async Task<long> AppendAsync(Guid runId, string type, object payload)
     {
         var payloadStr = payload is string s ? s : JsonSerializer.Serialize(payload);
@@ -61,7 +101,7 @@ public class ChatRunWriter(
                 .SetProperty(r => r.OwnerInstanceId, instanceId));
     }
 
-    public async Task CompleteAsync(Guid runId, string finalOutput)
+    public async Task CompleteAsync(Guid runId, string finalOutput, DateTime segmentStartedAt)
     {
         var run = await context.ChatRuns.FirstOrDefaultAsync(r => r.Id == runId);
         if (run == null) return;
@@ -78,7 +118,8 @@ public class ChatRunWriter(
                 Role = ChatRole.Ai,
                 Message = finalOutput,
                 RunId = runId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                ToolCallsJson = await BuildToolCallsJsonAsync(runId, segmentStartedAt)
             };
             context.ChatMessages.Add(aiMessage);
         }
@@ -87,7 +128,7 @@ public class ChatRunWriter(
         await AppendAsync(runId, ChatRunEventType.RunCompleted, "");
     }
 
-    public async Task CancelAsync(Guid runId, string finalOutput)
+    public async Task CancelAsync(Guid runId, string finalOutput, DateTime segmentStartedAt)
     {
         var run = await context.ChatRuns.FirstOrDefaultAsync(r => r.Id == runId);
         if (run == null) return;
@@ -104,7 +145,8 @@ public class ChatRunWriter(
                 Role = ChatRole.Ai,
                 Message = finalOutput,
                 RunId = runId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                ToolCallsJson = await BuildToolCallsJsonAsync(runId, segmentStartedAt)
             };
             context.ChatMessages.Add(aiMessage);
         }
@@ -149,7 +191,8 @@ public class ChatRunWriter(
                 Role = ChatRole.Ai,
                 Message = segmentOutput,
                 RunId = runId,
-                CreatedAt = segmentStartedAt
+                CreatedAt = segmentStartedAt,
+                ToolCallsJson = await BuildToolCallsJsonAsync(runId, segmentStartedAt)
             });
             await context.SaveChangesAsync();
         }

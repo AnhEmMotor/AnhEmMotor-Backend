@@ -1,0 +1,67 @@
+import json
+from pathlib import Path
+
+from langchain_core.tools import StructuredTool
+from pydantic import BaseModel, Field, create_model
+
+from app.services.backend_client import BackendClient
+
+SOLUTION_FILE_NAME = "AnhEmMotor-Backend.sln"
+CATALOG_RELATIVE_PATH = Path("SharedConfig") / "chat-tools-catalog.json"
+
+_ARG_TYPES = {"string": str, "integer": int}
+
+
+def _find_repo_root() -> Path:
+    directory = Path(__file__).resolve().parent
+    while directory != directory.parent:
+        if (directory / SOLUTION_FILE_NAME).exists():
+            return directory
+        directory = directory.parent
+    raise FileNotFoundError(f"Không tìm thấy {SOLUTION_FILE_NAME} ở thư mục cha nào của {__file__}.")
+
+
+def load_catalog() -> list[dict]:
+    path = _find_repo_root() / CATALOG_RELATIVE_PATH
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _build_schema(tool_name: str, args: list[dict]) -> type[BaseModel]:
+    fields = {}
+    for arg in args:
+        python_type = _ARG_TYPES[arg["type"]]
+        default = ... if arg.get("required") else arg.get("default")
+        fields[arg["name"]] = (python_type, Field(default, description=arg["description"]))
+    return create_model(f"{tool_name}_Input", **fields)
+
+
+def describe_args(tool_name: str, args: dict) -> str:
+    catalog_by_name = {entry["name"]: entry for entry in load_catalog()}
+    entry = catalog_by_name.get(tool_name)
+    arg_labels = {a["name"]: a["label"] for a in entry["args"]} if entry else {}
+    parts = [
+        f"{arg_labels.get(key, key)}: {value}"
+        for key, value in args.items()
+        if value not in (None, "")
+    ]
+    return ", ".join(parts)
+
+
+def build_tools(backend_client: BackendClient) -> list[StructuredTool]:
+    tools = []
+    for entry in load_catalog():
+        path = entry["path"]
+        schema = _build_schema(entry["name"], entry["args"])
+
+        async def _call(_path=path, **kwargs):
+            payload = {k: v for k, v in kwargs.items() if v != ""}
+            return await backend_client.call_tool(_path, payload)
+
+        tools.append(StructuredTool.from_function(
+            coroutine=_call,
+            name=entry["name"],
+            description=entry["description"],
+            args_schema=schema,
+        ))
+    return tools

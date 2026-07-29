@@ -32,4 +32,8 @@ public class ChatMessage : BaseEntity
     [ForeignKey("Run")]
     public Guid? RunId { get; set; }
     public ChatRun? Run { get; set; }
+
+    /// <summary>Danh sách tool (name+label) đã dùng để sinh ra tin nhắn này, dạng JSON — null nếu không gọi tool nào.</summary>
+    [Column("ToolCallsJson", TypeName = "nvarchar(max)")]
+    public string? ToolCallsJson { get; set; }
 }

@@ -15,6 +15,11 @@ public class ChatRunExecutor(
     IChatRunCancellationRegistry cancellationRegistry,
     ILogger<ChatRunExecutor> logger) : BackgroundService
 {
+    // Batching theo đúng thiết kế 08-STAGE-RUN-ENGINE.md mục "Cân nhắc hiệu năng": flush mỗi
+    // 100ms HOẶC 100 ký tự, tuỳ điều kiện nào tới trước — thiếu điều kiện ký tự sẽ khiến 1 lần
+    // flush gom quá nhiều chữ nếu sidecar đẩy dữ liệu nhanh, làm FE thấy "nhảy cục" thay vì mượt.
+    private const int FlushIntervalMs = 100;
+    private const int FlushCharThreshold = 100;
     private readonly SemaphoreSlim _semaphore = new(10); // 10 concurrent runs
     private readonly ConcurrentDictionary<Guid, Task> _inFlightRuns = new();
 
@@ -41,7 +46,9 @@ public class ChatRunExecutor(
             }, stoppingToken);
 
             _inFlightRuns[runId] = runTask;
-            _ = runTask.ContinueWith(_ => _inFlightRuns.TryRemove(runId, out _), TaskScheduler.Default);
+            _ = runTask.ContinueWith(
+                _ => ((IDictionary<Guid, Task>)_inFlightRuns).Remove(runId),
+                TaskScheduler.Default);
         }
     }
 
@@ -70,6 +77,7 @@ public class ChatRunExecutor(
         // Khai báo ngoài try để catch (khi bị huỷ giữa chừng) vẫn lưu được phần đã sinh ra.
         var fullOutput = new StringBuilder();
         var chunkBuffer = new StringBuilder();
+        var segmentStartedAt = DateTime.UtcNow;
 
         try
         {
@@ -85,7 +93,7 @@ public class ChatRunExecutor(
 
             var lastFlush = DateTime.UtcNow;
             var lastHeartbeat = DateTime.UtcNow;
-            var segmentStartedAt = DateTime.UtcNow;
+            segmentStartedAt = DateTime.UtcNow;
 
             await foreach (var evt in stream.WithCancellation(runCts.Token))
             {
@@ -97,7 +105,8 @@ public class ChatRunExecutor(
                     fullOutput.Append(content);
                     chunkBuffer.Append(content);
 
-                    if ((DateTime.UtcNow - lastFlush).TotalMilliseconds >= 100)
+                    if (chunkBuffer.Length >= FlushCharThreshold
+                        || (DateTime.UtcNow - lastFlush).TotalMilliseconds >= FlushIntervalMs)
                     {
                         var chunkToFlush = chunkBuffer.ToString();
                         if (!string.IsNullOrEmpty(chunkToFlush))
@@ -146,16 +155,16 @@ public class ChatRunExecutor(
 
             if (runCts.Token.IsCancellationRequested)
             {
-                await writer.CancelAsync(runId, fullOutput.ToString());
+                await writer.CancelAsync(runId, fullOutput.ToString(), segmentStartedAt);
             }
             else
             {
-                await writer.CompleteAsync(runId, fullOutput.ToString());
+                await writer.CompleteAsync(runId, fullOutput.ToString(), segmentStartedAt);
             }
         }
         catch (OperationCanceledException)
         {
-            await writer.CancelAsync(runId, fullOutput.ToString());
+            await writer.CancelAsync(runId, fullOutput.ToString(), segmentStartedAt);
         }
         catch (Exception ex)
         {

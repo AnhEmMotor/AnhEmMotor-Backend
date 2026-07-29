@@ -62,6 +62,7 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
         "absorbed_count": 0,
         "carried_steering": [],
         "cancelled": False,
+        "tool_turns": 0,
     }
 
     cancel_event = asyncio.Event()

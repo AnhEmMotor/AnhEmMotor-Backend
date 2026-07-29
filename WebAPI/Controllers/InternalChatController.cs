@@ -40,7 +40,9 @@ public class InternalChatController(
             .FirstOrDefaultAsync(s => s.Id == request.SessionId && s.UserId == userId, cancellationToken);
 
         if (session == null)
+        {
             return NotFound("Session không tồn tại hoặc không thuộc quyền sở hữu.");
+        }
 
         var roles = await userManager.GetRolesAsync(user);
 

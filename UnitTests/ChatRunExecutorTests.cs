@@ -46,8 +46,8 @@ public class ChatRunExecutorTests
 
         string? savedOutputOnCancel = null;
         var cancelled = new TaskCompletionSource();
-        writer.Setup(x => x.CancelAsync(runId, It.IsAny<string>()))
-              .Callback<Guid, string>((_, finalOutput) =>
+        writer.Setup(x => x.CancelAsync(runId, It.IsAny<string>(), It.IsAny<DateTime>()))
+              .Callback<Guid, string, DateTime>((_, finalOutput, _) =>
               {
                   savedOutputOnCancel = finalOutput;
                   cancelled.TrySetResult();
@@ -65,24 +65,24 @@ public class ChatRunExecutorTests
         var cancellationRegistry = new Mock<IChatRunCancellationRegistry>();
         var executor = new ChatRunExecutor(queue, provider, cancellationRegistry.Object, NullLogger<ChatRunExecutor>.Instance);
 
-        await executor.StartAsync(CancellationToken.None);
+        await executor.StartAsync(TestContext.Current.CancellationToken);
         try
         {
-            await queue.EnqueueAsync(runId);
+            await queue.EnqueueAsync(runId, TestContext.Current.CancellationToken);
 
-            var finished = await Task.WhenAny(cancelled.Task, Task.Delay(TimeSpan.FromSeconds(5)));
+            var finished = await Task.WhenAny(cancelled.Task, Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
             finished.Should().Be(cancelled.Task, "CancelAsync phải được gọi trong vòng 5s sau khi stream bị huỷ giữa chừng");
         }
         finally
         {
-            await executor.StopAsync(CancellationToken.None);
+            await executor.StopAsync(TestContext.Current.CancellationToken);
         }
 
         savedOutputOnCancel.Should().Be(
             "Đây là phần đã sinh ra trước khi bị huỷ.",
             "phần AI đã sinh ra trước khi bị huỷ phải được lưu lại, không phải chuỗi rỗng");
 
-        writer.Verify(x => x.CompleteAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
+        writer.Verify(x => x.CompleteAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<DateTime>()), Times.Never);
     }
 
     private static async IAsyncEnumerable<SidecarEvent> StreamWithTurnBoundary()
@@ -123,8 +123,8 @@ public class ChatRunExecutorTests
 
         string? finalSegment = null;
         var completed = new TaskCompletionSource();
-        writer.Setup(x => x.CompleteAsync(runId, It.IsAny<string>()))
-              .Callback<Guid, string>((_, output) =>
+        writer.Setup(x => x.CompleteAsync(runId, It.IsAny<string>(), It.IsAny<DateTime>()))
+              .Callback<Guid, string, DateTime>((_, output, _) =>
               {
                   finalSegment = output;
                   completed.TrySetResult();
@@ -142,17 +142,17 @@ public class ChatRunExecutorTests
         var cancellationRegistry = new Mock<IChatRunCancellationRegistry>();
         var executor = new ChatRunExecutor(queue, provider, cancellationRegistry.Object, NullLogger<ChatRunExecutor>.Instance);
 
-        await executor.StartAsync(CancellationToken.None);
+        await executor.StartAsync(TestContext.Current.CancellationToken);
         try
         {
-            await queue.EnqueueAsync(runId);
+            await queue.EnqueueAsync(runId, TestContext.Current.CancellationToken);
 
-            var finished = await Task.WhenAny(completed.Task, Task.Delay(TimeSpan.FromSeconds(5)));
+            var finished = await Task.WhenAny(completed.Task, Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
             finished.Should().Be(completed.Task, "CompleteAsync phải được gọi sau khi stream kết thúc");
         }
         finally
         {
-            await executor.StopAsync(CancellationToken.None);
+            await executor.StopAsync(TestContext.Current.CancellationToken);
         }
 
         firstSegment.Should().Be("Đoạn 1 phần a. Đoạn 1 phần b.", "đoạn trước ranh giới phải được chốt thành message riêng");

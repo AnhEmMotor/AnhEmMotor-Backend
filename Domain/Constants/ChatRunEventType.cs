@@ -12,4 +12,6 @@ public static class ChatRunEventType
     public const string SteeringApplied = "steering_applied";
     public const string RunRedirected = "run_redirected";
     public const string TurnBoundary = "turn_boundary";
+    public const string ToolStart = "tool_start";
+    public const string ToolEnd = "tool_end";
 }

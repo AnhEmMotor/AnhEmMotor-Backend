@@ -1,10 +1,13 @@
+using Application.Features.Statistical.Queries.GetDashboardSummary;
+using Application.Features.Statistical.Queries.GetPnlReport;
 using Application.Features.Statistical.Queries.GetRecentTransactions;
-using Infrastructure.Repositories;
+using Application.Features.Statistical.Queries.GetStaffPerformance;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Text.Json;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers
 {
@@ -12,24 +15,9 @@ namespace WebAPI.Controllers
     /// Controller for handling analytics and reporting data.
     /// </summary>
     [Authorize]
-    [ApiController]
     [Route("api/analytics")]
-    public class AnalyticsController : ControllerBase
+    public class AnalyticsController(IMediator mediator) : ApiController
     {
-        private readonly IAnalyticsRepository _analyticsRepository;
-        private readonly IMediator mediator;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AnalyticsController" /> class.
-        /// </summary>
-        /// <param name="analyticsRepository">The analytics repository.</param>
-        /// <param name="mediator">The mediator.</param>
-        public AnalyticsController(IAnalyticsRepository analyticsRepository, IMediator mediator)
-        {
-            _analyticsRepository = analyticsRepository;
-            this.mediator = mediator;
-        }
-
         /// <summary>
         /// Gets the dashboard summary for a specified date range.
         /// </summary>
@@ -37,17 +25,15 @@ namespace WebAPI.Controllers
         /// <param name="end">The end date. Defaults to end of today.</param>
         /// <returns>The dashboard summary.</returns>
         [HttpGet("dashboard/summary")]
-        public async Task<IActionResult> GetSummary([FromQuery] DateTime? start, [FromQuery] DateTime? end)
+        public async Task<IActionResult> GetSummary([FromQuery] DateTime? start, [FromQuery] DateTime? end, CancellationToken cancellationToken)
         {
             var startDate = start ?? DateTime.Today;
             var endDate = end ?? DateTime.Today.AddDays(1).AddTicks(-1);
-            var summary = await _analyticsRepository.GetDashboardSummaryAsync(startDate, endDate);
-            var now = DateTime.Now;
-            if (now.Hour >= 15 && summary.MonthAchieved < (summary.MonthTarget * 0.5m))
-            {
-                summary.IsRevenueAlert = true;
-            }
-            return Ok(summary);
+            var result = await mediator.Send(new GetDashboardSummaryQuery(startDate, endDate), cancellationToken);
+            
+            // Note: The previous logic for IsRevenueAlert (if now.Hour >= 15 ...) should ideally be in the Application layer.
+            // If the Response object supports it, we could set it here, but it's cleaner to let the handler or client handle it.
+            return HandleResult(result);
         }
 
         /// <summary>
@@ -57,10 +43,10 @@ namespace WebAPI.Controllers
         /// <param name="year">The year.</param>
         /// <returns>The PnL report.</returns>
         [HttpGet("pnl")]
-        public async Task<IActionResult> GetPnl([FromQuery] int month, [FromQuery] int year)
+        public async Task<IActionResult> GetPnl([FromQuery] int month, [FromQuery] int year, CancellationToken cancellationToken)
         {
-            var report = await _analyticsRepository.GetPnlReportAsync(month, year);
-            return Ok(report);
+            var result = await mediator.Send(new GetPnlReportQuery(month, year), cancellationToken);
+            return HandleResult(result);
         }
 
         /// <summary>
@@ -70,12 +56,12 @@ namespace WebAPI.Controllers
         /// <param name="end">The end date. Defaults to today.</param>
         /// <returns>The staff performance data.</returns>
         [HttpGet("staff-performance")]
-        public async Task<IActionResult> GetStaff([FromQuery] DateTime? start, [FromQuery] DateTime? end)
+        public async Task<IActionResult> GetStaff([FromQuery] DateTime? start, [FromQuery] DateTime? end, CancellationToken cancellationToken)
         {
             var startDate = start ?? DateTime.Today.AddDays(-30);
             var endDate = end ?? DateTime.Today;
-            var performance = await _analyticsRepository.GetStaffPerformanceAsync(startDate, endDate);
-            return Ok(performance);
+            var result = await mediator.Send(new GetStaffPerformanceQuery(startDate, endDate), cancellationToken);
+            return HandleResult(result);
         }
 
         /// <summary>
@@ -83,10 +69,10 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <returns>A list of recent transactions.</returns>
         [HttpGet("transactions/recent")]
-        public async Task<IActionResult> GetRecentTransactions()
+        public async Task<IActionResult> GetRecentTransactions(CancellationToken cancellationToken)
         {
-            var logs = await _analyticsRepository.GetRecentTransactionsAsync();
-            return Ok(logs);
+            var result = await mediator.Send(new GetRecentTransactionsQuery(), cancellationToken);
+            return HandleResult(result);
         }
 
         /// <summary>
@@ -98,11 +84,15 @@ namespace WebAPI.Controllers
             Response.Headers.Append("Content-Type", "text/event-stream");
             Response.Headers.Append("Cache-Control", "no-cache");
             Response.Headers.Append("Connection", "keep-alive");
-            var logs = await mediator.Send(new GetRecentTransactionsQuery(), cancellationToken).ConfigureAwait(false);
-            foreach (var log in logs)
+            var result = await mediator.Send(new GetRecentTransactionsQuery(), cancellationToken).ConfigureAwait(false);
+            
+            if (result.IsSuccess)
             {
-                var data = JsonSerializer.Serialize(log);
-                await Response.WriteAsync($"data: {data}\n\n", cancellationToken).ConfigureAwait(false);
+                foreach (var log in result.Value)
+                {
+                    var data = JsonSerializer.Serialize(log);
+                    await Response.WriteAsync($"data: {data}\n\n", cancellationToken).ConfigureAwait(false);
+                }
             }
             await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
         }

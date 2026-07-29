@@ -4,6 +4,6 @@ namespace Application.Interfaces.Services;
 
 public interface IChatRunEventBus
 {
-    void Publish(Guid runId, ChatRunEventDto evt);
-    IAsyncEnumerable<ChatRunEventDto> SubscribeAsync(Guid runId, CancellationToken ct);
+    public void Publish(Guid runId, ChatRunEventDto evt);
+    public IAsyncEnumerable<ChatRunEventDto> SubscribeAsync(Guid runId, CancellationToken ct);
 }

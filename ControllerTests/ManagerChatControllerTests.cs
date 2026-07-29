@@ -1,4 +1,5 @@
 using Application.Common.Models;
+using Application.Features.ManagerChat.Queries.GetChatToolCatalog;
 using Application.Features.ManagerChat.Queries.GetManagerChatSessions;
 using FluentAssertions;
 using MediatR;
@@ -43,6 +44,24 @@ public class ManagerChatControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnedSessions = Assert.IsType<List<ManagerChatSessionDto>>(okResult.Value);
         Assert.Single(returnedSessions);
+    }
+
+    [Fact(DisplayName = "MCHATC_03 - GetToolCatalog trả về danh sách label tool cho FE")]
+    public async Task GetToolCatalog_ReturnsOk_WithLabels()
+    {
+        var mockSender = new Mock<ISender>();
+        var labels = new List<ChatToolLabelDto> { new("search_products", "Tìm sản phẩm") };
+        mockSender.Setup(x => x.Send(It.IsAny<GetChatToolCatalogQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<List<ChatToolLabelDto>>.Success(labels));
+
+        var controller = new ManagerChatController(mockSender.Object);
+
+        var result = await controller.GetToolCatalog(CancellationToken.None);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returned = Assert.IsType<List<ChatToolLabelDto>>(okResult.Value);
+        Assert.Single(returned);
+        Assert.Equal("search_products", returned[0].Name);
     }
 
     [Fact(DisplayName = "MCHATC_01 - Endpoint gửi tin nhắn REST đã bị loại bỏ (Hướng A)")]

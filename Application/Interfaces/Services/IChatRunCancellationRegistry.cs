@@ -2,7 +2,7 @@ namespace Application.Interfaces.Services;
 
 public interface IChatRunCancellationRegistry
 {
-    void Register(Guid runId, CancellationTokenSource cts);
-    void Unregister(Guid runId);
-    bool TryCancel(Guid runId);
+    public void Register(Guid runId, CancellationTokenSource cts);
+    public void Unregister(Guid runId);
+    public bool TryCancel(Guid runId);
 }

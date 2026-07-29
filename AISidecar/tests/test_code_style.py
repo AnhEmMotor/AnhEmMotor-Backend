@@ -33,14 +33,10 @@ def test_no_comments_or_docstrings_in_functions():
             tokens = tokenize.tokenize(f.readline)
             comments = [tok for tok in tokens if tok.type == tokenize.COMMENT]
 
-        for func in functions:
-            start = func.lineno
-            end = func.end_lineno
-            for comment in comments:
-                if start <= comment.start[0] <= end:
-                    errors.append(f"{filepath}: Function '{func.name}' has a comment '{comment.string}' at line {comment.start[0]}")
+        for comment in comments:
+            errors.append(f"{filepath}: Comment '{comment.string}' at line {comment.start[0]}")
 
     if errors:
-        error_msg = "Found comments or docstrings inside functions:\n" + "\n".join(errors)
+        error_msg = "Found comments or docstrings:\n" + "\n".join(errors)
         import pytest
         pytest.fail(error_msg, pytrace=False)

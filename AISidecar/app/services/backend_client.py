@@ -7,6 +7,12 @@ from app.core.errors import BackendError, ForbiddenError
 
 logger = logging.getLogger(__name__)
 
+
+def _to_camel_case(snake_str: str) -> str:
+    parts = snake_str.split("_")
+    return parts[0] + "".join(p.title() for p in parts[1:])
+
+
 class BackendClient:
     def __init__(self, auth_header: str):
         self._settings = get_settings()
@@ -38,8 +44,9 @@ class BackendClient:
         })
 
     async def call_tool(self, tool_path: str, payload: dict) -> dict:
+        camel_payload = {_to_camel_case(k): v for k, v in payload.items()}
         return await self._post(
-            f"/internal/chat/tools/{tool_path.lstrip('/')}", payload
+            f"/internal/chat/tools/{tool_path.lstrip('/')}", camel_payload
         )
 
     async def pull_pending_steering(self, run_id: str) -> list[dict]:

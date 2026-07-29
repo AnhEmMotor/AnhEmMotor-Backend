@@ -3,6 +3,7 @@ using Application.Features.ManagerChat.Commands.CreateManagerChatSession;
 using Application.Features.ManagerChat.Commands.DeleteManagerChatSession;
 using Application.Features.ManagerChat.Commands.UpdateManagerChatSession;
 using Application.Features.ManagerChat.Queries.GetActiveChatRun;
+using Application.Features.ManagerChat.Queries.GetChatToolCatalog;
 using Application.Features.ManagerChat.Queries.GetManagerChatSessionHistory;
 using Application.Features.ManagerChat.Queries.GetManagerChatSessions;
 using Asp.Versioning;
@@ -71,6 +72,15 @@ public class ManagerChatController(ISender sender) : ApiController
     public async Task<IActionResult> GetActiveRun(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetActiveChatRunQuery(id);
+        var result = await sender.Send(query, cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpGet("tool-catalog")]
+    [SwaggerOperation(Summary = "Lấy tên hiển thị tiếng Việt của các tool AI dùng khi tra cứu dữ liệu, để FE hiện trạng thái đang xử lý")]
+    public async Task<IActionResult> GetToolCatalog(CancellationToken cancellationToken)
+    {
+        var query = new GetChatToolCatalogQuery();
         var result = await sender.Send(query, cancellationToken);
         return HandleResult(result);
     }

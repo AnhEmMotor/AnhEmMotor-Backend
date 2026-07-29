@@ -1,5 +1,5 @@
-import pytest
 import httpx
+import pytest
 import respx
 
 from app.core.errors import BackendError, ForbiddenError
@@ -63,3 +63,15 @@ async def test_call_tool(backend_client):
     )
     result = await backend_client.call_tool("products/search", {"q": "honda"})
     assert result == {"items": []}
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_call_tool_doi_key_snake_case_sang_camel_case(backend_client):
+    route = respx.post("http://testhost:5000/internal/chat/tools/orders/status").mock(
+        return_value=httpx.Response(200, json={})
+    )
+    await backend_client.call_tool("orders/status", {"order_id": 1024, "from_date": "2026-07-01"})
+    sent_body = route.calls[0].request.content
+    import json
+    assert json.loads(sent_body) == {"orderId": 1024, "fromDate": "2026-07-01"}
