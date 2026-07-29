@@ -22,7 +22,7 @@ public class CatalogController : ControllerBase
     /// <param name="search">Từ khóa tìm kiếm (tên xe, mã xe).</param>
     /// <param name="categoryId">ID danh mục để lọc.</param>
     [HttpGet("products")]
-    public async Task<IActionResult> GetProducts([FromQuery] string search, [FromQuery] int? categoryId)
+    public async Task<IActionResult> GetProducts([FromQuery] string? search, [FromQuery] int? categoryId)
     {
         var result = await _mediator.Send(new GetProductsQuery(search, categoryId));
         return Ok(result);
