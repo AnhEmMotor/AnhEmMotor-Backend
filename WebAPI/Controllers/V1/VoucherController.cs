@@ -177,9 +177,8 @@ public class VoucherController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(
-            new VoucherValidateQuery(request.VoucherId, request.OutputId),
-            cancellationToken)
-            .ConfigureAwait(false);
+            new VoucherValidateQuery(request.VoucherId, request.OutputId, request.OrderTotal),
+            cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

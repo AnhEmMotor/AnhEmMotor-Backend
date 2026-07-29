@@ -9,9 +9,12 @@ using Application.Interfaces.Services.Shipping.Models;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
+using Domain.Enums;
 using Mapster;
 using MediatR;
 using System.Linq;
+
+using Application.Interfaces.Repositories.Voucher;
 
 namespace Application.Features.Outputs.Commands.CreateOutput;
 
@@ -21,6 +24,8 @@ public class CreateOutputCommandHandler(
     IProductVariantReadRepository variantRepository,
     ISettingRepository settingRepository,
     IShippingService shippingService,
+    IVoucherReadRepository voucherReadRepository,
+    IVoucherUsageRepository voucherUsageRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -237,7 +242,48 @@ public class CreateOutputCommandHandler(
         output.CreatedBy = request.BuyerId;
         output.PaymentMethod = request.PaymentMethod ?? PaymentMethod.COD;
         output.PaymentStatus = "Pending";
+        
         insertRepository.Add(output);
+
+        if (!string.IsNullOrWhiteSpace(request.VoucherCode))
+        {
+            var voucher = await voucherReadRepository.GetByCodeAsync(request.VoucherCode, cancellationToken).ConfigureAwait(false);
+            if (voucher != null)
+            {
+                var today = DateTime.UtcNow.Date;
+                var totalUsed = await voucherUsageRepository.GetTotalUsageCountAsync(voucher.Id, cancellationToken);
+                var userUsedCount = request.BuyerId.HasValue ? await voucherUsageRepository.GetUserUsageCountAsync(voucher.Id, request.BuyerId.Value, cancellationToken) : 0;
+                
+                var isValid = today >= voucher.ValidFrom.Date && today <= voucher.ValidTo.Date
+                    && (voucher.TotalUsageLimit == 0 || totalUsed < voucher.TotalUsageLimit)
+                    && (voucher.UsageLimitPerUser == 0 || userUsedCount < voucher.UsageLimitPerUser)
+                    && (voucher.MinOrderValue == 0 || totalPrice >= voucher.MinOrderValue);
+
+                if (isValid)
+                {
+                    var discountAmount = voucher.DiscountType == DiscountType.Percent
+                        ? voucher.DiscountValue * totalPrice / 100
+                        : voucher.DiscountValue;
+                        
+                    if (voucher.MaxDiscountAmount > 0 && discountAmount > voucher.MaxDiscountAmount)
+                        discountAmount = voucher.MaxDiscountAmount.Value;
+
+                    discountAmount = Math.Min(discountAmount, totalPrice);
+
+                    var orderVoucher = new OrderVoucher
+                    {
+                        VoucherId = voucher.Id,
+                        OutputId = output.Id, // EF Core will fix up the ID upon SaveChangesAsync, actually wait!
+                        Output = output,
+                        DiscountApplied = discountAmount,
+                        AppliedAt = DateTimeOffset.UtcNow,
+                        AppliedBy = request.BuyerId?.ToString() ?? "System"
+                    };
+                    await voucherUsageRepository.AddAsync(orderVoucher, cancellationToken);
+                }
+            }
+        }
+
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(created);

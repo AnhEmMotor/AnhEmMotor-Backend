@@ -1,3 +1,4 @@
+using Application.Interfaces.Repositories.Voucher;
 using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
@@ -110,6 +111,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -140,6 +143,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -180,6 +185,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -219,6 +226,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -265,6 +274,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1044,6 +1055,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -1095,6 +1108,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -1111,6 +1126,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1130,6 +1147,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1254,6 +1273,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -1299,6 +1320,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1456,6 +1479,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1530,6 +1555,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -1662,6 +1689,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -1694,6 +1723,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -1725,6 +1756,8 @@ public class SalesOrder
             _variantRepoMock.Object,
             _settingRepoMock.Object,
             new Mock<IShippingService>().Object,
+            new Mock<IVoucherReadRepository>().Object,
+            new Mock<IVoucherUsageRepository>().Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
