@@ -18,8 +18,7 @@ namespace WebAPI.Controllers;
 public class InternalChatController(
     UserManager<ApplicationUser> userManager,
     ApplicationDBContext dbContext,
-    IConfiguration configuration,
-    ILogger<InternalChatController> logger) : ControllerBase
+    IConfiguration configuration) : ControllerBase
 {
     [HttpPost("context")]
     public async Task<IActionResult> GetContext([FromBody] ContextRequest request, CancellationToken cancellationToken)

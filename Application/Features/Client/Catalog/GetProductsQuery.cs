@@ -45,7 +45,7 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<Product
         var (entities, totalCount, groupedOptionFilters) = await _readRepo.GetPagedProductsAsync(
             normalizedSearch, statusIds,
             request.CategoryId.HasValue ? new List<int> { request.CategoryId.Value } : new List<int>(),
-            null, null, null, null,
+            new List<int>(), new List<int>(), null, null,
             1, 50, null, null, cancellationToken)
             .ConfigureAwait(false);
 
@@ -211,7 +211,7 @@ public class RequestConsultationHandler : IRequestHandler<RequestConsultationCom
     {
         var lead = new Lead
         {
-            InterestedVehicle = request.Request.ProductId.ToString(),
+            InterestedVehicle = request.Request.ProductId.ToString() ?? "",
             Notes = request.Request.CustomerNote,
             Source = "Catalog",
             CreatedAt = DateTime.UtcNow,

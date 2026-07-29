@@ -564,6 +564,7 @@ public class ProductMappingConfig : IRegister
             CoverImageUrl = coverImage,
             ProductLimit = effectiveMax,
             EffectiveMax = effectiveMax,
+            ManagementType = variant.Product?.ProductCategory?.ManagementType,
             Colors = MapVariantColors(variant)
         };
     }
