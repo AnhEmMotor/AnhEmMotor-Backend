@@ -179,16 +179,57 @@ public class CreateOutputCommandHandler(
         }
         if (totalPrice >= threshold)
         {
-            var ratioSetting = settings.FirstOrDefault(
-                s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
-            if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+            var depositTypeSetting = settings.FirstOrDefault(
+                s => string.Equals(s.Key, SettingKeys.DepositType, StringComparison.OrdinalIgnoreCase));
+            var isFixed = depositTypeSetting != null && string.Equals(depositTypeSetting.Value, "fixed", StringComparison.OrdinalIgnoreCase);
+
+            if (isFixed)
             {
-                output.DepositRatio = parsedRatio;
-            } else
-            {
-                output.DepositRatio = 50;
+                var fixedAmountSetting = settings.FirstOrDefault(
+                    s => string.Equals(s.Key, SettingKeys.FixedDepositAmount, StringComparison.OrdinalIgnoreCase));
+                decimal fixedAmountPerVehicle = 2000000;
+                if (fixedAmountSetting != null && decimal.TryParse(fixedAmountSetting.Value, out var parsedFixedAmount))
+                {
+                    fixedAmountPerVehicle = parsedFixedAmount;
+                }
+
+                int vehicleCount = 0;
+                foreach (var info in output.OutputInfos)
+                {
+                    var variant = variantsList.FirstOrDefault(v => v.Id == info.ProductVariantId);
+                    var managementType = variant?.Product?.ProductCategory?.ManagementType;
+                    if (string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase))
+                    {
+                        vehicleCount += info.Count ?? 0;
+                    }
+                }
+
+                if (vehicleCount > 0 && totalPrice > 0)
+                {
+                    var totalFixedDeposit = fixedAmountPerVehicle * vehicleCount;
+                    var calculatedRatio = (int)Math.Round((totalFixedDeposit / totalPrice) * 100m, MidpointRounding.AwayFromZero);
+                    output.DepositRatio = Math.Clamp(calculatedRatio, 1, 99);
+                }
+                else
+                {
+                    output.DepositRatio = 0;
+                }
             }
-        } else
+            else
+            {
+                var ratioSetting = settings.FirstOrDefault(
+                    s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
+                if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+                {
+                    output.DepositRatio = parsedRatio;
+                }
+                else
+                {
+                    output.DepositRatio = 50;
+                }
+            }
+        }
+        else
         {
             output.DepositRatio = 0;
         }

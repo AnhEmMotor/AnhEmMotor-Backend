@@ -20,7 +20,7 @@ public class PythonEnvService(ILogger<PythonEnvService> logger) : IPythonEnvServ
         var pipExe = isWindows ? Path.Combine(venvDir, "Scripts", "pip.exe") : Path.Combine(venvDir, "bin", "pip3");
         if (!Directory.Exists(venvDir) || !File.Exists(pythonExe))
         {
-            var basePython = isWindows ? "python" : "python3";
+            var basePython = isWindows ? "py" : "python3";
             await RunCommandAsync(basePython, $"-m venv \"{venvDir}\"", sidecarDir);
         }
         var reqFile = Path.Combine(sidecarDir, "requirements.txt");

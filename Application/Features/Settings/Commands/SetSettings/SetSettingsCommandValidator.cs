@@ -57,6 +57,26 @@ public class SetSettingsCommandValidator : AbstractValidator<SetSettingsCommand>
                             context.AddFailure("All numeric fields must contain valid numbers");
                         }
                     }
+                    else if (string.Compare(key, SettingKeys.DepositType) == 0)
+                    {
+                        var isValidType = string.Equals(value, "percentage", StringComparison.OrdinalIgnoreCase) ||
+                                          string.Equals(value, "fixed", StringComparison.OrdinalIgnoreCase);
+                        if (!isValidType)
+                        {
+                            context.AddFailure("Deposit type must be either 'percentage' or 'fixed'");
+                        }
+                    }
+                    else if (string.Compare(key, SettingKeys.FixedDepositAmount) == 0)
+                    {
+                        if (value.Contains('.') || value.Contains(','))
+                        {
+                            context.AddFailure("Fixed deposit amount cannot have decimal values");
+                        }
+                        else if (!decimal.TryParse(value, out var parsedAmount) || parsedAmount < 0)
+                        {
+                            context.AddFailure("Fixed deposit amount must be a non-negative number");
+                        }
+                    }
                 }
             });
     }

@@ -18,4 +18,6 @@ public interface IVoucherReadRepository
     public Task<bool> ExistsByCodeAsync(string code, CancellationToken cancellationToken);
 
     public Task<bool> ExistsByCodeAsync(string code, int excludeId, CancellationToken cancellationToken);
+
+    public Task<Domain.Entities.Voucher?> GetByCodeAsync(string code, CancellationToken cancellationToken);
 }

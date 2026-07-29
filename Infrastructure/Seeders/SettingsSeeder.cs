@@ -17,7 +17,9 @@ public static class SettingsSeeder
         {
             { SettingKeys.InventoryAlertLevel, "5" },
             { SettingKeys.DepositRatio, "50" },
-            { SettingKeys.OrderValueExceeds, "100000000" }
+            { SettingKeys.OrderValueExceeds, "100000000" },
+            { SettingKeys.DepositType, "percentage" },
+            { SettingKeys.FixedDepositAmount, "2000000" }
         };
         var toAdd = defaults
             .Where(kv => !existingKeys.Contains(kv.Key, StringComparer.OrdinalIgnoreCase))

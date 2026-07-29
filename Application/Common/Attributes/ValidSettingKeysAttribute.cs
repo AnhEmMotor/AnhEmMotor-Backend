@@ -4,7 +4,7 @@ namespace Application.Common.Attributes
 {
     public class ValidSettingKeysAttribute : ValidationAttribute
     {
-        private readonly HashSet<string> _ValidKeys = ["deposit_ratio", "inventory_alert_level", "order_value_exceeds", "bike_threshold_for_meeting"];
+        private readonly HashSet<string> _ValidKeys = ["deposit_ratio", "inventory_alert_level", "order_value_exceeds", "bike_threshold_for_meeting", "deposit_type", "fixed_deposit_amount", "Deposit_type", "Fixed_deposit_amount"];
 
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {

@@ -22,6 +22,8 @@ public class VoucherResponse
 
     public decimal? MaxDiscountAmount { get; set; }
 
+    public decimal MinOrderValue { get; set; }
+
     public DateTime ValidFrom { get; set; }
 
     public DateTime ValidTo { get; set; }
