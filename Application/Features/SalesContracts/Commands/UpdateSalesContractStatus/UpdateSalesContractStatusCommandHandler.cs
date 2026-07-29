@@ -19,6 +19,7 @@ public class UpdateSalesContractStatusCommandHandler(ISalesContractReadRepositor
             return Result<SalesContractResponse>.Failure("Không tìm thấy hợp đồng.");
         if (!SalesContractStatus.IsValid(request.Status))
             return Result<SalesContractResponse>.Failure("Trạng thái hợp đồng không hợp lệ.");
+
         var normalizedStatus = SalesContractStatus.All
             .First(status => string.Equals(status, request.Status, StringComparison.OrdinalIgnoreCase));
         var isSameStatus = string.Equals(contract.Status, normalizedStatus, StringComparison.OrdinalIgnoreCase);
@@ -27,11 +28,13 @@ public class UpdateSalesContractStatusCommandHandler(ISalesContractReadRepositor
             (string.Equals(contract.Status, SalesContractStatus.Draft, StringComparison.OrdinalIgnoreCase) &&
                 (string.Equals(normalizedStatus, SalesContractStatus.Approved, StringComparison.OrdinalIgnoreCase) ||
                  string.Equals(normalizedStatus, SalesContractStatus.PendingApproval, StringComparison.OrdinalIgnoreCase))) ||
+             string.Equals(normalizedStatus, SalesContractStatus.PendingApproval, StringComparison.OrdinalIgnoreCase)) ||
             (request.IsAdminApproval &&
              string.Equals(contract.Status, SalesContractStatus.PendingApproval, StringComparison.OrdinalIgnoreCase) &&
              string.Equals(normalizedStatus, SalesContractStatus.Approved, StringComparison.OrdinalIgnoreCase)) ||
             (string.Equals(contract.Status, SalesContractStatus.Signed, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(normalizedStatus, SalesContractStatus.Fulfilled, StringComparison.OrdinalIgnoreCase));
+             string.Equals(normalizedStatus, SalesContractStatus.Fulfilled, StringComparison.OrdinalIgnoreCase));
+
         if (!isAllowedTransition)
             return Result<SalesContractResponse>.Failure(
                 $"Không thể chuyển hợp đồng từ {contract.Status} sang {normalizedStatus}.");

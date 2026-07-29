@@ -1,4 +1,7 @@
 using Application.Common.Models;
+using Application.Features.HR.Commands.CreateEmployeeKpi;
+using Application.Features.HR.Commands.DeleteEmployeeKpi;
+using Application.Features.HR.Commands.UpdateEmployeeKpi;
 using Application.Features.HR.Queries.GetEmployeeKPIs;
 using Asp.Versioning;
 using Domain.Constants.Permission;
@@ -30,6 +33,48 @@ public class EmployeeKPIController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetEmployeeKPIsQuery(), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tạo KPI mới cho nhân viên.
+    /// </summary>
+    [HttpPost]
+    [RequiresAnyPermissions(Permissions.Admin.EmployeeManagement.Create)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
+    public async Task<IActionResult> Create(
+        [FromBody] CreateEmployeeKpiCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleCreated(result);
+    }
+
+    /// <summary>
+    /// Cập nhật KPI của nhân viên.
+    /// </summary>
+    [HttpPut("{id:int}")]
+    [RequiresAnyPermissions(Permissions.Admin.EmployeeManagement.Edit)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Update(
+        int id,
+        [FromBody] UpdateEmployeeKpiCommand command,
+        CancellationToken cancellationToken)
+    {
+        command.Id = id;
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Xóa KPI của nhân viên.
+    /// </summary>
+    [HttpDelete("{id:int}")]
+    [RequiresAnyPermissions(Permissions.Admin.EmployeeManagement.Delete)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new DeleteEmployeeKpiCommand(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

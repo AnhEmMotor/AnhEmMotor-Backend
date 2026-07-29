@@ -1,10 +1,10 @@
 using Application.ApiContracts.Client.Catalog;
+using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Features.Products.Mappings;
-using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Product;
-using ProductStatus = Domain.Constants.Product.ProductStatus;
+using Domain.Constants.Product;
 using Domain.Entities;
 using Domain.Primitives;
 using MediatR;
@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace Application.Features.Client.Catalog;
 
-public record GetProductsQuery(string? Search, int? CategoryId) : IRequest<List<ProductSummaryResponse>>;
+public record GetProductsQuery(string Search, int? CategoryId) : IRequest<List<ProductSummaryResponse>>;
 
 public record GetProductDetailQuery(int Id) : IRequest<ProductDetailResponse>;
 
@@ -89,7 +89,7 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<Product
 
             List<string> features = e.ProductTechnologies
                 ?.OrderBy(t => t.DisplayOrder)
-                .Select(t => t.CustomDescription ?? t.Technology?.DefaultDescription ?? t.CustomTitle ?? "")
+                .Select(t => t.CustomDescription ?? t.DefaultDescription ?? t.Technology?.DefaultDescription ?? t.CustomTitle)
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Cast<string>()
                 .ToList() ?? new List<string>();
@@ -109,14 +109,14 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<Product
         return items;
     }
 
-    private static string BuildPromotionText(Product product, ProductVariant? firstVariant)
+    private static string BuildPromotionText(ProductEntity product, ProductVariant? firstVariant)
     {
         var parts = new List<string> { "Chính hãng" };
         if (product.ProductTechnologies != null && product.ProductTechnologies.Any())
         {
             var techNames = product.ProductTechnologies
                 .Where(t => t.DisplayOrder <= 3)
-                .Select(t => t.CustomTitle ?? t.Technology?.DefaultTitle ?? "")
+                .Select(t => t.CustomTitle ?? t.DefaultTitle ?? t.Technology?.DefaultTitle)
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Take(2)
                 .Cast<string>();
@@ -150,7 +150,7 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
             .ConfigureAwait(false);
         if (variant is null || variant.Product is null)
         {
-            return new ProductDetailResponse { Id = request.Id, Name = "Không tìm thấy", Description = "", ReferencePrice = 0, Features = new List<string>(), IsCompatibleWithMyVehicle = false, CompatibilityNote = "" };
+            return new ProductDetailResponse(request.Id, "Không tìm thấy", "", 0, new List<string>(), false, "");
         }
 
         var product = variant.Product;
@@ -176,8 +176,8 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
             .OrderBy(t => t.DisplayOrder)
             .Select(t =>
             {
-                var title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? "";
-                var desc = t.CustomDescription ?? t.Technology?.DefaultDescription ?? "";
+                var title = t.CustomTitle ?? t.DefaultTitle ?? t.Technology?.DefaultTitle ?? "";
+                var desc = t.CustomDescription ?? t.DefaultDescription ?? t.Technology?.DefaultDescription ?? "";
                 return string.IsNullOrWhiteSpace(desc) ? title : $"{title}: {desc}";
             })
             .Where(s => !string.IsNullOrWhiteSpace(s))
