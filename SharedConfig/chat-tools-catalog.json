@@ -57,8 +57,8 @@
     "is_write": false,
     "description": "Lấy tổng doanh thu và số lượng đơn hàng trong một khoảng thời gian. DÙNG KHI người dùng hỏi 'doanh thu tháng này', 'bán được bao nhiêu đơn trong tuần qua'. KHÔNG dùng để tra một đơn hàng cụ thể hoặc top sản phẩm bán chạy — dùng get_order_status hoặc get_top_selling cho việc đó. Ví dụ: 'Doanh thu từ 01/07 đến 28/07 là bao nhiêu?'.",
     "args": [
-      { "name": "from_date", "type": "string", "required": true, "label": "Từ ngày", "description": "Ngày bắt đầu khoảng thời gian, dạng YYYY-MM-DD." },
-      { "name": "to_date", "type": "string", "required": true, "label": "Đến ngày", "description": "Ngày kết thúc khoảng thời gian, dạng YYYY-MM-DD." }
+      { "name": "from_date", "type": "string", "required": false, "default": "", "label": "Từ ngày", "description": "Ngày bắt đầu khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống '' khi người dùng hỏi 'hôm nay'/'tháng này' — tool tự tính đúng theo giờ Việt Nam, KHÔNG tự đoán ngày." },
+      { "name": "to_date", "type": "string", "required": false, "default": "", "label": "Đến ngày", "description": "Ngày kết thúc khoảng thời gian, dạng YYYY-MM-DD (chuỗi văn bản). Để trống '' để tính đến hôm nay theo giờ Việt Nam." }
     ]
   },
   {

@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.ChatTools.Queries.GetProductStockForChat;
 
-public sealed record GetProductStockForChatQuery : IRequest<Result<ChatToolResult<ChatProductStockDto>>>
+public sealed record GetProductStockForChatQuery : IRequest<Result<ChatToolEnvelope<ChatProductStockDto>>>
 {
     public int ProductId { get; init; }
 

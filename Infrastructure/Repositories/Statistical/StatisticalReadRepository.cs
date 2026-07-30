@@ -459,7 +459,9 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var days = (int)(end - start).TotalDays + 1;
         if (days <= 0)
             days = 1;
-        var startDate = DateOnly.FromDateTime(start.Date);
+        // Stage 16.2 mục #2 — ngày đầu chuỗi cũng phải theo giờ Việt Nam, không phải start.Date (UTC trần),
+        // nếu không dateSeries sẽ lệch 1 ngày so với revenueData được nhóm theo ngày giờ VN ở dưới.
+        var startDate = DateOnly.FromDateTime(start.ToOffset(TimeSpan.FromHours(7)).DateTime);
         var startDateTimeOffset = start;
         var endDateTimeOffset = end;
         var dateSeries = Enumerable.Range(0, days).Select(i => startDate.AddDays(i)).ToList();
@@ -475,8 +477,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(x => new { CreatedAt = x.o.CreatedAt!.Value, Price = x.oi.Price ?? 0, Count = x.oi.Count ?? 0 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
+        // Stage 16.2 mục #2 — nhóm theo ngày GIỜ VIỆT NAM (GMT+7), không phải theo x.CreatedAt.DateTime
+        // (giờ UTC trần): đơn tạo lúc 00:00-07:00 giờ VN sẽ rơi vào NGÀY HÔM TRƯỚC nếu nhóm theo UTC.
         var revenueData = rawData
-            .GroupBy(x => DateOnly.FromDateTime(x.CreatedAt.DateTime))
+            .GroupBy(x => DateOnly.FromDateTime(x.CreatedAt.ToOffset(TimeSpan.FromHours(7)).DateTime))
             .Select(g => new { Day = g.Key, Revenue = g.Sum(x => x.Price * x.Count) })
             .ToList();
         return dateSeries.Select(

@@ -218,6 +218,13 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
     }
 
 
+def _envelope_summary(result) -> dict:
+    if not isinstance(result, dict):
+        return {}
+    keys = ("truncated", "totalCount", "asOf", "warnings", "filtersApplied")
+    return {k: result[k] for k in keys if k in result}
+
+
 async def call_tools_node(state: AgentState) -> dict:
     writer = get_stream_writer()
     last_message = state["messages"][-1]
@@ -319,6 +326,7 @@ async def call_tools_node(state: AgentState) -> dict:
             tool_call_count += 1
 
         tool = tools_by_name.get(name)
+        result = None
         try:
             if tool is None:
                 raise ValueError(f"Unknown tool: {name}")
@@ -345,7 +353,7 @@ async def call_tools_node(state: AgentState) -> dict:
         except Exception as exc:
             content = json.dumps({"error": str(exc)}, ensure_ascii=False)
         result_messages.append(ToolMessage(content=content, tool_call_id=tool_call["id"]))
-        writer(("tool_end", json.dumps({"name": name}, ensure_ascii=False)))
+        writer(("tool_end", json.dumps({"name": name, **_envelope_summary(result)}, ensure_ascii=False)))
 
     updates = {"tool_turns": tool_turns, "tool_limit_reached": False, "messages": result_messages}
     if guarding:

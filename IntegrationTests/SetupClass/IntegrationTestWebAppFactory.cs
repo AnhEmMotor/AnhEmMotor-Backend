@@ -1,3 +1,4 @@
+using Application.Common.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
@@ -10,6 +11,7 @@ using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Services;
+using Infrastructure.Services.Ai;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -220,6 +222,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IPayOSService, PayOSService>();
                 services.AddSingleton<IShippingService>(new FakeShippingService());
                 services.AddSingleton<IAiSidecarUrlProvider>(new FakeAiSidecarUrlProvider());
+                services.AddSingleton<IServerDateProvider, SystemServerDateProvider>();
+                services.AddSingleton<IChatToolCatalogProvider, ChatToolCatalogProvider>();
                 services.AddHttpClient();
                 services.Scan(
                     scan => scan

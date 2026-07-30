@@ -1,13 +1,17 @@
+using Application.Common.Interfaces;
 using Application.Common.Models;
+using Application.Features.ChatTools.Common;
 using Application.Interfaces.Repositories.Output;
 using MediatR;
 
 namespace Application.Features.ChatTools.Queries.GetOrderStatusForChat;
 
-public class GetOrderStatusForChatQueryHandler(IOutputReadRepository outputReadRepository)
-    : IRequestHandler<GetOrderStatusForChatQuery, Result<ChatOrderStatusDto>>
+public class GetOrderStatusForChatQueryHandler(
+    IOutputReadRepository outputReadRepository,
+    IServerDateProvider dateProvider)
+    : IRequestHandler<GetOrderStatusForChatQuery, Result<ChatToolEnvelope<ChatOrderStatusDto>>>
 {
-    public async Task<Result<ChatOrderStatusDto>> Handle(
+    public async Task<Result<ChatToolEnvelope<ChatOrderStatusDto>>> Handle(
         GetOrderStatusForChatQuery request,
         CancellationToken cancellationToken)
     {
@@ -15,9 +19,9 @@ public class GetOrderStatusForChatQueryHandler(IOutputReadRepository outputReadR
             .ConfigureAwait(false);
         if (order == null)
         {
-            return Result<ChatOrderStatusDto>.Failure(Error.NotFound("Không tìm thấy đơn hàng"));
+            return Result<ChatToolEnvelope<ChatOrderStatusDto>>.Failure(Error.NotFound("Không tìm thấy đơn hàng"));
         }
-        return new ChatOrderStatusDto
+        var dto = new ChatOrderStatusDto
         {
             OrderId = order.Id,
             StatusId = order.StatusId,
@@ -29,5 +33,12 @@ public class GetOrderStatusForChatQueryHandler(IOutputReadRepository outputReadR
             CreatedAt = order.CreatedAt,
             LastStatusChangedAt = order.LastStatusChangedAt
         };
+        var meta = new ChatToolEnvelopeMeta(
+            dateProvider.VietnamNow,
+            "IOutputReadRepository.GetByIdWithDetailsAsync",
+            new Dictionary<string, string>(),
+            "so-don-hang",
+            "VND");
+        return ChatToolEnvelope<ChatOrderStatusDto>.WrapSingle(dto, meta);
     }
 }

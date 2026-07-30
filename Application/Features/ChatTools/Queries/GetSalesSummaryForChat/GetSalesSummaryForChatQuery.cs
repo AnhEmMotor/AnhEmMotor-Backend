@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.ChatTools.Queries.GetSalesSummaryForChat;
 
-public sealed record GetSalesSummaryForChatQuery : IRequest<Result<ChatToolResult<ChatDailyRevenueDto>>>
+public sealed record GetSalesSummaryForChatQuery : IRequest<Result<ChatToolEnvelope<ChatDailyRevenueDto>>>
 {
     public DateOnly? FromDate { get; init; }
 

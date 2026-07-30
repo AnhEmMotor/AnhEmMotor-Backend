@@ -47,6 +47,16 @@ class TestBuildSystemMessage:
         msg = build_system_message(ctx)
         assert "{" not in msg.content
 
+    def test_server_date_duoc_dua_vao_prompt(self):
+        ctx = {"user": {"fullName": "Test"}}
+        msg = build_system_message(ctx, "2026-07-30T09:00:00+07:00")
+        assert "2026-07-30T09:00:00+07:00" in msg.content
+
+    def test_khong_co_server_date_dung_mac_dinh(self):
+        ctx = {"user": {"fullName": "Test"}}
+        msg = build_system_message(ctx)
+        assert "(không rõ)" in msg.content
+
 
 class TestBuildHistoryMessages:
     def test_empty_history(self):

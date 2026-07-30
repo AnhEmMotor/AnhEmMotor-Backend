@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Features.ChatTools.Common;
 using Application.Interfaces.Repositories.Product;
@@ -8,15 +9,17 @@ using ProductEntity = Domain.Entities.Product;
 
 namespace Application.Features.ChatTools.Queries.SearchProductsForChat;
 
-public class SearchProductsForChatQueryHandler(IProductReadRepository productReadRepository)
-    : IRequestHandler<SearchProductsForChatQuery, Result<ChatToolResult<ChatProductSearchDto>>>
+public class SearchProductsForChatQueryHandler(
+    IProductReadRepository productReadRepository,
+    IServerDateProvider dateProvider)
+    : IRequestHandler<SearchProductsForChatQuery, Result<ChatToolEnvelope<ChatProductSearchDto>>>
 {
     // Chỉ dùng cho fallback khi search LIKE thường (accent-sensitive) không ra kết quả — ví dụ
     // gõ "đĩa" nhưng tên sản phẩm trong DB nhập nhầm không dấu "dĩa". Không sửa GetPagedProductsAsync
     // dùng chung toàn hệ thống (rủi ro/hiệu năng ảnh hưởng trang sản phẩm) — chỉ vá riêng cho tool AI.
     private const int DiacriticFallbackScanSize = 300;
 
-    public async Task<Result<ChatToolResult<ChatProductSearchDto>>> Handle(
+    public async Task<Result<ChatToolEnvelope<ChatProductSearchDto>>> Handle(
         SearchProductsForChatQuery request,
         CancellationToken cancellationToken)
     {
@@ -54,7 +57,14 @@ public class SearchProductsForChatQueryHandler(IProductReadRepository productRea
                 VariantCount = p.ProductVariants.Count
             })
             .ToList();
-        return new ChatToolResult<ChatProductSearchDto>(dtos, totalCount, totalCount > dtos.Count);
+        var inner = new ChatToolResult<ChatProductSearchDto>(dtos, totalCount, totalCount > dtos.Count);
+        var meta = new ChatToolEnvelopeMeta(
+            dateProvider.VietnamNow,
+            "IProductReadRepository.GetPagedProductsAsync",
+            new Dictionary<string, string>(),
+            null,
+            null);
+        return ChatToolEnvelope<ChatProductSearchDto>.Wrap(inner, meta);
     }
 
     private async Task<(List<ProductEntity> Items, int TotalCount)> SearchWithoutDiacriticsAsync(

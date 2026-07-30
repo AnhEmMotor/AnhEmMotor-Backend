@@ -15,9 +15,10 @@ def test_render_thay_placeholder():
 
 
 def test_render_system_manager_chat():
-    result = render("system_manager_chat", full_name="Nguyễn Văn A")
+    result = render("system_manager_chat", full_name="Nguyễn Văn A", server_date="2026-07-30T09:00:00+07:00")
     assert "AnhEmMotor" in result
     assert "Nguyễn Văn A" in result
+    assert "2026-07-30T09:00:00+07:00" in result
 
 
 def test_thieu_file_raise_file_not_found():

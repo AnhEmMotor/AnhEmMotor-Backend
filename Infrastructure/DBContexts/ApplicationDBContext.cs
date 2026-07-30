@@ -156,6 +156,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ChatRunEvent> ChatRunEvents { get; set; }
 
+    public virtual DbSet<ChatFeedback> ChatFeedbacks { get; set; }
+
     public virtual DbSet<Service> Services { get; set; }
 
     public virtual DbSet<Lead> Leads { get; set; }
@@ -718,6 +720,18 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(e => e.RunId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ChatRunEvent>().HasQueryFilter(e => e.Run!.DeletedAt == null);
+
+        modelBuilder.Entity<ChatFeedback>().HasIndex(f => f.ChatRunId);
+        modelBuilder.Entity<ChatFeedback>()
+            .HasOne(f => f.ChatRun)
+            .WithMany()
+            .HasForeignKey(f => f.ChatRunId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<ChatFeedback>()
+            .HasOne(f => f.ReportedByUser)
+            .WithMany()
+            .HasForeignKey(f => f.ReportedBy)
+            .OnDelete(DeleteBehavior.Restrict);
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {

@@ -1,15 +1,21 @@
 import json
+import logging
 from pathlib import Path
 
 from langchain_core.tools import StructuredTool
-from pydantic import BaseModel, Field, create_model
+from pydantic import BaseModel, Field, ValidationError, create_model
 
+from app.config import get_settings
 from app.services.backend_client import BackendClient
+from app.tools.envelope import ChatToolEnvelope
+
+logger = logging.getLogger(__name__)
 
 SOLUTION_FILE_NAME = "AnhEmMotor-Backend.sln"
 CATALOG_RELATIVE_PATH = Path("SharedConfig") / "chat-tools-catalog.json"
 
 _ARG_TYPES = {"string": str, "integer": int}
+_SUMMARY_EXCLUDED_ARGS = {"from_date", "to_date"}
 
 
 def _find_repo_root() -> Path:
@@ -43,7 +49,7 @@ def describe_args(tool_name: str, args: dict) -> str:
     parts = [
         f"{arg_labels.get(key, key)}: {value}"
         for key, value in args.items()
-        if value not in (None, "")
+        if value not in (None, "") and key not in _SUMMARY_EXCLUDED_ARGS
     ]
     return ", ".join(parts)
 
@@ -56,9 +62,18 @@ def build_tools(backend_client: BackendClient, allowed_names: set[str] | None = 
         path = entry["path"]
         schema = _build_schema(entry["name"], entry["args"])
 
-        async def _call(_path=path, **kwargs):
+        async def _call(_path=path, _name=entry["name"], **kwargs):
             payload = {k: v for k, v in kwargs.items() if v != ""}
-            return await backend_client.call_tool(_path, payload)
+            raw = await backend_client.call_tool(_path, payload)
+            try:
+                envelope = ChatToolEnvelope.model_validate(raw)
+            except ValidationError as exc:
+                logger.error("Tool %s trả envelope không hợp lệ: %s", _name, exc)
+                return {"error": f"Dữ liệu trả về từ tool '{_name}' không đúng định dạng, không thể dùng."}
+            if get_settings().tool_flags.get(_name) == "shadow":
+                logging.getLogger("chat_tools.shadow").info(
+                    "tool=%s payload=%s response=%s", _name, payload, raw)
+            return envelope.model_dump(mode="json")
 
         tools.append(StructuredTool.from_function(
             coroutine=_call,

@@ -64,7 +64,7 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
 
     initial_state = {
         "messages": [
-            build_system_message(context),
+            build_system_message(context, chat_req.server_date),
             *build_history_messages(context, chat_req.message),
             HumanMessage(content=chat_req.message),
         ],

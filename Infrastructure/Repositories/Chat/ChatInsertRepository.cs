@@ -20,4 +20,9 @@ public class ChatInsertRepository(ApplicationDBContext context) : IChatInsertRep
     {
         context.ChatRuns.Add(run);
     }
+
+    public void AddFeedback(ChatFeedback feedback)
+    {
+        context.ChatFeedbacks.Add(feedback);
+    }
 }

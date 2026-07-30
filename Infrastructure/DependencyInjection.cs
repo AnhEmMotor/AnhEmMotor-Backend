@@ -1,3 +1,4 @@
+using Application.Common.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Ai;
 using Application.Interfaces.Repositories.LogisticsDashboard;
@@ -131,6 +132,7 @@ public static class DependencyInjection
         services.AddSingleton<IChatRunCancellationRegistry, ChatRunCancellationRegistry>();
         services.AddSingleton<IChatRunTokenStore, ChatRunTokenStore>();
         services.AddSingleton<IChatToolCatalogProvider, ChatToolCatalogProvider>();
+        services.AddSingleton<IServerDateProvider, SystemServerDateProvider>();
         services.AddScoped<IChatRunWriter, ChatRunWriter>();
         services.AddScoped<ISidecarStreamClient, SidecarStreamClient>();
         services.AddHostedService<ChatRunExecutor>();

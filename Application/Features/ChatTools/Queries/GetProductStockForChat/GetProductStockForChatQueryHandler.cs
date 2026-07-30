@@ -1,3 +1,4 @@
+using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Features.ChatTools.Common;
 using Application.Interfaces.Repositories.Product;
@@ -8,10 +9,11 @@ namespace Application.Features.ChatTools.Queries.GetProductStockForChat;
 
 public class GetProductStockForChatQueryHandler(
     IProductReadRepository productReadRepository,
-    IStatisticalReadRepository statisticalReadRepository)
-    : IRequestHandler<GetProductStockForChatQuery, Result<ChatToolResult<ChatProductStockDto>>>
+    IStatisticalReadRepository statisticalReadRepository,
+    IServerDateProvider dateProvider)
+    : IRequestHandler<GetProductStockForChatQuery, Result<ChatToolEnvelope<ChatProductStockDto>>>
 {
-    public async Task<Result<ChatToolResult<ChatProductStockDto>>> Handle(
+    public async Task<Result<ChatToolEnvelope<ChatProductStockDto>>> Handle(
         GetProductStockForChatQuery request,
         CancellationToken cancellationToken)
     {
@@ -21,7 +23,7 @@ public class GetProductStockForChatQueryHandler(
         var product = products.FirstOrDefault();
         if (product == null)
         {
-            return Result<ChatToolResult<ChatProductStockDto>>.Failure(Error.NotFound("Không tìm thấy sản phẩm"));
+            return Result<ChatToolEnvelope<ChatProductStockDto>>.Failure(Error.NotFound("Không tìm thấy sản phẩm"));
         }
         var limit = ChatToolLimit.Clamp(request.Limit);
         var variants = product.ProductVariants.Take(limit).ToList();
@@ -40,6 +42,14 @@ public class GetProductStockForChatQueryHandler(
                     StockQuantity = stockAndPrice?.StockQuantity ?? 0
                 });
         }
-        return new ChatToolResult<ChatProductStockDto>(dtos, product.ProductVariants.Count, product.ProductVariants.Count > dtos.Count);
+        var inner = new ChatToolResult<ChatProductStockDto>(
+            dtos, product.ProductVariants.Count, product.ProductVariants.Count > dtos.Count);
+        var meta = new ChatToolEnvelopeMeta(
+            dateProvider.VietnamNow,
+            "IStatisticalReadRepository.GetProductStockAndPriceAsync",
+            new Dictionary<string, string> { ["Loại trừ"] = "Hàng đang giữ cho đơn chưa giao" },
+            "ton-kho",
+            "VND");
+        return ChatToolEnvelope<ChatProductStockDto>.Wrap(inner, meta);
     }
 }

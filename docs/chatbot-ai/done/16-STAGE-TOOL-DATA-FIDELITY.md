@@ -385,6 +385,12 @@ Bấm vào ghi lại: `runId`, các tool đã gọi, tham số, kết quả tool
 
 Vì Stage 8 đã lưu toàn bộ `ChatRunEvent`, việc dựng lại "AI đã lấy số từ đâu" là tra một truy vấn.
 
+> **⚠️ Chưa làm — xem [21-STAGE-ADMIN-CHAT-HISTORY.md](21-STAGE-ADMIN-CHAT-HISTORY.md):** ghi nhận
+> feedback vào bảng `ChatFeedback` mới chỉ là **thu thập**. Hiện chưa có màn hình/API để xem lại — dữ
+> liệu đang nằm im trong DB, phải query tay mới thấy. Cảnh báo production ở 16.10 ("Phản hồi 👎 số liệu
+> sai > 3 lượt/tuần") vì vậy chưa có nơi để xác minh. Stage 21 đóng nốt vòng lặp này bằng một trang
+> quản trị xem lịch sử chat (mọi người dùng) có tích hợp bộ lọc feedback, quyền hạn riêng biệt.
+
 ---
 
 ## 16.10. Giám sát trong production
@@ -433,3 +439,4 @@ Khuôn mẫu 5 bước ở [15-STAGE-TOOL-CATALOG.md](15-STAGE-TOOL-CATALOG.md) 
 - [ ] AI **không tự tính toán** giữa các tool — có eval case kiểm chứng.
 - [ ] Nút phản hồi "Số liệu chưa đúng" hoạt động, truy ngược được về `ChatRunEvent`.
 - [ ] Shadow mode chạy được và ghi log diff.
+- [ ] Xem lại danh sách `ChatFeedback` đã ghi nhận — xem [Stage 21](21-STAGE-ADMIN-CHAT-HISTORY.md) (chưa làm).

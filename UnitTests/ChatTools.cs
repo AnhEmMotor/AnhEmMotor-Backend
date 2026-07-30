@@ -1,4 +1,5 @@
 using Application.ApiContracts.Statistical.Responses;
+using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Features.ChatTools.Queries.GetLowStockProductsForChat;
 using Application.Features.ChatTools.Queries.GetOrderStatusForChat;
@@ -10,6 +11,7 @@ using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.Statistical;
 using FluentAssertions;
+using Infrastructure.Services;
 using Moq;
 using DomainBrand = Domain.Entities.Brand;
 using DomainOutput = Domain.Entities.Output;
@@ -23,12 +25,14 @@ public class ChatTools
     private readonly Mock<IProductReadRepository> _productReadRepositoryMock;
     private readonly Mock<IStatisticalReadRepository> _statisticalReadRepositoryMock;
     private readonly Mock<IOutputReadRepository> _outputReadRepositoryMock;
+    private readonly IServerDateProvider _dateProvider;
 
     public ChatTools()
     {
         _productReadRepositoryMock = new Mock<IProductReadRepository>();
         _statisticalReadRepositoryMock = new Mock<IStatisticalReadRepository>();
         _outputReadRepositoryMock = new Mock<IOutputReadRepository>();
+        _dateProvider = new SystemServerDateProvider();
     }
 
     #pragma warning disable IDE0079
@@ -59,7 +63,7 @@ public class ChatTools
                 null,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(([product], 1, new List<FilterGroup>()));
-        var handler = new SearchProductsForChatQueryHandler(_productReadRepositoryMock.Object);
+        var handler = new SearchProductsForChatQueryHandler(_productReadRepositoryMock.Object, _dateProvider);
         var result = await handler.Handle(new SearchProductsForChatQuery { Keyword = "Wave" }, CancellationToken.None)
             .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -106,7 +110,7 @@ public class ChatTools
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(([product], 1, new List<FilterGroup>()));
 
-        var handler = new SearchProductsForChatQueryHandler(_productReadRepositoryMock.Object);
+        var handler = new SearchProductsForChatQueryHandler(_productReadRepositoryMock.Object, _dateProvider);
         var result = await handler.Handle(new SearchProductsForChatQuery { Keyword = "Nhông sên đĩa" }, CancellationToken.None)
             .ConfigureAwait(true);
 
@@ -123,7 +127,7 @@ public class ChatTools
             .ReturnsAsync([product]);
         _statisticalReadRepositoryMock.Setup(r => r.GetProductStockAndPriceAsync(10, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductStockPriceResponse { UnitPrice = 30000000, StockQuantity = 15 });
-        var handler = new GetProductStockForChatQueryHandler(_productReadRepositoryMock.Object, _statisticalReadRepositoryMock.Object);
+        var handler = new GetProductStockForChatQueryHandler(_productReadRepositoryMock.Object, _statisticalReadRepositoryMock.Object, _dateProvider);
         var result = await handler.Handle(new GetProductStockForChatQuery { ProductId = 1 }, CancellationToken.None)
             .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -136,7 +140,7 @@ public class ChatTools
     {
         _productReadRepositoryMock.Setup(r => r.GetByIdWithVariantsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
             .ReturnsAsync([]);
-        var handler = new GetProductStockForChatQueryHandler(_productReadRepositoryMock.Object, _statisticalReadRepositoryMock.Object);
+        var handler = new GetProductStockForChatQueryHandler(_productReadRepositoryMock.Object, _statisticalReadRepositoryMock.Object, _dateProvider);
         var result = await handler.Handle(new GetProductStockForChatQuery { ProductId = 999 }, CancellationToken.None)
             .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -154,7 +158,7 @@ public class ChatTools
         _statisticalReadRepositoryMock.Setup(
             r => r.GetProductPerformanceTableAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(performance);
-        var handler = new GetLowStockProductsForChatQueryHandler(_statisticalReadRepositoryMock.Object);
+        var handler = new GetLowStockProductsForChatQueryHandler(_statisticalReadRepositoryMock.Object, _dateProvider);
         var result = await handler.Handle(new GetLowStockProductsForChatQuery(), CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value!.Items.Should().HaveCount(2);
@@ -167,11 +171,12 @@ public class ChatTools
         var order = new DomainOutput { Id = 123, StatusId = "completed", CustomerName = "Nguyễn Văn A" };
         _outputReadRepositoryMock.Setup(r => r.GetByIdWithDetailsAsync(123, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
             .ReturnsAsync(order);
-        var handler = new GetOrderStatusForChatQueryHandler(_outputReadRepositoryMock.Object);
+        var handler = new GetOrderStatusForChatQueryHandler(_outputReadRepositoryMock.Object, _dateProvider);
         var result = await handler.Handle(new GetOrderStatusForChatQuery { OrderId = 123 }, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
-        result.Value!.StatusId.Should().Be("completed");
-        result.Value.CustomerName.Should().Be("Nguyễn Văn A");
+        result.Value!.Items.Should().ContainSingle();
+        result.Value.Items[0].StatusId.Should().Be("completed");
+        result.Value.Items[0].CustomerName.Should().Be("Nguyễn Văn A");
     }
 
     [Fact(DisplayName = "CHATTOOLS_106 - Unit - GetOrderStatusForChatQueryHandler với đơn hàng không tồn tại")]
@@ -179,7 +184,7 @@ public class ChatTools
     {
         _outputReadRepositoryMock.Setup(r => r.GetByIdWithDetailsAsync(999, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
             .ReturnsAsync((DomainOutput?)null);
-        var handler = new GetOrderStatusForChatQueryHandler(_outputReadRepositoryMock.Object);
+        var handler = new GetOrderStatusForChatQueryHandler(_outputReadRepositoryMock.Object, _dateProvider);
         var result = await handler.Handle(new GetOrderStatusForChatQuery { OrderId = 999 }, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -193,7 +198,7 @@ public class ChatTools
         _statisticalReadRepositoryMock.Setup(
             r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(daily);
-        var handler = new GetSalesSummaryForChatQueryHandler(_statisticalReadRepositoryMock.Object);
+        var handler = new GetSalesSummaryForChatQueryHandler(_statisticalReadRepositoryMock.Object, _dateProvider);
         var result = await handler.Handle(new GetSalesSummaryForChatQuery { Limit = 10 }, CancellationToken.None)
             .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -208,7 +213,7 @@ public class ChatTools
         _statisticalReadRepositoryMock.Setup(
             r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        var handler = new GetSalesSummaryForChatQueryHandler(_statisticalReadRepositoryMock.Object);
+        var handler = new GetSalesSummaryForChatQueryHandler(_statisticalReadRepositoryMock.Object, _dateProvider);
         var result = await handler.Handle(new GetSalesSummaryForChatQuery { Limit = 999 }, CancellationToken.None)
             .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -225,11 +230,13 @@ public class ChatTools
             r => r.GetDailyRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
             .Callback<DateTimeOffset, DateTimeOffset, CancellationToken>((s, e, _) => { capturedStart = s; capturedEnd = e; })
             .ReturnsAsync([]);
-        var handler = new GetSalesSummaryForChatQueryHandler(_statisticalReadRepositoryMock.Object);
+        var handler = new GetSalesSummaryForChatQueryHandler(_statisticalReadRepositoryMock.Object, _dateProvider);
         await handler.Handle(new GetSalesSummaryForChatQuery { FromDate = fromDate, ToDate = toDate }, CancellationToken.None)
             .ConfigureAwait(true);
-        capturedStart.Date.Should().Be(fromDate.ToDateTime(TimeOnly.MinValue).Date);
-        capturedEnd.Date.Should().Be(toDate.ToDateTime(TimeOnly.MinValue).Date);
+        var (expectedStart, _) = _dateProvider.VietnamDayRangeUtc(fromDate);
+        var (_, expectedEndExclusive) = _dateProvider.VietnamDayRangeUtc(toDate);
+        capturedStart.UtcDateTime.Should().Be(expectedStart);
+        capturedEnd.UtcDateTime.Should().Be(expectedEndExclusive.AddTicks(-1));
     }
 
     [Fact(DisplayName = "CHATTOOLS_109 - Unit - GetTopSellingForChatQueryHandler trả danh sách bán chạy")]
@@ -239,7 +246,7 @@ public class ChatTools
         _statisticalReadRepositoryMock.Setup(
             r => r.GetTopProductsByRevenueAsync(It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), 10, It.IsAny<CancellationToken>()))
             .ReturnsAsync(topProducts);
-        var handler = new GetTopSellingForChatQueryHandler(_statisticalReadRepositoryMock.Object);
+        var handler = new GetTopSellingForChatQueryHandler(_statisticalReadRepositoryMock.Object, _dateProvider);
         var result = await handler.Handle(new GetTopSellingForChatQuery(), CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value!.Items.Should().ContainSingle();

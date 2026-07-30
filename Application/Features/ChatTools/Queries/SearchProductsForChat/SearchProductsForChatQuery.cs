@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.ChatTools.Queries.SearchProductsForChat;
 
-public sealed record SearchProductsForChatQuery : IRequest<Result<ChatToolResult<ChatProductSearchDto>>>
+public sealed record SearchProductsForChatQuery : IRequest<Result<ChatToolEnvelope<ChatProductSearchDto>>>
 {
     public string? Keyword { get; init; }
 

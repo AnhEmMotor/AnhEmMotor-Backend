@@ -1,3 +1,4 @@
+using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Features.ChatTools.Common;
 using Application.Interfaces.Repositories.Statistical;
@@ -5,16 +6,18 @@ using MediatR;
 
 namespace Application.Features.ChatTools.Queries.GetLowStockProductsForChat;
 
-public class GetLowStockProductsForChatQueryHandler(IStatisticalReadRepository statisticalReadRepository)
-    : IRequestHandler<GetLowStockProductsForChatQuery, Result<ChatToolResult<ChatLowStockProductDto>>>
+public class GetLowStockProductsForChatQueryHandler(
+    IStatisticalReadRepository statisticalReadRepository,
+    IServerDateProvider dateProvider)
+    : IRequestHandler<GetLowStockProductsForChatQuery, Result<ChatToolEnvelope<ChatLowStockProductDto>>>
 {
     private const string InStockStatus = "Còn hàng";
 
-    public async Task<Result<ChatToolResult<ChatLowStockProductDto>>> Handle(
+    public async Task<Result<ChatToolEnvelope<ChatLowStockProductDto>>> Handle(
         GetLowStockProductsForChatQuery request,
         CancellationToken cancellationToken)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = dateProvider.UtcNow;
         var performance = await statisticalReadRepository
             .GetProductPerformanceTableAsync(now.AddDays(-30), now, cancellationToken)
             .ConfigureAwait(false);
@@ -34,6 +37,13 @@ public class GetLowStockProductsForChatQueryHandler(IStatisticalReadRepository s
                     Status = p.Status ?? string.Empty
                 })
             .ToList();
-        return new ChatToolResult<ChatLowStockProductDto>(dtos, lowStock.Count, lowStock.Count > dtos.Count);
+        var inner = new ChatToolResult<ChatLowStockProductDto>(dtos, lowStock.Count, lowStock.Count > dtos.Count);
+        var meta = new ChatToolEnvelopeMeta(
+            dateProvider.VietnamNow,
+            "IStatisticalReadRepository.GetProductPerformanceTableAsync",
+            new Dictionary<string, string> { ["Loại trừ"] = "Sản phẩm còn hàng (\"Còn hàng\")" },
+            "ton-kho",
+            null);
+        return ChatToolEnvelope<ChatLowStockProductDto>.Wrap(inner, meta);
     }
 }

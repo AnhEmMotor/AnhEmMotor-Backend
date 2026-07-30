@@ -7,6 +7,21 @@ from app.agents import manager_agent
 from app.services.chat_tools import build_tools, describe_args
 
 
+def _fake_envelope(tool_path, payload):
+    return {
+        "items": [{"tool_path": tool_path, "payload": payload}],
+        "totalCount": 1,
+        "truncated": False,
+        "asOf": "2026-07-26T09:15:00+07:00",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "source": "fake",
+        "filtersApplied": {},
+        "definition": None,
+        "currency": None,
+        "warnings": [],
+    }
+
+
 class FakeBackendClient:
     def __init__(self, auth_header):
         self.auth_header = auth_header
@@ -15,7 +30,7 @@ class FakeBackendClient:
         return []
 
     async def call_tool(self, tool_path, payload):
-        return {"tool_path": tool_path, "payload": payload, "ok": True}
+        return _fake_envelope(tool_path, payload)
 
 
 class FailingBackendClient(FakeBackendClient):
@@ -80,7 +95,14 @@ def test_describe_args_dung_label_va_bo_qua_gia_tri_rong():
 
 def test_describe_args_nhieu_field_noi_bang_phay():
     summary = describe_args("get_top_selling", {"from_date": "2026-07-01", "to_date": "", "limit": 5})
-    assert summary == "Từ ngày: 2026-07-01, Top N: 5"
+    assert summary == "Top N: 5"
+
+
+def test_describe_args_bo_qua_from_to_date_vi_da_hien_o_filtersApplied():
+    summary = describe_args(
+        "get_sales_summary", {"from_date": "2026-06-01", "to_date": "2026-06-30", "limit": 10})
+    assert "2026-06-01" not in summary
+    assert "2026-06-30" not in summary
 
 
 async def test_call_tools_node_goi_dung_tool_va_emit_start_end(monkeypatch):
@@ -100,15 +122,18 @@ async def test_call_tools_node_goi_dung_tool_va_emit_start_end(monkeypatch):
     assert result["tool_limit_reached"] is False
     tool_message = result["messages"][0]
     payload = json.loads(tool_message.content)
-    assert payload["tool_path"] == "orders/status"
-    assert payload["payload"] == {"order_id": 1}
+    assert payload["items"][0]["tool_path"] == "orders/status"
+    assert payload["items"][0]["payload"] == {"order_id": 1}
     assert tool_message.tool_call_id == "call-1"
     tool_start_type, tool_start_payload = events[0]
     assert tool_start_type == "tool_start"
     assert json.loads(tool_start_payload) == {"name": "get_order_status", "summary": "Mã đơn hàng: 1"}
     tool_end_type, tool_end_payload = events[1]
     assert tool_end_type == "tool_end"
-    assert json.loads(tool_end_payload) == {"name": "get_order_status"}
+    assert json.loads(tool_end_payload) == {
+        "name": "get_order_status", "truncated": False, "totalCount": 1,
+        "asOf": "2026-07-26T09:15:00+07:00", "warnings": [], "filtersApplied": {},
+    }
 
 
 async def test_call_tools_node_tool_loi_khong_crash(monkeypatch):

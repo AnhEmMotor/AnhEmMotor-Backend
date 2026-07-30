@@ -5,6 +5,7 @@ class ChatRequest(BaseModel):
     run_id: str
     session_id: str
     message: str
+    server_date: str | None = None
 
 
 class GenerateTitleRequest(BaseModel):

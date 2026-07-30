@@ -13,12 +13,13 @@ FALLBACK_SYSTEM_PROMPT = (
 )
 
 
-def build_system_message(context: dict | None) -> SystemMessage:
+def build_system_message(context: dict | None, server_date: str | None = None) -> SystemMessage:
     if not context:
         return SystemMessage(content=FALLBACK_SYSTEM_PROMPT)
     user = context.get("user") or {}
     full_name = user.get("fullName") or "(không rõ)"
-    return SystemMessage(content=render("system_manager_chat", full_name=full_name))
+    return SystemMessage(content=render(
+        "system_manager_chat", full_name=full_name, server_date=server_date or "(không rõ)"))
 
 
 def build_history_messages(context: dict | None, current_message: str) -> list:

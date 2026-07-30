@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 
 namespace Infrastructure.Services.Ai;
 
@@ -103,6 +104,11 @@ public class AiSidecarManager(
         startInfo.EnvironmentVariables["QDRANT_URL"] = config["AISetup:QdrantUrl"] ?? string.Empty;
         startInfo.EnvironmentVariables["QDRANT_API_KEY"] = config["AISetup:QdrantApiKey"] ?? string.Empty;
         startInfo.EnvironmentVariables["POSTGRES_URL"] = config.GetConnectionString("PostgreSql") ?? string.Empty;
+        // Stage 16.8 — cờ shadow/canary/full/off theo tool, đọc từ AISetup:ToolFlags trong appsettings.json.
+        // pydantic-settings tự parse JSON string từ env var cho field kiểu dict — không cần đổi gì phía sidecar.
+        var toolFlags = config.GetSection("AISetup:ToolFlags").GetChildren()
+            .ToDictionary(s => s.Key, s => s.Value ?? "full");
+        startInfo.EnvironmentVariables["TOOL_FLAGS"] = JsonSerializer.Serialize(toolFlags);
         try
         {
             _sidecarProcess = new Process { StartInfo = startInfo };

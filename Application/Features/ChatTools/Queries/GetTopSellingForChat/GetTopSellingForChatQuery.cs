@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.ChatTools.Queries.GetTopSellingForChat;
 
-public sealed record GetTopSellingForChatQuery : IRequest<Result<ChatToolResult<ChatTopSellingProductDto>>>
+public sealed record GetTopSellingForChatQuery : IRequest<Result<ChatToolEnvelope<ChatTopSellingProductDto>>>
 {
     public DateOnly? FromDate { get; init; }
 

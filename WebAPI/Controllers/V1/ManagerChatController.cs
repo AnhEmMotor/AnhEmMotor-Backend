@@ -1,4 +1,5 @@
 using Application.ApiContracts.ManagerChat.Requests;
+using Application.Features.ManagerChat.Commands.CreateChatFeedback;
 using Application.Features.ManagerChat.Commands.CreateManagerChatSession;
 using Application.Features.ManagerChat.Commands.DeleteManagerChatSession;
 using Application.Features.ManagerChat.Commands.UpdateManagerChatSession;
@@ -73,6 +74,15 @@ public class ManagerChatController(ISender sender) : ApiController
     {
         var query = new GetActiveChatRunQuery(id);
         var result = await sender.Send(query, cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("runs/{runId}/feedback")]
+    [SwaggerOperation(Summary = "Ghi nhận phản hồi \"Số liệu chưa đúng\" cho một run chat (Stage 16.9)")]
+    public async Task<IActionResult> CreateFeedback(Guid runId, [FromBody] CreateChatFeedbackRequest request, CancellationToken cancellationToken)
+    {
+        var command = new CreateChatFeedbackCommand(runId, request.Comment);
+        var result = await sender.Send(command, cancellationToken);
         return HandleResult(result);
     }
 
