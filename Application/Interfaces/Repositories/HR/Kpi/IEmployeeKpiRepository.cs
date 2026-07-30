@@ -4,11 +4,11 @@ namespace Application.Interfaces.Repositories.HR.Kpi;
 
 public interface IEmployeeKpiRepository
 {
-    Task<List<KPI>> GetAllAsync(CancellationToken cancellationToken = default);
+    public Task<List<KPI>> GetAllAsync(CancellationToken cancellationToken = default);
 
-    Task<KPI?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+    public Task<KPI?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
-    Task<bool> HasDuplicateAsync(
+    public Task<bool> HasDuplicateAsync(
         int employeeProfileId,
         string metricName,
         DateTime periodStart,
@@ -16,9 +16,9 @@ public interface IEmployeeKpiRepository
         int? excludeId = null,
         CancellationToken cancellationToken = default);
 
-    Task AddAsync(KPI kpi, CancellationToken cancellationToken = default);
+    public Task AddAsync(KPI kpi, CancellationToken cancellationToken = default);
 
-    void Update(KPI kpi);
+    public void Update(KPI kpi);
 
-    void Delete(KPI kpi);
+    public void Delete(KPI kpi);
 }
