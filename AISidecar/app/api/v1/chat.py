@@ -9,10 +9,12 @@ from langchain_core.messages import HumanMessage
 
 from app.agents.manager_agent import get_graph
 from app.api.deps import verify_internal_secret
+from app.config import get_settings
 from app.schemas.chat import ChatRequest, GenerateTitleRequest
 from app.services.backend_client import BackendClient
 from app.services.prompt_builder import build_system_message, build_history_messages
 from app.services.routing import expire_if_stale, extract_entities
+from app.tools.registry import registry_fingerprint
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +78,7 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
         "permissions": (context or {}).get("permissions") or [],
         "history": (context or {}).get("history") or [],
         "routing_context": routing_context,
+        "tool_flags_snapshot": dict(get_settings().tool_flags),
     }
 
     cancel_event = asyncio.Event()
@@ -88,6 +91,12 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
         try:
             async for type_, payload in graph.astream(initial_state, config=config, stream_mode="custom"):
                 yield _event(type_, payload)
+            final_state = graph.get_state(config).values
+            run_meta = {
+                "toolRegistryFingerprint": registry_fingerprint(),
+                "modelUsed": final_state.get("model_used"),
+            }
+            yield _event("run_meta", json.dumps(run_meta, ensure_ascii=False))
             yield _event("done")
         except Exception as e:
             logger.error("LLM streaming error for run %s: %s", chat_req.run_id, str(e))

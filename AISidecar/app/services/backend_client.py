@@ -38,6 +38,15 @@ class BackendClient:
             return {}
         return resp.json()
 
+    async def get_tool_manifest(self) -> dict:
+        url = f"{self._settings.backend_base}/internal/chat/tools/manifest"
+        timeout = self._settings.request_timeout_seconds
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(url, headers=self._headers())
+        if resp.status_code >= 400:
+            raise BackendError("/internal/chat/tools/manifest", resp.status_code)
+        return resp.json()
+
     async def get_context(self, session_id: str, message: str,
                           history_limit: int = 20) -> dict:
         return await self._post("/internal/chat/context", {

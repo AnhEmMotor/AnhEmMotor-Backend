@@ -7,6 +7,8 @@ from fastapi.responses import JSONResponse
 from app.core.errors import SidecarError
 from app.core.logging import setup_logging
 from app.api.v1 import health, chat, search_products, admin
+from app.services.backend_client import BackendClient
+from app.tools.registry import verify_tool_contract
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +17,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(application: FastAPI):
     setup_logging()
     logger.info("AI Sidecar started")
+    await verify_tool_contract(BackendClient(""))
     yield
     logger.info("AI Sidecar shutting down")
 

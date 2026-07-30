@@ -1,9 +1,13 @@
 import json
+import re
 from dataclasses import dataclass
 from typing import Literal
 
 MAX_LIMIT = {"search_products": 25, "get_low_stock_products": 25, "get_order_status": 25}
 DEFAULT_TOOL_BUDGET = 8
+
+ID_PRODUCERS = {"search_products": "productId"}
+ID_CONSUMERS = {"get_product_stock": "product_id"}
 
 INJECTION_MARKERS = [
     "bỏ qua", "ignore previous", "system:", "[system]", "<|im_start|>",
@@ -26,6 +30,7 @@ class GuardResult:
     message: str = ""
     args: dict | None = None
     tool_name: str = ""
+    kind: str = ""
 
     @classmethod
     def allow(cls, args: dict | None = None) -> "GuardResult":
@@ -41,8 +46,8 @@ class GuardResult:
                     message=f"Tool ghi dữ liệu '{tool_name}' cần được duyệt trước khi chạy.")
 
     @classmethod
-    def rewrite(cls, message: str) -> "GuardResult":
-        return cls("rewrite", message=message)
+    def rewrite(cls, message: str, kind: str = "no_permission") -> "GuardResult":
+        return cls("rewrite", message=message, kind=kind)
 
 
 def call_signature(name: str, args: dict) -> str:
@@ -69,6 +74,31 @@ def check_tool_call(name: str, args: dict, state: dict) -> GuardResult:
     return GuardResult.allow(args)
 
 
+def extract_produced_ids(name: str, result) -> set[str]:
+    field = ID_PRODUCERS.get(name)
+    if not field or not isinstance(result, dict):
+        return set()
+    items = result.get("items")
+    if not isinstance(items, list):
+        return set()
+    return {str(item[field]) for item in items if isinstance(item, dict) and field in item}
+
+
+def check_known_id(name: str, args: dict, state: dict) -> str | None:
+    arg_name = ID_CONSUMERS.get(name)
+    if not arg_name or arg_name not in args:
+        return None
+    value = str(args[arg_name])
+    if value in (state.get("known_ids") or set()):
+        return None
+    if value in re.findall(r"\d+", state.get("user_text") or ""):
+        return None
+    return (
+        f"Mã sản phẩm '{value}' không khớp với kết quả tìm kiếm nào trong lượt này và người dùng "
+        f"cũng không nêu mã này. Hãy gọi search_products trước để lấy đúng mã, KHÔNG tự đặt mã sản phẩm."
+    )
+
+
 def contains_numbers(text: str) -> bool:
     return any(ch.isdigit() for ch in text)
 
@@ -84,19 +114,21 @@ def check_output(answer: str, state: dict) -> GuardResult:
     if state.get("had_forbidden_tool") and contains_numbers(answer):
         return GuardResult.rewrite(
             "Có tool bị từ chối quyền. Hãy viết lại câu trả lời, "
-            "nói rõ bạn không truy cập được dữ liệu đó và KHÔNG nêu bất kỳ con số nào.")
+            "nói rõ bạn không truy cập được dữ liệu đó và KHÔNG nêu bất kỳ con số nào.",
+            kind="no_permission")
 
     if contains_business_metric(answer) and state.get("tool_call_count", 0) == 0:
         return GuardResult.rewrite(
             "Bạn nêu số liệu mà chưa tra cứu dữ liệu. Hãy gọi tool phù hợp "
-            "hoặc nói rõ là bạn không có số liệu.")
+            "hoặc nói rõ là bạn không có số liệu.",
+            kind="unverified_metric")
 
     lowered = answer.lower()
     if state.get("tool_call_count", 0) == 0 and any(marker in lowered for marker in STALL_MARKERS):
         return GuardResult.rewrite(
-            "Bạn hứa sẽ kiểm tra nhưng không gọi tool nào và không có tool phù hợp trong "
-            "danh sách được cấp. Hãy nói rõ ngay là bạn không có quyền hoặc không có công cụ "
-            "để tra dữ liệu này, KHÔNG hứa hẹn sẽ làm.")
+            "Bạn hứa sẽ tra cứu nhưng chưa gọi tool nào trong lượt này. Hãy gọi tool phù hợp "
+            "ngay bây giờ thay vì chỉ hứa, hoặc nếu không có tool phù hợp thì nói rõ luôn.",
+            kind="stalled_promise")
 
     if any(marker in answer for marker in PROMPT_LEAK_MARKERS):
         return GuardResult.block("Không thể trả lời yêu cầu này.")

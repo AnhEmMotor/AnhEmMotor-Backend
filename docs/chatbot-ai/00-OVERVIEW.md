@@ -116,7 +116,7 @@ Vue ──SignalR── .NET Run Engine ──HTTP── AISidecar (LangGraph ag
 | 14 | Tối ưu tốc độ & số lần suy nghĩ | [14-STAGE-PERFORMANCE.md](14-STAGE-PERFORMANCE.md) | **#5** | 2–3 ngày |
 | 15 | Danh mục Tool đầy đủ (71 tool) | [15-STAGE-TOOL-CATALOG.md](15-STAGE-TOOL-CATALOG.md) | **bổ sung** | 8–12 ngày |
 | 16 | Độ chính xác dữ liệu (chống số sai lệch) | [16-STAGE-TOOL-DATA-FIDELITY.md](16-STAGE-TOOL-DATA-FIDELITY.md) | **bổ sung** | 3–4 ngày |
-| 17 | Vòng đời Tool & hợp đồng phiên bản | [17-STAGE-TOOL-LIFECYCLE.md](17-STAGE-TOOL-LIFECYCLE.md) | **bổ sung** | 3–4 ngày |
+| 17 | Vòng đời Tool & hợp đồng phiên bản | [17-STAGE-TOOL-LIFECYCLE.md](done/17-STAGE-TOOL-LIFECYCLE.md) | **bổ sung** | 3–4 ngày |
 | 18 | Nhất quán & hoà giải trạng thái | [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md) | **bổ sung** | 3–4 ngày |
 | 19 | Cache Plan (giảm số lần suy nghĩ) | [19-STAGE-PLAN-CACHE.md](19-STAGE-PLAN-CACHE.md) | **bổ sung** | 3–4 ngày |
 | 20 | Chọn tool động theo ngữ cảnh | [20-STAGE-DYNAMIC-TOOL-SCOPING.md](20-STAGE-DYNAMIC-TOOL-SCOPING.md) | **bổ sung** | 3–4 ngày |

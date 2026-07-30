@@ -16,20 +16,37 @@ from app.core.llm import get_llm
 from app.guardrails.tool_guard import (
     DEFAULT_TOOL_BUDGET,
     call_signature,
+    check_known_id,
     check_output,
     check_tool_call,
+    extract_produced_ids,
     sanitize_tool_result,
     wrap_tool_result,
 )
 from app.services.backend_client import BackendClient
 from app.services.chat_tools import build_tools, describe_args
 from app.services.routing import resolve_modules
-from app.tools.registry import build_tool_scope
+from app.tools.registry import build_tool_scope, load_tool_specs, resolve_tool_call_error
 
 STEERING_POLL_INTERVAL_SECONDS = 0.7
 MAX_TOOL_TURNS = 8
 
 GUARDRAIL_STATE_KEY = "permissions"
+
+REWRITE_MESSAGES = {
+    "no_permission": (
+        "Tôi không có đủ quyền hoặc công cụ để tra dữ liệu này. "
+        "Vui lòng liên hệ quản trị viên nếu bạn cần được cấp thêm quyền."
+    ),
+    "unverified_metric": (
+        "Tôi chưa tra cứu được dữ liệu thật cho câu hỏi này nên không thể đưa ra số liệu. "
+        "Bạn có thể hỏi lại cụ thể hơn để tôi tra đúng thông tin không?"
+    ),
+    "stalled_promise": (
+        "Xin lỗi, tôi cần tra cứu thêm để trả lời chính xác. Bạn có thể nhắc lại yêu cầu "
+        "hoặc cho thêm chi tiết (ví dụ tên/mã sản phẩm cụ thể) để tôi tìm giúp bạn?"
+    ),
+}
 
 
 class AgentState(TypedDict):
@@ -54,6 +71,12 @@ class AgentState(TypedDict):
     scoped_modules: list[str]
     expanded_modules: set[str]
     current_plan_step: dict | None
+    module_expansions: int
+    tool_not_found_counts: dict[str, int]
+    tools_disabled: bool
+    tool_flags_snapshot: dict[str, str]
+    model_used: str | None
+    known_ids: set[str]
 
 
 def _latest_human_text(messages) -> str:
@@ -120,14 +143,16 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
     llm = get_llm(temperature=0.3)
     updates = {}
 
-    all_tools = build_tools(client)
     scoping = GUARDRAIL_STATE_KEY in state
-    if scoping:
+    if scoping and state.get("tools_disabled"):
+        tools = []
+        updates["allowed_tool_names"] = set()
+    elif scoping:
         allowed_names = {spec.name for spec in build_tool_scope(state)}
-        tools = [t for t in all_tools if t.name in allowed_names]
+        tools = build_tools(client, allowed_names)
         updates["allowed_tool_names"] = allowed_names
     else:
-        tools = all_tools
+        tools = build_tools(client)
 
     if hasattr(llm, "bind_tools"):
         llm = llm.bind_tools(tools)
@@ -162,8 +187,18 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         result_message = AIMessage(content=full)
     else:
         result_message = full
+        metadata = getattr(full, "response_metadata", None) or {}
+        model_used = metadata.get("model_name") or metadata.get("model")
+        if model_used:
+            updates["model_used"] = model_used
 
-    if scoping and not getattr(result_message, "tool_calls", None):
+    tool_calls = getattr(result_message, "tool_calls", None)
+    if scoping and tool_calls and (result_message.content or "").strip():
+        writer(("message_correction", ""))
+        writer(("guardrail_blocked", json.dumps(
+            {"tool": "", "reason": "text_kem_tool_call_bi_xoa_vi_chua_co_ket_qua_that"}, ensure_ascii=False)))
+        result_message = AIMessage(content="", tool_calls=tool_calls)
+    elif scoping and not tool_calls:
         guard = check_output(result_message.content or "", {
             "had_forbidden_tool": state.get("had_forbidden_tool", False),
             "tool_call_count": state.get("tool_call_count", 0),
@@ -172,10 +207,7 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
             result_message = AIMessage(content="Không thể trả lời yêu cầu này.")
             writer(("message_correction", result_message.content))
         elif guard.action == "rewrite":
-            result_message = AIMessage(content=(
-                "Tôi không có đủ quyền hoặc công cụ để tra dữ liệu này. "
-                "Vui lòng liên hệ quản trị viên nếu bạn cần được cấp thêm quyền."
-            ))
+            result_message = AIMessage(content=REWRITE_MESSAGES.get(guard.kind, REWRITE_MESSAGES["no_permission"]))
             writer(("message_correction", result_message.content))
 
     return {
@@ -200,12 +232,21 @@ async def call_tools_node(state: AgentState) -> dict:
         return {"tool_turns": tool_turns, "tool_limit_reached": True, "messages": [limit_message]}
 
     client = BackendClient(state["auth_header"])
-    tools_by_name = {tool.name: tool for tool in build_tools(client)}
-
     guarding = "allowed_tool_names" in state
+    tools_by_name = {
+        tool.name: tool
+        for tool in build_tools(client, state["allowed_tool_names"] if guarding else None)
+    }
     call_signatures = set(state.get("call_signatures") or set())
     tool_call_count = state.get("tool_call_count", 0)
     had_forbidden_tool = state.get("had_forbidden_tool", False)
+    module_expansions = state.get("module_expansions", 0)
+    expanded_modules = set(state.get("expanded_modules") or set())
+    tool_not_found_counts = dict(state.get("tool_not_found_counts") or {})
+    tools_disabled = state.get("tools_disabled", False)
+    known_ids = set(state.get("known_ids") or set())
+    user_text = _latest_human_text(state.get("messages"))
+    specs = load_tool_specs() if guarding else {}
 
     result_messages = []
     for tool_call in tool_calls:
@@ -215,6 +256,35 @@ async def call_tools_node(state: AgentState) -> dict:
         writer(("tool_start", json.dumps({"name": name, "summary": summary}, ensure_ascii=False)))
 
         if guarding:
+            lifecycle_error = resolve_tool_call_error(name, {**state, "expanded_modules": expanded_modules}, specs)
+            if lifecycle_error is not None:
+                kind = lifecycle_error["kind"]
+                if kind == "module_expand" and module_expansions < 1:
+                    module = lifecycle_error["module"]
+                    expanded_modules.add(module)
+                    module_expansions += 1
+                    reason = "module_loaded"
+                    content = json.dumps({"info": reason,
+                                           "message": f"Đã nạp thêm nhóm tool '{module}'. Hãy gọi lại."},
+                                          ensure_ascii=False)
+                else:
+                    if kind == "module_expand":
+                        message = (f"Bạn không có quyền dùng '{name}'. Hãy nói với người dùng rằng họ "
+                                   "không có quyền truy cập thông tin này. KHÔNG đoán dữ liệu.")
+                    else:
+                        message = lifecycle_error["message"]
+                    if kind == "tool_not_found":
+                        tool_not_found_counts[name] = tool_not_found_counts.get(name, 0) + 1
+                        if tool_not_found_counts[name] >= 2:
+                            message += " Dừng thử tool này, hãy trả lời bằng dữ liệu đã có."
+                            tools_disabled = True
+                    reason = message
+                    content = json.dumps({"error": message}, ensure_ascii=False)
+                result_messages.append(ToolMessage(content=content, tool_call_id=tool_call["id"]))
+                writer(("tool_end", json.dumps({"name": name}, ensure_ascii=False)))
+                writer(("guardrail_blocked", json.dumps({"tool": name, "reason": reason}, ensure_ascii=False)))
+                continue
+
             guard = check_tool_call(name, args, {
                 "allowed_tool_names": state["allowed_tool_names"],
                 "tool_call_count": tool_call_count,
@@ -232,6 +302,18 @@ async def call_tools_node(state: AgentState) -> dict:
                 writer(("guardrail_blocked", json.dumps(
                     {"tool": name, "reason": guard.message}, ensure_ascii=False)))
                 continue
+
+            id_error = check_known_id(name, args, {"known_ids": known_ids, "user_text": user_text})
+            if id_error is not None:
+                result_messages.append(ToolMessage(
+                    content=json.dumps({"error": id_error}, ensure_ascii=False),
+                    tool_call_id=tool_call["id"],
+                ))
+                writer(("tool_end", json.dumps({"name": name}, ensure_ascii=False)))
+                writer(("guardrail_blocked", json.dumps(
+                    {"tool": name, "reason": id_error}, ensure_ascii=False)))
+                continue
+
             args = guard.args
             call_signatures.add(call_signature(name, args))
             tool_call_count += 1
@@ -242,6 +324,7 @@ async def call_tools_node(state: AgentState) -> dict:
                 raise ValueError(f"Unknown tool: {name}")
             result = await tool.ainvoke(args)
             if guarding:
+                known_ids.update(extract_produced_ids(name, result))
                 result, flagged = sanitize_tool_result(result)
                 if flagged:
                     writer(("guardrail_blocked", json.dumps(
@@ -269,6 +352,11 @@ async def call_tools_node(state: AgentState) -> dict:
         updates["call_signatures"] = call_signatures
         updates["tool_call_count"] = tool_call_count
         updates["had_forbidden_tool"] = had_forbidden_tool
+        updates["module_expansions"] = module_expansions
+        updates["expanded_modules"] = expanded_modules
+        updates["tool_not_found_counts"] = tool_not_found_counts
+        updates["tools_disabled"] = tools_disabled
+        updates["known_ids"] = known_ids
     return updates
 
 

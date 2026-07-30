@@ -48,9 +48,11 @@ def describe_args(tool_name: str, args: dict) -> str:
     return ", ".join(parts)
 
 
-def build_tools(backend_client: BackendClient) -> list[StructuredTool]:
+def build_tools(backend_client: BackendClient, allowed_names: set[str] | None = None) -> list[StructuredTool]:
     tools = []
     for entry in load_catalog():
+        if allowed_names is not None and entry["name"] not in allowed_names:
+            continue
         path = entry["path"]
         schema = _build_schema(entry["name"], entry["args"])
 

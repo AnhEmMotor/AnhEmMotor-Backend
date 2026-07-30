@@ -29,7 +29,7 @@ public class ChatToolCatalogProvider(ILogger<ChatToolCatalogProvider> logger) : 
         }
         var json = File.ReadAllText(path);
         var raw = JsonSerializer.Deserialize<List<RawEntry>>(json) ?? [];
-        return raw.Select(r => new ChatToolCatalogEntry(r.Name, r.Path, r.Label)).ToList();
+        return raw.Select(r => new ChatToolCatalogEntry(r.Name, r.Path, r.Label, r.Status ?? "active")).ToList();
     }
 
     // Tìm repo root bằng file .sln (giống SidecarConfigGuard.RepoRoot() trong UnitTests) — chung
@@ -52,5 +52,6 @@ public class ChatToolCatalogProvider(ILogger<ChatToolCatalogProvider> logger) : 
     private record RawEntry(
         [property: JsonPropertyName("name")] string Name,
         [property: JsonPropertyName("path")] string Path,
-        [property: JsonPropertyName("label")] string Label);
+        [property: JsonPropertyName("label")] string Label,
+        [property: JsonPropertyName("status")] string? Status = null);
 }

@@ -39,7 +39,8 @@ class Settings(BaseSettings):
     plan_cache_enabled: bool = True
 
     tool_flags: dict[str, Literal["off", "shadow", "canary", "full"]] = {}
-    tool_kill_switch: tuple[str, ...] = ()
+
+    expected_build_id: str = ""
 
     @property
     def backend_base(self) -> str:

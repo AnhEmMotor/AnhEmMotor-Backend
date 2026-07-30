@@ -54,11 +54,16 @@ public class ChatRunExecutorTests
               })
               .Returns(Task.CompletedTask);
 
+        var tokenManager = new Mock<ITokenManagerService>();
+        var configuration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+
         var services = new ServiceCollection();
         services.AddSingleton(readRepo.Object);
         services.AddSingleton(streamClient.Object);
         services.AddSingleton(tokenStore.Object);
         services.AddSingleton(writer.Object);
+        services.AddSingleton(tokenManager.Object);
+        services.AddSingleton(configuration.Object);
         var provider = services.BuildServiceProvider();
 
         var queue = new ChatRunQueue();
@@ -131,11 +136,16 @@ public class ChatRunExecutorTests
               })
               .Returns(Task.CompletedTask);
 
+        var tokenManager = new Mock<ITokenManagerService>();
+        var configuration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+
         var services = new ServiceCollection();
         services.AddSingleton(readRepo.Object);
         services.AddSingleton(streamClient.Object);
         services.AddSingleton(tokenStore.Object);
         services.AddSingleton(writer.Object);
+        services.AddSingleton(tokenManager.Object);
+        services.AddSingleton(configuration.Object);
         var provider = services.BuildServiceProvider();
 
         var queue = new ChatRunQueue();
@@ -205,11 +215,16 @@ public class ChatRunExecutorTests
               })
               .Returns(Task.CompletedTask);
 
+        var tokenManager = new Mock<ITokenManagerService>();
+        var configuration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+
         var services = new ServiceCollection();
         services.AddSingleton(readRepo.Object);
         services.AddSingleton(streamClient.Object);
         services.AddSingleton(tokenStore.Object);
         services.AddSingleton(writer.Object);
+        services.AddSingleton(tokenManager.Object);
+        services.AddSingleton(configuration.Object);
         var provider = services.BuildServiceProvider();
 
         var queue = new ChatRunQueue();
@@ -280,11 +295,16 @@ public class ChatRunExecutorTests
               .Callback(() => completed.TrySetResult())
               .Returns(Task.CompletedTask);
 
+        var tokenManager = new Mock<ITokenManagerService>();
+        var configuration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+
         var services = new ServiceCollection();
         services.AddSingleton(readRepo.Object);
         services.AddSingleton(streamClient.Object);
         services.AddSingleton(tokenStore.Object);
         services.AddSingleton(writer.Object);
+        services.AddSingleton(tokenManager.Object);
+        services.AddSingleton(configuration.Object);
         var provider = services.BuildServiceProvider();
 
         var queue = new ChatRunQueue();

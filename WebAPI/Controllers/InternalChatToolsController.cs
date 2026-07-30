@@ -5,6 +5,7 @@ using Application.Features.ChatTools.Queries.GetProductStockForChat;
 using Application.Features.ChatTools.Queries.GetSalesSummaryForChat;
 using Application.Features.ChatTools.Queries.GetTopSellingForChat;
 using Application.Features.ChatTools.Queries.SearchProductsForChat;
+using Application.Interfaces.Services;
 using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -23,8 +24,24 @@ namespace WebAPI.Controllers;
 [Authorize]
 [WebAPI.Attributes.LocalhostOnly]
 [DisableRateLimiting]
-public class InternalChatToolsController(ISender sender) : ApiController
+public class InternalChatToolsController(ISender sender, IChatToolCatalogProvider catalogProvider) : ApiController
 {
+    /// <summary>
+    /// Kiểm kê tool đang active + build id, dùng để sidecar tự đối chiếu hợp đồng lúc khởi động (Stage 17.5).
+    /// AllowAnonymous vì sidecar gọi lúc chưa có phiên user nào — LocalhostOnly là hàng rào thật.
+    /// </summary>
+    [HttpGet("manifest")]
+    [AllowAnonymous]
+    public IActionResult GetManifest()
+    {
+        var tools = catalogProvider.GetCatalog()
+            .Where(t => t.Status == "active")
+            .Select(t => t.Name)
+            .ToList();
+        var buildId = typeof(InternalChatToolsController).Assembly.GetName().Version?.ToString() ?? "dev";
+        return Ok(new { tools, buildId });
+    }
+
     [HttpPost("products/search")]
     [HasPermission(Permissions.Order.ProductManagement.View)]
     public async Task<IActionResult> SearchProducts(

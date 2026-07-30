@@ -4,6 +4,18 @@
 > Mục tiêu: với yêu cầu phức tạp, AI **lập kế hoạch trước**, người dùng **sửa được kế hoạch**
 > — kể cả **trong lúc kế hoạch đang được tạo** — rồi mới thực thi.
 
+> ⚠️ **Nợ từ Stage 17 (Tool Lifecycle) — làm kèm khi có Plan Mode:**
+> - **17.8** — Resume run / plan hết hiệu lực khi tool bị gỡ giữa lúc plan chờ duyệt: revalidate
+>   bằng `registry_fingerprint()` (đã có sẵn từ 17.2) trước khi resume; tool cần đã gỡ → plan về
+>   `Drafting`, bước liên quan `invalid`, phát event `plan_invalidated`.
+> - **17.9 phương án A** — Run token riêng, scope hẹp (chỉ `/internal/chat/tools/*`, gắn `runId`,
+>   không dùng chéo giữa các run). Hiện tại (chưa có Plan Mode) chỉ mới xử lý phần hẹp hơn: tự ký lại
+>   JWT user khi gần hết hạn giữa run (`ChatRunExecutor.EnsureFreshToken`) — đủ cho run dài tối đa
+>   5 phút, **không đủ** cho kịch bản "chờ duyệt 24h" của Stage 10. Khi duyệt plan, phải cấp run token
+>   mới **và** revalidate permission tại thời điểm duyệt, không dùng permission đã chụp 24h trước.
+>
+> Xem chi tiết: [17-STAGE-TOOL-LIFECYCLE.md](done/17-STAGE-TOOL-LIFECYCLE.md) mục 17.8, 17.9.
+
 Ví dụ:
 > User: "Chuẩn bị báo cáo tồn kho quý này cho tôi"
 > AI: *(sinh plan từng bước, stream ra màn hình)*

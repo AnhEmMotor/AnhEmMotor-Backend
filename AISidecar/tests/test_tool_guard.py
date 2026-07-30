@@ -83,6 +83,16 @@ def test_check_output_rewrite_khi_hua_kiem_tra_ma_khong_goi_tool():
         "Tôi sẽ kiểm tra doanh thu của tháng này cho bạn. Vui lòng đợi một chút nhé.",
         {"had_forbidden_tool": False, "tool_call_count": 0})
     assert result.action == "rewrite"
+    assert result.kind == "stalled_promise"
+
+
+def test_check_output_kind_phan_biet_tung_ly_do_rewrite():
+    forbidden = tool_guard.check_output("Doanh thu là 5000000 đồng",
+                                         {"had_forbidden_tool": True, "tool_call_count": 1})
+    assert forbidden.kind == "no_permission"
+    metric = tool_guard.check_output("Doanh thu là 5000000 đồng",
+                                      {"had_forbidden_tool": False, "tool_call_count": 0})
+    assert metric.kind == "unverified_metric"
 
 
 def test_check_output_block_khi_ro_ri_system_prompt():
@@ -103,6 +113,35 @@ def test_sanitize_tool_result_khong_flag_du_lieu_binh_thuong():
     cleaned, flagged = tool_guard.sanitize_tool_result({"name": "Lốp Michelin", "price": 500000})
     assert flagged is False
     assert cleaned == {"name": "Lốp Michelin", "price": 500000}
+
+
+def test_extract_produced_ids_lay_tu_ket_qua_search_products():
+    result = {"items": [{"productId": 1, "productName": "A"}, {"productId": 2, "productName": "B"}],
+              "totalCount": 2, "truncated": False}
+    assert tool_guard.extract_produced_ids("search_products", result) == {"1", "2"}
+
+
+def test_extract_produced_ids_bo_qua_tool_khong_phai_id_producer():
+    assert tool_guard.extract_produced_ids("get_order_status", {"items": [{"productId": 1}]}) == set()
+
+
+def test_check_known_id_chan_id_bia_khong_ro_nguon_goc():
+    error = tool_guard.check_known_id(
+        "get_product_stock", {"product_id": 12345}, {"known_ids": set(), "user_text": "tồn kho nhông sên đĩa"})
+    assert error is not None
+    assert "search_products" in error
+
+
+def test_check_known_id_cho_qua_id_tu_ket_qua_search_truoc_do():
+    error = tool_guard.check_known_id(
+        "get_product_stock", {"product_id": 5}, {"known_ids": {"5"}, "user_text": ""})
+    assert error is None
+
+
+def test_check_known_id_cho_qua_id_nguoi_dung_tu_neu_ro():
+    error = tool_guard.check_known_id(
+        "get_product_stock", {"product_id": 1024}, {"known_ids": set(), "user_text": "tồn kho sản phẩm 1024"})
+    assert error is None
 
 
 def test_wrap_tool_result_boc_ranh_gioi_ro_rang():

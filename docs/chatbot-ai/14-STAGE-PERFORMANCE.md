@@ -128,7 +128,7 @@ async def get_context_cached(session_id: str, ...) -> dict:
 > ⚠️ **Cách xử lý dứt điểm:** key cache theo `session_id:run_id` thay vì chỉ `session_id`.
 > Cache tự hết hiệu lực khi run kết thúc → cửa sổ rủi ro bằng đúng thời lượng một run (≤ 5 phút)
 > và không cần TTL. Kèm invalidate chủ động và revalidate ở backend.
-> Ba lớp đầy đủ ở [17-STAGE-TOOL-LIFECYCLE.md](17-STAGE-TOOL-LIFECYCLE.md) mục 17.7.
+> Ba lớp đầy đủ ở [17-STAGE-TOOL-LIFECYCLE.md](done/17-STAGE-TOOL-LIFECYCLE.md) mục 17.7.
 
 Lịch sử hội thoại thì **không cache** (đổi mỗi lượt) — tách thành request riêng, hoặc lấy
 kèm nhưng phần user/permissions dùng cache.

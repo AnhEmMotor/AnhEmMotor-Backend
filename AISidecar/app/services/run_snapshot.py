@@ -7,8 +7,6 @@ def _parse_as_of(value: str) -> datetime:
 
 
 class RunSnapshot:
-    """Ảnh chụp dữ liệu trong phạm vi một run. Mọi tool đọc qua đây."""
-
     def __init__(self, run_id: str):
         self.run_id = run_id
         self.as_of = None

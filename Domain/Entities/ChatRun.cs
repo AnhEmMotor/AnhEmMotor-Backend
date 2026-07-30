@@ -44,5 +44,13 @@ public class ChatRun : BaseEntity
     [Column("PendingSteering", TypeName = "nvarchar(max)")]
     public string PendingSteering { get; set; } = "[]";
 
+    /// <summary>Dấu vân tay registry tool lúc run bắt đầu — dùng để revalidate khi resume (Stage 17.2/17.8).</summary>
+    [Column("ToolRegistryFingerprint", TypeName = "nvarchar(20)")]
+    public string? ToolRegistryFingerprint { get; set; }
+
+    /// <summary>Tên model thật lấy từ response metadata của LLM, không phải từ config (Stage 17.10).</summary>
+    [Column("ModelUsed", TypeName = "nvarchar(100)")]
+    public string? ModelUsed { get; set; }
+
     public ICollection<ChatRunEvent> Events { get; set; } = [];
 }

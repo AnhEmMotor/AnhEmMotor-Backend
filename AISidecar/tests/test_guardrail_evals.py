@@ -149,9 +149,9 @@ async def test_eval_khong_co_quyen(monkeypatch):
 
     chunks, final = await _run(monkeypatch, FakeBackendClient, FakeLLM(), case)
     events = _guardrail_events(chunks)
-    assert any("không khả dụng" in e["reason"] for e in events)
+    assert any("không có quyền" in e["reason"] for e in events)
     tool_msgs = [m for m in final["messages"] if type(m).__name__ == "ToolMessage"]
-    assert tool_msgs and "không khả dụng" in tool_msgs[-1].content
+    assert tool_msgs and "không có quyền" in tool_msgs[-1].content
 
 
 async def test_eval_khong_bia_khi_tool_loi(monkeypatch):

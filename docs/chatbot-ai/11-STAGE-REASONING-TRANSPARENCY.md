@@ -15,6 +15,25 @@ Hai mục tiêu này kéo ngược nhau, nên phần khó nhất của Stage nà
 > Xem chi tiết: [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md#1810-thinking-mâu-thuẫn-với-câu-trả-lời-c6),
 > mục 18.10, 18.11.
 
+> **⚠️ Nợ từ Stage 17 (Tool Lifecycle) — bug thật gặp khi test thủ công (2026-07-29):**
+> Model đôi khi viết narration ("Tôi đã tìm thấy...", có lúc kèm cả cú pháp gọi tool dạng JSON)
+> **cùng lượt** với `tool_calls` thật — tức là "kể trước" nội dung mà tool **chưa** trả về, có thể
+> bịa hẳn dữ liệu (tên sản phẩm, thương hiệu không có thật). Vì `text_delta` stream theo từng
+> token ngay khi sinh ra (Stage 14 đã **quyết định không gom batch** — xem 14 mục "Không dùng
+> batching"), người dùng thấy đoạn bịa đó thoáng qua **trước khi** kịp bị sửa.
+>
+> **Vá tạm ở Stage 17** (`app/agents/manager_agent.py::call_model_node`): nếu message có
+> `tool_calls` **và** có text đi kèm → xoá text đó, chỉ giữ `tool_calls`, phát `message_correction`
+> rỗng. Chặn được nội dung bịa lọt vào **câu trả lời cuối cùng**, nhưng không chặn được hiện tượng
+> "nháy" trong lúc đang stream (đợi cả message xong mới biết cần xoá).
+>
+> **Sửa tận gốc ở đây (11.4):** cơ chế `<suy_nghi>` đã tách narration ra **kênh riêng** ngay từ đầu
+> (không đi qua `text_delta`) — nếu system prompt buộc mọi narration/dự định hành động phải nằm
+> trong `<suy_nghi>`, và parser cắt nó ra trước khi phát `text_delta`, thì đoạn "kể trước" sẽ không
+> bao giờ lọt vào kênh hiển thị chính để mà phải xoá/nháy nữa. **Thêm test:** model viết tên sản
+> phẩm/thương hiệu bịa trong `<suy_nghi>` kèm `tool_calls` → nội dung đó xuất hiện ở event
+> `thinking`, **không** xuất hiện ở `text_delta` nào, kể cả khi stream nửa chừng bị ngắt.
+
 ---
 
 ## 11.1. Cái gì được hiển thị

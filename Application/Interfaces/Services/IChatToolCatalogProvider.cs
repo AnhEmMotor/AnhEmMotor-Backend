@@ -1,6 +1,6 @@
 namespace Application.Interfaces.Services;
 
-public record ChatToolCatalogEntry(string Name, string Path, string Label);
+public record ChatToolCatalogEntry(string Name, string Path, string Label, string Status = "active");
 
 public interface IChatToolCatalogProvider
 {

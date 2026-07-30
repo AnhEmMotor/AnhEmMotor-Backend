@@ -1,8 +1,12 @@
 using System.Collections.Concurrent;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Application.Interfaces.Repositories.Chat;
 using Application.Interfaces.Services;
 using Domain.Constants;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -50,6 +54,31 @@ public class ChatRunExecutor(
         }
     }
 
+    private sealed record RunMetaPayload(
+        [property: JsonPropertyName("toolRegistryFingerprint")] string? ToolRegistryFingerprint,
+        [property: JsonPropertyName("modelUsed")] string? ModelUsed);
+
+    // Token còn đủ 5 phút (đúng bằng thời lượng chạy tối đa của 1 run) thì giữ nguyên; nếu không,
+    // ký lại giữ nguyên claim với hạn mới — tránh 401 giữa run khi JWT gần hết hạn lúc pickup (17.9/E1).
+    public static string EnsureFreshToken(string token, ITokenManagerService tokenManager, TimeSpan minRemaining)
+    {
+        DateTime validTo;
+        try
+        {
+            validTo = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo;
+        }
+        catch (ArgumentException)
+        {
+            return token;
+        }
+        if (validTo - DateTime.UtcNow >= minRemaining)
+        {
+            return token;
+        }
+        return tokenManager.RefreshAccessToken(
+            token, DateTimeOffset.UtcNow.AddMinutes(tokenManager.GetAccessTokenExpiryMinutes()));
+    }
+
     // Host gọi StopAsync khi app shutdown (ApplicationStopping) — đợi các run đang chạy
     // huỷ xong (catch OperationCanceledException ở ProcessRunAsync) trước khi thoát. Không còn
     // buffer nội bộ để mất vì mỗi text_delta đã được ghi ngay khi tới.
@@ -66,6 +95,8 @@ public class ChatRunExecutor(
         var streamClient = scope.ServiceProvider.GetRequiredService<ISidecarStreamClient>();
         var readRepo = scope.ServiceProvider.GetRequiredService<IChatReadRepository>();
         var tokenStore = scope.ServiceProvider.GetRequiredService<IChatRunTokenStore>();
+        var tokenManager = scope.ServiceProvider.GetRequiredService<ITokenManagerService>();
+        var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
         using var runCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
         runCts.CancelAfter(TimeSpan.FromMinutes(5));
@@ -85,7 +116,7 @@ public class ChatRunExecutor(
             await writer.MarkRunningAsync(runId, instanceId);
             await writer.AppendAsync(runId, ChatRunEventType.RunStarted, "");
 
-            var token = tokenStore.Take(runId);
+            var token = EnsureFreshToken(tokenStore.Take(runId), tokenManager, TimeSpan.FromMinutes(5));
             var stream = streamClient.StreamAsync(runId, run.SessionId, run.UserMessage, token, runCts.Token);
 
             var lastHeartbeat = DateTime.UtcNow;
@@ -117,6 +148,19 @@ public class ChatRunExecutor(
                     fullOutput.Append(evt.Payload);
                     await writer.FlushPartialOutputAsync(runId, fullOutput.ToString());
                     await writer.AppendAsync(runId, evt.Type, evt.Payload);
+                }
+                else if (evt.Type == ChatRunEventType.RunMeta)
+                {
+                    var meta = JsonSerializer.Deserialize<RunMetaPayload>(evt.Payload);
+                    await writer.SetRunMetaAsync(runId, meta?.ToolRegistryFingerprint, meta?.ModelUsed);
+                    var configuredModel = configuration["AISetup:Model"];
+                    if (!string.IsNullOrEmpty(meta?.ModelUsed) && !string.IsNullOrEmpty(configuredModel)
+                        && meta.ModelUsed != configuredModel)
+                    {
+                        logger.LogError(
+                            "ModelUsed lệch với AISetup:Model: run {RunId} dùng {Used}, cấu hình {Configured}",
+                            runId, meta.ModelUsed, configuredModel);
+                    }
                 }
                 else if (evt.Type != "done")
                 {

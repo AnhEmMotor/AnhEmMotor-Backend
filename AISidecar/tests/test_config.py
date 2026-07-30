@@ -36,5 +36,4 @@ def test_default_values():
     assert s.rag_enabled is True
     assert s.plan_cache_enabled is True
     assert s.tool_flags == {}
-    assert s.tool_kill_switch == ()
     assert s.tool_detail_level == "Full"

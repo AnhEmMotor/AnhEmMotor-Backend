@@ -83,6 +83,8 @@ public class AiSidecarManager(
         var backendUrl = GetInternalBackendUrl();
         startInfo.EnvironmentVariables["BACKEND_URL"] = $"{backendUrl}/api";
         startInfo.EnvironmentVariables["BACKEND_INTERNAL_SECRET"] = config["Jwt:Key"] ?? string.Empty;
+        startInfo.EnvironmentVariables["EXPECTED_BUILD_ID"] =
+            typeof(AiSidecarManager).Assembly.GetName().Version?.ToString() ?? "dev";
         startInfo.EnvironmentVariables["PORT"] = port.ToString();
         startInfo.EnvironmentVariables["PYTHONPATH"] = sidecarDir;
         startInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";

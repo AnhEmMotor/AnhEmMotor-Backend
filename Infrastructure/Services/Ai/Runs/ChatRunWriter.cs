@@ -210,6 +210,16 @@ public class ChatRunWriter(
         }
     }
 
+    public async Task SetRunMetaAsync(Guid runId, string? toolRegistryFingerprint, string? modelUsed)
+    {
+        await context.ChatRuns
+            .Where(r => r.Id == runId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(r => r.ToolRegistryFingerprint, r =>
+                    toolRegistryFingerprint ?? r.ToolRegistryFingerprint)
+                .SetProperty(r => r.ModelUsed, r => modelUsed ?? r.ModelUsed));
+    }
+
     private static bool IsActive(string status) =>
         status == ChatRunStatus.Running || status == ChatRunStatus.Pending;
 

@@ -68,6 +68,11 @@ def test_build_tools_tra_dung_ten_va_mo_ta():
         assert tool.description
 
 
+def test_build_tools_loc_theo_allowed_names():
+    tools = build_tools(FakeBackendClient("Bearer x"), {"search_products"})
+    assert {t.name for t in tools} == {"search_products"}
+
+
 def test_describe_args_dung_label_va_bo_qua_gia_tri_rong():
     summary = describe_args("search_products", {"keyword": "nhông sên đĩa DID", "limit": ""})
     assert summary == "Từ khóa: nhông sên đĩa DID"

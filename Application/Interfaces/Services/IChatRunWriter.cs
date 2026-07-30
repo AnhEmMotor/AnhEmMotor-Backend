@@ -31,4 +31,7 @@ public interface IChatRunWriter
 
     /// <summary>Đọc và xoá toàn bộ hàng chờ steering, atomic. Rỗng nếu không có gì hoặc vừa bị đọc bởi lời gọi khác.</summary>
     public Task<List<SteeringQueueItem>> PullPendingSteeringAsync(Guid runId);
+
+    /// <summary>Ghi fingerprint registry tool + model thật đã dùng vào ChatRun (Stage 17.2/17.10).</summary>
+    public Task SetRunMetaAsync(Guid runId, string? toolRegistryFingerprint, string? modelUsed);
 }

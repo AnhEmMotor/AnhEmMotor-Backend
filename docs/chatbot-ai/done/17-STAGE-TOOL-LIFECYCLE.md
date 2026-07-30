@@ -1,7 +1,20 @@
 # Stage 17 — Vòng đời Tool & Hợp đồng phiên bản
 
 > Nhóm A (12 ca) + E1 + E4 · Ưu tiên: 🔴 Cao · Ước lượng: 3–4 ngày
-> Phụ thuộc: **Stage 13, 16** · Nên làm **trước** Stage 15 đợt P1
+> Phụ thuộc thật: **Stage 13, 20** (đã xong — xem `done/`). Dòng "Phụ thuộc: Stage 13, 16" cũ mâu
+> thuẫn với thứ tự thực hiện ở [00-OVERVIEW.md](../00-OVERVIEW.md) mục 4 (17 làm **trước** 16) — đã sửa.
+
+> **Trạng thái (2026-07-29): triển khai phần lõi xong, 6 mục hoãn sang Stage 10.**
+> Quy mô thực tế hiện tại là 6 tool thật (chưa tới Stage 15 — 71 tool) và **chưa có Plan Mode**
+> (Stage 10 chưa xây). Các mục 17.8 và phần "run token riêng cho 24h chờ duyệt" của 17.9 giả định
+> có Plan Mode nên **chưa code** — xây khi làm Stage 10, xem ghi chú ở
+> [10-STAGE-PLAN-MODE.md](../10-STAGE-PLAN-MODE.md). Chi tiết từng mục ở Definition of Done cuối file.
+>
+> **Bug thật gặp khi test thủ công, đã vá tạm — sửa tận gốc ở Stage 11:** model viết narration bịa
+> (tên sản phẩm/thương hiệu không có thật) cùng lượt với `tool_calls`, thoáng hiện ra khi stream
+> trước khi kịp bị xoá. Đã vá tạm ở `call_model_node` (xoá text đi kèm `tool_calls`). Xem ghi chú
+> đầy đủ + hướng sửa tận gốc bằng thẻ `<suy_nghi>` ở
+> [11-STAGE-REASONING-TRANSPARENCY.md](../11-STAGE-REASONING-TRANSPARENCY.md).
 
 Gốc rễ của cả nhóm này là một sự thật đơn giản:
 
@@ -13,7 +26,7 @@ Gốc rễ của cả nhóm này là một sự thật đơn giản:
 >   15 phút phải được đóng dấu thời gian (`"(Số liệu trong tin nhắn này tính đến {timestamp})"`)
 >   và system prompt phải buộc AI tra cứu lại (không đọc số cũ) khi hỏi lại số liệu > 15 phút.
 >
-> Xem chi tiết: [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md), mục 18.8.
+> Xem chi tiết: [18-STAGE-CONSISTENCY.md](../18-STAGE-CONSISTENCY.md), mục 18.8.
 
 Trong lộ trình 71 tool, mỗi tuần đều có tool được thêm, đổi schema, đổi tên, hoặc gỡ.
 Không có cơ chế phiên bản thì mỗi lần đổi là một đợt lỗi âm ỉ mà không ai truy được nguyên nhân.
@@ -245,21 +258,17 @@ Lệch → log `ERROR` và trả cờ `stale` ở `GET /health`, để health ch
 
 ```python
 # Chụp lúc khởi tạo run, giữ trong AgentState suốt run
-state["tool_flags_snapshot"] = await backend.get_tool_flags()
-state["registry_fingerprint"] = registry_fingerprint()
+state["tool_flags_snapshot"] = get_settings().tool_flags
 ```
 
-**Ngoại lệ — tắt khẩn cấp:** khi phát hiện tool trả số sai trong production (Stage 16.8),
-cần tắt **ngay**, kể cả run đang chạy. Dùng cờ riêng:
-
-```jsonc
-"ToolFlags": {
-    "get_pnl_report": "off",
-    "_killSwitch": ["get_payroll_summary"]    // áp ngay, kể cả run đang chạy
-}
-```
-Tool trong `_killSwitch` bị kiểm tra lại **trước mỗi lần gọi**, không dùng snapshot.
-Run đang chạy gặp tool bị kill → trả `tool_not_available` và AI trả lời phần đã có.
+> **Đã bỏ ý tưởng "`_killSwitch` check-live, áp ngay cả run đang chạy" ở bản kế hoạch gốc.**
+> `Settings` (Python, `app/config.py`) bị `@lru_cache` theo tiến trình — đổi env var chỉ có tác
+> dụng sau khi **restart** sidecar, bất kể check "mỗi dispatch" hay "chụp đầu run": trong cùng một
+> tiến trình, giá trị đã cache không đổi. Tách riêng thành 1 endpoint admin runtime
+> (`POST /tool-kill-switch`) để "tắt không cần restart" hoá ra giải quyết vấn đề không tồn tại,
+> mà lại mở thêm 1 bề mặt tấn công (tắt tool từ xa qua HTTP). Quyết định 2026-07-29: bỏ endpoint,
+> chỉ dùng **một** cơ chế — `TOOL_FLAGS` env var, đổi giá trị + restart sidecar. Muốn gỡ tool hẳn
+> (không chỉ tạm tắt), sửa `status: "removed"` trong catalog — cũng cần restart.
 
 ---
 
@@ -415,40 +424,76 @@ vô nghĩa với model.
 
 ## Definition of Done — Stage 17
 
-- [ ] `ToolSpec` có `version`, `status`, `replaced_by`; quy ước tăng version được ghi trong `RULES.md`.
-- [ ] `registry_fingerprint()` hoạt động, lưu vào `ChatRun.ToolRegistryFingerprint`.
-- [ ] Gọi tool bịa → nhận thông báo có gợi ý tool gần nhất, run **không** chết.
-- [ ] Gọi tool bịa 2 lần → chuyển sang trả lời không dùng tool.
-- [ ] Gọi tool thuộc module chưa nạp → tự nạp module (tối đa 1 lần/run).
-- [ ] Lịch sử nạp lại từ DB **không** chứa tool call thô; đổi schema tham số không gây lỗi lặp ở lượt sau.
-- [ ] `GET /internal/chat/tools/manifest` sinh tự động bằng reflection.
-- [ ] Sidecar tự kiểm hợp đồng lúc khởi động; tool thiếu endpoint bị tự vô hiệu + log ERROR.
-- [ ] Deploy lệch build id → `/health` báo `stale`, workflow deploy fail.
-- [ ] Đổi `ToolFlags` giữa run → run đang chạy không bị ảnh hưởng; `_killSwitch` áp ngay.
-- [ ] Thu hồi permission → cache bị invalidate; run mới không còn tool đó.
-- [ ] Resume run sau khi gỡ tool → plan chuyển `Drafting`, bước liên quan `invalid`, FE hiện cảnh báo.
-- [ ] **Duyệt plan sau 24h vẫn thực thi được** (run token mới được cấp lúc duyệt).
-- [ ] Permission được revalidate tại thời điểm duyệt plan, không dùng bản chụp cũ.
-- [ ] Run token không dùng được cho API ngoài `/internal/chat/tools/*` (có test).
-- [ ] Run token của run A không dùng được cho run B (có test).
-- [ ] `ChatRun.ModelUsed` ghi model thật từ response metadata.
-- [ ] Eval hồi quy chạy theo lịch hằng tuần.
+- [x] `ToolSpec` có `version`, `status`, `replaced_by`, `since`; quy ước tăng version ghi ở
+      [RULES.md](../RULES.md). (`AISidecar/app/tools/registry.py`, `SharedConfig/chat-tools-catalog.json`)
+- [x] `registry_fingerprint()` hoạt động, lưu vào `ChatRun.ToolRegistryFingerprint` cuối mỗi run
+      (event `run_meta` từ sidecar → `ChatRunWriter.SetRunMetaAsync`).
+- [x] Gọi tool bịa → nhận thông báo có gợi ý tool gần nhất, run **không** chết.
+- [x] Gọi tool bịa 2 lần → chuyển sang trả lời không dùng tool (`tools_disabled`, không bind tool
+      nào ở lượt kế tiếp).
+- [x] Gọi tool thuộc module chưa nạp → tự nạp module (tối đa 1 lần/run) — dispatch trực tiếp từ
+      `call_tools_node`, không chỉ từ steering như bản đầu của Stage 20.
+- [x] Lịch sử nạp lại từ DB **không** chứa tool call thô (đã đúng sẵn từ Stage 1, khoá lại bằng test
+      `test_sanitize_history_khong_giu_tool_call`).
+- [x] `GET /internal/chat/tools/manifest` — **không dùng attribute `[ChatTool]` + reflection thủ công
+      như bản kế hoạch gốc.** Dùng lại `IChatToolCatalogProvider` (nguồn thật có sẵn, đọc
+      `chat-tools-catalog.json` — file này vốn đã dùng chung cho cả sidecar lẫn backend) + trả `Status`
+      theo catalog. Lý do đổi: catalog vốn đã là single-source-of-truth giữa 2 phía, tự chế reflection
+      thêm là trùng lặp không cần thiết ở quy mô 6 tool hiện tại.
+- [x] Sidecar tự kiểm hợp đồng lúc khởi động (`verify_tool_contract`, gọi trong FastAPI lifespan);
+      tool thiếu endpoint bị tự vô hiệu (`_locally_disabled`) + log ERROR; sidecar vẫn khởi động được.
+- [x] `/health` báo `stale: true` khi build id lệch (`EXPECTED_BUILD_ID` do `AiSidecarManager` truyền,
+      so với build id backend trả về live qua manifest, cache 60s để tránh gọi backend mỗi lần ping).
+      **Chưa làm:** fail CI/CD workflow khi `stale=true` — là thay đổi ở `.github/workflows/deploy.yml`,
+      ngoài phạm vi code lần này, cần làm riêng.
+- [x] `ToolFlags` (`app/config.py::tool_flags`, dict `{"tool_name": "off"}`) — tool bị `off` không
+      được cấp cho run mới. **Đã bỏ khối "kill switch qua endpoint runtime" từng làm ở đây** — vì
+      `Settings` bị `@lru_cache` nên đổi env var vốn dĩ **chỉ có tác dụng sau khi restart** dù có
+      check "live" mỗi dispatch hay không (không có gì để "live" cả — cùng 1 tiến trình thì giá trị
+      cache không đổi). Tách riêng "kill switch check-live" thành 1 endpoint admin
+      (`POST /tool-kill-switch`) hoá ra là giải quyết một vấn đề không tồn tại, mà lại mở thêm 1
+      endpoint có thể tắt tool từ xa — rủi ro không đáng so với lợi ích. **Quyết định:** tắt 1 tool
+      = sửa `TOOL_FLAGS` (hoặc catalog `status: "removed"`) + restart sidecar, không cần endpoint.
+- [x] Thu hồi permission → **đã thoả bởi kiến trúc hiện có, không cần code thêm**: không tồn tại cache
+      permission nào (context fetch mới ở đầu mỗi run), và backend check permission độc lập trên từng
+      endpoint tool (`[HasPermission]`). Xem 17.7.
+- [ ] **HOÃN sang Stage 10** — Resume run sau khi gỡ tool → plan chuyển `Drafting`, bước liên quan
+      `invalid`, FE hiện cảnh báo. Cần `ChatRun.Plan`/plan chờ duyệt (Stage 10) — chưa tồn tại.
+- [ ] **HOÃN sang Stage 10** — Duyệt plan sau 24h vẫn thực thi được (run token mới cấp lúc duyệt).
+- [ ] **HOÃN sang Stage 10** — Permission được revalidate tại thời điểm duyệt plan, không dùng bản
+      chụp cũ (chỉ có ý nghĩa khi có bước "duyệt" của Plan Mode).
+- [x] **Thu hẹp phạm vi cho hiện tại (không hoãn)** — JWT gần hết hạn giữa run (E1, run tối đa 5 phút)
+      → `ChatRunExecutor.EnsureFreshToken` tự ký lại (giữ nguyên claim, hạn mới) trước khi gọi sidecar,
+      tái dùng `ITokenManagerService` có sẵn. **Không phải run token riêng, scope hẹp** như phương án A
+      đề xuất ban đầu — phương án A đầy đủ (token chỉ dùng được `/internal/chat/tools/*`, không dùng
+      chéo giữa các run) **hoãn sang Stage 10**, vì lý do thật để cần token độc lập là kịch bản "chờ
+      duyệt 24h" — chưa tồn tại khi chưa có Plan Mode.
+- [ ] **HOÃN sang Stage 10** — Run token không dùng được cho API ngoài `/internal/chat/tools/*`.
+- [ ] **HOÃN sang Stage 10** — Run token của run A không dùng được cho run B.
+- [x] `ChatRun.ModelUsed` ghi model thật từ `response_metadata` của LLM (event `run_meta`), so lệch
+      với `AISetup:Model` → log ERROR.
+- [ ] **Chưa làm (quy trình vận hành, không phải code)** — Eval hồi quy chạy theo lịch hằng tuần +
+      `MODEL-CHANGELOG.md`. Cần lịch CI riêng, ghi chú follow-up thủ công.
 
-### Test
+### Test (đã viết, đang pass)
 
-`AISidecar/tests/test_tool_lifecycle.py`:
-- [ ] `registry_fingerprint()` **tất định** — gọi 2 lần cùng registry cho cùng hash.
-- [ ] Đổi `version` của 1 tool → fingerprint đổi; sửa mô tả → **không** đổi.
-- [ ] `dispatch_tool` tên bịa → `tool_not_found` + gợi ý tool gần nhất, **không** ném exception.
-- [ ] Gọi tool bịa lần 2 → `force_answer_without_tools`.
-- [ ] `status="removed"` có `replaced_by` → thông báo nêu tên tool thay thế.
-- [ ] `sanitize_history` — lịch sử chứa tool call cũ → output **không** có `tool_calls` nào.
-- [ ] `verify_tool_contract` — tool thiếu endpoint → tự set `removed` + log ERROR,
-      sidecar **vẫn khởi động được**.
-- [ ] `_killSwitch` áp ngay cả khi snapshot cờ đã chụp từ đầu run.
+`AISidecar/tests/test_tool_lifecycle.py` (147/147 test toàn bộ sidecar pass):
+- [x] `registry_fingerprint()` **tất định**; đổi `version` → đổi hash; tool `removed` bị bỏ qua khỏi hash.
+- [x] Gọi tool bịa → gợi ý tên gần nhất, **không** crash run.
+- [x] Gọi tool bịa lần 2 → `tools_disabled=True`, lượt kế tiếp không bind tool nào.
+- [x] `status="removed"` có/không `replaced_by` → thông báo đúng từng trường hợp.
+- [x] `sanitize_history` (`build_history_messages`) — lịch sử có tool call cũ → output không có
+      `tool_calls` nào.
+- [x] `verify_tool_contract` — tool thiếu endpoint → tự set `removed` + log ERROR, sidecar không crash;
+      backend lỗi/không tới được → trả về mặc định an toàn, không crash.
+- [x] `tool_flags` off theo snapshot đầu run (đổi env var có tác dụng sau khi restart sidecar).
+- [x] Gọi tool thuộc module chưa nạp → tự nạp (tối đa 1 lần), thử lần 2 khi đã hết suất → báo không
+      có quyền thay vì tự nạp tiếp.
 
-`UnitTests/ChatRunToken.cs`:
-- [ ] Run token **không** dùng được cho API ngoài `/internal/chat/tools/*`.
-- [ ] Run token của run A **không** dùng được cho run B.
-- [ ] Token hết hạn giữa run → executor gia hạn, tool call kế tiếp thành công.
-- [ ] Duyệt plan sau 24h → cấp token mới **và** revalidate permission tại thời điểm duyệt.
+`UnitTests/ChatRunExecutorTokenRefresh.cs` (2/2 pass) + `UnitTests/ChatRunExecutorTests.cs` (572/572 pass
+toàn bộ backend):
+- [x] Token còn nhiều thời gian → không mint lại.
+- [x] Token còn dưới ngưỡng (5 phút — đúng thời lượng chạy tối đa 1 run) → mint lại trước khi gọi sidecar.
+- [ ] **Chưa có / hoãn sang Stage 10** — run token không dùng được cho API ngoài
+      `/internal/chat/tools/*`; run token của run A không dùng được cho run B; duyệt plan sau 24h cấp
+      token mới + revalidate permission. Cả 3 cần Plan Mode.

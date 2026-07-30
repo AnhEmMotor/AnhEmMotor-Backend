@@ -27,8 +27,38 @@ def test_hai_module_bat_ky_khong_vuot_tran_request():
         assert counts[a] + counts[b] <= registry.MAX_TOOLS_PER_REQUEST
 
 
-def _spec(name, module, perms=()):
-    return registry.ToolSpec(name=name, module=module, required_permissions=tuple(perms))
+def _spec(name, module, perms=(), **kwargs):
+    return registry.ToolSpec(name=name, module=module, required_permissions=tuple(perms), **kwargs)
+
+
+def test_registry_fingerprint_tat_dinh():
+    specs = {"a": _spec("a", "product", ["p1"])}
+    assert registry.registry_fingerprint(specs) == registry.registry_fingerprint(specs)
+
+
+def test_registry_fingerprint_doi_khi_doi_version():
+    base = {"a": _spec("a", "product", ["p1"], version=1)}
+    bumped = {"a": _spec("a", "product", ["p1"], version=2)}
+    assert registry.registry_fingerprint(base) != registry.registry_fingerprint(bumped)
+
+
+def test_registry_fingerprint_khong_doi_khi_tool_removed_bi_bo_qua():
+    active_only = {"a": _spec("a", "product", ["p1"])}
+    with_removed = {
+        "a": _spec("a", "product", ["p1"]),
+        "b": _spec("b", "sales", status="removed"),
+    }
+    assert registry.registry_fingerprint(active_only) == registry.registry_fingerprint(with_removed)
+
+
+def test_filter_by_permission_bo_qua_tool_khong_active():
+    specs = {
+        "a": _spec("a", "product", ["p1"]),
+        "b": _spec("b", "product", ["p1"], status="deprecated"),
+        "c": _spec("c", "product", ["p1"], status="removed"),
+    }
+    allowed = registry.filter_by_permission(specs, ["p1"])
+    assert {s.name for s in allowed} == {"a"}
 
 
 def test_filter_by_permission_chi_tra_tool_du_quyen():
