@@ -4,16 +4,19 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Infrastructure.SqlServerMigrations
+namespace Infrastructure.Infrastructure.SqlServerMigrations
 {
     [DbContext(typeof(SqlServerDBContext))]
-    partial class SqlServerDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260729141551_UpdateNewsCommentPolymorphic")]
+    partial class UpdateNewsCommentPolymorphic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2420,9 +2423,6 @@ namespace Infrastructure.SqlServerMigrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PartsJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ServiceType")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("TechnicianId")

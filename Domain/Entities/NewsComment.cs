@@ -10,12 +10,17 @@ namespace Domain.Entities
         [Column("Id")]
         public int Id { get; set; }
 
-        [Required]
         [Column("NewsId")]
-        public int NewsId { get; set; }
+        public int? NewsId { get; set; }
 
         [ForeignKey("NewsId")]
         public News? News { get; set; }
+
+        [Column("ArticleType", TypeName = "nvarchar(50)")]
+        public string? ArticleType { get; set; }
+
+        [Column("ArticleSlug", TypeName = "nvarchar(255)")]
+        public string? ArticleSlug { get; set; }
 
         [Column("UserId")]
         public Guid? UserId { get; set; }
