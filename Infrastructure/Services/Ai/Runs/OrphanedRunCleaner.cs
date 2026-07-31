@@ -80,7 +80,7 @@ public class OrphanedRunCleaner(
         if (orphans.Any())
         {
             await context.SaveChangesAsync(stoppingToken);
-            logger.LogInformation("Đã dọn dẹp {Count} orphan runs lúc startup", orphans.Count);
+            logger.LogDebug("Đã dọn dẹp {Count} orphan runs lúc startup", orphans.Count);
         }
     }
 

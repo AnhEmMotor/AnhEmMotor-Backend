@@ -162,6 +162,10 @@ public class ChatRunExecutor(
                             runId, meta.ModelUsed, configuredModel);
                     }
                 }
+                else if (evt.Type == ChatRunEventType.Thinking)
+                {
+                    await writer.AppendAsync(runId, evt.Type, evt.Payload);
+                }
                 else if (evt.Type != "done")
                 {
                     await writer.AppendAsync(runId, evt.Type, evt.Payload);

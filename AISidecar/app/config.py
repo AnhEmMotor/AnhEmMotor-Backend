@@ -28,8 +28,6 @@ class Settings(BaseSettings):
     port: int = 8000
     request_timeout_seconds: float = 15.0
 
-    tool_detail_level: Literal["Full", "Summary", "Minimal"] = "Full"
-
     qdrant_url: str = ""
     qdrant_api_key: str = ""
     embedding_model: str = "text-embedding-004"

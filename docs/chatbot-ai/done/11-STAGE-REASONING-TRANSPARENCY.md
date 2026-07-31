@@ -70,20 +70,16 @@ Người dùng thường chỉ cần câu trả lời; phần suy nghĩ là đ�
 
 ---
 
-## 11.2. Ba mức độ hiển thị
+## 11.2. Một mức hiển thị duy nhất — luôn redact
 
-Mặc định **Full** — hiển thị đầy đủ suy nghĩ, tool, tham số và kết quả.
-Khi cần che bớt ở Production, sidecar tự áp mức thấp hơn trong code (không cần config riêng).
+**Quyết định (2026-07-31): bỏ 3 mức Full/Summary/Minimal.** Không có config nào (`TOOL_DETAIL_LEVEL`
+hay tương đương) để bật/tắt độ chi tiết theo môi trường — lý do: một cờ config kiểu này rất dễ bị
+để sai giá trị ở Production (lộ dữ liệu) hoặc bị quên khi thêm môi trường mới, và có thêm một biến
+môi trường để đồng bộ giữa .NET và sidecar là một điểm hỏng không cần thiết.
 
-Ba mức để code xử lý nội bộ (không phải config từ bên ngoài):
-
-| Mức | Môi trường | Suy nghĩ | Tên tool | Tham số | Kết quả |
-|---|---|---|---|---|---|
-| `Full` | Development | ✅ đầy đủ | ✅ | ✅ raw JSON | ✅ raw JSON |
-| `Summary` | **Production (mặc định)** | ✅ đã lọc | ✅ | ✅ đã che | ✅ chỉ tóm tắt |
-| `Minimal` | Production (chế độ chặt) | ❌ | ✅ nhãn tiếng Việt | ❌ | ❌ chỉ "đã hoàn tất" |
-
-Ở mức `Minimal`, dòng tool hiển thị: `🔧 Đang tra cứu doanh thu... ✓`
+Thay vào đó: **luôn hiển thị đầy đủ suy nghĩ, tên tool, tham số và kết quả ở mọi môi trường** —
+nhưng field nhạy cảm (`REDACT_FIELDS`, xem §11.3) luôn bị che bằng `***`, không phân biệt
+Development hay Production. Không cần bảng mức, không cần nhãn "Minimal ẩn tool".
 
 ---
 
@@ -101,17 +97,13 @@ là an toàn mới được hiển thị. Field lạ (do thêm tool mới, đổ
 ```python
 import re
 from typing import Any
-from app.config import get_settings
 
-# Field TUYỆT ĐỐI không bao giờ hiển thị, ở mọi mức, kể cả Development
-ALWAYS_REDACT = {
+# Field TUYỆT ĐỐI không bao giờ hiển thị, ở mọi môi trường — gồm cả bí mật hệ thống lẫn PII khách
+# hàng. Gộp chung một tập, không còn phân biệt "PII chỉ che ở Production" như bản 3-mức trước đó.
+REDACT_FIELDS = {
     "password", "passwordhash", "token", "accesstoken", "refreshtoken",
-    "apikey", "api_key", "secret", "internalsecret", "connectionstring",
+    "apikey", "secret", "internalsecret", "connectionstring",
     "securitystamp", "concurrencystamp", "creditcard", "cardnumber", "cvv",
-}
-
-# Field là PII — che ở Production, hiện ở Development
-PII_FIELDS = {
     "email", "phone", "phonenumber", "address", "identitycard",
     "citizenid", "fullname", "customername", "bankaccount",
 }
@@ -127,48 +119,36 @@ SENSITIVE_PATTERNS = [
 MAX_PREVIEW_CHARS = 500
 
 
-def redact_value(key: str, value: Any, level: str) -> Any:
+def redact_value(key: str, value: Any) -> Any:
     normalized = key.lower().replace("_", "")
 
-    if normalized in ALWAYS_REDACT:
-        return "***"
-    if level != "Full" and normalized in PII_FIELDS:
+    if normalized in REDACT_FIELDS:
         return "***"
     if isinstance(value, str):
         return _scrub_text(value)
     if isinstance(value, dict):
-        return redact_dict(value, level)
+        return redact_dict(value)
     if isinstance(value, list):
-        return [redact_value(key, v, level) for v in value[:10]]
+        return [redact_value(key, v) for v in value[:10]]
     return value
 
 
-def redact_dict(data: dict, level: str) -> dict:
-    return {k: redact_value(k, v, level) for k, v in data.items()}
+def redact_dict(data: dict) -> dict:
+    return {k: redact_value(k, v) for k, v in data.items()}
 
 
 def _scrub_text(text: str) -> str:
-    """Quét chuỗi tự do — bắt PII lọt qua tên field không đoán được."""
     for pattern, replacement in SENSITIVE_PATTERNS:
         text = pattern.sub(replacement, text)
     return text
 
 
-def make_tool_preview(name: str, payload: dict) -> dict:
-    """Tạo bản xem trước an toàn của tham số / kết quả tool.
-
-    CHỈ dùng cho đường ra FE. KHÔNG bao giờ áp lên dữ liệu vào LLM (Stage 18.11).
-    """
-    level = get_settings().tool_detail_level      # Full | Summary | Minimal
-
-    if level == "Minimal":
-        return {"hidden": True}
-
-    safe = redact_dict(payload, level)
+def make_tool_preview(payload: dict) -> dict:
+    safe = redact_dict(payload)
     text = str(safe)
     if len(text) > MAX_PREVIEW_CHARS:
         text = text[:MAX_PREVIEW_CHARS] + f"… (đã rút gọn, tổng {len(text)} ký tự)"
-    return {"preview": text, "level": level}
+    return {"preview": text}
 ```
 
 ### Áp dụng ở đâu
@@ -179,7 +159,7 @@ async def run_tool(name: str, args: dict, fn) -> dict:
     await emit("tool_start", {
         "name": name,
         "callId": call_id,
-        "argsPreview": make_tool_preview(name, args),   # ← redact tại đây
+        "argsPreview": make_tool_preview(args),   # ← redact tại đây
     })
 
     started = time.perf_counter()
@@ -191,7 +171,7 @@ async def run_tool(name: str, args: dict, fn) -> dict:
         "status": "ok" if "error" not in result else "error",
         "durationMs": elapsed_ms,
         "summary": summarize_result(name, result),        # ← tóm tắt an toàn
-        "resultPreview": make_tool_preview(name, result), # ← redact tại đây
+        "resultPreview": make_tool_preview(result), # ← redact tại đây
     })
     return result
 ```
@@ -212,8 +192,10 @@ def summarize_result(name: str, result: dict) -> str:
     return fn(result) if fn else "Đã hoàn tất"
 ```
 
-> **Việc bắt buộc khi thêm tool mới:** viết summarizer cho nó. Nếu quên, mức `Summary` chỉ hiện
-> "Đã hoàn tất" — an toàn nhưng vô dụng. Thêm test kiểm tra mọi tool trong registry đều có summarizer.
+> **Việc bắt buộc khi thêm tool mới:** viết summarizer cho nó (hoặc đảm bảo fallback chung dựa
+> trên `items`/`totalCount` của `ChatToolEnvelope` đã đủ nghĩa). Nếu không, người dùng chỉ thấy
+> "đã hoàn tất" — an toàn nhưng vô dụng. Thêm test kiểm tra mọi tool trong registry gọi
+> `summarize_result` không lỗi.
 
 ---
 
@@ -267,9 +249,9 @@ Không ghi xuống `ChatRunEvent`, không ghi vào log.
 > nếu không, AI đọc `***` và diễn giải nó như giá trị thật. Hai đường dữ liệu tách biệt hoàn toàn,
 > có test bắt buộc. Xem [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md) mục 18.11.
 
-> ⚠️ **Dev/Prod lệch `TOOL_DETAIL_LEVEL`** khiến test ở Development không bao giờ phát hiện được
-> rò rỉ ở Production. Bắt buộc **parametrize test qua cả ba mức**, không chỉ test theo môi
-> trường thật đang chạy.
+> Vì redaction không còn phân theo môi trường (§11.2), test chỉ cần chạy đúng một lần và áp dụng
+> như nhau cho Development lẫn Production — không còn rủi ro "test dev không phát hiện được rò rỉ
+> ở prod" của bản 3-mức trước đó.
 
 **Phân quyền xem:** người dùng chỉ xem được reasoning của run **của chính mình** —
 đã được đảm bảo bởi kiểm tra quyền sở hữu trong `GetChatRunEventsQuery` (Stage 8).
@@ -319,11 +301,9 @@ Component mới: `AnhEmMotor-Management/src/components/business/chat/ReasoningPa
 
 - [ ] Panel suy nghĩ hiển thị được, mặc định thu gọn, tự mở khi đang chạy.
 - [ ] Thấy được tên tool, thời gian chạy, tóm tắt kết quả.
-- [ ] `TOOL_DETAIL_LEVEL=Summary` → không có tham số/kết quả thô nào lọt ra FE (kiểm tra bằng DevTools Network).
-- [ ] `TOOL_DETAIL_LEVEL=Minimal` → **thực sự đạt tới được**, chỉ hiện nhãn tiếng Việt + trạng thái;
-      không còn dead code ở nhánh `Minimal`.
-- [ ] Kiểm tra `ChatRunEvent` trong DB ở chế độ Production: **không** chứa email, số điện thoại, token.
-- [ ] Tool trả về object chứa `passwordHash` → bị che ở **mọi** mức, kể cả Development.
+- [ ] Field nhạy cảm (`REDACT_FIELDS`) không lọt ra FE ở bất kỳ môi trường nào (kiểm tra bằng DevTools Network).
+- [ ] Kiểm tra `ChatRunEvent` trong DB: **không** chứa email, số điện thoại, token — kể cả ở Development.
+- [ ] Tool trả về object chứa `passwordHash` → bị che ở **mọi** môi trường, không có ngoại lệ.
 - [ ] Mọi tool trong registry đều có summarizer (test tự động).
 - [ ] Reasoning không bị lưu vào `ChatMessage`.
 - [ ] Tua lại run cũ (Stage 8) → reasoning hiển thị lại đúng thứ tự.

@@ -1,13 +1,14 @@
 import json
 import logging
 from pathlib import Path
+from typing import Callable
 
 from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field, ValidationError, create_model
 
 from app.config import get_settings
 from app.services.backend_client import BackendClient
-from app.tools.envelope import ChatToolEnvelope
+from app.schemas.tool_envelope import ChatToolEnvelope
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,51 @@ def describe_args(tool_name: str, args: dict) -> str:
         if value not in (None, "") and key not in _SUMMARY_EXCLUDED_ARGS
     ]
     return ", ".join(parts)
+
+
+def _catalog_label(tool_name: str) -> str:
+    entry = next((e for e in load_catalog() if e["name"] == tool_name), None)
+    return entry["label"] if entry else tool_name
+
+
+def _generic_summary(name: str, result: dict) -> str:
+    label = _catalog_label(name)
+    items = result.get("items")
+    if not isinstance(items, list) or not items:
+        return f"{label}: đã hoàn tất"
+    total = result.get("totalCount", len(items))
+    if total == 1:
+        scalars = [f"{k}: {v}" for k, v in items[0].items() if not isinstance(v, (dict, list))][:3]
+        if scalars:
+            return f"{label} — {', '.join(scalars)}"
+    return f"{label}: {total} kết quả"
+
+
+SUMMARIZERS: dict[str, Callable[[dict], str]] = {
+    "get_sales_summary": lambda r: (
+        f"Doanh thu {sum(i.get('totalRevenue', 0) for i in r.get('items', [])):,.0f} ₫ "
+        f"· {r.get('totalCount', 0)} ngày"
+    ),
+    "get_product_stock": lambda r: (
+        f"Tồn kho {sum(i.get('stockQuantity', 0) for i in r.get('items', []))} "
+        f"({len(r.get('items', []))} biến thể)"
+    ),
+    "get_pnl_report": lambda r: (
+        f"Lợi nhuận ròng {sum(i.get('netProfit', 0) for i in r.get('items', [])):,.0f} ₫ "
+        f"({r.get('totalCount', 0)} kỳ)"
+    ),
+    "get_order_status": lambda r: (
+        f"{r.get('totalCount', 0)} đơn hàng"
+        + (f", mới nhất: {r['items'][0].get('statusId', 'không rõ')}" if r.get("items") else "")
+    ),
+}
+
+
+def summarize_result(name: str, result: dict) -> str:
+    if not isinstance(result, dict) or result.get("error"):
+        return "Không lấy được dữ liệu"
+    fn = SUMMARIZERS.get(name)
+    return fn(result) if fn else _generic_summary(name, result)
 
 
 def build_tools(backend_client: BackendClient, allowed_names: set[str] | None = None) -> list[StructuredTool]:

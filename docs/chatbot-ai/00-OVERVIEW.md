@@ -193,7 +193,7 @@ Số hiệu file là ID cố định. Thứ tự làm việc như sau:
 | 7 | Embedding model (đổi = reindex toàn bộ) | 12.3 | `text-embedding-004` |
 | 8 | Có bật tool ghi dữ liệu không | 13.5, 15-P3/P4/P5 | **Có.** Đã đổi từ "Không ở bản đầu" (2026-07-31, qua 2 đợt): P3 có 1 tool ghi (`create_purchase_request`); P4 (+12) mở rộng update trạng thái đơn/PR/phiếu sửa chữa/vận đơn + tạo lead/booking/warranty claim/voucher/expense + xác nhận thanh toán công nợ + sửa cấu hình cửa hàng; P5 (+8) mở rộng chỉnh sửa khách hàng/lead/sản phẩm/lịch hẹn + **xoá mềm có khôi phục** (`deactivate_X`/`restore_X` cho voucher, tin tức). Xem [15-STAGE-TOOL-CATALOG.md](15-STAGE-TOOL-CATALOG.md) mục 15.8/15.9. Vẫn giữ nguyên tắc bất biến (đã hỏi lại và xác nhận 2026-07-31): **không tool xoá vĩnh viễn nào**, mọi tool ghi qua Plan Mode + confirm + audit log + idempotency key. |
 | 9 | Có đưa tool lương/hoa hồng vào chatbot không | 15-G4/G5 | **Có, đưa vào P3** với redaction `Minimal` + audit log riêng (đã chốt 2026-07-31, không loại bỏ) |
-| 10 | Mức hiển thị tool ở Production | 11.2 | **Full** (mặc định) |
+| 10 | Mức hiển thị tool ở Production | 11.2 | **Bỏ khái niệm mức** (2026-07-31) — luôn Full, chỉ field nhạy cảm bị redact |
 | 11 | **Chốt định nghĩa nghiệp vụ** (doanh thu, số đơn, tồn kho...) với người phụ trách | 16.4 | **Chưa chốt — cần làm trước tool tài chính** |
 | 12 | Múi giờ: backend trả `serverDate` GMT+7 hay sidecar tự tính | 16.2 | **Backend trả** — sidecar không tự tính |
 | 13 | **Token cho run nền**: run token riêng / refresh token / rút timeout plan | 17.9 | **Run token riêng (phương án A)** — cần chốt trước khi làm Stage 10 |

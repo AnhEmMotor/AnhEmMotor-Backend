@@ -95,6 +95,48 @@ def test_check_output_kind_phan_biet_tung_ly_do_rewrite():
     assert metric.kind == "unverified_metric"
 
 
+def test_check_output_rewrite_khi_bia_cu_phap_goi_tool_gia():
+    answer = (
+        "Doanh thu tháng này (từ ngày 1 đến ngày 31 tháng 7 năm 2026) cần được tra cứu từ hệ "
+        "thống. Vì câu hỏi chỉ nói \"tháng này\" mà không nêu ngày cụ thể, tôi sẽ gọi tool tra "
+        "cứu doanh thu theo khoảng thời gian tháng này, với tham số mặc định.\n\n"
+        '{call "get_monthly_revenue"()}'
+    )
+    result = tool_guard.check_output(answer, {"had_forbidden_tool": False, "tool_call_count": 0})
+    assert result.action == "rewrite"
+    assert result.kind == "stalled_promise"
+
+
+def test_check_output_rewrite_khi_hua_goi_tool_khong_khop_stall_marker_cu():
+    result = tool_guard.check_output(
+        "Tôi sẽ gọi tool tra cứu doanh thu ngay đây.",
+        {"had_forbidden_tool": False, "tool_call_count": 0})
+    assert result.action == "rewrite"
+    assert result.kind == "stalled_promise"
+
+
+def test_check_output_no_permission_khi_khong_co_tool_va_hua_hen():
+    result = tool_guard.check_output(
+        "Tôi sẽ kiểm tra doanh thu của tháng này cho bạn. Vui lòng đợi một chút nhé.",
+        {"had_forbidden_tool": False, "tool_call_count": 0, "has_tools_bound": False})
+    assert result.action == "rewrite"
+    assert result.kind == "no_permission"
+
+
+def test_check_output_no_permission_khi_khong_co_tool_va_bia_cu_phap_goi_tool():
+    result = tool_guard.check_output(
+        '{call "get_monthly_revenue"()}',
+        {"had_forbidden_tool": False, "tool_call_count": 0, "has_tools_bound": False})
+    assert result.kind == "no_permission"
+
+
+def test_check_output_van_giu_stalled_promise_khi_co_tool_duoc_cap():
+    result = tool_guard.check_output(
+        "Tôi sẽ kiểm tra doanh thu của tháng này cho bạn. Vui lòng đợi một chút nhé.",
+        {"had_forbidden_tool": False, "tool_call_count": 0, "has_tools_bound": True})
+    assert result.kind == "stalled_promise"
+
+
 def test_check_output_block_khi_ro_ri_system_prompt():
     from app.guardrails.tool_guard import PROMPT_LEAK_MARKERS
     result = tool_guard.check_output(PROMPT_LEAK_MARKERS[0], {})

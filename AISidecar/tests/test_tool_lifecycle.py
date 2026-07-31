@@ -255,6 +255,66 @@ async def test_get_product_stock_voi_id_tu_search_truoc_do_duoc_cho_qua(monkeypa
     assert "search_products" not in result["messages"][0].content
 
 
+async def test_suy_nghi_bia_ten_san_pham_khong_lot_vao_text_delta(monkeypatch):
+    monkeypatch.setattr(manager_agent, "BackendClient", FakeBackendClient)
+    events = []
+    monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: events.append)
+    from langchain_core.messages import AIMessageChunk, HumanMessage
+
+    class ThinkingThenToolLLM:
+        def bind_tools(self, tools):
+            return self
+
+        async def astream(self, messages):
+            chunks = [
+                "<suy_nghi>Chắc chắn là xe Honda XYZ-999 huyền thoại, ",
+                "để tôi tra giúp bạn.</suy_nghi>",
+            ]
+            for chunk in chunks:
+                yield AIMessageChunk(content=chunk)
+            yield AIMessageChunk(
+                content="", tool_calls=[_tool_call("search_products", {"keyword": "x"}, "c1")])
+
+    monkeypatch.setattr(manager_agent, "get_llm", lambda **kwargs: ThinkingThenToolLLM())
+    state = _base_state({
+        "messages": [HumanMessage(content="tìm sản phẩm x")],
+        "permissions": ["Permissions.Order.ProductManagement.View"],
+        "turns": 0,
+    })
+    result = await manager_agent.call_model_node(state, {"configurable": {}})
+
+    text_deltas = "".join(payload for type_, payload in events if type_ == "text_delta")
+    assert "Honda XYZ-999" not in text_deltas
+    thinking_events = [payload for type_, payload in events if type_ == "thinking"]
+    assert thinking_events and "Honda XYZ-999" in thinking_events[0]
+    assert "Honda XYZ-999" not in result["messages"][0].content
+
+
+async def test_suy_nghi_bi_ngat_giua_chung_khong_lo_ra_text_delta(monkeypatch):
+    monkeypatch.setattr(manager_agent, "BackendClient", FakeBackendClient)
+    events = []
+    monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: events.append)
+    from langchain_core.messages import AIMessageChunk, HumanMessage
+
+    class CutOffThinkingLLM:
+        def bind_tools(self, tools):
+            return self
+
+        async def astream(self, messages):
+            yield AIMessageChunk(content="<suy_nghi>tên sản phẩm bịa Honda XYZ-999")
+
+    monkeypatch.setattr(manager_agent, "get_llm", lambda **kwargs: CutOffThinkingLLM())
+    state = _base_state({
+        "messages": [HumanMessage(content="tìm sản phẩm x")],
+        "permissions": ["Permissions.Order.ProductManagement.View"],
+        "turns": 0,
+    })
+    await manager_agent.call_model_node(state, {"configurable": {}})
+
+    text_deltas = "".join(payload for type_, payload in events if type_ == "text_delta")
+    assert "Honda XYZ-999" not in text_deltas
+
+
 async def test_text_kem_tool_call_bi_xoa_vi_chua_co_ket_qua_that(monkeypatch):
     monkeypatch.setattr(manager_agent, "BackendClient", FakeBackendClient)
     events = []

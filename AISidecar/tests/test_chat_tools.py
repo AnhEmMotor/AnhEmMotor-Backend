@@ -4,7 +4,7 @@ import uuid
 from langchain_core.messages import AIMessageChunk, HumanMessage, SystemMessage
 
 from app.agents import manager_agent
-from app.services.chat_tools import build_tools, describe_args
+from app.services.chat_tools import SUMMARIZERS, build_tools, describe_args, load_catalog, summarize_result
 
 
 def _fake_envelope(tool_path, payload):
@@ -118,6 +118,22 @@ def test_describe_args_nhieu_field_noi_bang_phay():
     assert summary == "Top N: 5"
 
 
+def test_summarize_result_khong_loi_cho_moi_tool_trong_catalog():
+    fake_envelope = {"items": [{"a": 1, "b": "x"}], "totalCount": 1, "warnings": []}
+    for entry in load_catalog():
+        summary = summarize_result(entry["name"], fake_envelope)
+        assert isinstance(summary, str) and summary
+
+
+def test_summarize_result_bao_loi_ro_rang_khi_tool_that_bai():
+    assert summarize_result("get_sales_summary", {"error": "timeout"}) == "Không lấy được dữ liệu"
+
+
+def test_tool_tai_chinh_co_summarizer_rieng_khong_roi_vao_generic():
+    for name in ("get_sales_summary", "get_product_stock", "get_pnl_report", "get_order_status"):
+        assert name in SUMMARIZERS
+
+
 def test_describe_args_bo_qua_from_to_date_vi_da_hien_o_filtersApplied():
     summary = describe_args(
         "get_sales_summary", {"from_date": "2026-06-01", "to_date": "2026-06-30", "limit": 10})
@@ -147,13 +163,23 @@ async def test_call_tools_node_goi_dung_tool_va_emit_start_end(monkeypatch):
     assert tool_message.tool_call_id == "call-1"
     tool_start_type, tool_start_payload = events[0]
     assert tool_start_type == "tool_start"
-    assert json.loads(tool_start_payload) == {"name": "get_order_status", "summary": "Từ khoá: Nguyễn Văn A"}
+    start_payload = json.loads(tool_start_payload)
+    assert start_payload["name"] == "get_order_status"
+    assert start_payload["summary"] == "Từ khoá: Nguyễn Văn A"
+    assert isinstance(start_payload["argsPreview"]["preview"], str)
+
     tool_end_type, tool_end_payload = events[1]
     assert tool_end_type == "tool_end"
-    assert json.loads(tool_end_payload) == {
-        "name": "get_order_status", "truncated": False, "totalCount": 1,
-        "asOf": "2026-07-26T09:15:00+07:00", "warnings": [], "filtersApplied": {},
-    }
+    end_payload = json.loads(tool_end_payload)
+    assert end_payload["name"] == "get_order_status"
+    assert end_payload["truncated"] is False
+    assert end_payload["totalCount"] == 1
+    assert end_payload["asOf"] == "2026-07-26T09:15:00+07:00"
+    assert end_payload["warnings"] == []
+    assert end_payload["filtersApplied"] == {}
+    assert isinstance(end_payload["durationMs"], int)
+    assert end_payload["summary"] == "1 đơn hàng, mới nhất: không rõ"
+    assert "resultPreview" in end_payload
 
 
 async def test_call_tools_node_tool_loi_khong_crash(monkeypatch):

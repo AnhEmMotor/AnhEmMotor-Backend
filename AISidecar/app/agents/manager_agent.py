@@ -13,6 +13,7 @@ from pydantic import ValidationError
 
 from app.core.errors import ForbiddenError
 from app.core.llm import get_llm
+from app.core.redaction import _scrub_text, make_tool_preview
 from app.guardrails.tool_guard import (
     DEFAULT_TOOL_BUDGET,
     call_signature,
@@ -24,7 +25,7 @@ from app.guardrails.tool_guard import (
     wrap_tool_result,
 )
 from app.services.backend_client import BackendClient
-from app.services.chat_tools import build_tools, describe_args
+from app.services.chat_tools import build_tools, describe_args, summarize_result
 from app.services.routing import resolve_modules
 from app.tools.registry import build_tool_scope, load_tool_specs, resolve_tool_call_error
 
@@ -33,9 +34,49 @@ MAX_TOOL_TURNS = 8
 
 GUARDRAIL_STATE_KEY = "permissions"
 
+THINKING_OPEN = "<suy_nghi>"
+THINKING_CLOSE = "</suy_nghi>"
+
+
+class ThinkingParser:
+    def __init__(self):
+        self._buffer = ""
+        self._resolved = False
+        self._inside = False
+        self.thinking_text = ""
+
+    def feed(self, content: str) -> str:
+        if self._resolved and not self._inside:
+            return content
+        self._buffer += content
+        if not self._resolved:
+            if len(self._buffer) < len(THINKING_OPEN):
+                if THINKING_OPEN.startswith(self._buffer):
+                    return ""
+                self._resolved = True
+                out, self._buffer = self._buffer, ""
+                return out
+            self._resolved = True
+            if self._buffer.startswith(THINKING_OPEN):
+                self._inside = True
+                self._buffer = self._buffer[len(THINKING_OPEN):]
+            else:
+                out, self._buffer = self._buffer, ""
+                return out
+        if self._inside:
+            idx = self._buffer.find(THINKING_CLOSE)
+            if idx == -1:
+                return ""
+            self.thinking_text = self._buffer[:idx]
+            rest = self._buffer[idx + len(THINKING_CLOSE):]
+            self._inside, self._buffer = False, ""
+            return rest
+        return ""
+
+
 REWRITE_MESSAGES = {
     "no_permission": (
-        "Tôi không có đủ quyền hoặc công cụ để tra dữ liệu này. "
+        "Tôi không có đủ quyền để tra dữ liệu này. "
         "Vui lòng liên hệ quản trị viên nếu bạn cần được cấp thêm quyền."
     ),
     "unverified_metric": (
@@ -161,6 +202,7 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
     full = None
     carried = []
     last_poll = time.monotonic()
+    thinking_parser = ThinkingParser()
 
     async for chunk in llm.astream(state["messages"]):
         if cancel_event is not None and cancel_event.is_set():
@@ -168,7 +210,9 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
 
         content = chunk if isinstance(chunk, str) else (getattr(chunk, "content", "") or "")
         if content:
-            writer(("text_delta", content))
+            visible = thinking_parser.feed(content)
+            if visible:
+                writer(("text_delta", visible))
 
         full = chunk if full is None else full + chunk
 
@@ -192,6 +236,13 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         if model_used:
             updates["model_used"] = model_used
 
+    if thinking_parser.thinking_text:
+        writer(("thinking", json.dumps(
+            {"text": _scrub_text(thinking_parser.thinking_text.strip())}, ensure_ascii=False)))
+        if isinstance(result_message.content, str):
+            tagged = THINKING_OPEN + thinking_parser.thinking_text + THINKING_CLOSE
+            result_message.content = result_message.content.replace(tagged, "", 1).lstrip()
+
     tool_calls = getattr(result_message, "tool_calls", None)
     if scoping and tool_calls and (result_message.content or "").strip():
         writer(("message_correction", ""))
@@ -202,6 +253,7 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         guard = check_output(result_message.content or "", {
             "had_forbidden_tool": state.get("had_forbidden_tool", False),
             "tool_call_count": state.get("tool_call_count", 0),
+            "has_tools_bound": bool(tools),
         })
         if guard.action == "block":
             result_message = AIMessage(content="Không thể trả lời yêu cầu này.")
@@ -260,7 +312,9 @@ async def call_tools_node(state: AgentState) -> dict:
         name = tool_call["name"]
         args = dict(tool_call["args"])
         summary = describe_args(name, args)
-        writer(("tool_start", json.dumps({"name": name, "summary": summary}, ensure_ascii=False)))
+        writer(("tool_start", json.dumps(
+            {"name": name, "summary": summary, "argsPreview": make_tool_preview(args)},
+            ensure_ascii=False)))
 
         if guarding:
             lifecycle_error = resolve_tool_call_error(name, {**state, "expanded_modules": expanded_modules}, specs)
@@ -327,6 +381,7 @@ async def call_tools_node(state: AgentState) -> dict:
 
         tool = tools_by_name.get(name)
         result = None
+        started = time.perf_counter()
         try:
             if tool is None:
                 raise ValueError(f"Unknown tool: {name}")
@@ -353,7 +408,14 @@ async def call_tools_node(state: AgentState) -> dict:
         except Exception as exc:
             content = json.dumps({"error": str(exc)}, ensure_ascii=False)
         result_messages.append(ToolMessage(content=content, tool_call_id=tool_call["id"]))
-        writer(("tool_end", json.dumps({"name": name, **_envelope_summary(result)}, ensure_ascii=False)))
+        result_for_ui = result if isinstance(result, dict) else {"error": content}
+        writer(("tool_end", json.dumps({
+            "name": name,
+            "durationMs": int((time.perf_counter() - started) * 1000),
+            "summary": _scrub_text(summarize_result(name, result_for_ui)),
+            "resultPreview": make_tool_preview(result_for_ui),
+            **_envelope_summary(result),
+        }, ensure_ascii=False)))
 
     updates = {"tool_turns": tool_turns, "tool_limit_reached": False, "messages": result_messages}
     if guarding:

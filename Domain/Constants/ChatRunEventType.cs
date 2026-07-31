@@ -16,4 +16,5 @@ public static class ChatRunEventType
     public const string ToolEnd = "tool_end";
     public const string MessageCorrection = "message_correction";
     public const string RunMeta = "run_meta";
+    public const string Thinking = "thinking";
 }

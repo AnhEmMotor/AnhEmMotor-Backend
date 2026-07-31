@@ -18,8 +18,14 @@ PROMPT_LEAK_MARKERS = ["Bạn là trợ lý AI của hệ thống quản lý Anh
 
 STALL_MARKERS = [
     "để tôi kiểm tra", "để tôi tra", "để tôi tìm", "tôi sẽ kiểm tra", "tôi sẽ tra cứu",
-    "tôi sẽ tìm", "vui lòng đợi", "đợi một chút", "chờ tôi", "chờ một chút", "xin chờ",
+    "tôi sẽ tìm", "tôi sẽ gọi", "sẽ gọi tool", "vui lòng đợi", "đợi một chút", "chờ tôi",
+    "chờ một chút", "xin chờ",
 ]
+
+FAKE_TOOL_CALL_PATTERN = re.compile(
+    r'\{\s*"?call"?\s*[:\s]*"[a-z_]+"\s*\(|"tool_calls?"\s*:|\bfunction_call\s*\(',
+    re.IGNORECASE,
+)
 
 CURRENCY_UNIT_MARKERS = ["đồng", "vnđ", "₫", "vnd"]
 
@@ -111,6 +117,15 @@ def contains_business_metric(text: str) -> bool:
 
 
 def check_output(answer: str, state: dict) -> GuardResult:
+    no_tools_bound = not state.get("has_tools_bound", True)
+
+    if FAKE_TOOL_CALL_PATTERN.search(answer):
+        return GuardResult.rewrite(
+            "Câu trả lời chứa cú pháp gọi tool giả (không phải kết quả tool thật). Hãy trả lời "
+            "lại hoàn toàn bằng lời tự nhiên: nếu không có tool phù hợp hoặc không đủ quyền, "
+            "hãy nói rõ điều đó — TUYỆT ĐỐI không viết ra bất kỳ cú pháp gọi hàm/tool nào.",
+            kind="no_permission" if no_tools_bound else "stalled_promise")
+
     if state.get("had_forbidden_tool") and contains_numbers(answer):
         return GuardResult.rewrite(
             "Có tool bị từ chối quyền. Hãy viết lại câu trả lời, "
@@ -121,14 +136,14 @@ def check_output(answer: str, state: dict) -> GuardResult:
         return GuardResult.rewrite(
             "Bạn nêu số liệu mà chưa tra cứu dữ liệu. Hãy gọi tool phù hợp "
             "hoặc nói rõ là bạn không có số liệu.",
-            kind="unverified_metric")
+            kind="no_permission" if no_tools_bound else "unverified_metric")
 
     lowered = answer.lower()
     if state.get("tool_call_count", 0) == 0 and any(marker in lowered for marker in STALL_MARKERS):
         return GuardResult.rewrite(
             "Bạn hứa sẽ tra cứu nhưng chưa gọi tool nào trong lượt này. Hãy gọi tool phù hợp "
             "ngay bây giờ thay vì chỉ hứa, hoặc nếu không có tool phù hợp thì nói rõ luôn.",
-            kind="stalled_promise")
+            kind="no_permission" if no_tools_bound else "stalled_promise")
 
     if any(marker in answer for marker in PROMPT_LEAK_MARKERS):
         return GuardResult.block("Không thể trả lời yêu cầu này.")

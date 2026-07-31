@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.tools.envelope import ChatToolEnvelope
+from app.schemas.tool_envelope import ChatToolEnvelope
 
 VALID_ENVELOPE = {
     "items": [{"reportDay": "2026-07-26", "totalRevenue": 1000000}],

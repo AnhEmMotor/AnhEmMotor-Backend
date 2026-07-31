@@ -329,4 +329,82 @@ public class ChatRunExecutorTests
             "mỗi chunk model sinh ra phải forward riêng, không được gom nhiều chunk thành 1 lần " +
             "flush — đó là điều làm FE thấy chữ nhảy cục thay vì stream tự nhiên theo tốc độ model");
     }
+
+    private static async IAsyncEnumerable<SidecarEvent> StreamWithThinkingEvent()
+    {
+        yield return new SidecarEvent(ChatRunEventType.Thinking, "{\"text\":\"Cần tra doanh thu.\"}");
+        yield return new SidecarEvent(ChatRunEventType.TextDelta, "Doanh thu tháng này là 0.");
+        await Task.Yield();
+        yield return new SidecarEvent("done", "");
+    }
+
+    [Fact(DisplayName = "EXEC_05 - thinking được ghi lại nhưng không lẫn vào fullOutput/ChatMessage")]
+    public async Task ProcessRun_PersistsThinking_WithoutTouchingFullOutput()
+    {
+        var runId = Guid.NewGuid();
+        var sessionId = Guid.NewGuid();
+        var run = new ChatRun { Id = runId, SessionId = sessionId, UserMessage = "hỏi gì đó", Status = ChatRunStatus.Pending };
+
+        var readRepo = new Mock<IChatReadRepository>();
+        readRepo.Setup(x => x.GetRunByIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(run);
+
+        var streamClient = new Mock<ISidecarStreamClient>();
+        streamClient
+            .Setup(x => x.StreamAsync(runId, sessionId, run.UserMessage, "user-token", It.IsAny<CancellationToken>()))
+            .Returns(StreamWithThinkingEvent());
+
+        var tokenStore = new Mock<IChatRunTokenStore>();
+        tokenStore.Setup(x => x.Take(runId)).Returns("user-token");
+
+        var writer = new Mock<IChatRunWriter>();
+        var appendedThinking = new List<string>();
+        writer.Setup(x => x.AppendAsync(runId, It.IsAny<string>(), It.IsAny<object>())).ReturnsAsync(0L);
+        writer.Setup(x => x.AppendAsync(runId, ChatRunEventType.Thinking, It.IsAny<object>()))
+              .Callback<Guid, string, object>((_, _, payload) => appendedThinking.Add((string)payload))
+              .ReturnsAsync(0L);
+
+        string? finalOutput = null;
+        var completed = new TaskCompletionSource();
+        writer.Setup(x => x.CompleteAsync(runId, It.IsAny<string>(), It.IsAny<DateTime>()))
+              .Callback<Guid, string, DateTime>((_, output, _) =>
+              {
+                  finalOutput = output;
+                  completed.TrySetResult();
+              })
+              .Returns(Task.CompletedTask);
+
+        var tokenManager = new Mock<ITokenManagerService>();
+        var configuration = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+
+        var services = new ServiceCollection();
+        services.AddSingleton(readRepo.Object);
+        services.AddSingleton(streamClient.Object);
+        services.AddSingleton(tokenStore.Object);
+        services.AddSingleton(writer.Object);
+        services.AddSingleton(tokenManager.Object);
+        services.AddSingleton(configuration.Object);
+        var provider = services.BuildServiceProvider();
+
+        var queue = new ChatRunQueue();
+        var cancellationRegistry = new Mock<IChatRunCancellationRegistry>();
+        var executor = new ChatRunExecutor(queue, provider, cancellationRegistry.Object, NullLogger<ChatRunExecutor>.Instance);
+
+        await executor.StartAsync(TestContext.Current.CancellationToken);
+        try
+        {
+            await queue.EnqueueAsync(runId, TestContext.Current.CancellationToken);
+
+            var finished = await Task.WhenAny(completed.Task, Task.Delay(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
+            finished.Should().Be(completed.Task, "CompleteAsync phải được gọi sau khi stream kết thúc");
+        }
+        finally
+        {
+            await executor.StopAsync(TestContext.Current.CancellationToken);
+        }
+
+        appendedThinking.Should().Equal(new[] { "{\"text\":\"Cần tra doanh thu.\"}" },
+            "event thinking phải được ghi lại làm ChatRunEvent riêng để replay được");
+        finalOutput.Should().Be("Doanh thu tháng này là 0.",
+            "nội dung thinking tuyệt đối không được lẫn vào fullOutput/ChatMessage cuối cùng");
+    }
 }
