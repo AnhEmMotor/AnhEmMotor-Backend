@@ -114,7 +114,7 @@ Vue ──SignalR── .NET Run Engine ──HTTP── AISidecar (LangGraph ag
 | 12 | Qdrant & RAG | [12-STAGE-QDRANT-RAG.md](12-STAGE-QDRANT-RAG.md) | **#1** | 4–5 ngày |
 | 13 | Guardrails: không để AI hớ tool | [13-STAGE-GUARDRAILS.md](13-STAGE-GUARDRAILS.md) | **#6** | 2–3 ngày |
 | 14 | Tối ưu tốc độ & số lần suy nghĩ | [14-STAGE-PERFORMANCE.md](14-STAGE-PERFORMANCE.md) | **#5** | 2–3 ngày |
-| 15 | Danh mục Tool đầy đủ (71 tool) | [15-STAGE-TOOL-CATALOG.md](15-STAGE-TOOL-CATALOG.md) | **bổ sung** | 8–12 ngày |
+| 15 | Danh mục Tool đầy đủ (91 tool, gồm 20 tool ghi bổ sung P4+P5) | [15-STAGE-TOOL-CATALOG.md](15-STAGE-TOOL-CATALOG.md) | **bổ sung** | 15–22 ngày |
 | 16 | Độ chính xác dữ liệu (chống số sai lệch) | [16-STAGE-TOOL-DATA-FIDELITY.md](16-STAGE-TOOL-DATA-FIDELITY.md) | **bổ sung** | 3–4 ngày |
 | 17 | Vòng đời Tool & hợp đồng phiên bản | [17-STAGE-TOOL-LIFECYCLE.md](done/17-STAGE-TOOL-LIFECYCLE.md) | **bổ sung** | 3–4 ngày |
 | 18 | Nhất quán & hoà giải trạng thái | [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md) | **bổ sung** | 3–4 ngày |
@@ -122,7 +122,7 @@ Vue ──SignalR── .NET Run Engine ──HTTP── AISidecar (LangGraph ag
 | 20 | Chọn tool động theo ngữ cảnh | [20-STAGE-DYNAMIC-TOOL-SCOPING.md](20-STAGE-DYNAMIC-TOOL-SCOPING.md) | **bổ sung** | 3–4 ngày |
 | 21 | Trang quản trị: Lịch sử chat & phản hồi số liệu | [21-STAGE-ADMIN-CHAT-HISTORY.md](21-STAGE-ADMIN-CHAT-HISTORY.md) | **8, 16** | 2–3 ngày |
 
-**Tổng ước lượng: ~60–79 ngày công.**
+**Tổng ước lượng: ~67–89 ngày công** (tăng so với bản gốc do Stage 15 mở rộng thêm 20 tool ghi ở P4+P5).
 
 ---
 
@@ -176,7 +176,7 @@ Số hiệu file là ID cố định. Thứ tự làm việc như sau:
 | **M2 — Không mất việc** | 08, 09, 18 | Thoát ra vào lại không mất câu trả lời; gửi tiếp được khi AI đang chạy; ba lớp state không lệch nhau |
 | **M3 — Trợ lý thật** | 03, 13, 17, 16, 15-P1 | Trả lời được bằng dữ liệu thật (20 tool), số khớp báo cáo UI, đổi tool không gây lỗi âm ỉ |
 | **M4 — Minh bạch & thông minh** | 11, 10, 12, 19 | Xem được AI nghĩ gì; lập & sửa kế hoạch; tìm kiếm ngữ nghĩa; tái dùng kế hoạch quen |
-| **M5 — Sẵn sàng production** | 14, 15, 04, 05, 06, 21 | Nhanh, phủ 71 tool, đã kiểm thử & bảo mật; admin xem lại được lịch sử chat + feedback số liệu sai, không chỉ nằm trong DB |
+| **M5 — Sẵn sàng production** | 14, 15, 04, 05, 06, 21 | Nhanh, phủ 91 tool (gồm tool ghi P4+P5, xoá mềm có khôi phục), đã kiểm thử & bảo mật; admin xem lại được lịch sử chat + feedback số liệu sai, không chỉ nằm trong DB |
 
 ---
 
@@ -191,8 +191,8 @@ Số hiệu file là ID cố định. Thứ tự làm việc như sau:
 | 5 | Protocol stream: JSON lines | 03.4, 08.9 | **JSON lines** |
 | 6 | Agent: LangGraph hay `AgentExecutor` | 03.4 | **LangGraph** — `create_react_agent` ở Stage 3, `StateGraph` tự dựng từ Stage 9. Không tự chế vòng lặp agent (xem 7.8b) |
 | 7 | Embedding model (đổi = reindex toàn bộ) | 12.3 | `text-embedding-004` |
-| 8 | Có bật tool ghi dữ liệu không | 13.5, 15-P3 | **Không** ở bản đầu |
-| 9 | Có đưa tool lương/hoa hồng vào chatbot không | 15-G4/G5 | **Cân nhắc loại bỏ** |
+| 8 | Có bật tool ghi dữ liệu không | 13.5, 15-P3/P4/P5 | **Có.** Đã đổi từ "Không ở bản đầu" (2026-07-31, qua 2 đợt): P3 có 1 tool ghi (`create_purchase_request`); P4 (+12) mở rộng update trạng thái đơn/PR/phiếu sửa chữa/vận đơn + tạo lead/booking/warranty claim/voucher/expense + xác nhận thanh toán công nợ + sửa cấu hình cửa hàng; P5 (+8) mở rộng chỉnh sửa khách hàng/lead/sản phẩm/lịch hẹn + **xoá mềm có khôi phục** (`deactivate_X`/`restore_X` cho voucher, tin tức). Xem [15-STAGE-TOOL-CATALOG.md](15-STAGE-TOOL-CATALOG.md) mục 15.8/15.9. Vẫn giữ nguyên tắc bất biến (đã hỏi lại và xác nhận 2026-07-31): **không tool xoá vĩnh viễn nào**, mọi tool ghi qua Plan Mode + confirm + audit log + idempotency key. |
+| 9 | Có đưa tool lương/hoa hồng vào chatbot không | 15-G4/G5 | **Có, đưa vào P3** với redaction `Minimal` + audit log riêng (đã chốt 2026-07-31, không loại bỏ) |
 | 10 | Mức hiển thị tool ở Production | 11.2 | **Full** (mặc định) |
 | 11 | **Chốt định nghĩa nghiệp vụ** (doanh thu, số đơn, tồn kho...) với người phụ trách | 16.4 | **Chưa chốt — cần làm trước tool tài chính** |
 | 12 | Múi giờ: backend trả `serverDate` GMT+7 hay sidecar tự tính | 16.2 | **Backend trả** — sidecar không tự tính |
@@ -230,7 +230,7 @@ Số hiệu file là ID cố định. Thứ tự làm việc như sau:
 - [ ] Xem được AI nghĩ gì và gọi tool nào; Production **không lộ** tham số/kết quả thô.
 - [ ] "Xe ga tiết kiệm xăng cho nữ" → gợi ý đúng, giá và tồn kho lấy từ SQL.
 - [ ] TTFT < 1.5s (p50); trung vị số vòng agent ≤ 3.
-- [ ] 71 tool phủ hết phân hệ; độ chính xác chọn tool ≥ 88%.
+- [ ] 91 tool phủ hết phân hệ (gồm 20 tool ghi P4+P5, không có hard delete); độ chính xác chọn tool ≥ 88%.
 - [ ] Hỏi "Xe SH giá bao nhiêu?" → "còn màu đen không?" → hiểu đúng, **không gọi lại router**.
 - [ ] Session 200 tin nhắn: độ chính xác chọn tool **không giảm** (digest cố định < 200 token).
 - [ ] Số tool trung vị nạp vào mỗi bước **≤ 5**; khi chạy theo plan chỉ 2–3 tool.
