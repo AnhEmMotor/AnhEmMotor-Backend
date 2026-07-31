@@ -43,9 +43,9 @@
     "module": "sales",
     "required_permissions": ["Permissions.Order.OrderManagement.View"],
     "is_write": false,
-    "description": "Tra cứu trạng thái và thông tin của một đơn hàng theo ID đơn hàng (số nguyên). DÙNG KHI người dùng hỏi 'đơn hàng #1024 tới đâu rồi', 'đơn này đã giao chưa' VÀ có nhắc số ID đơn hàng. KHÔNG dùng cho câu hỏi về doanh thu hay thống kê nhiều đơn — dùng get_sales_summary cho việc đó. Ví dụ: 'Đơn hàng 1024 đang ở trạng thái nào?'.",
+    "description": "Tra cứu trạng thái và thông tin của (các) đơn hàng khớp tên khách hàng hoặc số điện thoại (tối đa 5 đơn gần nhất). DÙNG KHI người dùng hỏi 'đơn hàng của anh A tới đâu rồi', 'đơn của SĐT 09xx đã giao chưa'. KHÔNG dùng cho câu hỏi về doanh thu hay thống kê nhiều đơn — dùng get_sales_summary cho việc đó. Ví dụ: 'Đơn hàng của Nguyễn Văn A đang ở trạng thái nào?'.",
     "args": [
-      { "name": "order_id", "type": "integer", "required": true, "label": "Mã đơn hàng", "description": "ID đơn hàng cần tra cứu trạng thái, ví dụ 1024." }
+      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên khách hàng hoặc số điện thoại của đơn hàng cần tra cứu." }
     ]
   },
   {
@@ -188,9 +188,9 @@
     "module": "service",
     "required_permissions": ["Permissions.Factory.RepairOrderManagement.View"],
     "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi chi tiết một phiếu sửa chữa cụ thể theo ID (hạng mục sửa chữa, phụ tùng, chi phí, kỹ thuật viên, xe, khách hàng). KHÔNG DÙNG KHI cần liệt kê nhiều phiếu sửa chữa hoặc tìm kiếm theo bộ lọc — dùng list_repair_orders cho trường hợp đó.",
+    "description": "DÙNG KHI cần xem chi tiết phiếu sửa chữa (hạng mục sửa chữa, phụ tùng, chi phí, kỹ thuật viên) theo TÊN KHÁCH HÀNG hoặc BIỂN SỐ XE, không cần biết mã phiếu (tối đa 5 kết quả khớp gần nhất). KHÔNG DÙNG KHI cần liệt kê nhiều phiếu sửa chữa không lọc theo khách/xe cụ thể — dùng list_repair_orders cho trường hợp đó.",
     "args": [
-      { "name": "repair_order_id", "type": "integer", "required": true, "label": "Mã phiếu", "description": "ID phiếu sửa chữa cần xem chi tiết." }
+      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên khách hàng hoặc biển số xe (hoặc VIN) cần tìm phiếu sửa chữa." }
     ]
   },
   {
@@ -238,9 +238,9 @@
     "module": "logistics",
     "required_permissions": ["Permissions.Order.OrderManagement.View"],
     "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi về tình trạng vận chuyển, đơn vị vận chuyển hoặc thời gian giao hàng của một đơn hàng cụ thể theo mã đơn hàng. KHÔNG DÙNG KHI người dùng chỉ hỏi trạng thái đơn hàng nói chung (thanh toán, tổng tiền) — trường hợp đó dùng get_order_status.",
+    "description": "DÙNG KHI người dùng hỏi về tình trạng vận chuyển, đơn vị vận chuyển hoặc thời gian giao hàng của (các) đơn hàng khớp tên khách hàng hoặc số điện thoại (tối đa 5 vận đơn gần nhất, bỏ qua đơn chưa có vận đơn). KHÔNG DÙNG KHI người dùng chỉ hỏi trạng thái đơn hàng nói chung (thanh toán, tổng tiền) — trường hợp đó dùng get_order_status.",
     "args": [
-      { "name": "order_id", "type": "integer", "required": true, "label": "Mã đơn hàng", "description": "ID đơn hàng cần tra vận đơn." }
+      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên khách hàng hoặc số điện thoại của đơn hàng cần tra vận đơn." }
     ]
   },
   {
@@ -363,9 +363,9 @@
     "module": "inventory",
     "required_permissions": ["Permissions.Warehouse.ReceiptManagement.View"],
     "is_write": false,
-    "description": "DÙNG KHI người dùng hỏi chi tiết một phiếu nhập kho cụ thể theo ID (nhà cung cấp, trạng thái, danh sách sản phẩm, số lượng, đơn giá, tổng tiền). KHÔNG DÙNG KHI cần liệt kê nhiều phiếu nhập kho — dùng list_inventory_receipts.",
+    "description": "DÙNG KHI người dùng hỏi chi tiết phiếu nhập kho theo TÊN NHÀ CUNG CẤP (nhà cung cấp, trạng thái, danh sách sản phẩm, số lượng, đơn giá, tổng tiền). Trả về tối đa 5 phiếu khớp gần nhất. KHÔNG DÙNG KHI cần liệt kê nhiều phiếu nhập kho không lọc theo NCC — dùng list_inventory_receipts.",
     "args": [
-      { "name": "receipt_id", "type": "integer", "required": true, "label": "Mã phiếu nhập", "description": "ID phiếu nhập kho cần xem chi tiết." }
+      { "name": "keyword", "type": "string", "required": true, "label": "Tên nhà cung cấp", "description": "Tên (hoặc một phần tên) nhà cung cấp cần tìm phiếu nhập kho." }
     ]
   },
   {
@@ -388,9 +388,9 @@
     "module": "inventory",
     "required_permissions": ["Permissions.Warehouse.PurchaseRequestManagement.View"],
     "is_write": false,
-    "description": "Trả chi tiết đầy đủ của MỘT yêu cầu mua hàng (PR) theo ID. DÙNG KHI đã biết mã PR cụ thể. KHÔNG DÙNG KHI cần danh sách nhiều PR — dùng list_purchase_requests.",
+    "description": "Tìm chi tiết yêu cầu mua hàng (PR) theo TÊN NHÀ CUNG CẤP, không cần biết ID. Trả về tối đa 5 yêu cầu khớp gần nhất, mới nhất trước. KHÔNG DÙNG KHI cần danh sách nhiều PR không lọc theo NCC — dùng list_purchase_requests.",
     "args": [
-      { "name": "purchase_request_id", "type": "integer", "required": true, "label": "Mã yêu cầu mua hàng", "description": "ID yêu cầu mua hàng cần xem chi tiết." }
+      { "name": "keyword", "type": "string", "required": true, "label": "Tên nhà cung cấp", "description": "Tên (hoặc một phần tên) nhà cung cấp cần tìm yêu cầu mua hàng." }
     ]
   },
   {
@@ -491,7 +491,7 @@
     "module": "customer",
     "required_permissions": ["Permissions.Marketing.LeadManagement.View"],
     "is_write": false,
-    "description": "Lấy danh sách lead theo từng giai đoạn pipeline (Mới, Đang tư vấn, Đang lái thử, Đã đặt cọc, Đang chờ giấy tờ, Đã giao xe). DÙNG KHI người dùng hỏi 'pipeline lead hiện tại thế nào', 'có bao nhiêu lead đang đặt cọc'. KHÔNG dùng để tra chi tiết một lead cụ thể theo ID — dùng get_lead_detail.",
+    "description": "Lấy danh sách lead theo từng giai đoạn pipeline (Mới, Đang tư vấn, Đang lái thử, Đã đặt cọc, Đang chờ giấy tờ, Đã giao xe). DÙNG KHI người dùng hỏi 'pipeline lead hiện tại thế nào', 'có bao nhiêu lead đang đặt cọc'. KHÔNG dùng để tra chi tiết một lead cụ thể theo tên/SĐT — dùng get_lead_detail.",
     "args": [
       { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng", "description": "Số lead tối đa trả về, mặc định 10, tối đa 25." }
     ]
@@ -503,9 +503,9 @@
     "module": "customer",
     "required_permissions": ["Permissions.Marketing.LeadManagement.View"],
     "is_write": false,
-    "description": "Tra cứu thông tin chi tiết của một lead theo ID: trạng thái, nguồn, xe quan tâm, điểm số, người phụ trách. DÙNG KHI đã biết ID lead cụ thể. KHÔNG dùng cho danh sách nhiều lead — dùng get_lead_pipeline.",
+    "description": "Tìm chi tiết lead (khách hàng tiềm năng) theo tên hoặc số điện thoại: trạng thái, nguồn, xe quan tâm, điểm số, người phụ trách. Trả về tối đa 5 lead khớp gần nhất. KHÔNG dùng cho danh sách nhiều lead theo giai đoạn pipeline — dùng get_lead_pipeline.",
     "args": [
-      { "name": "lead_id", "type": "integer", "required": true, "label": "Mã lead", "description": "ID lead cần tra chi tiết." }
+      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên hoặc số điện thoại của lead cần tìm." }
     ]
   },
   {
@@ -539,9 +539,9 @@
     "module": "warranty",
     "required_permissions": ["Permissions.Factory.RepairOrderManagement.View"],
     "is_write": false,
-    "description": "DÙNG KHI cần chi tiết đầy đủ 1 yêu cầu bảo hành cụ thể theo ID (mô tả lỗi, phụ tùng thay, chi phí, quyết định hãng). KHÔNG DÙNG KHI cần danh sách nhiều yêu cầu (dùng list_warranty_claims) hoặc điều khoản/chính sách bảo hành chung (dùng get_warranty_terms).",
+    "description": "DÙNG KHI cần chi tiết đầy đủ 1 hoặc vài yêu cầu bảo hành, tìm theo tên khách hàng hoặc biển số xe (mô tả lỗi, phụ tùng thay, chi phí, quyết định hãng). Trả tối đa 5 kết quả khớp gần nhất. KHÔNG DÙNG KHI cần danh sách nhiều yêu cầu không theo khách/xe cụ thể (dùng list_warranty_claims) hoặc điều khoản/chính sách bảo hành chung (dùng get_warranty_terms).",
     "args": [
-      { "name": "claim_id", "type": "integer", "required": true, "label": "Mã yêu cầu bảo hành", "description": "ID yêu cầu bảo hành cần xem chi tiết." }
+      { "name": "keyword", "type": "string", "required": true, "label": "Từ khoá", "description": "Tên khách hàng hoặc biển số xe cần tìm yêu cầu bảo hành." }
     ]
   },
   {

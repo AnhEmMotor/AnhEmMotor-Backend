@@ -6,5 +6,5 @@ namespace Application.Features.ChatTools.Queries.GetRepairOrderDetailForChat;
 
 public sealed record GetRepairOrderDetailForChatQuery : IRequest<Result<ChatToolEnvelope<ChatRepairOrderDetailDto>>>
 {
-    public int RepairOrderId { get; init; }
+    public required string Keyword { get; init; }
 }

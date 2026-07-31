@@ -6,5 +6,5 @@ namespace Application.Features.ChatTools.Queries.GetShipmentTrackingForChat;
 
 public sealed record GetShipmentTrackingForChatQuery : IRequest<Result<ChatToolEnvelope<ChatShipmentTrackingDto>>>
 {
-    public int OrderId { get; init; }
+    public required string Keyword { get; init; }
 }

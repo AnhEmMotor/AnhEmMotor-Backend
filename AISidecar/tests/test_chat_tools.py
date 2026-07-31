@@ -133,7 +133,7 @@ async def test_call_tools_node_goi_dung_tool_va_emit_start_end(monkeypatch):
     state = _base_state("r1", {
         "messages": [AIMessageChunk(
             content="",
-            tool_calls=[_tool_call("get_order_status", {"order_id": 1}, "call-1")],
+            tool_calls=[_tool_call("get_order_status", {"keyword": "Nguyễn Văn A"}, "call-1")],
         )],
     })
     result = await manager_agent.call_tools_node(state)
@@ -143,11 +143,11 @@ async def test_call_tools_node_goi_dung_tool_va_emit_start_end(monkeypatch):
     tool_message = result["messages"][0]
     payload = json.loads(tool_message.content)
     assert payload["items"][0]["tool_path"] == "orders/status"
-    assert payload["items"][0]["payload"] == {"order_id": 1}
+    assert payload["items"][0]["payload"] == {"keyword": "Nguyễn Văn A"}
     assert tool_message.tool_call_id == "call-1"
     tool_start_type, tool_start_payload = events[0]
     assert tool_start_type == "tool_start"
-    assert json.loads(tool_start_payload) == {"name": "get_order_status", "summary": "Mã đơn hàng: 1"}
+    assert json.loads(tool_start_payload) == {"name": "get_order_status", "summary": "Từ khoá: Nguyễn Văn A"}
     tool_end_type, tool_end_payload = events[1]
     assert tool_end_type == "tool_end"
     assert json.loads(tool_end_payload) == {

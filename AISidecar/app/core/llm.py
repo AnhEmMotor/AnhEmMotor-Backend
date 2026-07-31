@@ -6,7 +6,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 def get_llm(temperature=0.1):
     settings = get_settings()
     if settings.ai_provider.lower() == "apiendpoint":
-        kwargs = {"model": settings.model, "temperature": temperature}
+        kwargs = {"model": settings.model, "temperature": temperature, "num_ctx": settings.ollama_num_ctx}
         if settings.ai_api_endpoint:
             kwargs["base_url"] = settings.ai_api_endpoint
         return ChatOllama(**kwargs)

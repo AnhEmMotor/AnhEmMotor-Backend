@@ -20,8 +20,7 @@ public class InternalChatController(
     UserManager<ApplicationUser> userManager,
     ApplicationDBContext dbContext,
     IConfiguration configuration,
-    IChatRunWriter chatRunWriter,
-    ILogger<InternalChatController> logger) : ControllerBase
+    IChatRunWriter chatRunWriter) : ControllerBase
 {
     [HttpPost("context")]
     public async Task<IActionResult> GetContext([FromBody] ContextRequest request, CancellationToken cancellationToken)

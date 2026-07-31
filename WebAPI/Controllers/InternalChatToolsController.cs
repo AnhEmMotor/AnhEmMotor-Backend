@@ -151,7 +151,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetOrderStatusForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetOrderStatusForChatQuery { OrderId = request.OrderId }, cancellationToken)
+        var result = await sender.Send(new GetOrderStatusForChatQuery { Keyword = request.Keyword }, cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -281,7 +281,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetRepairOrderDetailForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetRepairOrderDetailForChatQuery { RepairOrderId = request.RepairOrderId }, cancellationToken)
+        var result = await sender.Send(new GetRepairOrderDetailForChatQuery { Keyword = request.Keyword }, cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -325,7 +325,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetShipmentTrackingForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetShipmentTrackingForChatQuery { OrderId = request.OrderId }, cancellationToken)
+        var result = await sender.Send(new GetShipmentTrackingForChatQuery { Keyword = request.Keyword }, cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -465,7 +465,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetInventoryReceiptDetailForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetInventoryReceiptDetailForChatQuery { ReceiptId = request.ReceiptId }, cancellationToken)
+        var result = await sender.Send(new GetInventoryReceiptDetailForChatQuery { Keyword = request.Keyword }, cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -490,7 +490,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new GetPurchaseRequestDetailForChatQuery { PurchaseRequestId = request.PurchaseRequestId },
+            new GetPurchaseRequestDetailForChatQuery { Keyword = request.Keyword },
             cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
@@ -600,7 +600,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetLeadDetailForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetLeadDetailForChatQuery { LeadId = request.LeadId }, cancellationToken)
+        var result = await sender.Send(new GetLeadDetailForChatQuery { Keyword = request.Keyword }, cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -633,7 +633,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetWarrantyClaimDetailForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetWarrantyClaimDetailForChatQuery { ClaimId = request.ClaimId }, cancellationToken)
+        var result = await sender.Send(new GetWarrantyClaimDetailForChatQuery { Keyword = request.Keyword }, cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -1105,7 +1105,7 @@ public record ListInventoryReceiptsForChatRequest
 
 public record GetInventoryReceiptDetailForChatRequest
 {
-    public int ReceiptId { get; init; }
+    public required string Keyword { get; init; }
 }
 
 public record ListPurchaseRequestsForChatRequest
@@ -1116,7 +1116,7 @@ public record ListPurchaseRequestsForChatRequest
 
 public record GetPurchaseRequestDetailForChatRequest
 {
-    public int PurchaseRequestId { get; init; }
+    public required string Keyword { get; init; }
 }
 
 public record GetRevenueByCategoryForChatRequest
@@ -1168,7 +1168,7 @@ public record GetLeadPipelineForChatRequest
 
 public record GetLeadDetailForChatRequest
 {
-    public int LeadId { get; init; }
+    public required string Keyword { get; init; }
 }
 
 public record ListContactsForChatRequest
@@ -1183,7 +1183,7 @@ public record GetLoyaltyMembersForChatRequest
 
 public record GetWarrantyClaimDetailForChatRequest
 {
-    public int ClaimId { get; init; }
+    public required string Keyword { get; init; }
 }
 
 public record GetWarrantyTermsForChatRequest
@@ -1292,7 +1292,7 @@ public record ListRepairOrdersForChatRequest
 
 public record GetRepairOrderDetailForChatRequest
 {
-    public int RepairOrderId { get; init; }
+    public required string Keyword { get; init; }
 }
 
 public record ListWarrantyClaimsForChatRequest
@@ -1314,7 +1314,7 @@ public record GetSuppliersWithDebtForChatRequest
 
 public record GetShipmentTrackingForChatRequest
 {
-    public int OrderId { get; init; }
+    public required string Keyword { get; init; }
 }
 
 public record GetDashboardOverviewForChatRequest
@@ -1349,7 +1349,7 @@ public record GetLowStockProductsForChatRequest
 
 public record GetOrderStatusForChatRequest
 {
-    public int OrderId { get; init; }
+    public required string Keyword { get; init; }
 }
 
 public record GetSalesSummaryForChatRequest

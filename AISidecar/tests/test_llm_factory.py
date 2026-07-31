@@ -46,3 +46,14 @@ def test_temperature_duoc_truyen_dung(monkeypatch):
     monkeypatch.setenv("API_KEY", "fake-key-for-test")
     llm = get_llm(temperature=0.42)
     assert llm.temperature == 0.42
+
+
+def test_ollama_nhan_num_ctx_du_lon_cho_toan_bo_tool(monkeypatch):
+    monkeypatch.setenv("AI_PROVIDER", "apiendpoint")
+    monkeypatch.setenv("AI_API_ENDPOINT", "http://localhost:11434")
+    llm = get_llm()
+    assert type(llm).__name__ == "ChatOllama"
+    assert llm.num_ctx >= 8192, (
+        "context quá nhỏ sẽ vượt ngưỡng khi catalog có nhiều tool (mỗi tool ~1000+ ký tự "
+        "description/args) — xem lỗi 'exceed_context_size_error' đã gặp thật với 'Phiếu nhập?'"
+    )

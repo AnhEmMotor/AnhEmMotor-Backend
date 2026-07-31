@@ -6,5 +6,5 @@ namespace Application.Features.ChatTools.Queries.GetLeadDetailForChat;
 
 public sealed record GetLeadDetailForChatQuery : IRequest<Result<ChatToolEnvelope<ChatLeadDetailDto>>>
 {
-    public int LeadId { get; init; }
+    public required string Keyword { get; init; }
 }

@@ -6,5 +6,6 @@ namespace Application.Features.ChatTools.Queries.GetPurchaseRequestDetailForChat
 
 public sealed record GetPurchaseRequestDetailForChatQuery : IRequest<Result<ChatToolEnvelope<ChatPurchaseRequestDetailDto>>>
 {
-    public int PurchaseRequestId { get; init; }
+    /// <summary>Tên nhà cung cấp (hoặc một phần tên) — không phải ID, người dùng cuối không biết ID.</summary>
+    public required string Keyword { get; init; }
 }

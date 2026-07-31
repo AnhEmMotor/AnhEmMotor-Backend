@@ -13,46 +13,63 @@ public class GetPurchaseRequestDetailForChatQueryHandler(
     IServerDateProvider dateProvider)
     : IRequestHandler<GetPurchaseRequestDetailForChatQuery, Result<ChatToolEnvelope<ChatPurchaseRequestDetailDto>>>
 {
+    private const int MaxMatches = 5;
+
     public async Task<Result<ChatToolEnvelope<ChatPurchaseRequestDetailDto>>> Handle(
         GetPurchaseRequestDetailForChatQuery request,
         CancellationToken cancellationToken)
     {
-        var entity = await purchaseRequestReadRepository
-            .GetByIdWithDetailsAsync(request.PurchaseRequestId, cancellationToken)
-            .ConfigureAwait(false);
-        if (entity is null)
+        var keyword = request.Keyword.Trim();
+        var dtos = new List<ChatPurchaseRequestDetailDto>();
+
+        if (keyword.Length > 0)
         {
-            return Result<ChatToolEnvelope<ChatPurchaseRequestDetailDto>>.Failure(
-                Error.NotFound($"Không tìm thấy yêu cầu mua hàng có ID {request.PurchaseRequestId}.", "Id"));
+            var ids = await purchaseRequestReadRepository
+                .SearchIdsBySupplierNameAsync(keyword, MaxMatches, cancellationToken)
+                .ConfigureAwait(false);
+
+            foreach (var id in ids)
+            {
+                var entity = await purchaseRequestReadRepository
+                    .GetByIdWithDetailsAsync(id, cancellationToken)
+                    .ConfigureAwait(false);
+                if (entity is null)
+                {
+                    continue;
+                }
+
+                var response = entity.Adapt<PurchaseRequestDetailResponse>();
+                dtos.Add(
+                    new ChatPurchaseRequestDetailDto
+                    {
+                        PurchaseRequestId = response.Id,
+                        Status = response.Status,
+                        Note = response.Note,
+                        CreatedByName = response.CreatedByName,
+                        CreatedAt = response.CreatedAt,
+                        Items = response.Items
+                            .Select(
+                                i => new ChatPurchaseRequestDetailItemDto
+                                {
+                                    ProductName = i.ProductName,
+                                    Quantity = i.Quantity,
+                                    SupplierName = i.SupplierName,
+                                    UnitPrice = i.UnitPrice
+                                })
+                            .ToList()
+                    });
+            }
         }
 
-        var response = entity.Adapt<PurchaseRequestDetailResponse>();
-        var dto = new ChatPurchaseRequestDetailDto
-        {
-            PurchaseRequestId = response.Id,
-            Status = response.Status,
-            Note = response.Note,
-            CreatedByName = response.CreatedByName,
-            CreatedAt = response.CreatedAt,
-            Items = response.Items
-                .Select(
-                    i => new ChatPurchaseRequestDetailItemDto
-                    {
-                        ProductName = i.ProductName,
-                        Quantity = i.Quantity,
-                        SupplierName = i.SupplierName,
-                        UnitPrice = i.UnitPrice
-                    })
-                .ToList()
-        };
-
+        var inner = new ChatToolResult<ChatPurchaseRequestDetailDto>(dtos, dtos.Count, false);
+        var filtersApplied = new Dictionary<string, string> { ["Nhà cung cấp"] = keyword };
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
-            "IPurchaseRequestReadRepository.GetByIdWithDetailsAsync",
-            new Dictionary<string, string>(),
+            "IPurchaseRequestReadRepository.SearchIdsBySupplierNameAsync+GetByIdWithDetailsAsync",
+            filtersApplied,
             "yeu-cau-mua-hang",
             "VND");
 
-        return ChatToolEnvelope<ChatPurchaseRequestDetailDto>.WrapSingle(dto, meta);
+        return ChatToolEnvelope<ChatPurchaseRequestDetailDto>.Wrap(inner, meta);
     }
 }

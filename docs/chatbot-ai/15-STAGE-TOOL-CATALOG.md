@@ -39,8 +39,13 @@ code (2 bị chặn bởi phụ thuộc ngoài, 20 mới ở mức đặc tả).
 - Test đã cập nhật khớp: [`UnitTests/ChatToolCatalog.cs`](../../UnitTests/ChatToolCatalog.cs) (đếm
   69), [`AISidecar/tests/test_chat_tools.py`](../../AISidecar/tests/test_chat_tools.py),
   [`AISidecar/tests/test_chat_tools_catalog.py`](../../AISidecar/tests/test_chat_tools_catalog.py).
-- `dotnet build` toàn solution: 0 lỗi. `dotnet test`: 581/581 pass. `pytest` AISidecar: toàn bộ pass
-  (gồm 2 test trần bất biến `test_khong_module_nao_vuot_tran`, `test_hai_module_bat_ky_khong_vuot_tran_request`).
+- `dotnet build` toàn solution: 0 lỗi. `dotnet test` (UnitTests+ControllerTests+IntegrationTests):
+  1,184/1,184 pass. `pytest` AISidecar: toàn bộ pass (gồm 2 test trần bất biến
+  `test_khong_module_nao_vuot_tran`, `test_hai_module_bat_ky_khong_vuot_tran_request`).
+- **2026-07-31 (sau đó):** đổi 7 tool `*_detail` từ nhận ID sang nhận `keyword` (tên/SĐT/biển số/tên
+  NCC) — xem nguyên tắc mới ở mục 15.2 #7. Đã sửa xong `get_order_status`, `get_shipment_tracking`,
+  `get_repair_order_detail`, `get_warranty_claim_detail`, `get_lead_detail`,
+  `get_purchase_request_detail`, `get_inventory_receipt_detail` — build + test xanh lại.
 
 ### ⛔ Bị chặn — không phải việc chưa làm, mà là phụ thuộc ngoài chưa tồn tại
 - `semantic_product_search` (A3) — cần Qdrant, Stage 12 chưa xây.
@@ -120,6 +125,16 @@ Số liệu thật từ `AnhEmMotor-Backend`:
 6. **Tối đa 10 tool/module**, và **mọi cặp 2 module ≤ 20 tool** (trần một request).
    Đây là **bất biến có test chặn**, không phải hướng dẫn —
    xem [13-STAGE-GUARDRAILS.md](13-STAGE-GUARDRAILS.md) mục 13.3b và 13.3c.
+7. **Không tool nào nhận ID nội bộ (khoá chính số nguyên) làm tham số bắt buộc từ người dùng.**
+   Người dùng cuối không biết và không quan tâm ID trong DB — họ nhớ tên khách hàng, SĐT, biển số
+   xe, tên nhà cung cấp. Mọi tool "chi tiết theo ID" (`*_detail`, `get_*_by_id`...) phải nhận
+   `keyword` (string) và tự tìm kiếm nội bộ theo trường định danh tự nhiên, trả về **danh sách khớp
+   (tối đa 5)** thay vì bắt AI/người dùng phải biết ID trước — nếu 0 kết quả, trả `Items: []`,
+   KHÔNG trả lỗi. Áp dụng ngay (2026-07-31) cho 7 tool đã có: `get_order_status`,
+   `get_shipment_tracking`, `get_repair_order_detail`, `get_warranty_claim_detail`,
+   `get_lead_detail`, `get_purchase_request_detail`, `get_inventory_receipt_detail`. Khi viết P4/P5
+   (15.8/15.9), các tool `update_*`/`get_*_detail` còn lại (state B10, C11, D9, D11, E13, E15...)
+   **phải thiết kế theo nguyên tắc này ngay từ đầu**, không viết theo ID rồi sửa lại sau.
 
 ### Phân bổ module — đã tách lại để không vượt trần
 

@@ -2,11 +2,13 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Features.ChatTools.Common;
 using Application.Interfaces.Repositories.Logistics.Shipment;
+using Application.Interfaces.Repositories.Output;
 using MediatR;
 
 namespace Application.Features.ChatTools.Queries.GetShipmentTrackingForChat;
 
 public class GetShipmentTrackingForChatQueryHandler(
+    IOutputReadRepository outputReadRepository,
     IShipmentReadRepository shipmentReadRepository,
     IServerDateProvider dateProvider)
     : IRequestHandler<GetShipmentTrackingForChatQuery, Result<ChatToolEnvelope<ChatShipmentTrackingDto>>>
@@ -15,28 +17,38 @@ public class GetShipmentTrackingForChatQueryHandler(
         GetShipmentTrackingForChatQuery request,
         CancellationToken cancellationToken)
     {
-        var shipment = await shipmentReadRepository.GetByOutputIdAsync(request.OrderId, cancellationToken)
+        var keyword = request.Keyword.Trim();
+        var orderIds = await ChatToolOrderSearch
+            .FindOrderIdsByKeywordAsync(outputReadRepository, keyword, cancellationToken)
             .ConfigureAwait(false);
-        if (shipment == null)
+
+        var dtos = new List<ChatShipmentTrackingDto>();
+        foreach (var orderId in orderIds)
         {
-            return Result<ChatToolEnvelope<ChatShipmentTrackingDto>>.Failure(
-                Error.NotFound("Không tìm thấy thông tin vận chuyển"));
+            var shipment = await shipmentReadRepository.GetByOutputIdAsync(orderId, cancellationToken)
+                .ConfigureAwait(false);
+            if (shipment == null)
+            {
+                continue;
+            }
+            dtos.Add(new ChatShipmentTrackingDto
+            {
+                OrderId = shipment.OutputId ?? shipment.Id,
+                TrackingNumber = shipment.TrackingNumber,
+                Carrier = shipment.Carrier,
+                Status = shipment.Status.ToString(),
+                CreatedAt = shipment.CreatedAt,
+                DeliveredAt = shipment.DeliveredAt
+            });
         }
-        var dto = new ChatShipmentTrackingDto
-        {
-            OrderId = shipment.OutputId ?? shipment.Id,
-            TrackingNumber = shipment.TrackingNumber,
-            Carrier = shipment.Carrier,
-            Status = shipment.Status.ToString(),
-            CreatedAt = shipment.CreatedAt,
-            DeliveredAt = shipment.DeliveredAt
-        };
+
+        var inner = new ChatToolResult<ChatShipmentTrackingDto>(dtos, dtos.Count, false);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
-            "IShipmentReadRepository.GetByOutputIdAsync",
-            new Dictionary<string, string>(),
+            "IOutputReadRepository.GetPagedAsync+IShipmentReadRepository.GetByOutputIdAsync",
+            new Dictionary<string, string> { ["Từ khóa"] = keyword },
             "van-chuyen",
             null);
-        return ChatToolEnvelope<ChatShipmentTrackingDto>.WrapSingle(dto, meta);
+        return ChatToolEnvelope<ChatShipmentTrackingDto>.Wrap(inner, meta);
     }
 }

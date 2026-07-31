@@ -6,5 +6,5 @@ namespace Application.Features.ChatTools.Queries.GetInventoryReceiptDetailForCha
 
 public sealed record GetInventoryReceiptDetailForChatQuery : IRequest<Result<ChatToolEnvelope<ChatInventoryReceiptDetailDto>>>
 {
-    public int ReceiptId { get; init; }
+    public required string Keyword { get; init; }
 }

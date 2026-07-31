@@ -1,3 +1,4 @@
+using Application.ApiContracts.Output.Responses;
 using Application.ApiContracts.Statistical.Responses;
 using Application.Common.Interfaces;
 using Application.Common.Models;
@@ -10,9 +11,12 @@ using Application.Features.ChatTools.Queries.SearchProductsForChat;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.Statistical;
+using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.Services;
 using Moq;
+using Sieve.Models;
+using System.Linq.Expressions;
 using DomainBrand = Domain.Entities.Brand;
 using DomainOutput = Domain.Entities.Output;
 using DomainProduct = Domain.Entities.Product;
@@ -169,24 +173,37 @@ public class ChatTools
     public async Task GetOrderStatus_ValidOrder_ReturnsStatus()
     {
         var order = new DomainOutput { Id = 123, StatusId = "completed", CustomerName = "Nguyễn Văn A" };
+        _outputReadRepositoryMock.Setup(
+            r => r.GetPagedAsync<OutputItemResponse>(
+                It.IsAny<SieveModel>(),
+                It.IsAny<Domain.Constants.DataFetchMode>(),
+                It.IsAny<Expression<Func<DomainOutput, bool>>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<OutputItemResponse>([new OutputItemResponse { Id = 123 }], 1, 1, 5));
         _outputReadRepositoryMock.Setup(r => r.GetByIdWithDetailsAsync(123, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
             .ReturnsAsync(order);
         var handler = new GetOrderStatusForChatQueryHandler(_outputReadRepositoryMock.Object, _dateProvider);
-        var result = await handler.Handle(new GetOrderStatusForChatQuery { OrderId = 123 }, CancellationToken.None).ConfigureAwait(true);
+        var result = await handler.Handle(new GetOrderStatusForChatQuery { Keyword = "Nguyễn Văn A" }, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value!.Items.Should().ContainSingle();
         result.Value.Items[0].StatusId.Should().Be("completed");
         result.Value.Items[0].CustomerName.Should().Be("Nguyễn Văn A");
     }
 
-    [Fact(DisplayName = "CHATTOOLS_106 - Unit - GetOrderStatusForChatQueryHandler với đơn hàng không tồn tại")]
-    public async Task GetOrderStatus_OrderNotFound_ReturnsFailure()
+    [Fact(DisplayName = "CHATTOOLS_106 - Unit - GetOrderStatusForChatQueryHandler không tìm thấy đơn hàng khớp keyword")]
+    public async Task GetOrderStatus_NoMatch_ReturnsEmptyItems()
     {
-        _outputReadRepositoryMock.Setup(r => r.GetByIdWithDetailsAsync(999, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
-            .ReturnsAsync((DomainOutput?)null);
+        _outputReadRepositoryMock.Setup(
+            r => r.GetPagedAsync<OutputItemResponse>(
+                It.IsAny<SieveModel>(),
+                It.IsAny<Domain.Constants.DataFetchMode>(),
+                It.IsAny<Expression<Func<DomainOutput, bool>>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 5));
         var handler = new GetOrderStatusForChatQueryHandler(_outputReadRepositoryMock.Object, _dateProvider);
-        var result = await handler.Handle(new GetOrderStatusForChatQuery { OrderId = 999 }, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
+        var result = await handler.Handle(new GetOrderStatusForChatQuery { Keyword = "Không tồn tại" }, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Items.Should().BeEmpty();
     }
 
     [Fact(DisplayName = "CHATTOOLS_107 - Unit - GetSalesSummaryForChatQueryHandler giới hạn số bản ghi trả về")]

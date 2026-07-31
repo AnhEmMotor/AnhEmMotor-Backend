@@ -6,5 +6,5 @@ namespace Application.Features.ChatTools.Queries.GetOrderStatusForChat;
 
 public sealed record GetOrderStatusForChatQuery : IRequest<Result<ChatToolEnvelope<ChatOrderStatusDto>>>
 {
-    public int OrderId { get; init; }
+    public required string Keyword { get; init; }
 }

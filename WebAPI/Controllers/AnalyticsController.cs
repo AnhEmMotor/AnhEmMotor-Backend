@@ -23,6 +23,7 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <param name="start">The start date. Defaults to today.</param>
         /// <param name="end">The end date. Defaults to end of today.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The dashboard summary.</returns>
         [HttpGet("dashboard/summary")]
         public async Task<IActionResult> GetSummary([FromQuery] DateTime? start, [FromQuery] DateTime? end, CancellationToken cancellationToken)
@@ -41,6 +42,7 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <param name="month">The month (1-12).</param>
         /// <param name="year">The year.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The PnL report.</returns>
         [HttpGet("pnl")]
         public async Task<IActionResult> GetPnl([FromQuery] int month, [FromQuery] int year, CancellationToken cancellationToken)
@@ -54,6 +56,7 @@ namespace WebAPI.Controllers
         /// </summary>
         /// <param name="start">The start date. Defaults to 30 days ago.</param>
         /// <param name="end">The end date. Defaults to today.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The staff performance data.</returns>
         [HttpGet("staff-performance")]
         public async Task<IActionResult> GetStaff([FromQuery] DateTime? start, [FromQuery] DateTime? end, CancellationToken cancellationToken)
