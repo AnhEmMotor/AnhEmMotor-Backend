@@ -10,3 +10,9 @@ class ChatRequest(BaseModel):
 
 class GenerateTitleRequest(BaseModel):
     message: str
+
+
+class RevalidatePlanRequest(BaseModel):
+    run_id: str
+    expected_tools: list[str] = []
+    fingerprint: str = ""

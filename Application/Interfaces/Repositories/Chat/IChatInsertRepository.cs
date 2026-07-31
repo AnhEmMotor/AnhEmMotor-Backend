@@ -8,4 +8,5 @@ public interface IChatInsertRepository
     public void AddMessage(ChatMessage message);
     public void AddRun(ChatRun run);
     public void AddFeedback(ChatFeedback feedback);
+    public void AddPlan(ChatPlan plan);
 }

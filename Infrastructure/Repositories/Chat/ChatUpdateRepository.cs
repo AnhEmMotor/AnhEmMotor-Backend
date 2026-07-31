@@ -10,4 +10,9 @@ public class ChatUpdateRepository(ApplicationDBContext context) : IChatUpdateRep
     {
         context.ChatSessions.Update(session);
     }
+
+    public void UpdatePlan(ChatPlan plan)
+    {
+        context.ChatPlans.Update(plan);
+    }
 }

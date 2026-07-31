@@ -57,4 +57,11 @@ public class ChatReadRepository(ApplicationDBContext context) : IChatReadReposit
         return await context.ChatMessages
             .CountAsync(m => m.RunId == runId && m.IsSteering, cancellationToken);
     }
+
+    public async Task<ChatPlan?> GetPlanByRunIdAsync(Guid runId, CancellationToken cancellationToken = default)
+    {
+        return await context.ChatPlans
+            .Include(p => p.Run!.Session)
+            .FirstOrDefaultAsync(p => p.RunId == runId, cancellationToken);
+    }
 }

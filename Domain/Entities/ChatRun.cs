@@ -53,4 +53,6 @@ public class ChatRun : BaseEntity
     public string? ModelUsed { get; set; }
 
     public ICollection<ChatRunEvent> Events { get; set; } = [];
+
+    public ChatPlan? Plan { get; set; }
 }

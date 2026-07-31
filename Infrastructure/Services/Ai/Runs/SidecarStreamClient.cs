@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Application.Common.Interfaces;
 using Application.DTOs.Chat;
 using Application.Interfaces.Services;
@@ -81,4 +82,43 @@ public class SidecarStreamClient(
         var response = await client.SendAsync(httpRequest, ct);
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task<PlanRevalidationResult> RevalidatePlanAsync(
+        Guid runId, IReadOnlyList<string> expectedTools, string? fingerprint, CancellationToken ct = default)
+    {
+        var sidecarUrl = sidecarUrlProvider.GetSidecarUrl();
+        var client = httpClientFactory.CreateClient();
+
+        var requestBody = new
+        {
+            run_id = runId.ToString(),
+            expected_tools = expectedTools,
+            fingerprint = fingerprint ?? string.Empty
+        };
+
+        var requestContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{sidecarUrl}/plan/revalidate")
+        {
+            Content = requestContent
+        };
+
+        var internalSecret = configuration["Jwt:Key"];
+        if (!string.IsNullOrEmpty(internalSecret))
+        {
+            httpRequest.Headers.Add("X-Internal-Secret", internalSecret);
+        }
+
+        var response = await client.SendAsync(httpRequest, ct);
+        response.EnsureSuccessStatusCode();
+
+        var body = await response.Content.ReadAsStringAsync(ct);
+        var parsed = JsonSerializer.Deserialize<RevalidateResponseBody>(
+            body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return new PlanRevalidationResult(parsed?.Ok ?? true, parsed?.UnavailableTools ?? []);
+    }
+
+    private sealed record RevalidateResponseBody(
+        [property: JsonPropertyName("ok")] bool Ok,
+        [property: JsonPropertyName("unavailable_tools")] List<string>? UnavailableTools);
 }

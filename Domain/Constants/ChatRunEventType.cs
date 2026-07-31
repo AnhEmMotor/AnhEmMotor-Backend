@@ -17,4 +17,15 @@ public static class ChatRunEventType
     public const string MessageCorrection = "message_correction";
     public const string RunMeta = "run_meta";
     public const string Thinking = "thinking";
+
+    // Stage 10 — Plan Mode
+    public const string PlanStarted = "plan_started";
+    public const string PlanStepAdded = "plan_step_added";
+    public const string PlanReady = "plan_ready";
+    public const string PlanEdited = "plan_edited";
+    public const string PlanApproved = "plan_approved";
+    public const string PlanRejected = "plan_rejected";
+    public const string PlanStepStarted = "plan_step_started";
+    public const string PlanStepCompleted = "plan_step_completed";
+    public const string PlanInvalidated = "plan_invalidated";
 }

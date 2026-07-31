@@ -1,9 +1,13 @@
 using Application.ApiContracts.ManagerChat.Requests;
+using Application.Features.ManagerChat.Commands.ApproveChatPlan;
 using Application.Features.ManagerChat.Commands.CreateChatFeedback;
 using Application.Features.ManagerChat.Commands.CreateManagerChatSession;
 using Application.Features.ManagerChat.Commands.DeleteManagerChatSession;
+using Application.Features.ManagerChat.Commands.RejectChatPlan;
+using Application.Features.ManagerChat.Commands.UpdateChatPlan;
 using Application.Features.ManagerChat.Commands.UpdateManagerChatSession;
 using Application.Features.ManagerChat.Queries.GetActiveChatRun;
+using Application.Features.ManagerChat.Queries.GetChatPlan;
 using Application.Features.ManagerChat.Queries.GetChatToolCatalog;
 using Application.Features.ManagerChat.Queries.GetManagerChatSessionHistory;
 using Application.Features.ManagerChat.Queries.GetManagerChatSessions;
@@ -92,6 +96,42 @@ public class ManagerChatController(ISender sender) : ApiController
     {
         var query = new GetChatToolCatalogQuery();
         var result = await sender.Send(query, cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpGet("runs/{runId}/plan")]
+    [SwaggerOperation(Summary = "Lấy kế hoạch (Plan Mode) hiện tại của một run chat (Stage 10)")]
+    public async Task<IActionResult> GetPlan(Guid runId, CancellationToken cancellationToken)
+    {
+        var query = new GetChatPlanQuery(runId);
+        var result = await sender.Send(query, cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPatch("runs/{runId}/plan")]
+    [SwaggerOperation(Summary = "Sửa kế hoạch: thêm/sửa/xoá/đổi thứ tự bước (Stage 10)")]
+    public async Task<IActionResult> UpdatePlan(Guid runId, [FromBody] UpdateChatPlanRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateChatPlanCommand(runId, request.Version, request.Operations);
+        var result = await sender.Send(command, cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("runs/{runId}/plan/approve")]
+    [SwaggerOperation(Summary = "Duyệt kế hoạch và bắt đầu thực thi (Stage 10)")]
+    public async Task<IActionResult> ApprovePlan(Guid runId, [FromBody] ChatPlanVersionRequest request, CancellationToken cancellationToken)
+    {
+        var command = new ApproveChatPlanCommand(runId, request.Version);
+        var result = await sender.Send(command, cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("runs/{runId}/plan/reject")]
+    [SwaggerOperation(Summary = "Huỷ kế hoạch đang chờ duyệt (Stage 10)")]
+    public async Task<IActionResult> RejectPlan(Guid runId, CancellationToken cancellationToken)
+    {
+        var command = new RejectChatPlanCommand(runId);
+        var result = await sender.Send(command, cancellationToken);
         return HandleResult(result);
     }
 }

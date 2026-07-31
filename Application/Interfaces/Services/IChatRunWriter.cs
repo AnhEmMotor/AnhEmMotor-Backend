@@ -34,4 +34,8 @@ public interface IChatRunWriter
 
     /// <summary>Ghi fingerprint registry tool + model thật đã dùng vào ChatRun (Stage 17.2/17.10).</summary>
     public Task SetRunMetaAsync(Guid runId, string? toolRegistryFingerprint, string? modelUsed);
+
+    /// <summary>Run dừng lại chờ user duyệt plan (Stage 10) — khác Complete: không set CompletedAt, run có thể resume.
+    /// segmentStartedAt: xem CompleteAsync.</summary>
+    public Task AwaitingApprovalAsync(Guid runId, string finalOutput, DateTime segmentStartedAt);
 }

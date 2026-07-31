@@ -69,3 +69,28 @@ class BackendClient:
         await self._post(f"/internal/chat/sessions/{session_id}/routing-context", {
             "routingContext": json.dumps(routing_context, ensure_ascii=False, default=str),
         })
+
+    async def start_plan(self, run_id: str, fingerprint: str) -> dict:
+        return await self._post(f"/internal/chat/runs/{run_id}/plan/start", {"fingerprint": fingerprint})
+
+    async def get_plan(self, run_id: str) -> dict:
+        url = f"{self._settings.backend_base}/internal/chat/runs/{run_id}/plan"
+        timeout = self._settings.request_timeout_seconds
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(url, headers=self._headers())
+        if resp.status_code >= 400:
+            raise BackendError(f"/internal/chat/runs/{run_id}/plan", resp.status_code)
+        return resp.json()
+
+    async def add_plan_step(self, run_id: str, title: str, detail: str, expected_tools: list[str]) -> dict:
+        return await self._post(f"/internal/chat/runs/{run_id}/plan/steps", {
+            "title": title, "detail": detail, "expectedTools": expected_tools,
+        })
+
+    async def mark_plan_ready(self, run_id: str) -> None:
+        await self._post(f"/internal/chat/runs/{run_id}/plan/ready", {})
+
+    async def update_plan_step_status(self, run_id: str, step_id: str, status: str, result: str | None = None) -> None:
+        await self._post(f"/internal/chat/runs/{run_id}/plan/steps/{step_id}/status", {
+            "status": status, "result": result,
+        })

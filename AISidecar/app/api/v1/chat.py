@@ -10,11 +10,11 @@ from langchain_core.messages import HumanMessage
 from app.agents.manager_agent import get_graph
 from app.api.deps import verify_internal_secret
 from app.config import get_settings
-from app.schemas.chat import ChatRequest, GenerateTitleRequest
+from app.schemas.chat import ChatRequest, GenerateTitleRequest, RevalidatePlanRequest
 from app.services.backend_client import BackendClient
 from app.services.prompt_builder import build_system_message, build_history_messages
 from app.services.routing import expire_if_stale, extract_entities
-from app.tools.registry import registry_fingerprint
+from app.tools.registry import load_tool_specs, registry_fingerprint
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,20 @@ async def cancel_chat(run_id: str, _: str = Depends(verify_internal_secret)):
     if event:
         event.set()
     return {"cancelled": True}
+
+
+@router.post("/plan/revalidate")
+async def revalidate_plan(req: RevalidatePlanRequest, _: str = Depends(verify_internal_secret)):
+    current_fp = registry_fingerprint()
+    if not req.fingerprint or req.fingerprint == current_fp:
+        return {"ok": True, "unavailable_tools": []}
+
+    specs = load_tool_specs()
+    unavailable = [
+        name for name in req.expected_tools
+        if name not in specs or specs[name].status != "active"
+    ]
+    return {"ok": len(unavailable) == 0, "unavailable_tools": unavailable}
 
 
 def _event(type_: str, payload: str = "") -> str:
@@ -62,6 +76,14 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
             routing_context = {}
         routing_context = expire_if_stale(routing_context, now=datetime.now().isoformat())
 
+    plan_id = None
+    try:
+        existing_plan = await client.get_plan(chat_req.run_id)
+        if existing_plan.get("status") == "Executing":
+            plan_id = existing_plan.get("planId")
+    except Exception:
+        pass
+
     initial_state = {
         "messages": [
             build_system_message(context, chat_req.server_date),
@@ -79,6 +101,7 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
         "history": (context or {}).get("history") or [],
         "routing_context": routing_context,
         "tool_flags_snapshot": dict(get_settings().tool_flags),
+        "plan_id": plan_id,
     }
 
     cancel_event = asyncio.Event()
@@ -91,7 +114,7 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
         try:
             async for type_, payload in graph.astream(initial_state, config=config, stream_mode="custom"):
                 yield _event(type_, payload)
-            final_state = graph.get_state(config).values
+            final_state = (await graph.aget_state(config)).values
             run_meta = {
                 "toolRegistryFingerprint": registry_fingerprint(),
                 "modelUsed": final_state.get("model_used"),
@@ -110,7 +133,7 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
 
 async def _persist_routing_context(client: BackendClient, graph, config, session_id: str, previous: dict) -> None:
     try:
-        final = graph.get_state(config).values
+        final = (await graph.aget_state(config)).values
     except Exception:
         return
     tool_calls_made = [

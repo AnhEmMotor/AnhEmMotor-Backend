@@ -26,13 +26,14 @@ public class OrphanedRunCleaner(
             logger.LogError(ex, "Lỗi khi dọn dẹp orphan runs lúc startup");
         }
 
-        // 2. Mỗi 60s: run có HeartbeatAt cũ hơn 2 phút -> Orphaned
+        // 2. Mỗi 60s: run có HeartbeatAt cũ hơn 2 phút -> Orphaned; plan chờ duyệt quá 24h -> Cancelled
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken);
                 await ProcessTimeoutOrphansAsync(stoppingToken);
+                await ProcessExpiredPlansAsync(stoppingToken);
             }
             catch (OperationCanceledException)
             {
@@ -40,7 +41,7 @@ public class OrphanedRunCleaner(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Lỗi khi quét timeout orphans");
+                logger.LogError(ex, "Lỗi khi quét timeout orphans / plan hết hạn duyệt");
             }
         }
     }
@@ -122,6 +123,42 @@ public class OrphanedRunCleaner(
         {
             await context.SaveChangesAsync(stoppingToken);
             logger.LogWarning("Đã phát hiện và dọn dẹp {Count} timeout orphans", orphans.Count);
+        }
+    }
+
+    // Stage 10.5 — plan chờ duyệt quá 24h thì tự huỷ. Dùng HeartbeatAt làm mốc "dừng từ lúc nào"
+    // (đã đóng băng đúng lúc run chuyển AwaitingApproval, không cần thêm cột mới).
+    private async Task ProcessExpiredPlansAsync(CancellationToken stoppingToken)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var writer = scope.ServiceProvider.GetRequiredService<IChatRunWriter>();
+
+        var threshold = DateTime.UtcNow.AddHours(-24);
+
+        var expired = await context.ChatRuns
+            .Include(r => r.Plan)
+            .Where(r => r.Status == ChatRunStatus.AwaitingApproval && r.HeartbeatAt < threshold)
+            .ToListAsync(stoppingToken);
+
+        foreach (var run in expired)
+        {
+            run.Status = ChatRunStatus.Cancelled;
+            run.CompletedAt = DateTime.UtcNow;
+            run.ErrorCode = "plan_approval_timeout";
+
+            if (run.Plan != null)
+            {
+                run.Plan.Status = ChatPlanStatus.Rejected;
+            }
+
+            await writer.AppendAsync(run.Id, ChatRunEventType.RunCancelled, "plan_approval_timeout");
+        }
+
+        if (expired.Count > 0)
+        {
+            await context.SaveChangesAsync(stoppingToken);
+            logger.LogInformation("Đã tự huỷ {Count} plan chờ duyệt quá 24 giờ", expired.Count);
         }
     }
 }

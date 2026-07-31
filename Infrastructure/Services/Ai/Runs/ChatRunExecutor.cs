@@ -121,10 +121,19 @@ public class ChatRunExecutor(
 
             var lastHeartbeat = DateTime.UtcNow;
             segmentStartedAt = DateTime.UtcNow;
+            var isAwaitingApproval = false;
 
             await foreach (var evt in stream.WithCancellation(runCts.Token))
             {
                 if (runCts.Token.IsCancellationRequested) break;
+
+                // Stage 10 — plan_ready đánh dấu graph vừa dừng ở interrupt chờ duyệt; stream sẽ
+                // kết thúc tự nhiên ngay sau đó (sidecar ngừng yield). Vẫn ghi event qua nhánh
+                // catch-all bên dưới như các event khác, chỉ thêm cờ để quyết định trạng thái cuối.
+                if (evt.Type == ChatRunEventType.PlanReady)
+                {
+                    isAwaitingApproval = true;
+                }
 
                 if (evt.Type == ChatRunEventType.TextDelta)
                 {
@@ -181,6 +190,10 @@ public class ChatRunExecutor(
             if (runCts.Token.IsCancellationRequested)
             {
                 await writer.CancelAsync(runId, fullOutput.ToString(), segmentStartedAt);
+            }
+            else if (isAwaitingApproval)
+            {
+                await writer.AwaitingApprovalAsync(runId, fullOutput.ToString(), segmentStartedAt);
             }
             else
             {

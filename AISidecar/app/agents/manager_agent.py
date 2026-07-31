@@ -1,4 +1,6 @@
 import json
+import logging
+import re
 import time
 from functools import lru_cache
 from typing import Annotated, TypedDict
@@ -26,11 +28,17 @@ from app.guardrails.tool_guard import (
 )
 from app.services.backend_client import BackendClient
 from app.services.chat_tools import build_tools, describe_args, summarize_result
+from app.services.prompt_builder import build_plan_prompt
 from app.services.routing import resolve_modules
-from app.tools.registry import build_tool_scope, load_tool_specs, resolve_tool_call_error
+from app.tools.registry import build_tool_scope, load_tool_specs, registry_fingerprint, resolve_tool_call_error
+
+logger = logging.getLogger(__name__)
 
 STEERING_POLL_INTERVAL_SECONDS = 0.7
 MAX_TOOL_TURNS = 8
+MAX_PLAN_STEPS = 8
+
+PLAN_MODE_KEYWORDS = ("báo cáo", "phân tích", "tổng hợp", "so sánh", "lập kế hoạch", "kiểm tra toàn bộ")
 
 GUARDRAIL_STATE_KEY = "permissions"
 
@@ -44,6 +52,7 @@ class ThinkingParser:
         self._resolved = False
         self._inside = False
         self.thinking_text = ""
+        self.tag_closed = False
 
     def feed(self, content: str) -> str:
         if self._resolved and not self._inside:
@@ -68,6 +77,7 @@ class ThinkingParser:
             if idx == -1:
                 return ""
             self.thinking_text = self._buffer[:idx]
+            self.tag_closed = True
             rest = self._buffer[idx + len(THINKING_CLOSE):]
             self._inside, self._buffer = False, ""
             return rest
@@ -118,6 +128,9 @@ class AgentState(TypedDict):
     tool_flags_snapshot: dict[str, str]
     model_used: str | None
     known_ids: set[str]
+    needs_plan: bool
+    plan_id: str | None
+    plan_finished: bool
 
 
 def _latest_human_text(messages) -> str:
@@ -125,6 +138,18 @@ def _latest_human_text(messages) -> str:
         if isinstance(msg, HumanMessage):
             return msg.content
     return ""
+
+
+def classify_node(state: AgentState) -> dict:
+    text = (_latest_human_text(state.get("messages")) or "").lower()
+    needs_plan = any(keyword in text for keyword in PLAN_MODE_KEYWORDS)
+    return {"needs_plan": needs_plan}
+
+
+def route_after_classify(state: AgentState) -> str:
+    if state.get("plan_id"):
+        return "execute_step"
+    return "plan" if state.get("needs_plan") else "absorb_steering"
 
 
 def build_steering_message(item: dict) -> HumanMessage:
@@ -176,6 +201,146 @@ async def absorb_steering_node(state: AgentState) -> dict:
             updates["scoped_modules"] = list(dict.fromkeys([*current, *extra]))[:3]
 
     return {"messages": new_messages, "absorbed_count": len(pending), "carried_steering": [], **updates}
+
+
+_STEP_BLOCK_RE = re.compile(
+    r"###\s*BƯỚC\s*\d+\s*:\s*(?P<title>[^\n]+)\n+(?P<detail>.*?)\n+TOOLS:\s*(?P<tools>[^\n]*?)"
+    r"(?=\n+###\s*BƯỚC)",
+    re.DOTALL,
+)
+_PLAN_BLOCK_SENTINEL = "\n### BƯỚC 999:"
+
+
+def _split_plan_blocks(text: str) -> list[dict]:
+    blocks = []
+    for m in _STEP_BLOCK_RE.finditer(text):
+        tools = [t.strip() for t in m.group("tools").split(",") if t.strip()]
+        blocks.append({"title": m.group("title").strip(), "detail": m.group("detail").strip(), "tools": tools})
+    return blocks
+
+
+async def _emit_plan_step(client: BackendClient, writer, run_id: str, block: dict) -> None:
+    step = await client.add_plan_step(run_id, block["title"], block["detail"], block["tools"])
+    writer(("plan_step_added", json.dumps({"step": step}, ensure_ascii=False)))
+
+
+async def plan_node(state: AgentState) -> dict:
+    writer = get_stream_writer()
+    client = BackendClient(state["auth_header"])
+    run_id = state["run_id"]
+
+    plan_id = state.get("plan_id")
+    if not plan_id:
+        started = await client.start_plan(run_id, registry_fingerprint())
+        plan_id = started["planId"]
+        writer(("plan_started", json.dumps({"planId": plan_id}, ensure_ascii=False)))
+
+    current = await client.get_plan(run_id)
+    existing_count = len(current["steps"])
+
+    if existing_count >= MAX_PLAN_STEPS:
+        await client.mark_plan_ready(run_id)
+        writer(("plan_ready", json.dumps({"planId": plan_id}, ensure_ascii=False)))
+        return {"plan_id": plan_id}
+
+    request_text = _latest_human_text(state.get("messages"))
+    prompt = build_plan_prompt(request_text, current["steps"])
+
+    llm = get_llm(temperature=0.2)
+    full_text = ""
+    parsed_count = 0
+    budget = MAX_PLAN_STEPS - existing_count
+
+    async for chunk in llm.astream(prompt):
+        content = chunk if isinstance(chunk, str) else (getattr(chunk, "content", "") or "")
+        full_text += content
+        blocks = _split_plan_blocks(full_text)
+        while parsed_count < len(blocks) and parsed_count < budget:
+            await _emit_plan_step(client, writer, run_id, blocks[parsed_count])
+            parsed_count += 1
+
+    blocks = _split_plan_blocks(full_text + _PLAN_BLOCK_SENTINEL)
+    while parsed_count < len(blocks) and parsed_count < budget:
+        await _emit_plan_step(client, writer, run_id, blocks[parsed_count])
+        parsed_count += 1
+
+    if parsed_count == 0:
+        logger.warning("plan_node không parse được bước nào từ phản hồi LLM cho run %s", run_id)
+
+    await client.mark_plan_ready(run_id)
+    writer(("plan_ready", json.dumps({"planId": plan_id}, ensure_ascii=False)))
+    return {"plan_id": plan_id}
+
+
+async def execute_step_node(state: AgentState) -> dict:
+    writer = get_stream_writer()
+    client = BackendClient(state["auth_header"])
+    run_id = state["run_id"]
+
+    current = await client.get_plan(run_id)
+    next_step = next((s for s in current["steps"] if s["status"] == "pending"), None)
+
+    if next_step is None:
+        return {"current_plan_step": None, "plan_finished": True, "plan_approved": True}
+
+    await client.update_plan_step_status(run_id, next_step["id"], "running")
+    writer(("plan_step_started", json.dumps({"stepId": next_step["id"]}, ensure_ascii=False)))
+
+    step_request = HumanMessage(content=f"[BƯỚC KẾ HOẠCH] {next_step['title']}\n{next_step['detail']}")
+    return {
+        "current_plan_step": next_step,
+        "plan_finished": False,
+        "messages": [step_request],
+        "tool_turns": 0,
+        "plan_approved": True,
+    }
+
+
+def route_after_execute_step(state: AgentState) -> str:
+    return "summarize" if state.get("plan_finished") else "call_model"
+
+
+async def step_completed_node(state: AgentState) -> dict:
+    writer = get_stream_writer()
+    client = BackendClient(state["auth_header"])
+    run_id = state["run_id"]
+    step = state["current_plan_step"]
+
+    last_message = state["messages"][-1]
+    summary = (getattr(last_message, "content", "") or "").strip()
+
+    await client.update_plan_step_status(run_id, step["id"], "done", result=summary[:500])
+    writer(("plan_step_completed", json.dumps(
+        {"stepId": step["id"], "status": "done", "summary": summary[:200]}, ensure_ascii=False)))
+
+    return {"current_plan_step": None}
+
+
+async def summarize_node(state: AgentState) -> dict:
+    writer = get_stream_writer()
+    client = BackendClient(state["auth_header"])
+    run_id = state["run_id"]
+
+    current = await client.get_plan(run_id)
+    results_text = "\n".join(
+        f"- {s['title']}: {s.get('result') or '(không có kết quả)'}"
+        for s in current["steps"] if s["status"] == "done"
+    ) or "(không có bước nào hoàn tất)"
+
+    llm = get_llm(temperature=0.3)
+    prompt = (
+        "Tổng hợp kết quả các bước sau thành một câu trả lời hoàn chỉnh, mạch lạc cho người dùng, "
+        "bằng tiếng Việt, không liệt kê lại từng bước một cách máy móc:\n" + results_text
+    )
+
+    full = ""
+    async for chunk in llm.astream(prompt):
+        content = chunk if isinstance(chunk, str) else (getattr(chunk, "content", "") or "")
+        if content:
+            full += content
+            writer(("text_delta", content))
+
+    return {"messages": [AIMessage(content=full)]}
 
 
 async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
@@ -236,18 +401,30 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         if model_used:
             updates["model_used"] = model_used
 
-    if thinking_parser.thinking_text:
-        writer(("thinking", json.dumps(
-            {"text": _scrub_text(thinking_parser.thinking_text.strip())}, ensure_ascii=False)))
+    if thinking_parser.tag_closed:
+        if thinking_parser.thinking_text.strip():
+            writer(("thinking", json.dumps(
+                {"text": _scrub_text(thinking_parser.thinking_text.strip())}, ensure_ascii=False)))
         if isinstance(result_message.content, str):
             tagged = THINKING_OPEN + thinking_parser.thinking_text + THINKING_CLOSE
             result_message.content = result_message.content.replace(tagged, "", 1).lstrip()
+    elif isinstance(result_message.content, str) and THINKING_CLOSE in result_message.content:
+        leaked_thinking, _, rest = result_message.content.partition(THINKING_CLOSE)
+        writer(("message_correction", ""))
+        if leaked_thinking.strip():
+            writer(("thinking", json.dumps(
+                {"text": _scrub_text(leaked_thinking.strip())}, ensure_ascii=False)))
+        result_message.content = rest.lstrip()
+        if result_message.content:
+            writer(("text_delta", result_message.content))
 
     tool_calls = getattr(result_message, "tool_calls", None)
     if scoping and tool_calls and (result_message.content or "").strip():
+        leaked_text = _scrub_text(result_message.content.strip())
         writer(("message_correction", ""))
+        writer(("thinking", json.dumps({"text": leaked_text}, ensure_ascii=False)))
         writer(("guardrail_blocked", json.dumps(
-            {"tool": "", "reason": "text_kem_tool_call_bi_xoa_vi_chua_co_ket_qua_that"}, ensure_ascii=False)))
+            {"tool": "", "reason": "text_kem_tool_call_chuyen_thanh_thinking"}, ensure_ascii=False)))
         result_message = AIMessage(content="", tool_calls=tool_calls)
     elif scoping and not tool_calls:
         guard = check_output(result_message.content or "", {
@@ -444,31 +621,59 @@ def route_after_model(state: AgentState) -> str:
     last_message = state["messages"][-1]
     if getattr(last_message, "tool_calls", None):
         return "call_tools"
+    if state.get("carried_steering"):
+        return "absorb_steering"
+    if state.get("current_plan_step") is not None:
+        return "step_completed"
     return "absorb_steering"
 
 
 def route_after_tools(state: AgentState) -> str:
     if state.get("tool_limit_reached"):
+        if state.get("current_plan_step") is not None:
+            return "step_completed"
         return "absorb_steering"
     return "call_model"
 
 
 def build_graph():
     graph = StateGraph(AgentState)
+    graph.add_node("classify", classify_node)
+    graph.add_node("plan", plan_node)
+    graph.add_node("execute_step", execute_step_node)
+    graph.add_node("step_completed", step_completed_node)
+    graph.add_node("summarize", summarize_node)
     graph.add_node("absorb_steering", absorb_steering_node)
     graph.add_node("call_model", call_model_node)
     graph.add_node("call_tools", call_tools_node)
-    graph.set_entry_point("absorb_steering")
+
+    graph.set_entry_point("classify")
+    graph.add_conditional_edges("classify", route_after_classify, {
+        "plan": "plan",
+        "execute_step": "execute_step",
+        "absorb_steering": "absorb_steering",
+    })
+
+    graph.add_edge("plan", END)
+    graph.add_conditional_edges("execute_step", route_after_execute_step, {
+        "call_model": "call_model",
+        "summarize": "summarize",
+    })
+    graph.add_edge("step_completed", "execute_step")
+    graph.add_edge("summarize", END)
+
     graph.add_conditional_edges("absorb_steering", route_after_absorb, {
         "continue": "call_model",
         "end": END,
     })
     graph.add_conditional_edges("call_model", route_after_model, {
         "call_tools": "call_tools",
+        "step_completed": "step_completed",
         "absorb_steering": "absorb_steering",
     })
     graph.add_conditional_edges("call_tools", route_after_tools, {
         "call_model": "call_model",
+        "step_completed": "step_completed",
         "absorb_steering": "absorb_steering",
     })
     return graph.compile(checkpointer=MemorySaver())

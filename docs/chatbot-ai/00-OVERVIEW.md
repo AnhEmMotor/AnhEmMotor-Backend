@@ -187,7 +187,7 @@ Số hiệu file là ID cố định. Thứ tự làm việc như sau:
 | 1 | Bỏ hay giữ đường REST `SendMessage` | 01.1 | **Bỏ** (Hướng A) |
 | 2 | Điền tên permission thật vào bảng tool | 03.2, 15 | Đã điền theo `Domain/Constants/Permission/` |
 | 3 | Có làm tóm tắt hội thoại dài không (cần cột `Summary`) | 02.4 | Chưa làm, để Stage 14 |
-| 4 | Checkpointer: `MemorySaver` hay `AsyncPostgresSaver` | 08.9, 10.6 | Memory ở 08, **nâng lên Postgres ở 10** |
+| 4 | Checkpointer: `MemorySaver` hay `AsyncPostgresSaver` | 08.9, 10.6 | **Giữ `MemorySaver`** — plan chờ duyệt không cần checkpoint riêng, đã có `ChatPlan` ở DB chính backend (đổi quyết định 2026-07-31, xem 10.6) |
 | 5 | Protocol stream: JSON lines | 03.4, 08.9 | **JSON lines** |
 | 6 | Agent: LangGraph hay `AgentExecutor` | 03.4 | **LangGraph** — `create_react_agent` ở Stage 3, `StateGraph` tự dựng từ Stage 9. Không tự chế vòng lặp agent (xem 7.8b) |
 | 7 | Embedding model (đổi = reindex toàn bộ) | 12.3 | `text-embedding-004` |

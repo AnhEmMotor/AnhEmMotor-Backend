@@ -343,6 +343,77 @@ async def test_text_kem_tool_call_bi_xoa_vi_chua_co_ket_qua_that(monkeypatch):
     assert result["messages"][0].tool_calls
     corrections = [p for t, p in events if t == "message_correction"]
     assert corrections == [""]
+    thinking_events = [p for t, p in events if t == "thinking"]
+    assert thinking_events and "để tôi kiểm tra tồn kho ngay" in thinking_events[0]
+
+
+async def test_suy_nghi_rong_khong_lo_ra_tag_tho_va_khong_phat_thinking_rong(monkeypatch):
+    monkeypatch.setattr(manager_agent, "BackendClient", FakeBackendClient)
+    events = []
+    monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: events.append)
+    from langchain_core.messages import AIMessageChunk, HumanMessage
+
+    class EmptyThinkingLLM:
+        def bind_tools(self, tools):
+            return self
+
+        async def astream(self, messages):
+            for piece in ["<s", "uy", "_n", "ghi", "></", "s", "uy", "_n", "ghi", ">\n"]:
+                yield AIMessageChunk(content=piece)
+            yield AIMessageChunk(
+                content="", tool_calls=[_tool_call("search_products", {"keyword": "x"}, "c1")])
+
+    monkeypatch.setattr(manager_agent, "get_llm", lambda **kwargs: EmptyThinkingLLM())
+    state = _base_state({
+        "messages": [HumanMessage(content="tìm sản phẩm x")],
+        "permissions": ["Permissions.Order.ProductManagement.View"],
+        "turns": 0,
+    })
+    result = await manager_agent.call_model_node(state, {"configurable": {}})
+
+    assert result["messages"][0].content == ""
+    assert result["messages"][0].tool_calls
+    thinking_events = [p for t, p in events if t == "thinking"]
+    assert thinking_events == []
+    corrections = [p for t, p in events if t == "message_correction"]
+    assert corrections == []
+
+
+async def test_thieu_tag_mo_suy_nghi_van_duoc_gom_vao_thinking_khong_lo_tag_dong(monkeypatch):
+    monkeypatch.setattr(manager_agent, "BackendClient", FakeBackendClient)
+    events = []
+    monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: events.append)
+    from langchain_core.messages import AIMessageChunk, HumanMessage
+
+    narration = (
+        "Để trả lời câu hỏi về doanh thu tháng trước, tôi cần tra cứu tổng doanh thu "
+        "trong khoảng thời gian từ đầu tháng trước đến cuối tháng trước."
+    )
+
+    class MissingOpenTagLLM:
+        def bind_tools(self, tools):
+            return self
+
+        async def astream(self, messages):
+            for piece in [narration, "</suy_nghi>"]:
+                yield AIMessageChunk(content=piece)
+            yield AIMessageChunk(
+                content="", tool_calls=[_tool_call("search_products", {"keyword": "x"}, "c1")])
+
+    monkeypatch.setattr(manager_agent, "get_llm", lambda **kwargs: MissingOpenTagLLM())
+    state = _base_state({
+        "messages": [HumanMessage(content="tìm sản phẩm x")],
+        "permissions": ["Permissions.Order.ProductManagement.View"],
+        "turns": 0,
+    })
+    result = await manager_agent.call_model_node(state, {"configurable": {}})
+
+    assert result["messages"][0].content == ""
+    assert result["messages"][0].tool_calls
+    thinking_events = [p for t, p in events if t == "thinking"]
+    assert thinking_events and narration in thinking_events[0]
+    corrections = [p for t, p in events if t == "message_correction"]
+    assert corrections == [""]
 
 
 def test_sanitize_history_khong_giu_tool_call():

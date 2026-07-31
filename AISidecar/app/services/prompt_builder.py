@@ -39,3 +39,16 @@ def build_history_messages(context: dict | None, current_message: str) -> list:
             and messages[-1].content == current_message):
         messages.pop()
     return messages
+
+
+def build_plan_prompt(user_request: str, existing_steps: list[dict]) -> str:
+    locked = [s for s in existing_steps if s.get("editedByUser")]
+    locked_text = "\n".join(
+        f"- Bước {s['order']}: {s['title']} — {s['detail']}" for s in locked
+    )
+    return render(
+        "system_plan_mode",
+        request=user_request,
+        locked_steps=locked_text or "(chưa có)",
+        existing_count=len(existing_steps),
+    )

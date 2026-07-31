@@ -251,40 +251,53 @@ plan_step_completed cho bước cuối → tổng hợp câu trả lời → run
 
 ## 10.6. Sidecar — graph có nhánh plan
 
+> **Đã đổi so với thiết kế gốc (2026-07-31, sau khi trao đổi lại "muốn tập trung 1 DB"):**
+> **không dùng `interrupt()`/checkpointer Postgres.** Lý do: toàn bộ dữ liệu cần nhớ để duyệt/resume
+> (từng bước, trạng thái, ai sửa gì) **đã nằm sẵn trong bảng `ChatPlan` ở DB chính của backend**
+> (SQL Server dev / MySQL, PostgreSQL production — tuỳ theo `DBContext` đang cấu hình, KHÔNG bắt
+> buộc phải là Postgres). Dùng thêm một checkpointer Postgres riêng cho LangGraph là nhớ trùng lặp
+> đúng dữ liệu đã có, mà lại vi phạm nguyên tắc ở mục 6: *"LLM không bao giờ chạm DB trực tiếp"*
+> (Python vẫn phải tự mở connection tới Postgres cho checkpointer, bất kể `.NET` dùng DB nào).
+>
+> Thiết kế thật: khi plan sẵn sàng chờ duyệt, graph **kết thúc bình thường** (route `plan` → `END`,
+> không pause) — giống hệt một run hoàn tất, `MemorySaver` là đủ vì không cần sống sót qua restart.
+> Lúc user Duyệt, `.NET` enqueue lại run như một lời gọi **mới** tới sidecar; sidecar hỏi
+> `GET /internal/chat/runs/{runId}/plan` — nếu `status == "Executing"` thì seed `plan_id` vào
+> state ban đầu, route thẳng tới `execute_step` (bỏ qua `classify`/`plan`). Toàn bộ state cần thiết
+> (lịch sử hội thoại, các bước plan) đọc lại tươi từ DB chính qua `BackendClient`, không phụ thuộc
+> checkpoint cũ nào.
+
 ```python
-def build_graph(tools, llm, plan_mode: str):
+def build_graph():
     graph = StateGraph(AgentState)
     graph.add_node("classify",         classify_node)        # cần plan không?
     graph.add_node("plan",             plan_node)            # sinh plan từng bước
-    graph.add_node("await_approval",   await_approval_node)  # interrupt của LangGraph
     graph.add_node("absorb_steering",  absorb_steering_node) # Stage 9
     graph.add_node("execute_step",     execute_step_node)
     graph.add_node("call_model",       call_model_node)
     graph.add_node("call_tools",       call_tools_node)
+    graph.add_node("step_completed",   step_completed_node)
     graph.add_node("summarize",        summarize_node)
 
     graph.set_entry_point("classify")
-    graph.add_conditional_edges("classify", lambda s:
-        "plan" if s["needs_plan"] else "absorb_steering")
+    graph.add_conditional_edges("classify", route_after_classify, {
+        "plan": "plan",                    # yêu cầu mới, cần lập plan
+        "execute_step": "execute_step",    # resume: plan_id đã seed từ backend (status=Executing)
+        "absorb_steering": "absorb_steering",
+    })
 
-    graph.add_edge("plan", "await_approval")
-    graph.add_conditional_edges("await_approval", lambda s:
-        "execute_step" if s["plan_approved"] else END)
-
-    graph.add_edge("execute_step", "call_tools")
-    graph.add_conditional_edges("call_tools", lambda s:
-        "execute_step" if s["has_next_step"] else "summarize")
+    graph.add_edge("plan", END)  # dừng ở đây — không interrupt, không checkpoint riêng
+    graph.add_conditional_edges("execute_step", route_after_execute_step, {
+        "call_model": "call_model", "summarize": "summarize",
+    })
+    graph.add_edge("step_completed", "execute_step")
     graph.add_edge("summarize", END)
-    return graph.compile(checkpointer=checkpointer)
+    return graph.compile(checkpointer=MemorySaver())
 ```
 
-**`await_approval_node` dùng cơ chế `interrupt` của LangGraph** — graph dừng lại, state được
-checkpointer lưu, và **resume được sau nhiều giờ**. Đây là lý do Stage 8 khuyến nghị nâng
-checkpointer lên `AsyncPostgresSaver` ở Stage này: `MemorySaver` mất state khi backend restart,
-mà plan chờ duyệt có thể tồn tại 24 giờ.
-
-> **Quyết định cần chốt:** cấp connection string PostgreSQL cho sidecar (thêm env `POSTGRES_URL`
-> trong `AiSidecarManager.cs`), dùng schema riêng `langgraph` để không lẫn với bảng nghiệp vụ.
+`execute_step_node` chỉ được vào khi plan đã ở trạng thái `Executing` (đã qua `ApproveChatPlanCommand`
+phía `.NET`) — set `plan_approved: True` ngay tại đây để tool guard (`check_tool_call`) cho phép tool
+ghi dữ liệu, thay vì dựa vào giá trị do `await_approval_node` trả lại như bản thiết kế gốc.
 
 ---
 
@@ -335,7 +348,7 @@ POST  /api/v1/manager-chat/runs/{runId}/plan/reject
 | Xung đột version khi user sửa nhanh | Optimistic concurrency + 409 + reload |
 | Plan quá dài, user không đọc | Giới hạn 8 bước; nhiều hơn thì AI phải gộp |
 | User không duyệt, run treo | Timeout 24h → Cancelled |
-| Plan chờ duyệt bị mất khi restart | Checkpointer Postgres, không dùng MemorySaver |
+| Plan chờ duyệt bị mất khi restart | `ChatPlan` đã nằm ở DB chính backend (không phải checkpoint LangGraph) — restart không mất; lúc duyệt, sidecar dựng lại state từ DB, không phụ thuộc `MemorySaver` sống hay chết |
 | AI lập plan sai rồi thực thi luôn | Bắt buộc duyệt với mọi tool ghi dữ liệu |
 
 ---

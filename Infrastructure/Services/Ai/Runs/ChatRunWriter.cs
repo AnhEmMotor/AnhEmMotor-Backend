@@ -94,11 +94,15 @@ public class ChatRunWriter(
 
     public async Task MarkRunningAsync(Guid runId, string instanceId)
     {
+        // HeartbeatAt phải reset ở đây — nếu không, run resume sau khi chờ duyệt plan 24h (Stage 10)
+        // vẫn mang mốc heartbeat cũ, và lượt quét timeout kế tiếp của OrphanedRunCleaner (mỗi 60s)
+        // sẽ orphan nhầm run vừa mới resume trước khi tick heartbeat đầu tiên (15s) kịp chạy.
         await context.ChatRuns
             .Where(r => r.Id == runId)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(r => r.Status, ChatRunStatus.Running)
-                .SetProperty(r => r.OwnerInstanceId, instanceId));
+                .SetProperty(r => r.OwnerInstanceId, instanceId)
+                .SetProperty(r => r.HeartbeatAt, DateTime.UtcNow));
     }
 
     public async Task CompleteAsync(Guid runId, string finalOutput, DateTime segmentStartedAt)
@@ -126,6 +130,33 @@ public class ChatRunWriter(
 
         await context.SaveChangesAsync();
         await AppendAsync(runId, ChatRunEventType.RunCompleted, "");
+    }
+
+    public async Task AwaitingApprovalAsync(Guid runId, string finalOutput, DateTime segmentStartedAt)
+    {
+        var run = await context.ChatRuns.FirstOrDefaultAsync(r => r.Id == runId);
+        if (run == null) return;
+
+        run.Status = ChatRunStatus.AwaitingApproval;
+
+        if (!string.IsNullOrEmpty(finalOutput))
+        {
+            var aiMessage = new ChatMessage
+            {
+                Id = Guid.NewGuid(),
+                SessionId = run.SessionId,
+                Role = ChatRole.Ai,
+                Message = finalOutput,
+                RunId = runId,
+                CreatedAt = DateTime.UtcNow,
+                ToolCallsJson = await BuildToolCallsJsonAsync(runId, segmentStartedAt)
+            };
+            context.ChatMessages.Add(aiMessage);
+        }
+
+        await context.SaveChangesAsync();
+        // Không append event ở đây — plan_ready đã được ghi ở vòng lặp forward event của ChatRunExecutor
+        // ngay trước khi nó gọi hàm này.
     }
 
     public async Task CancelAsync(Guid runId, string finalOutput, DateTime segmentStartedAt)
