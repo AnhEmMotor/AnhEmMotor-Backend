@@ -54,6 +54,9 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
         };
     }
 
+    public string HashPassword(ApplicationUser user, string password) =>
+        new PasswordHasher<ApplicationUser>().HashPassword(user, password);
+
     public async Task<Result<UserAuth>> LoginWithExternalProviderAsync(
         ExternalUserDto externalUser,
         CancellationToken cancellationToken)

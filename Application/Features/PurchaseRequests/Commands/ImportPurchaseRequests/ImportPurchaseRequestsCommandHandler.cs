@@ -5,7 +5,7 @@ using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.Supplier;
-using ClosedXML.Excel;
+using Application.Interfaces.Services.Excel;
 using Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -20,7 +20,8 @@ public class ImportPurchaseRequestsCommandHandler(
     ISupplierReadRepository supplierReadRepository,
     IProductQuotationReadRepository quotationReadRepository,
     IUnitOfWork unitOfWork,
-    IConfiguration configuration) : IRequestHandler<ImportPurchaseRequestsCommand, Result<ImportPurchaseRequestsResult>>
+    IConfiguration configuration,
+    IPurchaseRequestExcelService excelService) : IRequestHandler<ImportPurchaseRequestsCommand, Result<ImportPurchaseRequestsResult>>
 {
     public async Task<Result<ImportPurchaseRequestsResult>> Handle(
         ImportPurchaseRequestsCommand request,
@@ -33,16 +34,13 @@ public class ImportPurchaseRequestsCommandHandler(
         using var memoryStream = new MemoryStream();
         await request.File.CopyToAsync(memoryStream, cancellationToken).ConfigureAwait(false);
         var fileBytes = memoryStream.ToArray();
-        using var stream = new MemoryStream(fileBytes);
-        using var workbook = new XLWorkbook(stream);
-        var worksheet = workbook.Worksheets.FirstOrDefault();
-        if (worksheet == null)
+        var importRows = excelService.ParseImportRows(fileBytes);
+        if (importRows == null)
         {
             return Result<ImportPurchaseRequestsResult>.Failure(
                 Error.BadRequest("Excel file does not contain any worksheet."));
         }
-        var rowCount = worksheet.LastRowUsed()?.RowNumber() ?? 0;
-        if (rowCount < 5)
+        if (importRows.Count == 0)
         {
             return Result<ImportPurchaseRequestsResult>.Success(new ImportPurchaseRequestsResult());
         }
@@ -60,20 +58,15 @@ public class ImportPurchaseRequestsCommandHandler(
         var tempCodeNotes = new Dictionary<string, string>();
         var failedRowsData = new List<(string TempCode, string Note, string ProductName, string VariantName, string ColorName, string Qty, string SupplierName, string Reason)>(
             );
-        for (int i = 5; i <= rowCount; i++)
+        foreach (var importRow in importRows)
         {
-            var row = worksheet.Row(i);
-            var tempCode = row.Cell(1).GetString()?.Trim() ?? string.Empty;
-            var note = row.Cell(2).GetString()?.Trim() ?? string.Empty;
-            var productName = row.Cell(3).GetString()?.Trim() ?? string.Empty;
-            var variantName = row.Cell(4).GetString()?.Trim() ?? string.Empty;
-            var colorName = row.Cell(5).GetString()?.Trim() ?? string.Empty;
-            var qtyStr = row.Cell(6).GetString()?.Trim() ?? string.Empty;
-            var supplierName = row.Cell(7).GetString()?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(tempCode) && string.IsNullOrWhiteSpace(productName))
-            {
-                continue;
-            }
+            var tempCode = importRow.TempCode;
+            var note = importRow.Note;
+            var productName = importRow.ProductName;
+            var variantName = importRow.VariantName;
+            var colorName = importRow.ColorName;
+            var qtyStr = importRow.Qty;
+            var supplierName = importRow.SupplierName;
             var rowErrors = new List<string>();
             if (string.IsNullOrWhiteSpace(tempCode))
                 rowErrors.Add("Thiếu mã phiếu.");
@@ -208,52 +201,23 @@ public class ImportPurchaseRequestsCommandHandler(
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var file1Name = $"ImportErrors_PurchaseRequest_{timestamp}.xlsx";
             var file2Name = $"ImportErrors_PurchaseRequest_WithReason_{timestamp}.xlsx";
-            string[] headers1 =
-            {
-                "Mã phiếu",
-                "Ghi chú",
-                "Tên sản phẩm",
-                "Tên biến thể sản phẩm",
-                "Tên biến thể màu sắc của sản phẩm (nếu có)",
-                "Số lượng yêu cầu",
-                "Tên nhà cung cấp"
-            };
-            using (var wb1 = new XLWorkbook())
-            {
-                var ws1 = wb1.Worksheets.Add("Lỗi nhập");
-                for (int i = 0; i < headers1.Length; i++)
-                    ws1.Cell(1, i + 1).Value = headers1[i];
-                for (int i = 0; i < failedRowsData.Count; i++)
-                {
-                    ws1.Cell(i + 2, 1).Value = failedRowsData[i].TempCode;
-                    ws1.Cell(i + 2, 2).Value = failedRowsData[i].Note;
-                    ws1.Cell(i + 2, 3).Value = failedRowsData[i].ProductName;
-                    ws1.Cell(i + 2, 4).Value = failedRowsData[i].VariantName;
-                    ws1.Cell(i + 2, 5).Value = failedRowsData[i].ColorName;
-                    ws1.Cell(i + 2, 6).Value = failedRowsData[i].Qty;
-                    ws1.Cell(i + 2, 7).Value = failedRowsData[i].SupplierName;
-                }
-                wb1.SaveAs(Path.Combine(errorsDir, file1Name));
-            }
-            using (var wb2 = new XLWorkbook())
-            {
-                var ws2 = wb2.Worksheets.Add("Lỗi nhập");
-                for (int i = 0; i < headers1.Length; i++)
-                    ws2.Cell(1, i + 1).Value = headers1[i];
-                ws2.Cell(1, headers1.Length + 1).Value = "Lý do lỗi";
-                for (int i = 0; i < failedRowsData.Count; i++)
-                {
-                    ws2.Cell(i + 2, 1).Value = failedRowsData[i].TempCode;
-                    ws2.Cell(i + 2, 2).Value = failedRowsData[i].Note;
-                    ws2.Cell(i + 2, 3).Value = failedRowsData[i].ProductName;
-                    ws2.Cell(i + 2, 4).Value = failedRowsData[i].VariantName;
-                    ws2.Cell(i + 2, 5).Value = failedRowsData[i].ColorName;
-                    ws2.Cell(i + 2, 6).Value = failedRowsData[i].Qty;
-                    ws2.Cell(i + 2, 7).Value = failedRowsData[i].SupplierName;
-                    ws2.Cell(i + 2, 8).Value = failedRowsData[i].Reason;
-                }
-                wb2.SaveAs(Path.Combine(errorsDir, file2Name));
-            }
+            var failedRows = failedRowsData
+                .Select(
+                    f => new PurchaseRequestImportFailedRow(
+                        f.TempCode,
+                        f.Note,
+                        f.ProductName,
+                        f.VariantName,
+                        f.ColorName,
+                        f.Qty,
+                        f.SupplierName,
+                        f.Reason))
+                .ToList();
+            var (file1Bytes, file2Bytes) = excelService.BuildImportErrorReports(failedRows);
+            await File.WriteAllBytesAsync(Path.Combine(errorsDir, file1Name), file1Bytes, cancellationToken)
+                .ConfigureAwait(false);
+            await File.WriteAllBytesAsync(Path.Combine(errorsDir, file2Name), file2Bytes, cancellationToken)
+                .ConfigureAwait(false);
             result.ErrorFileUrl = $"/import-errors/{file1Name}";
             result.ErrorFileWithReasonUrl = $"/import-errors/{file2Name}";
         }

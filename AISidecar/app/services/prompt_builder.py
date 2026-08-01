@@ -41,6 +41,10 @@ def build_history_messages(context: dict | None, current_message: str) -> list:
     return messages
 
 
+def build_store_system_message(server_date: str | None = None) -> SystemMessage:
+    return SystemMessage(content=render("system_store_chat", server_date=server_date or "(không rõ)"))
+
+
 def build_plan_prompt(user_request: str, existing_steps: list[dict]) -> str:
     locked = [s for s in existing_steps if s.get("editedByUser")]
     locked_text = "\n".join(

@@ -1,17 +1,25 @@
 using Application.Common.Helper;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
+using Application.Features.Suppliers.Commands.ImportSuppliers;
 using Application.Features.Suppliers.Commands.RestoreSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
+using Application.Features.Suppliers.Queries.ExportSuppliers;
+using Application.Features.Suppliers.Queries.GetImportSupplierTemplate;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.SupplierDebt;
+using Application.Interfaces.Services.Excel;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
+using Infrastructure.Services.Excel;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Moq;
+using Sieve.Models;
 using UnitTests.Models;
 using SupplierEntity = Domain.Entities.Supplier;
 
@@ -25,6 +33,8 @@ public class Supplier
     private readonly Mock<ISupplierReadRepository> _readRepoMock;
     private readonly Mock<ISupplierDebtReadRepository> _supplierDebtRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<ISupplierExcelService> _excelServiceMock;
+    private readonly Mock<IConfiguration> _configurationMock;
 
     public Supplier()
     {
@@ -34,6 +44,17 @@ public class Supplier
         _readRepoMock = new Mock<ISupplierReadRepository>();
         _supplierDebtRepoMock = new Mock<ISupplierDebtReadRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _excelServiceMock = new Mock<ISupplierExcelService>();
+        _configurationMock = new Mock<IConfiguration>();
+    }
+
+    private static IFormFile CreateFormFile(byte[] content)
+    {
+        var mock = new Mock<IFormFile>();
+        mock.Setup(f => f.Length).Returns(content.Length);
+        mock.Setup(f => f.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .Returns<Stream, CancellationToken>((s, ct) => s.WriteAsync(content, 0, content.Length, ct));
+        return mock.Object;
     }
 
     #pragma warning disable IDE0079 
@@ -706,5 +727,107 @@ public class Supplier
         var responses = new List<TestResponse> { new() { Id = 1 } };
         AuditColumnMapper.Apply(entities, responses, AuditColumn.CreatedAt);
         Assert.Equal(entities[0].CreatedAt, responses[0].CreatedAt);
+    }
+
+    [Fact(DisplayName = "SUP_066 - Unit: ExportSuppliersQueryHandler - Success")]
+    public async Task SUP_066_ExportSuppliers_Success()
+    {
+        var handler = new ExportSuppliersQueryHandler(_readRepoMock.Object, _excelServiceMock.Object);
+        var suppliers = new List<SupplierEntity> { new() { Id = 1, Name = "Supplier A" } };
+        _readRepoMock.Setup(
+            x => x.GetFilteredListAsync(It.IsAny<SieveModel>(), It.IsAny<DataFetchMode>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(suppliers);
+        var expectedBytes = new byte[] { 1, 2, 3 };
+        _excelServiceMock.Setup(x => x.ExportSuppliers(suppliers)).Returns(expectedBytes);
+        var result = await handler.Handle(new ExportSuppliersQuery(), CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.FileContents.Should().BeSameAs(expectedBytes);
+        result.Value.FileName.Should().Be("Danh_sach_nha_cung_cap.xlsx");
+    }
+
+    [Fact(DisplayName = "SUP_067 - Unit: GetImportSupplierTemplateQueryHandler - Success")]
+    public async Task SUP_067_GetImportSupplierTemplate_Success()
+    {
+        var handler = new GetImportSupplierTemplateQueryHandler(_excelServiceMock.Object);
+        var expectedBytes = new byte[] { 4, 5, 6 };
+        _excelServiceMock.Setup(x => x.BuildImportTemplate()).Returns(expectedBytes);
+        var result = await handler.Handle(new GetImportSupplierTemplateQuery(), CancellationToken.None)
+            .ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.FileContents.Should().BeSameAs(expectedBytes);
+        result.Value.FileName.Should().Be("Mau_nhap_doi_tac.xlsx");
+    }
+
+    [Fact(DisplayName = "SUP_068 - Unit: ImportSuppliersCommandHandler - Success")]
+    public async Task SUP_068_ImportSuppliers_Success()
+    {
+        var handler = new ImportSuppliersCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _configurationMock.Object,
+            _excelServiceMock.Object);
+        var importRows = new List<SupplierImportRow>
+        {
+            new("Nhà cung cấp", "Supplier Import", "0912345678", "import@test.com", "0123456789", "Address", "Notes")
+        };
+        _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>())).Returns(importRows);
+        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var command = new ImportSuppliersCommand { File = CreateFormFile([1, 2, 3]) };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.SuccessCount.Should().Be(1);
+        result.Value.FailedCount.Should().Be(0);
+        _insertRepoMock.Verify(x => x.Add(It.Is<SupplierEntity>(s => s.Name == "Supplier Import")), Times.Once);
+    }
+
+    [Fact(
+        DisplayName = "SUP_069 - ImportSuppliersCommandHandler thất bại khi file không có worksheet (ParseImportRows trả về null)")]
+    public async Task SUP_069_ImportSuppliers_NoWorksheet_ReturnsFailure()
+    {
+        var handler = new ImportSuppliersCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _configurationMock.Object,
+            _excelServiceMock.Object);
+        _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>()))
+            .Returns((IReadOnlyList<SupplierImportRow>?)null);
+        var command = new ImportSuppliersCommand { File = CreateFormFile([1, 2, 3]) };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsFailure.Should().BeTrue();
+        _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
+    }
+
+    [Fact(
+        DisplayName = "SUP_070 - ImportSuppliersCommandHandler thành công với 0 dòng khi worksheet không có dữ liệu")]
+    public async Task SUP_070_ImportSuppliers_EmptyRows_ReturnsSuccessWithZeroCounts()
+    {
+        var handler = new ImportSuppliersCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _configurationMock.Object,
+            _excelServiceMock.Object);
+        _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>())).Returns(new List<SupplierImportRow>());
+        var command = new ImportSuppliersCommand { File = CreateFormFile([1, 2, 3]) };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.SuccessCount.Should().Be(0);
+        result.Value.FailedCount.Should().Be(0);
+        _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
+    }
+
+    [Fact(
+        DisplayName = "SUP_071 - Infrastructure: SupplierExcelService.ParseImportRows round-trips BuildImportTemplate (không có dòng dữ liệu)")]
+    public void SUP_071_SupplierExcelService_ParseImportRows_TemplateHasNoDataRows()
+    {
+        var service = new SupplierExcelService();
+        var templateBytes = service.BuildImportTemplate();
+        var rows = service.ParseImportRows(templateBytes);
+        rows.Should().NotBeNull();
+        rows.Should().BeEmpty();
     }
 }

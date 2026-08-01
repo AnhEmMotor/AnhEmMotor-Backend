@@ -1,15 +1,15 @@
 using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
-using Domain.Entities;
+using Application.Interfaces.Services;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Auth.Commands.ResetPassword;
 
 public class ResetPasswordCommandHandler(
     IUserReadRepository userReadRepository,
-    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ResetPasswordCommand, Result<ResetPasswordResponse>>
+    IUserUpdateRepository userUpdateRepository,
+    IIdentityService identityService) : IRequestHandler<ResetPasswordCommand, Result<ResetPasswordResponse>>
 {
     public async Task<Result<ResetPasswordResponse>> Handle(
         ResetPasswordCommand request,
@@ -30,8 +30,7 @@ public class ResetPasswordCommandHandler(
         {
             return Error.BadRequest("Invalid or expired reset token.");
         }
-        var passwordHasher = new PasswordHasher<ApplicationUser>();
-        user.PasswordHash = passwordHasher.HashPassword(user, newPassword);
+        user.PasswordHash = identityService.HashPassword(user, newPassword);
         user.PasswordResetToken = null;
         user.PasswordResetTokenExpiry = null;
         await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);

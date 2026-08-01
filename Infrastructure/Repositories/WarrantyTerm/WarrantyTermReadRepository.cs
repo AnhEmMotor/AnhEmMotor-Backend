@@ -40,12 +40,12 @@ public class WarrantyTermReadRepository(ApplicationDBContext context, ISievePagi
 
     public Task<IEnumerable<global::Domain.Entities.WarrantyTerm>> GetAllAsync(
         CancellationToken cancellationToken,
-        Func<IQueryable<global::Domain.Entities.WarrantyTerm>, IQueryable<global::Domain.Entities.WarrantyTerm>>? include = null,
+        bool includeBrand = false,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-        if (include != null)
-            query = include(query);
+        if (includeBrand)
+            query = query.Include(t => t.Brand);
         return query.ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<global::Domain.Entities.WarrantyTerm>>(t => t.Result, cancellationToken);
     }
@@ -53,12 +53,12 @@ public class WarrantyTermReadRepository(ApplicationDBContext context, ISievePagi
     public Task<global::Domain.Entities.WarrantyTerm?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,
-        Func<IQueryable<global::Domain.Entities.WarrantyTerm>, IQueryable<global::Domain.Entities.WarrantyTerm>>? include = null,
+        bool includeBrand = false,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-        if (include != null)
-            query = include(query);
+        if (includeBrand)
+            query = query.Include(t => t.Brand);
         return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
     }

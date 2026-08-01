@@ -27,7 +27,7 @@ public class CreateRoleCommandHandler(
         var createResult = await roleInsertRepository.CreateAsync(role, cancellationToken).ConfigureAwait(false);
         if (!createResult.Succeeded)
         {
-            return Error.BadRequest(string.Join(", ", createResult.Errors.Select(e => e.Description)));
+            return Error.BadRequest(string.Join(", ", createResult.Errors));
         }
         var permissionsInDb = await permissionRepository.GetPermissionsByNamesAsync(
             request.Permissions!,

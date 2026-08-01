@@ -2,7 +2,6 @@ using Application.ApiContracts.Admin.Warranty;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.WarrantyTerm;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.WarrantyTerms.Queries.GetWarrantyTermById;
 
@@ -15,7 +14,7 @@ public class GetWarrantyTermByIdQueryHandler(IWarrantyTermReadRepository readRep
         var term = await readRepository.GetByIdAsync(
             request.Id,
             cancellationToken,
-            include: q => q.Include(t => t.Brand))
+            includeBrand: true)
             .ConfigureAwait(false);
         if (term == null)
         {

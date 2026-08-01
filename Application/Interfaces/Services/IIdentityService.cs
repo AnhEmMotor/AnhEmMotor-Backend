@@ -1,6 +1,7 @@
 using Application.ApiContracts.Auth.Requests;
 using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
+using Domain.Entities;
 
 namespace Application.Interfaces.Services
 {
@@ -14,6 +15,8 @@ namespace Application.Interfaces.Services
         public Task<Result<UserAuth>> LoginWithExternalProviderAsync(
             ExternalUserDto externalUser,
             CancellationToken cancellationToken);
+
+        public string HashPassword(ApplicationUser user, string password);
     }
 }
 

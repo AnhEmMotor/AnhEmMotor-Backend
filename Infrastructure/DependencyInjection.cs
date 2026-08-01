@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories.LogisticsDashboard;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Statistical;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Excel;
 using Application.Interfaces.Services.Logistics;
 using Application.Interfaces.Services.Shipping;
 using Domain.Entities;
@@ -19,6 +20,7 @@ using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Repositories.Statistical;
 using Infrastructure.Services;
 using Infrastructure.Services.Ai;
+using Infrastructure.Services.Excel;
 using Infrastructure.Services.Ai.Runs;
 using Infrastructure.Services.Ai.Clients;
 using Infrastructure.Services.Logistics;
@@ -113,6 +115,14 @@ public static class DependencyInjection
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IBrandExcelService, BrandExcelService>();
+        services.AddScoped<IProductExcelService, ProductExcelService>();
+        services.AddScoped<IProductCategoryExcelService, ProductCategoryExcelService>();
+        services.AddScoped<ISupplierExcelService, SupplierExcelService>();
+        services.AddScoped<IPurchaseRequestExcelService, PurchaseRequestExcelService>();
+        services.AddScoped<IInventoryReceiptExcelService, InventoryReceiptExcelService>();
+        services.AddScoped<IInventoryLedgerExcelService, InventoryLedgerExcelService>();
+        services.AddScoped<IInventoryReportExcelService, InventoryReportExcelService>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient<IShippingService, ShippingService>(
             client =>
@@ -135,6 +145,7 @@ public static class DependencyInjection
         services.AddSingleton<IServerDateProvider, SystemServerDateProvider>();
         services.AddScoped<IChatRunWriter, ChatRunWriter>();
         services.AddScoped<ISidecarStreamClient, SidecarStreamClient>();
+        services.AddScoped<IStoreChatAiClient, StoreChatAiClient>();
         services.AddHostedService<ChatRunExecutor>();
         services.AddHostedService<OrphanedRunCleaner>();
         services.AddHostedService<ChatRunEventCleanupJob>();

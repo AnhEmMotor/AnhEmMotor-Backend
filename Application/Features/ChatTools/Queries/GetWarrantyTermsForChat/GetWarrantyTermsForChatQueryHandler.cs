@@ -4,7 +4,6 @@ using Application.Features.ChatTools.Common;
 using Application.Interfaces.Repositories.WarrantyTerm;
 using Domain.Constants;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.ChatTools.Queries.GetWarrantyTermsForChat;
 
@@ -18,7 +17,7 @@ public class GetWarrantyTermsForChatQueryHandler(
         CancellationToken cancellationToken)
     {
         var terms = (await warrantyTermReadRepository
-            .GetAllAsync(cancellationToken, include: q => q.Include(t => t.Brand), mode: DataFetchMode.ActiveOnly)
+            .GetAllAsync(cancellationToken, includeBrand: true, mode: DataFetchMode.ActiveOnly)
             .ConfigureAwait(false)).ToList();
 
         var ordered = terms.OrderByDescending(t => t.Id).ToList();

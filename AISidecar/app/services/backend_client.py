@@ -61,6 +61,12 @@ class BackendClient:
             f"/internal/chat/tools/{tool_path.lstrip('/')}", camel_payload
         )
 
+    async def call_public_tool(self, tool_path: str, payload: dict) -> dict:
+        camel_payload = {_to_camel_case(k): v for k, v in payload.items()}
+        return await self._post(
+            f"/internal/chat/tools/store/{tool_path.lstrip('/')}", camel_payload
+        )
+
     async def pull_pending_steering(self, run_id: str) -> list[dict]:
         result = await self._post(f"/internal/chat/runs/{run_id}/pull-steering", {})
         return result if isinstance(result, list) else []

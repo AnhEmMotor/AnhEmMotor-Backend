@@ -123,6 +123,96 @@ public class ChatTools
         result.Value.Items[0].ProductName.Should().Be("Nhông sên dĩa DID chính hãng");
     }
 
+    [Fact(DisplayName = "CHATTOOLS_111 - Unit - SearchProductsForChatQueryHandler tìm được sản phẩm khi tên sản phẩm thiếu dấu hoàn toàn")]
+    public async Task Search_KeywordCoDauNhungTenSanPhamKhongCoDau_VanTimDuocQuaFallback()
+    {
+        _productReadRepositoryMock.Setup(
+            r => r.GetPagedProductsAsync(
+                "Phuộc nhún",
+                It.IsAny<List<string>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                null,
+                null,
+                1,
+                It.IsAny<int>(),
+                null,
+                null,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(([], 0, new List<FilterGroup>()));
+
+        var product = new DomainProduct { Id = 6, Name = "Phuoc nhun truoc sau Yamaha", ProductVariants = [] };
+        _productReadRepositoryMock.Setup(
+            r => r.GetPagedProductsAsync(
+                null,
+                It.IsAny<List<string>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                null,
+                null,
+                1,
+                It.IsAny<int>(),
+                null,
+                null,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(([product], 1, new List<FilterGroup>()));
+
+        var handler = new SearchProductsForChatQueryHandler(_productReadRepositoryMock.Object, _dateProvider);
+        var result = await handler.Handle(new SearchProductsForChatQuery { Keyword = "Phuộc nhún" }, CancellationToken.None)
+            .ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Items.Should().ContainSingle();
+        result.Value.Items[0].ProductName.Should().Be("Phuoc nhun truoc sau Yamaha");
+    }
+
+    [Fact(DisplayName = "CHATTOOLS_112 - Unit - SearchProductsForChatQueryHandler tìm được sản phẩm khi lệch vị trí dấu tiếng Việt")]
+    public async Task Search_KeywordLechViTriDau_VanTimDuocQuaFallback()
+    {
+        _productReadRepositoryMock.Setup(
+            r => r.GetPagedProductsAsync(
+                "vành đúc",
+                It.IsAny<List<string>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                null,
+                null,
+                1,
+                It.IsAny<int>(),
+                null,
+                null,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(([], 0, new List<FilterGroup>()));
+
+        var product = new DomainProduct { Id = 7, Name = "Vành đuc hợp kim 17 inch", ProductVariants = [] };
+        _productReadRepositoryMock.Setup(
+            r => r.GetPagedProductsAsync(
+                null,
+                It.IsAny<List<string>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                null,
+                null,
+                1,
+                It.IsAny<int>(),
+                null,
+                null,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(([product], 1, new List<FilterGroup>()));
+
+        var handler = new SearchProductsForChatQueryHandler(_productReadRepositoryMock.Object, _dateProvider);
+        var result = await handler.Handle(new SearchProductsForChatQuery { Keyword = "vành đúc" }, CancellationToken.None)
+            .ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Items.Should().ContainSingle();
+        result.Value.Items[0].ProductName.Should().Be("Vành đuc hợp kim 17 inch");
+    }
+
     [Fact(DisplayName = "CHATTOOLS_102 - Unit - GetProductStockForChatQueryHandler trả tồn kho theo variant")]
     public async Task GetProductStock_ValidProduct_ReturnsVariantStock()
     {

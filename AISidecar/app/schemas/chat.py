@@ -16,3 +16,10 @@ class RevalidatePlanRequest(BaseModel):
     run_id: str
     expected_tools: list[str] = []
     fingerprint: str = ""
+
+
+class StoreChatRequest(BaseModel):
+    session_id: str
+    message: str
+    history: list[dict] = []
+    server_date: str | None = None

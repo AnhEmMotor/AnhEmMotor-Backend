@@ -7,7 +7,6 @@ using Application.Interfaces.Services;
 using Domain.Constants.Permission;
 using Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Permissions.Commands.UpdateRole;
 
@@ -16,7 +15,6 @@ public class UpdateRoleCommandHandler(
     IRoleUpdateRepository roleUpdateRepository,
     IPermissionReadRepository permissionReadRepository,
     IUserStreamService userStreamService,
-    RoleManager<ApplicationRole> roleManager,
     IProtectedEntityManagerService protectedEntityManagerService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateRoleCommand, Result<PermissionRoleUpdateResponse>>
 {
@@ -44,11 +42,11 @@ public class UpdateRoleCommandHandler(
             {
                 return Error.BadRequest("Cannot rename SuperRole.");
             }
-            if (await roleManager.RoleExistsAsync(request.RoleName).ConfigureAwait(false))
+            if (await roleReadRepository.IsRoleExistAsync(request.RoleName, cancellationToken).ConfigureAwait(false))
             {
                 return Error.BadRequest($"Role name '{request.RoleName}' already exists.");
             }
-            await roleManager.SetRoleNameAsync(role, request.RoleName).ConfigureAwait(false);
+            await roleUpdateRepository.RenameRoleAsync(role, request.RoleName, cancellationToken).ConfigureAwait(false);
             isRoleUpdated = true;
         }
         if (request.Permissions != null)
