@@ -133,6 +133,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ManagerChatHub>("/hubs/manager-chat");
+app.MapHub<StoreChatHub>("/hubs/store-chat");
 if (!app.Environment.IsEnvironment("Test"))
 {
     await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);

@@ -73,6 +73,27 @@ public static class RateLimitingExtensions
                                         QueueLimit = 0
                                     });
                     });
+                options.AddPolicy(
+                    policyName: "store_chat_session_creation",
+                    partitioner: httpContext =>
+                    {
+                        if (IsLoopback(httpContext))
+                        {
+                            return RateLimitPartition.GetNoLimiter(string.Empty);
+                        }
+                        var remoteIp = httpContext.Request.Headers["CF-Connecting-IP"].FirstOrDefault() ??
+                            httpContext.Connection.RemoteIpAddress?.ToString() ??
+                            "unknown";
+                        return RateLimitPartition.GetFixedWindowLimiter(
+                            partitionKey: remoteIp,
+                            factory: _ => new FixedWindowRateLimiterOptions
+                                    {
+                                        PermitLimit = 5,
+                                        Window = TimeSpan.FromHours(1),
+                                        QueueLimit = 0,
+                                        AutoReplenishment = true
+                                    });
+                    });
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
                     httpContext =>
                     {
@@ -93,6 +114,20 @@ public static class RateLimitingExtensions
                                     });
                     });
             });
+
+        // Giới hạn tin nhắn StoreChatHub theo VisitorKey (không phải theo request HTTP nên không dùng
+        // policy ở trên được — SignalR gọi thủ công trong Hub method).
+        services.AddSingleton(PartitionedRateLimiter.Create<string, string>(
+            visitorKey => RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: visitorKey,
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 20,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0,
+                    AutoReplenishment = true
+                })));
+
         return services;
     }
 

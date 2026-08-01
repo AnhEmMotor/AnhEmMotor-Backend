@@ -158,6 +158,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ChatFeedback> ChatFeedbacks { get; set; }
 
+    public virtual DbSet<StoreChatSession> StoreChatSessions { get; set; }
+
+    public virtual DbSet<StoreChatMessage> StoreChatMessages { get; set; }
+
     public virtual DbSet<ChatPlan> ChatPlans { get; set; }
 
     public virtual DbSet<Service> Services { get; set; }
@@ -742,6 +746,15 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey<ChatPlan>(p => p.RunId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ChatPlan>().HasQueryFilter(p => p.Run!.DeletedAt == null);
+
+        modelBuilder.Entity<StoreChatSession>().HasIndex(s => s.VisitorKey).IsUnique();
+        modelBuilder.Entity<StoreChatSession>().HasIndex(s => s.Mode);
+        modelBuilder.Entity<StoreChatMessage>().HasIndex(m => m.SessionId);
+        modelBuilder.Entity<StoreChatMessage>()
+            .HasOne(m => m.Session)
+            .WithMany(s => s.Messages)
+            .HasForeignKey(m => m.SessionId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {

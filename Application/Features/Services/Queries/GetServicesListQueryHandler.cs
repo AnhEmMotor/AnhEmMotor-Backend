@@ -1,6 +1,7 @@
 using Application.ApiContracts.Service.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Service;
+using Application.Sieve;
 using Domain.Primitives;
 using Mapster;
 using MediatR;
@@ -16,6 +17,7 @@ public class GetServicesListQueryHandler(IServiceReadRepository serviceRepositor
     {
         cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(request);
+        SieveHelper.ApplyDefaultSorting(request.SieveModel);
         var query = serviceRepository.GetQueryable();
         var filteredQuery = sieveProcessor.Apply(request.SieveModel, query);
         var totalCount = filteredQuery.Count();
