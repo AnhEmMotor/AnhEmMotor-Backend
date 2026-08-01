@@ -10,5 +10,6 @@ public interface IStoreChatAiClient
         Guid sessionId,
         string visitorMessage,
         IReadOnlyList<StoreChatHistoryItem> history,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        Func<string, Task>? onChunk = null);
 }

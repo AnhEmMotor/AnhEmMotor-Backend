@@ -18,7 +18,8 @@ public class StoreChatAiClient(
         Guid sessionId,
         string visitorMessage,
         IReadOnlyList<StoreChatHistoryItem> history,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Func<string, Task>? onChunk = null)
     {
         var sidecarUrl = sidecarUrlProvider.GetSidecarUrl();
         var client = httpClientFactory.CreateClient();
@@ -69,6 +70,10 @@ public class StoreChatAiClient(
             if (sidecarEvent.Type == "text_delta")
             {
                 text.Append(sidecarEvent.Payload);
+                if (onChunk != null)
+                {
+                    await onChunk(sidecarEvent.Payload).ConfigureAwait(false);
+                }
             } else if (sidecarEvent.Type is "product-cards" or "variant-cards")
             {
                 var node = JsonNode.Parse(sidecarEvent.Payload);

@@ -40,7 +40,17 @@ public class StoreChatHub(ISender sender, PartitionedRateLimiter<string> message
 
         try
         {
-            var aiResult = await sender.Send(new GenerateStoreChatAiReplyCommand(sessionId, content));
+            await Clients.Group(sessionId.ToString()).SendAsync("AiTyping");
+            var aiResult = await sender.Send(new GenerateStoreChatAiReplyCommand(sessionId, content, OnChunk: async delta =>
+            {
+                try
+                {
+                    await Clients.Group(sessionId.ToString()).SendAsync("ReceiveMessageChunk", delta);
+                } catch
+                {
+                    // Khách đã rời tab giữa chừng — không được làm hỏng việc sinh + lưu câu trả lời AI vào DB.
+                }
+            }));
             if (aiResult.IsSuccess)
             {
                 await Clients.Group(sessionId.ToString()).SendAsync("ReceiveMessage", aiResult.Value);

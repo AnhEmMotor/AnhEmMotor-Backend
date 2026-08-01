@@ -38,7 +38,7 @@ class FakeStoreBackendClient:
                 "productId": 123, "productName": "Honda SH 2024", "brandName": "Honda",
                 "categoryName": "Xe tay ga", "priceFrom": 89000000, "priceTo": 95000000, "currency": "VND",
                 "variants": [
-                    {"variantId": 456, "variantName": "Đỏ đen", "sku": "SH24-RB", "price": 91000000},
+                    {"variantId": 456, "variantName": "Đỏ đen", "sku": "SH24-RB", "price": 91000000, "slug": "sh-2024-do-den"},
                 ],
             }])
         return _fake_envelope([])
@@ -132,7 +132,7 @@ async def test_call_tools_node_get_product_detail_emit_variant_cards(monkeypatch
     payload = json.loads(variant_events[0][1])
     assert payload["productId"] == 123
     assert payload["items"][0] == {
-        "variantId": 456, "colorName": "Đỏ đen", "sku": "SH24-RB", "price": 91000000,
+        "variantId": 456, "colorName": "Đỏ đen", "sku": "SH24-RB", "price": 91000000, "slug": "sh-2024-do-den",
     }
 
 

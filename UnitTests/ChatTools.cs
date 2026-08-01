@@ -4,6 +4,7 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Features.ChatTools.Queries.GetLowStockProductsForChat;
 using Application.Features.ChatTools.Queries.GetOrderStatusForChat;
+using Application.Features.ChatTools.Queries.GetProductDetailForChat;
 using Application.Features.ChatTools.Queries.GetProductStockForChat;
 using Application.Features.ChatTools.Queries.GetSalesSummaryForChat;
 using Application.Features.ChatTools.Queries.GetTopSellingForChat;
@@ -238,6 +239,24 @@ public class ChatTools
         var result = await handler.Handle(new GetProductStockForChatQuery { ProductId = 999 }, CancellationToken.None)
             .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "CHATTOOLS_113 - Unit - GetProductDetailForChatQueryHandler map đúng Slug từ UrlSlug")]
+    public async Task GetProductDetail_ValidProduct_MapsVariantSlug()
+    {
+        var product = new DomainProduct
+        {
+            Id = 1,
+            Name = "SH 2024",
+            ProductVariants = [new DomainProductVariant { Id = 456, VariantName = "Đỏ đen", SKU = "SH24-RB", Price = 91000000, UrlSlug = "sh-2024-do-den" }]
+        };
+        _productReadRepositoryMock.Setup(r => r.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+            .ReturnsAsync(product);
+        var handler = new GetProductDetailForChatQueryHandler(_productReadRepositoryMock.Object, _dateProvider);
+        var result = await handler.Handle(new GetProductDetailForChatQuery { ProductId = 1 }, CancellationToken.None)
+            .ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Items[0].Variants[0].Slug.Should().Be("sh-2024-do-den");
     }
 
     [Fact(DisplayName = "CHATTOOLS_104 - Unit - GetLowStockProductsForChatQueryHandler chỉ trả sản phẩm sắp/hết hàng")]

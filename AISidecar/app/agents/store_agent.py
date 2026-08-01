@@ -65,6 +65,7 @@ def _emit_cards(writer, name: str, result) -> None:
                 "colorName": variant.get("variantName"),
                 "sku": variant.get("sku"),
                 "price": variant.get("price"),
+                "slug": variant.get("slug"),
             }
             for variant in (product.get("variants") or [])
         ]

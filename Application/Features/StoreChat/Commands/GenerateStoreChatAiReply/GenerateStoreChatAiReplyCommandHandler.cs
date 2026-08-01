@@ -34,7 +34,7 @@ public class GenerateStoreChatAiReplyCommandHandler(
             .ToList();
 
         var reply = await storeChatAiClient
-            .GetReplyAsync(request.SessionId, request.VisitorMessage, history, cancellationToken)
+            .GetReplyAsync(request.SessionId, request.VisitorMessage, history, cancellationToken, request.OnChunk)
             .ConfigureAwait(false);
 
         var message = new StoreChatMessage

@@ -29,7 +29,8 @@ public class GetProductDetailForChatQueryHandler(
                     VariantId = v.Id,
                     VariantName = v.VariantName,
                     Sku = v.SKU,
-                    Price = v.Price
+                    Price = v.Price,
+                    Slug = v.UrlSlug
                 })
             .ToList();
 

@@ -192,6 +192,34 @@ public class StoreChatTests
     }
 
     [Fact]
+    public async Task GenerateAiReply_WithOnChunk_ForwardsSameCallbackToAiClient()
+    {
+        var sessionId = Guid.NewGuid();
+        var session = new StoreChatSession { Id = sessionId };
+        var mockReadRepo = new Mock<IStoreChatReadRepository>();
+        var mockInsertRepo = new Mock<IStoreChatInsertRepository>();
+        var mockUpdateRepo = new Mock<IStoreChatUpdateRepository>();
+        var mockAiClient = new Mock<IStoreChatAiClient>();
+        var mockUnitOfWork = new Mock<IUnitOfWork>();
+        mockReadRepo.Setup(x => x.GetSessionByIdAsync(sessionId, It.IsAny<CancellationToken>())).ReturnsAsync(session);
+        mockReadRepo.Setup(x => x.GetHistoryAsync(sessionId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        Func<string, Task> onChunk = _ => Task.CompletedTask;
+        mockAiClient
+            .Setup(x => x.GetReplyAsync(sessionId, "Hi", It.IsAny<IReadOnlyList<StoreChatHistoryItem>>(), It.IsAny<CancellationToken>(), onChunk))
+            .ReturnsAsync(new StoreChatAiReplyResult("Chào bạn", null));
+
+        var handler = new GenerateStoreChatAiReplyCommandHandler(
+            mockReadRepo.Object, mockInsertRepo.Object, mockUpdateRepo.Object, mockAiClient.Object, mockUnitOfWork.Object);
+        var result = await handler.Handle(new GenerateStoreChatAiReplyCommand(sessionId, "Hi", onChunk), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        mockAiClient.Verify(
+            x => x.GetReplyAsync(sessionId, "Hi", It.IsAny<IReadOnlyList<StoreChatHistoryItem>>(), It.IsAny<CancellationToken>(), onChunk),
+            Times.Once);
+    }
+
+    [Fact]
     public async Task GenerateAiReply_SessionMissing_ReturnsNotFound()
     {
         var mockReadRepo = new Mock<IStoreChatReadRepository>();

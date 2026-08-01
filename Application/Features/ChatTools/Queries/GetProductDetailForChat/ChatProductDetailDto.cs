@@ -30,4 +30,6 @@ public record ChatProductVariantDetailDto
     public string? Sku { get; init; }
 
     public decimal? Price { get; init; }
+
+    public string? Slug { get; init; }
 }
