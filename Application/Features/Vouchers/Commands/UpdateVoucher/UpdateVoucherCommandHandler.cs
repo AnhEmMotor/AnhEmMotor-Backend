@@ -45,6 +45,8 @@ public class UpdateVoucherCommandHandler : IRequestHandler<UpdateVoucherCommand,
         voucher.MaxDiscountAmount = req.MaxDiscountAmount;
         voucher.ValidFrom = req.ValidFrom;
         voucher.ValidTo = req.ValidTo;
+        voucher.UsageLimitPerUser = req.UsageLimitPerUser;
+        voucher.TotalUsageLimit = req.TotalUsageLimit;
         voucher.VoucherLeads.Clear();
         if (req.Type == VoucherType.Private && req.AssignedCustomerIds != null)
         {

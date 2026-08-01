@@ -103,7 +103,7 @@ public class CreateOutputByManagerCommandHandler(
         if (request.DepositRatio.HasValue)
         {
             output.DepositRatio = request.DepositRatio.Value;
-        } else if (totalPrice >= threshold)
+        } else if (totalPrice > threshold)
         {
             var depositTypeSetting = settings.FirstOrDefault(
                 s => string.Equals(s.Key, SettingKeys.DepositType, StringComparison.OrdinalIgnoreCase));
@@ -162,7 +162,7 @@ public class CreateOutputByManagerCommandHandler(
 
         if (string.IsNullOrWhiteSpace(output.StatusId))
         {
-            output.StatusId = totalPrice >= threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
+            output.StatusId = totalPrice > threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
         }
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

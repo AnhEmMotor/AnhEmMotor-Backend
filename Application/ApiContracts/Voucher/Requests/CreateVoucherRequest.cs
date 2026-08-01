@@ -30,5 +30,9 @@ public class CreateVoucherRequest
     [Required]
     public DateTime ValidTo { get; set; }
 
+    public int UsageLimitPerUser { get; set; } = 1;
+
+    public int TotalUsageLimit { get; set; } = 0;
+
     public List<int> AssignedCustomerIds { get; set; } = new();
 }

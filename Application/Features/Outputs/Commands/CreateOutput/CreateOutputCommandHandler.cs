@@ -180,9 +180,9 @@ public class CreateOutputCommandHandler(
         }
         if (string.IsNullOrWhiteSpace(output.StatusId))
         {
-            output.StatusId = totalPrice >= threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
+            output.StatusId = totalPrice > threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
         }
-        if (totalPrice >= threshold)
+        if (totalPrice > threshold)
         {
             var depositTypeSetting = settings.FirstOrDefault(
                 s => string.Equals(s.Key, SettingKeys.DepositType, StringComparison.OrdinalIgnoreCase));

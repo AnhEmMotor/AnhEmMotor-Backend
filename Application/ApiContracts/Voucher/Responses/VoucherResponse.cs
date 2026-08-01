@@ -28,6 +28,12 @@ public class VoucherResponse
 
     public DateTime ValidTo { get; set; }
 
+    public int UsageLimitPerUser { get; set; }
+
+    public int TotalUsageLimit { get; set; }
+
+    public int UsedCount { get; set; }
+
     public List<int> AssignedCustomerIds { get; set; } = new();
 
     public DateTimeOffset? CreatedAt { get; set; }
