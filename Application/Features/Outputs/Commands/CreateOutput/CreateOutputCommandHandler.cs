@@ -232,10 +232,9 @@ public class CreateOutputCommandHandler(
 
         if (string.IsNullOrWhiteSpace(output.StatusId))
         {
-            output.StatusId = totalPrice >= threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
+            output.StatusId = totalPrice > threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
         }
-
-        if (totalPrice >= threshold)
+if (totalPrice >= threshold)
         {
             output.DepositRatio = ratio;
         }

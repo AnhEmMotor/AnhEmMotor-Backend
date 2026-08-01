@@ -41,7 +41,9 @@ public class CreateVoucherCommandHandler : IRequestHandler<CreateVoucherCommand,
             DiscountValue = req.DiscountValue,
             MaxDiscountAmount = req.MaxDiscountAmount,
             ValidFrom = req.ValidFrom,
-            ValidTo = req.ValidTo
+            ValidTo = req.ValidTo,
+            UsageLimitPerUser = req.UsageLimitPerUser,
+            TotalUsageLimit = req.TotalUsageLimit
         };
         if (req.Type == VoucherType.Private && req.AssignedCustomerIds != null)
         {
