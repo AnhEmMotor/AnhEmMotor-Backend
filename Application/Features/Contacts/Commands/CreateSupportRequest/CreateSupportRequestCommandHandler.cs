@@ -1,3 +1,4 @@
+using Application.ApiContracts.Contacts.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Contact;
@@ -10,9 +11,11 @@ namespace Application.Features.Contacts.Commands.CreateSupportRequest;
 public class CreateSupportRequestCommandHandler(
     ISupportRequestRepository supportRequestRepository,
     IContactInsertRepository contactInsertRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateSupportRequestCommand, Result<int>>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateSupportRequestCommand, Result<CreateSupportRequestResponse>>
 {
-    public async Task<Result<int>> Handle(CreateSupportRequestCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreateSupportRequestResponse>> Handle(
+        CreateSupportRequestCommand request,
+        CancellationToken cancellationToken)
     {
         var contact = new Contact
         {
@@ -25,6 +28,7 @@ public class CreateSupportRequestCommandHandler(
         };
         contactInsertRepository.Add(contact);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        var trackingToken = Guid.NewGuid();
         var supportRequest = new SupportRequest
         {
             ContactId = contact.Id,
@@ -33,10 +37,16 @@ public class CreateSupportRequestCommandHandler(
             Email = request.Request.Email,
             OrderCode = request.Request.OrderCode,
             Content = request.Request.Content,
-            Status = SupportRequestStatus.New
+            Status = SupportRequestStatus.New,
+            CustomerTrackingToken = trackingToken
         };
         await supportRequestRepository.AddAsync(supportRequest, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return Result<int>.Success(supportRequest.Id);
+        return Result<CreateSupportRequestResponse>.Success(
+            new CreateSupportRequestResponse
+            {
+                Id = supportRequest.Id,
+                TrackingToken = trackingToken
+            });
     }
 }

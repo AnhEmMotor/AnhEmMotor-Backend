@@ -2169,14 +2169,24 @@ namespace Infrastructure.MySqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<long?>("AssignedAt").HasColumnType("bigint").HasColumnName("AssignedAt");
                     b.Property<Guid?>("AssignedUserId").HasColumnType("char(36)").HasColumnName("AssignedUserId");
                     b.Property<string>("Category").IsRequired().HasColumnType("longtext").HasColumnName("Category");
+                    b.Property<long?>("ClosedAt").HasColumnType("bigint").HasColumnName("ClosedAt");
                     b.Property<int>("ContactId").HasColumnType("int").HasColumnName("ContactId");
                     b.Property<string>("Content").IsRequired().HasColumnType("longtext").HasColumnName("Content");
                     b.Property<long?>("CreatedAt").HasColumnType("bigint");
+                    b.Property<long?>("CustomerRatedAt").HasColumnType("bigint").HasColumnName("CustomerRatedAt");
+                    b.Property<string>("CustomerRatingComment").HasColumnType("longtext").HasColumnName("CustomerRatingComment");
+                    b.Property<int?>("CustomerRatingOfEmployee").HasColumnType("int").HasColumnName("CustomerRatingOfEmployee");
+                    b.Property<Guid?>("CustomerTrackingToken").HasColumnType("char(36)").HasColumnName("CustomerTrackingToken");
                     b.Property<long?>("DeletedAt").HasColumnType("bigint");
                     b.Property<string>("Email").IsRequired().HasColumnType("longtext").HasColumnName("Email");
+                    b.Property<long?>("EmployeeRatedAt").HasColumnType("bigint").HasColumnName("EmployeeRatedAt");
+                    b.Property<string>("EmployeeRatingComment").HasColumnType("longtext").HasColumnName("EmployeeRatingComment");
+                    b.Property<int?>("EmployeeRatingOfCustomer").HasColumnType("int").HasColumnName("EmployeeRatingOfCustomer");
                     b.Property<string>("OrderCode").HasColumnType("longtext").HasColumnName("OrderCode");
+                    b.Property<long?>("StartedAt").HasColumnType("bigint").HasColumnName("StartedAt");
                     b.Property<string>("Status").IsRequired().HasColumnType("longtext").HasColumnName("Status");
                     b.Property<string>("Subject").IsRequired().HasColumnType("longtext").HasColumnName("Subject");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");

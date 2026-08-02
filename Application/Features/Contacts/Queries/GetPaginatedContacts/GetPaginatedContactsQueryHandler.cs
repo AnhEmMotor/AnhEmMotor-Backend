@@ -50,6 +50,15 @@ public class GetPaginatedContactsQueryHandler(
                         Status = s.Status,
                         AssignedUserId = s.AssignedUserId,
                         AssignedUserName = s.AssignedUser?.FullName,
+                        AssignedAt = s.AssignedAt,
+                        StartedAt = s.StartedAt,
+                        ClosedAt = s.ClosedAt,
+                        EmployeeRatingOfCustomer = s.EmployeeRatingOfCustomer,
+                        EmployeeRatingComment = s.EmployeeRatingComment,
+                        EmployeeRatedAt = s.EmployeeRatedAt,
+                        CustomerRatingOfEmployee = s.CustomerRatingOfEmployee,
+                        CustomerRatingComment = s.CustomerRatingComment,
+                        CustomerRatedAt = s.CustomerRatedAt,
                         CreatedAt = s.CreatedAt,
                         Contact =
                             s.Contact == null

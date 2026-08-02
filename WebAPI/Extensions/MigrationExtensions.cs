@@ -23,12 +23,15 @@ catch (Exception ex)
 {
 logger.LogError(ex, "Migration phase encountered errors. App will continue with seeding.");
 }
+var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+var dbContext2 = services.GetRequiredService<ApplicationDBContext>();
+await PermissionDataSeeder.SeedPermissionsAsync(dbContext2, cancellationToken).ConfigureAwait(false);
+await ProtectedEntitiesSeeder.SyncProtectedRolePermissionsAsync(
+dbContext2, roleManager, configuration, cancellationToken).ConfigureAwait(false);
 var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
 if (!shouldSeed)
 return;
-var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
 var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-var dbContext2 = services.GetRequiredService<ApplicationDBContext>();
 await ProductCategorySeeder.SeedAsync(dbContext2, configuration, cancellationToken).ConfigureAwait(false);
 await InventoryReceiptStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
 await OutputStatusSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
@@ -41,7 +44,6 @@ await SettingsSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(fal
 await NewsCategorySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
 await NewsSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
 await TechnologySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
-await PermissionDataSeeder.SeedPermissionsAsync(dbContext2, cancellationToken).ConfigureAwait(false);
 await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
 dbContext2, roleManager, userManager, configuration, cancellationToken)
 .ConfigureAwait(false);

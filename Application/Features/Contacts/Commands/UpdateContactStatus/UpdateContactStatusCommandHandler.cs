@@ -1,6 +1,8 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Contact;
+using Application.Interfaces.Services;
+using Domain.Enums;
 using MediatR;
 
 namespace Application.Features.Contacts.Commands.UpdateContactStatus;
@@ -9,7 +11,8 @@ public class UpdateContactStatusCommandHandler(
     ISupportRequestRepository supportRequestRepository,
     ICustomerFeedbackRepository feedbackRepository,
     IJobApplicationRepository jobApplicationRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateContactStatusCommand, Result<bool>>
+    IUnitOfWork unitOfWork,
+    ICurrentUserContext currentUserContext) : IRequestHandler<UpdateContactStatusCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(UpdateContactStatusCommand request, CancellationToken cancellationToken)
     {
@@ -33,7 +36,25 @@ public class UpdateContactStatusCommandHandler(
         var entity = await supportRequestRepository.GetByIdAsync(id, ct).ConfigureAwait(false);
         if (entity is null)
             return false;
-        entity.Status = status;
+        if (!SupportRequestStatus.All.Contains(status, StringComparer.OrdinalIgnoreCase))
+            return false;
+        if (entity.AssignedUserId is null || entity.AssignedUserId != currentUserContext.GetUserId())
+            return false;
+
+        var normalizedStatus = SupportRequestStatus.All.First(
+            value => value.Equals(status, StringComparison.OrdinalIgnoreCase));
+        var isAllowedTransition =
+            (entity.Status == SupportRequestStatus.Assigned && normalizedStatus == SupportRequestStatus.InProgress) ||
+            (entity.Status == SupportRequestStatus.InProgress && normalizedStatus == SupportRequestStatus.Closed);
+        if (!isAllowedTransition)
+            return false;
+
+        var now = DateTimeOffset.UtcNow;
+        if (normalizedStatus == SupportRequestStatus.InProgress)
+            entity.StartedAt ??= now;
+        if (normalizedStatus == SupportRequestStatus.Closed)
+            entity.ClosedAt ??= now;
+        entity.Status = normalizedStatus;
         await supportRequestRepository.UpdateAsync(entity, ct).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
         return true;
