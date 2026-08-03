@@ -86,6 +86,11 @@ trong CÙNG một lượt thay vì gọi lần lượt.
 
 3 tool tuần tự (4.5s) → 3 tool song song (1.8s).
 
+> 📌 **Không nhầm với Stage 22 (Multi-Agent).** `asyncio.gather` ở trên là cơ chế chạy song song
+> nhiều **tool call trong cùng một lượt của một agent**. Stage 22 tái dùng nguyên vẹn cơ chế này để
+> chạy nhiều lệnh gọi `delegate_to_subagent` song song — không phải một cơ chế fan-out mới, và
+> không phải nhiều agent chạy độc lập ngoài vòng lặp này.
+
 ### d) Trần cứng số vòng
 
 Đã đặt ở Stage 13.6: 6 vòng thường, 12 vòng plan mode. Theo dõi phân bố thực tế —

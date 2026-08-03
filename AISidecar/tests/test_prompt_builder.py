@@ -5,6 +5,8 @@ from app.prompts.loader import _read
 from app.services.prompt_builder import (
     build_system_message,
     build_history_messages,
+    build_store_system_message,
+    _read_store_faq,
     FALLBACK_SYSTEM_PROMPT,
 )
 
@@ -12,8 +14,10 @@ from app.services.prompt_builder import (
 @pytest.fixture(autouse=True)
 def _clear_prompt_cache():
     _read.cache_clear()
+    _read_store_faq.cache_clear()
     yield
     _read.cache_clear()
+    _read_store_faq.cache_clear()
 
 
 class TestBuildSystemMessage:
@@ -56,6 +60,20 @@ class TestBuildSystemMessage:
         ctx = {"user": {"fullName": "Test"}}
         msg = build_system_message(ctx)
         assert "(không rõ)" in msg.content
+
+
+class TestBuildStoreSystemMessage:
+    def test_faq_content_co_mat(self):
+        msg = build_store_system_message()
+        assert "Bảo hành" in msg.content
+        assert "08:00 - 20:00" in msg.content
+
+    def test_store_faq_khong_bia_chinh_sach_doi_tra(self):
+        assert "đổi trả" not in _read_store_faq().lower()
+
+    def test_khong_co_placeholder_con_sot(self):
+        msg = build_store_system_message("2026-07-30T09:00:00+07:00")
+        assert "{" not in msg.content
 
 
 class TestBuildHistoryMessages:

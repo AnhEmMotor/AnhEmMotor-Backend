@@ -5,6 +5,8 @@ namespace Application.ApiContracts.Product.Responses
 {
     public class ProductInfoStoreResponse
     {
+        public int Id { get; set; }
+
         public string? Name { get; set; }
 
         public string? Brand { get; set; }

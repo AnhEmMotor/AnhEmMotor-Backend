@@ -64,6 +64,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ProductVariantColor> ProductVariantColors { get; set; }
 
+    public virtual DbSet<ProductView> ProductViews { get; set; }
+
     public virtual DbSet<Setting> Settings { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
@@ -749,6 +751,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
         modelBuilder.Entity<StoreChatSession>().HasIndex(s => s.VisitorKey).IsUnique();
         modelBuilder.Entity<StoreChatSession>().HasIndex(s => s.Mode);
+
+        modelBuilder.Entity<ProductView>().HasIndex(v => v.ProductId);
+        modelBuilder.Entity<ProductView>().HasIndex(v => new { v.CustomerUserId, v.CreatedAt });
+        modelBuilder.Entity<ProductView>().HasIndex(v => new { v.VisitorKey, v.CreatedAt });
         modelBuilder.Entity<StoreChatMessage>().HasIndex(m => m.SessionId);
         modelBuilder.Entity<StoreChatMessage>()
             .HasOne(m => m.Session)

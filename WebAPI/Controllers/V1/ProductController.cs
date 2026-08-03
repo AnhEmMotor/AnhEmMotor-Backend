@@ -24,6 +24,8 @@ using Application.Features.Products.Queries.GetActiveVariantLiteListForInventory
 using Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
+using Application.Features.Products.Commands.TrackProductView;
+using Application.Features.Products.Queries.GetPersonalizedRecommendations;
 using Application.Features.Products.Queries.GetProductAttributeLabels;
 using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProductsList;
@@ -83,6 +85,36 @@ public class ProductController(ISender sender) : ApiController
     {
         var query = GetProductsListQuery.FromRequest(request, minPrice, maxPrice);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách sản phẩm gợi ý cá nhân hóa dựa trên trạng thái đăng nhập và lịch sử xem của khách.
+    /// </summary>
+    [HttpGet("recommendations")]
+    [ProducesResponseType(typeof(PagedResult<ProductListStoreResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetRecommendationsAsync(
+        [FromQuery] int pageSize,
+        [FromQuery] string? visitorKey,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetPersonalizedRecommendationsQuery(pageSize <= 0 ? 4 : pageSize, visitorKey);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Ghi nhận một lượt xem sản phẩm (kèm thời gian xem) để phục vụ gợi ý cá nhân hóa.
+    /// </summary>
+    [HttpPost("{id:int}/track-view")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> TrackViewAsync(
+        int id,
+        [FromBody] TrackProductViewRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new TrackProductViewCommand(id, request.DwellTimeMs, request.VisitorKey);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

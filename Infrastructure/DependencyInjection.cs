@@ -28,6 +28,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -135,7 +136,11 @@ public static class DependencyInjection
         services.AddSingleton<AiSidecarManager>();
         services.AddSingleton<IAiSidecarUrlProvider>(provider => provider.GetRequiredService<AiSidecarManager>());
         services.AddHostedService(provider => provider.GetRequiredService<AiSidecarManager>());
-        services.AddHttpClient<IAiSearchClient, AiSearchClient>();
+        services.AddHttpClient<AiSearchClient>();
+        services.AddScoped<IAiSearchClient>(
+            provider => new CachedAiSearchClient(
+                provider.GetRequiredService<AiSearchClient>(),
+                provider.GetRequiredService<IMemoryCache>()));
         services.AddHttpClient<IAiTestRoleClient, AiTestRoleClient>();
         services.AddSingleton<IChatRunQueue, ChatRunQueue>();
         services.AddSingleton<IChatRunEventBus, ChatRunEventBus>();
@@ -149,6 +154,8 @@ public static class DependencyInjection
         services.AddHostedService<ChatRunExecutor>();
         services.AddHostedService<OrphanedRunCleaner>();
         services.AddHostedService<ChatRunEventCleanupJob>();
+        services.AddHostedService<Infrastructure.Services.Product.ProductViewCleanupJob>();
+        services.AddHostedService<Infrastructure.Services.StoreChat.StaleWaitingSessionMonitor>();
         services.Scan(
             scan => scan
                 .FromAssemblies(Assembly.GetExecutingAssembly())

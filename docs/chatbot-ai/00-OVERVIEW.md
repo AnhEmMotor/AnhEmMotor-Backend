@@ -41,7 +41,8 @@ Mỗi Stage là một file riêng, mỗi Stage nên là một PR.
 Vue ──SignalR── .NET Run Engine ──HTTP── AISidecar (LangGraph agent)
                      │                          ├── 71 tool → /internal/chat/tools/*
                      │                          ├── Qdrant (semantic search + RAG)
-                     │                          └── Guardrails (permission, injection, loop)
+                     │                          ├── Guardrails (permission, injection, loop)
+                     │                          └── Sub-agent tạm thời theo prompt động (Stage 22)
                      ├── ChatRun / ChatRunEvent  (chạy nền, tua lại, khôi phục)
                      └── ChatPlan                (plan mode, user sửa được)
 ```
@@ -121,8 +122,10 @@ Vue ──SignalR── .NET Run Engine ──HTTP── AISidecar (LangGraph ag
 | 19 | Cache Plan (giảm số lần suy nghĩ) | [19-STAGE-PLAN-CACHE.md](19-STAGE-PLAN-CACHE.md) | **bổ sung** | 3–4 ngày |
 | 20 | Chọn tool động theo ngữ cảnh | [20-STAGE-DYNAMIC-TOOL-SCOPING.md](20-STAGE-DYNAMIC-TOOL-SCOPING.md) | **bổ sung** | 3–4 ngày |
 | 21 | Trang quản trị: Lịch sử chat & phản hồi số liệu | [21-STAGE-ADMIN-CHAT-HISTORY.md](21-STAGE-ADMIN-CHAT-HISTORY.md) | **8, 16** | 2–3 ngày |
+| 22 | Multi-Agent: Sub-agent theo prompt động | [22-STAGE-MULTI-AGENT-ORCHESTRATION.md](22-STAGE-MULTI-AGENT-ORCHESTRATION.md) | **7, 8, 9, 11, 13, 20** | 5–7 ngày |
 
-**Tổng ước lượng: ~67–89 ngày công** (tăng so với bản gốc do Stage 15 mở rộng thêm 20 tool ghi ở P4+P5).
+**Tổng ước lượng: ~72–96 ngày công** (tăng so với bản gốc do Stage 15 mở rộng thêm 20 tool ghi ở
+P4+P5, và bổ sung Stage 22 Multi-Agent).
 
 ---
 
@@ -145,7 +148,7 @@ Số hiệu file là ID cố định. Thứ tự làm việc như sau:
   11 Transparency  →  10 Plan Mode  →  12 Qdrant/RAG  →  19 Plan Cache
 
 Đợt 5 — Hoàn thiện
-  14 Performance  →  15 Tool Catalog (P2, P3)  →  04 UX  →  05 Security  →  06 Testing  →  21 Admin Chat History
+  22 Multi-Agent  →  14 Performance  →  15 Tool Catalog (P2, P3)  →  04 UX  →  05 Security  →  06 Testing  →  21 Admin Chat History
 ```
 
 ### Vì sao thứ tự này
@@ -164,6 +167,7 @@ Số hiệu file là ID cố định. Thứ tự làm việc như sau:
 | **14 sau 12** | Tối ưu khi đã có đủ thành phần thật để đo |
 | **04/05/06 cuối** | Là các Stage rà soát tổng thể — cần hệ thống đã hoàn chỉnh |
 | **21 sau cùng** | Cần cả `ChatRunEvent` (Stage 8) lẫn `ChatFeedback` (Stage 16) đã có dữ liệu thật để xem — làm sớm khi chưa ai chat/bấm feedback thì không kiểm thử được gì |
+| **22 đầu Đợt 5** | Sub-agent tái dùng nguyên vẹn cơ chế chọn tool của Stage 20 và khối hiển thị suy nghĩ của Stage 11 — cả hai xong muộn nhất ở cuối Đợt 3/Đợt 4; làm 22 trước đó sẽ phải viết tạm rồi sửa lại |
 
 > **04, 05, 06 làm cuốn chiếu.** Ví dụ redaction (Stage 11) và permission tool (Stage 13) đều là
 > hạng mục bảo mật — làm ngay trong Stage đó, Stage 05 chỉ là lượt rà soát tổng thể cuối cùng.
@@ -176,7 +180,7 @@ Số hiệu file là ID cố định. Thứ tự làm việc như sau:
 | **M2 — Không mất việc** | 08, 09, 18 | Thoát ra vào lại không mất câu trả lời; gửi tiếp được khi AI đang chạy; ba lớp state không lệch nhau |
 | **M3 — Trợ lý thật** | 03, 13, 17, 16, 15-P1 | Trả lời được bằng dữ liệu thật (20 tool), số khớp báo cáo UI, đổi tool không gây lỗi âm ỉ |
 | **M4 — Minh bạch & thông minh** | 11, 10, 12, 19 | Xem được AI nghĩ gì; lập & sửa kế hoạch; tìm kiếm ngữ nghĩa; tái dùng kế hoạch quen |
-| **M5 — Sẵn sàng production** | 14, 15, 04, 05, 06, 21 | Nhanh, phủ 91 tool (gồm tool ghi P4+P5, xoá mềm có khôi phục), đã kiểm thử & bảo mật; admin xem lại được lịch sử chat + feedback số liệu sai, không chỉ nằm trong DB |
+| **M5 — Sẵn sàng production** | 14, 15, 04, 05, 06, 21, 22 | Nhanh, phủ 91 tool (gồm tool ghi P4+P5, xoá mềm có khôi phục), đã kiểm thử & bảo mật; admin xem lại được lịch sử chat + feedback số liệu sai, không chỉ nằm trong DB; câu hỏi nhiều nhánh độc lập được phân việc cho sub-agent thay vì dồn hết vào một luồng suy luận |
 
 ---
 
@@ -202,6 +206,7 @@ Số hiệu file là ID cố định. Thứ tự làm việc như sau:
 | 16 | Chọn tool: LLM router theo module hay Qdrant tool retrieval | 20.9 | **Router là chính**; Qdrant chỉ làm fail-safe + gợi ý khi bịa tên tool |
 | 17 | Trần module khi steering `queue` mở rộng scope | 20.7 | **3 module** (thay vì 2), trần 20 tool vẫn giữ |
 | 18 | Permission xem lịch sử chat của **người dùng khác** (đọc dữ liệu riêng tư) | 21.2 | **Permission admin riêng `Admin.ChatHistoryManagement.View`, không gán mặc định cho role nào** — chưa chốt ai được cấp trong thực tế |
+| 19 | Kiến trúc multi-agent: sub-agent theo prompt động hay dàn agent chuyên biệt cố định | 22.2 | **Sub-agent theo prompt động** — agent cha tự soạn prompt cho từng lần gọi `delegate_to_subagent`, không dựng dàn agent đặt tên sẵn. Tối đa 1 cấp (không đệ quy), tối đa 3 sub-agent/lượt, chỉ tool read-only, dùng chung `RunSnapshot` với cha |
 
 ---
 

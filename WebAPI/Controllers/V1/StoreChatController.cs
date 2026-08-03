@@ -1,14 +1,19 @@
 using Application.Common.Models;
 using Application.Features.StoreChat.Commands.CreateOrRestoreStoreChatSession;
 using Application.Features.StoreChat.Commands.LinkStoreChatSessionToCustomer;
+using Application.Features.StoreChat.Commands.RequestHandoff;
+using Application.Features.StoreChat.Commands.SetStoreChatContactInfo;
 using Application.Features.StoreChat.Queries.GetStoreChatHistory;
 using Asp.Versioning;
+using Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
+using WebAPI.Hubs;
 
 namespace WebAPI.Controllers.V1;
 
@@ -20,7 +25,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Chat AI công khai trên Store")]
 [Route("api/v{version:apiVersion}/store-chat")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class StoreChatController(ISender sender) : ApiController
+public class StoreChatController(ISender sender, IHubContext<StoreChatHub> hubContext) : ApiController
 {
     /// <summary>
     /// Tạo phiên chat mới hoặc khôi phục phiên cũ theo VisitorKey — khách không cần đăng nhập.
@@ -61,4 +66,49 @@ public class StoreChatController(ISender sender) : ApiController
         var result = await sender.Send(new LinkStoreChatSessionToCustomerCommand(id), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
+
+    /// <summary>
+    /// Khách bấm "Gặp nhân viên" — chuyển phiên vào hàng đợi chờ nhận. Công khai, không cần đăng nhập.
+    /// </summary>
+    [HttpPost("sessions/{id:guid}/request-handoff")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RequestHandoffAsync(
+        Guid id,
+        [FromBody] RequestHandoffRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender
+            .Send(new RequestHandoffCommand(id, request.ContactName, request.ContactPhone, "Customer"), cancellationToken)
+            .ConfigureAwait(false);
+        if (result.IsSuccess)
+        {
+            await hubContext.Clients.Group(id.ToString()).SendAsync(
+                "ModeChanged", new StoreChatModeChangedPayload(StoreChatMode.Waiting, null), cancellationToken);
+            await hubContext.Clients.Group(StoreChatHub.StaffGroupName).SendAsync("SessionUpdated", id, cancellationToken);
+        }
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Khách điền Tên/SĐT trước khi chat (khách vãng lai) — công khai, không cần đăng nhập.
+    /// </summary>
+    [HttpPost("sessions/{id:guid}/contact-info")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SetContactInfoAsync(
+        Guid id,
+        [FromBody] SetContactInfoRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender
+            .Send(new SetStoreChatContactInfoCommand(id, request.ContactName, request.ContactPhone), cancellationToken)
+            .ConfigureAwait(false);
+        return HandleResult(result);
+    }
 }
+
+public record RequestHandoffRequest(string? ContactName, string? ContactPhone);
+
+public record SetContactInfoRequest(string ContactName, string ContactPhone);

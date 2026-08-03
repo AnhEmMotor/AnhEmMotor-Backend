@@ -74,6 +74,13 @@ public class StoreChatAiClient(
                 {
                     await onChunk(sidecarEvent.Payload).ConfigureAwait(false);
                 }
+            } else if (sidecarEvent.Type == "message_correction")
+            {
+                // Guardrail (check_output rewrite, hoặc suppress text khi escalate_to_staff) phát hiện
+                // câu vừa stream cần thay/xoá SAU KHI đã stream — payload là toàn văn bản CUỐI CÙNG,
+                // không phải delta, nên THAY nguyên buffer chứ không nối thêm.
+                text.Clear();
+                text.Append(sidecarEvent.Payload);
             } else if (sidecarEvent.Type is "product-cards" or "variant-cards")
             {
                 var node = JsonNode.Parse(sidecarEvent.Payload);

@@ -1,3 +1,4 @@
+using Application.Features.Ai;
 using Application.Interfaces.Repositories.Ai;
 using Domain.Entities;
 using Infrastructure.DBContexts;
@@ -23,12 +24,27 @@ public class AiController(
     public async Task<IActionResult> Search([FromBody] AiSearchRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var response = await aiSearchClient.ChatSearchAsync(request.Keyword, userId);
-        if (response.Result == null || response.Status != "success")
+
+        var brandNames = await dbContext.Brands.Where(b => b.Name != null).Select(b => b.Name!).ToListAsync();
+        var categoryNames = await dbContext.ProductCategories.Where(c => c.Name != null).Select(c => c.Name!).ToListAsync();
+        var vehicleTypeNames = await dbContext.OptionValues
+            .Include(ov => ov.Option)
+            .Where(ov => ov.Option != null && ov.Option.Name == "VehicleType" && ov.Name != null)
+            .Select(ov => ov.Name!)
+            .ToListAsync();
+
+        // Thử khớp fuzzy trên các từ điển brand/category/vehicleType/giá đã có sẵn trước — chỉ gọi AI Sidecar
+        // (chậm, tốn phí) khi câu nhập còn quá nhiều từ khó hiểu mà rule không giải thích được.
+        var aiResult = AiSearchRuleParser.TryParse(request.Keyword, brandNames, categoryNames, vehicleTypeNames);
+        if (aiResult == null)
         {
-            return BadRequest(new { Message = "Lỗi khi gọi AI Sidecar" });
+            var response = await aiSearchClient.ChatSearchAsync(request.Keyword, userId);
+            if (response.Result == null || response.Status != "success")
+            {
+                return BadRequest(new { Message = "Lỗi khi gọi AI Sidecar" });
+            }
+            aiResult = response.Result;
         }
-        var aiResult = response.Result;
         int? categoryId = null;
         if (!string.IsNullOrEmpty(aiResult.Category))
         {

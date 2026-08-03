@@ -1,10 +1,20 @@
 import logging
+from functools import lru_cache
+from pathlib import Path
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 from app.prompts.loader import render
 
 logger = logging.getLogger(__name__)
+
+KNOWLEDGE_DIR = Path(__file__).resolve().parent.parent / "knowledge"
+
+
+@lru_cache
+def _read_store_faq() -> str:
+    return (KNOWLEDGE_DIR / "store_faq.md").read_text(encoding="utf-8")
+
 
 FALLBACK_SYSTEM_PROMPT = (
     "Bạn là trợ lý AI của hệ thống quản lý AnhEmMotor. "
@@ -42,7 +52,11 @@ def build_history_messages(context: dict | None, current_message: str) -> list:
 
 
 def build_store_system_message(server_date: str | None = None) -> SystemMessage:
-    return SystemMessage(content=render("system_store_chat", server_date=server_date or "(không rõ)"))
+    return SystemMessage(content=render(
+        "system_store_chat",
+        server_date=server_date or "(không rõ)",
+        faq_content=_read_store_faq(),
+    ))
 
 
 def build_plan_prompt(user_request: str, existing_steps: list[dict]) -> str:

@@ -30,7 +30,16 @@ public class GetProductDetailForChatQueryHandler(
                     VariantName = v.VariantName,
                     Sku = v.SKU,
                     Price = v.Price,
-                    Slug = v.UrlSlug
+                    Slug = v.UrlSlug,
+                    Colors = v.ProductVariantColors
+                        .Select(c => new ChatVariantColorDto
+                        {
+                            ColorId = c.Id,
+                            ColorName = c.ColorName,
+                            ColorCode = c.ColorCode,
+                            ImageUrl = c.CoverImageUrl
+                        })
+                        .ToList()
                 })
             .ToList();
 

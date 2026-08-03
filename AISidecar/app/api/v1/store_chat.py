@@ -28,10 +28,12 @@ async def handle_store_chat(chat_req: StoreChatRequest, _: str = Depends(verify_
             *build_history_messages({"history": chat_req.history}, chat_req.message),
             HumanMessage(content=chat_req.message),
         ],
+        "session_id": chat_req.session_id,
         "tool_turns": 0,
         "tool_limit_reached": False,
         "tool_call_count": 0,
         "call_signatures": set(),
+        "recommendation_nudge_used": False,
     }
 
     graph = get_store_graph()

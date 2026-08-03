@@ -32,4 +32,17 @@ public record ChatProductVariantDetailDto
     public decimal? Price { get; init; }
 
     public string? Slug { get; init; }
+
+    public IReadOnlyList<ChatVariantColorDto> Colors { get; init; } = [];
+}
+
+public record ChatVariantColorDto
+{
+    public int ColorId { get; init; }
+
+    public string? ColorName { get; init; }
+
+    public string? ColorCode { get; init; }
+
+    public string? ImageUrl { get; init; }
 }

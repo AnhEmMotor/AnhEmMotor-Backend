@@ -170,6 +170,7 @@ logger.LogInformation(
 | Tỉ lệ lỗi gọi sidecar | Phát hiện sidecar chết |
 | Token in/out per ngày | Kiểm soát chi phí |
 | Tỉ lệ tool call thất bại (403 / 5xx) | Phát hiện lệch permission |
+| Số sub-agent / lượt (`subagent_count`, chờ Stage 22) | Phát hiện agent cha lạm dụng `delegate_to_subagent`, kiểm soát chi phí phụ trội |
 
 ---
 

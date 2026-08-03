@@ -17,6 +17,8 @@
 > - **18.10** cần Stage 11 (Reasoning Transparency) — panel "suy nghĩ" chưa tồn tại.
 > - **18.11** cần Stage 11 — chưa có redaction ở đường ra FE nên chưa có gì để tách 2 đường dữ liệu.
 > - **18.12** cần Stage 16 (Data Fidelity).
+> - **18.13** cần Stage 22 (Multi-Agent) — chưa có sub-agent nào chạy nên chưa có trạng thái lồng
+>   nào để hoà giải.
 
 Hệ thống có **ba lớp giữ trạng thái độc lập**, và chúng sẽ lệch nhau:
 
@@ -382,6 +384,20 @@ AI gọi `get_sales_summary` hai lần (tháng này, tháng trước) rồi tr�
 
 ---
 
+## 18.13. Trạng thái sub-agent lồng trong một run (chờ Stage 22)
+
+Stage 22 (Multi-Agent) cho agent cha sinh sub-agent tạm thời **trong cùng một `ChatRun`** — không
+phải một lớp state thứ tư độc lập, nhưng vẫn có hai điểm cần hoà giải theo đúng khuôn khổ của Stage
+này:
+
+1. **`asOf` phải nhất quán giữa cha và con.** Sub-agent **không** được tạo `RunSnapshot` riêng —
+   dùng chung instance của cha theo `run_id` (mục 18.2), nếu không sẽ tái diễn đúng lỗi *"còn 12 xe,
+   giá 98 triệu"* đã nêu ở 18.2, nhưng lần này giữa hai tầng agent thay vì hai lần gọi tool.
+2. **`Seq` của event sub-agent vẫn thuộc chuỗi `Seq` chung của run** (không đánh số riêng) — chỉ
+   thêm field `subagentId` trong `Payload` để FE nhóm lại. Không cần cơ chế đối chiếu `Seq` mới.
+
+---
+
 ## Definition of Done — Stage 18
 
 - [ ] Bảng nguồn sự thật (18.1) được ghi vào `RULES.md`. **⚠️ Chưa** — `RULES.md` ở root
@@ -408,6 +424,8 @@ AI gọi `get_sales_summary` hai lần (tháng này, tháng trước) rồi tr�
 - [ ] Panel suy nghĩ có nhãn "diễn giải trong quá trình xử lý". **Chờ Stage 11.**
 - [ ] **Test: dữ liệu vào LLM không chứa `***`** — redaction chỉ áp cho đường ra FE. **Chờ Stage 11.**
 - [ ] Câu trả lời so sánh nhiều kỳ luôn có nhãn kỳ cạnh từng con số. **Chờ Stage 16.**
+- [ ] Sub-agent dùng chung `RunSnapshot` và chuỗi `Seq` của run cha, không tạo trạng thái riêng.
+      **Chờ Stage 22.**
 
 ### Test
 
@@ -418,6 +436,7 @@ AI gọi `get_sales_summary` hai lần (tháng này, tháng trước) rồi tr�
 - [ ] **Dữ liệu vào LLM không chứa `***`** — redaction chỉ áp cho đường ra FE (18.11). **Chờ Stage 11.**
 - [ ] Mã trích dẫn `[c9]` không có trong kết quả → output guard yêu cầu viết lại. **Chờ Stage 12.**
 - [ ] Tin nhắn cũ > 15 phút được gắn nhãn thời điểm khi nạp lại lịch sử. **Chờ Stage 17.4.**
+- [ ] Sub-agent và cha đọc cùng một `RunSnapshot` (cùng `asOf`) trong cùng một run. **Chờ Stage 22.**
 
 `UnitTests/ManagerChatRun.cs`:
 - [ ] Cancel run → gọi endpoint `/manager-chat/{runId}/cancel` của sidecar (mock, verify).

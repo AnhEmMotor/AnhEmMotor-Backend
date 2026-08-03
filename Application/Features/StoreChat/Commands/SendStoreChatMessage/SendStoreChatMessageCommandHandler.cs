@@ -17,11 +17,6 @@ public class SendStoreChatMessageCommandHandler(
 {
     public async Task<Result<StoreChatMessageDto>> Handle(SendStoreChatMessageCommand request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Content))
-        {
-            return Error.Validation("Nội dung tin nhắn không được để trống.");
-        }
-
         var session = await storeChatReadRepository.GetSessionByIdAsync(request.SessionId, cancellationToken);
         if (session == null)
         {

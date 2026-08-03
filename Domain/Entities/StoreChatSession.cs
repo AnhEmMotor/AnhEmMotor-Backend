@@ -27,6 +27,17 @@ public class StoreChatSession : BaseEntity
     [Column("AssignedStaffId")]
     public Guid? AssignedStaffId { get; set; }
 
+    [Column("ContactName", TypeName = "nvarchar(100)")]
+    public string? ContactName { get; set; }
+
+    [Column("ContactPhone", TypeName = "nvarchar(20)")]
+    public string? ContactPhone { get; set; }
+
+    /// <summary>Phiên trước khi khách bấm "Xoá cuộc trò chuyện" — mỗi lần xoá tạo phiên mới, liên kết
+    /// lại phiên cũ để quản trị lần theo được, phiên cũ vẫn giữ nguyên lịch sử, không nhận tin mới nữa.</summary>
+    [Column("PreviousSessionId")]
+    public Guid? PreviousSessionId { get; set; }
+
     [Required]
     public DateTime LastMessageAt { get; set; }
 

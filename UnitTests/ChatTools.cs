@@ -214,6 +214,95 @@ public class ChatTools
         result.Value.Items[0].ProductName.Should().Be("Vành đuc hợp kim 17 inch");
     }
 
+    [Fact(DisplayName = "CHATTOOLS_113 - Unit - SearchProductsForChatQueryHandler tìm được sản phẩm khi từ khoá không liên tục trong tên (vd \"sh 2024\" vs \"Honda SH 150i 2024\")")]
+    public async Task Search_KeywordKhongLienTucTrongTen_VanTimDuocQuaFallback()
+    {
+        _productReadRepositoryMock.Setup(
+            r => r.GetPagedProductsAsync(
+                "sh 2024",
+                It.IsAny<List<string>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                null,
+                null,
+                1,
+                It.IsAny<int>(),
+                null,
+                null,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(([], 0, new List<FilterGroup>()));
+
+        var product = new DomainProduct { Id = 8, Name = "Honda SH 150i 2024", ProductVariants = [] };
+        _productReadRepositoryMock.Setup(
+            r => r.GetPagedProductsAsync(
+                null,
+                It.IsAny<List<string>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                null,
+                null,
+                1,
+                It.IsAny<int>(),
+                null,
+                null,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(([product], 1, new List<FilterGroup>()));
+
+        var handler = new SearchProductsForChatQueryHandler(_productReadRepositoryMock.Object, _dateProvider);
+        var result = await handler.Handle(new SearchProductsForChatQuery { Keyword = "sh 2024" }, CancellationToken.None)
+            .ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Items.Should().ContainSingle();
+        result.Value.Items[0].ProductName.Should().Be("Honda SH 150i 2024");
+    }
+
+    [Fact(DisplayName = "CHATTOOLS_114 - Unit - SearchProductsForChatQueryHandler KHÔNG khớp nếu chỉ 1 trong các từ khoá xuất hiện")]
+    public async Task Search_ChiMotTuKhopTrongTen_KhongDuocTinhLaKhop()
+    {
+        _productReadRepositoryMock.Setup(
+            r => r.GetPagedProductsAsync(
+                "sh 2025",
+                It.IsAny<List<string>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                null,
+                null,
+                1,
+                It.IsAny<int>(),
+                null,
+                null,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(([], 0, new List<FilterGroup>()));
+
+        var product = new DomainProduct { Id = 9, Name = "Honda SH 150i 2024", ProductVariants = [] };
+        _productReadRepositoryMock.Setup(
+            r => r.GetPagedProductsAsync(
+                null,
+                It.IsAny<List<string>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                null,
+                null,
+                1,
+                It.IsAny<int>(),
+                null,
+                null,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(([product], 1, new List<FilterGroup>()));
+
+        var handler = new SearchProductsForChatQueryHandler(_productReadRepositoryMock.Object, _dateProvider);
+        var result = await handler.Handle(new SearchProductsForChatQuery { Keyword = "sh 2025" }, CancellationToken.None)
+            .ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Items.Should().BeEmpty();
+    }
+
     [Fact(DisplayName = "CHATTOOLS_102 - Unit - GetProductStockForChatQueryHandler trả tồn kho theo variant")]
     public async Task GetProductStock_ValidProduct_ReturnsVariantStock()
     {
@@ -257,6 +346,39 @@ public class ChatTools
             .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value!.Items[0].Variants[0].Slug.Should().Be("sh-2024-do-den");
+    }
+
+    [Fact(DisplayName = "CHATTOOLS_114 - Unit - GetProductDetailForChatQueryHandler map đúng danh sách màu theo biến thể")]
+    public async Task GetProductDetail_VariantHasColors_MapsColorList()
+    {
+        var product = new DomainProduct
+        {
+            Id = 1,
+            Name = "SH 2024",
+            ProductVariants =
+            [
+                new DomainProductVariant
+                {
+                    Id = 456, VariantName = "Đỏ đen", SKU = "SH24-RB", Price = 91000000, UrlSlug = "sh-2024-do-den",
+                    ProductVariantColors =
+                    [
+                        new Domain.Entities.ProductVariantColor { Id = 1, ColorName = "Đỏ", ColorCode = "#FF0000", CoverImageUrl = "do.jpg" },
+                        new Domain.Entities.ProductVariantColor { Id = 2, ColorName = "Đen", ColorCode = "#000000", CoverImageUrl = "den.jpg" },
+                    ]
+                }
+            ]
+        };
+        _productReadRepositoryMock.Setup(r => r.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+            .ReturnsAsync(product);
+        var handler = new GetProductDetailForChatQueryHandler(_productReadRepositoryMock.Object, _dateProvider);
+        var result = await handler.Handle(new GetProductDetailForChatQuery { ProductId = 1 }, CancellationToken.None)
+            .ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        var colors = result.Value!.Items[0].Variants[0].Colors;
+        colors.Should().HaveCount(2);
+        colors[0].ColorId.Should().Be(1);
+        colors[0].ColorName.Should().Be("Đỏ");
+        colors[1].ColorName.Should().Be("Đen");
     }
 
     [Fact(DisplayName = "CHATTOOLS_104 - Unit - GetLowStockProductsForChatQueryHandler chỉ trả sản phẩm sắp/hết hàng")]

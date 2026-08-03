@@ -1,6 +1,7 @@
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
+using Application.Sieve;
 using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.DBContexts;
@@ -68,6 +69,7 @@ public class ProductCategoryReadRepository(
         string? searchKeyword,
         CancellationToken cancellationToken)
     {
+        SieveHelper.ApplyDefaultSorting(sieveModel, DataFetchMode.ActiveOnly);
         var lang = GetCurrentLanguage();
         var nameField = lang == "vi" ? "tVi.Name" : "COALESCE(tEn.Name, tVi.Name)";
         var descField = lang == "vi" ? "tVi.Description" : "COALESCE(tEn.Description, tVi.Description)";

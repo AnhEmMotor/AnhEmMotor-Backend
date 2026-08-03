@@ -56,5 +56,14 @@
     "args": [
       { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng thương hiệu tối đa trả về." }
     ]
+  },
+  {
+    "name": "escalate_to_staff",
+    "path": "handoff/escalate",
+    "label": "Chuyển nhân viên hỗ trợ",
+    "module": "handoff",
+    "is_write": true,
+    "description": "Chuyển phiên chat này sang hàng đợi để một nhân viên thật tiếp nhận trực tiếp — sau khi gọi, AI sẽ NGỪNG trả lời các tin nhắn tiếp theo của khách trong phiên này cho tới khi nhân viên xử lý xong. CHỈ gọi khi câu hỏi VƯỢT NGOÀI khả năng: khiếu nại, đàm phán giá, yêu cầu CSKH phức tạp không có trong nội dung CSKH đã cung cấp. KHÔNG gọi cho câu hỏi tra cứu sản phẩm/tồn kho/giá bình thường. Tool này không cần tham số và không trả về dữ liệu nghiệp vụ nào khác ngoài việc xác nhận đã chuyển.",
+    "args": []
   }
 ]

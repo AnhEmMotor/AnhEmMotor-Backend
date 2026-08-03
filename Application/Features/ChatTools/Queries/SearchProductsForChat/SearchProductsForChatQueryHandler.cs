@@ -14,9 +14,11 @@ public class SearchProductsForChatQueryHandler(
     IServerDateProvider dateProvider)
     : IRequestHandler<SearchProductsForChatQuery, Result<ChatToolEnvelope<ChatProductSearchDto>>>
 {
-    // Chỉ dùng cho fallback khi search LIKE thường (accent-sensitive) không ra kết quả — ví dụ
-    // gõ "đĩa" nhưng tên sản phẩm trong DB nhập nhầm không dấu "dĩa". Không sửa GetPagedProductsAsync
-    // dùng chung toàn hệ thống (rủi ro/hiệu năng ảnh hưởng trang sản phẩm) — chỉ vá riêng cho tool AI.
+    // Chỉ dùng cho fallback khi search LIKE thường (1 chuỗi liên tục, accent-sensitive) không ra kết
+    // quả — vd gõ "đĩa" nhưng DB nhập nhầm không dấu "dĩa", HOẶC AI tách từ khoá kiểu "sh 2024" trong
+    // khi tên sản phẩm thực tế là "Honda SH 150i 2024" (không khớp vì "150i" chen giữa, LIKE cần chuỗi
+    // liên tục). Không sửa GetPagedProductsAsync dùng chung toàn hệ thống (rủi ro/hiệu năng ảnh hưởng
+    // trang sản phẩm) — chỉ vá riêng cho tool AI.
     private const int DiacriticFallbackScanSize = 300;
 
     public async Task<Result<ChatToolEnvelope<ChatProductSearchDto>>> Handle(
@@ -80,12 +82,21 @@ public class SearchProductsForChatQueryHandler(
         return (matched.Take(limit).ToList(), matched.Count);
     }
 
+    // Tách từ khoá đã bỏ dấu thành từng từ, khớp khi TẤT CẢ từ đều xuất hiện đâu đó trong dữ liệu sản
+    // phẩm — không cần liên tục và không cần cùng field (vd "sh 2024" khớp "Honda SH 150i 2024" dù
+    // "150i" chen giữa "SH" và "2024"). Khớp 1 chuỗi liên tục là quá chặt cho câu tự do của khách.
     private static bool ProductMatchesKeyword(ProductEntity product, string normalizedKeyword)
     {
-        return ContainsIgnoreDiacritics(product.Name, normalizedKeyword)
-            || ContainsIgnoreDiacritics(product.Brand?.Name, normalizedKeyword)
-            || ContainsIgnoreDiacritics(product.ProductCategory?.Name, normalizedKeyword)
-            || product.ProductVariants.Any(v => ContainsIgnoreDiacritics(v.VariantName, normalizedKeyword));
+        var words = normalizedKeyword.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return words.Length > 0 && words.All(word => ProductContainsWordAnywhere(product, word));
+    }
+
+    private static bool ProductContainsWordAnywhere(ProductEntity product, string word)
+    {
+        return ContainsIgnoreDiacritics(product.Name, word)
+            || ContainsIgnoreDiacritics(product.Brand?.Name, word)
+            || ContainsIgnoreDiacritics(product.ProductCategory?.Name, word)
+            || product.ProductVariants.Any(v => ContainsIgnoreDiacritics(v.VariantName, word));
     }
 
     private static bool ContainsIgnoreDiacritics(string? source, string normalizedKeyword)
