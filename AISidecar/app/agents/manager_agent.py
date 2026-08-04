@@ -13,6 +13,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from pydantic import ValidationError
 
+from app.config import get_settings
 from app.core.errors import ForbiddenError
 from app.core.llm import get_llm
 from app.core.redaction import _scrub_text, make_tool_preview
@@ -26,10 +27,13 @@ from app.guardrails.tool_guard import (
     sanitize_tool_result,
     wrap_tool_result,
 )
+from app.services import plan_cache
+from app.services import qdrant_client as qc
 from app.services.backend_client import BackendClient
-from app.services.chat_tools import build_tools, describe_args, summarize_result
+from app.services.chat_tools import build_all_tools, describe_args, summarize_result
 from app.services.prompt_builder import build_plan_prompt
 from app.services.routing import resolve_modules
+from app.tools.knowledge import rag_enabled
 from app.tools.registry import build_tool_scope, load_tool_specs, registry_fingerprint, resolve_tool_call_error
 
 logger = logging.getLogger(__name__)
@@ -237,6 +241,67 @@ async def _emit_plan_step(client: BackendClient, writer, run_id: str, block: dic
     writer(("plan_step_added", json.dumps({"step": step}, ensure_ascii=False)))
 
 
+def _plan_module(state: AgentState) -> str:
+    modules = state.get("scoped_modules") or []
+    return modules[0] if modules else "none"
+
+
+def validate_plan_template(tpl: dict, state: AgentState) -> bool:
+    if tpl.get("status") != "active":
+        return False
+    specs = load_tool_specs()
+    if tpl.get("toolRegistryFingerprint") != registry_fingerprint(specs):
+        for name in tpl.get("requiredTools") or []:
+            spec = specs.get(name)
+            if spec is None or spec.status != "active":
+                return False
+    user_permissions = set(state.get("permissions") or [])
+    if not set(tpl.get("requiredPermissions") or []).issubset(user_permissions):
+        return False
+    return True
+
+
+async def _find_cached_plan_template(client: BackendClient, request_text: str, module: str) -> dict | None:
+    intent_hash = plan_cache.intent_hash(request_text, module)
+    tpl = await client.find_plan_template(intent_hash, module)
+    if tpl is not None:
+        return tpl
+    if not rag_enabled():
+        return None
+    try:
+        match = await qc.find_similar_plan_template(request_text, module)
+    except Exception:
+        return None
+    if match is None:
+        return None
+    return await client.get_plan_template(match["templateId"])
+
+
+async def _try_plan_from_cache(client: BackendClient, writer, run_id: str, plan_id: str,
+                                request_text: str, state: AgentState, specs: dict, budget: int) -> bool:
+    module = _plan_module(state)
+    tpl = await _find_cached_plan_template(client, request_text, module)
+    if tpl is None or not validate_plan_template(tpl, state):
+        return False
+
+    server_date = state.get("server_date") or ""
+    slot_values = await plan_cache.fill_slots(
+        json.loads(tpl["slots"]) if isinstance(tpl["slots"], str) else tpl["slots"],
+        request_text, server_date)
+    steps_template = json.loads(tpl["stepsTemplate"]) if isinstance(tpl["stepsTemplate"], str) else tpl["stepsTemplate"]
+    rendered_steps = plan_cache.render_steps(steps_template, slot_values)[:budget]
+
+    for step in rendered_steps:
+        block = {"title": step.get("title", ""), "detail": step.get("detail", ""),
+                  "tools": step.get("expectedTools") or []}
+        await _emit_plan_step(client, writer, run_id, block, specs)
+
+    await client.mark_plan_ready(run_id)
+    writer(("plan_ready", json.dumps({"planId": plan_id, "fromCache": True}, ensure_ascii=False)))
+    writer(("plan_cache_hit", json.dumps({"templateId": tpl.get("templateId")}, ensure_ascii=False)))
+    return True
+
+
 async def plan_node(state: AgentState) -> dict:
     writer = get_stream_writer()
     client = BackendClient(state["auth_header"])
@@ -257,8 +322,19 @@ async def plan_node(state: AgentState) -> dict:
         return {"plan_id": plan_id}
 
     request_text = _latest_human_text(state.get("messages"))
-    prompt = build_plan_prompt(request_text, current["steps"])
     specs = load_tool_specs()
+
+    if existing_count == 0 and get_settings().plan_cache_enabled:
+        try:
+            cache_hit = await _try_plan_from_cache(
+                client, writer, run_id, plan_id, request_text, state, specs, MAX_PLAN_STEPS)
+        except Exception:
+            logger.warning("plan_node: tra cache thất bại, lập plan mới cho run %s", run_id, exc_info=True)
+            cache_hit = False
+        if cache_hit:
+            return {"plan_id": plan_id}
+
+    prompt = build_plan_prompt(request_text, current["steps"])
 
     llm = get_llm(temperature=0.2)
     full_text = ""
@@ -377,10 +453,10 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         updates["allowed_tool_names"] = set()
     elif scoping:
         allowed_names = {spec.name for spec in build_tool_scope(state)}
-        tools = build_tools(client, allowed_names)
+        tools = build_all_tools(client, allowed_names)
         updates["allowed_tool_names"] = allowed_names
     else:
-        tools = build_tools(client)
+        tools = build_all_tools(client)
 
     if hasattr(llm, "bind_tools"):
         llm = llm.bind_tools(tools)
@@ -460,6 +536,7 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
             "had_forbidden_tool": state.get("had_forbidden_tool", False),
             "tool_call_count": state.get("tool_call_count", 0),
             "has_tools_bound": bool(tools),
+            "available_citations": state.get("available_citations") or set(),
         })
         if guard.action == "block":
             result_message = AIMessage(content="Không thể trả lời yêu cầu này.")
@@ -479,8 +556,15 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
 def _envelope_summary(result) -> dict:
     if not isinstance(result, dict):
         return {}
-    keys = ("truncated", "totalCount", "asOf", "warnings", "filtersApplied")
-    return {k: result[k] for k in keys if k in result}
+    keys = ("truncated", "totalCount", "asOf", "warnings", "filtersApplied", "periodLabel")
+    summary = {k: result[k] for k in keys if k in result}
+    if result.get("source") == "knowledge_base":
+        summary["citations"] = [
+            {"citationId": i.get("citationId"), "sourceFile": i.get("sourceFile"),
+             "heading": i.get("heading"), "content": i.get("content")}
+            for i in (result.get("items") or []) if i.get("citationId")
+        ]
+    return summary
 
 
 async def call_tools_node(state: AgentState) -> dict:
@@ -500,7 +584,7 @@ async def call_tools_node(state: AgentState) -> dict:
     guarding = "allowed_tool_names" in state
     tools_by_name = {
         tool.name: tool
-        for tool in build_tools(client, state["allowed_tool_names"] if guarding else None)
+        for tool in build_all_tools(client, state["allowed_tool_names"] if guarding else None)
     }
     call_signatures = set(state.get("call_signatures") or set())
     tool_call_count = state.get("tool_call_count", 0)
@@ -510,6 +594,7 @@ async def call_tools_node(state: AgentState) -> dict:
     tool_not_found_counts = dict(state.get("tool_not_found_counts") or {})
     tools_disabled = state.get("tools_disabled", False)
     known_ids = set(state.get("known_ids") or set())
+    available_citations = set(state.get("available_citations") or set())
     user_text = _latest_human_text(state.get("messages"))
     specs = load_tool_specs() if guarding else {}
 
@@ -595,6 +680,11 @@ async def call_tools_node(state: AgentState) -> dict:
             result = await tool.ainvoke(args)
             if guarding:
                 known_ids.update(extract_produced_ids(name, result))
+                if name == "search_knowledge" and isinstance(result, dict):
+                    available_citations.update(
+                        item.get("citationId") for item in (result.get("items") or [])
+                        if item.get("citationId")
+                    )
                 result, flagged = sanitize_tool_result(result)
                 if flagged:
                     writer(("guardrail_blocked", json.dumps(
@@ -634,6 +724,7 @@ async def call_tools_node(state: AgentState) -> dict:
         updates["tool_not_found_counts"] = tool_not_found_counts
         updates["tools_disabled"] = tools_disabled
         updates["known_ids"] = known_ids
+        updates["available_citations"] = available_citations
     return updates
 
 

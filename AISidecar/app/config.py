@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     api_key: str = ""
     ai_api_endpoint: str = ""
     model: str = "gemini-3.5-flash"
-    ollama_num_ctx: int = 16384
+    ollama_num_ctx: int = 8192
 
     @field_validator("model", mode="before")
     @classmethod

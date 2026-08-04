@@ -13,6 +13,34 @@
     ]
   },
   {
+    "name": "semantic_product_search",
+    "path": "qdrant/semantic-product-search",
+    "label": "Tìm sản phẩm theo nhu cầu",
+    "module": "product",
+    "required_permissions": ["Permissions.Order.ProductManagement.View"],
+    "is_write": false,
+    "description": "Tìm sản phẩm theo MÔ TẢ, NHU CẦU hoặc ĐẶC ĐIỂM khi người dùng không nêu tên chính xác. Ví dụ: 'xe ga tiết kiệm xăng', 'đồ bảo hộ đi mưa'. KHÔNG dùng tool này khi người dùng đã nêu tên/mã sản phẩm cụ thể — khi đó hãy dùng search_products.",
+    "args": [
+      { "name": "query", "type": "string", "required": true, "label": "Nhu cầu", "description": "Mô tả nhu cầu bằng ngôn ngữ tự nhiên, ví dụ 'xe ga tiết kiệm xăng cho nữ'." },
+      { "name": "max_price", "type": "integer", "required": false, "default": null, "label": "Giá tối đa", "description": "Giá tối đa (VNĐ)." },
+      { "name": "in_stock_only", "type": "boolean", "required": false, "default": true, "label": "Chỉ còn hàng", "description": "Chỉ lấy hàng còn tồn kho." },
+      { "name": "limit", "type": "integer", "required": false, "default": 8, "label": "Số lượng tối đa", "description": "Số kết quả tối đa, tối đa 15." }
+    ]
+  },
+  {
+    "name": "search_knowledge",
+    "path": "qdrant/knowledge",
+    "label": "Tra cứu chính sách nội bộ",
+    "module": "knowledge",
+    "required_permissions": [],
+    "is_write": false,
+    "description": "Tra cứu chính sách, bảo hành, đổi trả, quy trình nội bộ từ tài liệu công ty. Kết quả kèm citationId — PHẢI gắn mã trích dẫn dạng [c1] ngay sau câu dùng thông tin này, KHÔNG nêu tên tài liệu nếu không có mã tương ứng.",
+    "args": [
+      { "name": "query", "type": "string", "required": true, "label": "Câu hỏi", "description": "Câu hỏi về chính sách, bảo hành, đổi trả, quy trình nội bộ." },
+      { "name": "limit", "type": "integer", "required": false, "default": 5, "label": "Số lượng tối đa", "description": "Số đoạn trích tối đa trả về." }
+    ]
+  },
+  {
     "name": "get_product_stock",
     "path": "products/stock",
     "label": "Tra tồn kho",

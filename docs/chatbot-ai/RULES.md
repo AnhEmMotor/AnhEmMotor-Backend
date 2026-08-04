@@ -37,3 +37,34 @@ nghĩa với model.
 Một file duy nhất `SharedConfig/chat-tools-catalog.json` là nguồn thật cho **cả** sidecar (Python,
 `app/tools/registry.py`) lẫn backend (C#, `IChatToolCatalogProvider`) — sửa 1 chỗ, cả hai phía đọc lại.
 Thêm tool mới hoặc đổi field: chỉ sửa file JSON này, không cần đồng bộ tay hai nơi.
+
+---
+
+# Nguồn sự thật cho từng loại dữ liệu
+
+> Nguồn: [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md) mục 18.1.
+
+| Dữ liệu | Nguồn sự thật | Hai lớp kia làm gì |
+|---|---|---|
+| Lịch sử hội thoại | `ChatMessage` (.NET) | FE cache để hiển thị; sidecar nhận bản sạch hoá (Stage 17.4) |
+| Trạng thái run | `ChatRun.Status` (.NET) | FE suy ra từ event; sidecar **không** quyết định |
+| Nội dung đang stream | `ChatRunEvent` (.NET) | FE dựng lại từ `Seq`; sidecar chỉ phát ra |
+| Plan | `ChatPlan` (.NET) | FE giữ `version` để phát hiện lệch; sidecar đọc lại mỗi bước |
+| State suy luận của agent | checkpointer (sidecar) | .NET không cần biết nội dung, chỉ cần biết còn/hết |
+| Permission | DB (.NET) | Sidecar chỉ nhận bản chụp theo run |
+
+**Quy tắc bao trùm: .NET là nguồn sự thật cho mọi thứ người dùng nhìn thấy.**
+Sidecar là bộ máy tính toán không có ký ức lâu dài — mất state của nó thì run làm lại được,
+không mất dữ liệu người dùng.
+
+## Hai đường dữ liệu tách biệt (Stage 18.11)
+
+```
+Kết quả tool
+   ├─→ [đường 1] LLM        : dữ liệu ĐẦY ĐỦ, không redact
+   └─→ [đường 2] ChatRunEvent → FE : ĐÃ redact (Stage 11)
+```
+
+`make_tool_preview()` chỉ được gọi khi phát event cho FE (`manager_agent.py` — `tool_start`,
+`tool_end`). Tuyệt đối không gọi nó trên dữ liệu đưa vào `ToolMessage` của LLM
+(`AISidecar/tests/test_consistency.py::test_du_lieu_vao_llm_khong_bi_che_con_fe_thi_co`).

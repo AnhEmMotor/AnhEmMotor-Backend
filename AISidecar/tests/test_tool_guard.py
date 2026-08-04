@@ -190,3 +190,47 @@ def test_wrap_tool_result_boc_ranh_gioi_ro_rang():
     wrapped = tool_guard.wrap_tool_result("get_order_status", '{"ok": true}')
     assert wrapped.startswith('<ket_qua_tra_cuu tool="get_order_status">')
     assert "DỮ LIỆU thuần tuý" in wrapped
+
+
+def test_check_output_rewrite_khi_hai_so_tien_thieu_nhan_ky():
+    result = tool_guard.check_output(
+        "Doanh thu là 98 triệu đồng, tháng trước là 85 triệu đồng.",
+        {"had_forbidden_tool": False, "tool_call_count": 1})
+    assert result.action == "rewrite"
+    assert result.kind == "unverified_metric"
+
+
+def test_check_output_allow_khi_hai_so_tien_co_nhan_ky_day_du():
+    result = tool_guard.check_output(
+        "Doanh thu tháng 7 là 98 triệu đồng, doanh thu tháng 6 là 85 triệu đồng.",
+        {"had_forbidden_tool": False, "tool_call_count": 1})
+    assert result.action == "allow"
+
+
+def test_check_output_allow_khi_chi_co_mot_so_tien():
+    result = tool_guard.check_output(
+        "Doanh thu tháng này là 98 triệu đồng.",
+        {"had_forbidden_tool": False, "tool_call_count": 1})
+    assert result.action == "allow"
+
+
+def test_check_output_rewrite_khi_ma_trich_dan_khong_ton_tai():
+    result = tool_guard.check_output(
+        "Theo chính sách đổi trả [c9], bạn có 7 ngày để đổi hàng.",
+        {"had_forbidden_tool": False, "tool_call_count": 1, "available_citations": {"c1"}})
+    assert result.action == "rewrite"
+
+
+def test_check_output_allow_khi_ma_trich_dan_hop_le():
+    result = tool_guard.check_output(
+        "Theo chính sách đổi trả [c1], bạn có 7 ngày để đổi hàng.",
+        {"had_forbidden_tool": False, "tool_call_count": 1, "available_citations": {"c1"}})
+    assert result.action == "allow"
+
+
+def test_contains_unlabeled_period_comparison_phat_hien_dung():
+    assert tool_guard.contains_unlabeled_period_comparison(
+        "Lợi nhuận 12 triệu đồng so với 9 triệu đồng.")
+    assert not tool_guard.contains_unlabeled_period_comparison(
+        "Lợi nhuận quý này 12 triệu đồng so với quý trước 9 triệu đồng.")
+    assert not tool_guard.contains_unlabeled_period_comparison("Chỉ có 12 triệu đồng.")

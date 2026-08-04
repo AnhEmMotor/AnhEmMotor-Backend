@@ -1,0 +1,20 @@
+- query: "xe ga tiết kiệm xăng cho nữ"
+  collection: product_catalog
+  must_include_any: ["Vision", "SH Mode", "Lead"]
+  must_not_include: ["Winner", "Exciter"]
+
+- query: "xe nào giống Air Blade nhưng rẻ hơn"
+  collection: product_catalog
+  must_include_any: ["Air Blade", "Vision", "Lead"]
+
+- query: "chính sách đổi trả trong bao lâu"
+  collection: knowledge_base
+  must_include_any: ["đổi trả", "7 ngày"]
+
+- query: "nhớt cho xe côn tay 150cc"
+  collection: product_catalog
+  must_include_any: ["nhớt", "dầu nhớt"]
+
+- query: "abcxyz không tồn tại"
+  collection: product_catalog
+  expect_empty: true

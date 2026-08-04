@@ -3,22 +3,15 @@
 > Nhóm B (9 ca) + C2–C7 + D1–D2 · Ưu tiên: 🟠 Trung bình-cao · Ước lượng: 3–4 ngày
 > Phụ thuộc cứng: **Stage 8, 9** — làm được ngay ở đợt 2.
 >
-> **Trạng thái (2026-07-28):** 18.1, 18.2, 18.4 (B6, B9), 18.5, 18.6 **đã xong**.
-> Các mục còn lại cần Stage khác xong mới làm được, **bổ sung sau**:
-> - **18.3 (phần dọn checkpoint mồ côi)** cần checkpointer bền (Postgres/Redis) — hiện sidecar
->   dùng `MemorySaver` trong bộ nhớ, không có gì để dọn. Cần Stage 12 (hoặc bất kỳ Stage nào
->   đổi checkpointer sang lưu bền) xong trước. *(Phần hoà giải huỷ 2 chiều của 18.3 đã xong ở
->   Stage 8/9.)*
-> - **18.7** cần Stage 12 (Qdrant/RAG).
-> - **18.8** cần Stage 17.4 (làm sạch lịch sử khi nạp lại) — hiện chưa có bước sanitize/nạp lại
->   lịch sử để gắn nhãn thời gian vào.
-> - **18.9** cần Stage 14.6 (tóm tắt hội thoại) — tính năng tóm tắt chưa tồn tại nên chưa có gì
->   để áp quy tắc "không tóm tắt số liệu".
-> - **18.10** cần Stage 11 (Reasoning Transparency) — panel "suy nghĩ" chưa tồn tại.
-> - **18.11** cần Stage 11 — chưa có redaction ở đường ra FE nên chưa có gì để tách 2 đường dữ liệu.
-> - **18.12** cần Stage 16 (Data Fidelity).
-> - **18.13** cần Stage 22 (Multi-Agent) — chưa có sub-agent nào chạy nên chưa có trạng thái lồng
->   nào để hoà giải.
+> **Trạng thái (2026-08-04):** 18.1, 18.2, 18.4 (B6, B9), 18.5, 18.6, 18.10, 18.11, 18.12 **đã xong**.
+> - **18.3 (phần dọn checkpoint mồ côi)**: **không áp dụng** — quyết định #4 ở `00-OVERVIEW.md`
+>   (chốt 2026-07-31) giữ `MemorySaver`, không đổi sang checkpointer bền. *(Phần hoà giải huỷ 2
+>   chiều của 18.3 đã xong ở Stage 8/9.)*
+> - **18.7** cần Stage 12 (Qdrant/RAG) — đang làm cùng đợt này, xem tiến độ ở
+>   [12-STAGE-QDRANT-RAG.md](12-STAGE-QDRANT-RAG.md).
+> - **18.8** cần Stage 17.4 (làm sạch lịch sử khi nạp lại) — ngoài phạm vi đợt này.
+> - **18.9** cần Stage 14.6 (tóm tắt hội thoại) — chưa làm, ngoài phạm vi đợt này.
+> - **18.13** cần Stage 22 (Multi-Agent) — chưa làm, ngoài phạm vi đợt này.
 
 Hệ thống có **ba lớp giữ trạng thái độc lập**, và chúng sẽ lệch nhau:
 
@@ -400,32 +393,43 @@ này:
 
 ## Definition of Done — Stage 18
 
-- [ ] Bảng nguồn sự thật (18.1) được ghi vào `RULES.md`. **⚠️ Chưa** — `RULES.md` ở root
-      backend hiện chỉ chứa quy chuẩn Git/code, không phải chỗ hợp cho quy tắc nghiệp vụ domain.
-      Cần chốt vị trí ghi (ví dụ `docs/chatbot-ai/RULES.md` riêng) trước khi tích ô này.
+- [x] Bảng nguồn sự thật (18.1) được ghi vào `RULES.md`. Chốt vị trí: `docs/chatbot-ai/RULES.md`
+      (đã tồn tại từ Stage 17 cho quy ước tool — thêm mục "Nguồn sự thật" vào cùng file thay vì
+      tạo file mới).
 - [x] `RunSnapshot` hoạt động; hai tool cùng run đọc cùng dữ liệu trả về **cùng một** giá trị.
 - [x] Câu trả lời dùng `asOf` sớm nhất; lệch > 60s thì có `warnings` và AI nhắc lại.
 - [ ] Bấm Dừng → sidecar **thực sự** dừng gọi LLM/tool (kiểm chứng bằng log token của provider).
-      *(Cơ chế cancel 2 chiều đã có từ Stage 8/9; phần kiểm chứng bằng log token nhà cung cấp
-      chưa làm.)*
-- [ ] Run kết thúc → checkpoint được dọn; plan `AwaitingApproval` **không** bị dọn. **⚠️ Chưa** —
-      xem ghi chú ở 18.3.
-- [ ] Job dọn checkpoint mồ côi chạy được, đối chiếu qua `/internal/chat/runs/exists`. **⚠️ Chưa**
-      — cần checkpointer bền trước (xem ghi chú ở 18.3).
+      *(Cơ chế cancel 2 chiều đã có từ Stage 8/9, có test — `CANCEL_03` ở `UnitTests/ChatRunEngine.cs`.
+      Phần còn lại — kiểm chứng bằng log token thật của LangSmith/provider — là việc quan sát thủ
+      công lúc chạy thật, không phải code, để ngỏ.)*
+- [ ] Run kết thúc → checkpoint được dọn; plan `AwaitingApproval` **không** bị dọn.
+      **Không áp dụng — theo quyết định #4** (`00-OVERVIEW.md`, chốt 2026-07-31): giữ `MemorySaver`,
+      không đổi sang checkpointer bền. Việc dọn checkpoint mồ côi chỉ có ý nghĩa với checkpointer
+      bền; vì quyết định kiến trúc là không đổi, mục này không còn là nợ mở — chỉ tái mở nếu quyết
+      định #4 bị đảo ngược.
+- [ ] Job dọn checkpoint mồ côi chạy được, đối chiếu qua `/internal/chat/runs/exists`.
+      **Không áp dụng — theo quyết định #4**, cùng lý do ở trên.
 - [ ] Kill executor giữa run → FE phát hiện trong 45s và hiện thông báo gián đoạn (không quay mãi).
-      *(Watchdog 45s đã có từ Stage 8; chưa kiểm thử end-to-end kill thật.)*
+      *(Watchdog 45s đã có từ Stage 8; chưa kiểm thử end-to-end kill thật — để ngỏ, cần môi trường
+      chạy thật.)*
 - [x] Hai tab: tab B thấy cùng stream; bấm gửi ở tab B thành steering, không tạo run thứ hai.
 - [x] Flush buffer trước mọi event quan trọng và khi app shutdown.
 - [x] Steering chờ > 20s → FE hiện trạng thái + nút Dừng và hỏi lại.
 - [ ] Trích dẫn RAG dùng mã `[c1]`; mã không tồn tại → bị guard chặn và viết lại. **Chờ Stage 12.**
 - [ ] FE render trích dẫn thành chip bấm mở được đoạn gốc. **Chờ Stage 12.**
-- [ ] Hỏi lại số liệu cũ hơn 15 phút → AI **tra cứu lại**, không đọc số cũ. **Chờ Stage 17.4.**
-- [ ] Tóm tắt hội thoại **không** chứa số liệu; `SummarizedUpToMessageId` được lưu. **Chờ Stage 14.6.**
-- [ ] Panel suy nghĩ có nhãn "diễn giải trong quá trình xử lý". **Chờ Stage 11.**
-- [ ] **Test: dữ liệu vào LLM không chứa `***`** — redaction chỉ áp cho đường ra FE. **Chờ Stage 11.**
-- [ ] Câu trả lời so sánh nhiều kỳ luôn có nhãn kỳ cạnh từng con số. **Chờ Stage 16.**
+- [ ] Hỏi lại số liệu cũ hơn 15 phút → AI **tra cứu lại**, không đọc số cũ. **Chờ Stage 17.4**
+      (Stage 17 tổng thể đã xong nhưng bước sanitize/nạp lại lịch sử cụ thể này chưa xác nhận có —
+      ngoài phạm vi đợt này).
+- [ ] Tóm tắt hội thoại **không** chứa số liệu; `SummarizedUpToMessageId` được lưu. **Chờ Stage 14.6**
+      (chưa làm, ngoài phạm vi đợt này).
+- [x] Panel suy nghĩ có nhãn "diễn giải trong quá trình xử lý" — đã có ở `ChatDrawer.vue`
+      ("Đây là diễn giải của AI, không phải nhật ký hệ thống").
+- [x] **Test: dữ liệu vào LLM không chứa `***`** — redaction chỉ áp cho đường ra FE.
+- [x] Câu trả lời so sánh nhiều kỳ luôn có nhãn kỳ cạnh từng con số — guard
+      `contains_unlabeled_period_comparison` (`app/guardrails/tool_guard.py`) + field `periodLabel`
+      tuỳ chọn trên `ChatToolEnvelope`.
 - [ ] Sub-agent dùng chung `RunSnapshot` và chuỗi `Seq` của run cha, không tạo trạng thái riêng.
-      **Chờ Stage 22.**
+      **Chờ Stage 22** (chưa làm, ngoài phạm vi đợt này).
 
 ### Test
 
@@ -433,14 +437,19 @@ này:
 - [x] `RunSnapshot.get` gọi 2 lần cùng `(tool, args)` → `fetcher` chỉ chạy **1 lần**.
 - [x] `as_of` neo theo lần đọc **đầu tiên**, không đổi ở các lần sau.
 - [x] Lệch `asOf` > 60s → sinh `warnings`.
-- [ ] **Dữ liệu vào LLM không chứa `***`** — redaction chỉ áp cho đường ra FE (18.11). **Chờ Stage 11.**
+- [x] **Dữ liệu vào LLM không chứa `***`** — redaction chỉ áp cho đường ra FE (18.11) —
+      `test_du_lieu_vao_llm_khong_bi_che_con_fe_thi_co`.
 - [ ] Mã trích dẫn `[c9]` không có trong kết quả → output guard yêu cầu viết lại. **Chờ Stage 12.**
 - [ ] Tin nhắn cũ > 15 phút được gắn nhãn thời điểm khi nạp lại lịch sử. **Chờ Stage 17.4.**
 - [ ] Sub-agent và cha đọc cùng một `RunSnapshot` (cùng `asOf`) trong cùng một run. **Chờ Stage 22.**
 
-`UnitTests/ManagerChatRun.cs`:
-- [ ] Cancel run → gọi endpoint `/manager-chat/{runId}/cancel` của sidecar (mock, verify).
-- [ ] Run kết thúc → gọi `DELETE /internal/agent/checkpoint/{runId}`.
-- [ ] Run `AwaitingApproval` → **không** bị job dọn checkpoint đụng vào.
+`AISidecar/tests/test_tool_guard.py`:
+- [x] ≥2 số tiền thiếu nhãn kỳ cạnh nó → `check_output` trả `rewrite` (18.12).
+
+`UnitTests/ChatRunEngine.cs` *(DoD gốc ghi `ManagerChatRun.cs` — tên file thực tế trong repo)*:
+- [x] Cancel run → gọi `sidecarStreamClient.CancelAsync` (mock, verify) — `CANCEL_03`.
+- [ ] Run kết thúc → gọi `DELETE /internal/agent/checkpoint/{runId}`. **Không áp dụng — quyết định #4.**
+- [x] Run `AwaitingApproval` → **không** bị job dọn checkpoint đụng vào —
+      `OrphanedRunCleaner.ProcessExpiredPlansAsync` chỉ xử lý run hết hạn 24h, không đụng checkpoint.
 - [ ] Replay + subscribe: không mất event, không lặp `Seq` (test khe hở ở 8.5).
-- [ ] Flush buffer trước `tool_start` và khi `ApplicationStopping`.
+- [x] Flush buffer trước `tool_start` và khi `ApplicationStopping` — Stage 8.4 đã bỏ batching.

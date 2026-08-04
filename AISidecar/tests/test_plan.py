@@ -316,7 +316,7 @@ async def test_call_tools_node_chan_tool_ghi_khi_plan_chua_duyet(monkeypatch):
             FakeTool.called = True
             return {"ok": True}
 
-    monkeypatch.setattr(manager_agent, "build_tools", lambda client, allowed: [FakeTool()])
+    monkeypatch.setattr(manager_agent, "build_all_tools", lambda client, allowed: [FakeTool()])
     monkeypatch.setattr(manager_agent, "BackendClient", lambda auth_header: object())
 
     from langchain_core.messages import AIMessage
@@ -351,7 +351,7 @@ async def test_call_tools_node_cho_phep_tool_ghi_khi_plan_da_duyet(monkeypatch):
             FakeTool.called = True
             return {"ok": True}
 
-    monkeypatch.setattr(manager_agent, "build_tools", lambda client, allowed: [FakeTool()])
+    monkeypatch.setattr(manager_agent, "build_all_tools", lambda client, allowed: [FakeTool()])
     monkeypatch.setattr(manager_agent, "BackendClient", lambda auth_header: object())
 
     from langchain_core.messages import AIMessage

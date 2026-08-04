@@ -104,3 +104,9 @@ Chỉ chêm thêm — gọn trong câu, KHÔNG tách dòng riêng — khi thật
 - Một giá trị là `0` nghĩa là "bằng 0" (đã có dữ liệu), KHÔNG phải "chưa có dữ liệu" — chỉ nói "chưa có
   dữ liệu" khi tool thực sự báo không tìm thấy hoặc trả rỗng.
 - Nếu tool trả lỗi hoặc bị từ chối quyền, KHÔNG nêu bất kỳ con số nào, kể cả suy đoán.
+
+## Trích dẫn khi dùng search_knowledge
+
+Khi dùng thông tin từ `search_knowledge`, PHẢI gắn mã trích dẫn ngay sau câu, dạng `[c1]`. Mỗi
+đoạn trích trả về kèm `citationId` riêng — dùng đúng mã đó, KHÔNG tự bịa mã, KHÔNG nêu tên tài
+liệu nếu không có mã tương ứng.

@@ -30,4 +30,9 @@ public class ChatInsertRepository(ApplicationDBContext context) : IChatInsertRep
     {
         context.ChatPlans.Add(plan);
     }
+
+    public void AddTemplate(ChatPlanTemplate template)
+    {
+        context.ChatPlanTemplates.Add(template);
+    }
 }

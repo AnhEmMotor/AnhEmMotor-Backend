@@ -9,4 +9,5 @@ public interface IChatInsertRepository
     public void AddRun(ChatRun run);
     public void AddFeedback(ChatFeedback feedback);
     public void AddPlan(ChatPlan plan);
+    public void AddTemplate(ChatPlanTemplate template);
 }

@@ -64,4 +64,18 @@ public class ChatReadRepository(ApplicationDBContext context) : IChatReadReposit
             .Include(p => p.Run!.Session)
             .FirstOrDefaultAsync(p => p.RunId == runId, cancellationToken);
     }
+
+    public async Task<ChatPlanTemplate?> GetActiveTemplateByIntentHashAsync(
+        string intentHash, string module, CancellationToken cancellationToken = default)
+    {
+        return await context.ChatPlanTemplates
+            .Where(t => t.IntentHash == intentHash && t.Module == module && t.Status == "active")
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<ChatPlanTemplate?> GetTemplateByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await context.ChatPlanTemplates
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+    }
 }

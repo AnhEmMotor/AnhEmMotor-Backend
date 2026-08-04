@@ -170,6 +170,7 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
         "routing_context": routing_context,
         "tool_flags_snapshot": dict(get_settings().tool_flags),
         "plan_id": plan_id,
+        "server_date": chat_req.server_date,
     }
 
     cancel_event = asyncio.Event()

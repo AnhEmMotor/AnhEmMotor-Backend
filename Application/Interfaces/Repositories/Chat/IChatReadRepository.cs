@@ -12,4 +12,7 @@ public interface IChatReadRepository
     public Task<List<ChatRunEvent>> GetRunEventsAsync(Guid runId, long afterSeq, CancellationToken cancellationToken = default);
     public Task<int> CountSteeringMessagesAsync(Guid runId, CancellationToken cancellationToken = default);
     public Task<ChatPlan?> GetPlanByRunIdAsync(Guid runId, CancellationToken cancellationToken = default);
+    public Task<ChatPlanTemplate?> GetActiveTemplateByIntentHashAsync(
+        string intentHash, string module, CancellationToken cancellationToken = default);
+    public Task<ChatPlanTemplate?> GetTemplateByIdAsync(Guid id, CancellationToken cancellationToken = default);
 }

@@ -92,7 +92,7 @@ def test_build_tool_scope_gioi_han_theo_plan_step():
         "expanded_modules": set(),
     }
     scoped = registry.build_tool_scope(state)
-    assert {s.name for s in scoped} == {"get_low_stock_products"}
+    assert {s.name for s in scoped} == {"get_low_stock_products", "search_knowledge"}
 
 
 async def test_infer_step_tools_loc_ten_bia(monkeypatch):

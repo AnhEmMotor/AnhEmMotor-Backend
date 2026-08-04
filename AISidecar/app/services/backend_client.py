@@ -100,3 +100,35 @@ class BackendClient:
         await self._post(f"/internal/chat/runs/{run_id}/plan/steps/{step_id}/status", {
             "status": status, "result": result,
         })
+
+    async def find_plan_template(self, intent_hash: str, module: str) -> dict | None:
+        url = f"{self._settings.backend_base}/internal/chat/plan-templates/find"
+        timeout = self._settings.request_timeout_seconds
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(
+                url, params={"intentHash": intent_hash, "module": module}, headers=self._headers())
+        if resp.status_code == 404:
+            return None
+        if resp.status_code >= 400:
+            raise BackendError("/internal/chat/plan-templates/find", resp.status_code)
+        return resp.json()
+
+    async def get_plan_template(self, template_id: str) -> dict | None:
+        url = f"{self._settings.backend_base}/internal/chat/plan-templates/{template_id}"
+        timeout = self._settings.request_timeout_seconds
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(url, headers=self._headers())
+        if resp.status_code == 404:
+            return None
+        if resp.status_code >= 400:
+            raise BackendError(f"/internal/chat/plan-templates/{template_id}", resp.status_code)
+        return resp.json()
+
+    async def create_plan_template(self, payload: dict) -> dict:
+        return await self._post("/internal/chat/plan-templates", payload)
+
+    async def record_plan_template_use(self, template_id: str, success: bool,
+                                        user_edited: bool, rejected: bool) -> None:
+        await self._post(f"/internal/chat/plan-templates/{template_id}/record-use", {
+            "success": success, "userEdited": user_edited, "rejected": rejected,
+        })

@@ -42,12 +42,5 @@ public class StaleWaitingSessionMonitor(
         var stale = await context.StoreChatSessions
             .Where(s => s.Mode == StoreChatMode.Waiting && s.LastMessageAt < threshold)
             .ToListAsync(stoppingToken);
-
-        foreach (var session in stale)
-        {
-            logger.LogWarning(
-                "[StoreChat] Phiên {SessionId} chờ nhân viên quá 10 phút, LastMessageAt={LastMessageAt}",
-                session.Id, session.LastMessageAt);
-        }
     }
 }

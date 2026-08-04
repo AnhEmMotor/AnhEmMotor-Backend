@@ -15,4 +15,9 @@ public class ChatUpdateRepository(ApplicationDBContext context) : IChatUpdateRep
     {
         context.ChatPlans.Update(plan);
     }
+
+    public void UpdateTemplate(ChatPlanTemplate template)
+    {
+        context.ChatPlanTemplates.Update(template);
+    }
 }

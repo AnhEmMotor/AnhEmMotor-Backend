@@ -166,6 +166,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<ChatPlan> ChatPlans { get; set; }
 
+    public virtual DbSet<ChatPlanTemplate> ChatPlanTemplates { get; set; }
+
     public virtual DbSet<Service> Services { get; set; }
 
     public virtual DbSet<Lead> Leads { get; set; }

@@ -12,6 +12,7 @@ dependencies = [
     "langchain-google-genai>=2.0,<5",
     "langchain-ollama>=1.0,<2",
     "langgraph>=0.2,<2",
+    "qdrant-client>=1.12,<2",
 ]
 
 [project.optional-dependencies]
@@ -21,4 +22,3 @@ dev = [
     "respx>=0.21",
     "ruff>=0.7",
 ]
-qdrant = ["qdrant-client>=1.12,<2"]

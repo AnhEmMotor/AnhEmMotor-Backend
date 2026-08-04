@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Application.DTOs.Chat;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Chat;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
@@ -23,7 +25,11 @@ public class InternalChatController(
     UserManager<ApplicationUser> userManager,
     ApplicationDBContext dbContext,
     IConfiguration configuration,
-    IChatRunWriter chatRunWriter) : ControllerBase
+    IChatRunWriter chatRunWriter,
+    IChatReadRepository chatReadRepository,
+    IChatInsertRepository chatInsertRepository,
+    IChatUpdateRepository chatUpdateRepository,
+    IUnitOfWork unitOfWork) : ControllerBase
 {
     [HttpPost("context")]
     public async Task<IActionResult> GetContext([FromBody] ContextRequest request, CancellationToken cancellationToken)
@@ -270,6 +276,76 @@ public class InternalChatController(
 
         return Ok();
     }
+
+    [HttpGet("plan-templates/find")]
+    public async Task<IActionResult> FindPlanTemplate(
+        [FromQuery] string intentHash, [FromQuery] string module, CancellationToken cancellationToken)
+    {
+        var template = await chatReadRepository.GetActiveTemplateByIntentHashAsync(intentHash, module, cancellationToken);
+        if (template == null) return NotFound();
+        return Ok(ToPlanTemplateResponse(template));
+    }
+
+    [HttpGet("plan-templates/{id:guid}")]
+    public async Task<IActionResult> GetPlanTemplate(Guid id, CancellationToken cancellationToken)
+    {
+        var template = await chatReadRepository.GetTemplateByIdAsync(id, cancellationToken);
+        if (template == null) return NotFound();
+        return Ok(ToPlanTemplateResponse(template));
+    }
+
+    [HttpPost("plan-templates")]
+    public async Task<IActionResult> CreatePlanTemplate(
+        [FromBody] CreatePlanTemplateRequest request, CancellationToken cancellationToken)
+    {
+        var template = new ChatPlanTemplate
+        {
+            CanonicalQuestion = request.CanonicalQuestion,
+            IntentHash = request.IntentHash,
+            Module = request.Module,
+            StepsTemplate = request.StepsTemplateJson,
+            Slots = request.SlotsJson,
+            RequiredTools = request.RequiredToolsJson,
+            RequiredPermissions = request.RequiredPermissionsJson,
+            ToolRegistryFingerprint = request.ToolRegistryFingerprint,
+        };
+        chatInsertRepository.AddTemplate(template);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Ok(new { templateId = template.Id });
+    }
+
+    [HttpPost("plan-templates/{id:guid}/record-use")]
+    public async Task<IActionResult> RecordPlanTemplateUse(
+        Guid id, [FromBody] RecordPlanTemplateUseRequest request, CancellationToken cancellationToken)
+    {
+        var template = await chatReadRepository.GetTemplateByIdAsync(id, cancellationToken);
+        if (template == null) return NotFound();
+
+        template.UseCount++;
+        if (request.Success) template.SuccessCount++;
+        if (request.UserEdited) template.UserEditCount++;
+        if (request.Rejected) template.RejectCount++;
+        template.LastUsedAt = DateTimeOffset.UtcNow;
+        chatUpdateRepository.UpdateTemplate(template);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Ok();
+    }
+
+    private static object ToPlanTemplateResponse(ChatPlanTemplate template) => new
+    {
+        templateId = template.Id,
+        canonicalQuestion = template.CanonicalQuestion,
+        module = template.Module,
+        stepsTemplate = JsonSerializer.Deserialize<JsonElement>(template.StepsTemplate),
+        slots = JsonSerializer.Deserialize<JsonElement>(template.Slots),
+        requiredTools = JsonSerializer.Deserialize<List<string>>(template.RequiredTools) ?? [],
+        requiredPermissions = JsonSerializer.Deserialize<List<string>>(template.RequiredPermissions) ?? [],
+        toolRegistryFingerprint = template.ToolRegistryFingerprint,
+        useCount = template.UseCount,
+        successCount = template.SuccessCount,
+        userEditCount = template.UserEditCount,
+        status = template.Status,
+    };
 }
 
 public class ContextRequest
@@ -300,4 +376,23 @@ public class UpdatePlanStepStatusRequest
 {
     public string Status { get; set; } = string.Empty;
     public string? Result { get; set; }
+}
+
+public class CreatePlanTemplateRequest
+{
+    public string CanonicalQuestion { get; set; } = string.Empty;
+    public string IntentHash { get; set; } = string.Empty;
+    public string Module { get; set; } = string.Empty;
+    public string StepsTemplateJson { get; set; } = "[]";
+    public string SlotsJson { get; set; } = "[]";
+    public string RequiredToolsJson { get; set; } = "[]";
+    public string RequiredPermissionsJson { get; set; } = "[]";
+    public string? ToolRegistryFingerprint { get; set; }
+}
+
+public class RecordPlanTemplateUseRequest
+{
+    public bool Success { get; set; }
+    public bool UserEdited { get; set; }
+    public bool Rejected { get; set; }
 }

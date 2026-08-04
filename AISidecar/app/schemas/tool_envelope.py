@@ -16,3 +16,4 @@ class ChatToolEnvelope(BaseModel):
     definition: str | None = None
     currency: str | None = None
     warnings: list[str] = []
+    periodLabel: str | None = None

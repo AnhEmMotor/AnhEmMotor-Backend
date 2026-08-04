@@ -3,8 +3,14 @@
 Chạy câu lệnh sau để cập nhật thư viện. Nếu chưa có cài sudo, buộc phải chạy trong root.
 
 ```
-apt update && apt upgrade -y
-apt install -y sudo curl git unzip libicu-dev build-essential python3 python3-venv python3-pip
+apt update && apt upgrade -y && \
+apt install -y sudo curl git unzip libicu-dev build-essential python3 python3-venv python3-pip ca-certificates gnupg && \
+install -m 0755 -d /etc/apt/keyrings && \
+curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
+chmod a+r /etc/apt/keyrings/docker.asc && \
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+apt update && \
+apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
 # Bước 2: Tạo người dùng riêng biệt
@@ -280,3 +286,40 @@ sudo chmod -R 755 /var/www/anhemmotor/
 sudo mkdir -p /var/www/anhemmotor/backend
 sudo mkdir -p /var/www/anhemmotor/data
 ```
+
+# Bước 7: Chạy Qdrant
+
+Vào đường dẫn mong muốn lưu QDrant Data, chạy câu lệnh sau:
+
+```
+echo "QDRANT_API_KEY=$(openssl rand -hex 32)" | sudo tee .env
+```
+
+Tạo file docker-compose.yml (`sudo nano docker-compose.yml`) cùng thư mục với .env:
+
+```yaml
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant_service
+    restart: always
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    environment:
+      - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY}
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+volumes:
+  qdrant_storage:
+    name: qdrant_storage
+```
+
+Sau đó chạy:
+
+```
+docker compose up -d qdrant
+```
+
+Biến `QDRANT_URL` là `http://127.0.0.1:6333`, còn biến `QDRANT_API_KEY` chính là kết quả in ra màn hình chuỗi kí tự dài nằm ở khối lệnh tạo ra file .env

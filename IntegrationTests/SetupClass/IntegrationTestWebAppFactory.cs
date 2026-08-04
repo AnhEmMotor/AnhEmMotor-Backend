@@ -251,6 +251,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IFileDeleteService, FileDeleteService>();
                 services.AddScoped<ISievePaginator, SievePaginator>();
                 services.AddScoped<IUnitOfWork, UnitOfWork>();
+                services.AddSingleton<IProductIndexQueue, Infrastructure.Services.Product.ProductIndexQueue>();
                 services.AddSingleton<INotificationService, NotificationService>();
                 services.AddScoped<IEmailService, EmailService>();
                 services.AddScoped<IExternalAuthService, ExternalAuthService>();
