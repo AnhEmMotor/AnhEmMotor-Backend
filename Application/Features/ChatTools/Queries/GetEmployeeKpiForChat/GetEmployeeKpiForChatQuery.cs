@@ -4,5 +4,4 @@ using MediatR;
 
 namespace Application.Features.ChatTools.Queries.GetEmployeeKpiForChat;
 
-public sealed record GetEmployeeKpiForChatQuery(int EmployeeId)
-    : IRequest<Result<ChatToolEnvelope<ChatEmployeeKpiDto>>>;
+public sealed record GetEmployeeKpiForChatQuery(int EmployeeId) : IRequest<Result<ChatToolEnvelope<ChatEmployeeKpiDto>>>;

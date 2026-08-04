@@ -9,10 +9,7 @@ public class GetPnlReportQueryHandler(IStatisticalAnalyticsRepository analyticsR
 {
     public async Task<Result<PnlReportResponse>> Handle(GetPnlReportQuery request, CancellationToken cancellationToken)
     {
-        var result = await analyticsRepository.GetPnlReportAsync(
-            request.Month,
-            request.Year,
-            cancellationToken);
+        var result = await analyticsRepository.GetPnlReportAsync(request.Month, request.Year, cancellationToken);
         return result;
     }
 }

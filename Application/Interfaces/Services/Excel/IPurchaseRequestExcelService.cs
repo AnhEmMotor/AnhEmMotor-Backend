@@ -36,5 +36,6 @@ public interface IPurchaseRequestExcelService
     /// </summary>
     public IReadOnlyList<PurchaseRequestImportRow>? ParseImportRows(byte[] fileBytes);
 
-    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(IReadOnlyList<PurchaseRequestImportFailedRow> failedRows);
+    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(
+        IReadOnlyList<PurchaseRequestImportFailedRow> failedRows);
 }

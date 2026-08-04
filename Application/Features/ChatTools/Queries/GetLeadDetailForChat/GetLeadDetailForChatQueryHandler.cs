@@ -6,10 +6,7 @@ using MediatR;
 
 namespace Application.Features.ChatTools.Queries.GetLeadDetailForChat;
 
-public class GetLeadDetailForChatQueryHandler(
-    ILeadReadRepository leadReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetLeadDetailForChatQuery, Result<ChatToolEnvelope<ChatLeadDetailDto>>>
+public class GetLeadDetailForChatQueryHandler(ILeadReadRepository leadReadRepository, IServerDateProvider dateProvider) : IRequestHandler<GetLeadDetailForChatQuery, Result<ChatToolEnvelope<ChatLeadDetailDto>>>
 {
     private const int MaxResults = 5;
 
@@ -19,7 +16,6 @@ public class GetLeadDetailForChatQueryHandler(
     {
         var leads = await leadReadRepository.GetLoyaltyMembersAsync(request.Keyword, cancellationToken)
             .ConfigureAwait(false);
-
         var totalCount = leads.Count;
         var dtos = leads
             .Take(MaxResults)
@@ -40,7 +36,6 @@ public class GetLeadDetailForChatQueryHandler(
                     CreatedAt = lead.CreatedAt ?? DateTimeOffset.MinValue
                 })
             .ToList();
-
         var inner = new ChatToolResult<ChatLeadDetailDto>(dtos, totalCount, totalCount > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,

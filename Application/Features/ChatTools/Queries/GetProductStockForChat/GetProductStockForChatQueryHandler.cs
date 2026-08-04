@@ -10,8 +10,7 @@ namespace Application.Features.ChatTools.Queries.GetProductStockForChat;
 public class GetProductStockForChatQueryHandler(
     IProductReadRepository productReadRepository,
     IStatisticalReadRepository statisticalReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetProductStockForChatQuery, Result<ChatToolEnvelope<ChatProductStockDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetProductStockForChatQuery, Result<ChatToolEnvelope<ChatProductStockDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatProductStockDto>>> Handle(
         GetProductStockForChatQuery request,
@@ -43,7 +42,9 @@ public class GetProductStockForChatQueryHandler(
                 });
         }
         var inner = new ChatToolResult<ChatProductStockDto>(
-            dtos, product.ProductVariants.Count, product.ProductVariants.Count > dtos.Count);
+            dtos,
+            product.ProductVariants.Count,
+            product.ProductVariants.Count > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "IStatisticalReadRepository.GetProductStockAndPriceAsync",

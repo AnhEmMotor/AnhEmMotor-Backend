@@ -13,6 +13,7 @@ public class ChatRunEvent
     [Column("RunId")]
     [ForeignKey("Run")]
     public Guid RunId { get; set; }
+
     public ChatRun? Run { get; set; }
 
     [Required]

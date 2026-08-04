@@ -122,7 +122,16 @@ public class ImportSuppliersCommandHandler(
             var file1Name = $"ImportErrors_Supplier_{timestamp}.xlsx";
             var file2Name = $"ImportErrors_Supplier_WithReason_{timestamp}.xlsx";
             var failedRows = failedRowsData
-                .Select(f => new SupplierImportFailedRow(f.PartnerTypeId, f.Name, f.Phone, f.Email, f.TaxId, f.Address, f.Notes, f.Reason))
+                .Select(
+                    f => new SupplierImportFailedRow(
+                        f.PartnerTypeId,
+                        f.Name,
+                        f.Phone,
+                        f.Email,
+                        f.TaxId,
+                        f.Address,
+                        f.Notes,
+                        f.Reason))
                 .ToList();
             var (file1Bytes, file2Bytes) = excelService.BuildImportErrorReports(failedRows);
             await File.WriteAllBytesAsync(Path.Combine(errorsDir, file1Name), file1Bytes, cancellationToken)

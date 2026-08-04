@@ -1,11 +1,10 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Application.Interfaces.Services;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Infrastructure.Services.Ai;
 
-// Đăng ký Singleton trong DI nên _cache chỉ đọc file 1 lần cho cả vòng đời app.
 public class ChatToolCatalogProvider(ILogger<ChatToolCatalogProvider> logger) : IChatToolCatalogProvider
 {
     private const string SolutionFileName = "AnhEmMotor-Backend.sln";
@@ -23,8 +22,10 @@ public class ChatToolCatalogProvider(ILogger<ChatToolCatalogProvider> logger) : 
         var path = FindCatalogFile();
         if (path == null)
         {
-            logger.LogWarning("Không tìm thấy {RelativePath} từ {BaseDir} — tool-catalog cho FE sẽ trống.",
-                CatalogRelativePath, AppContext.BaseDirectory);
+            logger.LogWarning(
+                "Không tìm thấy {RelativePath} từ {BaseDir} — tool-catalog cho FE sẽ trống.",
+                CatalogRelativePath,
+                AppContext.BaseDirectory);
             return [];
         }
         var json = File.ReadAllText(path);
@@ -32,8 +33,6 @@ public class ChatToolCatalogProvider(ILogger<ChatToolCatalogProvider> logger) : 
         return raw.Select(r => new ChatToolCatalogEntry(r.Name, r.Path, r.Label, r.Status ?? "active")).ToList();
     }
 
-    // Tìm repo root bằng file .sln (giống SidecarConfigGuard.RepoRoot() trong UnitTests) — chung
-    // 1 checkout với sidecar Python (spawn qua AiSidecarManager) nên luôn tìm được từ đây.
     private static string? FindCatalogFile()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

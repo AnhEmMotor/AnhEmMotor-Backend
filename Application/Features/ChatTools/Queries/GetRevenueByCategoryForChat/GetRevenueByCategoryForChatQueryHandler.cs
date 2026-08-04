@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetRevenueByCategoryForChat;
 
 public class GetRevenueByCategoryForChatQueryHandler(
     IStatisticalReadRepository statisticalReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetRevenueByCategoryForChatQuery, Result<ChatToolEnvelope<ChatRevenueByCategoryItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetRevenueByCategoryForChatQuery, Result<ChatToolEnvelope<ChatRevenueByCategoryItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatRevenueByCategoryItemDto>>> Handle(
         GetRevenueByCategoryForChatQuery request,
@@ -22,21 +21,22 @@ public class GetRevenueByCategoryForChatQueryHandler(
         var limit = ChatToolLimit.Clamp(request.Limit);
         var dtos = categoryList
             .Take(limit)
-            .Select(c => new ChatRevenueByCategoryItemDto
-            {
-                CategoryName = c.CategoryName,
-                Revenue = c.Revenue,
-                Percentage = c.Percentage
-            })
+            .Select(
+                c => new ChatRevenueByCategoryItemDto
+                {
+                    CategoryName = c.CategoryName,
+                    Revenue = c.Revenue,
+                    Percentage = c.Percentage
+                })
             .ToList();
-        var inner = new ChatToolResult<ChatRevenueByCategoryItemDto>(dtos, categoryList.Count, categoryList.Count > dtos.Count);
+        var inner = new ChatToolResult<ChatRevenueByCategoryItemDto>(
+            dtos,
+            categoryList.Count,
+            categoryList.Count > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "IStatisticalReadRepository.GetRevenueByCategoryAsync",
-            new Dictionary<string, string>
-            {
-                ["Khoảng thời gian"] = ChatToolDateRange.FormatVietnamRange(start, end)
-            },
+            new Dictionary<string, string> { ["Khoảng thời gian"] = ChatToolDateRange.FormatVietnamRange(start, end) },
             "doanh-thu-theo-danh-muc",
             "VND");
         return ChatToolEnvelope<ChatRevenueByCategoryItemDto>.Wrap(inner, meta);

@@ -11,9 +11,7 @@ public class GetRecentTransactionsQueryHandler(IStatisticalAnalyticsRepository a
         GetRecentTransactionsQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await analyticsRepository.GetRecentTransactionsAsync(
-            request.Limit,
-            cancellationToken);
+        var result = await analyticsRepository.GetRecentTransactionsAsync(request.Limit, cancellationToken);
         return result;
     }
 }

@@ -12,8 +12,7 @@ public class DeleteManagerChatSessionCommandHandler(
     IChatDeleteRepository chatDeleteRepository,
     IPermissionReadRepository permissionReadRepository,
     ICurrentUserContext currentUserContext,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<DeleteManagerChatSessionCommand, Result<bool>>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManagerChatSessionCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(DeleteManagerChatSessionCommand request, CancellationToken cancellationToken)
     {
@@ -23,16 +22,13 @@ public class DeleteManagerChatSessionCommandHandler(
         {
             return Error.Forbidden();
         }
-
         var session = await chatReadRepository.GetSessionByIdAsync(request.SessionId, cancellationToken);
         if (session == null || session.UserId != userId)
         {
             return Error.NotFound("Phiên chat không tồn tại hoặc không thuộc quyền sở hữu.");
         }
-
         chatDeleteRepository.DeleteSession(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return true;
     }
 }

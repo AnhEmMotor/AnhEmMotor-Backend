@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetSuppliersWithDebtForChat;
 
 public class GetSuppliersWithDebtForChatQueryHandler(
     ISupplierDebtReadRepository supplierDebtRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetSuppliersWithDebtForChatQuery, Result<ChatToolEnvelope<ChatSupplierDebtListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetSuppliersWithDebtForChatQuery, Result<ChatToolEnvelope<ChatSupplierDebtListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatSupplierDebtListItemDto>>> Handle(
         GetSuppliersWithDebtForChatQuery request,
@@ -24,18 +23,15 @@ public class GetSuppliersWithDebtForChatQueryHandler(
             {
                 continue;
             }
-
             var remainingDebt = debt.TotalAmount - debt.PaidAmount;
             if (supplierDebts.TryGetValue(supplier.Id, out var existing))
             {
                 supplierDebts[supplier.Id] = (existing.Name, existing.TotalDebt + remainingDebt);
-            }
-            else
+            } else
             {
                 supplierDebts[supplier.Id] = (supplier.Name ?? string.Empty, remainingDebt);
             }
         }
-
         var suppliersWithDebt = supplierDebts
             .Where(kvp => kvp.Value.TotalDebt > 0)
             .OrderByDescending(kvp => kvp.Value.TotalDebt)

@@ -14,10 +14,7 @@ public record ChatProductStockPublicDto
     {
         VariantId = dto.VariantId,
         VariantName = dto.VariantName,
-        StockStatus = dto.StockQuantity <= 0
-            ? "het_hang"
-            : dto.StockQuantity <= LowStockThreshold
-                ? "sap_het"
-                : "con_hang"
+        StockStatus =
+            dto.StockQuantity <= 0 ? "het_hang" : dto.StockQuantity <= LowStockThreshold ? "sap_het" : "con_hang"
     };
 }

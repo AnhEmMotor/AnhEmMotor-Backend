@@ -10,8 +10,7 @@ namespace Application.Features.ChatTools.Queries.ListFinanceContractsForChat;
 
 public class ListFinanceContractsForChatQueryHandler(
     IFinanceContractReadRepository financeContractReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListFinanceContractsForChatQuery, Result<ChatToolEnvelope<ChatFinanceContractListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListFinanceContractsForChatQuery, Result<ChatToolEnvelope<ChatFinanceContractListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatFinanceContractListItemDto>>> Handle(
         ListFinanceContractsForChatQuery request,
@@ -26,11 +25,9 @@ public class ListFinanceContractsForChatQueryHandler(
             PageSize = limit,
             Filters = statusId is null ? null : $"DisbursementStatus=={statusId}"
         };
-
         var paged = await financeContractReadRepository
             .GetPagedAsync<FinanceContractDetailResponse>(sieveModel, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         var items = paged.Items ?? [];
         var dtos = items
             .Select(
@@ -44,7 +41,6 @@ public class ListFinanceContractsForChatQueryHandler(
                     PrincipalAmount = c.CreditPackage?.PrincipalAmount
                 })
             .ToList();
-
         var totalCount = (int)(paged.TotalCount ?? dtos.Count);
         var inner = new ChatToolResult<ChatFinanceContractListItemDto>(dtos, totalCount, totalCount > dtos.Count);
         var filtersApplied = new Dictionary<string, string>();
@@ -52,14 +48,12 @@ public class ListFinanceContractsForChatQueryHandler(
         {
             filtersApplied["Trạng thái giải ngân"] = statusId;
         }
-
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "IFinanceContractReadRepository.GetPagedAsync",
             filtersApplied,
             "hop-dong-tai-chinh",
             "VND");
-
         return ChatToolEnvelope<ChatFinanceContractListItemDto>.Wrap(inner, meta);
     }
 }

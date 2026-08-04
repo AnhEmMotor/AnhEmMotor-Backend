@@ -197,9 +197,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         content!.Last().TotalRevenue.Should().Be(2000000);
     }
 
-    // Stage 16.2 mục #2 — GetDailyRevenueAsync giờ nhóm theo ngày GIỜ VIỆT NAM (GMT+7), không phải theo
-    // ngày UTC trần nữa, nên đơn tạo lúc 23:30 UTC (= 06:30 sáng hôm sau giờ VN) phải rơi vào ngày hôm SAU
-    // theo UTC, không phải cùng ngày UTC như hành vi cũ.
     [Fact(DisplayName = "STAT_023 - Lấy doanh thu nhóm theo ngày giờ Việt Nam, không phải ngày UTC trần")]
     public async Task GetDailyRevenue_Timezone_UTC()
     {
@@ -229,7 +226,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        // yest = 23:30 UTC → +7h = 06:30 giờ VN của ngày HÔM SAU (theo lịch UTC) — đó là ngày phải nhóm vào.
         var targetDay = DateOnly.FromDateTime(yest.AddHours(7));
         content!.FirstOrDefault(x => x.ReportDay == targetDay)?.TotalRevenue.Should().Be(500000);
     }

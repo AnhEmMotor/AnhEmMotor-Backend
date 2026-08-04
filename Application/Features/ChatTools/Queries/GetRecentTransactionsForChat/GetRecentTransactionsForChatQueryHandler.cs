@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetRecentTransactionsForChat;
 
 public class GetRecentTransactionsForChatQueryHandler(
     IStatisticalAnalyticsRepository statisticalAnalyticsRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetRecentTransactionsForChatQuery, Result<ChatToolEnvelope<ChatRecentTransactionDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetRecentTransactionsForChatQuery, Result<ChatToolEnvelope<ChatRecentTransactionDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatRecentTransactionDto>>> Handle(
         GetRecentTransactionsForChatQuery request,
@@ -20,16 +19,17 @@ public class GetRecentTransactionsForChatQueryHandler(
             .GetRecentTransactionsAsync(limit, cancellationToken)
             .ConfigureAwait(false);
         var dtos = transactions
-            .Select(t => new ChatRecentTransactionDto
-            {
-                Timestamp = t.Timestamp,
-                CustomerName = t.CustomerName,
-                ProductName = t.ProductName,
-                Amount = t.Amount,
-                IsRevenue = t.IsRevenue,
-                Status = t.Status,
-                StaffName = t.StaffName
-            })
+            .Select(
+                t => new ChatRecentTransactionDto
+                {
+                    Timestamp = t.Timestamp,
+                    CustomerName = t.CustomerName,
+                    ProductName = t.ProductName,
+                    Amount = t.Amount,
+                    IsRevenue = t.IsRevenue,
+                    Status = t.Status,
+                    StaffName = t.StaffName
+                })
             .ToList();
         var inner = new ChatToolResult<ChatRecentTransactionDto>(dtos, dtos.Count, false);
         var meta = new ChatToolEnvelopeMeta(

@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetSupplierStatisticsForChat;
 
 public class GetSupplierStatisticsForChatQueryHandler(
     ISupplierReadRepository supplierReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetSupplierStatisticsForChatQuery, Result<ChatToolEnvelope<ChatSupplierStatisticsDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetSupplierStatisticsForChatQuery, Result<ChatToolEnvelope<ChatSupplierStatisticsDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatSupplierStatisticsDto>>> Handle(
         GetSupplierStatisticsForChatQuery request,

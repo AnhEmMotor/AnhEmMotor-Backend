@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetInventoryReportForChat;
 
 public class GetInventoryReportForChatQueryHandler(
     IInventoryOnHandReadRepository inventoryOnHandReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetInventoryReportForChatQuery, Result<ChatToolEnvelope<ChatInventoryReportItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetInventoryReportForChatQuery, Result<ChatToolEnvelope<ChatInventoryReportItemDto>>>
 {
     private const string OutOfStockStatus = "Hết hàng";
     private const string InStockStatus = "Còn hàng";
@@ -41,17 +40,14 @@ public class GetInventoryReportForChatQueryHandler(
         {
             filters["Tìm kiếm"] = request.SearchTerm;
         }
-
         if (request.Month.HasValue)
         {
             filters["Tháng"] = request.Month.Value.ToString();
         }
-
         if (request.Year.HasValue)
         {
             filters["Năm"] = request.Year.Value.ToString();
         }
-
         var inner = new ChatToolResult<ChatInventoryReportItemDto>(dtos, rows.Count, rows.Count > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,

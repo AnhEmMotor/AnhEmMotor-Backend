@@ -12,11 +12,13 @@ public class ProductView : BaseEntity
     [Column("ProductId")]
     [ForeignKey("Product")]
     public int ProductId { get; set; }
+
     public Product? Product { get; set; }
 
     [Column("CustomerUserId")]
     [ForeignKey("CustomerUser")]
     public Guid? CustomerUserId { get; set; }
+
     public ApplicationUser? CustomerUser { get; set; }
 
     [Column("VisitorKey", TypeName = "nvarchar(64)")]

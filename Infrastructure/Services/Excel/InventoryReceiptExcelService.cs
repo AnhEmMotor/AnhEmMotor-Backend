@@ -7,7 +7,9 @@ namespace Infrastructure.Services.Excel;
 
 public class InventoryReceiptExcelService : IInventoryReceiptExcelService
 {
-    public byte[] ExportInventoryReceipts(IReadOnlyList<InventoryReceiptListResponse> receipts, IReadOnlyList<InventoryReceiptInfo> items)
+    public byte[] ExportInventoryReceipts(
+        IReadOnlyList<InventoryReceiptListResponse> receipts,
+        IReadOnlyList<InventoryReceiptInfo> items)
     {
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Phiếu nhập");
@@ -263,12 +265,22 @@ public class InventoryReceiptExcelService : IInventoryReceiptExcelService
                 continue;
             }
             parsedRows.Add(
-                new InventoryReceiptImportRow(prIdStr, productName, variantName, colorName, remQtyStr, qtyStr, vin, engine, generalNote));
+                new InventoryReceiptImportRow(
+                    prIdStr,
+                    productName,
+                    variantName,
+                    colorName,
+                    remQtyStr,
+                    qtyStr,
+                    vin,
+                    engine,
+                    generalNote));
         }
         return parsedRows;
     }
 
-    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(IReadOnlyList<InventoryReceiptImportFailedRow> failedRows)
+    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(
+        IReadOnlyList<InventoryReceiptImportFailedRow> failedRows)
     {
         var generalNote = failedRows.Count > 0 ? failedRows[0].Note : string.Empty;
         string[] headers1 =

@@ -7,7 +7,9 @@ using System.Linq;
 
 namespace Application.Features.InventoryLedgers.Queries.ExportInventoryLedger
 {
-    public class ExportInventoryLedgerQueryHandler(IInventoryLedgerRepository ledgerRepository, IInventoryLedgerExcelService excelService) : IRequestHandler<ExportInventoryLedgerQuery, Result<FileStreamResult>>
+    public class ExportInventoryLedgerQueryHandler(
+        IInventoryLedgerRepository ledgerRepository,
+        IInventoryLedgerExcelService excelService) : IRequestHandler<ExportInventoryLedgerQuery, Result<FileStreamResult>>
     {
         public async Task<Result<FileStreamResult>> Handle(
             ExportInventoryLedgerQuery request,

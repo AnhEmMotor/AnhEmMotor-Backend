@@ -1,10 +1,10 @@
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using Application.Common.Interfaces;
 using Application.DTOs.Chat;
 using Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Infrastructure.Services.Ai;
 
@@ -23,7 +23,6 @@ public class StoreChatAiClient(
     {
         var sidecarUrl = sidecarUrlProvider.GetSidecarUrl();
         var client = httpClientFactory.CreateClient();
-
         var requestBody = new
         {
             session_id = sessionId.ToString(),
@@ -31,27 +30,21 @@ public class StoreChatAiClient(
             history = history.Select(h => new { role = h.Role, message = h.Message }),
             server_date = dateProvider.VietnamNow.ToString("O")
         };
-
-        var requestContent = new StringContent(
-            JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var requestContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{sidecarUrl}/store-chat")
         {
             Content = requestContent
         };
-
         var internalSecret = configuration["Jwt:Key"];
         if (!string.IsNullOrEmpty(internalSecret))
         {
             httpRequest.Headers.Add("X-Internal-Secret", internalSecret);
         }
-
         var response = await client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
             .ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
-
         var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         using var reader = new StreamReader(stream);
-
         var text = new StringBuilder();
         var cardNodes = new List<JsonNode>();
         string? line;
@@ -62,7 +55,8 @@ public class StoreChatAiClient(
                 continue;
             }
             var sidecarEvent = JsonSerializer.Deserialize<SidecarEvent>(
-                line, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                line,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (sidecarEvent == null)
             {
                 continue;
@@ -76,9 +70,6 @@ public class StoreChatAiClient(
                 }
             } else if (sidecarEvent.Type == "message_correction")
             {
-                // Guardrail (check_output rewrite, hoặc suppress text khi escalate_to_staff) phát hiện
-                // câu vừa stream cần thay/xoá SAU KHI đã stream — payload là toàn văn bản CUỐI CÙNG,
-                // không phải delta, nên THAY nguyên buffer chứ không nối thêm.
                 text.Clear();
                 text.Append(sidecarEvent.Payload);
             } else if (sidecarEvent.Type is "product-cards" or "variant-cards")
@@ -91,7 +82,6 @@ public class StoreChatAiClient(
                 }
             }
         }
-
         var cardsJson = cardNodes.Count > 0 ? JsonSerializer.Serialize(cardNodes) : null;
         return new StoreChatAiReplyResult(text.ToString(), cardsJson);
     }

@@ -14,31 +14,25 @@ public class RequestHandoffCommandHandler(
     IStoreChatUpdateRepository storeChatUpdateRepository,
     IStoreChatInsertRepository storeChatInsertRepository,
     IUnitOfWork unitOfWork,
-    ILogger<RequestHandoffCommandHandler> logger)
-    : IRequestHandler<RequestHandoffCommand, Result<RequestHandoffResultDto>>
+    ILogger<RequestHandoffCommandHandler> logger) : IRequestHandler<RequestHandoffCommand, Result<RequestHandoffResultDto>>
 {
-    public async Task<Result<RequestHandoffResultDto>> Handle(RequestHandoffCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RequestHandoffResultDto>> Handle(
+        RequestHandoffCommand request,
+        CancellationToken cancellationToken)
     {
         var session = await storeChatReadRepository.GetSessionByIdAsync(request.SessionId, cancellationToken);
         if (session == null)
         {
             return Error.NotFound("Phiên chat không tồn tại.");
         }
-
         StoreChatMessage? systemMessage = null;
-
-        // Chỉ chuyển Ai -> Waiting; không kéo lùi Human về Waiting nếu khách bấm lại nút
-        // trong lúc nhân viên đang xử lý.
         if (session.Mode == StoreChatMode.Ai)
         {
             session.Mode = StoreChatMode.Waiting;
             logger.LogInformation(
                 "[StoreChat] Action=RequestHandoff SessionId={SessionId} TriggeredBy={TriggeredBy}",
-                request.SessionId, request.TriggeredBy);
-
-            // AI tự quyết định chuyển (escalate_to_staff) — hệ thống tự thông báo bằng 1 tin nhắn
-            // System ngắn gọn thay vì để AI tự soạn lời xác nhận: tránh trùng lặp với trạng thái đã
-            // đổi, và FE hiển thị System dạng dòng nhỏ chứ không phải bong bóng chat như tin AI thường.
+                request.SessionId,
+                request.TriggeredBy);
             if (request.TriggeredBy == "Ai")
             {
                 systemMessage = new StoreChatMessage
@@ -58,10 +52,8 @@ public class RequestHandoffCommandHandler(
         {
             session.ContactPhone = request.ContactPhone;
         }
-
         storeChatUpdateRepository.UpdateSession(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         var systemMessageDto = systemMessage == null
             ? null
             : new StoreChatMessageDto

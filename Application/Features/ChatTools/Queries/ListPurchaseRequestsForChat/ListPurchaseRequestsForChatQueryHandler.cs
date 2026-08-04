@@ -11,8 +11,7 @@ namespace Application.Features.ChatTools.Queries.ListPurchaseRequestsForChat;
 
 public class ListPurchaseRequestsForChatQueryHandler(
     IPurchaseRequestReadRepository purchaseRequestReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListPurchaseRequestsForChatQuery, Result<ChatToolEnvelope<ChatPurchaseRequestListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListPurchaseRequestsForChatQuery, Result<ChatToolEnvelope<ChatPurchaseRequestListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatPurchaseRequestListItemDto>>> Handle(
         ListPurchaseRequestsForChatQuery request,
@@ -27,11 +26,9 @@ public class ListPurchaseRequestsForChatQueryHandler(
             Page = 1,
             PageSize = limit
         };
-
         var result = await purchaseRequestReadRepository
             .GetPagedAsync<PurchaseRequestListResponse>(sieveModel, DataFetchMode.ActiveOnly, cancellationToken)
             .ConfigureAwait(false);
-
         var items = result.Items ?? [];
         var dtos = items
             .Select(
@@ -45,7 +42,6 @@ public class ListPurchaseRequestsForChatQueryHandler(
                     CreatedAt = pr.CreatedAt
                 })
             .ToList();
-
         var totalCount = (int)(result.TotalCount ?? dtos.Count);
         var inner = new ChatToolResult<ChatPurchaseRequestListItemDto>(dtos, totalCount, totalCount > dtos.Count);
         var filtersApplied = new Dictionary<string, string>();
@@ -53,14 +49,12 @@ public class ListPurchaseRequestsForChatQueryHandler(
         {
             filtersApplied["Trạng thái"] = statusId;
         }
-
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "IPurchaseRequestReadRepository.GetPagedAsync",
             filtersApplied,
             "yeu-cau-mua-hang",
             null);
-
         return ChatToolEnvelope<ChatPurchaseRequestListItemDto>.Wrap(inner, meta);
     }
 }

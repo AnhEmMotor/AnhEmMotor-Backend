@@ -1,10 +1,10 @@
-using System.Text.Json;
 using Application.DTOs.Chat;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Infrastructure.Services.Ai.Runs;
 
@@ -13,35 +13,37 @@ public class ChatRunWriter(
     IChatRunEventBus eventBus,
     IChatToolCatalogProvider catalogProvider) : IChatRunWriter
 {
-    // Chặn trên bằng "bây giờ" — nếu không, thinking/tool_start của ĐOẠN KẾ TIẾP (chạy sau khi hàm
-    // này được gọi) sẽ vô tình bị gán nhầm vào ChatMessage của đoạn trước do điều kiện lọc hở phía trên.
     private async Task<string?> BuildReasoningStepsJsonAsync(Guid runId, DateTime segmentStartedAt)
     {
         var segmentEndedAt = DateTime.UtcNow;
         var events = await context.ChatRunEvents
-            .Where(e => e.RunId == runId
-                        && (e.Type == ChatRunEventType.Thinking
-                            || e.Type == ChatRunEventType.ToolStart
-                            || e.Type == ChatRunEventType.ToolEnd)
-                        && e.CreatedAt >= segmentStartedAt && e.CreatedAt <= segmentEndedAt)
+            .Where(
+                e => e.RunId == runId &&
+                    (e.Type == ChatRunEventType.Thinking ||
+                        e.Type == ChatRunEventType.ToolStart ||
+                        e.Type == ChatRunEventType.ToolEnd) &&
+                    e.CreatedAt >= segmentStartedAt &&
+                    e.CreatedAt <= segmentEndedAt)
             .OrderBy(e => e.Seq)
             .Select(e => new { e.Type, e.Payload })
             .ToListAsync();
-        if (events.Count == 0) return null;
-
+        if (events.Count == 0)
+            return null;
         var labelByName = catalogProvider.GetCatalog().ToDictionary(e => e.Name, e => e.Label);
         var steps = BuildReasoningSteps(events.Select(e => (e.Type, e.Payload)), labelByName);
         return steps.Count == 0 ? null : JsonSerializer.Serialize(steps);
     }
 
-    /// <summary>Gộp các event thinking/tool_start/tool_end (theo đúng thứ tự Seq) thành danh sách
-    /// ChatReasoningStepDto — cùng hình dạng "reasoningSteps" mà FE dựng live lúc đang stream.
-    /// Tách riêng khỏi truy vấn DB để test trực tiếp không cần EF InMemory.</summary>
+    /// <summary>
+    /// Gộp các event thinking/tool_start/tool_end (theo đúng thứ tự Seq) thành danh sách ChatReasoningStepDto — cùng
+    /// hình dạng "reasoningSteps" mà FE dựng live lúc đang stream. Tách riêng khỏi truy vấn DB để test trực tiếp không
+    /// cần EF InMemory.
+    /// </summary>
     public static List<ChatReasoningStepDto> BuildReasoningSteps(
-        IEnumerable<(string Type, string Payload)> events, Dictionary<string, string> labelByName)
+        IEnumerable<(string Type, string Payload)> events,
+        Dictionary<string, string> labelByName)
     {
         var steps = new List<ChatReasoningStepDto>();
-
         foreach (var (type, payload) in events)
         {
             if (type == ChatRunEventType.Thinking)
@@ -51,15 +53,18 @@ public class ChatRunWriter(
                 {
                     steps.Add(new ChatReasoningStepDto("thinking", Text: text));
                 }
-            }
-            else if (type == ChatRunEventType.ToolStart)
+            } else if (type == ChatRunEventType.ToolStart)
             {
                 var (name, summary, argsPreview) = ParseToolStartPayload(payload);
-                steps.Add(new ChatReasoningStepDto(
-                    "tool", Name: name, Label: labelByName.GetValueOrDefault(name, name),
-                    Summary: summary, Status: "running", ArgsPreview: argsPreview));
-            }
-            else
+                steps.Add(
+                    new ChatReasoningStepDto(
+                        "tool",
+                        Name: name,
+                        Label: labelByName.GetValueOrDefault(name, name),
+                        Summary: summary,
+                        Status: "running",
+                        ArgsPreview: argsPreview));
+            } else
             {
                 var end = ParseToolEndPayload(payload);
                 var idx = steps.FindLastIndex(s => s.Kind == "tool" && s.Name == end.Name && s.Status == "running");
@@ -80,7 +85,6 @@ public class ChatRunWriter(
                 }
             }
         }
-
         return steps;
     }
 
@@ -90,15 +94,12 @@ public class ChatRunWriter(
         {
             using var doc = JsonDocument.Parse(payload);
             return doc.RootElement.TryGetProperty("text", out var t) ? t.GetString() : payload;
-        }
-        catch (JsonException)
+        } catch (JsonException)
         {
             return payload;
         }
     }
 
-    // tool_start payload là JSON {"name":..., "summary":..., "argsPreview":...} — fallback về
-    // string thô làm tên tool nếu gặp payload cũ hoặc payload không hợp lệ.
     private static (string Name, string? Summary, JsonElement? ArgsPreview) ParseToolStartPayload(string payload)
     {
         try
@@ -109,16 +110,21 @@ public class ChatRunWriter(
             var summary = root.TryGetProperty("summary", out var s) ? s.GetString() : null;
             JsonElement? argsPreview = root.TryGetProperty("argsPreview", out var ap) ? ap.Clone() : null;
             return (name, string.IsNullOrEmpty(summary) ? null : summary, argsPreview);
-        }
-        catch (JsonException)
+        } catch (JsonException)
         {
             return (payload, null, null);
         }
     }
 
     private sealed record ToolEndPayloadData(
-        string Name, string? Summary, int? DurationMs, JsonElement? ResultPreview,
-        bool? Truncated, int? TotalCount, string? AsOf, List<string>? Warnings,
+        string Name,
+        string? Summary,
+        int? DurationMs,
+        JsonElement? ResultPreview,
+        bool? Truncated,
+        int? TotalCount,
+        string? AsOf,
+        List<string>? Warnings,
         Dictionary<string, string>? FiltersApplied);
 
     private static ToolEndPayloadData ParseToolEndPayload(string payload)
@@ -135,12 +141,22 @@ public class ChatRunWriter(
             int? totalCount = root.TryGetProperty("totalCount", out var tc) && tc.TryGetInt32(out var tcv) ? tcv : null;
             string? asOf = root.TryGetProperty("asOf", out var ao) ? ao.GetString() : null;
             List<string>? warnings = root.TryGetProperty("warnings", out var w)
-                ? JsonSerializer.Deserialize<List<string>>(w.GetRawText()) : null;
+                ? JsonSerializer.Deserialize<List<string>>(w.GetRawText())
+                : null;
             Dictionary<string, string>? filtersApplied = root.TryGetProperty("filtersApplied", out var fa)
-                ? JsonSerializer.Deserialize<Dictionary<string, string>>(fa.GetRawText()) : null;
-            return new ToolEndPayloadData(name, summary, durationMs, resultPreview, truncated, totalCount, asOf, warnings, filtersApplied);
-        }
-        catch (JsonException)
+                ? JsonSerializer.Deserialize<Dictionary<string, string>>(fa.GetRawText())
+                : null;
+            return new ToolEndPayloadData(
+                name,
+                summary,
+                durationMs,
+                resultPreview,
+                truncated,
+                totalCount,
+                asOf,
+                warnings,
+                filtersApplied);
+        } catch (JsonException)
         {
             return new ToolEndPayloadData(payload, null, null, null, null, null, null, null, null);
         }
@@ -149,23 +165,17 @@ public class ChatRunWriter(
     public async Task<long> AppendAsync(Guid runId, string type, object payload)
     {
         var payloadStr = payload is string s ? s : JsonSerializer.Serialize(payload);
-
-        // ponytail: từ Stage 9, ChatRunExecutor và endpoint pull-steering có thể ghi event cho
-        // CÙNG một run trên hai DbContext khác nhau cùng lúc — LastSeq++ trong bộ nhớ không còn
-        // an toàn. Dùng compare-and-swap giống PendingSteering thay vì rowversion riêng.
         for (var attempt = 0; attempt < 5; attempt++)
         {
             var run = await context.ChatRuns.AsNoTracking().FirstOrDefaultAsync(r => r.Id == runId);
-            if (run == null) throw new InvalidOperationException("Run not found");
-
+            if (run == null)
+                throw new InvalidOperationException("Run not found");
             var nextSeq = run.LastSeq + 1;
-
             var claimed = await context.ChatRuns
                 .Where(r => r.Id == runId && r.LastSeq == run.LastSeq)
                 .ExecuteUpdateAsync(u => u.SetProperty(r => r.LastSeq, nextSeq));
-
-            if (claimed == 0) continue;
-
+            if (claimed == 0)
+                continue;
             var evt = new ChatRunEvent
             {
                 Id = Guid.NewGuid(),
@@ -175,12 +185,9 @@ public class ChatRunWriter(
                 Payload = payloadStr,
                 CreatedAt = DateTime.UtcNow
             };
-
             context.ChatRunEvents.Add(evt);
             await context.SaveChangesAsync();
-
             eventBus.Publish(runId, new ChatRunEventDto(nextSeq, type, payloadStr));
-
             return nextSeq;
         }
         throw new InvalidOperationException($"Không thể ghi event cho run {runId} sau nhiều lần thử.");
@@ -188,25 +195,22 @@ public class ChatRunWriter(
 
     public async Task MarkRunningAsync(Guid runId, string instanceId)
     {
-        // HeartbeatAt phải reset ở đây — nếu không, run resume sau khi chờ duyệt plan 24h (Stage 10)
-        // vẫn mang mốc heartbeat cũ, và lượt quét timeout kế tiếp của OrphanedRunCleaner (mỗi 60s)
-        // sẽ orphan nhầm run vừa mới resume trước khi tick heartbeat đầu tiên (15s) kịp chạy.
         await context.ChatRuns
             .Where(r => r.Id == runId)
-            .ExecuteUpdateAsync(s => s
+            .ExecuteUpdateAsync(
+                s => s
                 .SetProperty(r => r.Status, ChatRunStatus.Running)
-                .SetProperty(r => r.OwnerInstanceId, instanceId)
-                .SetProperty(r => r.HeartbeatAt, DateTime.UtcNow));
+                    .SetProperty(r => r.OwnerInstanceId, instanceId)
+                    .SetProperty(r => r.HeartbeatAt, DateTime.UtcNow));
     }
 
     public async Task CompleteAsync(Guid runId, string finalOutput, DateTime segmentStartedAt)
     {
         var run = await context.ChatRuns.FirstOrDefaultAsync(r => r.Id == runId);
-        if (run == null) return;
-
+        if (run == null)
+            return;
         run.Status = ChatRunStatus.Completed;
         run.CompletedAt = DateTime.UtcNow;
-
         if (!string.IsNullOrEmpty(finalOutput))
         {
             var now = DateTime.UtcNow;
@@ -223,18 +227,16 @@ public class ChatRunWriter(
             };
             context.ChatMessages.Add(aiMessage);
         }
-
         await context.SaveChangesAsync();
-        await AppendAsync(runId, ChatRunEventType.RunCompleted, "");
+        await AppendAsync(runId, ChatRunEventType.RunCompleted, string.Empty);
     }
 
     public async Task AwaitingApprovalAsync(Guid runId, string finalOutput, DateTime segmentStartedAt)
     {
         var run = await context.ChatRuns.FirstOrDefaultAsync(r => r.Id == runId);
-        if (run == null) return;
-
+        if (run == null)
+            return;
         run.Status = ChatRunStatus.AwaitingApproval;
-
         if (!string.IsNullOrEmpty(finalOutput))
         {
             var now = DateTime.UtcNow;
@@ -251,20 +253,16 @@ public class ChatRunWriter(
             };
             context.ChatMessages.Add(aiMessage);
         }
-
         await context.SaveChangesAsync();
-        // Không append event ở đây — plan_ready đã được ghi ở vòng lặp forward event của ChatRunExecutor
-        // ngay trước khi nó gọi hàm này.
     }
 
     public async Task CancelAsync(Guid runId, string finalOutput, DateTime segmentStartedAt)
     {
         var run = await context.ChatRuns.FirstOrDefaultAsync(r => r.Id == runId);
-        if (run == null) return;
-
+        if (run == null)
+            return;
         run.Status = ChatRunStatus.Cancelled;
         run.CompletedAt = DateTime.UtcNow;
-
         if (!string.IsNullOrEmpty(finalOutput))
         {
             var now = DateTime.UtcNow;
@@ -281,20 +279,19 @@ public class ChatRunWriter(
             };
             context.ChatMessages.Add(aiMessage);
         }
-
         await context.SaveChangesAsync();
-        await AppendAsync(runId, ChatRunEventType.RunCancelled, "");
+        await AppendAsync(runId, ChatRunEventType.RunCancelled, string.Empty);
     }
 
     public async Task FailAsync(Guid runId, Exception ex)
     {
         await context.ChatRuns
             .Where(r => r.Id == runId)
-            .ExecuteUpdateAsync(s => s
+            .ExecuteUpdateAsync(
+                s => s
                 .SetProperty(r => r.Status, ChatRunStatus.Failed)
-                .SetProperty(r => r.ErrorCode, ex.Message)
-                .SetProperty(r => r.CompletedAt, DateTime.UtcNow));
-
+                    .SetProperty(r => r.ErrorCode, ex.Message)
+                    .SetProperty(r => r.CompletedAt, DateTime.UtcNow));
         await AppendAsync(runId, ChatRunEventType.Error, ex.Message);
     }
 
@@ -302,34 +299,35 @@ public class ChatRunWriter(
     {
         await context.ChatRuns
             .Where(r => r.Id == runId)
-            .ExecuteUpdateAsync(s => s
+            .ExecuteUpdateAsync(
+                s => s
                 .SetProperty(r => r.HeartbeatAt, DateTime.UtcNow));
-        
-        await AppendAsync(runId, ChatRunEventType.RunHeartbeat, "");
+        await AppendAsync(runId, ChatRunEventType.RunHeartbeat, string.Empty);
     }
 
     public async Task<long> AppendSegmentAsync(Guid runId, string segmentOutput, DateTime segmentStartedAt)
     {
         var run = await context.ChatRuns.AsNoTracking().FirstOrDefaultAsync(r => r.Id == runId);
-        if (run == null) throw new InvalidOperationException("Run not found");
-
+        if (run == null)
+            throw new InvalidOperationException("Run not found");
         if (!string.IsNullOrEmpty(segmentOutput))
         {
-            context.ChatMessages.Add(new ChatMessage
-            {
-                Id = Guid.NewGuid(),
-                SessionId = run.SessionId,
-                Role = ChatRole.Ai,
-                Message = segmentOutput,
-                RunId = runId,
-                CreatedAt = segmentStartedAt,
-                ReasoningStepsJson = await BuildReasoningStepsJsonAsync(runId, segmentStartedAt),
-                ReasoningElapsedSeconds = (DateTime.UtcNow - segmentStartedAt).TotalSeconds
-            });
+            context.ChatMessages
+                .Add(
+                    new ChatMessage
+                    {
+                        Id = Guid.NewGuid(),
+                        SessionId = run.SessionId,
+                        Role = ChatRole.Ai,
+                        Message = segmentOutput,
+                        RunId = runId,
+                        CreatedAt = segmentStartedAt,
+                        ReasoningStepsJson = await BuildReasoningStepsJsonAsync(runId, segmentStartedAt),
+                        ReasoningElapsedSeconds = (DateTime.UtcNow - segmentStartedAt).TotalSeconds
+                    });
             await context.SaveChangesAsync();
         }
-
-        return await AppendAsync(runId, ChatRunEventType.TurnBoundary, "");
+        return await AppendAsync(runId, ChatRunEventType.TurnBoundary, string.Empty);
     }
 
     public async Task FlushPartialOutputAsync(Guid runId, string partialOutput)
@@ -346,41 +344,41 @@ public class ChatRunWriter(
     {
         await context.ChatRuns
             .Where(r => r.Id == runId)
-            .ExecuteUpdateAsync(s => s
-                .SetProperty(r => r.ToolRegistryFingerprint, r =>
-                    toolRegistryFingerprint ?? r.ToolRegistryFingerprint)
-                .SetProperty(r => r.ModelUsed, r => modelUsed ?? r.ModelUsed));
+            .ExecuteUpdateAsync(
+                s => s
+                .SetProperty(r => r.ToolRegistryFingerprint, r => toolRegistryFingerprint ?? r.ToolRegistryFingerprint)
+                    .SetProperty(r => r.ModelUsed, r => modelUsed ?? r.ModelUsed));
     }
 
-    private static bool IsActive(string status) =>
-        status == ChatRunStatus.Running || status == ChatRunStatus.Pending;
+    private static bool IsActive(string status) => status == ChatRunStatus.Running || status == ChatRunStatus.Pending;
 
-    private static List<SteeringQueueItem> DeserializeSteering(string json) =>
-        string.IsNullOrEmpty(json)
-            ? []
-            : JsonSerializer.Deserialize<List<SteeringQueueItem>>(json) ?? [];
+    private static List<SteeringQueueItem> DeserializeSteering(string json) => string.IsNullOrEmpty(json)
+        ? []
+        : JsonSerializer.Deserialize<List<SteeringQueueItem>>(json) ?? [];
 
-    public async Task<PendingSteeringAppendResult> AppendPendingSteeringAsync(Guid runId, SteeringQueueItem item, int maxPending)
+    public async Task<PendingSteeringAppendResult> AppendPendingSteeringAsync(
+        Guid runId,
+        SteeringQueueItem item,
+        int maxPending)
     {
-        // ponytail: compare-and-swap trên chuỗi PendingSteering thay vì rowversion riêng —
-        // đủ dùng vì cột này chỉ 1-3 phần tử, tranh chấp cực hiếm. Nâng cấp nếu throughput tăng.
         for (var attempt = 0; attempt < 5; attempt++)
         {
             var run = await context.ChatRuns.AsNoTracking().FirstOrDefaultAsync(r => r.Id == runId);
-            if (run == null || !IsActive(run.Status)) return PendingSteeringAppendResult.RunNotActive;
-
+            if (run == null || !IsActive(run.Status))
+                return PendingSteeringAppendResult.RunNotActive;
             var items = DeserializeSteering(run.PendingSteering);
-            if (items.Count >= maxPending) return PendingSteeringAppendResult.TooMany;
-
+            if (items.Count >= maxPending)
+                return PendingSteeringAppendResult.TooMany;
             items.Add(item);
             var newJson = JsonSerializer.Serialize(items);
-
             var affected = await context.ChatRuns
-                .Where(r => r.Id == runId && r.PendingSteering == run.PendingSteering
-                            && (r.Status == ChatRunStatus.Running || r.Status == ChatRunStatus.Pending))
+                .Where(
+                    r => r.Id == runId &&
+                        r.PendingSteering == run.PendingSteering &&
+                        (r.Status == ChatRunStatus.Running || r.Status == ChatRunStatus.Pending))
                 .ExecuteUpdateAsync(s => s.SetProperty(r => r.PendingSteering, newJson));
-
-            if (affected > 0) return PendingSteeringAppendResult.Appended;
+            if (affected > 0)
+                return PendingSteeringAppendResult.Appended;
         }
         return PendingSteeringAppendResult.Conflict;
     }
@@ -388,24 +386,20 @@ public class ChatRunWriter(
     public async Task<List<SteeringQueueItem>> PullPendingSteeringAsync(Guid runId)
     {
         var run = await context.ChatRuns.AsNoTracking().FirstOrDefaultAsync(r => r.Id == runId);
-        if (run == null || run.PendingSteering == "[]") return [];
-
+        if (run == null || run.PendingSteering == "[]")
+            return [];
         var items = DeserializeSteering(run.PendingSteering);
-        if (items.Count == 0) return [];
-
+        if (items.Count == 0)
+            return [];
         var affected = await context.ChatRuns
             .Where(r => r.Id == runId && r.PendingSteering == run.PendingSteering)
             .ExecuteUpdateAsync(s => s.SetProperty(r => r.PendingSteering, "[]"));
-
-        // Bị đè bởi 1 lần append khác giữa lúc đọc và xoá — không trả gì, lần poll sau sẽ lấy trọn.
-        if (affected == 0) return [];
-
+        if (affected == 0)
+            return [];
         foreach (var item in items)
         {
-            await AppendAsync(runId, ChatRunEventType.SteeringApplied,
-                JsonSerializer.Serialize(item));
+            await AppendAsync(runId, ChatRunEventType.SteeringApplied, JsonSerializer.Serialize(item));
         }
-
         return items;
     }
 }

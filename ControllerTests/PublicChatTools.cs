@@ -1,4 +1,3 @@
-using System.Reflection;
 using Application.Features.ChatTools.Common;
 using Application.Features.ChatTools.Queries.GetProductDetailForChat;
 using Application.Features.ChatTools.Queries.GetProductPriceListForChat;
@@ -9,6 +8,7 @@ using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Reflection;
 using WebAPI.Controllers;
 
 namespace ControllerTests;
@@ -18,7 +18,11 @@ public class PublicChatTools
     private readonly Mock<ISender> _senderMock;
     private readonly PublicChatToolsController _controller;
     private static readonly ChatToolEnvelopeMeta TestMeta = new(
-        DateTimeOffset.UtcNow, "test-source", new Dictionary<string, string>(), null, null);
+        DateTimeOffset.UtcNow,
+        "test-source",
+        new Dictionary<string, string>(),
+        null,
+        null);
 
     public PublicChatTools()
     {
@@ -33,8 +37,9 @@ public class PublicChatTools
             .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
             .Select(m => m.Name)
             .ToList();
-        actionNames.Should().BeEquivalentTo(
-            ["SearchProducts", "GetProductDetail", "GetProductStock", "GetProductPriceList", "ListBrands"]);
+        actionNames.Should()
+            .BeEquivalentTo(
+                ["SearchProducts", "GetProductDetail", "GetProductStock", "GetProductPriceList", "ListBrands"]);
     }
 
     [Fact(DisplayName = "PUBLICCHATTOOLS_002 - Tìm sản phẩm - Happy Path trả đúng field")]
@@ -80,11 +85,25 @@ public class PublicChatTools
     {
         var expected = ChatToolEnvelope<ChatProductStockDto>.Wrap(
             new ChatToolResult<ChatProductStockDto>(
-                [
-                    new ChatProductStockDto { VariantId = 10, VariantName = "Đỏ đen", UnitPrice = 2500000, StockQuantity = 50 },
-                    new ChatProductStockDto { VariantId = 11, VariantName = "Trắng", UnitPrice = 2500000, StockQuantity = 2 },
-                    new ChatProductStockDto { VariantId = 12, VariantName = "Xanh", UnitPrice = 2500000, StockQuantity = 0 }
-                ],
+                [new ChatProductStockDto
+                {
+                    VariantId = 10,
+                    VariantName = "Đỏ đen",
+                    UnitPrice = 2500000,
+                    StockQuantity = 50
+                }, new ChatProductStockDto
+                {
+                    VariantId = 11,
+                    VariantName = "Trắng",
+                    UnitPrice = 2500000,
+                    StockQuantity = 2
+                }, new ChatProductStockDto
+                {
+                    VariantId = 12,
+                    VariantName = "Xanh",
+                    UnitPrice = 2500000,
+                    StockQuantity = 0
+                }],
                 3,
                 false),
             TestMeta);

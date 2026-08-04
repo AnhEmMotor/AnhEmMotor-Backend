@@ -119,7 +119,9 @@ public class GetVehiclePortfolioQueryHandler(
 public class MaintenanceHistoryItemDto
 {
     public string? Type { get; set; }
+
     public string? Name { get; set; }
+
     public int Count { get; set; }
 }
 

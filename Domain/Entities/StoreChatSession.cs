@@ -1,6 +1,6 @@
+using Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Constants;
 
 namespace Domain.Entities;
 
@@ -33,8 +33,10 @@ public class StoreChatSession : BaseEntity
     [Column("ContactPhone", TypeName = "nvarchar(20)")]
     public string? ContactPhone { get; set; }
 
-    /// <summary>Phiên trước khi khách bấm "Xoá cuộc trò chuyện" — mỗi lần xoá tạo phiên mới, liên kết
-    /// lại phiên cũ để quản trị lần theo được, phiên cũ vẫn giữ nguyên lịch sử, không nhận tin mới nữa.</summary>
+    /// <summary>
+    /// Phiên trước khi khách bấm "Xoá cuộc trò chuyện" — mỗi lần xoá tạo phiên mới, liên kết lại phiên cũ để quản trị
+    /// lần theo được, phiên cũ vẫn giữ nguyên lịch sử, không nhận tin mới nữa.
+    /// </summary>
     [Column("PreviousSessionId")]
     public Guid? PreviousSessionId { get; set; }
 

@@ -1,8 +1,8 @@
 using Application.ApiContracts.Statistical.Responses;
-using MediatR;
-using System;
-
 using Application.Common.Models;
+using MediatR;
+
+using System;
 
 namespace Application.Features.Statistical.Queries.GetDashboardSummary;
 

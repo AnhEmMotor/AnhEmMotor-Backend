@@ -12,15 +12,13 @@ namespace Application.Features.ChatTools.Queries.GetCustomerProfileForChat;
 public class GetCustomerProfileForChatQueryHandler(
     ILeadReadRepository leadReadRepository,
     IOutputReadRepository outputReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetCustomerProfileForChatQuery, Result<ChatToolEnvelope<ChatCustomerProfileDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetCustomerProfileForChatQuery, Result<ChatToolEnvelope<ChatCustomerProfileDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatCustomerProfileDto>>> Handle(
         GetCustomerProfileForChatQuery request,
         CancellationToken cancellationToken)
     {
-        var lead = await leadReadRepository.GetByIdAsync(request.CustomerId, cancellationToken)
-            .ConfigureAwait(false);
+        var lead = await leadReadRepository.GetByIdAsync(request.CustomerId, cancellationToken).ConfigureAwait(false);
         if (lead == null)
         {
             return Result<ChatToolEnvelope<ChatCustomerProfileDto>>.Failure(Error.NotFound("Không tìm thấy khách hàng"));

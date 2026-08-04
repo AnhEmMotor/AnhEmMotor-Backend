@@ -5,9 +5,7 @@ using MediatR;
 
 namespace Application.Features.Contacts.Queries.GetSupportRequestTracking;
 
-public class GetSupportRequestTrackingQueryHandler(
-    ISupportRequestRepository supportRequestRepository)
-    : IRequestHandler<GetSupportRequestTrackingQuery, Result<SupportRequestTrackingResponse>>
+public class GetSupportRequestTrackingQueryHandler(ISupportRequestRepository supportRequestRepository) : IRequestHandler<GetSupportRequestTrackingQuery, Result<SupportRequestTrackingResponse>>
 {
     public async Task<Result<SupportRequestTrackingResponse>> Handle(
         GetSupportRequestTrackingQuery request,
@@ -20,7 +18,6 @@ public class GetSupportRequestTrackingQueryHandler(
             supportRequest.CustomerTrackingToken is null ||
             supportRequest.CustomerTrackingToken != request.TrackingToken)
             return Result<SupportRequestTrackingResponse>.Failure("Không tìm thấy yêu cầu hỗ trợ.");
-
         return Result<SupportRequestTrackingResponse>.Success(
             new SupportRequestTrackingResponse
             {

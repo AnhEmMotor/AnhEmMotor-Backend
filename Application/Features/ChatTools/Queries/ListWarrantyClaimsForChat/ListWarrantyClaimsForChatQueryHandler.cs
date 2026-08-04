@@ -9,8 +9,7 @@ namespace Application.Features.ChatTools.Queries.ListWarrantyClaimsForChat;
 
 public class ListWarrantyClaimsForChatQueryHandler(
     IWarrantyClaimReadRepository warrantyClaimReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListWarrantyClaimsForChatQuery, Result<ChatToolEnvelope<ChatWarrantyClaimListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListWarrantyClaimsForChatQuery, Result<ChatToolEnvelope<ChatWarrantyClaimListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatWarrantyClaimListItemDto>>> Handle(
         ListWarrantyClaimsForChatQuery request,
@@ -19,14 +18,12 @@ public class ListWarrantyClaimsForChatQueryHandler(
         var claims = (await warrantyClaimReadRepository
             .GetAllWithDetailsAsync(DataFetchMode.ActiveOnly, cancellationToken)
             .ConfigureAwait(false)).AsEnumerable();
-
         var filtersApplied = new Dictionary<string, string>();
         if (int.TryParse(request.StatusId, out var statusId))
         {
             claims = claims.Where(c => c.Status == statusId);
             filtersApplied["StatusId"] = statusId.ToString();
         }
-
         var filtered = claims.OrderByDescending(c => c.CreatedAt).ToList();
         var limit = ChatToolLimit.Clamp(request.Limit);
         var dtos = filtered
@@ -42,7 +39,6 @@ public class ListWarrantyClaimsForChatQueryHandler(
                     CreatedAt = c.CreatedAt
                 })
             .ToList();
-
         var inner = new ChatToolResult<ChatWarrantyClaimListItemDto>(dtos, filtered.Count, filtered.Count > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,

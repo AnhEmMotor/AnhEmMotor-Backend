@@ -20,29 +20,23 @@ public class GetActiveChatRunQueryHandler(
         {
             return Result<ActiveRunDto?>.Failure(Error.Forbidden());
         }
-
         var session = await chatReadRepository.GetSessionByIdAsync(request.SessionId, cancellationToken);
         if (session == null || session.UserId != userId)
         {
             return Result<ActiveRunDto?>.Failure(Error.NotFound("Session not found or forbidden"));
         }
-
         var activeRun = await chatReadRepository.GetActiveRunForUserAsync(userId, cancellationToken);
-        
         if (activeRun == null || activeRun.SessionId != request.SessionId)
         {
             return Result<ActiveRunDto?>.Success(null);
         }
-
         var dto = new ActiveRunDto(
             activeRun.Id,
             activeRun.Status,
             activeRun.LastSeq,
             activeRun.StartedAt,
             activeRun.UserMessage,
-            activeRun.PartialOutput
-        );
-
+            activeRun.PartialOutput);
         return Result<ActiveRunDto?>.Success(dto);
     }
 }

@@ -25,9 +25,10 @@ public class GetEmployeeKPIsQueryHandler(IEmployeeKpiRepository kpiRepository) :
                 Target = k.TargetValue.ToString("N0"),
                 TargetValue = k.TargetValue,
                 ActualValue = k.ActualValue,
-                Score = k.TargetValue <= 0
-                    ? 0
-                    : Math.Round((k.ActualValue / k.TargetValue) * 100, 1, MidpointRounding.AwayFromZero),
+                Score =
+                    k.TargetValue <= 0
+                            ? 0
+                            : Math.Round((k.ActualValue / k.TargetValue) * 100, 1, MidpointRounding.AwayFromZero),
                 PeriodStart = k.PeriodStart,
                 PeriodEnd = k.PeriodEnd,
                 EvaluatedAt = k.PeriodEnd,

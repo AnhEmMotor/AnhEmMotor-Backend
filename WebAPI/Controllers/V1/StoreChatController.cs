@@ -18,8 +18,8 @@ using WebAPI.Hubs;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Chat AI công khai trên Store — khách vãng lai (chưa đăng nhập) chat được, không đụng tới entity/quyền
-/// của Manager Chat nội bộ.
+/// Chat AI công khai trên Store — khách vãng lai (chưa đăng nhập) chat được, không đụng tới entity/quyền của Manager
+/// Chat nội bộ.
 /// </summary>
 [ApiVersion("1.0")]
 [SwaggerTag("Chat AI công khai trên Store")]
@@ -55,15 +55,16 @@ public class StoreChatController(ISender sender, IHubContext<StoreChatHub> hubCo
     }
 
     /// <summary>
-    /// Gắn phiên chat vô danh vào tài khoản khách hàng khi phát hiện đăng nhập giữa chừng. Yêu cầu JWT —
-    /// CustomerUserId lấy từ token, không tin dữ liệu client gửi lên.
+    /// Gắn phiên chat vô danh vào tài khoản khách hàng khi phát hiện đăng nhập giữa chừng. Yêu cầu JWT — CustomerUserId
+    /// lấy từ token, không tin dữ liệu client gửi lên.
     /// </summary>
     [HttpPost("sessions/{id:guid}/link-customer")]
     [Authorize]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> LinkToCustomerAsync(Guid id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new LinkStoreChatSessionToCustomerCommand(id), cancellationToken).ConfigureAwait(false);
+        var result = await sender.Send(new LinkStoreChatSessionToCustomerCommand(id), cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -79,13 +80,21 @@ public class StoreChatController(ISender sender, IHubContext<StoreChatHub> hubCo
         CancellationToken cancellationToken)
     {
         var result = await sender
-            .Send(new RequestHandoffCommand(id, request.ContactName, request.ContactPhone, "Customer"), cancellationToken)
+            .Send(
+                new RequestHandoffCommand(id, request.ContactName, request.ContactPhone, "Customer"),
+                cancellationToken)
             .ConfigureAwait(false);
         if (result.IsSuccess)
         {
-            await hubContext.Clients.Group(id.ToString()).SendAsync(
-                "ModeChanged", new StoreChatModeChangedPayload(StoreChatMode.Waiting, null), cancellationToken);
-            await hubContext.Clients.Group(StoreChatHub.StaffGroupName).SendAsync("SessionUpdated", id, cancellationToken);
+            await hubContext.Clients
+                .Group(id.ToString())
+                .SendAsync(
+                    "ModeChanged",
+                    new StoreChatModeChangedPayload(StoreChatMode.Waiting, null),
+                    cancellationToken);
+            await hubContext.Clients
+                .Group(StoreChatHub.StaffGroupName)
+                .SendAsync("SessionUpdated", id, cancellationToken);
         }
         return HandleResult(result);
     }

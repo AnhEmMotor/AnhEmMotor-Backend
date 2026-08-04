@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Application.DTOs.Chat;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Chat;
@@ -39,23 +37,19 @@ public class InternalChatController(
         {
             return Unauthorized();
         }
-
         var user = await userManager.FindByIdAsync(userIdString);
-        if (user == null) return NotFound("User not found");
-
+        if (user == null)
+            return NotFound("User not found");
         var session = await dbContext.ChatSessions
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == request.SessionId && s.UserId == userId, cancellationToken);
-
         if (session == null)
         {
             return NotFound("Session không tồn tại hoặc không thuộc quyền sở hữu.");
         }
-
         var roles = await userManager.GetRolesAsync(user);
-
-        var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? new List<string>();
-
+        var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ??
+            new List<string>();
         List<string> rolePermissions;
         if (roles.Any(r => superRoles.Contains(r)))
         {
@@ -63,8 +57,7 @@ public class InternalChatController(
                 .Where(p => p.Name != null)
                 .Select(p => p.Name!)
                 .ToListAsync(cancellationToken);
-        }
-        else
+        } else
         {
             rolePermissions = await dbContext.RolePermissions
                 .Include(rp => rp.Permission)
@@ -74,9 +67,7 @@ public class InternalChatController(
                 .Distinct()
                 .ToListAsync(cancellationToken);
         }
-
         var limit = Math.Clamp(request.HistoryLimit, 1, 50);
-
         var history = await dbContext.ChatMessages
             .AsNoTracking()
             .Where(m => m.SessionId == request.SessionId)
@@ -85,41 +76,35 @@ public class InternalChatController(
             .OrderBy(m => m.CreatedAt)
             .Select(m => new { m.Role, m.Message, m.CreatedAt })
             .ToListAsync(cancellationToken);
-
-        return Ok(new
-        {
-            User = new
+        return Ok(
+            new
             {
-                user.Id,
-                user.UserName,
-                user.FullName,
-                user.Email
-            },
-            Roles = roles,
-            Permissions = rolePermissions,
-            SessionId = request.SessionId,
-            History = history,
-            RoutingContext = session.RoutingContext
-        });
+                User = new { user.Id, user.UserName, user.FullName, user.Email },
+                Roles = roles,
+                Permissions = rolePermissions,
+                SessionId = request.SessionId,
+                History = history,
+                RoutingContext = session.RoutingContext
+            });
     }
 
     [HttpPost("sessions/{sessionId}/routing-context")]
-    public async Task<IActionResult> UpdateRoutingContext(Guid sessionId, [FromBody] UpdateRoutingContextRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateRoutingContext(
+        Guid sessionId,
+        [FromBody] UpdateRoutingContextRequest request,
+        CancellationToken cancellationToken)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdString, out Guid userId))
         {
             return Unauthorized();
         }
-
         var session = await dbContext.ChatSessions
             .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == userId, cancellationToken);
-
         if (session == null)
         {
             return NotFound("Session không tồn tại hoặc không thuộc quyền sở hữu.");
         }
-
         session.RoutingContext = request.RoutingContext;
         await dbContext.SaveChangesAsync(cancellationToken);
         return Ok();
@@ -133,25 +118,17 @@ public class InternalChatController(
         {
             return Unauthorized();
         }
-
         var run = await dbContext.ChatRuns
             .AsNoTracking()
             .Include(r => r.Session)
             .FirstOrDefaultAsync(r => r.Id == runId, cancellationToken);
-
         if (run == null || run.Session?.UserId != userId)
         {
             return NotFound("Run không tồn tại hoặc không thuộc quyền sở hữu.");
         }
-
         var items = await chatRunWriter.PullPendingSteeringAsync(runId);
         return Ok(items);
     }
-
-    // ---- Stage 10 — Plan Mode: DB thật cho plan_node/execute_step_node bên sidecar ----
-    // Các endpoint này chỉ thuần mutate DB (giống UpdateRoutingContext ở trên) — sự kiện plan_*
-    // do chính sidecar phát qua get_stream_writer() trong cùng lượt gọi, chảy qua stream JSON-lines
-    // sẵn có tới ChatRunExecutor (nhánh catch-all) rồi ra SignalR, không append trùng ở đây.
 
     private const int MaxPlanSteps = 8;
 
@@ -164,11 +141,14 @@ public class InternalChatController(
     }
 
     [HttpPost("runs/{runId}/plan/start")]
-    public async Task<IActionResult> StartPlan(Guid runId, [FromBody] StartPlanRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> StartPlan(
+        Guid runId,
+        [FromBody] StartPlanRequest request,
+        CancellationToken cancellationToken)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId)) return Unauthorized();
-
+        if (!Guid.TryParse(userIdString, out Guid userId))
+            return Unauthorized();
         var run = await dbContext.ChatRuns
             .Include(r => r.Session)
             .Include(r => r.Plan)
@@ -177,13 +157,10 @@ public class InternalChatController(
         {
             return NotFound("Run không tồn tại hoặc không thuộc quyền sở hữu.");
         }
-
-        // Idempotent — resume/retry gọi lại start thì trả về plan đã có, không tạo trùng.
         if (run.Plan != null)
         {
             return Ok(new { planId = run.Plan.Id });
         }
-
         var plan = new ChatPlan
         {
             RunId = runId,
@@ -194,7 +171,6 @@ public class InternalChatController(
         };
         dbContext.ChatPlans.Add(plan);
         await dbContext.SaveChangesAsync(cancellationToken);
-
         return Ok(new { planId = plan.Id });
     }
 
@@ -202,31 +178,33 @@ public class InternalChatController(
     public async Task<IActionResult> GetPlanForSidecar(Guid runId, CancellationToken cancellationToken)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId)) return Unauthorized();
-
+        if (!Guid.TryParse(userIdString, out Guid userId))
+            return Unauthorized();
         var plan = await GetOwnedPlanAsync(runId, userId, cancellationToken);
-        if (plan == null) return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
-
+        if (plan == null)
+            return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
         var steps = JsonSerializer.Deserialize<List<PlanStepDto>>(plan.Steps) ?? [];
         return Ok(new { planId = plan.Id, version = plan.Version, status = plan.Status, steps });
     }
 
     [HttpPost("runs/{runId}/plan/steps")]
-    public async Task<IActionResult> AddPlanStep(Guid runId, [FromBody] AddPlanStepRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddPlanStep(
+        Guid runId,
+        [FromBody] AddPlanStepRequest request,
+        CancellationToken cancellationToken)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId)) return Unauthorized();
-
+        if (!Guid.TryParse(userIdString, out Guid userId))
+            return Unauthorized();
         var plan = await GetOwnedPlanAsync(runId, userId, cancellationToken);
-        if (plan == null) return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
-
+        if (plan == null)
+            return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
         var steps = JsonSerializer.Deserialize<List<PlanStepDto>>(plan.Steps) ?? [];
         var activeCount = steps.Count(s => s.Status != PlanStepStatus.Skipped);
         if (activeCount >= MaxPlanSteps)
         {
             return BadRequest("Kế hoạch đã đạt tối đa 8 bước.");
         }
-
         var step = PlanStepDto.NewPending(
             Guid.NewGuid().ToString("N"),
             steps.Count == 0 ? 1 : steps.Max(s => s.Order) + 1,
@@ -234,11 +212,9 @@ public class InternalChatController(
             request.Detail,
             request.ExpectedTools ?? []);
         steps.Add(step);
-
         plan.Steps = JsonSerializer.Serialize(steps);
         plan.Version++;
         await dbContext.SaveChangesAsync(cancellationToken);
-
         return Ok(step);
     }
 
@@ -246,11 +222,11 @@ public class InternalChatController(
     public async Task<IActionResult> MarkPlanReady(Guid runId, CancellationToken cancellationToken)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId)) return Unauthorized();
-
+        if (!Guid.TryParse(userIdString, out Guid userId))
+            return Unauthorized();
         var plan = await GetOwnedPlanAsync(runId, userId, cancellationToken);
-        if (plan == null) return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
-
+        if (plan == null)
+            return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
         plan.Status = ChatPlanStatus.Ready;
         await dbContext.SaveChangesAsync(cancellationToken);
         return Ok();
@@ -258,31 +234,39 @@ public class InternalChatController(
 
     [HttpPost("runs/{runId}/plan/steps/{stepId}/status")]
     public async Task<IActionResult> UpdatePlanStepStatus(
-        Guid runId, string stepId, [FromBody] UpdatePlanStepStatusRequest request, CancellationToken cancellationToken)
+        Guid runId,
+        string stepId,
+        [FromBody] UpdatePlanStepStatusRequest request,
+        CancellationToken cancellationToken)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId)) return Unauthorized();
-
+        if (!Guid.TryParse(userIdString, out Guid userId))
+            return Unauthorized();
         var plan = await GetOwnedPlanAsync(runId, userId, cancellationToken);
-        if (plan == null) return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
-
+        if (plan == null)
+            return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
         var steps = JsonSerializer.Deserialize<List<PlanStepDto>>(plan.Steps) ?? [];
         var idx = steps.FindIndex(s => s.Id == stepId);
-        if (idx < 0) return NotFound("Không tìm thấy bước.");
-
+        if (idx < 0)
+            return NotFound("Không tìm thấy bước.");
         steps[idx] = steps[idx] with { Status = request.Status, Result = request.Result ?? steps[idx].Result };
         plan.Steps = JsonSerializer.Serialize(steps);
         await dbContext.SaveChangesAsync(cancellationToken);
-
         return Ok();
     }
 
     [HttpGet("plan-templates/find")]
     public async Task<IActionResult> FindPlanTemplate(
-        [FromQuery] string intentHash, [FromQuery] string module, CancellationToken cancellationToken)
+        [FromQuery] string intentHash,
+        [FromQuery] string module,
+        CancellationToken cancellationToken)
     {
-        var template = await chatReadRepository.GetActiveTemplateByIntentHashAsync(intentHash, module, cancellationToken);
-        if (template == null) return NotFound();
+        var template = await chatReadRepository.GetActiveTemplateByIntentHashAsync(
+            intentHash,
+            module,
+            cancellationToken);
+        if (template == null)
+            return NotFound();
         return Ok(ToPlanTemplateResponse(template));
     }
 
@@ -290,13 +274,15 @@ public class InternalChatController(
     public async Task<IActionResult> GetPlanTemplate(Guid id, CancellationToken cancellationToken)
     {
         var template = await chatReadRepository.GetTemplateByIdAsync(id, cancellationToken);
-        if (template == null) return NotFound();
+        if (template == null)
+            return NotFound();
         return Ok(ToPlanTemplateResponse(template));
     }
 
     [HttpPost("plan-templates")]
     public async Task<IActionResult> CreatePlanTemplate(
-        [FromBody] CreatePlanTemplateRequest request, CancellationToken cancellationToken)
+        [FromBody] CreatePlanTemplateRequest request,
+        CancellationToken cancellationToken)
     {
         var template = new ChatPlanTemplate
         {
@@ -316,15 +302,20 @@ public class InternalChatController(
 
     [HttpPost("plan-templates/{id:guid}/record-use")]
     public async Task<IActionResult> RecordPlanTemplateUse(
-        Guid id, [FromBody] RecordPlanTemplateUseRequest request, CancellationToken cancellationToken)
+        Guid id,
+        [FromBody] RecordPlanTemplateUseRequest request,
+        CancellationToken cancellationToken)
     {
         var template = await chatReadRepository.GetTemplateByIdAsync(id, cancellationToken);
-        if (template == null) return NotFound();
-
+        if (template == null)
+            return NotFound();
         template.UseCount++;
-        if (request.Success) template.SuccessCount++;
-        if (request.UserEdited) template.UserEditCount++;
-        if (request.Rejected) template.RejectCount++;
+        if (request.Success)
+            template.SuccessCount++;
+        if (request.UserEdited)
+            template.UserEditCount++;
+        if (request.Rejected)
+            template.RejectCount++;
         template.LastUsedAt = DateTimeOffset.UtcNow;
         chatUpdateRepository.UpdateTemplate(template);
         await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -351,7 +342,9 @@ public class InternalChatController(
 public class ContextRequest
 {
     public Guid SessionId { get; set; }
+
     public string Message { get; set; } = string.Empty;
+
     public int HistoryLimit { get; set; } = 20;
 }
 
@@ -368,31 +361,43 @@ public class StartPlanRequest
 public class AddPlanStepRequest
 {
     public string Title { get; set; } = string.Empty;
+
     public string Detail { get; set; } = string.Empty;
+
     public List<string>? ExpectedTools { get; set; }
 }
 
 public class UpdatePlanStepStatusRequest
 {
     public string Status { get; set; } = string.Empty;
+
     public string? Result { get; set; }
 }
 
 public class CreatePlanTemplateRequest
 {
     public string CanonicalQuestion { get; set; } = string.Empty;
+
     public string IntentHash { get; set; } = string.Empty;
+
     public string Module { get; set; } = string.Empty;
+
     public string StepsTemplateJson { get; set; } = "[]";
+
     public string SlotsJson { get; set; } = "[]";
+
     public string RequiredToolsJson { get; set; } = "[]";
+
     public string RequiredPermissionsJson { get; set; } = "[]";
+
     public string? ToolRegistryFingerprint { get; set; }
 }
 
 public class RecordPlanTemplateUseRequest
 {
     public bool Success { get; set; }
+
     public bool UserEdited { get; set; }
+
     public bool Rejected { get; set; }
 }

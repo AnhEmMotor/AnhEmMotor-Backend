@@ -10,8 +10,7 @@ namespace Application.Features.ChatTools.Queries.ListSupplierContractsForChat;
 
 public class ListSupplierContractsForChatQueryHandler(
     ISupplierContractReadRepository supplierContractReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListSupplierContractsForChatQuery, Result<ChatToolEnvelope<ChatSupplierContractListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListSupplierContractsForChatQuery, Result<ChatToolEnvelope<ChatSupplierContractListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatSupplierContractListItemDto>>> Handle(
         ListSupplierContractsForChatQuery request,
@@ -26,11 +25,9 @@ public class ListSupplierContractsForChatQueryHandler(
             PageSize = limit,
             Filters = statusId is null ? null : $"Status=={statusId}"
         };
-
         var paged = await supplierContractReadRepository
             .GetPagedAsync<SupplierContractResponse>(sieveModel, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         var items = paged.Items ?? [];
         var dtos = items
             .Select(
@@ -45,7 +42,6 @@ public class ListSupplierContractsForChatQueryHandler(
                     ExpirationDate = c.ExpirationDate
                 })
             .ToList();
-
         var totalCount = (int)(paged.TotalCount ?? dtos.Count);
         var inner = new ChatToolResult<ChatSupplierContractListItemDto>(dtos, totalCount, totalCount > dtos.Count);
         var filtersApplied = new Dictionary<string, string>();
@@ -53,14 +49,12 @@ public class ListSupplierContractsForChatQueryHandler(
         {
             filtersApplied["Trạng thái"] = statusId;
         }
-
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "ISupplierContractReadRepository.GetPagedAsync",
             filtersApplied,
             "hop-dong-nha-cung-cap",
             "VND");
-
         return ChatToolEnvelope<ChatSupplierContractListItemDto>.Wrap(inner, meta);
     }
 }

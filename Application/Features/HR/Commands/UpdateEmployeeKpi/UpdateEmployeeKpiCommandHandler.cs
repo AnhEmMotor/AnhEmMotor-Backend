@@ -11,9 +11,7 @@ public sealed class UpdateEmployeeKpiCommandHandler(
     IEmployeeKpiRepository kpiRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateEmployeeKpiCommand, Result<int>>
 {
-    public async Task<Result<int>> Handle(
-        UpdateEmployeeKpiCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(UpdateEmployeeKpiCommand request, CancellationToken cancellationToken)
     {
         var kpi = await kpiRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (kpi is null)
@@ -47,9 +45,7 @@ public sealed class UpdateEmployeeKpiCommandHandler(
         kpi.ActualValue = request.ActualValue;
         kpi.PeriodStart = request.PeriodStart;
         kpi.PeriodEnd = request.PeriodEnd;
-        kpi.Description = string.IsNullOrWhiteSpace(request.Description)
-            ? null
-            : request.Description.Trim();
+        kpi.Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
         kpiRepository.Update(kpi);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(kpi.Id);

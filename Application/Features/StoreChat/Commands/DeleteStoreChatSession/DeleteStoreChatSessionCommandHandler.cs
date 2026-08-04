@@ -8,8 +8,7 @@ namespace Application.Features.StoreChat.Commands.DeleteStoreChatSession;
 public class DeleteStoreChatSessionCommandHandler(
     IStoreChatReadRepository storeChatReadRepository,
     IStoreChatDeleteRepository storeChatDeleteRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<DeleteStoreChatSessionCommand, Result<bool>>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteStoreChatSessionCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(DeleteStoreChatSessionCommand request, CancellationToken cancellationToken)
     {
@@ -18,10 +17,8 @@ public class DeleteStoreChatSessionCommandHandler(
         {
             return Error.NotFound("Phiên chat không tồn tại.");
         }
-
         await storeChatDeleteRepository.DeleteSessionAsync(session, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return true;
     }
 }

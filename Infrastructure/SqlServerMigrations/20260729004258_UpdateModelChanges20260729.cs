@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -32,7 +32,6 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ChatMessage",
                 columns: table => new
@@ -55,36 +54,17 @@ namespace Infrastructure.SqlServerMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChatMessage_CreatedAt",
-                table: "ChatMessage",
-                column: "CreatedAt");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChatMessage_SessionId",
-                table: "ChatMessage",
-                column: "SessionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChatSession_UpdatedAt",
-                table: "ChatSession",
-                column: "UpdatedAt");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChatSession_UserId",
-                table: "ChatSession",
-                column: "UserId");
+            migrationBuilder.CreateIndex(name: "IX_ChatMessage_CreatedAt", table: "ChatMessage", column: "CreatedAt");
+            migrationBuilder.CreateIndex(name: "IX_ChatMessage_SessionId", table: "ChatMessage", column: "SessionId");
+            migrationBuilder.CreateIndex(name: "IX_ChatSession_UpdatedAt", table: "ChatSession", column: "UpdatedAt");
+            migrationBuilder.CreateIndex(name: "IX_ChatSession_UserId", table: "ChatSession", column: "UserId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "ChatMessage");
-
-            migrationBuilder.DropTable(
-                name: "ChatSession");
+            migrationBuilder.DropTable(name: "ChatMessage");
+            migrationBuilder.DropTable(name: "ChatSession");
         }
     }
 }

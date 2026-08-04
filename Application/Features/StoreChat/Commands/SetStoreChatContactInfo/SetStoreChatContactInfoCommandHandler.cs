@@ -8,8 +8,7 @@ namespace Application.Features.StoreChat.Commands.SetStoreChatContactInfo;
 public class SetStoreChatContactInfoCommandHandler(
     IStoreChatReadRepository storeChatReadRepository,
     IStoreChatUpdateRepository storeChatUpdateRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<SetStoreChatContactInfoCommand, Result<bool>>
+    IUnitOfWork unitOfWork) : IRequestHandler<SetStoreChatContactInfoCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(SetStoreChatContactInfoCommand request, CancellationToken cancellationToken)
     {
@@ -18,12 +17,10 @@ public class SetStoreChatContactInfoCommandHandler(
         {
             return Error.NotFound("Phiên chat không tồn tại.");
         }
-
         session.ContactName = request.ContactName;
         session.ContactPhone = request.ContactPhone;
         storeChatUpdateRepository.UpdateSession(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return true;
     }
 }

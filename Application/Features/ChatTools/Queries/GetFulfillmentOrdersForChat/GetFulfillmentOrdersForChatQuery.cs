@@ -6,7 +6,9 @@ namespace Application.Features.ChatTools.Queries.GetFulfillmentOrdersForChat;
 
 public sealed record GetFulfillmentOrdersForChatQuery : IRequest<Result<ChatToolEnvelope<ChatFulfillmentOrderListItemDto>>>
 {
-    /// <summary>"shipping" | "completed" | "returned" — để trống nếu không lọc theo trạng thái.</summary>
+    /// <summary>
+    /// "shipping" | "completed" | "returned" — để trống nếu không lọc theo trạng thái.
+    /// </summary>
     public string? Status { get; init; }
 
     public string? Carrier { get; init; }

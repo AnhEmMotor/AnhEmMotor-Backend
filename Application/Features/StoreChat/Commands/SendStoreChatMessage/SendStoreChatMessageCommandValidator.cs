@@ -6,7 +6,10 @@ public class SendStoreChatMessageCommandValidator : AbstractValidator<SendStoreC
 {
     public SendStoreChatMessageCommandValidator()
     {
-        RuleFor(x => x.Content).NotEmpty().WithMessage("Nội dung tin nhắn không được để trống.")
-            .MaximumLength(2000).WithMessage("Nội dung tin nhắn tối đa 2000 ký tự.");
+        RuleFor(x => x.Content)
+            .NotEmpty()
+            .WithMessage("Nội dung tin nhắn không được để trống.")
+            .MaximumLength(2000)
+            .WithMessage("Nội dung tin nhắn tối đa 2000 ký tự.");
     }
 }

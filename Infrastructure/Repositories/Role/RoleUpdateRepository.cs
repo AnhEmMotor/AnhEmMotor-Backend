@@ -20,7 +20,10 @@ namespace Infrastructure.Repositories.Role
             context.RolePermissions.RemoveRange(rolePermissions);
         }
 
-        public async Task RenameRoleAsync(ApplicationRole role, string newName, CancellationToken cancellationToken = default)
+        public async Task RenameRoleAsync(
+            ApplicationRole role,
+            string newName,
+            CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             await roleManager.SetRoleNameAsync(role, newName).ConfigureAwait(false);

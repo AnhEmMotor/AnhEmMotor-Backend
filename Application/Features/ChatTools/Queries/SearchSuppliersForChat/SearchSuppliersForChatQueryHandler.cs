@@ -9,20 +9,17 @@ namespace Application.Features.ChatTools.Queries.SearchSuppliersForChat;
 
 public class SearchSuppliersForChatQueryHandler(
     ISupplierReadRepository supplierReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<SearchSuppliersForChatQuery, Result<ChatToolEnvelope<ChatSupplierSearchResultDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<SearchSuppliersForChatQuery, Result<ChatToolEnvelope<ChatSupplierSearchResultDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatSupplierSearchResultDto>>> Handle(
         SearchSuppliersForChatQuery request,
         CancellationToken cancellationToken)
     {
         var keyword = string.IsNullOrWhiteSpace(request.Keyword) ? null : request.Keyword.Trim();
-        var sieveModel = new SieveModel
-        {
-            Filters = keyword is null ? null : $"Name@=*{keyword}*"
-        };
-
-        var suppliers = await supplierReadRepository.GetFilteredListAsync(sieveModel, cancellationToken: cancellationToken)
+        var sieveModel = new SieveModel { Filters = keyword is null ? null : $"Name@=*{keyword}*" };
+        var suppliers = await supplierReadRepository.GetFilteredListAsync(
+            sieveModel,
+            cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         var limit = ChatToolLimit.Clamp(request.Limit);
         var dtos = suppliers
@@ -43,7 +40,6 @@ public class SearchSuppliersForChatQueryHandler(
         {
             filtersApplied["Từ khóa"] = keyword;
         }
-
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "ISupplierReadRepository.GetFilteredListAsync",

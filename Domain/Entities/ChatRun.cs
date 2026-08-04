@@ -1,6 +1,6 @@
+using Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Constants;
 
 namespace Domain.Entities;
 
@@ -14,6 +14,7 @@ public class ChatRun : BaseEntity
     [Column("SessionId")]
     [ForeignKey("Session")]
     public Guid SessionId { get; set; }
+
     public ChatSession? Session { get; set; }
 
     [Required]
@@ -30,6 +31,7 @@ public class ChatRun : BaseEntity
     public long LastSeq { get; set; }
 
     public DateTime? StartedAt { get; set; }
+
     public DateTime? CompletedAt { get; set; }
 
     [Column("ErrorCode", TypeName = "nvarchar(100)")]
@@ -40,15 +42,21 @@ public class ChatRun : BaseEntity
 
     public DateTime? HeartbeatAt { get; set; }
 
-    /// <summary>Tin nhắn steering đang chờ được nạp vào agent, dạng JSON array.</summary>
+    /// <summary>
+    /// Tin nhắn steering đang chờ được nạp vào agent, dạng JSON array.
+    /// </summary>
     [Column("PendingSteering", TypeName = "nvarchar(max)")]
     public string PendingSteering { get; set; } = "[]";
 
-    /// <summary>Dấu vân tay registry tool lúc run bắt đầu — dùng để revalidate khi resume (Stage 17.2/17.8).</summary>
+    /// <summary>
+    /// Dấu vân tay registry tool lúc run bắt đầu — dùng để revalidate khi resume (Stage 17.2/17.8).
+    /// </summary>
     [Column("ToolRegistryFingerprint", TypeName = "nvarchar(20)")]
     public string? ToolRegistryFingerprint { get; set; }
 
-    /// <summary>Tên model thật lấy từ response metadata của LLM, không phải từ config (Stage 17.10).</summary>
+    /// <summary>
+    /// Tên model thật lấy từ response metadata của LLM, không phải từ config (Stage 17.10).
+    /// </summary>
     [Column("ModelUsed", TypeName = "nvarchar(100)")]
     public string? ModelUsed { get; set; }
 

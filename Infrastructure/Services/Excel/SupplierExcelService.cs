@@ -180,7 +180,8 @@ public class SupplierExcelService : ISupplierExcelService
         return rows;
     }
 
-    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(IReadOnlyList<SupplierImportFailedRow> failedRows)
+    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(
+        IReadOnlyList<SupplierImportFailedRow> failedRows)
     {
         using var wb1 = new XLWorkbook();
         var ws1 = wb1.Worksheets.Add("Lỗi nhập");
@@ -203,16 +204,7 @@ public class SupplierExcelService : ISupplierExcelService
         subtitleRange1.Style.Font.FontSize = 10;
         subtitleRange1.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
         subtitleRange1.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
-        string[] headers1 =
-        {
-            "Loại đối tác",
-            "Tên đối tác",
-            "Điện thoại",
-            "Email",
-            "Mã số thuế",
-            "Địa chỉ",
-            "Ghi chú"
-        };
+        string[] headers1 = { "Loại đối tác", "Tên đối tác", "Điện thoại", "Email", "Mã số thuế", "Địa chỉ", "Ghi chú" };
         for (int i = 0; i < headers1.Length; i++)
         {
             var cell = ws1.Cell(4, i + 1);
@@ -257,7 +249,6 @@ public class SupplierExcelService : ISupplierExcelService
         }
         using var stream1 = new MemoryStream();
         wb1.SaveAs(stream1);
-
         using var wb2 = new XLWorkbook();
         var ws2 = wb2.Worksheets.Add("Lỗi nhập");
         ws2.Row(1).Height = 40;
@@ -336,7 +327,6 @@ public class SupplierExcelService : ISupplierExcelService
         }
         using var stream2 = new MemoryStream();
         wb2.SaveAs(stream2);
-
         return (stream1.ToArray(), stream2.ToArray());
     }
 }

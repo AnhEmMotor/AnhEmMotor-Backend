@@ -1,10 +1,10 @@
-using System.Net;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
+using System.Net;
 using WebAPI.Attributes;
 
 namespace ControllerTests;
@@ -13,10 +13,7 @@ public class LocalhostOnlyAttributeTests
 {
     private static ActionExecutingContext BuildContext(IPAddress? remoteIp)
     {
-        var httpContext = new DefaultHttpContext
-        {
-            Connection = { RemoteIpAddress = remoteIp }
-        };
+        var httpContext = new DefaultHttpContext { Connection = { RemoteIpAddress = remoteIp } };
         var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
         return new ActionExecutingContext(
             actionContext,
@@ -31,9 +28,7 @@ public class LocalhostOnlyAttributeTests
     public void OnActionExecuting_ChanIpNgoai(string ip)
     {
         var context = BuildContext(IPAddress.Parse(ip));
-
         new LocalhostOnlyAttribute().OnActionExecuting(context);
-
         context.Result.Should().BeOfType<UnauthorizedObjectResult>();
     }
 
@@ -43,9 +38,7 @@ public class LocalhostOnlyAttributeTests
     public void OnActionExecuting_ChoPhepLoopback(string ip)
     {
         var context = BuildContext(IPAddress.Parse(ip));
-
         new LocalhostOnlyAttribute().OnActionExecuting(context);
-
         context.Result.Should().BeNull();
     }
 }

@@ -1,3 +1,5 @@
+using Domain.Enums;
+
 namespace Application.ApiContracts.Contacts.Responses;
 
 public record SupportRequestTrackingResponse
@@ -22,6 +24,5 @@ public record SupportRequestTrackingResponse
 
     public string? CustomerRatingComment { get; init; }
 
-    public bool CanCustomerRate =>
-        Status == Domain.Enums.SupportRequestStatus.Closed && AssignedUserName is not null;
+    public bool CanCustomerRate => Status == SupportRequestStatus.Closed && AssignedUserName is not null;
 }

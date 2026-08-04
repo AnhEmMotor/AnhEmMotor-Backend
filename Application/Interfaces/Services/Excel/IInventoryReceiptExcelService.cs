@@ -28,12 +28,18 @@ public record InventoryReceiptImportFailedRow(
 
 public interface IInventoryReceiptExcelService
 {
-    public byte[] ExportInventoryReceipts(IReadOnlyList<InventoryReceiptListResponse> receipts, IReadOnlyList<InventoryReceiptInfo> items);
+    public byte[] ExportInventoryReceipts(
+        IReadOnlyList<InventoryReceiptListResponse> receipts,
+        IReadOnlyList<InventoryReceiptInfo> items);
 
     public byte[] BuildImportTemplate(IReadOnlyList<PurchaseRequestItem> items);
 
-    /// <summary>Returns null when the uploaded file has no worksheet at all; returns an empty list when the worksheet has no data rows.</summary>
+    /// <summary>
+    /// Returns null when the uploaded file has no worksheet at all; returns an empty list when the worksheet has no
+    /// data rows.
+    /// </summary>
     public IReadOnlyList<InventoryReceiptImportRow>? ParseImportRows(byte[] fileBytes);
 
-    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(IReadOnlyList<InventoryReceiptImportFailedRow> failedRows);
+    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(
+        IReadOnlyList<InventoryReceiptImportFailedRow> failedRows);
 }

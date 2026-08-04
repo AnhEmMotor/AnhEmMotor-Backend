@@ -23,15 +23,14 @@ public class ProductViewRepository(ApplicationDBContext context) : IProductViewR
         {
             return Task.FromResult(new List<ProductViewSample>());
         }
-
         var query = context.ProductViews
             .Where(v => v.CreatedAt >= since)
             .Where(v => customerUserId != null ? v.CustomerUserId == customerUserId : v.VisitorKey == visitorKey);
-
         return query
             .OrderByDescending(v => v.CreatedAt)
             .Take(take)
-            .Select(v => new ProductViewSample(v.Product!.CategoryId, v.DwellTimeMs, v.CreatedAt ?? DateTimeOffset.UtcNow))
+            .Select(
+                v => new ProductViewSample(v.Product!.CategoryId, v.DwellTimeMs, v.CreatedAt ?? DateTimeOffset.UtcNow))
             .ToListAsync(cancellationToken);
     }
 }

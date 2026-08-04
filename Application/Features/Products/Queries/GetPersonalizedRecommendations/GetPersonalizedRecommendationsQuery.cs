@@ -5,5 +5,4 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetPersonalizedRecommendations;
 
-public sealed record GetPersonalizedRecommendationsQuery(int PageSize, string? VisitorKey)
-    : IRequest<Result<PagedResult<ProductListStoreResponse>>>;
+public sealed record GetPersonalizedRecommendationsQuery(int PageSize, string? VisitorKey) : IRequest<Result<PagedResult<ProductListStoreResponse>>>;

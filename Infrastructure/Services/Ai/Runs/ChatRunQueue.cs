@@ -1,5 +1,5 @@
-using System.Threading.Channels;
 using Application.Interfaces.Services;
+using System.Threading.Channels;
 
 namespace Infrastructure.Services.Ai.Runs;
 
@@ -9,11 +9,7 @@ public class ChatRunQueue : IChatRunQueue
 
     public ChatRunQueue()
     {
-        var options = new UnboundedChannelOptions
-        {
-            SingleReader = true, // ChatRunExecutor will read
-            SingleWriter = false // Multiple commands can write
-        };
+        var options = new UnboundedChannelOptions { SingleReader = true, SingleWriter = false };
         _queue = Channel.CreateUnbounded<Guid>(options);
     }
 

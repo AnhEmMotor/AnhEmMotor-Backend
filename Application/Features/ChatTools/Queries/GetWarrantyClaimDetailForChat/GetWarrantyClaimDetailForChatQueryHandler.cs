@@ -9,8 +9,7 @@ namespace Application.Features.ChatTools.Queries.GetWarrantyClaimDetailForChat;
 
 public class GetWarrantyClaimDetailForChatQueryHandler(
     IWarrantyClaimReadRepository warrantyClaimReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetWarrantyClaimDetailForChatQuery, Result<ChatToolEnvelope<ChatWarrantyClaimDetailDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetWarrantyClaimDetailForChatQuery, Result<ChatToolEnvelope<ChatWarrantyClaimDetailDto>>>
 {
     private const int MaxMatches = 5;
 
@@ -22,14 +21,12 @@ public class GetWarrantyClaimDetailForChatQueryHandler(
         var claims = await warrantyClaimReadRepository
             .GetAllWithDetailsAsync(DataFetchMode.ActiveOnly, cancellationToken)
             .ConfigureAwait(false);
-
         var matches = claims
             .Where(
-                c => (c.Vehicle?.Lead?.FullName?.Contains(keyword, StringComparison.OrdinalIgnoreCase) ?? false)
-                    || (c.Vehicle?.LicensePlate?.Contains(keyword, StringComparison.OrdinalIgnoreCase) ?? false))
+                c => (c.Vehicle?.Lead?.FullName?.Contains(keyword, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (c.Vehicle?.LicensePlate?.Contains(keyword, StringComparison.OrdinalIgnoreCase) ?? false))
             .OrderByDescending(c => c.CreatedAt)
             .ToList();
-
         var dtos = matches
             .Take(MaxMatches)
             .Select(
@@ -47,7 +44,6 @@ public class GetWarrantyClaimDetailForChatQueryHandler(
                             parts.Add(vehicle.EngineNumber);
                         vehicleInfo = parts.Count > 0 ? string.Join(" | ", parts) : null;
                     }
-
                     return new ChatWarrantyClaimDetailDto
                     {
                         ClaimId = claim.Id,
@@ -67,23 +63,23 @@ public class GetWarrantyClaimDetailForChatQueryHandler(
                         IsRecall = claim.IsRecall,
                         TotalPartsCost = claim.TotalPartsCost,
                         TotalLaborCost = claim.TotalLaborCost,
-                        Parts = claim.WarrantyClaimParts
-                            .Where(p => p.DeletedAt == null)
-                            .Select(
-                                p => new ChatWarrantyClaimPartDto
-                                {
-                                    PartName = p.PartName,
-                                    PartCode = p.PartCode,
-                                    UnitPrice = p.UnitPrice,
-                                    Status = p.Status
-                                })
-                            .ToList(),
+                        Parts =
+                            claim.WarrantyClaimParts
+                                    .Where(p => p.DeletedAt == null)
+                                    .Select(
+                                        p => new ChatWarrantyClaimPartDto
+                                    {
+                                        PartName = p.PartName,
+                                        PartCode = p.PartCode,
+                                        UnitPrice = p.UnitPrice,
+                                        Status = p.Status
+                                    })
+                                    .ToList(),
                         CreatedAt = claim.CreatedAt,
                         UpdatedAt = claim.UpdatedAt
                     };
                 })
             .ToList();
-
         var inner = new ChatToolResult<ChatWarrantyClaimDetailDto>(dtos, matches.Count, matches.Count > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,

@@ -10,8 +10,7 @@ namespace Application.Features.Products.Commands.TrackProductView;
 public class TrackProductViewCommandHandler(
     IProductViewRepository productViewRepository,
     ICurrentUserContext currentUserContext,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<TrackProductViewCommand, Result>
+    IUnitOfWork unitOfWork) : IRequestHandler<TrackProductViewCommand, Result>
 {
     public async Task<Result> Handle(TrackProductViewCommand request, CancellationToken cancellationToken)
     {
@@ -19,7 +18,6 @@ public class TrackProductViewCommandHandler(
         {
             return Result.Failure(Error.Validation("ProductId không hợp lệ."));
         }
-
         productViewRepository.Add(
             new ProductViewEntity
             {
@@ -29,7 +27,6 @@ public class TrackProductViewCommandHandler(
                 DwellTimeMs = Math.Max(0, request.DwellTimeMs)
             });
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return Result.Success();
     }
 }

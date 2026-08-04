@@ -2,7 +2,9 @@ using Application.Common.Interfaces;
 
 namespace IntegrationTests.SetupClass;
 
-/// <summary>"Bây giờ" cố định cho test biên giờ VN (Stage 16.6) — không dùng đồng hồ hệ thống.</summary>
+/// <summary>
+/// "Bây giờ" cố định cho test biên giờ VN (Stage 16.6) — không dùng đồng hồ hệ thống.
+/// </summary>
 public class FakeServerDateProvider(DateTimeOffset fixedUtcNow) : IServerDateProvider
 {
     private static readonly TimeSpan VietnamOffset = TimeSpan.FromHours(7);

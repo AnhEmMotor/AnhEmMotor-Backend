@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetSalesSummaryForChat;
 
 public class GetSalesSummaryForChatQueryHandler(
     IStatisticalReadRepository statisticalReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetSalesSummaryForChatQuery, Result<ChatToolEnvelope<ChatDailyRevenueDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetSalesSummaryForChatQuery, Result<ChatToolEnvelope<ChatDailyRevenueDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatDailyRevenueDto>>> Handle(
         GetSalesSummaryForChatQuery request,

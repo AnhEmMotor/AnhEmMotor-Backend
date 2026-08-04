@@ -9,8 +9,7 @@ namespace Application.Features.ChatTools.Queries.ListWorkshopPaymentsForChat;
 
 public class ListWorkshopPaymentsForChatQueryHandler(
     IWorkshopPaymentReadRepository workshopPaymentReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListWorkshopPaymentsForChatQuery, Result<ChatToolEnvelope<ChatWorkshopPaymentListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListWorkshopPaymentsForChatQuery, Result<ChatToolEnvelope<ChatWorkshopPaymentListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatWorkshopPaymentListItemDto>>> Handle(
         ListWorkshopPaymentsForChatQuery request,
@@ -19,7 +18,6 @@ public class ListWorkshopPaymentsForChatQueryHandler(
         var payments = (await workshopPaymentReadRepository
             .GetAllAsync(cancellationToken, DataFetchMode.ActiveOnly)
             .ConfigureAwait(false)).AsEnumerable();
-
         var ordered = payments.OrderByDescending(p => p.CreatedAt).ToList();
         var limit = ChatToolLimit.Clamp(request.Limit);
         var dtos = ordered
@@ -41,7 +39,6 @@ public class ListWorkshopPaymentsForChatQueryHandler(
                     CreatedAt = p.CreatedAt
                 })
             .ToList();
-
         var inner = new ChatToolResult<ChatWorkshopPaymentListItemDto>(dtos, ordered.Count, ordered.Count > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,

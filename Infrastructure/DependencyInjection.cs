@@ -20,11 +20,12 @@ using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Repositories.Statistical;
 using Infrastructure.Services;
 using Infrastructure.Services.Ai;
-using Infrastructure.Services.Excel;
-using Infrastructure.Services.Ai.Runs;
 using Infrastructure.Services.Ai.Clients;
+using Infrastructure.Services.Ai.Runs;
+using Infrastructure.Services.Excel;
 using Infrastructure.Services.Logistics;
 using Infrastructure.Services.Product;
+using Infrastructure.Services.StoreChat;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -158,8 +159,8 @@ public static class DependencyInjection
         services.AddHostedService<ChatRunExecutor>();
         services.AddHostedService<OrphanedRunCleaner>();
         services.AddHostedService<ChatRunEventCleanupJob>();
-        services.AddHostedService<Infrastructure.Services.Product.ProductViewCleanupJob>();
-        services.AddHostedService<Infrastructure.Services.StoreChat.StaleWaitingSessionMonitor>();
+        services.AddHostedService<ProductViewCleanupJob>();
+        services.AddHostedService<StaleWaitingSessionMonitor>();
         services.Scan(
             scan => scan
                 .FromAssemblies(Assembly.GetExecutingAssembly())

@@ -12,23 +12,21 @@ public class UnitOfWork(ApplicationDBContext context, IPublisher publisher) : IU
 {
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var changedProductIds = context.ChangeTracker.Entries<ProductEntity>()
+        var changedProductIds = context.ChangeTracker
+            .Entries<ProductEntity>()
             .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
             .Select(e => e.Entity.Id)
-            .Union(context.ChangeTracker.Entries<ProductVariantEntity>()
-                .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
-                .Select(e => e.Entity.ProductId))
+            .Union(
+                context.ChangeTracker
+                    .Entries<ProductVariantEntity>()
+                    .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+                    .Select(e => e.Entity.ProductId))
             .Distinct()
             .ToList();
-
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-        // Stage 12.4 — sau khi lưu thành công, báo cho ProductIndexWorker nạp lại Qdrant.
-        // Đặt ở đây (không phải từng command handler) để không command mới nào quên báo.
         foreach (var productId in changedProductIds)
         {
-            await publisher.Publish(new ProductChangedNotification(productId), cancellationToken)
-                .ConfigureAwait(false);
+            await publisher.Publish(new ProductChangedNotification(productId), cancellationToken).ConfigureAwait(false);
         }
     }
 }

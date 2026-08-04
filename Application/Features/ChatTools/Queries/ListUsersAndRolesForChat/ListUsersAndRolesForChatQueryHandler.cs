@@ -9,8 +9,7 @@ namespace Application.Features.ChatTools.Queries.ListUsersAndRolesForChat;
 
 public class ListUsersAndRolesForChatQueryHandler(
     IUserReadRepository userReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListUsersAndRolesForChatQuery, Result<ChatToolEnvelope<ChatUserRoleListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListUsersAndRolesForChatQuery, Result<ChatToolEnvelope<ChatUserRoleListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatUserRoleListItemDto>>> Handle(
         ListUsersAndRolesForChatQuery request,
@@ -19,7 +18,6 @@ public class ListUsersAndRolesForChatQueryHandler(
         var limit = ChatToolLimit.Clamp(request.Limit);
         var sieveModel = new SieveModel { Page = 1, PageSize = limit };
         var paged = await userReadRepository.GetPagedListAsync(sieveModel, cancellationToken).ConfigureAwait(false);
-
         var dtos = (paged.Items ?? [])
             .Select(
                 u => new ChatUserRoleListItemDto
@@ -29,7 +27,6 @@ public class ListUsersAndRolesForChatQueryHandler(
                     Roles = (u.Roles ?? []).ToList()
                 })
             .ToList();
-
         var totalCount = (int)(paged.TotalCount ?? dtos.Count);
         var inner = new ChatToolResult<ChatUserRoleListItemDto>(dtos, totalCount, totalCount > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
@@ -38,7 +35,6 @@ public class ListUsersAndRolesForChatQueryHandler(
             new Dictionary<string, string>(),
             "nguoi-dung-va-vai-tro",
             null);
-
         return ChatToolEnvelope<ChatUserRoleListItemDto>.Wrap(inner, meta);
     }
 }

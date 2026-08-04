@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.ListContactsForChat;
 
 public class ListContactsForChatQueryHandler(
     IContactReadRepository contactReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListContactsForChatQuery, Result<ChatToolEnvelope<ChatContactListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListContactsForChatQuery, Result<ChatToolEnvelope<ChatContactListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatContactListItemDto>>> Handle(
         ListContactsForChatQuery request,

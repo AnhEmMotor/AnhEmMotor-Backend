@@ -12,6 +12,7 @@ using Infrastructure.Repositories;
 using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Services;
 using Infrastructure.Services.Ai;
+using Infrastructure.Services.Product;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -49,12 +50,13 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
     private static async Task EnsureTemplateDatabaseAsync(string baseConnectionString)
     {
-        if (_templateReady) return;
+        if (_templateReady)
+            return;
         await _templateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            if (_templateReady) return;
-
+            if (_templateReady)
+                return;
             var builder = new NpgsqlConnectionStringBuilder(baseConnectionString) { Database = "postgres" };
             using (var masterConn = new NpgsqlConnection(builder.ConnectionString))
             {
@@ -66,18 +68,15 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 create.CommandText = $"CREATE DATABASE \"{TemplateDbName}\";";
                 await create.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
-
             builder.Database = TemplateDbName;
             var options = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseNpgsql(builder.ConnectionString)
                 .Options;
             using (var context = new ApplicationDBContext(options))
                 await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
-
             NpgsqlConnection.ClearAllPools();
             _templateReady = true;
-        }
-        finally
+        } finally
         {
             _templateLock.Release();
         }
@@ -251,7 +250,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IFileDeleteService, FileDeleteService>();
                 services.AddScoped<ISievePaginator, SievePaginator>();
                 services.AddScoped<IUnitOfWork, UnitOfWork>();
-                services.AddSingleton<IProductIndexQueue, Infrastructure.Services.Product.ProductIndexQueue>();
+                services.AddSingleton<IProductIndexQueue, ProductIndexQueue>();
                 services.AddSingleton<INotificationService, NotificationService>();
                 services.AddScoped<IEmailService, EmailService>();
                 services.AddScoped<IExternalAuthService, ExternalAuthService>();

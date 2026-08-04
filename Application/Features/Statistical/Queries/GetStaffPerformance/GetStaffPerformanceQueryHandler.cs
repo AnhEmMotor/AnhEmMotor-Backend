@@ -11,10 +11,7 @@ public class GetStaffPerformanceQueryHandler(IStatisticalAnalyticsRepository ana
         GetStaffPerformanceQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await analyticsRepository.GetStaffPerformanceAsync(
-            request.Start,
-            request.End,
-            cancellationToken);
+        var result = await analyticsRepository.GetStaffPerformanceAsync(request.Start, request.End, cancellationToken);
         return result;
     }
 }

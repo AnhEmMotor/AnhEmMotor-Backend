@@ -11,8 +11,7 @@ namespace Application.Features.ChatTools.Queries.ListPurchaseInvoicesForChat;
 
 public class ListPurchaseInvoicesForChatQueryHandler(
     IPurchaseInvoiceReadRepository purchaseInvoiceRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListPurchaseInvoicesForChatQuery, Result<ChatToolEnvelope<ChatPurchaseInvoiceListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListPurchaseInvoicesForChatQuery, Result<ChatToolEnvelope<ChatPurchaseInvoiceListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatPurchaseInvoiceListItemDto>>> Handle(
         ListPurchaseInvoicesForChatQuery request,
@@ -23,7 +22,6 @@ public class ListPurchaseInvoicesForChatQueryHandler(
         var paged = await purchaseInvoiceRepository
             .GetPagedAsync<PurchaseInvoiceListResponse>(sieveModel, DataFetchMode.ActiveOnly, cancellationToken)
             .ConfigureAwait(false);
-
         var dtos = (paged.Items ?? [])
             .Select(
                 invoice => new ChatPurchaseInvoiceListItemDto

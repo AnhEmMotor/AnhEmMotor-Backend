@@ -2190,24 +2190,44 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("Id");
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    b.Property<DateTimeOffset?>("AssignedAt").HasColumnType("timestamp with time zone").HasColumnName("AssignedAt");
+                    b.Property<DateTimeOffset?>("AssignedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("AssignedAt");
                     b.Property<Guid?>("AssignedUserId").HasColumnType("uuid").HasColumnName("AssignedUserId");
                     b.Property<string>("Category").IsRequired().HasColumnType("text").HasColumnName("Category");
-                    b.Property<DateTimeOffset?>("ClosedAt").HasColumnType("timestamp with time zone").HasColumnName("ClosedAt");
+                    b.Property<DateTimeOffset?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ClosedAt");
                     b.Property<int>("ContactId").HasColumnType("integer").HasColumnName("ContactId");
                     b.Property<string>("Content").IsRequired().HasColumnType("text").HasColumnName("Content");
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
-                    b.Property<DateTimeOffset?>("CustomerRatedAt").HasColumnType("timestamp with time zone").HasColumnName("CustomerRatedAt");
-                    b.Property<string>("CustomerRatingComment").HasColumnType("text").HasColumnName("CustomerRatingComment");
-                    b.Property<int?>("CustomerRatingOfEmployee").HasColumnType("integer").HasColumnName("CustomerRatingOfEmployee");
-                    b.Property<Guid?>("CustomerTrackingToken").HasColumnType("uuid").HasColumnName("CustomerTrackingToken");
+                    b.Property<DateTimeOffset?>("CustomerRatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CustomerRatedAt");
+                    b.Property<string>("CustomerRatingComment")
+                        .HasColumnType("text")
+                        .HasColumnName("CustomerRatingComment");
+                    b.Property<int?>("CustomerRatingOfEmployee")
+                        .HasColumnType("integer")
+                        .HasColumnName("CustomerRatingOfEmployee");
+                    b.Property<Guid?>("CustomerTrackingToken")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CustomerTrackingToken");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
                     b.Property<string>("Email").IsRequired().HasColumnType("text").HasColumnName("Email");
-                    b.Property<DateTimeOffset?>("EmployeeRatedAt").HasColumnType("timestamp with time zone").HasColumnName("EmployeeRatedAt");
-                    b.Property<string>("EmployeeRatingComment").HasColumnType("text").HasColumnName("EmployeeRatingComment");
-                    b.Property<int?>("EmployeeRatingOfCustomer").HasColumnType("integer").HasColumnName("EmployeeRatingOfCustomer");
+                    b.Property<DateTimeOffset?>("EmployeeRatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("EmployeeRatedAt");
+                    b.Property<string>("EmployeeRatingComment")
+                        .HasColumnType("text")
+                        .HasColumnName("EmployeeRatingComment");
+                    b.Property<int?>("EmployeeRatingOfCustomer")
+                        .HasColumnType("integer")
+                        .HasColumnName("EmployeeRatingOfCustomer");
                     b.Property<string>("OrderCode").HasColumnType("text").HasColumnName("OrderCode");
-                    b.Property<DateTimeOffset?>("StartedAt").HasColumnType("timestamp with time zone").HasColumnName("StartedAt");
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("StartedAt");
                     b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("Status");
                     b.Property<string>("Subject").IsRequired().HasColumnType("text").HasColumnName("Subject");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");

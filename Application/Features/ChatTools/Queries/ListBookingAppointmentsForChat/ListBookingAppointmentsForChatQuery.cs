@@ -4,8 +4,7 @@ using MediatR;
 
 namespace Application.Features.ChatTools.Queries.ListBookingAppointmentsForChat;
 
-public sealed record ListBookingAppointmentsForChatQuery
-    : IRequest<Result<ChatToolEnvelope<ChatBookingAppointmentListItemDto>>>
+public sealed record ListBookingAppointmentsForChatQuery : IRequest<Result<ChatToolEnvelope<ChatBookingAppointmentListItemDto>>>
 {
     public DateOnly? FromDate { get; init; }
 

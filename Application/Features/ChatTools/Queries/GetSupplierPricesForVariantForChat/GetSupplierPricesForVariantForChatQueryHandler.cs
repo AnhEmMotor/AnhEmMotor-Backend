@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetSupplierPricesForVariantForC
 
 public class GetSupplierPricesForVariantForChatQueryHandler(
     IProductQuotationReadRepository quotationReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetSupplierPricesForVariantForChatQuery, Result<ChatToolEnvelope<ChatSupplierPriceListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetSupplierPricesForVariantForChatQuery, Result<ChatToolEnvelope<ChatSupplierPriceListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatSupplierPriceListItemDto>>> Handle(
         GetSupplierPricesForVariantForChatQuery request,

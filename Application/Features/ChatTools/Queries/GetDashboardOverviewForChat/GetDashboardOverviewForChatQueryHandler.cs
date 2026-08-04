@@ -9,8 +9,7 @@ namespace Application.Features.ChatTools.Queries.GetDashboardOverviewForChat;
 
 public class GetDashboardOverviewForChatQueryHandler(
     IStatisticalReadRepository statisticalReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetDashboardOverviewForChatQuery, Result<ChatToolEnvelope<ChatDashboardOverviewDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetDashboardOverviewForChatQuery, Result<ChatToolEnvelope<ChatDashboardOverviewDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatDashboardOverviewDto>>> Handle(
         GetDashboardOverviewForChatQuery request,
@@ -18,7 +17,8 @@ public class GetDashboardOverviewForChatQueryHandler(
     {
         var (start, end) = ChatToolDateRange.Resolve(request.FromDate, request.ToDate, dateProvider);
         var stats = await statisticalReadRepository.GetDashboardStatsAsync(start, end, cancellationToken)
-            .ConfigureAwait(false) ?? new DashboardStatsResponse();
+                .ConfigureAwait(false) ??
+            new DashboardStatsResponse();
         var dto = new ChatDashboardOverviewDto
         {
             TodayRevenue = stats.TodayRevenue,
@@ -36,10 +36,7 @@ public class GetDashboardOverviewForChatQueryHandler(
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "IStatisticalReadRepository.GetDashboardStatsAsync",
-            new Dictionary<string, string>
-            {
-                ["Khoảng thời gian"] = ChatToolDateRange.FormatVietnamRange(start, end)
-            },
+            new Dictionary<string, string> { ["Khoảng thời gian"] = ChatToolDateRange.FormatVietnamRange(start, end) },
             "tong-quan-dashboard",
             null);
         return ChatToolEnvelope<ChatDashboardOverviewDto>.WrapSingle(dto, meta);

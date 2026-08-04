@@ -11,10 +11,7 @@ public class GetWarrantyTermByIdQueryHandler(IWarrantyTermReadRepository readRep
         GetWarrantyTermByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var term = await readRepository.GetByIdAsync(
-            request.Id,
-            cancellationToken,
-            includeBrand: true)
+        var term = await readRepository.GetByIdAsync(request.Id, cancellationToken, includeBrand: true)
             .ConfigureAwait(false);
         if (term == null)
         {

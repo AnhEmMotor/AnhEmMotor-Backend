@@ -19,28 +19,19 @@ public class ManagerChatControllerTests
     [Fact]
     public async Task GetSessions_ReturnsOk_WithSessions()
     {
-        // Arrange
         var mockSender = new Mock<ISender>();
         var userId = Guid.NewGuid();
-        
-        var sessions = new List<ManagerChatSessionDto> { new ManagerChatSessionDto { Id = Guid.NewGuid(), Title = "Test" } };
+        var sessions = new List<ManagerChatSessionDto>
+        {
+            new ManagerChatSessionDto { Id = Guid.NewGuid(), Title = "Test" }
+        };
         mockSender.Setup(x => x.Send(It.IsAny<GetManagerChatSessionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<List<ManagerChatSessionDto>>.Success(sessions));
-
         var controller = new ManagerChatController(mockSender.Object);
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ], "mock"));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        // Act
+        var user = new ClaimsPrincipal(
+            new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, userId.ToString())], "mock"));
+        controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = user } };
         var result = await controller.GetSessions(CancellationToken.None);
-
-        // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnedSessions = Assert.IsType<List<ManagerChatSessionDto>>(okResult.Value);
         Assert.Single(returnedSessions);
@@ -53,11 +44,8 @@ public class ManagerChatControllerTests
         var labels = new List<ChatToolLabelDto> { new("search_products", "Tìm sản phẩm") };
         mockSender.Setup(x => x.Send(It.IsAny<GetChatToolCatalogQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<List<ChatToolLabelDto>>.Success(labels));
-
         var controller = new ManagerChatController(mockSender.Object);
-
         var result = await controller.GetToolCatalog(CancellationToken.None);
-
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returned = Assert.IsType<List<ChatToolLabelDto>>(okResult.Value);
         Assert.Single(returned);
@@ -70,20 +58,15 @@ public class ManagerChatControllerTests
         var actions = typeof(ManagerChatController)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
             .ToList();
-
         actions.Should().NotBeEmpty("controller phải còn các action khác");
-
-        // Dò theo ROUTE chứ không theo tên method: thêm lại endpoint dưới tên `PostMessage`
-        // vẫn phải bị bắt.
         var templates = actions
             .SelectMany(m => m.GetCustomAttributes<HttpMethodAttribute>(inherit: true))
             .Select(a => a.Template ?? string.Empty)
             .ToList();
-
-        templates.Should().NotContain(
-            t => t.EndsWith("/message", StringComparison.OrdinalIgnoreCase),
-            "Stage 1.1 Hướng A đã bỏ đường REST gửi tin nhắn, chỉ dùng SignalR");
-
+        templates.Should()
+            .NotContain(
+                t => t.EndsWith("/message", StringComparison.OrdinalIgnoreCase),
+                "Stage 1.1 Hướng A đã bỏ đường REST gửi tin nhắn, chỉ dùng SignalR");
         actions.Select(m => m.Name).Should().NotContain("SendMessage");
     }
 
@@ -92,6 +75,7 @@ public class ManagerChatControllerTests
     {
         typeof(ManagerChatController)
             .GetCustomAttributes<AuthorizeAttribute>(inherit: true)
-            .Should().NotBeEmpty();
+            .Should()
+            .NotBeEmpty();
     }
 }

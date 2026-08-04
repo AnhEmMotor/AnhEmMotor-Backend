@@ -1,9 +1,8 @@
-using System.Collections.Concurrent;
 using Application.Interfaces.Services;
+using System.Collections.Concurrent;
 
 namespace Infrastructure.Services.Ai.Runs;
 
-// ponytail: in-memory token handoff, tied to a single instance — fine while runs stay single-instance (Stage 8 scope)
 public class ChatRunTokenStore : IChatRunTokenStore
 {
     private readonly ConcurrentDictionary<Guid, string> _tokens = new();

@@ -12,8 +12,7 @@ public class GetWarrantyTermsListQueryHandler(IWarrantyTermReadRepository readRe
         GetWarrantyTermsListQuery request,
         CancellationToken cancellationToken)
     {
-        var terms = await readRepository.GetAllAsync(cancellationToken, includeBrand: true)
-            .ConfigureAwait(false);
+        var terms = await readRepository.GetAllAsync(cancellationToken, includeBrand: true).ConfigureAwait(false);
         var totalCount = terms.Count();
         var query = terms.AsQueryable();
         query = query.OrderByDescending(t => t.Id);

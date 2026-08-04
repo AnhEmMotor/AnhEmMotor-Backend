@@ -1,32 +1,24 @@
-using System.Text.Json;
-using Application.Common.Models;
 using Application.Features.ChatTools.Commands.CreatePurchaseRequestForChat;
 using Application.Features.ChatTools.Queries.CalculateShippingFeeForChat;
 using Application.Features.ChatTools.Queries.GetActiveShipmentsForChat;
 using Application.Features.ChatTools.Queries.GetCommissionRecordsForChat;
 using Application.Features.ChatTools.Queries.GetConversionToolsForChat;
 using Application.Features.ChatTools.Queries.GetCustomerProfileForChat;
-using Application.Features.ChatTools.Queries.GetDebtLogsMissingProofsForChat;
-using Application.Features.ChatTools.Queries.GetFulfillmentOrdersForChat;
-using Application.Features.ChatTools.Queries.GetLogisticsDashboardForChat;
-using Application.Features.ChatTools.Queries.GetPayrollSummaryForChat;
-using Application.Features.ChatTools.Queries.GetStoreSettingsForChat;
-using Application.Features.ChatTools.Queries.ListNewsForChat;
-using Application.Features.ChatTools.Queries.ListUsersAndRolesForChat;
 using Application.Features.ChatTools.Queries.GetDashboardOverviewForChat;
+using Application.Features.ChatTools.Queries.GetDebtLogsMissingProofsForChat;
 using Application.Features.ChatTools.Queries.GetEmployeeKpiForChat;
+using Application.Features.ChatTools.Queries.GetFulfillmentOrdersForChat;
 using Application.Features.ChatTools.Queries.GetInventoryLedgerForChat;
 using Application.Features.ChatTools.Queries.GetInventoryReceiptDetailForChat;
 using Application.Features.ChatTools.Queries.GetInventoryReportForChat;
-using Application.Features.ChatTools.Queries.GetSupplierDebtDetailForChat;
-using Application.Features.ChatTools.Queries.ListExpensesForChat;
-using Application.Features.ChatTools.Queries.ListPurchaseInvoicesForChat;
 using Application.Features.ChatTools.Queries.GetLeadDetailForChat;
 using Application.Features.ChatTools.Queries.GetLeadPipelineForChat;
-using Application.Features.ChatTools.Queries.GetLoyaltyMembersForChat;
+using Application.Features.ChatTools.Queries.GetLogisticsDashboardForChat;
 using Application.Features.ChatTools.Queries.GetLowStockProductsForChat;
+using Application.Features.ChatTools.Queries.GetLoyaltyMembersForChat;
 using Application.Features.ChatTools.Queries.GetOrderStatisticsForChat;
 using Application.Features.ChatTools.Queries.GetOrderStatusForChat;
+using Application.Features.ChatTools.Queries.GetPayrollSummaryForChat;
 using Application.Features.ChatTools.Queries.GetPnlReportForChat;
 using Application.Features.ChatTools.Queries.GetProductDetailForChat;
 using Application.Features.ChatTools.Queries.GetProductPriceListForChat;
@@ -40,6 +32,8 @@ using Application.Features.ChatTools.Queries.GetSalesReportForChat;
 using Application.Features.ChatTools.Queries.GetSalesSummaryForChat;
 using Application.Features.ChatTools.Queries.GetShipmentTrackingForChat;
 using Application.Features.ChatTools.Queries.GetStaffPerformanceForChat;
+using Application.Features.ChatTools.Queries.GetStoreSettingsForChat;
+using Application.Features.ChatTools.Queries.GetSupplierDebtDetailForChat;
 using Application.Features.ChatTools.Queries.GetSupplierPricesForVariantForChat;
 using Application.Features.ChatTools.Queries.GetSupplierStatisticsForChat;
 using Application.Features.ChatTools.Queries.GetSuppliersWithDebtForChat;
@@ -55,14 +49,18 @@ using Application.Features.ChatTools.Queries.ListBrandsForChat;
 using Application.Features.ChatTools.Queries.ListCategoriesForChat;
 using Application.Features.ChatTools.Queries.ListContactsForChat;
 using Application.Features.ChatTools.Queries.ListEmployeesForChat;
+using Application.Features.ChatTools.Queries.ListExpensesForChat;
 using Application.Features.ChatTools.Queries.ListFinanceContractsForChat;
 using Application.Features.ChatTools.Queries.ListInventoryReceiptsForChat;
+using Application.Features.ChatTools.Queries.ListNewsForChat;
 using Application.Features.ChatTools.Queries.ListOrdersForChat;
+using Application.Features.ChatTools.Queries.ListPurchaseInvoicesForChat;
 using Application.Features.ChatTools.Queries.ListPurchaseRequestsForChat;
 using Application.Features.ChatTools.Queries.ListRepairOrdersForChat;
 using Application.Features.ChatTools.Queries.ListSalesContractsForChat;
 using Application.Features.ChatTools.Queries.ListServicesForChat;
 using Application.Features.ChatTools.Queries.ListSupplierContractsForChat;
+using Application.Features.ChatTools.Queries.ListUsersAndRolesForChat;
 using Application.Features.ChatTools.Queries.ListVouchersForChat;
 using Application.Features.ChatTools.Queries.ListWarrantyClaimsForChat;
 using Application.Features.ChatTools.Queries.ListWorkshopPaymentsForChat;
@@ -76,17 +74,18 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Text.Json;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers;
 
 /// <summary>
-/// Các tool đọc dữ liệu thật (sản phẩm, tồn kho, đơn hàng, doanh thu) cho AI sidecar gọi trong luồng tool-calling.
-/// Mỗi action tự kiểm tra permission độc lập với những gì sidecar/prompt tuyên bố.
+/// Các tool đọc dữ liệu thật (sản phẩm, tồn kho, đơn hàng, doanh thu) cho AI sidecar gọi trong luồng tool-calling. Mỗi
+/// action tự kiểm tra permission độc lập với những gì sidecar/prompt tuyên bố.
 /// </summary>
 [Route("internal/chat/tools")]
 [Authorize]
-[WebAPI.Attributes.LocalhostOnly]
+[Attributes.LocalhostOnly]
 [DisableRateLimiting]
 public class InternalChatToolsController(ISender sender, IChatToolCatalogProvider catalogProvider) : ApiController
 {
@@ -98,10 +97,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
     [AllowAnonymous]
     public IActionResult GetManifest()
     {
-        var tools = catalogProvider.GetCatalog()
-            .Where(t => t.Status == "active")
-            .Select(t => t.Name)
-            .ToList();
+        var tools = catalogProvider.GetCatalog().Where(t => t.Status == "active").Select(t => t.Name).ToList();
         var buildId = typeof(InternalChatToolsController).Assembly.GetName().Version?.ToString() ?? "dev";
         return Ok(new { tools, buildId });
     }
@@ -138,9 +134,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetLowStockProductsForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(
-            new GetLowStockProductsForChatQuery { Limit = request.Limit },
-            cancellationToken)
+        var result = await sender.Send(new GetLowStockProductsForChatQuery { Limit = request.Limit }, cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -163,7 +157,12 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new GetSalesSummaryForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate, Limit = request.Limit },
+            new GetSalesSummaryForChatQuery
+            {
+                FromDate = request.FromDate,
+                ToDate = request.ToDate,
+                Limit = request.Limit
+            },
             cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
@@ -176,7 +175,12 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new GetTopSellingForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate, Limit = request.Limit },
+            new GetTopSellingForChatQuery
+            {
+                FromDate = request.FromDate,
+                ToDate = request.ToDate,
+                Limit = request.Limit
+            },
             cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
@@ -188,7 +192,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetProductDetailForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetProductDetailForChatQuery { ProductId = request.ProductId }, cancellationToken)
+        var result = await sender.Send(
+            new GetProductDetailForChatQuery { ProductId = request.ProductId },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -237,7 +243,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetOrderStatisticsForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetOrderStatisticsForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate }, cancellationToken)
+        var result = await sender.Send(
+            new GetOrderStatisticsForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -248,7 +256,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetCustomerProfileForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetCustomerProfileForChatQuery { CustomerId = request.CustomerId }, cancellationToken)
+        var result = await sender.Send(
+            new GetCustomerProfileForChatQuery { CustomerId = request.CustomerId },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -259,7 +269,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] SearchCustomersForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new SearchCustomersForChatQuery { Keyword = request.Keyword, Limit = request.Limit }, cancellationToken)
+        var result = await sender.Send(
+            new SearchCustomersForChatQuery { Keyword = request.Keyword, Limit = request.Limit },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -281,7 +293,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetRepairOrderDetailForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetRepairOrderDetailForChatQuery { Keyword = request.Keyword }, cancellationToken)
+        var result = await sender.Send(
+            new GetRepairOrderDetailForChatQuery { Keyword = request.Keyword },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -292,7 +306,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] ListWarrantyClaimsForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new ListWarrantyClaimsForChatQuery { StatusId = request.StatusId, Limit = request.Limit }, cancellationToken)
+        var result = await sender.Send(
+            new ListWarrantyClaimsForChatQuery { StatusId = request.StatusId, Limit = request.Limit },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -303,7 +319,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetPnlReportForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetPnlReportForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate }, cancellationToken)
+        var result = await sender.Send(
+            new GetPnlReportForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -314,7 +332,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetSuppliersWithDebtForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetSuppliersWithDebtForChatQuery { Limit = request.Limit }, cancellationToken)
+        var result = await sender.Send(
+            new GetSuppliersWithDebtForChatQuery { Limit = request.Limit },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -325,7 +345,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetShipmentTrackingForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetShipmentTrackingForChatQuery { Keyword = request.Keyword }, cancellationToken)
+        var result = await sender.Send(
+            new GetShipmentTrackingForChatQuery { Keyword = request.Keyword },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -336,8 +358,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetDashboardOverviewForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetDashboardOverviewForChatQuery(), cancellationToken)
-            .ConfigureAwait(false);
+        var result = await sender.Send(new GetDashboardOverviewForChatQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -348,7 +369,12 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new ListBookingAppointmentsForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate, Limit = request.Limit },
+            new ListBookingAppointmentsForChatQuery
+            {
+                FromDate = request.FromDate,
+                ToDate = request.ToDate,
+                Limit = request.Limit
+            },
             cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
@@ -421,8 +447,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetSupplierStatisticsForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetSupplierStatisticsForChatQuery(), cancellationToken)
-            .ConfigureAwait(false);
+        var result = await sender.Send(new GetSupplierStatisticsForChatQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -453,7 +478,12 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new ListInventoryReceiptsForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate, Limit = request.Limit },
+            new ListInventoryReceiptsForChatQuery
+            {
+                FromDate = request.FromDate,
+                ToDate = request.ToDate,
+                Limit = request.Limit
+            },
             cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
@@ -465,7 +495,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetInventoryReceiptDetailForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetInventoryReceiptDetailForChatQuery { Keyword = request.Keyword }, cancellationToken)
+        var result = await sender.Send(
+            new GetInventoryReceiptDetailForChatQuery { Keyword = request.Keyword },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -503,7 +535,12 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new GetRevenueByCategoryForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate, Limit = request.Limit },
+            new GetRevenueByCategoryForChatQuery
+            {
+                FromDate = request.FromDate,
+                ToDate = request.ToDate,
+                Limit = request.Limit
+            },
             cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
@@ -516,7 +553,12 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new GetSalesReportForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate, Limit = request.Limit },
+            new GetSalesReportForChatQuery
+            {
+                FromDate = request.FromDate,
+                ToDate = request.ToDate,
+                Limit = request.Limit
+            },
             cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
@@ -528,7 +570,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetRecentTransactionsForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetRecentTransactionsForChatQuery { Limit = request.Limit }, cancellationToken)
+        var result = await sender.Send(
+            new GetRecentTransactionsForChatQuery { Limit = request.Limit },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -633,7 +677,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetWarrantyClaimDetailForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetWarrantyClaimDetailForChatQuery { Keyword = request.Keyword }, cancellationToken)
+        var result = await sender.Send(
+            new GetWarrantyClaimDetailForChatQuery { Keyword = request.Keyword },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -655,7 +701,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] ListWorkshopPaymentsForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new ListWorkshopPaymentsForChatQuery { Limit = request.Limit }, cancellationToken)
+        var result = await sender.Send(
+            new ListWorkshopPaymentsForChatQuery { Limit = request.Limit },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -737,7 +785,12 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new GetStaffPerformanceForChatQuery { FromDate = request.FromDate, ToDate = request.ToDate, Limit = request.Limit },
+            new GetStaffPerformanceForChatQuery
+            {
+                FromDate = request.FromDate,
+                ToDate = request.ToDate,
+                Limit = request.Limit
+            },
             cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
@@ -799,7 +852,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] ListPurchaseInvoicesForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new ListPurchaseInvoicesForChatQuery { Limit = request.Limit }, cancellationToken)
+        var result = await sender.Send(
+            new ListPurchaseInvoicesForChatQuery { Limit = request.Limit },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -821,7 +876,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetLogisticsDashboardForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetLogisticsDashboardForChatQuery { Range = request.Range }, cancellationToken)
+        var result = await sender.Send(
+            new GetLogisticsDashboardForChatQuery { Range = request.Range },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -872,7 +929,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         CancellationToken cancellationToken)
     {
         var items = JsonSerializer.Deserialize<List<ChatCreatePurchaseRequestItemInput>>(
-            request.ItemsJson, JsonSerializerOptions.Web) ?? [];
+                request.ItemsJson,
+                JsonSerializerOptions.Web) ??
+            [];
         var result = await sender.Send(
             new CreatePurchaseRequestForChatCommand { Items = items, Note = request.Note },
             cancellationToken)
@@ -897,7 +956,9 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetDebtLogsMissingProofsForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetDebtLogsMissingProofsForChatQuery { Limit = request.Limit }, cancellationToken)
+        var result = await sender.Send(
+            new GetDebtLogsMissingProofsForChatQuery { Limit = request.Limit },
+            cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -950,8 +1011,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         [FromBody] GetStoreSettingsForChatRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetStoreSettingsForChatQuery(), cancellationToken)
-            .ConfigureAwait(false);
+        var result = await sender.Send(new GetStoreSettingsForChatQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -965,12 +1025,12 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
             .ConfigureAwait(false);
         return HandleResult(result);
     }
-
 }
 
 public record CreatePurchaseRequestForChatRequest
 {
     public string ItemsJson { get; init; } = "[]";
+
     public string? Note { get; init; }
 }
 
@@ -992,14 +1052,18 @@ public record GetConversionToolsForChatRequest
 public record GetPayrollSummaryForChatRequest
 {
     public int? EmployeeId { get; init; }
+
     public int? Month { get; init; }
+
     public int? Year { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
 public record GetCommissionRecordsForChatRequest
 {
     public int? EmployeeId { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
@@ -1025,23 +1089,31 @@ public record GetLogisticsDashboardForChatRequest
 public record GetFulfillmentOrdersForChatRequest
 {
     public string? Status { get; init; }
+
     public string? Carrier { get; init; }
+
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
 public record CalculateShippingFeeForChatRequest
 {
     public int ProvinceId { get; init; }
+
     public string WardId { get; init; } = string.Empty;
+
     public int ProductVariantId { get; init; }
+
     public int Quantity { get; init; } = 1;
 }
 
 public record GetSupplierDebtDetailForChatRequest
 {
     public int SupplierId { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
@@ -1058,6 +1130,7 @@ public record ListPurchaseInvoicesForChatRequest
 public record GetProductPriceListForChatRequest
 {
     public string? Keyword { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
@@ -1074,12 +1147,14 @@ public record ListCategoriesForChatRequest
 public record GetSupplierPricesForVariantForChatRequest
 {
     public int VariantId { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
 public record SearchSuppliersForChatRequest
 {
     public string? Keyword { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
@@ -1090,16 +1165,22 @@ public record GetSupplierStatisticsForChatRequest
 public record GetInventoryLedgerForChatRequest
 {
     public int? ProductId { get; init; }
+
     public int? VariantId { get; init; }
+
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
 public record ListInventoryReceiptsForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
@@ -1111,6 +1192,7 @@ public record GetInventoryReceiptDetailForChatRequest
 public record ListPurchaseRequestsForChatRequest
 {
     public string? StatusId { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
@@ -1122,14 +1204,18 @@ public record GetPurchaseRequestDetailForChatRequest
 public record GetRevenueByCategoryForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
 public record GetSalesReportForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
@@ -1141,18 +1227,21 @@ public record GetRecentTransactionsForChatRequest
 public record ListSalesContractsForChatRequest
 {
     public string? StatusId { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
 public record ListFinanceContractsForChatRequest
 {
     public string? StatusId { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
 public record ListSupplierContractsForChatRequest
 {
     public string? StatusId { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
@@ -1209,6 +1298,7 @@ public record ListServicesForChatRequest
 public record GetWorkshopDashboardForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
 }
 
@@ -1220,6 +1310,7 @@ public record GetVehiclePortfolioForChatRequest
 public record ListEmployeesForChatRequest
 {
     public string? Keyword { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
@@ -1231,19 +1322,23 @@ public record GetEmployeeKpiForChatRequest
 public record GetStaffPerformanceForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
 public record GetWarehouseReportForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
 }
 
 public record GetRevenueAnalysisForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
 }
 
@@ -1255,22 +1350,29 @@ public record GetProductDetailForChatRequest
 public record GetInventoryReportForChatRequest
 {
     public int Limit { get; init; } = 10;
+
     public string? SearchTerm { get; init; }
+
     public int? Month { get; init; }
+
     public int? Year { get; init; }
 }
 
 public record ListOrdersForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
+
     public string? StatusId { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
 public record GetOrderStatisticsForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
 }
 
@@ -1282,6 +1384,7 @@ public record GetCustomerProfileForChatRequest
 public record SearchCustomersForChatRequest
 {
     public string? Keyword { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
@@ -1298,12 +1401,14 @@ public record GetRepairOrderDetailForChatRequest
 public record ListWarrantyClaimsForChatRequest
 {
     public string? StatusId { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 
 public record GetPnlReportForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
 }
 
@@ -1324,7 +1429,9 @@ public record GetDashboardOverviewForChatRequest
 public record ListBookingAppointmentsForChatRequest
 {
     public DateOnly? FromDate { get; init; }
+
     public DateOnly? ToDate { get; init; }
+
     public int Limit { get; init; } = 10;
 }
 

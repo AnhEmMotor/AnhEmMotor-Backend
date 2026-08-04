@@ -6,7 +6,9 @@ namespace Infrastructure.Services.Excel;
 
 public class ProductCategoryExcelService : IProductCategoryExcelService
 {
-    public byte[] ExportProductCategories(IReadOnlyList<ProductCategory> categories, IReadOnlyList<ProductCategory> allCategories)
+    public byte[] ExportProductCategories(
+        IReadOnlyList<ProductCategory> categories,
+        IReadOnlyList<ProductCategory> allCategories)
     {
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Thể loại sản phẩm");

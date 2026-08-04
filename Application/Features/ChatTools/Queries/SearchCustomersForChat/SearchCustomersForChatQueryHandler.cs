@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.SearchCustomersForChat;
 
 public class SearchCustomersForChatQueryHandler(
     ILeadReadRepository leadReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<SearchCustomersForChatQuery, Result<ChatToolEnvelope<ChatCustomerSearchResultDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<SearchCustomersForChatQuery, Result<ChatToolEnvelope<ChatCustomerSearchResultDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatCustomerSearchResultDto>>> Handle(
         SearchCustomersForChatQuery request,
@@ -18,7 +17,6 @@ public class SearchCustomersForChatQueryHandler(
         var limit = ChatToolLimit.Clamp(request.Limit);
         var leads = await leadReadRepository.GetLoyaltyMembersAsync(request.Keyword, cancellationToken)
             .ConfigureAwait(false);
-
         var totalCount = leads.Count;
         var dtos = leads
             .Take(limit)
@@ -30,7 +28,6 @@ public class SearchCustomersForChatQueryHandler(
                     PhoneNumber = l.PhoneNumber
                 })
             .ToList();
-
         var inner = new ChatToolResult<ChatCustomerSearchResultDto>(dtos, totalCount, totalCount > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,

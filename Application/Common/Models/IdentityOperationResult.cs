@@ -8,6 +8,9 @@ public sealed class IdentityOperationResult
 
     public static IdentityOperationResult Success() => new() { Succeeded = true };
 
-    public static IdentityOperationResult Failure(IEnumerable<string> errors) =>
-        new() { Succeeded = false, Errors = errors.ToList() };
+    public static IdentityOperationResult Failure(IEnumerable<string> errors) => new()
+    {
+        Succeeded = false,
+        Errors = errors.ToList()
+    };
 }

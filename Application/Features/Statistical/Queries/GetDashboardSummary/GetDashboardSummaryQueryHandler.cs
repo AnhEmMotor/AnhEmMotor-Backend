@@ -7,12 +7,11 @@ namespace Application.Features.Statistical.Queries.GetDashboardSummary;
 
 public class GetDashboardSummaryQueryHandler(IStatisticalAnalyticsRepository analyticsRepository) : IRequestHandler<GetDashboardSummaryQuery, Result<DashboardSummaryResponse>>
 {
-    public async Task<Result<DashboardSummaryResponse>> Handle(GetDashboardSummaryQuery request, CancellationToken cancellationToken)
+    public async Task<Result<DashboardSummaryResponse>> Handle(
+        GetDashboardSummaryQuery request,
+        CancellationToken cancellationToken)
     {
-        var result = await analyticsRepository.GetDashboardSummaryAsync(
-            request.Start,
-            request.End,
-            cancellationToken);
+        var result = await analyticsRepository.GetDashboardSummaryAsync(request.Start, request.End, cancellationToken);
         return result;
     }
 }

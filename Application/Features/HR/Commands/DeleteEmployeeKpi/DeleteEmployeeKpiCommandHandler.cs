@@ -5,13 +5,9 @@ using MediatR;
 
 namespace Application.Features.HR.Commands.DeleteEmployeeKpi;
 
-public sealed class DeleteEmployeeKpiCommandHandler(
-    IEmployeeKpiRepository kpiRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteEmployeeKpiCommand, Result<int>>
+public sealed class DeleteEmployeeKpiCommandHandler(IEmployeeKpiRepository kpiRepository, IUnitOfWork unitOfWork) : IRequestHandler<DeleteEmployeeKpiCommand, Result<int>>
 {
-    public async Task<Result<int>> Handle(
-        DeleteEmployeeKpiCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(DeleteEmployeeKpiCommand request, CancellationToken cancellationToken)
     {
         var kpi = await kpiRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (kpi is null)

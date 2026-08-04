@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetSupplierDebtDetailForChat;
 
 public class GetSupplierDebtDetailForChatQueryHandler(
     ISupplierDebtReadRepository supplierDebtRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetSupplierDebtDetailForChatQuery, Result<ChatToolEnvelope<ChatSupplierDebtDetailDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetSupplierDebtDetailForChatQuery, Result<ChatToolEnvelope<ChatSupplierDebtDetailDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatSupplierDebtDetailDto>>> Handle(
         GetSupplierDebtDetailForChatQuery request,
@@ -18,7 +17,6 @@ public class GetSupplierDebtDetailForChatQueryHandler(
         var logs = await supplierDebtRepository
             .GetSupplierDebtLogsBySupplierIdAsync(request.SupplierId, cancellationToken)
             .ConfigureAwait(false);
-
         var ordered = logs.OrderByDescending(log => log.PaymentDate).ToList();
         var limit = ChatToolLimit.Clamp(request.Limit);
         var dtos = ordered

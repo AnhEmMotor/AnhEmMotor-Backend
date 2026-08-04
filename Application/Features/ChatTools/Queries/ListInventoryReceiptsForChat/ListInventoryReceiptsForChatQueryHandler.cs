@@ -10,8 +10,7 @@ namespace Application.Features.ChatTools.Queries.ListInventoryReceiptsForChat;
 
 public class ListInventoryReceiptsForChatQueryHandler(
     IInventoryReceiptReadRepository repository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListInventoryReceiptsForChatQuery, Result<ChatToolEnvelope<ChatInventoryReceiptListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListInventoryReceiptsForChatQuery, Result<ChatToolEnvelope<ChatInventoryReceiptListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatInventoryReceiptListItemDto>>> Handle(
         ListInventoryReceiptsForChatQuery request,
@@ -26,7 +25,9 @@ public class ListInventoryReceiptsForChatQueryHandler(
             sieveModel.Filters = $"CreatedAt>={start:yyyy-MM-dd},CreatedAt<={end:yyyy-MM-dd}";
             filters["Khoảng ngày"] = ChatToolDateRange.FormatVietnamRange(start, end);
         }
-        var paged = await repository.GetPagedAsync<InventoryReceiptListResponse>(sieveModel, cancellationToken: cancellationToken)
+        var paged = await repository.GetPagedAsync<InventoryReceiptListResponse>(
+            sieveModel,
+            cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         var items = paged.Items ?? [];
         var dtos = items

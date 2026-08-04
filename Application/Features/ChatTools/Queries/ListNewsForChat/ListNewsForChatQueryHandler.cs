@@ -8,10 +8,7 @@ using Sieve.Models;
 
 namespace Application.Features.ChatTools.Queries.ListNewsForChat;
 
-public class ListNewsForChatQueryHandler(
-    INewsReadRepository newsReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListNewsForChatQuery, Result<ChatToolEnvelope<ChatNewsListItemDto>>>
+public class ListNewsForChatQueryHandler(INewsReadRepository newsReadRepository, IServerDateProvider dateProvider) : IRequestHandler<ListNewsForChatQuery, Result<ChatToolEnvelope<ChatNewsListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatNewsListItemDto>>> Handle(
         ListNewsForChatQuery request,

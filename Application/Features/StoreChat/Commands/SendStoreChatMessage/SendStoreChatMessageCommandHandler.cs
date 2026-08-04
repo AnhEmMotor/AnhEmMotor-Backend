@@ -12,17 +12,17 @@ public class SendStoreChatMessageCommandHandler(
     IStoreChatReadRepository storeChatReadRepository,
     IStoreChatInsertRepository storeChatInsertRepository,
     IStoreChatUpdateRepository storeChatUpdateRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<SendStoreChatMessageCommand, Result<StoreChatMessageDto>>
+    IUnitOfWork unitOfWork) : IRequestHandler<SendStoreChatMessageCommand, Result<StoreChatMessageDto>>
 {
-    public async Task<Result<StoreChatMessageDto>> Handle(SendStoreChatMessageCommand request, CancellationToken cancellationToken)
+    public async Task<Result<StoreChatMessageDto>> Handle(
+        SendStoreChatMessageCommand request,
+        CancellationToken cancellationToken)
     {
         var session = await storeChatReadRepository.GetSessionByIdAsync(request.SessionId, cancellationToken);
         if (session == null)
         {
             return Error.NotFound("Phiên chat không tồn tại.");
         }
-
         var message = new StoreChatMessage
         {
             SessionId = session.Id,
@@ -30,12 +30,9 @@ public class SendStoreChatMessageCommandHandler(
             Content = request.Content
         };
         storeChatInsertRepository.AddMessage(message);
-
         session.LastMessageAt = DateTime.UtcNow;
         storeChatUpdateRepository.UpdateSession(session);
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return new StoreChatMessageDto
         {
             Id = message.Id,

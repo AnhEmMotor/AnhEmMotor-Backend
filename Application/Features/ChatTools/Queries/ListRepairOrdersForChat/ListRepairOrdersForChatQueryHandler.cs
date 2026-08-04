@@ -12,24 +12,16 @@ namespace Application.Features.ChatTools.Queries.ListRepairOrdersForChat;
 public class ListRepairOrdersForChatQueryHandler(
     IMaintenanceHistoryReadRepository repo,
     IVehicleReadRepository vehicleRepo,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListRepairOrdersForChatQuery, Result<ChatToolEnvelope<ChatRepairOrderListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListRepairOrdersForChatQuery, Result<ChatToolEnvelope<ChatRepairOrderListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatRepairOrderListItemDto>>> Handle(
         ListRepairOrdersForChatQuery request,
         CancellationToken cancellationToken)
     {
         var limit = ChatToolLimit.Clamp(request.Limit);
-        var sieveModel = new SieveModel
-        {
-            Sorts = "-MaintenanceDate",
-            Page = 1,
-            PageSize = limit
-        };
-
+        var sieveModel = new SieveModel { Sorts = "-MaintenanceDate", Page = 1, PageSize = limit };
         var paged = await repo.GetPagedAsync<RepairOrderResponse>(sieveModel, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         var items = paged.Items ?? [];
         if (items.Count > 0)
         {
@@ -50,7 +42,6 @@ public class ListRepairOrdersForChatQueryHandler(
                 }
             }
         }
-
         var dtos = items
             .Select(
                 x => new ChatRepairOrderListItemDto
@@ -61,7 +52,6 @@ public class ListRepairOrdersForChatQueryHandler(
                     MaintenanceDate = x.MaintenanceDate
                 })
             .ToList();
-
         var totalCount = (int)(paged.TotalCount ?? dtos.Count);
         var inner = new ChatToolResult<ChatRepairOrderListItemDto>(dtos, totalCount, totalCount > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
@@ -70,7 +60,6 @@ public class ListRepairOrdersForChatQueryHandler(
             new Dictionary<string, string>(),
             "phieu-sua-chua",
             null);
-
         return ChatToolEnvelope<ChatRepairOrderListItemDto>.Wrap(inner, meta);
     }
 }

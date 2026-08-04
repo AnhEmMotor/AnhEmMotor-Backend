@@ -35,7 +35,9 @@ public interface IStatisticalReadRepository
 
     public Task<IEnumerable<ProductReportResponse>> GetProductReportLastMonthAsync(CancellationToken cancellationToken);
 
-    public Task<ProductStockPriceResponse?> GetProductStockAndPriceAsync(int variantId, CancellationToken cancellationToken);
+    public Task<ProductStockPriceResponse?> GetProductStockAndPriceAsync(
+        int variantId,
+        CancellationToken cancellationToken);
 
     public Task<List<RecentOrderResponse>> GetRecentOrdersAsync(int count, CancellationToken cancellationToken);
 
@@ -45,7 +47,9 @@ public interface IStatisticalReadRepository
         int limit,
         CancellationToken cancellationToken);
 
-    public Task<IEnumerable<TransactionLogResponse>> GetRecentTransactionsAsync(int limit, CancellationToken cancellationToken);
+    public Task<IEnumerable<TransactionLogResponse>> GetRecentTransactionsAsync(
+        int limit,
+        CancellationToken cancellationToken);
 
     public Task<IEnumerable<TopProductRevenueResponse>> GetTopProductsByRevenueAsync(
         DateTimeOffset start,

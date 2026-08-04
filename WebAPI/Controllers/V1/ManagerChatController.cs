@@ -17,7 +17,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -39,7 +38,9 @@ public class ManagerChatController(ISender sender) : ApiController
 
     [HttpPost("sessions")]
     [SwaggerOperation(Summary = "Tạo mới phiên chat")]
-    public async Task<IActionResult> CreateSession([FromBody] CreateManagerChatSessionRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateSession(
+        [FromBody] CreateManagerChatSessionRequest request,
+        CancellationToken cancellationToken)
     {
         var command = new CreateManagerChatSessionCommand(request.Title, request.InitialMessage);
         var result = await sender.Send(command, cancellationToken);
@@ -57,7 +58,10 @@ public class ManagerChatController(ISender sender) : ApiController
 
     [HttpPut("sessions/{id}")]
     [SwaggerOperation(Summary = "Cập nhật tiêu đề phiên chat")]
-    public async Task<IActionResult> UpdateSession(Guid id, [FromBody] UpdateManagerChatSessionRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateSession(
+        Guid id,
+        [FromBody] UpdateManagerChatSessionRequest request,
+        CancellationToken cancellationToken)
     {
         var command = new UpdateManagerChatSessionCommand(id, request.Title);
         var result = await sender.Send(command, cancellationToken);
@@ -84,7 +88,10 @@ public class ManagerChatController(ISender sender) : ApiController
 
     [HttpPost("runs/{runId}/feedback")]
     [SwaggerOperation(Summary = "Ghi nhận phản hồi \"Số liệu chưa đúng\" cho một run chat (Stage 16.9)")]
-    public async Task<IActionResult> CreateFeedback(Guid runId, [FromBody] CreateChatFeedbackRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateFeedback(
+        Guid runId,
+        [FromBody] CreateChatFeedbackRequest request,
+        CancellationToken cancellationToken)
     {
         var command = new CreateChatFeedbackCommand(runId, request.Comment);
         var result = await sender.Send(command, cancellationToken);
@@ -92,7 +99,8 @@ public class ManagerChatController(ISender sender) : ApiController
     }
 
     [HttpGet("tool-catalog")]
-    [SwaggerOperation(Summary = "Lấy tên hiển thị tiếng Việt của các tool AI dùng khi tra cứu dữ liệu, để FE hiện trạng thái đang xử lý")]
+    [SwaggerOperation(
+        Summary = "Lấy tên hiển thị tiếng Việt của các tool AI dùng khi tra cứu dữ liệu, để FE hiện trạng thái đang xử lý")]
     public async Task<IActionResult> GetToolCatalog(CancellationToken cancellationToken)
     {
         var query = new GetChatToolCatalogQuery();
@@ -111,7 +119,10 @@ public class ManagerChatController(ISender sender) : ApiController
 
     [HttpPatch("runs/{runId}/plan")]
     [SwaggerOperation(Summary = "Sửa kế hoạch: thêm/sửa/xoá/đổi thứ tự bước (Stage 10)")]
-    public async Task<IActionResult> UpdatePlan(Guid runId, [FromBody] UpdateChatPlanRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdatePlan(
+        Guid runId,
+        [FromBody] UpdateChatPlanRequest request,
+        CancellationToken cancellationToken)
     {
         var command = new UpdateChatPlanCommand(runId, request.Version, request.Operations);
         var result = await sender.Send(command, cancellationToken);
@@ -120,7 +131,10 @@ public class ManagerChatController(ISender sender) : ApiController
 
     [HttpPost("runs/{runId}/plan/approve")]
     [SwaggerOperation(Summary = "Duyệt kế hoạch và bắt đầu thực thi (Stage 10)")]
-    public async Task<IActionResult> ApprovePlan(Guid runId, [FromBody] ChatPlanVersionRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ApprovePlan(
+        Guid runId,
+        [FromBody] ChatPlanVersionRequest request,
+        CancellationToken cancellationToken)
     {
         var command = new ApproveChatPlanCommand(runId, request.Version);
         var result = await sender.Send(command, cancellationToken);
@@ -138,7 +152,10 @@ public class ManagerChatController(ISender sender) : ApiController
 
     [HttpPost("runs/{runId}/plan/chat")]
     [SwaggerOperation(Summary = "Chat để duyệt/huỷ/sửa/bình luận kế hoạch, thay cho nút bấm (Stage 10.9)")]
-    public async Task<IActionResult> SendPlanChat(Guid runId, [FromBody] SendPlanChatRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> SendPlanChat(
+        Guid runId,
+        [FromBody] SendPlanChatRequest request,
+        CancellationToken cancellationToken)
     {
         var command = new SendPlanChatMessageCommand(runId, request.Content, request.TargetStepId);
         var result = await sender.Send(command, cancellationToken);

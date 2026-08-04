@@ -4,6 +4,7 @@ using Application.Features.ChatTools.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Employee;
 using Application.Interfaces.Repositories.Vehicle;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.ChatTools.Queries.GetRepairOrderDetailForChat;
@@ -12,8 +13,7 @@ public class GetRepairOrderDetailForChatQueryHandler(
     IMaintenanceHistoryReadRepository repo,
     IVehicleReadRepository vehicleRepo,
     IEmployeeReadRepository employeeRepo,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetRepairOrderDetailForChatQuery, Result<ChatToolEnvelope<ChatRepairOrderDetailDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetRepairOrderDetailForChatQuery, Result<ChatToolEnvelope<ChatRepairOrderDetailDto>>>
 {
     private const int MaxResults = 5;
 
@@ -21,25 +21,22 @@ public class GetRepairOrderDetailForChatQueryHandler(
         GetRepairOrderDetailForChatQuery request,
         CancellationToken cancellationToken)
     {
-        // Tìm xe khớp keyword theo biển số/VIN/tên khách hàng (đã có sẵn trong IVehicleReadRepository).
         var vehicles = await vehicleRepo.GetVehiclesAsync(request.Keyword, cancellationToken).ConfigureAwait(false);
         var vehicleDict = vehicles.ToDictionary(v => v.Id, v => v);
-
         var dtos = new List<ChatRepairOrderDetailDto>();
         if (vehicleDict.Count > 0)
         {
-            var histories = new List<Domain.Entities.MaintenanceHistory>();
+            var histories = new List<MaintenanceHistory>();
             foreach (var vehicleId in vehicleDict.Keys)
             {
-                var vehicleHistories = await repo.GetByVehicleIdAsync(vehicleId, cancellationToken).ConfigureAwait(false);
+                var vehicleHistories = await repo.GetByVehicleIdAsync(vehicleId, cancellationToken)
+                    .ConfigureAwait(false);
                 histories.AddRange(vehicleHistories);
             }
-
             var topHistories = histories
                 .OrderByDescending(h => h.MaintenanceDate)
                 .Take(MaxResults)
                 .ToList();
-
             var technicianIds = topHistories
                 .Where(h => h.TechnicianId.HasValue)
                 .Select(h => h.TechnicianId!.Value)
@@ -51,7 +48,6 @@ public class GetRepairOrderDetailForChatQueryHandler(
                 var emp = await employeeRepo.GetByIdAsync(technicianId, cancellationToken).ConfigureAwait(false);
                 technicianNames[technicianId] = emp?.User?.FullName;
             }
-
             foreach (var entity in topHistories)
             {
                 var vehicle = vehicleDict.GetValueOrDefault(entity.VehicleId);
@@ -62,7 +58,6 @@ public class GetRepairOrderDetailForChatQueryHandler(
                 string? technicianName = entity.TechnicianId.HasValue
                     ? technicianNames.GetValueOrDefault(entity.TechnicianId.Value)
                     : null;
-
                 dtos.Add(
                     new ChatRepairOrderDetailDto
                     {
@@ -80,7 +75,6 @@ public class GetRepairOrderDetailForChatQueryHandler(
                     });
             }
         }
-
         var inner = new ChatToolResult<ChatRepairOrderDetailDto>(dtos, dtos.Count, false);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,

@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.NewsComment;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.NewsComment;

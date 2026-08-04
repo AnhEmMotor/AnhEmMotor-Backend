@@ -1,9 +1,9 @@
 using Application.ApiContracts.Ai;
-using Application.Interfaces.Services;
 using Application.Interfaces.Repositories.Ai;
+using Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
-using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Json;
 
 namespace Infrastructure.Services.Ai.Clients;
 
@@ -13,7 +13,11 @@ public class AiSearchClient : IAiSearchClient
     private readonly IAiSidecarUrlProvider _sidecarUrlProvider;
     private readonly ILogger<AiSearchClient> _logger;
 
-    public AiSearchClient(HttpClient httpClient, IAiSidecarUrlProvider sidecarUrlProvider, IConfiguration config, ILogger<AiSearchClient> logger)
+    public AiSearchClient(
+        HttpClient httpClient,
+        IAiSidecarUrlProvider sidecarUrlProvider,
+        IConfiguration config,
+        ILogger<AiSearchClient> logger)
     {
         _httpClient = httpClient;
         _sidecarUrlProvider = sidecarUrlProvider;
@@ -32,8 +36,7 @@ public class AiSearchClient : IAiSearchClient
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<AiAgentResponse<AiSearchResult>>() ??
                 throw new Exception("Không nhận được phản hồi từ AI Sidecar.");
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             _logger.LogError(ex, "[AiSearchClient] Error during search request.");
             throw;

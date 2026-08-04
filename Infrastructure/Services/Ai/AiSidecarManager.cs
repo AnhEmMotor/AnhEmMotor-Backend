@@ -33,8 +33,6 @@ public class AiSidecarManager(
     private async Task StartSidecarProcessAsync()
     {
         var port = GetFreePort();
-        // Dùng thẳng 127.0.0.1 thay vì "localhost" để khớp với địa chỉ uvicorn bind (tránh việc
-        // "localhost" phân giải ra ::1 rồi không kết nối được).
         _sidecarUrl = $"http://127.0.0.1:{port}";
         var searchPaths = new[] { AppContext.BaseDirectory, Directory.GetCurrentDirectory() };
         string? sidecarDir = null;
@@ -104,9 +102,8 @@ public class AiSidecarManager(
         startInfo.EnvironmentVariables["QDRANT_URL"] = config["AISetup:QdrantUrl"] ?? string.Empty;
         startInfo.EnvironmentVariables["QDRANT_API_KEY"] = config["AISetup:QdrantApiKey"] ?? string.Empty;
         startInfo.EnvironmentVariables["POSTGRES_URL"] = config.GetConnectionString("PostgreSql") ?? string.Empty;
-        // Stage 16.8 — cờ shadow/canary/full/off theo tool, đọc từ AISetup:ToolFlags trong appsettings.json.
-        // pydantic-settings tự parse JSON string từ env var cho field kiểu dict — không cần đổi gì phía sidecar.
-        var toolFlags = config.GetSection("AISetup:ToolFlags").GetChildren()
+        var toolFlags = config.GetSection("AISetup:ToolFlags")
+            .GetChildren()
             .ToDictionary(s => s.Key, s => s.Value ?? "full");
         startInfo.EnvironmentVariables["TOOL_FLAGS"] = JsonSerializer.Serialize(toolFlags);
         try

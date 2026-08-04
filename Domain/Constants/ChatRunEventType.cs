@@ -18,7 +18,6 @@ public static class ChatRunEventType
     public const string RunMeta = "run_meta";
     public const string Thinking = "thinking";
 
-    // Stage 10 — Plan Mode
     public const string PlanStarted = "plan_started";
     public const string PlanStepAdded = "plan_step_added";
     public const string PlanReady = "plan_ready";

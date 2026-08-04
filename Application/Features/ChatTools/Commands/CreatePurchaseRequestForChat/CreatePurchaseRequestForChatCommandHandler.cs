@@ -7,10 +7,11 @@ using MediatR;
 
 namespace Application.Features.ChatTools.Commands.CreatePurchaseRequestForChat;
 
-/// <summary>Không viết lại logic tạo PR — tái sử dụng <see cref="CreatePurchaseRequestCommand"/> qua ISender
-/// (cùng validation, audit log, unit of work như API thường).</summary>
-public class CreatePurchaseRequestForChatCommandHandler(ISender sender, IServerDateProvider dateProvider)
-    : IRequestHandler<CreatePurchaseRequestForChatCommand, Result<ChatToolEnvelope<ChatCreatePurchaseRequestResultDto>>>
+/// <summary>
+/// Không viết lại logic tạo PR — tái sử dụng <see cref="CreatePurchaseRequestCommand" /> qua ISender (cùng validation,
+/// audit log, unit of work như API thường).
+/// </summary>
+public class CreatePurchaseRequestForChatCommandHandler(ISender sender, IServerDateProvider dateProvider) : IRequestHandler<CreatePurchaseRequestForChatCommand, Result<ChatToolEnvelope<ChatCreatePurchaseRequestResultDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatCreatePurchaseRequestResultDto>>> Handle(
         CreatePurchaseRequestForChatCommand request,
@@ -23,18 +24,16 @@ public class CreatePurchaseRequestForChatCommandHandler(ISender sender, IServerD
                 [.. request.Items
                     .Select(
                         item => new CreatePurchaseRequestItemRequest
-                        {
-                            ProductVariantId = item.ProductVariantId,
-                            Quantity = item.Quantity
-                        })]
+                    {
+                        ProductVariantId = item.ProductVariantId,
+                        Quantity = item.Quantity
+                    })]
         };
-
         var result = await sender.Send(innerCommand, cancellationToken).ConfigureAwait(false);
         if (result.IsFailure || result.Value is null)
         {
             return result.Errors;
         }
-
         var dto = new ChatCreatePurchaseRequestResultDto
         {
             PurchaseRequestId = result.Value.Id,
@@ -47,7 +46,6 @@ public class CreatePurchaseRequestForChatCommandHandler(ISender sender, IServerD
             new Dictionary<string, string>(),
             "yeu-cau-mua-hang",
             null);
-
         return ChatToolEnvelope<ChatCreatePurchaseRequestResultDto>.WrapSingle(dto, meta);
     }
 }

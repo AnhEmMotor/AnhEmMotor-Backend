@@ -8,7 +8,9 @@ namespace Infrastructure.Repositories.Role
 {
     public class RoleDeleteRepository(RoleManager<ApplicationRole> roleManager) : IRoleDeleteRepository
     {
-        public async Task<IdentityOperationResult> DeleteAsync(ApplicationRole role, CancellationToken cancellationToken)
+        public async Task<IdentityOperationResult> DeleteAsync(
+            ApplicationRole role,
+            CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var result = await roleManager.DeleteAsync(role).ConfigureAwait(false);

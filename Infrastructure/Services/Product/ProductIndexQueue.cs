@@ -1,5 +1,5 @@
-using System.Threading.Channels;
 using Application.Interfaces.Services;
+using System.Threading.Channels;
 
 namespace Infrastructure.Services.Product;
 
@@ -9,11 +9,7 @@ public class ProductIndexQueue : IProductIndexQueue
 
     public ProductIndexQueue()
     {
-        var options = new UnboundedChannelOptions
-        {
-            SingleReader = true,
-            SingleWriter = false
-        };
+        var options = new UnboundedChannelOptions { SingleReader = true, SingleWriter = false };
         _queue = Channel.CreateUnbounded<int>(options);
     }
 

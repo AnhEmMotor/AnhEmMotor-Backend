@@ -1,12 +1,14 @@
 using Application.ApiContracts.Vehicle.Responses;
-using Application.Common.Models;
 using Application.Features.Client.Vehicles.Queries;
+using Application.Features.Client.Vehicles.Queries.GetCustomerVehicleDetail;
+using Application.Features.Client.Vehicles.Queries.GetCustomerVehicleHistory;
 using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers.V1.Client;
 
@@ -23,9 +25,11 @@ public class VehicleController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<VehicleResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetMyVehicles([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetMyVehicles(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
-        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
             User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
             User.FindFirst("sub")?.Value ??
             User.Identity?.Name ??
@@ -34,8 +38,9 @@ public class VehicleController(IMediator mediator) : ControllerBase
         {
             return BadRequest(new { message = "Invalid user identifier" });
         }
-
-        var result = await mediator.Send(new GetMyVehiclesQuery { UserId = userId, SieveModel = sieveModel }, cancellationToken);
+        var result = await mediator.Send(
+            new GetMyVehiclesQuery { UserId = userId, SieveModel = sieveModel },
+            cancellationToken);
         return Ok(result);
     }
 
@@ -46,7 +51,7 @@ public class VehicleController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(VehicleDetailResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetVehicleDetail([FromRoute] int id, CancellationToken cancellationToken)
     {
-        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
             User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
             User.FindFirst("sub")?.Value ??
             User.Identity?.Name ??
@@ -55,8 +60,9 @@ public class VehicleController(IMediator mediator) : ControllerBase
         {
             return BadRequest(new { message = "Invalid user identifier" });
         }
-
-        var result = await mediator.Send(new Application.Features.Client.Vehicles.Queries.GetCustomerVehicleDetail.GetCustomerVehicleDetailQuery { UserId = userId, VehicleId = id }, cancellationToken);
+        var result = await mediator.Send(
+            new GetCustomerVehicleDetailQuery { UserId = userId, VehicleId = id },
+            cancellationToken);
         return Ok(result);
     }
 
@@ -64,10 +70,10 @@ public class VehicleController(IMediator mediator) : ControllerBase
     /// Lấy lịch sử mua hàng và bảo hành của xe.
     /// </summary>
     [HttpGet("{id}/history")]
-    [ProducesResponseType(typeof(Application.Features.Client.Vehicles.Queries.GetCustomerVehicleHistory.CustomerVehicleHistoryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CustomerVehicleHistoryResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetVehicleHistory([FromRoute] int id, CancellationToken cancellationToken)
     {
-        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
+        var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
             User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
             User.FindFirst("sub")?.Value ??
             User.Identity?.Name ??
@@ -76,8 +82,9 @@ public class VehicleController(IMediator mediator) : ControllerBase
         {
             return BadRequest(new { message = "Invalid user identifier" });
         }
-
-        var result = await mediator.Send(new Application.Features.Client.Vehicles.Queries.GetCustomerVehicleHistory.GetCustomerVehicleHistoryQuery { UserId = userId, VehicleId = id }, cancellationToken);
+        var result = await mediator.Send(
+            new GetCustomerVehicleHistoryQuery { UserId = userId, VehicleId = id },
+            cancellationToken);
         return Ok(result);
     }
 

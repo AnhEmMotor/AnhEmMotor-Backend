@@ -19,7 +19,11 @@ public class InternalChatTools
     private readonly Mock<ISender> _senderMock;
     private readonly InternalChatToolsController _controller;
     private static readonly ChatToolEnvelopeMeta TestMeta = new(
-        DateTimeOffset.UtcNow, "test-source", new Dictionary<string, string>(), null, null);
+        DateTimeOffset.UtcNow,
+        "test-source",
+        new Dictionary<string, string>(),
+        null,
+        null);
 
     public InternalChatTools()
     {
@@ -42,7 +46,9 @@ public class InternalChatTools
             TestMeta);
         _senderMock.Setup(s => s.Send(It.IsAny<SearchProductsForChatQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
-        var result = await _controller.SearchProducts(new SearchProductsForChatRequest { Keyword = "Wave" }, CancellationToken.None)
+        var result = await _controller.SearchProducts(
+            new SearchProductsForChatRequest { Keyword = "Wave" },
+            CancellationToken.None)
             .ConfigureAwait(true);
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actual = okResult.Value.Should().BeAssignableTo<ChatToolEnvelope<ChatProductSearchDto>>().Subject;
@@ -56,7 +62,9 @@ public class InternalChatTools
         _senderMock.Setup(s => s.Send(It.IsAny<SearchProductsForChatQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Không có quyền"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.SearchProducts(new SearchProductsForChatRequest { Keyword = "Wave" }, CancellationToken.None))
+            () => _controller.SearchProducts(
+                new SearchProductsForChatRequest { Keyword = "Wave" },
+                CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -71,7 +79,9 @@ public class InternalChatTools
             TestMeta);
         _senderMock.Setup(s => s.Send(It.IsAny<GetProductStockForChatQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
-        var result = await _controller.GetProductStock(new GetProductStockForChatRequest { ProductId = 5 }, CancellationToken.None)
+        var result = await _controller.GetProductStock(
+            new GetProductStockForChatRequest { ProductId = 5 },
+            CancellationToken.None)
             .ConfigureAwait(true);
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actual = okResult.Value.Should().BeAssignableTo<ChatToolEnvelope<ChatProductStockDto>>().Subject;
@@ -84,7 +94,9 @@ public class InternalChatTools
         _senderMock.Setup(s => s.Send(It.IsAny<GetProductStockForChatQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Không có quyền"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetProductStock(new GetProductStockForChatRequest { ProductId = 5 }, CancellationToken.None))
+            () => _controller.GetProductStock(
+                new GetProductStockForChatRequest { ProductId = 5 },
+                CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -99,7 +111,9 @@ public class InternalChatTools
             TestMeta);
         _senderMock.Setup(s => s.Send(It.IsAny<GetLowStockProductsForChatQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
-        var result = await _controller.GetLowStockProducts(new GetLowStockProductsForChatRequest(), CancellationToken.None)
+        var result = await _controller.GetLowStockProducts(
+            new GetLowStockProductsForChatRequest(),
+            CancellationToken.None)
             .ConfigureAwait(true);
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actual = okResult.Value.Should().BeAssignableTo<ChatToolEnvelope<ChatLowStockProductDto>>().Subject;
@@ -124,7 +138,9 @@ public class InternalChatTools
             TestMeta);
         _senderMock.Setup(s => s.Send(It.IsAny<GetOrderStatusForChatQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
-        var result = await _controller.GetOrderStatus(new GetOrderStatusForChatRequest { Keyword = "Nguyễn Văn A" }, CancellationToken.None)
+        var result = await _controller.GetOrderStatus(
+            new GetOrderStatusForChatRequest { Keyword = "Nguyễn Văn A" },
+            CancellationToken.None)
             .ConfigureAwait(true);
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actual = okResult.Value.Should().BeAssignableTo<ChatToolEnvelope<ChatOrderStatusDto>>().Subject;
@@ -138,7 +154,9 @@ public class InternalChatTools
         _senderMock.Setup(s => s.Send(It.IsAny<GetOrderStatusForChatQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Không có quyền"));
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetOrderStatus(new GetOrderStatusForChatRequest { Keyword = "Nguyễn Văn A" }, CancellationToken.None))
+            () => _controller.GetOrderStatus(
+                new GetOrderStatusForChatRequest { Keyword = "Nguyễn Văn A" },
+                CancellationToken.None))
             .ConfigureAwait(true);
     }
 

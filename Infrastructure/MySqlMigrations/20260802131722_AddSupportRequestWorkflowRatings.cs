@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -16,64 +16,46 @@ namespace Infrastructure.MySqlMigrations
                 table: "SupportRequest",
                 type: "bigint",
                 nullable: true);
-
-            migrationBuilder.AddColumn<long>(
-                name: "ClosedAt",
-                table: "SupportRequest",
-                type: "bigint",
-                nullable: true);
-
+            migrationBuilder.AddColumn<long>(name: "ClosedAt", table: "SupportRequest", type: "bigint", nullable: true);
             migrationBuilder.AddColumn<long>(
                 name: "CustomerRatedAt",
                 table: "SupportRequest",
                 type: "bigint",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "CustomerRatingComment",
                 table: "SupportRequest",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<int>(
                 name: "CustomerRatingOfEmployee",
                 table: "SupportRequest",
                 type: "int",
                 nullable: true);
-
             migrationBuilder.AddColumn<Guid>(
                 name: "CustomerTrackingToken",
                 table: "SupportRequest",
                 type: "char(36)",
                 nullable: true,
                 collation: "ascii_general_ci");
-
             migrationBuilder.AddColumn<long>(
                 name: "EmployeeRatedAt",
                 table: "SupportRequest",
                 type: "bigint",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "EmployeeRatingComment",
                 table: "SupportRequest",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<int>(
                 name: "EmployeeRatingOfCustomer",
                 table: "SupportRequest",
                 type: "int",
                 nullable: true);
-
-            migrationBuilder.AddColumn<long>(
-                name: "StartedAt",
-                table: "SupportRequest",
-                type: "bigint",
-                nullable: true);
-
+            migrationBuilder.AddColumn<long>(name: "StartedAt", table: "SupportRequest", type: "bigint", nullable: true);
             migrationBuilder.AlterColumn<int>(
                 name: "NewsId",
                 table: "NewsComments",
@@ -81,28 +63,24 @@ namespace Infrastructure.MySqlMigrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
-
             migrationBuilder.AddColumn<string>(
                 name: "ArticleSlug",
                 table: "NewsComments",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "ArticleType",
                 table: "NewsComments",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.AddColumn<string>(
                 name: "ServiceType",
                 table: "MaintenanceHistory",
                 type: "longtext",
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ChatSession",
                 columns: table => new
@@ -126,7 +104,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "DepositSettingHistory",
                 columns: table => new
@@ -145,7 +122,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_DepositSettingHistory", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ChatMessage",
                 columns: table => new
@@ -171,92 +147,31 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChatMessage_CreatedAt",
-                table: "ChatMessage",
-                column: "CreatedAt");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChatMessage_SessionId",
-                table: "ChatMessage",
-                column: "SessionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChatSession_UpdatedAt",
-                table: "ChatSession",
-                column: "UpdatedAt");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChatSession_UserId",
-                table: "ChatSession",
-                column: "UserId");
+            migrationBuilder.CreateIndex(name: "IX_ChatMessage_CreatedAt", table: "ChatMessage", column: "CreatedAt");
+            migrationBuilder.CreateIndex(name: "IX_ChatMessage_SessionId", table: "ChatMessage", column: "SessionId");
+            migrationBuilder.CreateIndex(name: "IX_ChatSession_UpdatedAt", table: "ChatSession", column: "UpdatedAt");
+            migrationBuilder.CreateIndex(name: "IX_ChatSession_UserId", table: "ChatSession", column: "UserId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "ChatMessage");
-
-            migrationBuilder.DropTable(
-                name: "DepositSettingHistory");
-
-            migrationBuilder.DropTable(
-                name: "ChatSession");
-
-            migrationBuilder.DropColumn(
-                name: "AssignedAt",
-                table: "SupportRequest");
-
-            migrationBuilder.DropColumn(
-                name: "ClosedAt",
-                table: "SupportRequest");
-
-            migrationBuilder.DropColumn(
-                name: "CustomerRatedAt",
-                table: "SupportRequest");
-
-            migrationBuilder.DropColumn(
-                name: "CustomerRatingComment",
-                table: "SupportRequest");
-
-            migrationBuilder.DropColumn(
-                name: "CustomerRatingOfEmployee",
-                table: "SupportRequest");
-
-            migrationBuilder.DropColumn(
-                name: "CustomerTrackingToken",
-                table: "SupportRequest");
-
-            migrationBuilder.DropColumn(
-                name: "EmployeeRatedAt",
-                table: "SupportRequest");
-
-            migrationBuilder.DropColumn(
-                name: "EmployeeRatingComment",
-                table: "SupportRequest");
-
-            migrationBuilder.DropColumn(
-                name: "EmployeeRatingOfCustomer",
-                table: "SupportRequest");
-
-            migrationBuilder.DropColumn(
-                name: "StartedAt",
-                table: "SupportRequest");
-
-            migrationBuilder.DropColumn(
-                name: "ArticleSlug",
-                table: "NewsComments");
-
-            migrationBuilder.DropColumn(
-                name: "ArticleType",
-                table: "NewsComments");
-
-            migrationBuilder.DropColumn(
-                name: "ServiceType",
-                table: "MaintenanceHistory");
-
+            migrationBuilder.DropTable(name: "ChatMessage");
+            migrationBuilder.DropTable(name: "DepositSettingHistory");
+            migrationBuilder.DropTable(name: "ChatSession");
+            migrationBuilder.DropColumn(name: "AssignedAt", table: "SupportRequest");
+            migrationBuilder.DropColumn(name: "ClosedAt", table: "SupportRequest");
+            migrationBuilder.DropColumn(name: "CustomerRatedAt", table: "SupportRequest");
+            migrationBuilder.DropColumn(name: "CustomerRatingComment", table: "SupportRequest");
+            migrationBuilder.DropColumn(name: "CustomerRatingOfEmployee", table: "SupportRequest");
+            migrationBuilder.DropColumn(name: "CustomerTrackingToken", table: "SupportRequest");
+            migrationBuilder.DropColumn(name: "EmployeeRatedAt", table: "SupportRequest");
+            migrationBuilder.DropColumn(name: "EmployeeRatingComment", table: "SupportRequest");
+            migrationBuilder.DropColumn(name: "EmployeeRatingOfCustomer", table: "SupportRequest");
+            migrationBuilder.DropColumn(name: "StartedAt", table: "SupportRequest");
+            migrationBuilder.DropColumn(name: "ArticleSlug", table: "NewsComments");
+            migrationBuilder.DropColumn(name: "ArticleType", table: "NewsComments");
+            migrationBuilder.DropColumn(name: "ServiceType", table: "MaintenanceHistory");
             migrationBuilder.AlterColumn<int>(
                 name: "NewsId",
                 table: "NewsComments",

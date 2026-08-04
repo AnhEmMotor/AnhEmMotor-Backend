@@ -179,12 +179,14 @@ public class PurchaseRequestExcelService : IPurchaseRequestExcelService
             {
                 continue;
             }
-            rows.Add(new PurchaseRequestImportRow(tempCode, note, productName, variantName, colorName, qtyStr, supplierName));
+            rows.Add(
+                new PurchaseRequestImportRow(tempCode, note, productName, variantName, colorName, qtyStr, supplierName));
         }
         return rows;
     }
 
-    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(IReadOnlyList<PurchaseRequestImportFailedRow> failedRows)
+    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(
+        IReadOnlyList<PurchaseRequestImportFailedRow> failedRows)
     {
         string[] headers1 =
         {
@@ -212,7 +214,6 @@ public class PurchaseRequestExcelService : IPurchaseRequestExcelService
         }
         using var stream1 = new MemoryStream();
         wb1.SaveAs(stream1);
-
         using var wb2 = new XLWorkbook();
         var ws2 = wb2.Worksheets.Add("Lỗi nhập");
         for (int i = 0; i < headers1.Length; i++)
@@ -231,7 +232,6 @@ public class PurchaseRequestExcelService : IPurchaseRequestExcelService
         }
         using var stream2 = new MemoryStream();
         wb2.SaveAs(stream2);
-
         return (stream1.ToArray(), stream2.ToArray());
     }
 }

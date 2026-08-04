@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetInventoryLedgerForChat;
 
 public class GetInventoryLedgerForChatQueryHandler(
     IInventoryLedgerRepository ledgerRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetInventoryLedgerForChatQuery, Result<ChatToolEnvelope<ChatInventoryLedgerItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetInventoryLedgerForChatQuery, Result<ChatToolEnvelope<ChatInventoryLedgerItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatInventoryLedgerItemDto>>> Handle(
         GetInventoryLedgerForChatQuery request,
@@ -20,7 +19,8 @@ public class GetInventoryLedgerForChatQueryHandler(
         var filtered = entries.Where(x => x.TransactionDate >= start && x.TransactionDate <= end);
         if (request.ProductId.HasValue)
         {
-            filtered = filtered.Where(x => x.ProductVariant != null && x.ProductVariant.ProductId == request.ProductId.Value);
+            filtered = filtered.Where(
+                x => x.ProductVariant != null && x.ProductVariant.ProductId == request.ProductId.Value);
         }
         if (request.VariantId.HasValue)
         {
@@ -48,7 +48,10 @@ public class GetInventoryLedgerForChatQueryHandler(
                 })
             .ToList();
         var inner = new ChatToolResult<ChatInventoryLedgerItemDto>(dtos, ordered.Count, ordered.Count > dtos.Count);
-        var filters = new Dictionary<string, string> { ["Khoảng ngày"] = ChatToolDateRange.FormatVietnamRange(start, end) };
+        var filters = new Dictionary<string, string>
+        {
+            ["Khoảng ngày"] = ChatToolDateRange.FormatVietnamRange(start, end)
+        };
         if (request.ProductId.HasValue)
         {
             filters["ProductId"] = request.ProductId.Value.ToString();

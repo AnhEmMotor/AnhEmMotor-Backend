@@ -1,8 +1,8 @@
+using Application.DTOs.Chat;
+using Application.Interfaces.Services;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
-using Application.DTOs.Chat;
-using Application.Interfaces.Services;
 
 namespace Infrastructure.Services.Ai.Runs;
 
@@ -16,9 +16,7 @@ public class ChatRunEventBus : IChatRunEventBus
         {
             lock (channels)
             {
-                // Remove closed channels
                 channels.RemoveAll(ch => ch.Reader.Completion.IsCompleted);
-
                 foreach (var channel in channels)
                 {
                     channel.Writer.TryWrite(evt);
@@ -27,29 +25,24 @@ public class ChatRunEventBus : IChatRunEventBus
         }
     }
 
-    public async IAsyncEnumerable<ChatRunEventDto> SubscribeAsync(Guid runId, [EnumeratorCancellation] CancellationToken ct)
+    public async IAsyncEnumerable<ChatRunEventDto> SubscribeAsync(
+        Guid runId,
+        [EnumeratorCancellation] CancellationToken ct)
     {
-        var channel = Channel.CreateUnbounded<ChatRunEventDto>(new UnboundedChannelOptions
-        {
-            SingleReader = true,
-            SingleWriter = false
-        });
-
+        var channel = Channel.CreateUnbounded<ChatRunEventDto>(
+            new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
         var channels = _subscribers.GetOrAdd(runId, _ => new List<Channel<ChatRunEventDto>>());
-        
         lock (channels)
         {
             channels.Add(channel);
         }
-
         try
         {
             await foreach (var item in channel.Reader.ReadAllAsync(ct))
             {
                 yield return item;
             }
-        }
-        finally
+        } finally
         {
             lock (channels)
             {

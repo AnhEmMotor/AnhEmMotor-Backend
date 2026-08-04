@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetLogisticsDashboardForChat;
 
 public class GetLogisticsDashboardForChatQueryHandler(
     ILogisticsDashboardRepository logisticsDashboardRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetLogisticsDashboardForChatQuery, Result<ChatToolEnvelope<ChatLogisticsDashboardDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetLogisticsDashboardForChatQuery, Result<ChatToolEnvelope<ChatLogisticsDashboardDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatLogisticsDashboardDto>>> Handle(
         GetLogisticsDashboardForChatQuery request,
@@ -22,10 +21,8 @@ public class GetLogisticsDashboardForChatQueryHandler(
             "year" => now.AddDays(-365),
             _ => now.AddDays(-1)
         };
-
         var dashboard = await logisticsDashboardRepository.GetDashboardAsync(from, cancellationToken)
             .ConfigureAwait(false);
-
         var dto = new ChatLogisticsDashboardDto
         {
             FulfillmentWorkload = dashboard.Summary.FulfillmentWorkload,
@@ -35,14 +32,12 @@ public class GetLogisticsDashboardForChatQueryHandler(
             ReturnsClaimsRate = dashboard.Summary.ReturnsClaimsRate,
             ExceptionCount = dashboard.Exceptions.Count
         };
-
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "ILogisticsDashboardRepository.GetDashboardAsync",
             new Dictionary<string, string> { ["Khoảng thời gian"] = request.Range },
             "tong-quan-logistics",
             null);
-
         return ChatToolEnvelope<ChatLogisticsDashboardDto>.WrapSingle(dto, meta);
     }
 }

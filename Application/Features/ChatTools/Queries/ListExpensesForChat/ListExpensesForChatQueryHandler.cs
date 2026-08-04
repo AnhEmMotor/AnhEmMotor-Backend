@@ -8,10 +8,7 @@ using Sieve.Models;
 
 namespace Application.Features.ChatTools.Queries.ListExpensesForChat;
 
-public class ListExpensesForChatQueryHandler(
-    IExpenseReadRepository expenseRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListExpensesForChatQuery, Result<ChatToolEnvelope<ChatExpenseListItemDto>>>
+public class ListExpensesForChatQueryHandler(IExpenseReadRepository expenseRepository, IServerDateProvider dateProvider) : IRequestHandler<ListExpensesForChatQuery, Result<ChatToolEnvelope<ChatExpenseListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatExpenseListItemDto>>> Handle(
         ListExpensesForChatQuery request,
@@ -22,7 +19,6 @@ public class ListExpensesForChatQueryHandler(
         var paged = await expenseRepository
             .GetPagedAsync<ExpenseResponse>(sieveModel, cancellationToken)
             .ConfigureAwait(false);
-
         var dtos = (paged.Items ?? [])
             .Select(
                 expense => new ChatExpenseListItemDto

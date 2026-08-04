@@ -710,29 +710,23 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(ov => ov.OutputId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<OrderVoucher>().HasQueryFilter(ov => ov.Output!.DeletedAt == null);
-
         modelBuilder.Entity<ChatSession>().HasIndex(c => c.UserId);
         modelBuilder.Entity<ChatSession>().HasIndex(c => c.UpdatedAt);
         modelBuilder.Entity<ChatMessage>().HasIndex(c => c.SessionId);
         modelBuilder.Entity<ChatMessage>().HasIndex(c => c.CreatedAt);
-
         modelBuilder.Entity<ChatRun>().HasIndex(r => new { r.SessionId, r.Status });
         modelBuilder.Entity<ChatRun>()
             .HasOne(r => r.Session)
             .WithMany()
             .HasForeignKey(r => r.SessionId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<ChatRunEvent>()
-            .HasIndex(e => new { e.RunId, e.Seq })
-            .IsUnique();
+        modelBuilder.Entity<ChatRunEvent>().HasIndex(e => new { e.RunId, e.Seq }).IsUnique();
         modelBuilder.Entity<ChatRunEvent>()
             .HasOne(e => e.Run)
             .WithMany(r => r.Events)
             .HasForeignKey(e => e.RunId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ChatRunEvent>().HasQueryFilter(e => e.Run!.DeletedAt == null);
-
         modelBuilder.Entity<ChatFeedback>().HasIndex(f => f.ChatRunId);
         modelBuilder.Entity<ChatFeedback>()
             .HasOne(f => f.ChatRun)
@@ -744,7 +738,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(f => f.ReportedBy)
             .OnDelete(DeleteBehavior.Restrict);
-
         modelBuilder.Entity<ChatPlan>().HasIndex(p => p.RunId).IsUnique();
         modelBuilder.Entity<ChatPlan>()
             .HasOne(p => p.Run)
@@ -752,10 +745,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey<ChatPlan>(p => p.RunId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ChatPlan>().HasQueryFilter(p => p.Run!.DeletedAt == null);
-
         modelBuilder.Entity<StoreChatSession>().HasIndex(s => s.VisitorKey).IsUnique();
         modelBuilder.Entity<StoreChatSession>().HasIndex(s => s.Mode);
-
         modelBuilder.Entity<ProductView>().HasIndex(v => v.ProductId);
         modelBuilder.Entity<ProductView>().HasIndex(v => new { v.CustomerUserId, v.CreatedAt });
         modelBuilder.Entity<ProductView>().HasIndex(v => new { v.VisitorKey, v.CreatedAt });
@@ -765,7 +756,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(s => s.Messages)
             .HasForeignKey(m => m.SessionId)
             .OnDelete(DeleteBehavior.Cascade);
-
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))

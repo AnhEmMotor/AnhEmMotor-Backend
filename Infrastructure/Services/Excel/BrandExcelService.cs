@@ -192,7 +192,8 @@ public class BrandExcelService : IBrandExcelService
         return rows;
     }
 
-    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(IReadOnlyList<BrandImportFailedRow> failedRows)
+    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(
+        IReadOnlyList<BrandImportFailedRow> failedRows)
     {
         using var wb1 = new XLWorkbook();
         var ws1 = wb1.Worksheets.Add("Lỗi nhập");
@@ -252,7 +253,6 @@ public class BrandExcelService : IBrandExcelService
         }
         using var stream1 = new MemoryStream();
         wb1.SaveAs(stream1);
-
         using var wb2 = new XLWorkbook();
         var ws2 = wb2.Worksheets.Add("Lỗi nhập");
         ws2.Row(1).Height = 40;
@@ -314,7 +314,6 @@ public class BrandExcelService : IBrandExcelService
         }
         using var stream2 = new MemoryStream();
         wb2.SaveAs(stream2);
-
         return (stream1.ToArray(), stream2.ToArray());
     }
 }

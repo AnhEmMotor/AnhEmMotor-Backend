@@ -9,8 +9,7 @@ namespace Application.Features.ChatTools.Queries.ListCategoriesForChat;
 
 public class ListCategoriesForChatQueryHandler(
     IProductCategoryReadRepository productCategoryReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListCategoriesForChatQuery, Result<ChatToolEnvelope<ChatCategoryListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListCategoriesForChatQuery, Result<ChatToolEnvelope<ChatCategoryListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatCategoryListItemDto>>> Handle(
         ListCategoriesForChatQuery request,

@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetConversionToolsForChat;
 
 public class GetConversionToolsForChatQueryHandler(
     IConversionToolReadRepository conversionToolReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetConversionToolsForChatQuery, Result<ChatToolEnvelope<ChatConversionToolDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetConversionToolsForChatQuery, Result<ChatToolEnvelope<ChatConversionToolDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatConversionToolDto>>> Handle(
         GetConversionToolsForChatQuery request,

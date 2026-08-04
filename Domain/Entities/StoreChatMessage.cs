@@ -24,7 +24,9 @@ public class StoreChatMessage : BaseEntity
     [Column("Content", TypeName = "nvarchar(max)")]
     public string Content { get; set; } = string.Empty;
 
-    /// <summary>Payload card sản phẩm/biến thể (Stage 02), JSON — null nếu tin nhắn không kèm card.</summary>
+    /// <summary>
+    /// Payload card sản phẩm/biến thể (Stage 02), JSON — null nếu tin nhắn không kèm card.
+    /// </summary>
     [Column("CardsJson", TypeName = "nvarchar(max)")]
     public string? CardsJson { get; set; }
 }

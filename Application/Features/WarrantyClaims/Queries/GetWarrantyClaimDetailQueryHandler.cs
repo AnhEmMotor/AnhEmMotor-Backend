@@ -8,7 +8,9 @@ namespace Application.Features.WarrantyClaims.Queries;
 
 public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository repo) : IRequestHandler<GetWarrantyClaimDetailQuery, Result<WarrantyClaimDetailResponse?>>
 {
-    public async Task<Result<WarrantyClaimDetailResponse?>> Handle(GetWarrantyClaimDetailQuery req, CancellationToken ct)
+    public async Task<Result<WarrantyClaimDetailResponse?>> Handle(
+        GetWarrantyClaimDetailQuery req,
+        CancellationToken ct)
     {
         var claim = await repo.GetDetailByIdAsync(req.Id, ct, DataFetchMode.All).ConfigureAwait(false);
         if (claim is null)
@@ -43,9 +45,12 @@ public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository rep
             StatusText = WarrantyClaimStatus.GetLabel(claim.Status),
             VehicleVin = vehicle?.VinNumber,
             IssueDescription = claim.IssueDescription,
-            MediaUrls = string.IsNullOrWhiteSpace(claim.MediaUrls)
-                ? new List<string>()
-                : claim.MediaUrls.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
+            MediaUrls =
+                string.IsNullOrWhiteSpace(claim.MediaUrls)
+                    ? new List<string>()
+                    : claim.MediaUrls
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .ToList(),
             ServiceCenterName = claim.ServiceCenterName,
             ManufacturerClaimNumber = claim.ManufacturerClaimNumber,
             Status = claim.Status,

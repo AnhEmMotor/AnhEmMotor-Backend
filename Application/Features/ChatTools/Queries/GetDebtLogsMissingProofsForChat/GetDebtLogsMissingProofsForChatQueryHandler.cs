@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetDebtLogsMissingProofsForChat
 
 public class GetDebtLogsMissingProofsForChatQueryHandler(
     ISupplierDebtReadRepository supplierDebtReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetDebtLogsMissingProofsForChatQuery, Result<ChatToolEnvelope<ChatDebtLogMissingProofItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetDebtLogsMissingProofsForChatQuery, Result<ChatToolEnvelope<ChatDebtLogMissingProofItemDto>>>
 {
     public Task<Result<ChatToolEnvelope<ChatDebtLogMissingProofItemDto>>> Handle(
         GetDebtLogsMissingProofsForChatQuery request,
@@ -39,7 +38,9 @@ public class GetDebtLogsMissingProofsForChatQueryHandler(
             new Dictionary<string, string> { ["Điều kiện"] = "Chưa có chứng từ (ProofImages rỗng)" },
             "cong-no-thieu-chung-tu",
             null);
-        Result<ChatToolEnvelope<ChatDebtLogMissingProofItemDto>> result = ChatToolEnvelope<ChatDebtLogMissingProofItemDto>.Wrap(inner, meta);
+        Result<ChatToolEnvelope<ChatDebtLogMissingProofItemDto>> result = ChatToolEnvelope<ChatDebtLogMissingProofItemDto>.Wrap(
+            inner,
+            meta);
         return Task.FromResult(result);
     }
 }

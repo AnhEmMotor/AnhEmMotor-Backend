@@ -10,10 +10,7 @@ using System.Linq.Expressions;
 
 namespace Application.Features.ChatTools.Queries.ListOrdersForChat;
 
-public class ListOrdersForChatQueryHandler(
-    IOutputReadRepository outputReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListOrdersForChatQuery, Result<ChatToolEnvelope<ChatOrderListItemDto>>>
+public class ListOrdersForChatQueryHandler(IOutputReadRepository outputReadRepository, IServerDateProvider dateProvider) : IRequestHandler<ListOrdersForChatQuery, Result<ChatToolEnvelope<ChatOrderListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatOrderListItemDto>>> Handle(
         ListOrdersForChatQuery request,
@@ -21,24 +18,17 @@ public class ListOrdersForChatQueryHandler(
     {
         var (start, end) = ChatToolDateRange.Resolve(request.FromDate, request.ToDate, dateProvider);
         var statusId = string.IsNullOrWhiteSpace(request.StatusId) ? null : request.StatusId.Trim();
-
         Expression<Func<Output, bool>> filter = statusId is null
             ? output => output.CreatedAt != null && output.CreatedAt >= start && output.CreatedAt <= end
-            : output => output.CreatedAt != null && output.CreatedAt >= start && output.CreatedAt <= end &&
+            : output => output.CreatedAt != null &&
+                output.CreatedAt >= start &&
+                output.CreatedAt <= end &&
                 output.StatusId == statusId;
-
         var limit = ChatToolLimit.Clamp(request.Limit);
-        var sieveModel = new SieveModel
-        {
-            Sorts = "-CreatedAt",
-            Page = 1,
-            PageSize = limit
-        };
-
+        var sieveModel = new SieveModel { Sorts = "-CreatedAt", Page = 1, PageSize = limit };
         var result = await outputReadRepository
             .GetPagedAsync<OutputItemResponse>(sieveModel, filter: filter, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         var items = result.Items ?? [];
         var dtos = items
             .Select(
@@ -51,7 +41,6 @@ public class ListOrdersForChatQueryHandler(
                     CreatedAt = o.CreatedAt
                 })
             .ToList();
-
         var totalCount = (int)(result.TotalCount ?? dtos.Count);
         var inner = new ChatToolResult<ChatOrderListItemDto>(dtos, totalCount, totalCount > dtos.Count);
         var filtersApplied = new Dictionary<string, string>
@@ -62,14 +51,12 @@ public class ListOrdersForChatQueryHandler(
         {
             filtersApplied["Trạng thái"] = statusId;
         }
-
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "IOutputReadRepository.GetPagedAsync",
             filtersApplied,
             "don-hang",
             "VND");
-
         return ChatToolEnvelope<ChatOrderListItemDto>.Wrap(inner, meta);
     }
 }

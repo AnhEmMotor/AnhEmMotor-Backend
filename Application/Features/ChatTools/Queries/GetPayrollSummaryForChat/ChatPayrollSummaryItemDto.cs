@@ -8,7 +8,9 @@ public record ChatPayrollSummaryItemDto
 
     public string JobTitle { get; init; } = string.Empty;
 
-    /// <summary>Kỳ lương dạng "MM/yyyy".</summary>
+    /// <summary>
+    /// Kỳ lương dạng "MM/yyyy".
+    /// </summary>
     public string Period { get; init; } = string.Empty;
 
     public decimal BaseSalary { get; init; }

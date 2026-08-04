@@ -37,11 +37,8 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
     public async Task CreateSession_Anonymous_ReturnsOk()
     {
         var visitorKey = Guid.NewGuid().ToString("N");
-        var response = await _client.PostAsJsonAsync(
-            "/api/v1/store-chat/sessions",
-            new { visitorKey })
+        var response = await _client.PostAsJsonAsync("/api/v1/store-chat/sessions", new { visitorKey })
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var session = await response.Content
             .ReadFromJsonAsync<StoreChatSessionDto>(TestContext.Current.CancellationToken)
@@ -54,22 +51,16 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
     public async Task CreateSession_SameVisitorKeyTwice_RestoresSameSession()
     {
         var visitorKey = Guid.NewGuid().ToString("N");
-        var firstResponse = await _client.PostAsJsonAsync(
-            "/api/v1/store-chat/sessions",
-            new { visitorKey })
+        var firstResponse = await _client.PostAsJsonAsync("/api/v1/store-chat/sessions", new { visitorKey })
             .ConfigureAwait(true);
         var first = await firstResponse.Content
             .ReadFromJsonAsync<StoreChatSessionDto>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
-        var secondResponse = await _client.PostAsJsonAsync(
-            "/api/v1/store-chat/sessions",
-            new { visitorKey })
+        var secondResponse = await _client.PostAsJsonAsync("/api/v1/store-chat/sessions", new { visitorKey })
             .ConfigureAwait(true);
         var second = await secondResponse.Content
             .ReadFromJsonAsync<StoreChatSessionDto>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         second!.Id.Should().Be(first!.Id);
     }
 
@@ -83,17 +74,15 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             var session = new StoreChatSession { VisitorKey = Guid.NewGuid().ToString("N") };
             db.StoreChatSessions.Add(session);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-            db.StoreChatMessages.Add(
-                new StoreChatMessage { SessionId = session.Id, Sender = "Visitor", Content = "Xin chào" });
+            db.StoreChatMessages
+                .Add(new StoreChatMessage { SessionId = session.Id, Sender = "Visitor", Content = "Xin chào" });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         var response = await _client.GetAsync(
             $"/api/v1/store-chat/sessions/{sessionId}/history",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var history = await response.Content
             .ReadFromJsonAsync<List<StoreChatMessageDto>>(TestContext.Current.CancellationToken)
@@ -113,13 +102,11 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         var response = await _client.PostAsync(
             $"/api/v1/store-chat/sessions/{sessionId}/link-customer",
             null,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -135,7 +122,6 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
@@ -151,13 +137,11 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.PostAsync(
             $"/api/v1/store-chat/sessions/{sessionId}/link-customer",
             null,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope2 = _factory.Services.CreateScope();
         var dbAfter = scope2.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -185,22 +169,26 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_release_{uniqueId}", "Password123!",
+            _factory.Services,
+            $"staff_release_{uniqueId}",
+            "Password123!",
             [Permissions.Marketing.StoreChatManagement.View, Permissions.Marketing.StoreChatManagement.Claim],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_release_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_release_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.PostAsync(
-            $"/api/v1/store-chat-handoff/sessions/{sessionId}/release", null, TestContext.Current.CancellationToken)
+            $"/api/v1/store-chat-handoff/sessions/{sessionId}/release",
+            null,
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope2 = _factory.Services.CreateScope();
         var dbAfter = scope2.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -216,17 +204,23 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_list_noperm_{uniqueId}", "Password123!", [], TestContext.Current.CancellationToken)
+            _factory.Services,
+            $"staff_list_noperm_{uniqueId}",
+            "Password123!",
+            [],
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_list_noperm_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_list_noperm_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync(
-            "/api/v1/store-chat-handoff/sessions", TestContext.Current.CancellationToken)
+            "/api/v1/store-chat-handoff/sessions",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -248,22 +242,25 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_list_{uniqueId}", "Password123!",
+            _factory.Services,
+            $"staff_list_{uniqueId}",
+            "Password123!",
             [Permissions.Marketing.StoreChatManagement.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_list_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_list_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync(
-            "/api/v1/store-chat-handoff/sessions", TestContext.Current.CancellationToken)
+            "/api/v1/store-chat-handoff/sessions",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var sessions = await response.Content
             .ReadFromJsonAsync<List<StoreChatSessionListItemDto>>(TestContext.Current.CancellationToken)
@@ -281,29 +278,36 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             var session = new StoreChatSession { VisitorKey = Guid.NewGuid().ToString("N") };
             db.StoreChatSessions.Add(session);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-            db.StoreChatMessages.Add(new StoreChatMessage
-            {
-                SessionId = session.Id, Sender = StoreChatSender.Staff,
-                Content = "<p>Dạ shop còn <strong>xe SH 2024</strong> ạ</p>"
-            });
+            db.StoreChatMessages
+                .Add(
+                    new StoreChatMessage
+                    {
+                        SessionId = session.Id,
+                        Sender = StoreChatSender.Staff,
+                        Content = "<p>Dạ shop còn <strong>xe SH 2024</strong> ạ</p>"
+                    });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_preview_{uniqueId}", "Password123!",
-            [Permissions.Marketing.StoreChatManagement.View], TestContext.Current.CancellationToken)
+            _factory.Services,
+            $"staff_preview_{uniqueId}",
+            "Password123!",
+            [Permissions.Marketing.StoreChatManagement.View],
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_preview_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_preview_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync(
-            "/api/v1/store-chat-handoff/sessions", TestContext.Current.CancellationToken)
+            "/api/v1/store-chat-handoff/sessions",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var sessions = await response.Content
             .ReadFromJsonAsync<List<StoreChatSessionListItemDto>>(TestContext.Current.CancellationToken)
@@ -317,9 +321,12 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var customer = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"customer_named_{uniqueId}", "Password123!", [], TestContext.Current.CancellationToken)
+            _factory.Services,
+            $"customer_named_{uniqueId}",
+            "Password123!",
+            [],
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         Guid sessionId;
         using (var scope = _factory.Services.CreateScope())
         {
@@ -334,21 +341,24 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_customername_{uniqueId}", "Password123!",
+            _factory.Services,
+            $"staff_customername_{uniqueId}",
+            "Password123!",
             [Permissions.Marketing.StoreChatManagement.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_customername_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_customername_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync(
-            "/api/v1/store-chat-handoff/sessions", TestContext.Current.CancellationToken)
+            "/api/v1/store-chat-handoff/sessions",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var sessions = await response.Content
             .ReadFromJsonAsync<List<StoreChatSessionListItemDto>>(TestContext.Current.CancellationToken)
@@ -356,24 +366,28 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         sessions!.Should().ContainSingle(s => s.Id == sessionId && s.CustomerName == customer.FullName);
     }
 
-    [Fact(DisplayName = "STORECHAT_012 - Endpoint công khai không bị cấp quyền cao hơn khi kèm JWT nhân viên không liên quan")]
+    [Fact(
+        DisplayName = "STORECHAT_012 - Endpoint công khai không bị cấp quyền cao hơn khi kèm JWT nhân viên không liên quan")]
     public async Task CreateSession_WithUnrelatedStaffJwt_BehavesLikeAnonymous()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_unrelated_{uniqueId}", "Password123!", [], TestContext.Current.CancellationToken)
+            _factory.Services,
+            $"staff_unrelated_{uniqueId}",
+            "Password123!",
+            [],
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_unrelated_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_unrelated_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var visitorKey = Guid.NewGuid().ToString("N");
-        var response = await _client.PostAsJsonAsync(
-            "/api/v1/store-chat/sessions",
-            new { visitorKey })
+        var response = await _client.PostAsJsonAsync("/api/v1/store-chat/sessions", new { visitorKey })
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var session = await response.Content
             .ReadFromJsonAsync<StoreChatSessionDto>(TestContext.Current.CancellationToken)
@@ -386,13 +400,9 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
     public async Task CreateSession_WithMalformedAuthHeader_StillSucceeds()
     {
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "khong-phai-jwt-hop-le");
-
         var visitorKey = Guid.NewGuid().ToString("N");
-        var response = await _client.PostAsJsonAsync(
-            "/api/v1/store-chat/sessions",
-            new { visitorKey })
+        var response = await _client.PostAsJsonAsync("/api/v1/store-chat/sessions", new { visitorKey })
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -408,12 +418,10 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         var response = await _client.PostAsJsonAsync(
             $"/api/v1/store-chat/sessions/{sessionId}/contact-info",
             new { contactName = "Nguyễn Văn A", contactPhone = "0901234567" })
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope2 = _factory.Services.CreateScope();
         var dbAfter = scope2.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -436,16 +444,15 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         var response = await _client.PostAsJsonAsync(
             $"/api/v1/store-chat/sessions/{sessionId}/contact-info",
             new { contactName = "Nguyễn Văn A", contactPhone = "091234" })
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "STORECHAT_016 - Xoá cuộc trò chuyện tạo phiên mới liên kết phiên cũ, phiên cũ giữ nguyên lịch sử cho quản trị")]
+    [Fact(
+        DisplayName = "STORECHAT_016 - Xoá cuộc trò chuyện tạo phiên mới liên kết phiên cũ, phiên cũ giữ nguyên lịch sử cho quản trị")]
     public async Task ClearChat_CreatesNewLinkedSession_OldSessionHistoryUntouched()
     {
         Guid oldSessionId;
@@ -454,24 +461,22 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var session = new StoreChatSession
             {
-                VisitorKey = Guid.NewGuid().ToString("N"), ContactName = "Khách D", ContactPhone = "0933333333"
+                VisitorKey = Guid.NewGuid().ToString("N"),
+                ContactName = "Khách D",
+                ContactPhone = "0933333333"
             };
             db.StoreChatSessions.Add(session);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-            db.StoreChatMessages.Add(
-                new StoreChatMessage { SessionId = session.Id, Sender = "Visitor", Content = "Tin nhắn cũ" });
+            db.StoreChatMessages
+                .Add(new StoreChatMessage { SessionId = session.Id, Sender = "Visitor", Content = "Tin nhắn cũ" });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             oldSessionId = session.Id;
         }
-
-        // Khách bấm "Xoá cuộc trò chuyện" — Store tạo VisitorKey mới rồi gọi lại chính endpoint tạo/khôi phục
-        // phiên, kèm previousSessionId.
         var newVisitorKey = Guid.NewGuid().ToString("N");
         var createResponse = await _client.PostAsJsonAsync(
             "/api/v1/store-chat/sessions",
             new { visitorKey = newVisitorKey, previousSessionId = oldSessionId })
             .ConfigureAwait(true);
-
         createResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var newSession = await createResponse.Content
             .ReadFromJsonAsync<StoreChatSessionDto>(TestContext.Current.CancellationToken)
@@ -479,23 +484,22 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         newSession!.Id.Should().NotBe(oldSessionId);
         newSession.ContactName.Should().Be("Khách D");
         newSession.ContactPhone.Should().Be("0933333333");
-
         var newHistoryResponse = await _client.GetAsync(
-            $"/api/v1/store-chat/sessions/{newSession.Id}/history", TestContext.Current.CancellationToken)
+            $"/api/v1/store-chat/sessions/{newSession.Id}/history",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var newHistory = await newHistoryResponse.Content
             .ReadFromJsonAsync<List<StoreChatMessageDto>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         newHistory.Should().BeEmpty();
-
         var oldHistoryResponse = await _client.GetAsync(
-            $"/api/v1/store-chat/sessions/{oldSessionId}/history", TestContext.Current.CancellationToken)
+            $"/api/v1/store-chat/sessions/{oldSessionId}/history",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var oldHistory = await oldHistoryResponse.Content
             .ReadFromJsonAsync<List<StoreChatMessageDto>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         oldHistory!.Should().ContainSingle(m => m.Content == "Tin nhắn cũ");
-
         using var scope2 = _factory.Services.CreateScope();
         var dbAfter = scope2.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var updated = await dbAfter.StoreChatSessions
@@ -516,25 +520,30 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_delnoperm_{uniqueId}", "Password123!",
-            [Permissions.Marketing.StoreChatManagement.View], TestContext.Current.CancellationToken)
+            _factory.Services,
+            $"staff_delnoperm_{uniqueId}",
+            "Password123!",
+            [Permissions.Marketing.StoreChatManagement.View],
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_delnoperm_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_delnoperm_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.DeleteAsync(
-            $"/api/v1/store-chat-handoff/sessions/{sessionId}", TestContext.Current.CancellationToken)
+            $"/api/v1/store-chat-handoff/sessions/{sessionId}",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact(DisplayName = "STORECHAT_018 - Xoá phiên có quyền Delete ẩn khỏi mọi truy vấn (xoá mềm) nhưng vẫn giữ lại cả phiên lẫn tin nhắn")]
+    [Fact(
+        DisplayName = "STORECHAT_018 - Xoá phiên có quyền Delete ẩn khỏi mọi truy vấn (xoá mềm) nhưng vẫn giữ lại cả phiên lẫn tin nhắn")]
     public async Task DeleteSession_WithPermission_SoftDeletesSessionAndMessages()
     {
         Guid sessionId;
@@ -544,47 +553,49 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             var session = new StoreChatSession { VisitorKey = Guid.NewGuid().ToString("N") };
             db.StoreChatSessions.Add(session);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-            db.StoreChatMessages.Add(
-                new StoreChatMessage { SessionId = session.Id, Sender = "Visitor", Content = "Xoá tôi đi" });
+            db.StoreChatMessages
+                .Add(new StoreChatMessage { SessionId = session.Id, Sender = "Visitor", Content = "Xoá tôi đi" });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             sessionId = session.Id;
         }
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_del_{uniqueId}", "Password123!",
-            [Permissions.Marketing.StoreChatManagement.Delete], TestContext.Current.CancellationToken)
+            _factory.Services,
+            $"staff_del_{uniqueId}",
+            "Password123!",
+            [Permissions.Marketing.StoreChatManagement.Delete],
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_del_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_del_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.DeleteAsync(
-            $"/api/v1/store-chat-handoff/sessions/{sessionId}", TestContext.Current.CancellationToken)
+            $"/api/v1/store-chat-handoff/sessions/{sessionId}",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         using var scope2 = _factory.Services.CreateScope();
         var dbAfter = scope2.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
-        // Truy vấn thường (có query filter global DeletedAt == null) phải không còn thấy — đúng hành
-        // vi "ẩn khỏi trang quản trị" mà tính năng cần.
-        (await dbAfter.StoreChatSessions.AnyAsync(s => s.Id == sessionId, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true)).Should().BeFalse();
-        (await dbAfter.StoreChatMessages.AnyAsync(m => m.SessionId == sessionId, TestContext.Current.CancellationToken)
-            .ConfigureAwait(true)).Should().BeFalse();
-
-        // Bỏ qua query filter để xác nhận đây là XOÁ MỀM thật sự — row vẫn còn nguyên trong DB, có
-        // DeletedAt, không phải xoá vật lý.
-        var sessionIgnoringFilter = await dbAfter.StoreChatSessions.IgnoreQueryFilters()
+        (await dbAfter.StoreChatSessions
+            .AnyAsync(s => s.Id == sessionId, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true)).Should()
+            .BeFalse();
+        (await dbAfter.StoreChatMessages
+            .AnyAsync(m => m.SessionId == sessionId, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true)).Should()
+            .BeFalse();
+        var sessionIgnoringFilter = await dbAfter.StoreChatSessions
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(s => s.Id == sessionId, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         sessionIgnoringFilter.Should().NotBeNull();
         sessionIgnoringFilter!.DeletedAt.Should().NotBeNull();
-
-        var messageIgnoringFilter = await dbAfter.StoreChatMessages.IgnoreQueryFilters()
+        var messageIgnoringFilter = await dbAfter.StoreChatMessages
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(m => m.SessionId == sessionId, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         messageIgnoringFilter.Should().NotBeNull();
@@ -604,28 +615,30 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             oldSessionId = oldSession.Id;
         }
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_del2_{uniqueId}", "Password123!",
-            [Permissions.Marketing.StoreChatManagement.Delete], TestContext.Current.CancellationToken)
+            _factory.Services,
+            $"staff_del2_{uniqueId}",
+            "Password123!",
+            [Permissions.Marketing.StoreChatManagement.Delete],
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_del2_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_del2_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         (await _client.DeleteAsync(
-            $"/api/v1/store-chat-handoff/sessions/{oldSessionId}", TestContext.Current.CancellationToken)
-            .ConfigureAwait(true)).StatusCode.Should().Be(HttpStatusCode.OK);
+            $"/api/v1/store-chat-handoff/sessions/{oldSessionId}",
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true)).StatusCode
+            .Should()
+            .Be(HttpStatusCode.OK);
         _client.DefaultRequestHeaders.Authorization = null;
-
-        // Trình duyệt khách vẫn giữ VisitorKey cũ trong localStorage — trước bản vá này, insert sẽ
-        // đụng unique index (row cũ vẫn còn trong DB do xoá mềm) và trả 500.
-        var response = await _client.PostAsJsonAsync(
-            "/api/v1/store-chat/sessions",
-            new { visitorKey })
+        var response = await _client.PostAsJsonAsync("/api/v1/store-chat/sessions", new { visitorKey })
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var session = await response.Content
             .ReadFromJsonAsync<StoreChatSessionDto>(TestContext.Current.CancellationToken)
@@ -639,22 +652,28 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_prodnoperm_{uniqueId}", "Password123!",
-            [Permissions.Marketing.StoreChatManagement.View], TestContext.Current.CancellationToken)
+            _factory.Services,
+            $"staff_prodnoperm_{uniqueId}",
+            "Password123!",
+            [Permissions.Marketing.StoreChatManagement.View],
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_prodnoperm_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_prodnoperm_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync(
-            "/api/v1/store-chat-handoff/products/search?keyword=abc", TestContext.Current.CancellationToken)
+            "/api/v1/store-chat-handoff/products/search?keyword=abc",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact(DisplayName = "STORECHAT_021 - Nhân viên có quyền Claim tìm sản phẩm và xem biến thể + màu để gán vào tin nhắn")]
+    [Fact(
+        DisplayName = "STORECHAT_021 - Nhân viên có quyền Claim tìm sản phẩm và xem biến thể + màu để gán vào tin nhắn")]
     public async Task SearchProductsAndGetVariants_WithPermission_ReturnsProductWithColors()
     {
         int productId;
@@ -664,7 +683,8 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var suffix = Guid.NewGuid().ToString("N")[..8];
             const string statusId = Domain.Constants.Product.ProductStatus.ForSale;
-            if (!await db.ProductStatuses.AnyAsync(s => s.Key == statusId, TestContext.Current.CancellationToken)
+            if (!await db.ProductStatuses
+                .AnyAsync(s => s.Key == statusId, TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.ProductStatuses.Add(new ProductStatus { Key = statusId });
@@ -674,53 +694,65 @@ public class StoreChat : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             db.ProductCategories.Add(category);
             db.Brands.Add(brand);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
             var product = new Domain.Entities.Product
             {
-                Name = $"Honda SH {suffix}", CategoryId = category.Id, BrandId = brand.Id, StatusId = statusId
+                Name = $"Honda SH {suffix}",
+                CategoryId = category.Id,
+                BrandId = brand.Id,
+                StatusId = statusId
             };
             db.Products.Add(product);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
             var variant = new ProductVariant
             {
-                ProductId = product.Id, VariantName = "Đỏ đen", SKU = $"SKU_{suffix}",
-                Price = 91000000, UrlSlug = $"sh-{suffix}"
+                ProductId = product.Id,
+                VariantName = "Đỏ đen",
+                SKU = $"SKU_{suffix}",
+                Price = 91000000,
+                UrlSlug = $"sh-{suffix}"
             };
             db.ProductVariants.Add(variant);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-            db.ProductVariantColors.Add(new ProductVariantColor
-            {
-                ProductVariantId = variant.Id, ColorName = "Đỏ đen", ColorCode = "#c00", CoverImageUrl = "red.jpg"
-            });
+            db.ProductVariantColors
+                .Add(
+                    new ProductVariantColor
+                    {
+                        ProductVariantId = variant.Id,
+                        ColorName = "Đỏ đen",
+                        ColorCode = "#c00",
+                        CoverImageUrl = "red.jpg"
+                    });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
             productId = product.Id;
             variantId = variant.Id;
         }
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_prodok_{uniqueId}", "Password123!",
-            [Permissions.Marketing.StoreChatManagement.Claim], TestContext.Current.CancellationToken)
+            _factory.Services,
+            $"staff_prodok_{uniqueId}",
+            "Password123!",
+            [Permissions.Marketing.StoreChatManagement.Claim],
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client, $"staff_prodok_{uniqueId}", "Password123!", TestContext.Current.CancellationToken)
+            _client,
+            $"staff_prodok_{uniqueId}",
+            "Password123!",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var searchResponse = await _client.GetAsync(
-            $"/api/v1/store-chat-handoff/products/search?keyword=Honda SH", TestContext.Current.CancellationToken)
+            $"/api/v1/store-chat-handoff/products/search?keyword=Honda SH",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         searchResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var searchItems = await searchResponse.Content
             .ReadFromJsonAsync<List<StoreChatProductSearchItemDto>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         searchItems.Should().Contain(i => i.ProductId == productId);
-
         var variantsResponse = await _client.GetAsync(
-            $"/api/v1/store-chat-handoff/products/{productId}/variants", TestContext.Current.CancellationToken)
+            $"/api/v1/store-chat-handoff/products/{productId}/variants",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         variantsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var variants = await variantsResponse.Content

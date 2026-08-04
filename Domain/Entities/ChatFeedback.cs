@@ -13,6 +13,7 @@ public class ChatFeedback : BaseEntity
     [Column("ChatRunId")]
     [ForeignKey("ChatRun")]
     public Guid ChatRunId { get; set; }
+
     public ChatRun? ChatRun { get; set; }
 
     [Column("Comment", TypeName = "nvarchar(max)")]
@@ -22,5 +23,6 @@ public class ChatFeedback : BaseEntity
     [Column("ReportedBy")]
     [ForeignKey("ReportedByUser")]
     public Guid ReportedBy { get; set; }
+
     public ApplicationUser? ReportedByUser { get; set; }
 }

@@ -5,7 +5,9 @@ using MediatR;
 
 namespace Application.Features.InventoryReports.Queries.ExportInventoryReport
 {
-    public class ExportInventoryReportQueryHandler(IInventoryOnHandReadRepository readRepository, IInventoryReportExcelService excelService) : IRequestHandler<ExportInventoryReportQuery, Result<FileStreamResult>>
+    public class ExportInventoryReportQueryHandler(
+        IInventoryOnHandReadRepository readRepository,
+        IInventoryReportExcelService excelService) : IRequestHandler<ExportInventoryReportQuery, Result<FileStreamResult>>
     {
         public async Task<Result<FileStreamResult>> Handle(
             ExportInventoryReportQuery request,

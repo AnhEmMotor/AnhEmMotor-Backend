@@ -26,14 +26,14 @@ namespace WebAPI.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The dashboard summary.</returns>
         [HttpGet("dashboard/summary")]
-        public async Task<IActionResult> GetSummary([FromQuery] DateTime? start, [FromQuery] DateTime? end, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSummary(
+            [FromQuery] DateTime? start,
+            [FromQuery] DateTime? end,
+            CancellationToken cancellationToken)
         {
             var startDate = start ?? DateTime.Today;
             var endDate = end ?? DateTime.Today.AddDays(1).AddTicks(-1);
             var result = await mediator.Send(new GetDashboardSummaryQuery(startDate, endDate), cancellationToken);
-            
-            // Note: The previous logic for IsRevenueAlert (if now.Hour >= 15 ...) should ideally be in the Application layer.
-            // If the Response object supports it, we could set it here, but it's cleaner to let the handler or client handle it.
             return HandleResult(result);
         }
 
@@ -45,7 +45,10 @@ namespace WebAPI.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The PnL report.</returns>
         [HttpGet("pnl")]
-        public async Task<IActionResult> GetPnl([FromQuery] int month, [FromQuery] int year, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetPnl(
+            [FromQuery] int month,
+            [FromQuery] int year,
+            CancellationToken cancellationToken)
         {
             var result = await mediator.Send(new GetPnlReportQuery(month, year), cancellationToken);
             return HandleResult(result);
@@ -59,7 +62,10 @@ namespace WebAPI.Controllers
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The staff performance data.</returns>
         [HttpGet("staff-performance")]
-        public async Task<IActionResult> GetStaff([FromQuery] DateTime? start, [FromQuery] DateTime? end, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetStaff(
+            [FromQuery] DateTime? start,
+            [FromQuery] DateTime? end,
+            CancellationToken cancellationToken)
         {
             var startDate = start ?? DateTime.Today.AddDays(-30);
             var endDate = end ?? DateTime.Today;
@@ -88,7 +94,6 @@ namespace WebAPI.Controllers
             Response.Headers.Append("Cache-Control", "no-cache");
             Response.Headers.Append("Connection", "keep-alive");
             var result = await mediator.Send(new GetRecentTransactionsQuery(), cancellationToken).ConfigureAwait(false);
-            
             if (result.IsSuccess)
             {
                 foreach (var log in result.Value)

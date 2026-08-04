@@ -7,8 +7,7 @@ namespace Application.Features.StoreChat.Commands.ReleaseStoreChatSession;
 
 public class ReleaseStoreChatSessionCommandHandler(
     IStoreChatUpdateRepository storeChatUpdateRepository,
-    ILogger<ReleaseStoreChatSessionCommandHandler> logger)
-    : IRequestHandler<ReleaseStoreChatSessionCommand, Result<bool>>
+    ILogger<ReleaseStoreChatSessionCommandHandler> logger) : IRequestHandler<ReleaseStoreChatSessionCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(ReleaseStoreChatSessionCommand request, CancellationToken cancellationToken)
     {
@@ -17,7 +16,6 @@ public class ReleaseStoreChatSessionCommandHandler(
         {
             return Error.Conflict("Phiên không ở trạng thái đang có nhân viên xử lý.");
         }
-
         logger.LogInformation("[StoreChat] Action=Release SessionId={SessionId}", request.SessionId);
         return true;
     }

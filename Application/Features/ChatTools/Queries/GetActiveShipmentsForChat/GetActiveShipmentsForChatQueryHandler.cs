@@ -9,8 +9,7 @@ namespace Application.Features.ChatTools.Queries.GetActiveShipmentsForChat;
 
 public class GetActiveShipmentsForChatQueryHandler(
     IShipmentReadRepository shipmentReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetActiveShipmentsForChatQuery, Result<ChatToolEnvelope<ChatActiveShipmentListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetActiveShipmentsForChatQuery, Result<ChatToolEnvelope<ChatActiveShipmentListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatActiveShipmentListItemDto>>> Handle(
         GetActiveShipmentsForChatQuery request,
@@ -19,12 +18,10 @@ public class GetActiveShipmentsForChatQueryHandler(
         var shipments = await shipmentReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         var now = dateProvider.UtcNow;
         var limit = ChatToolLimit.Clamp(request.Limit);
-
         var active = shipments
             .Where(x => x.Status == ParcelDeliveryStatus.Shipping && !x.DeliveredAt.HasValue)
             .OrderByDescending(x => x.CreatedAt)
             .ToList();
-
         var dtos = active
             .Take(limit)
             .Select(
@@ -39,7 +36,6 @@ public class GetActiveShipmentsForChatQueryHandler(
                     DaysInTransit = (int)(now - (x.CreatedAt ?? now)).TotalDays
                 })
             .ToList();
-
         var inner = new ChatToolResult<ChatActiveShipmentListItemDto>(dtos, active.Count, active.Count > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
@@ -47,7 +43,6 @@ public class GetActiveShipmentsForChatQueryHandler(
             new Dictionary<string, string>(),
             "van-don-dang-giao",
             "VND");
-
         return ChatToolEnvelope<ChatActiveShipmentListItemDto>.Wrap(inner, meta);
     }
 }

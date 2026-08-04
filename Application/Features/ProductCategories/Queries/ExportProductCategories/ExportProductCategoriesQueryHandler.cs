@@ -11,7 +11,9 @@ using System.Text.RegularExpressions;
 
 namespace Application.Features.ProductCategories.Queries.ExportProductCategories;
 
-public class ExportProductCategoriesQueryHandler(IProductCategoryReadRepository repository, IProductCategoryExcelService excelService) : IRequestHandler<ExportProductCategoriesQuery, Result<FileStreamResult>>
+public class ExportProductCategoriesQueryHandler(
+    IProductCategoryReadRepository repository,
+    IProductCategoryExcelService excelService) : IRequestHandler<ExportProductCategoriesQuery, Result<FileStreamResult>>
 {
     public async Task<Result<FileStreamResult>> Handle(
         ExportProductCategoriesQuery request,

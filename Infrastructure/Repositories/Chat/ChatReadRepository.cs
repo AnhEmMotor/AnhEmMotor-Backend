@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.Chat;
+using Domain.Constants;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,9 @@ namespace Infrastructure.Repositories.Chat;
 
 public class ChatReadRepository(ApplicationDBContext context) : IChatReadRepository
 {
-    public async Task<List<ChatSession>> GetSessionsByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<List<ChatSession>> GetSessionsByUserIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
     {
         return await context.ChatSessions
             .Where(s => s.UserId == userId)
@@ -17,11 +20,12 @@ public class ChatReadRepository(ApplicationDBContext context) : IChatReadReposit
 
     public async Task<ChatSession?> GetSessionByIdAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
-        return await context.ChatSessions
-            .FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken);
+        return await context.ChatSessions.FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken);
     }
 
-    public async Task<List<ChatMessage>> GetMessagesBySessionIdAsync(Guid sessionId, CancellationToken cancellationToken = default)
+    public async Task<List<ChatMessage>> GetMessagesBySessionIdAsync(
+        Guid sessionId,
+        CancellationToken cancellationToken = default)
     {
         return await context.ChatMessages
             .Where(m => m.SessionId == sessionId)
@@ -33,18 +37,21 @@ public class ChatReadRepository(ApplicationDBContext context) : IChatReadReposit
     {
         return await context.ChatRuns
             .Include(r => r.Session)
-            .Where(r => r.Session!.UserId == userId && (r.Status == Domain.Constants.ChatRunStatus.Pending || r.Status == Domain.Constants.ChatRunStatus.Running))
+            .Where(
+                r => r.Session!.UserId == userId &&
+                    (r.Status == ChatRunStatus.Pending || r.Status == ChatRunStatus.Running))
             .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<ChatRun?> GetRunByIdAsync(Guid runId, CancellationToken cancellationToken = default)
     {
-        return await context.ChatRuns
-            .Include(r => r.Session)
-            .FirstOrDefaultAsync(r => r.Id == runId, cancellationToken);
+        return await context.ChatRuns.Include(r => r.Session).FirstOrDefaultAsync(r => r.Id == runId, cancellationToken);
     }
 
-    public async Task<List<ChatRunEvent>> GetRunEventsAsync(Guid runId, long afterSeq, CancellationToken cancellationToken = default)
+    public async Task<List<ChatRunEvent>> GetRunEventsAsync(
+        Guid runId,
+        long afterSeq,
+        CancellationToken cancellationToken = default)
     {
         return await context.ChatRunEvents
             .Where(e => e.RunId == runId && e.Seq > afterSeq)
@@ -54,8 +61,7 @@ public class ChatReadRepository(ApplicationDBContext context) : IChatReadReposit
 
     public async Task<int> CountSteeringMessagesAsync(Guid runId, CancellationToken cancellationToken = default)
     {
-        return await context.ChatMessages
-            .CountAsync(m => m.RunId == runId && m.IsSteering, cancellationToken);
+        return await context.ChatMessages.CountAsync(m => m.RunId == runId && m.IsSteering, cancellationToken);
     }
 
     public async Task<ChatPlan?> GetPlanByRunIdAsync(Guid runId, CancellationToken cancellationToken = default)
@@ -66,7 +72,9 @@ public class ChatReadRepository(ApplicationDBContext context) : IChatReadReposit
     }
 
     public async Task<ChatPlanTemplate?> GetActiveTemplateByIntentHashAsync(
-        string intentHash, string module, CancellationToken cancellationToken = default)
+        string intentHash,
+        string module,
+        CancellationToken cancellationToken = default)
     {
         return await context.ChatPlanTemplates
             .Where(t => t.IntentHash == intentHash && t.Module == module && t.Status == "active")
@@ -75,7 +83,6 @@ public class ChatReadRepository(ApplicationDBContext context) : IChatReadReposit
 
     public async Task<ChatPlanTemplate?> GetTemplateByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await context.ChatPlanTemplates
-            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        return await context.ChatPlanTemplates.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
     }
 }

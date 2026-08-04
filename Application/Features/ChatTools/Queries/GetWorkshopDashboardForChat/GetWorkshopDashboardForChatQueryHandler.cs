@@ -6,24 +6,19 @@ using MediatR;
 
 namespace Application.Features.ChatTools.Queries.GetWorkshopDashboardForChat;
 
-public class GetWorkshopDashboardForChatQueryHandler(
-    IStatisticalReadRepository repo,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetWorkshopDashboardForChatQuery, Result<ChatToolEnvelope<ChatWorkshopDashboardDto>>>
+public class GetWorkshopDashboardForChatQueryHandler(IStatisticalReadRepository repo, IServerDateProvider dateProvider) : IRequestHandler<GetWorkshopDashboardForChatQuery, Result<ChatToolEnvelope<ChatWorkshopDashboardDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatWorkshopDashboardDto>>> Handle(
         GetWorkshopDashboardForChatQuery request,
         CancellationToken cancellationToken)
     {
         var (start, end) = ChatToolDateRange.Resolve(request.FromDate, request.ToDate, dateProvider);
-
         var response = await repo
             .GetWorkshopDashboardOverviewAsync(
                 start.ToString("yyyy-MM-dd"),
                 end.ToString("yyyy-MM-dd"),
                 cancellationToken)
             .ConfigureAwait(false);
-
         var dto = new ChatWorkshopDashboardDto
         {
             InProgressCount = response.KpiCards.InProgressCount,
@@ -34,14 +29,12 @@ public class GetWorkshopDashboardForChatQueryHandler(
             WarrantyRequestsCount = response.WarrantyRequestsCount,
             ComplaintsCount = response.ComplaintsCount
         };
-
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "IStatisticalReadRepository.GetWorkshopDashboardOverviewAsync",
             new Dictionary<string, string> { ["Khoảng thời gian"] = ChatToolDateRange.FormatVietnamRange(start, end) },
             "tong-quan-xuong-dich-vu",
             "VND");
-
         return ChatToolEnvelope<ChatWorkshopDashboardDto>.WrapSingle(dto, meta);
     }
 }

@@ -12,8 +12,7 @@ public class UpdateManagerChatSessionCommandHandler(
     IChatUpdateRepository chatUpdateRepository,
     IPermissionReadRepository permissionReadRepository,
     ICurrentUserContext currentUserContext,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateManagerChatSessionCommand, Result<bool>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManagerChatSessionCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(UpdateManagerChatSessionCommand request, CancellationToken cancellationToken)
     {
@@ -23,19 +22,15 @@ public class UpdateManagerChatSessionCommandHandler(
         {
             return Error.Forbidden();
         }
-
         var session = await chatReadRepository.GetSessionByIdAsync(request.SessionId, cancellationToken);
         if (session == null || session.UserId != userId)
         {
             return Error.NotFound("Phiên chat không tồn tại hoặc không thuộc quyền sở hữu.");
         }
-
         session.Title = request.Title;
         session.UpdatedAt = DateTime.UtcNow;
-
         chatUpdateRepository.UpdateSession(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return true;
     }
 }

@@ -2,8 +2,10 @@ using System.Text.Json;
 
 namespace Application.DTOs.Chat;
 
-/// <summary>Bước suy nghĩ/gọi tool của 1 tin nhắn AI, tái dựng từ ChatRunEvent để hiển thị lại khi
-/// mở lịch sử chat cũ — cùng hình dạng với ChatReasoningStep phía FE (kind: "thinking" | "tool").</summary>
+/// <summary>
+/// Bước suy nghĩ/gọi tool của 1 tin nhắn AI, tái dựng từ ChatRunEvent để hiển thị lại khi mở lịch sử chat cũ — cùng
+/// hình dạng với ChatReasoningStep phía FE (kind: "thinking" | "tool").
+/// </summary>
 public record ChatReasoningStepDto(
     string Kind,
     string? Text = null,

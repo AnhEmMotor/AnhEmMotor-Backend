@@ -28,5 +28,5 @@ public class MaintenanceHistory : BaseEntity
 
     public int? NextMaintenanceOdo { get; set; }
 
-public string? ServiceType { get; set; }
+    public string? ServiceType { get; set; }
 }

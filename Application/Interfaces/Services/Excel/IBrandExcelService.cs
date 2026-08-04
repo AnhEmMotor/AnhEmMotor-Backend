@@ -14,5 +14,6 @@ public interface IBrandExcelService
 
     public IReadOnlyList<BrandImportRow> ParseImportRows(byte[] fileBytes);
 
-    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(IReadOnlyList<BrandImportFailedRow> failedRows);
+    public (byte[] WithoutReason, byte[] WithReason) BuildImportErrorReports(
+        IReadOnlyList<BrandImportFailedRow> failedRows);
 }

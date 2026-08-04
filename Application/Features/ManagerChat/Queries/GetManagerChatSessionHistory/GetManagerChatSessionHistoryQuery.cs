@@ -1,5 +1,4 @@
 using Application.Common.Models;
-using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.ManagerChat.Queries.GetManagerChatSessionHistory;

@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Application.DTOs.Chat;
 using Application.Features.ManagerChat.Commands.CancelChatRun;
 using Application.Features.ManagerChat.Commands.SendSteeringMessage;
@@ -9,6 +8,7 @@ using Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Runtime.CompilerServices;
 
 namespace WebAPI.Hubs;
 
@@ -23,7 +23,9 @@ public class ManagerChatHub(ISender sender, IChatRunEventBus bus) : Hub
         return await sender.Send(command);
     }
 
-    /// <summary>Gửi tin nhắn khi có run đang chạy (steering).</summary>
+    /// <summary>
+    /// Gửi tin nhắn khi có run đang chạy (steering).
+    /// </summary>
     public async Task<SteeringResultDto> SendSteering(Guid runId, string content)
     {
         var userId = ParseUserId();
@@ -37,13 +39,13 @@ public class ManagerChatHub(ISender sender, IChatRunEventBus bus) : Hub
     }
 
     public async IAsyncEnumerable<ChatRunEventDto> SubscribeRun(
-        Guid runId, long afterSeq, [EnumeratorCancellation] CancellationToken cancellationToken)
+        Guid runId,
+        long afterSeq,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        // Subscribe trước để không lọt event xảy ra giữa lúc replay và lúc nối bus.
         var bufferCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var liveEvents = bus.SubscribeAsync(runId, bufferCts.Token);
         var liveEnumerator = liveEvents.GetAsyncEnumerator(bufferCts.Token);
-
         var query = new GetChatRunEventsQuery(runId, afterSeq);
         var result = await sender.Send(query, cancellationToken);
         if (result.IsFailure)
@@ -51,32 +53,30 @@ public class ManagerChatHub(ISender sender, IChatRunEventBus bus) : Hub
             await liveEnumerator.DisposeAsync();
             throw new HubException(result.Error!.Message);
         }
-
         long lastSeq = afterSeq;
         foreach (var e in result.Value!.Events)
         {
             lastSeq = e.Seq;
             yield return e;
         }
-
         if (result.Value.RunIsTerminal)
         {
             await liveEnumerator.DisposeAsync();
             yield break;
         }
-
         try
         {
             while (await liveEnumerator.MoveNextAsync())
             {
                 var e = liveEnumerator.Current;
-                if (e.Seq <= lastSeq) continue;
+                if (e.Seq <= lastSeq)
+                    continue;
                 lastSeq = e.Seq;
                 yield return e;
-                if (IsTerminal(e.Type)) yield break;
+                if (IsTerminal(e.Type))
+                    yield break;
             }
-        }
-        finally
+        } finally
         {
             await liveEnumerator.DisposeAsync();
         }
@@ -102,11 +102,11 @@ public class ManagerChatHub(ISender sender, IChatRunEventBus bus) : Hub
         var token = Context.GetHttpContext()?.Request.Query["access_token"].ToString();
         if (string.IsNullOrEmpty(token))
         {
-            token = Context.GetHttpContext()?.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            token = Context.GetHttpContext()?.Request.Headers["Authorization"].ToString()
+                .Replace("Bearer ", string.Empty);
         }
         return token ?? string.Empty;
     }
 
-    private static bool IsTerminal(string type) =>
-        type is ChatRunEventType.RunCompleted or ChatRunEventType.RunCancelled or ChatRunEventType.Error;
+    private static bool IsTerminal(string type) => type is ChatRunEventType.RunCompleted or ChatRunEventType.RunCancelled or ChatRunEventType.Error;
 }

@@ -9,8 +9,7 @@ namespace Application.Features.ChatTools.Queries.ListSalesContractsForChat;
 
 public class ListSalesContractsForChatQueryHandler(
     ISalesContractReadRepository salesContractReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListSalesContractsForChatQuery, Result<ChatToolEnvelope<ChatSalesContractListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListSalesContractsForChatQuery, Result<ChatToolEnvelope<ChatSalesContractListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatSalesContractListItemDto>>> Handle(
         ListSalesContractsForChatQuery request,
@@ -25,11 +24,9 @@ public class ListSalesContractsForChatQueryHandler(
             PageSize = limit,
             Filters = statusId is null ? null : $"Status=={statusId}"
         };
-
         var paged = await salesContractReadRepository
             .GetPagedAsync(sieveModel, cancellationToken)
             .ConfigureAwait(false);
-
         var items = paged.Items ?? [];
         var dtos = items
             .Select(
@@ -46,7 +43,6 @@ public class ListSalesContractsForChatQueryHandler(
                     CreatedAt = c.CreatedAt
                 })
             .ToList();
-
         var totalCount = (int)(paged.TotalCount ?? dtos.Count);
         var inner = new ChatToolResult<ChatSalesContractListItemDto>(dtos, totalCount, totalCount > dtos.Count);
         var filtersApplied = new Dictionary<string, string>();
@@ -54,14 +50,12 @@ public class ListSalesContractsForChatQueryHandler(
         {
             filtersApplied["Trạng thái"] = statusId;
         }
-
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "ISalesContractReadRepository.GetPagedAsync",
             filtersApplied,
             "hop-dong-ban-hang",
             "VND");
-
         return ChatToolEnvelope<ChatSalesContractListItemDto>.Wrap(inner, meta);
     }
 }

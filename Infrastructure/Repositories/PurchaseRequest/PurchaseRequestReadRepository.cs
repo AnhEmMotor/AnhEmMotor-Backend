@@ -97,9 +97,12 @@ namespace Infrastructure.Repositories.PurchaseRequest
         {
             return GetQueryable()
                 .Where(
-                    x => x.PurchaseRequestItems.Any(
-                        item => item.DeletedAt == null && item.Supplier != null && item.Supplier.Name != null &&
-                                item.Supplier.Name.Contains(keyword)))
+                    x => x.PurchaseRequestItems
+                        .Any(
+                            item => item.DeletedAt == null &&
+                                    item.Supplier != null &&
+                                    item.Supplier.Name != null &&
+                                    item.Supplier.Name.Contains(keyword)))
                 .OrderByDescending(x => x.CreatedAt)
                 .Select(x => x.Id)
                 .Take(limit)

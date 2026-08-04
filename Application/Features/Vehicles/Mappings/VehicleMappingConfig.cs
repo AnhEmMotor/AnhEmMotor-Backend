@@ -22,11 +22,13 @@ public class VehicleMappingConfig : IRegister
                 src => src.Product != null && src.Product.Brand != null ? src.Product.Brand.Name : null)
             .Map(
                 dest => dest.CategoryName,
-                src => src.Product != null && src.Product.ProductCategory != null ? src.Product.ProductCategory.Name : null)
-            .Map(
-                dest => dest.ProductName,
-                src => src.Product != null ? src.Product.Name : null)
+                src => src.Product != null && src.Product.ProductCategory != null
+                    ? src.Product.ProductCategory.Name
+                    : null)
+            .Map(dest => dest.ProductName, src => src.Product != null ? src.Product.Name : null)
             .Map(dest => dest.WarrantyPeriod, src => src.Product != null ? src.Product.WarrantyPeriod : null)
-            .Map(dest => dest.ImageUrl, src => src.ProductVariantColor != null ? src.ProductVariantColor.CoverImageUrl : null);
+            .Map(
+                dest => dest.ImageUrl,
+                src => src.ProductVariantColor != null ? src.ProductVariantColor.CoverImageUrl : null);
     }
 }

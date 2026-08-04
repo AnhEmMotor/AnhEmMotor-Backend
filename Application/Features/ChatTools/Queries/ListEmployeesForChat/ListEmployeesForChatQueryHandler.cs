@@ -8,24 +8,21 @@ namespace Application.Features.ChatTools.Queries.ListEmployeesForChat;
 
 public class ListEmployeesForChatQueryHandler(
     IEmployeeReadRepository employeeReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<ListEmployeesForChatQuery, Result<ChatToolEnvelope<ChatEmployeeListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<ListEmployeesForChatQuery, Result<ChatToolEnvelope<ChatEmployeeListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatEmployeeListItemDto>>> Handle(
         ListEmployeesForChatQuery request,
         CancellationToken cancellationToken)
     {
         var employees = await employeeReadRepository.GetAllWithUsersAsync(cancellationToken).ConfigureAwait(false);
-
         var keyword = request.Keyword?.Trim();
         var filtered = string.IsNullOrEmpty(keyword)
             ? employees
             : employees
                 .Where(
-                    e => e.User.FullName.Contains(keyword, StringComparison.OrdinalIgnoreCase)
-                        || e.JobTitle.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                    e => e.User.FullName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+                            e.JobTitle.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                 .ToList();
-
         var limit = ChatToolLimit.Clamp(request.Limit);
         var dtos = filtered
             .Take(limit)
@@ -38,7 +35,6 @@ public class ListEmployeesForChatQueryHandler(
                     Status = e.User.Status
                 })
             .ToList();
-
         var inner = new ChatToolResult<ChatEmployeeListItemDto>(dtos, filtered.Count, filtered.Count > dtos.Count);
         var filtersApplied = string.IsNullOrEmpty(keyword)
             ? new Dictionary<string, string>()
@@ -49,7 +45,6 @@ public class ListEmployeesForChatQueryHandler(
             filtersApplied,
             "nhan-vien",
             null);
-
         return ChatToolEnvelope<ChatEmployeeListItemDto>.Wrap(inner, meta);
     }
 }

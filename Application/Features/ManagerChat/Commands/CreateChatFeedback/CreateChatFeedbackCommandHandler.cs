@@ -21,7 +21,6 @@ public class CreateChatFeedbackCommandHandler(
         {
             return Result<Guid>.Failure(Error.NotFound("Không tìm thấy run hoặc không thuộc về bạn"));
         }
-
         var feedback = new ChatFeedback
         {
             ChatRunId = request.ChatRunId,
@@ -30,7 +29,6 @@ public class CreateChatFeedbackCommandHandler(
         };
         chatInsertRepository.AddFeedback(feedback);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return feedback.Id;
     }
 }

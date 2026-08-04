@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetProductPriceListForChat;
 
 public class GetProductPriceListForChatQueryHandler(
     IProductReadRepository productReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetProductPriceListForChatQuery, Result<ChatToolEnvelope<ChatProductPriceListItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetProductPriceListForChatQuery, Result<ChatToolEnvelope<ChatProductPriceListItemDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatProductPriceListItemDto>>> Handle(
         GetProductPriceListForChatQuery request,
@@ -34,7 +33,6 @@ public class GetProductPriceListForChatQueryHandler(
         {
             filtersApplied["Từ khóa"] = request.Keyword;
         }
-
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,
             "IProductReadRepository.GetPagedProductsForPriceManagementAsync",

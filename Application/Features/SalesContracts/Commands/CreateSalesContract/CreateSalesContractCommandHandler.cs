@@ -27,7 +27,6 @@ public class CreateSalesContractCommandHandler(
             .ConfigureAwait(false);
         if (order == null)
             return Result<SalesContractResponse>.Failure("Không tìm thấy đơn hàng tương ứng.");
-
         var isCancelledOrRefunded =
             string.Equals(order.StatusId, OrderStatus.Cancelled, StringComparison.OrdinalIgnoreCase) ||
             string.Equals(order.StatusId, OrderStatus.Refunding, StringComparison.OrdinalIgnoreCase) ||
@@ -35,13 +34,11 @@ public class CreateSalesContractCommandHandler(
         if (!OrderStatus.IsConfirmedOrderStatus(order.StatusId) || isCancelledOrRefunded)
             return Result<SalesContractResponse>.Failure(
                 "Chỉ có thể tạo hợp đồng từ đơn hàng đã được xác nhận thành công.");
-
         var existingContract = await readRepo.GetByOrderIdAsync(request.OrderId, cancellationToken)
             .ConfigureAwait(false);
         if (existingContract != null)
             return Result<SalesContractResponse>.Failure(
                 $"Đơn hàng #{request.OrderId} đã được liên kết với hợp đồng {existingContract.ContractNumber}.");
-
         var contractNumber = $"HDMB-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString()[..8]}";
         var entity = request.Adapt<SalesContract>();
         entity.ContractNumber = contractNumber;

@@ -11,9 +11,7 @@ public sealed class CreateEmployeeKpiCommandValidator : AbstractValidator<Create
         RuleFor(command => command.TargetValue).GreaterThan(0);
         RuleFor(command => command.ActualValue).GreaterThanOrEqualTo(0);
         RuleFor(command => command.PeriodStart).NotEmpty();
-        RuleFor(command => command.PeriodEnd)
-            .NotEmpty()
-            .GreaterThanOrEqualTo(command => command.PeriodStart);
+        RuleFor(command => command.PeriodEnd).NotEmpty().GreaterThanOrEqualTo(command => command.PeriodStart);
         RuleFor(command => command.Description).MaximumLength(2000);
     }
 }

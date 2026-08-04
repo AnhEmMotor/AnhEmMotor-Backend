@@ -11,17 +11,24 @@ namespace Application.Features.ChatTools.Queries.GetLoyaltyMembersForChat;
 
 public class GetLoyaltyMembersForChatQueryHandler(
     ILeadReadRepository leadReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetLoyaltyMembersForChatQuery, Result<ChatToolEnvelope<ChatLoyaltyMemberDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetLoyaltyMembersForChatQuery, Result<ChatToolEnvelope<ChatLoyaltyMemberDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatLoyaltyMemberDto>>> Handle(
         GetLoyaltyMembersForChatQuery request,
         CancellationToken cancellationToken)
     {
         var limit = ChatToolLimit.Clamp(request.Limit);
-        var sieveModel = new SieveModel { Sorts = $"-{nameof(LoyaltyMemberResponse.Points)}", Page = 1, PageSize = limit };
+        var sieveModel = new SieveModel
+        {
+            Sorts = $"-{nameof(LoyaltyMemberResponse.Points)}",
+            Page = 1,
+            PageSize = limit
+        };
         var paged = await leadReadRepository
-            .GetPagedAsync<LoyaltyMemberResponse>(sieveModel, DataFetchMode.ActiveOnly, cancellationToken: cancellationToken)
+            .GetPagedAsync<LoyaltyMemberResponse>(
+                sieveModel,
+                DataFetchMode.ActiveOnly,
+                cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         var dtos = (paged.Items ?? [])
             .Select(

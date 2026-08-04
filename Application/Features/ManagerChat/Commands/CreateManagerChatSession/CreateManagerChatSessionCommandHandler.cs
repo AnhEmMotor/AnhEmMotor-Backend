@@ -18,10 +18,11 @@ public class CreateManagerChatSessionCommandHandler(
     IConfiguration configuration,
     IAiSidecarUrlProvider sidecarUrlProvider,
     IHttpClientFactory httpClientFactory,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateManagerChatSessionCommand, Result<CreateManagerChatSessionResponse>>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateManagerChatSessionCommand, Result<CreateManagerChatSessionResponse>>
 {
-    public async Task<Result<CreateManagerChatSessionResponse>> Handle(CreateManagerChatSessionCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreateManagerChatSessionResponse>> Handle(
+        CreateManagerChatSessionCommand request,
+        CancellationToken cancellationToken)
     {
         var userId = currentUserContext.GetUserId();
         bool hasPermission = await permissionReadRepository.HasAnyPermissionAsync(userId, cancellationToken);
@@ -29,27 +30,18 @@ public class CreateManagerChatSessionCommandHandler(
         {
             return Error.Forbidden();
         }
-
         var finalTitle = request.Title;
         if (string.IsNullOrWhiteSpace(finalTitle) && !string.IsNullOrWhiteSpace(request.InitialMessage))
         {
             finalTitle = await GenerateTitleFromSidecar(request.InitialMessage, cancellationToken);
         }
-        
         if (string.IsNullOrWhiteSpace(finalTitle))
         {
             finalTitle = "New Chat";
         }
-
-        var session = new ChatSession
-        {
-            Title = finalTitle,
-            UserId = userId
-        };
-
+        var session = new ChatSession { Title = finalTitle, UserId = userId };
         chatInsertRepository.AddSession(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return new CreateManagerChatSessionResponse
         {
             Id = session.Id,
@@ -66,21 +58,20 @@ public class CreateManagerChatSessionCommandHandler(
         {
             var sidecarUrl = sidecarUrlProvider.GetSidecarUrl();
             var client = httpClientFactory.CreateClient();
-            
             var requestBody = new { message = message };
-            var requestContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-
+            var requestContent = new StringContent(
+                JsonSerializer.Serialize(requestBody),
+                Encoding.UTF8,
+                "application/json");
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{sidecarUrl}/manager-chat/generate-title")
             {
                 Content = requestContent
             };
-
             var internalSecret = configuration["Jwt:Key"];
             if (!string.IsNullOrEmpty(internalSecret))
             {
                 httpRequest.Headers.Add("X-Internal-Secret", internalSecret);
             }
-
             using var response = await client.SendAsync(httpRequest, cancellationToken);
             if (response.IsSuccessStatusCode)
             {
@@ -91,12 +82,9 @@ public class CreateManagerChatSessionCommandHandler(
                     return titleProp.GetString() ?? string.Empty;
                 }
             }
-        }
-        catch (Exception)
+        } catch (Exception)
         {
-            // fallback
         }
-        
         var title = message;
         if (title.Length > 30)
         {

@@ -1,9 +1,11 @@
 using Application.Common.Models;
+using Application.Features.NewsComments.Commands.CreateNewsComment;
 using Application.Features.NewsComments.Queries.GetNewsComments;
 using Asp.Versioning;
 using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
@@ -50,11 +52,15 @@ public class NewsCommentsController(IMediator mediator) : ApiController
     /// Lấy danh sách bình luận công khai theo loại và slug (dành cho Store).
     /// </summary>
     [HttpGet("public")]
-    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(List<NewsCommentResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetPublicComments([FromQuery] string? articleType, [FromQuery] string? articleSlug, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetPublicComments(
+        [FromQuery] string? articleType,
+        [FromQuery] string? articleSlug,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetNewsCommentsQuery(null, articleType, articleSlug), cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new GetNewsCommentsQuery(null, articleType, articleSlug), cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -62,9 +68,11 @@ public class NewsCommentsController(IMediator mediator) : ApiController
     /// Tạo mới một bình luận công khai (dành cho Store).
     /// </summary>
     [HttpPost("public")]
-    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreatePublicComment([FromBody] Application.Features.NewsComments.Commands.CreateNewsComment.CreateNewsCommentCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreatePublicComment(
+        [FromBody] CreateNewsCommentCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);

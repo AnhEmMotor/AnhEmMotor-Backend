@@ -11,8 +11,7 @@ namespace Application.Features.ChatTools.Queries.GetInventoryReceiptDetailForCha
 
 public class GetInventoryReceiptDetailForChatQueryHandler(
     IInventoryReceiptReadRepository repository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetInventoryReceiptDetailForChatQuery, Result<ChatToolEnvelope<ChatInventoryReceiptDetailDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetInventoryReceiptDetailForChatQuery, Result<ChatToolEnvelope<ChatInventoryReceiptDetailDto>>>
 {
     private const int MaxMatches = 5;
 
@@ -23,16 +22,16 @@ public class GetInventoryReceiptDetailForChatQueryHandler(
         var keyword = request.Keyword.Trim();
         var sieveModel = new SieveModel { Page = 1, PageSize = MaxMatches, Sorts = "-CreatedAt" };
         var paged = await repository.GetPagedAsync<InventoryReceiptListResponse>(
-                sieveModel,
-                filter: r => r.InventoryReceiptInfos.Any(
+            sieveModel,
+            filter: r => r.InventoryReceiptInfos
+                .Any(
                     ii => ii.DeletedAt == null &&
-                        ii.PurchaseRequestItem != null &&
-                        ii.PurchaseRequestItem.Supplier != null &&
-                        ii.PurchaseRequestItem.Supplier.Name != null &&
-                        ii.PurchaseRequestItem.Supplier.Name.Contains(keyword)),
-                cancellationToken: cancellationToken)
+                            ii.PurchaseRequestItem != null &&
+                            ii.PurchaseRequestItem.Supplier != null &&
+                            ii.PurchaseRequestItem.Supplier.Name != null &&
+                            ii.PurchaseRequestItem.Supplier.Name.Contains(keyword)),
+            cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         var matchIds = (paged.Items ?? []).Where(x => x.Id.HasValue).Select(x => x.Id!.Value).ToList();
         var dtos = new List<ChatInventoryReceiptDetailDto>();
         foreach (var id in matchIds)
@@ -42,7 +41,6 @@ public class GetInventoryReceiptDetailForChatQueryHandler(
             {
                 continue;
             }
-
             var detail = receipt.Adapt<InventoryReceiptDetailResponse>();
             var items = (detail.Products ?? [])
                 .Select(
@@ -68,7 +66,6 @@ public class GetInventoryReceiptDetailForChatQueryHandler(
                     Items = items
                 });
         }
-
         var inner = new ChatToolResult<ChatInventoryReceiptDetailDto>(dtos, dtos.Count, false);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,

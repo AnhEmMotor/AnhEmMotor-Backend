@@ -23,19 +23,17 @@ public class StartChatRunCommandHandler(
         {
             throw new UnauthorizedAccessException("Forbidden");
         }
-
         var session = await chatReadRepository.GetSessionByIdAsync(request.SessionId, cancellationToken);
         if (session == null || session.UserId != request.UserId)
         {
             throw new InvalidOperationException("Phiên chat không tồn tại hoặc không thuộc quyền sở hữu.");
         }
-
         var activeRun = await chatReadRepository.GetActiveRunForUserAsync(request.UserId, cancellationToken);
         if (activeRun != null)
         {
-            throw new InvalidOperationException("Đang có một tiến trình AI khác đang chạy. Vui lòng chờ hoặc huỷ tiến trình hiện tại.");
+            throw new InvalidOperationException(
+                "Đang có một tiến trình AI khác đang chạy. Vui lòng chờ hoặc huỷ tiến trình hiện tại.");
         }
-
         var userMessage = new ChatMessage
         {
             Id = Guid.NewGuid(),
@@ -44,7 +42,6 @@ public class StartChatRunCommandHandler(
             Message = request.Content,
             CreatedAt = DateTime.UtcNow
         };
-
         var runId = Guid.NewGuid();
         var run = new ChatRun
         {
@@ -54,15 +51,11 @@ public class StartChatRunCommandHandler(
             UserMessage = request.Content,
             StartedAt = DateTime.UtcNow
         };
-
         chatInsertRepository.AddMessage(userMessage);
         chatInsertRepository.AddRun(run);
-        
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         tokenStore.Store(runId, request.Token);
         await chatRunQueue.EnqueueAsync(runId, cancellationToken);
-
         return runId;
     }
 }

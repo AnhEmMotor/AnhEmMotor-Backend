@@ -34,8 +34,10 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
     {
         return context.GetQuery<Domain.Entities.Vehicle>(mode)
             .Include(v => v.Lead)
-            .Include(v => v.Product).ThenInclude(p => p.ProductCategory)
-            .Include(v => v.Product).ThenInclude(p => p.Brand)
+            .Include(v => v.Product)
+            .ThenInclude(p => p!.ProductCategory)
+            .Include(v => v.Product)
+            .ThenInclude(p => p!.Brand)
             .Include(v => v.ProductVariant)
             .Include(v => v.ProductVariantColor);
     }
@@ -61,8 +63,10 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
     {
         return context.Vehicles
             .Include(v => v.Lead)
-            .Include(v => v.Product).ThenInclude(p => p.ProductCategory)
-            .Include(v => v.Product).ThenInclude(p => p.Brand)
+            .Include(v => v.Product)
+            .ThenInclude(p => p!.ProductCategory)
+            .Include(v => v.Product)
+            .ThenInclude(p => p!.Brand)
             .Include(v => v.ProductVariant)
             .Include(v => v.ProductVariantColor)
             .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
@@ -79,7 +83,8 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
             .Where(v => ids.Contains(v.Id))
             .ToListAsync(cancellationToken);
     }
-public Task<List<Domain.Entities.Vehicle>> GetByIdsWithLeadAsync(
+
+    public Task<List<Domain.Entities.Vehicle>> GetByIdsWithLeadAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken = default)
     {

@@ -1,6 +1,6 @@
 using Application.ApiContracts.Ai;
-using Application.Interfaces.Services;
 using Application.Interfaces.Repositories.Ai;
+using Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 

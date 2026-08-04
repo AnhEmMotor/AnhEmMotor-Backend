@@ -1,5 +1,5 @@
-using System.Collections.Concurrent;
 using Application.Interfaces.Services;
+using System.Collections.Concurrent;
 
 namespace Infrastructure.Services.Ai.Runs;
 
@@ -28,10 +28,8 @@ public class ChatRunCancellationRegistry : IChatRunCancellationRegistry
             {
                 cts.Cancel();
                 return true;
-            }
-            catch
+            } catch
             {
-                // ignore
             }
         }
         return false;

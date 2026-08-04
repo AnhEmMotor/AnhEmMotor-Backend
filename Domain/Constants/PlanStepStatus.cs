@@ -8,6 +8,8 @@ public static class PlanStepStatus
     public const string Failed = "failed";
     public const string Skipped = "skipped";
 
-    /// <summary>Tool cần cho bước này đã bị gỡ khỏi registry giữa lúc chờ duyệt (Stage 17.8).</summary>
+    /// <summary>
+    /// Tool cần cho bước này đã bị gỡ khỏi registry giữa lúc chờ duyệt (Stage 17.8).
+    /// </summary>
     public const string Invalid = "invalid";
 }

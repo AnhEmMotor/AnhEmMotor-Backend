@@ -8,13 +8,10 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetPersonalizedRecommendations;
 
-// ponytail: heuristic scoring (recency x dwell time), không dùng model ML — phù hợp quy mô catalog hiện tại;
-// nếu catalog lớn hơn nhiều và cần "khách xem X cũng xem Y" thật sự thì mới cần collaborative filtering.
 public class GetPersonalizedRecommendationsQueryHandler(
     IProductViewRepository productViewRepository,
     ICurrentUserContext currentUserContext,
-    ISender sender)
-    : IRequestHandler<GetPersonalizedRecommendationsQuery, Result<PagedResult<ProductListStoreResponse>>>
+    ISender sender) : IRequestHandler<GetPersonalizedRecommendationsQuery, Result<PagedResult<ProductListStoreResponse>>>
 {
     private const int MaxHistoryRows = 200;
     private const int HistoryWindowDays = 90;
@@ -29,7 +26,6 @@ public class GetPersonalizedRecommendationsQueryHandler(
     {
         var customerUserId = currentUserContext.GetUserIdOrNull();
         var topCategoryIds = new List<int>();
-
         if (customerUserId is not null || !string.IsNullOrWhiteSpace(request.VisitorKey))
         {
             var since = DateTimeOffset.UtcNow.AddDays(-HistoryWindowDays);
@@ -39,7 +35,6 @@ public class GetPersonalizedRecommendationsQueryHandler(
                 since,
                 MaxHistoryRows,
                 cancellationToken);
-
             var now = DateTimeOffset.UtcNow;
             topCategoryIds = views
                 .Where(v => v.CategoryId.HasValue)
@@ -62,14 +57,8 @@ public class GetPersonalizedRecommendationsQueryHandler(
                 .Select(g => g.CategoryId)
                 .ToList();
         }
-
         return await sender.Send(
-            new GetProductsListQuery
-            {
-                PageSize = request.PageSize,
-                CategoryIds = topCategoryIds,
-                Sorts = "-createdAt"
-            },
+            new GetProductsListQuery { PageSize = request.PageSize, CategoryIds = topCategoryIds, Sorts = "-createdAt" },
             cancellationToken);
     }
 }

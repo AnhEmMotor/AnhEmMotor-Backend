@@ -8,8 +8,7 @@ namespace Application.Features.ChatTools.Queries.GetLowStockProductsForChat;
 
 public class GetLowStockProductsForChatQueryHandler(
     IStatisticalReadRepository statisticalReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetLowStockProductsForChatQuery, Result<ChatToolEnvelope<ChatLowStockProductDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetLowStockProductsForChatQuery, Result<ChatToolEnvelope<ChatLowStockProductDto>>>
 {
     private const string InStockStatus = "Còn hàng";
 

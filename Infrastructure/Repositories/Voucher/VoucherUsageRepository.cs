@@ -21,16 +21,17 @@ public class VoucherUsageRepository(ApplicationDBContext context) : IVoucherUsag
     }
 
     public Task<IEnumerable<OrderVoucher>> GetByOutputIdAsync(
- int outputId, CancellationToken cancellationToken = default)
- {
- return context.Set<OrderVoucher>()
- .Include(ov => ov.Voucher)
- .Where(ov => ov.OutputId == outputId)
- .ToListAsync(cancellationToken)
- .ContinueWith<IEnumerable<OrderVoucher>>(t => t.Result, cancellationToken);
- }
+        int outputId,
+        CancellationToken cancellationToken = default)
+    {
+        return context.Set<OrderVoucher>()
+            .Include(ov => ov.Voucher)
+            .Where(ov => ov.OutputId == outputId)
+            .ToListAsync(cancellationToken)
+            .ContinueWith<IEnumerable<OrderVoucher>>(t => t.Result, cancellationToken);
+    }
 
- public Task<OrderVoucher?> GetByVoucherAndOutputAsync(
+    public Task<OrderVoucher?> GetByVoucherAndOutputAsync(
         int voucherId,
         int outputId,
         CancellationToken cancellationToken = default)

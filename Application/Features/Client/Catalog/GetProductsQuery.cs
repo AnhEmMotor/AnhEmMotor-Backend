@@ -1,20 +1,12 @@
 using Application.ApiContracts.Client.Catalog;
-using Application.Common.Models;
-using Application.Features.Products.Mappings;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Product;
-using ProductStatus = Domain.Constants.Product.ProductStatus;
 using Domain.Entities;
-using Domain.Primitives;
 using MediatR;
-using Sieve.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
+using ProductStatus = Domain.Constants.Product.ProductStatus;
 
 namespace Application.Features.Client.Catalog;
 
@@ -41,71 +33,78 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<Product
     {
         var statusIds = new List<string> { ProductStatus.ForSale };
         string? normalizedSearch = string.IsNullOrWhiteSpace(request.Search) ? null : request.Search.Trim();
-
         var (entities, totalCount, groupedOptionFilters) = await _readRepo.GetPagedProductsAsync(
-            normalizedSearch, statusIds,
+            normalizedSearch,
+            statusIds,
             request.CategoryId.HasValue ? new List<int> { request.CategoryId.Value } : new List<int>(),
-            new List<int>(), new List<int>(), null, null,
-            1, 50, null, null, cancellationToken)
+            new List<int>(),
+            new List<int>(),
+            null,
+            null,
+            1,
+            50,
+            null,
+            null,
+            cancellationToken)
             .ConfigureAwait(false);
-
-        var effectiveBrandName = entities.FirstOrDefault()?.ProductVariants.FirstOrDefault()?.Product?.Brand?.Name ?? "AnhEm Motor";
-
-        var items = entities.Select(e =>
-        {
-            var brandName = e.Brand?.Name ?? effectiveBrandName;
-            var catName = e.ProductCategory?.Name ?? "";
-
-            var sortedVariants = e.ProductVariants.ToList();
-            sortedVariants.Sort((a, b) => (a.Price ?? decimal.MaxValue).CompareTo(b.Price ?? decimal.MaxValue));
-
-            var firstVariant = sortedVariants
-                .FirstOrDefault(v => !string.IsNullOrWhiteSpace(v.VariantName) || v.ProductVariantColors.Count > 0)
-                ?? sortedVariants.FirstOrDefault();
-
-            string ResolveImgUrl(ProductVariant? v)
+        var effectiveBrandName = entities.FirstOrDefault()?.ProductVariants.FirstOrDefault()?.Product?.Brand?.Name ??
+            "AnhEm Motor";
+        var items = entities.Select(
+            e =>
             {
-                if (v == null) return string.Empty;
-                var cover = v.ProductVariantColors
-                    .Where(c => !string.IsNullOrEmpty(c.CoverImageUrl) && !c.CoverImageUrl.Contains("dummyimage"))
-                    .Select(c => c.CoverImageUrl!)
-                    .FirstOrDefault();
-                if (!string.IsNullOrEmpty(cover)) return _fileReadService.GetPublicUrl(cover);
-                cover = v.CoverImageUrl;
-                if (!string.IsNullOrEmpty(cover) && !cover.Contains("dummyimage")) return _fileReadService.GetPublicUrl(cover);
-                var photo = v.ProductCollectionPhotos
-                    .Where(p => !string.IsNullOrEmpty(p.ImageUrl) && !p.ImageUrl.Contains("dummyimage"))
-                    .Select(p => p.ImageUrl!)
-                    .FirstOrDefault();
-                if (!string.IsNullOrEmpty(photo)) return _fileReadService.GetPublicUrl(photo);
-                return string.Empty;
-            }
+                var brandName = e.Brand?.Name ?? effectiveBrandName;
+                var catName = e.ProductCategory?.Name ?? string.Empty;
+                var sortedVariants = e.ProductVariants.ToList();
+                sortedVariants.Sort((a, b) => (a.Price ?? decimal.MaxValue).CompareTo(b.Price ?? decimal.MaxValue));
+                var firstVariant = sortedVariants
+                .FirstOrDefault(v => !string.IsNullOrWhiteSpace(v.VariantName) || v.ProductVariantColors.Count > 0) ??
+                    sortedVariants.FirstOrDefault();
+                string ResolveImgUrl(ProductVariant? v)
+                {
+                    if (v == null)
+                        return string.Empty;
+                    var cover = v.ProductVariantColors
+                        .Where(c => !string.IsNullOrEmpty(c.CoverImageUrl) && !c.CoverImageUrl.Contains("dummyimage"))
+                        .Select(c => c.CoverImageUrl!)
+                        .FirstOrDefault();
+                    if (!string.IsNullOrEmpty(cover))
+                        return _fileReadService.GetPublicUrl(cover);
+                    cover = v.CoverImageUrl;
+                    if (!string.IsNullOrEmpty(cover) && !cover.Contains("dummyimage"))
+                        return _fileReadService.GetPublicUrl(cover);
+                    var photo = v.ProductCollectionPhotos
+                        .Where(p => !string.IsNullOrEmpty(p.ImageUrl) && !p.ImageUrl.Contains("dummyimage"))
+                        .Select(p => p.ImageUrl!)
+                        .FirstOrDefault();
+                    if (!string.IsNullOrEmpty(photo))
+                        return _fileReadService.GetPublicUrl(photo);
+                    return string.Empty;
+                }
 
-            var coverUrl = ResolveImgUrl(firstVariant);
-
-            decimal? minPrice = e.ProductVariants
-                .Where(v => v.Price.HasValue)
-                .Min(v => v.Price);
-
-            List<string> features = e.ProductTechnologies
+                var coverUrl = ResolveImgUrl(firstVariant);
+                decimal? minPrice = e.ProductVariants.Where(v => v.Price.HasValue).Min(v => v.Price);
+                List<string> features = e.ProductTechnologies
                 ?.OrderBy(t => t.DisplayOrder)
-                .Select(t => t.CustomDescription ?? t.Technology?.DefaultDescription ?? t.CustomTitle ?? "")
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Cast<string>()
-                .ToList() ?? new List<string>();
-
-            string promotionText = BuildPromotionText(e, firstVariant);
-
-            return new ProductSummaryResponse
-            {
-                Id = e.Id,
-                Name = e.Name,
-                ImageUrl = coverUrl,
-                ReferencePrice = minPrice ?? 0,
-                PromotionText = promotionText
-            };
-        }).ToList();
-
+                            .Select(
+                                t => t.CustomDescription ??
+                                            t.Technology?.DefaultDescription ??
+                                            t.CustomTitle ??
+                                            string.Empty)
+                            .Where(s => !string.IsNullOrWhiteSpace(s))
+                            .Cast<string>()
+                            .ToList() ??
+                    new List<string>();
+                string promotionText = BuildPromotionText(e, firstVariant);
+                return new ProductSummaryResponse
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    ImageUrl = coverUrl,
+                    ReferencePrice = minPrice ?? 0,
+                    PromotionText = promotionText
+                };
+            })
+            .ToList();
         return items;
     }
 
@@ -116,7 +115,7 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<Product
         {
             var techNames = product.ProductTechnologies
                 .Where(t => t.DisplayOrder <= 3)
-                .Select(t => t.CustomTitle ?? t.Technology?.DefaultTitle ?? "")
+                .Select(t => t.CustomTitle ?? t.Technology?.DefaultTitle ?? string.Empty)
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Take(2)
                 .Cast<string>();
@@ -125,7 +124,8 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<Product
         if (firstVariant != null && firstVariant.Price.HasValue)
         {
             var maxQty = firstVariant.MaxPurchaseQuantity;
-            if (maxQty.HasValue) parts.Add($"Tối đa {maxQty} chiếc/đơn");
+            if (maxQty.HasValue)
+                parts.Add($"Tối đa {maxQty} chiếc/đơn");
         }
         return string.Join(" · ", parts);
     }
@@ -142,17 +142,23 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
         _fileReadService = fileReadService;
     }
 
-    public async Task<ProductDetailResponse> Handle(
-        GetProductDetailQuery request,
-        CancellationToken cancellationToken)
+    public async Task<ProductDetailResponse> Handle(GetProductDetailQuery request, CancellationToken cancellationToken)
     {
         var variant = await _readRepo.GetVariantByIdWithDetailsAsync(request.Id, cancellationToken)
             .ConfigureAwait(false);
         if (variant is null || variant.Product is null)
         {
-            return new ProductDetailResponse { Id = request.Id, Name = "Không tìm thấy", Description = "", ReferencePrice = 0, Features = new List<string>(), IsCompatibleWithMyVehicle = false, CompatibilityNote = "" };
+            return new ProductDetailResponse
+            {
+                Id = request.Id,
+                Name = "Không tìm thấy",
+                Description = string.Empty,
+                ReferencePrice = 0,
+                Features = new List<string>(),
+                IsCompatibleWithMyVehicle = false,
+                CompatibilityNote = string.Empty
+            };
         }
-
         var product = variant.Product;
         string ResolveImgUrl(ProductVariant v)
         {
@@ -160,42 +166,44 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
                 .Where(c => !string.IsNullOrEmpty(c.CoverImageUrl) && !c.CoverImageUrl.Contains("dummyimage"))
                 .Select(c => c.CoverImageUrl!)
                 .FirstOrDefault();
-            if (!string.IsNullOrEmpty(cover)) return _fileReadService.GetPublicUrl(cover);
+            if (!string.IsNullOrEmpty(cover))
+                return _fileReadService.GetPublicUrl(cover);
             cover = v.CoverImageUrl;
-            if (!string.IsNullOrEmpty(cover) && !cover.Contains("dummyimage")) return _fileReadService.GetPublicUrl(cover);
+            if (!string.IsNullOrEmpty(cover) && !cover.Contains("dummyimage"))
+                return _fileReadService.GetPublicUrl(cover);
             var photo = v.ProductCollectionPhotos
                 .Where(p => !string.IsNullOrEmpty(p.ImageUrl) && !p.ImageUrl.Contains("dummyimage"))
                 .Select(p => p.ImageUrl!)
                 .FirstOrDefault();
-            if (!string.IsNullOrEmpty(photo)) return _fileReadService.GetPublicUrl(photo);
+            if (!string.IsNullOrEmpty(photo))
+                return _fileReadService.GetPublicUrl(photo);
             return string.Empty;
         }
 
         string mainImage = ResolveImgUrl(variant);
         var techList = (product.ProductTechnologies ?? new List<ProductTechnology>())
             .OrderBy(t => t.DisplayOrder)
-            .Select(t =>
-            {
-                var title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? "";
-                var desc = t.CustomDescription ?? t.Technology?.DefaultDescription ?? "";
-                return string.IsNullOrWhiteSpace(desc) ? title : $"{title}: {desc}";
-            })
+            .Select(
+                t =>
+                {
+                    var title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? string.Empty;
+                    var desc = t.CustomDescription ?? t.Technology?.DefaultDescription ?? string.Empty;
+                    return string.IsNullOrWhiteSpace(desc) ? title : $"{title}: {desc}";
+                })
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Take(8)
             .Cast<string>()
             .ToList();
-
         bool IsCompatible = product.CategoryId == 8;
-
         return new ProductDetailResponse
         {
             Id = product.Id,
             Name = product.Name,
-            Description = product.Description ?? "",
+            Description = product.Description ?? string.Empty,
             ReferencePrice = variant.Price ?? 0,
             Features = techList,
             IsCompatibleWithMyVehicle = IsCompatible,
-            CompatibilityNote = IsCompatible ? "Liên hệ để kiểm tra tương thích với xe của bạn" : ""
+            CompatibilityNote = IsCompatible ? "Liên hệ để kiểm tra tương thích với xe của bạn" : string.Empty
         };
     }
 }
@@ -206,13 +214,12 @@ public class RequestConsultationHandler : IRequestHandler<RequestConsultationCom
 
     public RequestConsultationHandler(ILeadInsertRepository leadRepo) => _leadRepo = leadRepo;
 
-    public async Task<bool> Handle(RequestConsultationCommand request,
-        CancellationToken cancellationToken)
+    public async Task<bool> Handle(RequestConsultationCommand request, CancellationToken cancellationToken)
     {
         var lead = new Lead
         {
-            InterestedVehicle = request.Request.ProductId.ToString() ?? "",
-            Notes = request.Request.CustomerNote ?? "",
+            InterestedVehicle = request.Request.ProductId.ToString() ?? string.Empty,
+            Notes = request.Request.CustomerNote ?? string.Empty,
             Source = "Catalog",
             CreatedAt = DateTime.UtcNow,
             Status = "New",

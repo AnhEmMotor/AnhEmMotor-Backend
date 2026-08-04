@@ -1,8 +1,3 @@
-using System.Collections.Concurrent;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Application.Interfaces.Repositories.Chat;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -10,6 +5,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Infrastructure.Services.Ai.Runs;
 
@@ -19,10 +19,7 @@ public class ChatRunExecutor(
     IChatRunCancellationRegistry cancellationRegistry,
     ILogger<ChatRunExecutor> logger) : BackgroundService
 {
-    // Không batching text_delta — forward ngay từng chunk model sinh ra, nhanh nhất có thể tới
-    // FE, đúng tốc độ AI sinh token. Đánh đổi: nhiều lần ghi DB/SignalR hơn khi model trả chunk
-    // nhỏ; nếu cần tối ưu lại, đó là việc của Stage 14 (Performance), không phải chặn tự nhiên.
-    private readonly SemaphoreSlim _semaphore = new(10); // 10 concurrent runs
+    private readonly SemaphoreSlim _semaphore = new(10);
     private readonly ConcurrentDictionary<Guid, Task> _inFlightRuns = new();
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,27 +27,23 @@ public class ChatRunExecutor(
         await foreach (var runId in queue.ReadAllAsync(stoppingToken))
         {
             await _semaphore.WaitAsync(stoppingToken);
-
-            var runTask = Task.Run(async () =>
-            {
-                try
+            var runTask = Task.Run(
+                async () =>
                 {
-                    await ProcessRunAsync(runId, stoppingToken);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Lỗi khi xử lý run {RunId}", runId);
-                }
-                finally
-                {
-                    _semaphore.Release();
-                }
-            }, stoppingToken);
-
+                    try
+                    {
+                        await ProcessRunAsync(runId, stoppingToken);
+                    } catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Lỗi khi xử lý run {RunId}", runId);
+                    } finally
+                    {
+                        _semaphore.Release();
+                    }
+                },
+                stoppingToken);
             _inFlightRuns[runId] = runTask;
-            _ = runTask.ContinueWith(
-                _ => ((IDictionary<Guid, Task>)_inFlightRuns).Remove(runId),
-                TaskScheduler.Default);
+            _ = runTask.ContinueWith(_ => ((IDictionary<Guid, Task>)_inFlightRuns).Remove(runId), TaskScheduler.Default);
         }
     }
 
@@ -58,16 +51,13 @@ public class ChatRunExecutor(
         [property: JsonPropertyName("toolRegistryFingerprint")] string? ToolRegistryFingerprint,
         [property: JsonPropertyName("modelUsed")] string? ModelUsed);
 
-    // Token còn đủ 5 phút (đúng bằng thời lượng chạy tối đa của 1 run) thì giữ nguyên; nếu không,
-    // ký lại giữ nguyên claim với hạn mới — tránh 401 giữa run khi JWT gần hết hạn lúc pickup (17.9/E1).
     public static string EnsureFreshToken(string token, ITokenManagerService tokenManager, TimeSpan minRemaining)
     {
         DateTime validTo;
         try
         {
             validTo = new JwtSecurityTokenHandler().ReadJwtToken(token).ValidTo;
-        }
-        catch (ArgumentException)
+        } catch (ArgumentException)
         {
             return token;
         }
@@ -76,12 +66,10 @@ public class ChatRunExecutor(
             return token;
         }
         return tokenManager.RefreshAccessToken(
-            token, DateTimeOffset.UtcNow.AddMinutes(tokenManager.GetAccessTokenExpiryMinutes()));
+            token,
+            DateTimeOffset.UtcNow.AddMinutes(tokenManager.GetAccessTokenExpiryMinutes()));
     }
 
-    // Host gọi StopAsync khi app shutdown (ApplicationStopping) — đợi các run đang chạy
-    // huỷ xong (catch OperationCanceledException ở ProcessRunAsync) trước khi thoát. Không còn
-    // buffer nội bộ để mất vì mỗi text_delta đã được ghi ngay khi tới.
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await base.StopAsync(cancellationToken);
@@ -97,119 +85,95 @@ public class ChatRunExecutor(
         var tokenStore = scope.ServiceProvider.GetRequiredService<IChatRunTokenStore>();
         var tokenManager = scope.ServiceProvider.GetRequiredService<ITokenManagerService>();
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-
         using var runCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
         runCts.CancelAfter(TimeSpan.FromMinutes(5));
-
         cancellationRegistry.Register(runId, runCts);
-
-        // Khai báo ngoài try để catch (khi bị huỷ giữa chừng) vẫn lưu được phần đã sinh ra.
         var fullOutput = new StringBuilder();
         var segmentStartedAt = DateTime.UtcNow;
-
         try
         {
             var run = await readRepo.GetRunByIdAsync(runId, runCts.Token);
-            if (run == null) return;
-
+            if (run == null)
+                return;
             var instanceId = Environment.MachineName;
             await writer.MarkRunningAsync(runId, instanceId);
-            await writer.AppendAsync(runId, ChatRunEventType.RunStarted, "");
-
+            await writer.AppendAsync(runId, ChatRunEventType.RunStarted, string.Empty);
             var token = EnsureFreshToken(tokenStore.Take(runId), tokenManager, TimeSpan.FromMinutes(5));
             var stream = streamClient.StreamAsync(runId, run.SessionId, run.UserMessage, token, runCts.Token);
-
             var lastHeartbeat = DateTime.UtcNow;
             segmentStartedAt = DateTime.UtcNow;
             var isAwaitingApproval = false;
-
             await foreach (var evt in stream.WithCancellation(runCts.Token))
             {
-                if (runCts.Token.IsCancellationRequested) break;
-
-                // Stage 10 — plan_ready đánh dấu graph vừa dừng ở interrupt chờ duyệt; stream sẽ
-                // kết thúc tự nhiên ngay sau đó (sidecar ngừng yield). Vẫn ghi event qua nhánh
-                // catch-all bên dưới như các event khác, chỉ thêm cờ để quyết định trạng thái cuối.
+                if (runCts.Token.IsCancellationRequested)
+                    break;
                 if (evt.Type == ChatRunEventType.PlanReady)
                 {
                     isAwaitingApproval = true;
                 }
-
                 if (evt.Type == ChatRunEventType.TextDelta)
                 {
                     fullOutput.Append(evt.Payload);
                     await writer.FlushPartialOutputAsync(runId, fullOutput.ToString());
                     await writer.AppendAsync(runId, evt.Type, evt.Payload);
-                }
-                else if (evt.Type == ChatRunEventType.TurnBoundary)
+                } else if (evt.Type == ChatRunEventType.TurnBoundary)
                 {
                     await writer.AppendSegmentAsync(runId, fullOutput.ToString(), segmentStartedAt);
                     fullOutput.Clear();
-                    await writer.FlushPartialOutputAsync(runId, "");
+                    await writer.FlushPartialOutputAsync(runId, string.Empty);
                     segmentStartedAt = DateTime.UtcNow;
-                }
-                else if (evt.Type == ChatRunEventType.MessageCorrection)
+                } else if (evt.Type == ChatRunEventType.MessageCorrection)
                 {
-                    // Guardrail (13.7) phát hiện câu trả lời đã stream sai sau khi sinh xong —
-                    // thay TOÀN BỘ nội dung đoạn hiện tại, không phải append, để cả lịch sử lưu
-                    // và FE hiển thị đều dùng bản đã sửa, không chỉ FE.
                     fullOutput.Clear();
                     fullOutput.Append(evt.Payload);
                     await writer.FlushPartialOutputAsync(runId, fullOutput.ToString());
                     await writer.AppendAsync(runId, evt.Type, evt.Payload);
-                }
-                else if (evt.Type == ChatRunEventType.RunMeta)
+                } else if (evt.Type == ChatRunEventType.RunMeta)
                 {
                     var meta = JsonSerializer.Deserialize<RunMetaPayload>(evt.Payload);
                     await writer.SetRunMetaAsync(runId, meta?.ToolRegistryFingerprint, meta?.ModelUsed);
                     var configuredModel = configuration["AISetup:Model"];
-                    if (!string.IsNullOrEmpty(meta?.ModelUsed) && !string.IsNullOrEmpty(configuredModel)
-                        && meta.ModelUsed != configuredModel)
+                    if (!string.IsNullOrEmpty(meta?.ModelUsed) &&
+                        !string.IsNullOrEmpty(configuredModel) &&
+                        meta.ModelUsed != configuredModel)
                     {
                         logger.LogError(
                             "ModelUsed lệch với AISetup:Model: run {RunId} dùng {Used}, cấu hình {Configured}",
-                            runId, meta.ModelUsed, configuredModel);
+                            runId,
+                            meta.ModelUsed,
+                            configuredModel);
                     }
-                }
-                else if (evt.Type == ChatRunEventType.Thinking)
+                } else if (evt.Type == ChatRunEventType.Thinking)
+                {
+                    await writer.AppendAsync(runId, evt.Type, evt.Payload);
+                } else if (evt.Type != "done")
                 {
                     await writer.AppendAsync(runId, evt.Type, evt.Payload);
                 }
-                else if (evt.Type != "done")
-                {
-                    await writer.AppendAsync(runId, evt.Type, evt.Payload);
-                }
-
                 if ((DateTime.UtcNow - lastHeartbeat).TotalSeconds >= 15)
                 {
                     await writer.UpdateHeartbeatAsync(runId);
                     lastHeartbeat = DateTime.UtcNow;
                 }
             }
-
             if (runCts.Token.IsCancellationRequested)
             {
                 await writer.CancelAsync(runId, fullOutput.ToString(), segmentStartedAt);
-            }
-            else if (isAwaitingApproval)
+            } else if (isAwaitingApproval)
             {
                 await writer.AwaitingApprovalAsync(runId, fullOutput.ToString(), segmentStartedAt);
-            }
-            else
+            } else
             {
                 await writer.CompleteAsync(runId, fullOutput.ToString(), segmentStartedAt);
             }
-        }
-        catch (OperationCanceledException)
+        } catch (OperationCanceledException)
         {
             await writer.CancelAsync(runId, fullOutput.ToString(), segmentStartedAt);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             logger.LogError(ex, "Failed to run {RunId}", runId);
             await writer.FailAsync(runId, ex);
-        }
-        finally
+        } finally
         {
             cancellationRegistry.Unregister(runId);
         }

@@ -10,6 +10,7 @@ using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.RestoreManyProducts;
 using Application.Features.Products.Commands.RestoreProduct;
 using Application.Features.Products.Commands.SetProductCompatibility;
+using Application.Features.Products.Commands.TrackProductView;
 using Application.Features.Products.Commands.UpdateManyProductPrices;
 using Application.Features.Products.Commands.UpdateManyProductStatuses;
 using Application.Features.Products.Commands.UpdateManyVariantPrices;
@@ -24,7 +25,6 @@ using Application.Features.Products.Queries.GetActiveVariantLiteListForInventory
 using Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
-using Application.Features.Products.Commands.TrackProductView;
 using Application.Features.Products.Queries.GetPersonalizedRecommendations;
 using Application.Features.Products.Queries.GetProductAttributeLabels;
 using Application.Features.Products.Queries.GetProductById;

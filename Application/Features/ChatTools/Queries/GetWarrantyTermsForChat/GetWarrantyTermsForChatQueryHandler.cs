@@ -9,8 +9,7 @@ namespace Application.Features.ChatTools.Queries.GetWarrantyTermsForChat;
 
 public class GetWarrantyTermsForChatQueryHandler(
     IWarrantyTermReadRepository warrantyTermReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetWarrantyTermsForChatQuery, Result<ChatToolEnvelope<ChatWarrantyTermDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetWarrantyTermsForChatQuery, Result<ChatToolEnvelope<ChatWarrantyTermDto>>>
 {
     public async Task<Result<ChatToolEnvelope<ChatWarrantyTermDto>>> Handle(
         GetWarrantyTermsForChatQuery request,
@@ -19,7 +18,6 @@ public class GetWarrantyTermsForChatQueryHandler(
         var terms = (await warrantyTermReadRepository
             .GetAllAsync(cancellationToken, includeBrand: true, mode: DataFetchMode.ActiveOnly)
             .ConfigureAwait(false)).ToList();
-
         var ordered = terms.OrderByDescending(t => t.Id).ToList();
         var limit = ChatToolLimit.Clamp(request.Limit);
         var dtos = ordered
@@ -40,7 +38,6 @@ public class GetWarrantyTermsForChatQueryHandler(
                     ExpirationDate = t.ExpirationDate
                 })
             .ToList();
-
         var inner = new ChatToolResult<ChatWarrantyTermDto>(dtos, ordered.Count, ordered.Count > dtos.Count);
         var meta = new ChatToolEnvelopeMeta(
             dateProvider.VietnamNow,

@@ -3,7 +3,6 @@ using Application.Common.Models;
 using Application.Features.SalesContracts.Commands.CreateSalesContract;
 using Application.Features.SalesContracts.Commands.UploadSalesContractScan;
 using Application.Features.SalesContracts.Commands.UpdateSalesContractStatus;
-using Application.Features.SalesContracts.Commands.UploadSalesContractScan;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Output;

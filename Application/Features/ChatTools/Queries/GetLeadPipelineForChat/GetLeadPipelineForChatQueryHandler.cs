@@ -9,18 +9,9 @@ namespace Application.Features.ChatTools.Queries.GetLeadPipelineForChat;
 
 public class GetLeadPipelineForChatQueryHandler(
     ILeadReadRepository leadReadRepository,
-    IServerDateProvider dateProvider)
-    : IRequestHandler<GetLeadPipelineForChatQuery, Result<ChatToolEnvelope<ChatLeadPipelineItemDto>>>
+    IServerDateProvider dateProvider) : IRequestHandler<GetLeadPipelineForChatQuery, Result<ChatToolEnvelope<ChatLeadPipelineItemDto>>>
 {
-    private static readonly (string Key, string Display)[] Stages =
-    [
-        (LeadStatus.New, "Mới"),
-        (LeadStatus.Consulting, "Đang tư vấn"),
-        (LeadStatus.TestDriving, "Đang lái thử"),
-        (LeadStatus.Deposited, "Đã đặt cọc"),
-        (LeadStatus.Paperwork, "Đang chờ giấy tờ"),
-        (LeadStatus.Delivered, "Đã giao xe")
-    ];
+    private static readonly (string Key, string Display)[] Stages =[(LeadStatus.New, "Mới"), (LeadStatus.Consulting, "Đang tư vấn"), (LeadStatus.TestDriving, "Đang lái thử"), (LeadStatus.Deposited, "Đã đặt cọc"), (LeadStatus.Paperwork, "Đang chờ giấy tờ"), (LeadStatus.Delivered, "Đã giao xe")];
 
     public async Task<Result<ChatToolEnvelope<ChatLeadPipelineItemDto>>> Handle(
         GetLeadPipelineForChatQuery request,

@@ -8,7 +8,9 @@ namespace Infrastructure.Repositories.Role
 {
     public class RoleInsertRepository(RoleManager<ApplicationRole> roleManager) : IRoleInsertRepository
     {
-        public async Task<IdentityOperationResult> CreateAsync(ApplicationRole role, CancellationToken cancellationToken)
+        public async Task<IdentityOperationResult> CreateAsync(
+            ApplicationRole role,
+            CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var result = await roleManager.CreateAsync(role)

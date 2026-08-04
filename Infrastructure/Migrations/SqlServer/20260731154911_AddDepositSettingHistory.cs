@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -32,8 +32,7 @@ namespace Infrastructure.Migrations.SqlServer
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "DepositSettingHistory");
+            migrationBuilder.DropTable(name: "DepositSettingHistory");
         }
     }
 }

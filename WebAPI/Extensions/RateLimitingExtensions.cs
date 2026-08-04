@@ -114,20 +114,17 @@ public static class RateLimitingExtensions
                                     });
                     });
             });
-
-        // Giới hạn tin nhắn StoreChatHub theo VisitorKey (không phải theo request HTTP nên không dùng
-        // policy ở trên được — SignalR gọi thủ công trong Hub method).
-        services.AddSingleton(PartitionedRateLimiter.Create<string, string>(
-            visitorKey => RateLimitPartition.GetFixedWindowLimiter(
-                partitionKey: visitorKey,
-                factory: _ => new FixedWindowRateLimiterOptions
-                {
-                    PermitLimit = 20,
-                    Window = TimeSpan.FromMinutes(1),
-                    QueueLimit = 0,
-                    AutoReplenishment = true
-                })));
-
+        services.AddSingleton(
+            PartitionedRateLimiter.Create<string, string>(
+                visitorKey => RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: visitorKey,
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 20,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0,
+                        AutoReplenishment = true
+                    })));
         return services;
     }
 
