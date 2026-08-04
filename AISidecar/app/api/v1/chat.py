@@ -7,14 +7,20 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import StreamingResponse
 from langchain_core.messages import HumanMessage
 
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.prompts import PromptTemplate
+
 from app.agents.manager_agent import get_graph
 from app.api.deps import verify_internal_secret
 from app.config import get_settings
-from app.schemas.chat import ChatRequest, GenerateTitleRequest, RevalidatePlanRequest
+from app.core.llm import get_llm
+from app.prompts.loader import render
+from app.schemas.chat import ChatRequest, GenerateTitleRequest, PlanChatInterpretRequest, RevalidatePlanRequest
+from app.schemas.plan_chat import PlanChatIntent
 from app.services.backend_client import BackendClient
 from app.services.prompt_builder import build_system_message, build_history_messages
 from app.services.routing import expire_if_stale, extract_entities
-from app.tools.registry import load_tool_specs, registry_fingerprint
+from app.tools.registry import infer_step_tools, load_tool_specs, registry_fingerprint
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +55,68 @@ async def revalidate_plan(req: RevalidatePlanRequest, _: str = Depends(verify_in
         if name not in specs or specs[name].status != "active"
     ]
     return {"ok": len(unavailable) == 0, "unavailable_tools": unavailable}
+
+
+def _steps_text(steps: list[dict]) -> str:
+    lines = [
+        f"- id={s.get('id')} (order {s.get('order')}, status={s.get('status')}): "
+        f"{s.get('title')} — {s.get('detail')}"
+        for s in steps
+    ]
+    return "\n".join(lines) or "(chưa có bước nào)"
+
+
+def _get_plan_chat_structured_llm():
+    llm = get_llm(temperature=0.1)
+    try:
+        return llm.with_structured_output(PlanChatIntent)
+    except (NotImplementedError, AttributeError):
+        return None
+
+
+@router.post("/plan/interpret")
+async def interpret_plan_chat(req: PlanChatInterpretRequest, _: str = Depends(verify_internal_secret)):
+    target_hint = (
+        f"\nNgười dùng đang bình luận trực tiếp vào bước id={req.target_step_id}.\n"
+        if req.target_step_id else ""
+    )
+    prompt_text = render(
+        "plan_chat_intent",
+        steps_text=_steps_text(req.steps),
+        target_step_hint=target_hint,
+        message=req.message,
+    )
+
+    try:
+        structured_llm = _get_plan_chat_structured_llm()
+        if structured_llm is not None:
+            result = await structured_llm.ainvoke(prompt_text)
+        else:
+            parser = PydanticOutputParser(pydantic_object=PlanChatIntent)
+            template = PromptTemplate(
+                template=prompt_text + "\n{format_instructions}",
+                input_variables=[],
+                partial_variables={"format_instructions": parser.get_format_instructions()},
+            )
+            chain = template | get_llm(temperature=0.1) | parser
+            result = await chain.ainvoke({})
+    except Exception:
+        logger.exception("Lỗi khi diễn giải chat sửa plan cho run %s", req.run_id)
+        return {
+            "intent": "unclear", "operations": [],
+            "reply": "Xin lỗi, tôi chưa hiểu rõ yêu cầu. Bạn có thể nói cụ thể hơn không?",
+        }
+
+    allowed_specs = [s for s in load_tool_specs().values() if s.status == "active"]
+    operations = []
+    for op in result.operations:
+        op_dict = op.model_dump()
+        if op.type == "edit" and (op.title or op.detail):
+            step_text = f"{op.title or ''} {op.detail or ''}".strip()
+            op_dict["expected_tools"] = await infer_step_tools(step_text, allowed_specs)
+        operations.append(op_dict)
+
+    return {"intent": result.intent, "operations": operations, "reply": result.reply}
 
 
 def _event(type_: str, payload: str = "") -> str:
@@ -112,6 +180,8 @@ async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(
 
     async def stream_generator():
         try:
+            if plan_id:
+                yield _event("turn_boundary", "")
             async for type_, payload in graph.astream(initial_state, config=config, stream_mode="custom"):
                 yield _event(type_, payload)
             final_state = (await graph.aget_state(config)).values

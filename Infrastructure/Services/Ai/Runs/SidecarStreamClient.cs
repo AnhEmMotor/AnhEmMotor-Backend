@@ -121,4 +121,40 @@ public class SidecarStreamClient(
     private sealed record RevalidateResponseBody(
         [property: JsonPropertyName("ok")] bool Ok,
         [property: JsonPropertyName("unavailable_tools")] List<string>? UnavailableTools);
+
+    public async Task<PlanChatInterpretationDto> InterpretPlanChatAsync(
+        Guid runId, string message, List<PlanStepDto> steps, string? targetStepId, CancellationToken ct = default)
+    {
+        var sidecarUrl = sidecarUrlProvider.GetSidecarUrl();
+        var client = httpClientFactory.CreateClient();
+
+        var requestBody = new
+        {
+            run_id = runId.ToString(),
+            message,
+            steps = steps.Select(s => new { id = s.Id, order = s.Order, title = s.Title, detail = s.Detail, status = s.Status }),
+            target_step_id = targetStepId,
+        };
+
+        var requestContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{sidecarUrl}/plan/interpret")
+        {
+            Content = requestContent
+        };
+
+        var internalSecret = configuration["Jwt:Key"];
+        if (!string.IsNullOrEmpty(internalSecret))
+        {
+            httpRequest.Headers.Add("X-Internal-Secret", internalSecret);
+        }
+
+        var response = await client.SendAsync(httpRequest, ct);
+        response.EnsureSuccessStatusCode();
+
+        var body = await response.Content.ReadAsStringAsync(ct);
+        var parsed = JsonSerializer.Deserialize<PlanChatInterpretationDto>(
+            body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        return parsed ?? new PlanChatInterpretationDto("unclear", [], "Xin lỗi, tôi chưa hiểu rõ yêu cầu.");
+    }
 }

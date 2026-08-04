@@ -18,6 +18,13 @@ class RevalidatePlanRequest(BaseModel):
     fingerprint: str = ""
 
 
+class PlanChatInterpretRequest(BaseModel):
+    run_id: str
+    message: str
+    steps: list[dict] = []
+    target_step_id: str | None = None
+
+
 class StoreChatRequest(BaseModel):
     session_id: str
     message: str

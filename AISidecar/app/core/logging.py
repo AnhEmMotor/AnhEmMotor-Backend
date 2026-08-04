@@ -19,6 +19,8 @@ class JsonFormatter(logging.Formatter):
 
 
 def setup_logging(level: str = "WARNING") -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(JsonFormatter())
     root = logging.getLogger()

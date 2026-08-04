@@ -4,6 +4,7 @@ using Application.Features.ManagerChat.Commands.CreateChatFeedback;
 using Application.Features.ManagerChat.Commands.CreateManagerChatSession;
 using Application.Features.ManagerChat.Commands.DeleteManagerChatSession;
 using Application.Features.ManagerChat.Commands.RejectChatPlan;
+using Application.Features.ManagerChat.Commands.SendPlanChatMessage;
 using Application.Features.ManagerChat.Commands.UpdateChatPlan;
 using Application.Features.ManagerChat.Commands.UpdateManagerChatSession;
 using Application.Features.ManagerChat.Queries.GetActiveChatRun;
@@ -131,6 +132,15 @@ public class ManagerChatController(ISender sender) : ApiController
     public async Task<IActionResult> RejectPlan(Guid runId, CancellationToken cancellationToken)
     {
         var command = new RejectChatPlanCommand(runId);
+        var result = await sender.Send(command, cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPost("runs/{runId}/plan/chat")]
+    [SwaggerOperation(Summary = "Chat để duyệt/huỷ/sửa/bình luận kế hoạch, thay cho nút bấm (Stage 10.9)")]
+    public async Task<IActionResult> SendPlanChat(Guid runId, [FromBody] SendPlanChatRequest request, CancellationToken cancellationToken)
+    {
+        var command = new SendPlanChatMessageCommand(runId, request.Content, request.TargetStepId);
         var result = await sender.Send(command, cancellationToken);
         return HandleResult(result);
     }

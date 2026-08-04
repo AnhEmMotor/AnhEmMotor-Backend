@@ -1,3 +1,4 @@
+import json
 import sys
 import uuid
 
@@ -16,6 +17,11 @@ def test_classify_node_nhan_dien_tu_khoa_da_buoc():
 def test_classify_node_bo_qua_cau_hoi_don_gian():
     result = manager_agent.classify_node({"messages": [HumanMessage(content="Xe SH giá bao nhiêu?")]})
     assert result == {"needs_plan": False}
+
+
+def test_classify_node_nhan_dien_tu_khoa_ghi_du_lieu():
+    result = manager_agent.classify_node({"messages": [HumanMessage(content="Tạo yêu cầu mua hàng 10 lốp xe")]})
+    assert result == {"needs_plan": True}
 
 
 def test_route_after_classify_di_dung_nhanh():
@@ -110,6 +116,49 @@ async def test_plan_node_dua_locked_steps_vao_prompt(monkeypatch):
     assert captured["request"] == "Chuẩn bị báo cáo"
 
 
+async def test_plan_node_loc_ten_tool_bia_truoc_khi_luu(monkeypatch):
+    monkeypatch.setattr(manager_agent, "build_plan_prompt", lambda *a, **k: "PROMPT")
+    monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: (lambda *_: None))
+    monkeypatch.setattr(manager_agent, "load_tool_specs", lambda: {
+        "get_orders": registry.ToolSpec(name="get_orders", module="order", status="active"),
+    })
+    fake_llm = FakeListLLM(responses=[
+        "### BƯỚC 1: Bước mới\nMô tả bước mới\nTOOLS: get_orders, ten_tool_bia_khong_ton_tai",
+    ])
+    monkeypatch.setattr(manager_agent, "get_llm", lambda **kwargs: fake_llm)
+
+    captured = {}
+
+    class FakeBackendClient:
+        def __init__(self, auth_header):
+            pass
+
+        async def start_plan(self, run_id, fingerprint):
+            return {"planId": "p1"}
+
+        async def get_plan(self, run_id):
+            return {"planId": "p1", "version": 1, "status": "Drafting", "steps": []}
+
+        async def add_plan_step(self, run_id, title, detail, expected_tools):
+            captured["expected_tools"] = expected_tools
+            return {"id": "s1", "order": 1, "title": title, "detail": detail,
+                    "expectedTools": expected_tools, "status": "pending", "editedByUser": False, "result": None}
+
+        async def mark_plan_ready(self, run_id):
+            pass
+
+    monkeypatch.setattr(manager_agent, "BackendClient", FakeBackendClient)
+
+    result = await manager_agent.plan_node({
+        "messages": [HumanMessage(content="Chuẩn bị báo cáo")],
+        "run_id": "r1",
+        "auth_header": "Bearer x",
+    })
+
+    assert result == {"plan_id": "p1"}
+    assert captured["expected_tools"] == ["get_orders"]
+
+
 async def test_execute_step_node_lay_dung_buoc_pending_ke_tiep(monkeypatch):
     events = []
     monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: (lambda evt: events.append(evt)))
@@ -138,6 +187,71 @@ async def test_execute_step_node_lay_dung_buoc_pending_ke_tiep(monkeypatch):
     assert result["plan_finished"] is False
     assert status_calls == [("s2", "running", None)]
     assert ("plan_step_started", '{"stepId": "s2"}') in events
+
+
+async def test_execute_step_node_tinh_scoped_modules_khi_buoc_khong_co_expected_tools(monkeypatch):
+    monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: (lambda *_: None))
+    captured = {}
+
+    async def fake_resolve_modules(query, routing_ctx, history):
+        captured["query"] = query
+        captured["routing_ctx"] = routing_ctx
+        captured["history"] = history
+        return ["sales"]
+
+    monkeypatch.setattr(manager_agent, "resolve_modules", fake_resolve_modules)
+
+    class FakeBackendClient:
+        def __init__(self, auth_header):
+            pass
+
+        async def get_plan(self, run_id):
+            return {"steps": [
+                {"id": "s1", "order": 1, "title": "Tra cứu doanh thu", "detail": "theo ngày",
+                 "expectedTools": [], "status": "pending", "editedByUser": False, "result": None},
+            ]}
+
+        async def update_plan_step_status(self, run_id, step_id, status, result=None):
+            pass
+
+    monkeypatch.setattr(manager_agent, "BackendClient", FakeBackendClient)
+
+    result = await manager_agent.execute_step_node({
+        "run_id": "r1", "auth_header": "Bearer x",
+        "routing_context": {"lastModules": ["order"]}, "history": [],
+    })
+
+    assert result["scoped_modules"] == ["sales"]
+    assert result["expanded_modules"] == set()
+    assert captured["query"] == "Tra cứu doanh thu theo ngày"
+
+
+async def test_execute_step_node_khong_tinh_scoped_modules_khi_da_co_expected_tools(monkeypatch):
+    monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: (lambda *_: None))
+
+    async def fail_resolve_modules(*args, **kwargs):
+        raise AssertionError("Không được gọi resolve_modules khi bước đã có expectedTools")
+
+    monkeypatch.setattr(manager_agent, "resolve_modules", fail_resolve_modules)
+
+    class FakeBackendClient:
+        def __init__(self, auth_header):
+            pass
+
+        async def get_plan(self, run_id):
+            return {"steps": [
+                {"id": "s1", "order": 1, "title": "Tra cứu doanh thu", "detail": "theo ngày",
+                 "expectedTools": ["get_sales_summary"], "status": "pending", "editedByUser": False, "result": None},
+            ]}
+
+        async def update_plan_step_status(self, run_id, step_id, status, result=None):
+            pass
+
+    monkeypatch.setattr(manager_agent, "BackendClient", FakeBackendClient)
+
+    result = await manager_agent.execute_step_node({"run_id": "r1", "auth_header": "Bearer x"})
+
+    assert "scoped_modules" not in result
 
 
 async def test_execute_step_node_het_buoc_thi_plan_finished(monkeypatch):
@@ -185,6 +299,75 @@ async def test_step_completed_node_ghi_ket_qua_va_phat_event(monkeypatch):
     assert result == {"current_plan_step": None}
     assert status_calls == [("s2", "done", "Đã tra xong: còn 3 sản phẩm.")]
     assert any(t == "plan_step_completed" for t, _ in events)
+
+
+async def test_call_tools_node_chan_tool_ghi_khi_plan_chua_duyet(monkeypatch):
+    monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: (lambda *_: None))
+    monkeypatch.setattr(manager_agent, "load_tool_specs", lambda: {
+        "create_purchase_request": registry.ToolSpec(
+            name="create_purchase_request", module="inventory", is_write=True, status="active"),
+    })
+
+    class FakeTool:
+        name = "create_purchase_request"
+        called = False
+
+        async def ainvoke(self, args):
+            FakeTool.called = True
+            return {"ok": True}
+
+    monkeypatch.setattr(manager_agent, "build_tools", lambda client, allowed: [FakeTool()])
+    monkeypatch.setattr(manager_agent, "BackendClient", lambda auth_header: object())
+
+    from langchain_core.messages import AIMessage
+    state = {
+        "messages": [AIMessage(content="", tool_calls=[
+            {"name": "create_purchase_request", "args": {"note": "x"}, "id": "call1"},
+        ])],
+        "auth_header": "Bearer x",
+        "tool_turns": 0,
+        "allowed_tool_names": {"create_purchase_request"},
+        "plan_approved": False,
+    }
+
+    result = await manager_agent.call_tools_node(state)
+
+    assert FakeTool.called is False
+    assert "cần được duyệt" in result["messages"][0].content
+
+
+async def test_call_tools_node_cho_phep_tool_ghi_khi_plan_da_duyet(monkeypatch):
+    monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: (lambda *_: None))
+    monkeypatch.setattr(manager_agent, "load_tool_specs", lambda: {
+        "create_purchase_request": registry.ToolSpec(
+            name="create_purchase_request", module="inventory", is_write=True, status="active"),
+    })
+
+    class FakeTool:
+        name = "create_purchase_request"
+        called = False
+
+        async def ainvoke(self, args):
+            FakeTool.called = True
+            return {"ok": True}
+
+    monkeypatch.setattr(manager_agent, "build_tools", lambda client, allowed: [FakeTool()])
+    monkeypatch.setattr(manager_agent, "BackendClient", lambda auth_header: object())
+
+    from langchain_core.messages import AIMessage
+    state = {
+        "messages": [AIMessage(content="", tool_calls=[
+            {"name": "create_purchase_request", "args": {"note": "x"}, "id": "call1"},
+        ])],
+        "auth_header": "Bearer x",
+        "tool_turns": 0,
+        "allowed_tool_names": {"create_purchase_request"},
+        "plan_approved": True,
+    }
+
+    result = await manager_agent.call_tools_node(state)
+
+    assert FakeTool.called is True
 
 
 def test_route_after_model_uu_tien_carried_steering_hon_step_completed():
@@ -335,3 +518,77 @@ def test_revalidate_plan_tool_bi_go_thi_bao_khong_kha_dung(client, internal_secr
     body = resp.json()
     assert body["ok"] is False
     assert body["unavailable_tools"] == ["get_stock"]
+
+
+def test_manager_chat_phat_turn_boundary_khi_resume_plan_dang_executing(client, internal_secret, monkeypatch):
+    chat_module = sys.modules["app.api.v1.chat"]
+
+    class FakeBackendClient:
+        def __init__(self, auth_header):
+            pass
+
+        async def get_context(self, session_id, message):
+            return None
+
+        async def get_plan(self, run_id):
+            return {"planId": "p1", "status": "Executing"}
+
+    class FakeGraph:
+        async def astream(self, state, config, stream_mode):
+            return
+            yield
+
+        async def aget_state(self, config):
+            class State:
+                values = {}
+            return State()
+
+    monkeypatch.setattr(chat_module, "BackendClient", FakeBackendClient)
+    monkeypatch.setattr(chat_module, "get_graph", lambda: FakeGraph())
+
+    resp = client.post(
+        "/manager-chat",
+        json={"run_id": "r1", "session_id": "s1", "message": "tiếp tục"},
+        headers={"Authorization": "Bearer x", "X-Internal-Secret": internal_secret},
+    )
+
+    assert resp.status_code == 200
+    lines = [json.loads(line) for line in resp.text.strip().splitlines() if line]
+    assert lines[0] == {"type": "turn_boundary", "payload": ""}
+
+
+def test_manager_chat_khong_phat_turn_boundary_khi_khong_co_plan_dang_cho(client, internal_secret, monkeypatch):
+    chat_module = sys.modules["app.api.v1.chat"]
+
+    class FakeBackendClient:
+        def __init__(self, auth_header):
+            pass
+
+        async def get_context(self, session_id, message):
+            return None
+
+        async def get_plan(self, run_id):
+            return {"planId": "p1", "status": "Ready"}
+
+    class FakeGraph:
+        async def astream(self, state, config, stream_mode):
+            return
+            yield
+
+        async def aget_state(self, config):
+            class State:
+                values = {}
+            return State()
+
+    monkeypatch.setattr(chat_module, "BackendClient", FakeBackendClient)
+    monkeypatch.setattr(chat_module, "get_graph", lambda: FakeGraph())
+
+    resp = client.post(
+        "/manager-chat",
+        json={"run_id": "r1", "session_id": "s1", "message": "xin chào"},
+        headers={"Authorization": "Bearer x", "X-Internal-Secret": internal_secret},
+    )
+
+    assert resp.status_code == 200
+    lines = [json.loads(line) for line in resp.text.strip().splitlines() if line]
+    assert all(line["type"] != "turn_boundary" for line in lines)

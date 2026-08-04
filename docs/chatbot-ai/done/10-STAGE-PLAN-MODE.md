@@ -225,9 +225,9 @@ plan_ready
    ↓
 ChatRun.Status = AwaitingApproval        ← đã định nghĩa ở Stage 8
    ↓
-[FE hiện plan card + nút Duyệt / Sửa / Huỷ]
+[FE hiện plan panel — Sửa/Xoá/Thêm/kéo-thả vẫn qua nút, Duyệt/Huỷ qua chat (xem 10.9)]
    ↓
-User duyệt → POST /runs/{runId}/plan/approve { version }
+User gõ "duyệt" → POST /runs/{runId}/plan/chat → PlanChatClassifier → ApproveChatPlanCommand
    ↓
 ChatRun.Status = Running
 Plan.Status = Executing
@@ -236,6 +236,10 @@ Agent chạy từng bước: plan_step_started → gọi tool → plan_step_comp
    ↓
 plan_step_completed cho bước cuối → tổng hợp câu trả lời → run_completed
 ```
+
+> **Đã đổi (Stage 10.9):** nút Duyệt/Huỷ trên PlanCard đã bỏ — user gõ chat để duyệt/huỷ, xem
+> mục 10.9. Endpoint REST `plan/approve`/`plan/reject` vẫn còn nguyên, chỉ không còn được FE gọi
+> trực tiếp từ nút bấm nữa mà được `SendPlanChatMessageCommand` gọi lại qua `ISender`.
 
 ### Chờ duyệt bao lâu?
 - Run ở `AwaitingApproval` **không tính vào timeout 5 phút** của Stage 8.
@@ -303,19 +307,21 @@ ghi dữ liệu, thay vì dựa vào giá trị do `await_approval_node` trả l
 
 ## 10.7. Frontend — Plan Card
 
-Component mới: `AnhEmMotor-Management/src/components/business/chat/PlanCard.vue`
+Component: `AnhEmMotor-Management/src/components/business/chat/PlanCard.vue`, mount trong
+panel bên phải màn hình chat (`ChatDrawer.vue`), không còn nằm inline trong dòng chat — xem 10.9.
 
 ```
 ┌─────────────────────────────────────────────┐
 │ 📋 Kế hoạch thực hiện          [Đang tạo…]  │
 ├─────────────────────────────────────────────┤
 │ ⠿ 1. Lấy DS sản phẩm tồn kho thấp    ✎  ✕  │
+│    💬 bình luận...                          │
 │ ⠿ 2. Tính giá trị tồn theo danh mục   ✎  ✕  │
 │ ⠿ 3. So sánh cùng kỳ năm ngoái  ✏️đã sửa ✎ ✕│
 │ ⠿ 4. Tổng hợp báo cáo                 ✎  ✕  │
 │    + Thêm bước                              │
 ├─────────────────────────────────────────────┤
-│           [ Huỷ ]  [ Sửa ]  [ Duyệt & chạy ]│
+│   💬 Gõ "duyệt" hoặc "huỷ" trong khung chat │
 └─────────────────────────────────────────────┘
 ```
 
@@ -327,16 +333,17 @@ Yêu cầu:
 - Khi đang thực thi: mỗi bước hiện spinner / ✓ / ✗ theo `plan_step_*` event.
 - Gửi `version` trong mọi request sửa; nhận 409 → tải lại plan, hiện toast
   "Kế hoạch vừa được cập nhật, vui lòng xem lại".
-- Nút **Duyệt** disable khi `Status = Drafting` (AI chưa xong) — trừ khi user bấm
-  "Duyệt phần đã có" (tuỳ chọn, cân nhắc).
+- ~~Nút Duyệt/Huỷ~~ — **đã bỏ (Stage 10.9)**, thay bằng gõ chat. Mỗi bước có thêm ô bình luận
+  riêng, có thể để nhiều bình luận/bước.
 
 ### API cho FE
 ```
 GET   /api/v1/manager-chat/runs/{runId}/plan
 PATCH /api/v1/manager-chat/runs/{runId}/plan          { version, operations: [...] }
-POST  /api/v1/manager-chat/runs/{runId}/plan/approve  { version }
-POST  /api/v1/manager-chat/runs/{runId}/plan/reject
+POST  /api/v1/manager-chat/runs/{runId}/plan/chat     { content, targetStepId? }   ← Stage 10.9
 ```
+`plan/approve` và `plan/reject` (REST) vẫn tồn tại nguyên vẹn cho tương thích/gọi nội bộ, chỉ
+không còn được FE gọi trực tiếp — xem 10.9.
 
 ---
 
@@ -353,6 +360,72 @@ POST  /api/v1/manager-chat/runs/{runId}/plan/reject
 
 ---
 
+## 10.9. Vá 2 bug thật + chat-driven Plan Mode (2026-08-03)
+
+Sau khi vận hành thật, phát hiện 2 bug và đổi UX theo yêu cầu người dùng.
+
+### Bug 1 — `allowed_tool_names` rỗng khi thực thi plan step dù user đủ quyền
+
+Root cause: `route_after_classify` route thẳng vào `execute_step` khi resume, bỏ qua
+`absorb_steering_node` — node duy nhất tính `scoped_modules`. Cứu cánh
+`current_plan_step["expectedTools"]` cũng gãy vì tên tool do LLM tự sinh ở `plan_node` chưa từng
+được đối chiếu `load_tool_specs()` trước khi lưu.
+
+**Fix:** `plan_node` (`AISidecar/app/agents/manager_agent.py`) lọc `TOOLS:` qua
+`load_tool_specs()` (chỉ giữ tên có thật, `status == "active"`) trước khi gọi `add_plan_step` —
+đúng chỗ ghi duy nhất của `expectedTools`, không đụng routing.
+
+### Bug 2 — PlanCard báo nhầm "mất kết nối" khi chờ duyệt, nhân đôi sau khi duyệt
+
+Root cause: sau `plan_ready` không còn `run_heartbeat` nào (graph đã kết thúc, route `plan→END`).
+Watchdog FE 45s chỉ reset bằng `run_heartbeat` → chắc chắn nổ, xoá `activePlans[sessionId]`.
+
+**Fix:** `ChatDrawer.vue` — `clearWatchdog` ở `plan_ready`/khi resume vào `AwaitingApproval`,
+`armWatchdog` lại ở `plan_approved`. Bug nhân đôi tự hết sau khi bỏ cơ chế push-plan-vào-`messages`
+(xem dưới).
+
+### Chat-driven: bỏ nút Duyệt/Huỷ, panel bên phải, bình luận theo bước
+
+**Panel:** `activePlans` đổi từ `Record<sessionId, ChatMessage>` (bọc plan như 1 "tin nhắn giả"
+trong dòng chat) sang thẳng `Record<sessionId, ChatPlanDto>`. `PlanCard` mount trong cột riêng bên
+phải (`ChatDrawer.vue`, toggle mở/đóng bằng nút "📋 Kế hoạch" ở header), không còn push vào mảng
+`messages` — nhờ vậy bug nhân đôi PlanCard khi resume cũng hết theo, không cần dedupe thủ công nữa.
+
+**Duyệt/Huỷ qua chat, không qua nút:** mọi tin nhắn gõ trong lúc `Plan.Status ∈ {Drafting, Ready}`
+đi qua `POST runs/{runId}/plan/chat` (`SendPlanChatMessageCommand`) thay vì `SendSteering` — vốn cố
+ý từ chối `AwaitingApproval` (coi run đã kết thúc) và trước đây âm thầm tạo hẳn 1 run mới không
+liên quan gì tới plan.
+
+`SendPlanChatMessageCommandHandler` chỉ điều phối, KHÔNG viết lại nghiệp vụ đã có:
+1. `PlanChatClassifier.Classify(content)` — khớp CHÍNH XÁC (không phải substring) một tập từ khoá
+   duyệt (`"duyệt"`, `"đồng ý"`, `"ok"`...) / huỷ (`"huỷ"`, `"không"`, `"thôi"`...). Khớp thì gọi
+   lại `ApproveChatPlanCommand`/`RejectChatPlanCommand` có sẵn qua `ISender` — mọi
+   ownership/version-conflict/permission vẫn do 2 handler đó tự kiểm tra.
+2. Không khớp + có `targetStepId` (gõ vào đúng ô bình luận của 1 bước trên PlanCard) → ghép thẳng
+   operation `{"type":"comment", stepId, comment}`, KHÔNG cần LLM (đã rõ ràng).
+3. Không khớp + không có `targetStepId` (chat tự do, không gắn bước nào) → gọi sidecar
+   `POST /plan/interpret` (`app/api/v1/chat.py`) — LLM diễn giải free-text thành
+   `operations` (edit/add/remove/reorder/comment), tái dùng nguyên mẫu `PydanticOutputParser` đã
+   có ở `search_products.py` và hàm `infer_step_tools()` có sẵn (trước đó chưa được gọi ở đâu) để
+   suy `expectedTools` cho bước vừa sửa. Trả `intent: "unclear"` nếu không đủ rõ — không tự sửa liều.
+4. Cả 2 nhánh trên đều KẾT THÚC bằng gọi lại `UpdateChatPlanCommand` có sẵn — không có đường ghi
+   plan nào đi tắt qua handler mới.
+
+**Bình luận theo bước:** `PlanStepDto` thêm `Comments: List<PlanStepCommentDto>?` (nullable, JSON
+blob nên không cần migration — plan cũ deserialize ra `null`, chỗ ghi tự `?? []`). Nhiều bình luận
+tích luỹ trên cùng 1 bước, mỗi lần gọi `operation "comment"` append thêm, không ghi đè.
+
+### File mới/sửa chính
+- `AISidecar/app/agents/manager_agent.py` — lọc tool trong `plan_node`.
+- `AISidecar/app/api/v1/chat.py`, `app/schemas/plan_chat.py`, `app/prompts/plan_chat_intent.md` —
+  endpoint `/plan/interpret`.
+- `Application/Features/ManagerChat/Commands/SendPlanChatMessage/*` — Command/Handler/Classifier.
+- `Application/DTOs/Chat/PlanStepCommentDto.cs`, `PlanChatResultDto.cs`, `PlanChatInterpretationDto.cs`.
+- `ISidecarStreamClient`/`SidecarStreamClient` — `InterpretPlanChatAsync`.
+- `ChatDrawer.vue`, `PlanCard.vue`, `chat.api.ts` — panel, bỏ nút, ô bình luận, `sendPlanChat`.
+
+---
+
 ## Definition of Done — Stage 10
 
 - [ ] Migration `ChatPlan` chạy được trên cả MySQL và PostgreSQL.
@@ -365,6 +438,9 @@ POST  /api/v1/manager-chat/runs/{runId}/plan/reject
 - [ ] Đang chờ duyệt → thoát ra, restart backend, vào lại → plan vẫn còn nguyên, duyệt được.
 - [ ] Mọi tool ghi dữ liệu đều bị chặn nếu chưa có plan được duyệt.
 - [ ] Không duyệt sau 24h → run tự huỷ.
+- [ ] (10.9) Gõ "duyệt"/"huỷ" trong chat lúc plan `Ready` → thực thi/huỷ đúng, không tạo run mới.
+- [ ] (10.9) Bình luận vào 1 bước cụ thể → xuất hiện đúng bước đó, cộng dồn được nhiều bình luận.
+- [ ] (10.9) Chat tự do không khớp keyword → sidecar diễn giải đúng thành sửa bước tương ứng.
 
 ### Test
 
@@ -376,6 +452,14 @@ POST  /api/v1/manager-chat/runs/{runId}/plan/reject
 - [ ] Duyệt khi `Status=Drafting` → bị từ chối.
 - [ ] Sửa bước đang `running`/`done` → bị từ chối; bước `pending` → cho phép.
 - [ ] Plan > 8 bước → bị từ chối, có thông báo rõ.
+- [ ] (10.9) `PlanChatClassifier` khớp đúng từ khoá duyệt/huỷ; `SendPlanChatMessageCommandHandler`
+      route đúng approve/reject/update; bình luận cộng dồn không ghi đè.
 
 `AISidecar/tests/test_plan.py`:
 - [ ] `plan_node` đưa `locked_steps` vào prompt đúng định dạng khi có bước user sửa.
+- [ ] (10.9) `plan_node` lọc tên tool bịa trước khi lưu `expectedTools`.
+- [ ] (10.9) `call_tools_node` chặn đúng tool ghi khi `plan_approved=False`, cho qua khi `True`.
+
+`AISidecar/tests/test_plan_chat.py` (mới, Stage 10.9):
+- [ ] `/plan/interpret` suy đúng `expected_tools` cho operation `edit`; operation `comment` không
+      gọi `infer_step_tools`; LLM lỗi → trả `intent: "unclear"`.

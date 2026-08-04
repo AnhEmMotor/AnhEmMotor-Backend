@@ -39,6 +39,7 @@ MAX_TOOL_TURNS = 8
 MAX_PLAN_STEPS = 8
 
 PLAN_MODE_KEYWORDS = ("báo cáo", "phân tích", "tổng hợp", "so sánh", "lập kế hoạch", "kiểm tra toàn bộ")
+WRITE_INTENT_KEYWORDS = ("tạo", "thêm", "xoá", "xóa", "sửa", "cập nhật", "duyệt", "xác nhận", "gửi", "đặt hàng")
 
 GUARDRAIL_STATE_KEY = "permissions"
 
@@ -142,7 +143,10 @@ def _latest_human_text(messages) -> str:
 
 def classify_node(state: AgentState) -> dict:
     text = (_latest_human_text(state.get("messages")) or "").lower()
-    needs_plan = any(keyword in text for keyword in PLAN_MODE_KEYWORDS)
+    needs_plan = (
+        any(keyword in text for keyword in PLAN_MODE_KEYWORDS)
+        or any(keyword in text for keyword in WRITE_INTENT_KEYWORDS)
+    )
     return {"needs_plan": needs_plan}
 
 
@@ -219,8 +223,17 @@ def _split_plan_blocks(text: str) -> list[dict]:
     return blocks
 
 
-async def _emit_plan_step(client: BackendClient, writer, run_id: str, block: dict) -> None:
-    step = await client.add_plan_step(run_id, block["title"], block["detail"], block["tools"])
+def _filter_valid_tools(tools: list[str], specs: dict) -> list[str]:
+    valid = [t for t in tools if (spec := specs.get(t)) and spec.status == "active"]
+    dropped = [t for t in tools if t not in valid]
+    if dropped:
+        logger.warning("plan_node: bỏ tên tool không hợp lệ %s (không có trong registry hoặc không active)", dropped)
+    return valid
+
+
+async def _emit_plan_step(client: BackendClient, writer, run_id: str, block: dict, specs: dict) -> None:
+    valid_tools = _filter_valid_tools(block["tools"], specs)
+    step = await client.add_plan_step(run_id, block["title"], block["detail"], valid_tools)
     writer(("plan_step_added", json.dumps({"step": step}, ensure_ascii=False)))
 
 
@@ -245,6 +258,7 @@ async def plan_node(state: AgentState) -> dict:
 
     request_text = _latest_human_text(state.get("messages"))
     prompt = build_plan_prompt(request_text, current["steps"])
+    specs = load_tool_specs()
 
     llm = get_llm(temperature=0.2)
     full_text = ""
@@ -256,12 +270,12 @@ async def plan_node(state: AgentState) -> dict:
         full_text += content
         blocks = _split_plan_blocks(full_text)
         while parsed_count < len(blocks) and parsed_count < budget:
-            await _emit_plan_step(client, writer, run_id, blocks[parsed_count])
+            await _emit_plan_step(client, writer, run_id, blocks[parsed_count], specs)
             parsed_count += 1
 
     blocks = _split_plan_blocks(full_text + _PLAN_BLOCK_SENTINEL)
     while parsed_count < len(blocks) and parsed_count < budget:
-        await _emit_plan_step(client, writer, run_id, blocks[parsed_count])
+        await _emit_plan_step(client, writer, run_id, blocks[parsed_count], specs)
         parsed_count += 1
 
     if parsed_count == 0:
@@ -287,13 +301,21 @@ async def execute_step_node(state: AgentState) -> dict:
     writer(("plan_step_started", json.dumps({"stepId": next_step["id"]}, ensure_ascii=False)))
 
     step_request = HumanMessage(content=f"[BƯỚC KẾ HOẠCH] {next_step['title']}\n{next_step['detail']}")
-    return {
+    updates = {
         "current_plan_step": next_step,
         "plan_finished": False,
         "messages": [step_request],
         "tool_turns": 0,
         "plan_approved": True,
     }
+
+    if not next_step.get("expectedTools"):
+        query = f"{next_step['title']} {next_step['detail']}"
+        updates["scoped_modules"] = await resolve_modules(
+            query, state.get("routing_context") or {}, state.get("history") or [])
+        updates["expanded_modules"] = set()
+
+    return updates
 
 
 def route_after_execute_step(state: AgentState) -> str:
@@ -368,6 +390,13 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
     carried = []
     last_poll = time.monotonic()
     thinking_parser = ThinkingParser()
+    in_plan_step = bool(state.get("current_plan_step"))
+
+    def emit_answer(event_type: str, payload: str) -> None:
+        if in_plan_step:
+            writer(("run_heartbeat", ""))
+        else:
+            writer((event_type, payload))
 
     async for chunk in llm.astream(state["messages"]):
         if cancel_event is not None and cancel_event.is_set():
@@ -377,7 +406,7 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         if content:
             visible = thinking_parser.feed(content)
             if visible:
-                writer(("text_delta", visible))
+                emit_answer("text_delta", visible)
 
         full = chunk if full is None else full + chunk
 
@@ -410,18 +439,18 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
             result_message.content = result_message.content.replace(tagged, "", 1).lstrip()
     elif isinstance(result_message.content, str) and THINKING_CLOSE in result_message.content:
         leaked_thinking, _, rest = result_message.content.partition(THINKING_CLOSE)
-        writer(("message_correction", ""))
+        emit_answer("message_correction", "")
         if leaked_thinking.strip():
             writer(("thinking", json.dumps(
                 {"text": _scrub_text(leaked_thinking.strip())}, ensure_ascii=False)))
         result_message.content = rest.lstrip()
         if result_message.content:
-            writer(("text_delta", result_message.content))
+            emit_answer("text_delta", result_message.content)
 
     tool_calls = getattr(result_message, "tool_calls", None)
     if scoping and tool_calls and (result_message.content or "").strip():
         leaked_text = _scrub_text(result_message.content.strip())
-        writer(("message_correction", ""))
+        emit_answer("message_correction", "")
         writer(("thinking", json.dumps({"text": leaked_text}, ensure_ascii=False)))
         writer(("guardrail_blocked", json.dumps(
             {"tool": "", "reason": "text_kem_tool_call_chuyen_thanh_thinking"}, ensure_ascii=False)))
@@ -434,10 +463,10 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         })
         if guard.action == "block":
             result_message = AIMessage(content="Không thể trả lời yêu cầu này.")
-            writer(("message_correction", result_message.content))
+            emit_answer("message_correction", result_message.content)
         elif guard.action == "rewrite":
             result_message = AIMessage(content=REWRITE_MESSAGES.get(guard.kind, REWRITE_MESSAGES["no_permission"]))
-            writer(("message_correction", result_message.content))
+            emit_answer("message_correction", result_message.content)
 
     return {
         "turns": state.get("turns", 0) + 1,
@@ -523,12 +552,13 @@ async def call_tools_node(state: AgentState) -> dict:
                 writer(("guardrail_blocked", json.dumps({"tool": name, "reason": reason}, ensure_ascii=False)))
                 continue
 
+            spec = specs.get(name)
             guard = check_tool_call(name, args, {
                 "allowed_tool_names": state["allowed_tool_names"],
                 "tool_call_count": tool_call_count,
                 "tool_budget": state.get("tool_budget", DEFAULT_TOOL_BUDGET),
                 "call_signatures": call_signatures,
-                "is_write": False,
+                "is_write": spec.is_write if spec else False,
                 "plan_approved": state.get("plan_approved", False),
             })
             if guard.action != "allow":

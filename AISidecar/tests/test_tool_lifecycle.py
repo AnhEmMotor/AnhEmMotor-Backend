@@ -416,6 +416,35 @@ async def test_thieu_tag_mo_suy_nghi_van_duoc_gom_vao_thinking_khong_lo_tag_dong
     assert corrections == [""]
 
 
+async def test_khong_phat_text_delta_khi_dang_thuc_thi_buoc_plan(monkeypatch):
+    monkeypatch.setattr(manager_agent, "BackendClient", FakeBackendClient)
+    events = []
+    monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: events.append)
+    from langchain_core.messages import AIMessageChunk, HumanMessage
+
+    class AnsweringLLM:
+        def bind_tools(self, tools):
+            return self
+
+        async def astream(self, messages):
+            yield AIMessageChunk(content="Đây là câu trả lời riêng của bước này.")
+
+    monkeypatch.setattr(manager_agent, "get_llm", lambda **kwargs: AnsweringLLM())
+    state = _base_state({
+        "messages": [HumanMessage(content="[BƯỚC KẾ HOẠCH] test")],
+        "permissions": ["Permissions.Order.ProductManagement.View"],
+        "turns": 0,
+        "current_plan_step": {"id": "s1", "title": "test"},
+    })
+    result = await manager_agent.call_model_node(state, {"configurable": {}})
+
+    text_deltas = [p for t, p in events if t == "text_delta"]
+    assert text_deltas == []
+    assert result["messages"][0].content == "Đây là câu trả lời riêng của bước này."
+    heartbeats = [t for t, _ in events if t == "run_heartbeat"]
+    assert heartbeats, "phải phát run_heartbeat thay cho text_delta bị chặn, tránh watchdog FE ngắt oan"
+
+
 def test_sanitize_history_khong_giu_tool_call():
     history = [
         {"role": "user", "message": "tra cuu don hang 1"},

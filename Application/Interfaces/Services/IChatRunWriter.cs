@@ -14,7 +14,8 @@ public interface IChatRunWriter
 {
     public Task<long> AppendAsync(Guid runId, string type, object payload);
     public Task MarkRunningAsync(Guid runId, string instanceId);
-    /// <summary>segmentStartedAt: mốc bắt đầu đoạn hiện tại — dùng để tra ChatRunEvent (tool_start) trong đúng khoảng thời gian của đoạn này, gắn vào ChatMessage.ToolCallsJson.</summary>
+    /// <summary>segmentStartedAt: mốc bắt đầu đoạn hiện tại — dùng để tra ChatRunEvent (thinking/tool_start/tool_end)
+    /// trong đúng khoảng thời gian của đoạn này, gắn vào ChatMessage.ReasoningStepsJson.</summary>
     public Task CompleteAsync(Guid runId, string finalOutput, DateTime segmentStartedAt);
 
     /// <summary>segmentStartedAt: xem CompleteAsync.</summary>

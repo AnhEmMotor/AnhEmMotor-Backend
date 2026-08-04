@@ -36,13 +36,15 @@ public class GetManagerChatSessionHistoryQueryHandler(
             .OrderBy(m => m.CreatedAt)
             .Select(m => new ManagerChatMessageDto
             {
+                Id = m.Id.ToString(),
                 Role = m.Role.ToString(),
                 Message = m.Message,
                 CreatedAt = m.CreatedAt,
                 IsSteering = m.IsSteering,
-                ToolCalls = string.IsNullOrEmpty(m.ToolCallsJson)
+                ReasoningElapsedSeconds = m.ReasoningElapsedSeconds,
+                ReasoningSteps = string.IsNullOrEmpty(m.ReasoningStepsJson)
                     ? null
-                    : JsonSerializer.Deserialize<List<ChatMessageToolCallDto>>(m.ToolCallsJson)
+                    : JsonSerializer.Deserialize<List<ChatReasoningStepDto>>(m.ReasoningStepsJson)
             }).ToList();
 
         return dtos;

@@ -13,42 +13,136 @@ public class ChatRunWriter(
     IChatRunEventBus eventBus,
     IChatToolCatalogProvider catalogProvider) : IChatRunWriter
 {
-    // Chặn trên bằng "bây giờ" — nếu không, tool_start của ĐOẠN KẾ TIẾP (chạy sau khi hàm này
-    // được gọi) sẽ vô tình bị gán nhầm vào ChatMessage của đoạn trước do điều kiện lọc hở phía trên.
-    private async Task<string?> BuildToolCallsJsonAsync(Guid runId, DateTime segmentStartedAt)
+    // Chặn trên bằng "bây giờ" — nếu không, thinking/tool_start của ĐOẠN KẾ TIẾP (chạy sau khi hàm
+    // này được gọi) sẽ vô tình bị gán nhầm vào ChatMessage của đoạn trước do điều kiện lọc hở phía trên.
+    private async Task<string?> BuildReasoningStepsJsonAsync(Guid runId, DateTime segmentStartedAt)
     {
         var segmentEndedAt = DateTime.UtcNow;
-        var payloads = await context.ChatRunEvents
-            .Where(e => e.RunId == runId && e.Type == ChatRunEventType.ToolStart
+        var events = await context.ChatRunEvents
+            .Where(e => e.RunId == runId
+                        && (e.Type == ChatRunEventType.Thinking
+                            || e.Type == ChatRunEventType.ToolStart
+                            || e.Type == ChatRunEventType.ToolEnd)
                         && e.CreatedAt >= segmentStartedAt && e.CreatedAt <= segmentEndedAt)
             .OrderBy(e => e.Seq)
-            .Select(e => e.Payload)
+            .Select(e => new { e.Type, e.Payload })
             .ToListAsync();
-        if (payloads.Count == 0) return null;
+        if (events.Count == 0) return null;
 
         var labelByName = catalogProvider.GetCatalog().ToDictionary(e => e.Name, e => e.Label);
-        var calls = payloads.Select(p =>
-        {
-            var (name, summary) = ParseToolStartPayload(p);
-            return new ChatMessageToolCallDto(name, labelByName.GetValueOrDefault(name, name), summary);
-        });
-        return JsonSerializer.Serialize(calls);
+        var steps = BuildReasoningSteps(events.Select(e => (e.Type, e.Payload)), labelByName);
+        return steps.Count == 0 ? null : JsonSerializer.Serialize(steps);
     }
 
-    // tool_start payload là JSON {"name":..., "summary":...} — fallback về string thô làm tên
-    // tool nếu gặp payload cũ (trước khi bổ sung summary) hoặc payload không hợp lệ.
-    private static (string Name, string? Summary) ParseToolStartPayload(string payload)
+    /// <summary>Gộp các event thinking/tool_start/tool_end (theo đúng thứ tự Seq) thành danh sách
+    /// ChatReasoningStepDto — cùng hình dạng "reasoningSteps" mà FE dựng live lúc đang stream.
+    /// Tách riêng khỏi truy vấn DB để test trực tiếp không cần EF InMemory.</summary>
+    public static List<ChatReasoningStepDto> BuildReasoningSteps(
+        IEnumerable<(string Type, string Payload)> events, Dictionary<string, string> labelByName)
+    {
+        var steps = new List<ChatReasoningStepDto>();
+
+        foreach (var (type, payload) in events)
+        {
+            if (type == ChatRunEventType.Thinking)
+            {
+                var text = ParseThinkingPayload(payload);
+                if (!string.IsNullOrEmpty(text))
+                {
+                    steps.Add(new ChatReasoningStepDto("thinking", Text: text));
+                }
+            }
+            else if (type == ChatRunEventType.ToolStart)
+            {
+                var (name, summary, argsPreview) = ParseToolStartPayload(payload);
+                steps.Add(new ChatReasoningStepDto(
+                    "tool", Name: name, Label: labelByName.GetValueOrDefault(name, name),
+                    Summary: summary, Status: "running", ArgsPreview: argsPreview));
+            }
+            else
+            {
+                var end = ParseToolEndPayload(payload);
+                var idx = steps.FindLastIndex(s => s.Kind == "tool" && s.Name == end.Name && s.Status == "running");
+                if (idx >= 0)
+                {
+                    steps[idx] = steps[idx] with
+                    {
+                        Summary = end.Summary ?? steps[idx].Summary,
+                        Status = "done",
+                        DurationMs = end.DurationMs,
+                        ResultPreview = end.ResultPreview,
+                        Truncated = end.Truncated,
+                        TotalCount = end.TotalCount,
+                        AsOf = end.AsOf,
+                        Warnings = end.Warnings,
+                        FiltersApplied = end.FiltersApplied,
+                    };
+                }
+            }
+        }
+
+        return steps;
+    }
+
+    private static string? ParseThinkingPayload(string payload)
     {
         try
         {
             using var doc = JsonDocument.Parse(payload);
-            var name = doc.RootElement.TryGetProperty("name", out var n) ? n.GetString() ?? payload : payload;
-            var summary = doc.RootElement.TryGetProperty("summary", out var s) ? s.GetString() : null;
-            return (name, string.IsNullOrEmpty(summary) ? null : summary);
+            return doc.RootElement.TryGetProperty("text", out var t) ? t.GetString() : payload;
         }
         catch (JsonException)
         {
-            return (payload, null);
+            return payload;
+        }
+    }
+
+    // tool_start payload là JSON {"name":..., "summary":..., "argsPreview":...} — fallback về
+    // string thô làm tên tool nếu gặp payload cũ hoặc payload không hợp lệ.
+    private static (string Name, string? Summary, JsonElement? ArgsPreview) ParseToolStartPayload(string payload)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(payload);
+            var root = doc.RootElement;
+            var name = root.TryGetProperty("name", out var n) ? n.GetString() ?? payload : payload;
+            var summary = root.TryGetProperty("summary", out var s) ? s.GetString() : null;
+            JsonElement? argsPreview = root.TryGetProperty("argsPreview", out var ap) ? ap.Clone() : null;
+            return (name, string.IsNullOrEmpty(summary) ? null : summary, argsPreview);
+        }
+        catch (JsonException)
+        {
+            return (payload, null, null);
+        }
+    }
+
+    private sealed record ToolEndPayloadData(
+        string Name, string? Summary, int? DurationMs, JsonElement? ResultPreview,
+        bool? Truncated, int? TotalCount, string? AsOf, List<string>? Warnings,
+        Dictionary<string, string>? FiltersApplied);
+
+    private static ToolEndPayloadData ParseToolEndPayload(string payload)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(payload);
+            var root = doc.RootElement;
+            var name = root.TryGetProperty("name", out var n) ? n.GetString() ?? payload : payload;
+            var summary = root.TryGetProperty("summary", out var s) ? s.GetString() : null;
+            int? durationMs = root.TryGetProperty("durationMs", out var d) && d.TryGetInt32(out var dv) ? dv : null;
+            JsonElement? resultPreview = root.TryGetProperty("resultPreview", out var rp) ? rp.Clone() : null;
+            bool? truncated = root.TryGetProperty("truncated", out var tr) ? tr.GetBoolean() : null;
+            int? totalCount = root.TryGetProperty("totalCount", out var tc) && tc.TryGetInt32(out var tcv) ? tcv : null;
+            string? asOf = root.TryGetProperty("asOf", out var ao) ? ao.GetString() : null;
+            List<string>? warnings = root.TryGetProperty("warnings", out var w)
+                ? JsonSerializer.Deserialize<List<string>>(w.GetRawText()) : null;
+            Dictionary<string, string>? filtersApplied = root.TryGetProperty("filtersApplied", out var fa)
+                ? JsonSerializer.Deserialize<Dictionary<string, string>>(fa.GetRawText()) : null;
+            return new ToolEndPayloadData(name, summary, durationMs, resultPreview, truncated, totalCount, asOf, warnings, filtersApplied);
+        }
+        catch (JsonException)
+        {
+            return new ToolEndPayloadData(payload, null, null, null, null, null, null, null, null);
         }
     }
 
@@ -115,6 +209,7 @@ public class ChatRunWriter(
 
         if (!string.IsNullOrEmpty(finalOutput))
         {
+            var now = DateTime.UtcNow;
             var aiMessage = new ChatMessage
             {
                 Id = Guid.NewGuid(),
@@ -122,8 +217,9 @@ public class ChatRunWriter(
                 Role = ChatRole.Ai,
                 Message = finalOutput,
                 RunId = runId,
-                CreatedAt = DateTime.UtcNow,
-                ToolCallsJson = await BuildToolCallsJsonAsync(runId, segmentStartedAt)
+                CreatedAt = now,
+                ReasoningStepsJson = await BuildReasoningStepsJsonAsync(runId, segmentStartedAt),
+                ReasoningElapsedSeconds = (now - segmentStartedAt).TotalSeconds
             };
             context.ChatMessages.Add(aiMessage);
         }
@@ -141,6 +237,7 @@ public class ChatRunWriter(
 
         if (!string.IsNullOrEmpty(finalOutput))
         {
+            var now = DateTime.UtcNow;
             var aiMessage = new ChatMessage
             {
                 Id = Guid.NewGuid(),
@@ -148,8 +245,9 @@ public class ChatRunWriter(
                 Role = ChatRole.Ai,
                 Message = finalOutput,
                 RunId = runId,
-                CreatedAt = DateTime.UtcNow,
-                ToolCallsJson = await BuildToolCallsJsonAsync(runId, segmentStartedAt)
+                CreatedAt = now,
+                ReasoningStepsJson = await BuildReasoningStepsJsonAsync(runId, segmentStartedAt),
+                ReasoningElapsedSeconds = (now - segmentStartedAt).TotalSeconds
             };
             context.ChatMessages.Add(aiMessage);
         }
@@ -169,6 +267,7 @@ public class ChatRunWriter(
 
         if (!string.IsNullOrEmpty(finalOutput))
         {
+            var now = DateTime.UtcNow;
             var aiMessage = new ChatMessage
             {
                 Id = Guid.NewGuid(),
@@ -176,8 +275,9 @@ public class ChatRunWriter(
                 Role = ChatRole.Ai,
                 Message = finalOutput,
                 RunId = runId,
-                CreatedAt = DateTime.UtcNow,
-                ToolCallsJson = await BuildToolCallsJsonAsync(runId, segmentStartedAt)
+                CreatedAt = now,
+                ReasoningStepsJson = await BuildReasoningStepsJsonAsync(runId, segmentStartedAt),
+                ReasoningElapsedSeconds = (now - segmentStartedAt).TotalSeconds
             };
             context.ChatMessages.Add(aiMessage);
         }
@@ -223,7 +323,8 @@ public class ChatRunWriter(
                 Message = segmentOutput,
                 RunId = runId,
                 CreatedAt = segmentStartedAt,
-                ToolCallsJson = await BuildToolCallsJsonAsync(runId, segmentStartedAt)
+                ReasoningStepsJson = await BuildReasoningStepsJsonAsync(runId, segmentStartedAt),
+                ReasoningElapsedSeconds = (DateTime.UtcNow - segmentStartedAt).TotalSeconds
             });
             await context.SaveChangesAsync();
         }

@@ -128,6 +128,23 @@ public class UpdateChatPlanCommandHandler(
                 steps[idx] = steps[idx] with { Order = op.Order.Value, EditedByUser = true };
                 return null;
             }
+            case "comment":
+            {
+                var idx = steps.FindIndex(s => s.Id == op.StepId);
+                if (idx < 0) return Error.Validation($"Không tìm thấy bước '{op.StepId}'.");
+                if (string.IsNullOrWhiteSpace(op.Comment)) return Error.Validation("Nội dung bình luận không được để trống.");
+                var current = steps[idx];
+                if (current.Status is PlanStepStatus.Running or PlanStepStatus.Done)
+                {
+                    return Error.Validation("Không thể bình luận vào bước đang chạy hoặc đã xong.");
+                }
+                var comments = new List<PlanStepCommentDto>(current.Comments ?? [])
+                {
+                    new(Guid.NewGuid().ToString("N"), op.Comment.Trim(), "user", DateTime.UtcNow),
+                };
+                steps[idx] = current with { Comments = comments, EditedByUser = true };
+                return null;
+            }
             default:
                 return Error.Validation($"Loại thao tác không hợp lệ: '{op.Type}'.");
         }

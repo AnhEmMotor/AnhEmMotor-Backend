@@ -33,7 +33,12 @@ public class ChatMessage : BaseEntity
     public Guid? RunId { get; set; }
     public ChatRun? Run { get; set; }
 
-    /// <summary>Danh sách tool (name+label) đã dùng để sinh ra tin nhắn này, dạng JSON — null nếu không gọi tool nào.</summary>
-    [Column("ToolCallsJson", TypeName = "nvarchar(max)")]
-    public string? ToolCallsJson { get; set; }
+    /// <summary>Các bước suy nghĩ (thinking) + gọi tool đã dùng để sinh ra tin nhắn này, dạng JSON
+    /// (ChatReasoningStepDto[]) — null nếu không có bước nào.</summary>
+    [Column("ReasoningStepsJson", TypeName = "nvarchar(max)")]
+    public string? ReasoningStepsJson { get; set; }
+
+    /// <summary>Thời gian (giây) từ lúc đoạn suy nghĩ này bắt đầu đến lúc hoàn tất — null với tin
+    /// nhắn không phải AI hoặc tin nhắn cũ trước khi cột này tồn tại.</summary>
+    public double? ReasoningElapsedSeconds { get; set; }
 }
