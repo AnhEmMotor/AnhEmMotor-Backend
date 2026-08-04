@@ -212,7 +212,7 @@ public class RequestConsultationHandler : IRequestHandler<RequestConsultationCom
         var lead = new Lead
         {
             InterestedVehicle = request.Request.ProductId.ToString() ?? "",
-            Notes = request.Request.CustomerNote,
+            Notes = request.Request.CustomerNote ?? "",
             Source = "Catalog",
             CreatedAt = DateTime.UtcNow,
             Status = "New",
