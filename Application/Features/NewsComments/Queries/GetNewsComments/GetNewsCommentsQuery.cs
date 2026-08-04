@@ -3,15 +3,21 @@ using MediatR;
 
 namespace Application.Features.NewsComments.Queries.GetNewsComments;
 
-public sealed record GetNewsCommentsQuery(int? NewsId = null) : IRequest<Result<List<NewsCommentResponse>>>;
+public sealed record GetNewsCommentsQuery(int? NewsId = null, string? ArticleType = null, string? ArticleSlug = null) : IRequest<Result<List<NewsCommentResponse>>>;
 
 public class NewsCommentResponse
 {
     public int Id { get; set; }
 
-    public int NewsId { get; set; }
+    public int? NewsId { get; set; }
 
     public string? NewsTitle { get; set; }
+
+    public string? NewsImage { get; set; }
+
+    public string? ArticleType { get; set; }
+
+    public string? ArticleSlug { get; set; }
 
     public Guid? UserId { get; set; }
 

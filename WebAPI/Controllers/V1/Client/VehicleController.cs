@@ -1,5 +1,12 @@
+using Application.ApiContracts.Vehicle.Responses;
+using Application.Common.Models;
+using Application.Features.Client.Vehicles.Queries;
+using Domain.Primitives;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace WebAPI.Controllers.V1.Client;
 
@@ -9,15 +16,79 @@ namespace WebAPI.Controllers.V1.Client;
 [ApiController]
 [Route("api/v1/client/vehicles")]
 [Authorize]
-public class VehicleController : ControllerBase
+public class VehicleController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Lấy danh sách xe đã đăng ký của khách hàng đang đăng nhập.
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> GetMyVehicles(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(PagedResult<VehicleResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyVehicles([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
-        return Ok(new { message = "Endpoint temporarily unavailable" });
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
+            User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
+            User.FindFirst("sub")?.Value ??
+            User.Identity?.Name ??
+            string.Empty;
+        if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+        {
+            return BadRequest(new { message = "Invalid user identifier" });
+        }
+
+        var result = await mediator.Send(new GetMyVehiclesQuery { UserId = userId, SieveModel = sieveModel }, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy thông tin chi tiết xe của khách hàng.
+    /// </summary>
+    [HttpGet("{id}/detail")]
+    [ProducesResponseType(typeof(VehicleDetailResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetVehicleDetail([FromRoute] int id, CancellationToken cancellationToken)
+    {
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
+            User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
+            User.FindFirst("sub")?.Value ??
+            User.Identity?.Name ??
+            string.Empty;
+        if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+        {
+            return BadRequest(new { message = "Invalid user identifier" });
+        }
+
+        var result = await mediator.Send(new Application.Features.Client.Vehicles.Queries.GetCustomerVehicleDetail.GetCustomerVehicleDetailQuery { UserId = userId, VehicleId = id }, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy lịch sử mua hàng và bảo hành của xe.
+    /// </summary>
+    [HttpGet("{id}/history")]
+    [ProducesResponseType(typeof(Application.Features.Client.Vehicles.Queries.GetCustomerVehicleHistory.CustomerVehicleHistoryResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetVehicleHistory([FromRoute] int id, CancellationToken cancellationToken)
+    {
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ??
+            User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
+            User.FindFirst("sub")?.Value ??
+            User.Identity?.Name ??
+            string.Empty;
+        if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+        {
+            return BadRequest(new { message = "Invalid user identifier" });
+        }
+
+        var result = await mediator.Send(new Application.Features.Client.Vehicles.Queries.GetCustomerVehicleHistory.GetCustomerVehicleHistoryQuery { UserId = userId, VehicleId = id }, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Đăng ký xe mới cho khách hàng.
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> RegisterVehicle([FromBody] object request, CancellationToken cancellationToken)
+    {
+        // TODO: Implement actual logic
+        return Ok(new { message = "Vehicle registered successfully (mock)" });
     }
 
     /// <summary>

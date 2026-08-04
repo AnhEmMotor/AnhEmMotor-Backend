@@ -55,6 +55,7 @@ public class WarrantyClaimReadRepository(ApplicationDBContext context, ISievePag
         var vehicleIds = claims.Select(c => c.VehicleId).Distinct().ToList();
         var vehicles = await context.Set<Domain.Entities.Vehicle>()
             .Include(v => v.Lead)
+            .Include(v => v.User)
             .Where(v => vehicleIds.Contains(v.Id))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

@@ -232,6 +232,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<VehicleAuditLog> VehicleAuditLogs { get; set; }
 
+    public virtual DbSet<DepositSettingHistory> DepositSettingHistories { get; set; }
+
     public virtual DbSet<PurchaseRequestAuditLog> PurchaseRequestAuditLogs { get; set; }
 
     public virtual DbSet<PurchaseRequestItemAuditLog> PurchaseRequestItemAuditLogs { get; set; }

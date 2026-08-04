@@ -10,6 +10,7 @@ public class VoucherValidateRequest
     [Required]
     public int VoucherId { get; set; }
 
-    [Required]
-    public int OutputId { get; set; }
+    public int? OutputId { get; set; }
+
+    public decimal? OrderTotal { get; set; }
 }

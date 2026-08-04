@@ -20,6 +20,8 @@ namespace Application.ApiContracts.Return.Responses
 
         public DateTime CreatedAt { get; set; }
 
+        public DateTime? InspectedAt { get; set; }
+
         public string? BoxCondition { get; set; }
 
         public string? ProductCondition { get; set; }
@@ -29,6 +31,8 @@ namespace Application.ApiContracts.Return.Responses
         public string? ReturnInternalNote { get; set; }
 
         public string? ReturnAction { get; set; }
+
+        public string? RejectionReason { get; set; }
 
         public decimal RefundAmount { get; set; }
 

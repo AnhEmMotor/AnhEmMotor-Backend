@@ -20,7 +20,10 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturns
                     x => x.InspectedAt == null && string.IsNullOrWhiteSpace(x.ReturnAction))],
                 ReturnOrderStatus.Inspecting => [.. returns.Where(
                     x => x.InspectedAt != null && string.IsNullOrWhiteSpace(x.ReturnAction))],
-                ReturnOrderStatus.Completed => [.. returns.Where(x => !string.IsNullOrWhiteSpace(x.ReturnAction))],
+                ReturnOrderStatus.Completed => [.. returns.Where(
+                    x => GetReturnStatus(x) == ReturnOrderStatus.Completed)],
+                ReturnOrderStatus.Rejected => [.. returns.Where(
+                    x => GetReturnStatus(x) == ReturnOrderStatus.Rejected)],
                 _ => returns
             };
             return[.. filtered
@@ -40,6 +43,8 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturns
 
         private static ReturnOrderStatus GetReturnStatus(ParcelDeliveryOrder order)
         {
+            if (string.Equals(order.ReturnAction, "rejected", StringComparison.OrdinalIgnoreCase))
+                return ReturnOrderStatus.Rejected;
             if (!string.IsNullOrWhiteSpace(order.ReturnAction))
                 return ReturnOrderStatus.Completed;
             if (order.InspectedAt != null)

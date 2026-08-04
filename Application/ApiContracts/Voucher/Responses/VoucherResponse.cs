@@ -22,9 +22,17 @@ public class VoucherResponse
 
     public decimal? MaxDiscountAmount { get; set; }
 
+    public decimal MinOrderValue { get; set; }
+
     public DateTime ValidFrom { get; set; }
 
     public DateTime ValidTo { get; set; }
+
+    public int UsageLimitPerUser { get; set; }
+
+    public int TotalUsageLimit { get; set; }
+
+    public int UsedCount { get; set; }
 
     public List<int> AssignedCustomerIds { get; set; } = new();
 

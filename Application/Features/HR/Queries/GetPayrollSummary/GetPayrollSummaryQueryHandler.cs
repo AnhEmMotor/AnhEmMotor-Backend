@@ -68,7 +68,7 @@ public class GetPayrollSummaryQueryHandler(
                     PendingCommission = pendingThisMonth,
                     ConfirmedCommission = confirmedThisMonth,
                     PaidCommission = paidThisMonth,
-                    VolumeBonus = volumeBonus,
+                    KpiBonus = volumeBonus,
                 });
         }
         return Result<List<PayrollResponse>>.Success(result);

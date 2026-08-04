@@ -9,9 +9,12 @@ using Application.Interfaces.Services.Shipping.Models;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
+using Domain.Enums;
 using Mapster;
 using MediatR;
 using System.Linq;
+
+using Application.Interfaces.Repositories.Voucher;
 
 namespace Application.Features.Outputs.Commands.CreateOutput;
 
@@ -21,6 +24,8 @@ public class CreateOutputCommandHandler(
     IProductVariantReadRepository variantRepository,
     ISettingRepository settingRepository,
     IShippingService shippingService,
+    IVoucherReadRepository voucherReadRepository,
+    IVoucherUsageRepository voucherUsageRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -166,29 +171,74 @@ public class CreateOutputCommandHandler(
         }
         var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
-        var thresholdSetting = settings.FirstOrDefault(
-            s => string.Equals(s.Key, SettingKeys.OrderValueExceeds, StringComparison.OrdinalIgnoreCase));
+        bool hasVehicle = false;
+        bool hasPart = false;
+        bool hasAccessory = false;
+
+        foreach (var info in output.OutputInfos)
+        {
+            var variant = variantsList.FirstOrDefault(v => v.Id == info.ProductVariantId);
+            var managementType = variant?.Product?.ProductCategory?.ManagementType;
+            var categoryName = variant?.Product?.ProductCategory?.Name ?? "";
+            
+            if (string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase))
+            {
+                hasVehicle = true;
+            }
+            else if (categoryName.Contains("Phụ kiện", StringComparison.OrdinalIgnoreCase))
+            {
+                hasAccessory = true;
+            }
+            else
+            {
+                hasPart = true;
+            }
+        }
+
+        string orderType = "Xe máy";
+        if (hasVehicle && (hasPart || hasAccessory))
+        {
+            orderType = "Phụ tùng & xe máy";
+        }
+        else if (hasVehicle)
+        {
+            orderType = "Xe máy";
+        }
+        else if (hasPart)
+        {
+            orderType = "Chỉ có phụ tùng";
+        }
+        else if (hasAccessory)
+        {
+            orderType = "Chỉ có phụ kiện";
+        }
+
+        var thresholdKey = $"Deposit_{orderType}_Threshold";
+        var ratioKey = $"Deposit_{orderType}_Ratio";
+
+        var thresholdSetting = settings.FirstOrDefault(s => string.Equals(s.Key, thresholdKey, StringComparison.OrdinalIgnoreCase));
         decimal threshold = 100000000;
         if (thresholdSetting != null && decimal.TryParse(thresholdSetting.Value, out var parsedThreshold))
         {
             threshold = parsedThreshold;
         }
+
+        var ratioSetting = settings.FirstOrDefault(s => string.Equals(s.Key, ratioKey, StringComparison.OrdinalIgnoreCase));
+        int ratio = 20;
+        if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+        {
+            ratio = parsedRatio;
+        }
+
         if (string.IsNullOrWhiteSpace(output.StatusId))
         {
-            output.StatusId = totalPrice >= threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
+            output.StatusId = totalPrice > threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
         }
-        if (totalPrice >= threshold)
+if (totalPrice >= threshold)
         {
-            var ratioSetting = settings.FirstOrDefault(
-                s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
-            if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
-            {
-                output.DepositRatio = parsedRatio;
-            } else
-            {
-                output.DepositRatio = 50;
-            }
-        } else
+            output.DepositRatio = ratio;
+        }
+        else
         {
             output.DepositRatio = 0;
         }
@@ -196,7 +246,48 @@ public class CreateOutputCommandHandler(
         output.CreatedBy = request.BuyerId;
         output.PaymentMethod = request.PaymentMethod ?? PaymentMethod.COD;
         output.PaymentStatus = "Pending";
+        
         insertRepository.Add(output);
+
+        if (!string.IsNullOrWhiteSpace(request.VoucherCode))
+        {
+            var voucher = await voucherReadRepository.GetByCodeAsync(request.VoucherCode, cancellationToken).ConfigureAwait(false);
+            if (voucher != null)
+            {
+                var today = DateTime.UtcNow.Date;
+                var totalUsed = await voucherUsageRepository.GetTotalUsageCountAsync(voucher.Id, cancellationToken);
+                var userUsedCount = request.BuyerId.HasValue ? await voucherUsageRepository.GetUserUsageCountAsync(voucher.Id, request.BuyerId.Value, cancellationToken) : 0;
+                
+                var isValid = today >= voucher.ValidFrom.Date && today <= voucher.ValidTo.Date
+                    && (voucher.TotalUsageLimit == 0 || totalUsed < voucher.TotalUsageLimit)
+                    && (voucher.UsageLimitPerUser == 0 || userUsedCount < voucher.UsageLimitPerUser)
+                    && (voucher.MinOrderValue == 0 || totalPrice >= voucher.MinOrderValue);
+
+                if (isValid)
+                {
+                    var discountAmount = voucher.DiscountType == DiscountType.Percent
+                        ? voucher.DiscountValue * totalPrice / 100
+                        : voucher.DiscountValue;
+                        
+                    if (voucher.MaxDiscountAmount > 0 && discountAmount > voucher.MaxDiscountAmount)
+                        discountAmount = voucher.MaxDiscountAmount.Value;
+
+                    discountAmount = Math.Min(discountAmount, totalPrice);
+
+                    var orderVoucher = new OrderVoucher
+                    {
+                        VoucherId = voucher.Id,
+                        OutputId = output.Id, // EF Core will fix up the ID upon SaveChangesAsync, actually wait!
+                        Output = output,
+                        DiscountApplied = discountAmount,
+                        AppliedAt = DateTimeOffset.UtcNow,
+                        AppliedBy = request.BuyerId?.ToString() ?? "System"
+                    };
+                    await voucherUsageRepository.AddAsync(orderVoucher, cancellationToken);
+                }
+            }
+        }
+
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(created);

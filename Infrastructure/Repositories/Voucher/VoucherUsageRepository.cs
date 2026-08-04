@@ -2,6 +2,7 @@ using Application.Interfaces.Repositories.Voucher;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Infrastructure.Repositories.Voucher;
 
@@ -19,7 +20,17 @@ public class VoucherUsageRepository(ApplicationDBContext context) : IVoucherUsag
         return context.Set<OrderVoucher>().Where(ov => ov.VoucherId == voucherId).CountAsync(cancellationToken);
     }
 
-    public Task<OrderVoucher?> GetByVoucherAndOutputAsync(
+    public Task<IEnumerable<OrderVoucher>> GetByOutputIdAsync(
+ int outputId, CancellationToken cancellationToken = default)
+ {
+ return context.Set<OrderVoucher>()
+ .Include(ov => ov.Voucher)
+ .Where(ov => ov.OutputId == outputId)
+ .ToListAsync(cancellationToken)
+ .ContinueWith<IEnumerable<OrderVoucher>>(t => t.Result, cancellationToken);
+ }
+
+ public Task<OrderVoucher?> GetByVoucherAndOutputAsync(
         int voucherId,
         int outputId,
         CancellationToken cancellationToken = default)

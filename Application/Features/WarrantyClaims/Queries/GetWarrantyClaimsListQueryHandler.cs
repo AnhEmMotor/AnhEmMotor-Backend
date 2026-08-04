@@ -81,6 +81,7 @@ public class GetWarrantyClaimsListQueryHandler(IWarrantyClaimReadRepository read
                 parts.Add(vehicle.EngineNumber);
             vehicleInfo = parts.Count > 0 ? string.Join(" | ", parts) : null;
         }
+        var user = vehicle?.User;
         var leadAddress = lead?.Address;
         return new WarrantyClaimResponse
         {
@@ -89,8 +90,8 @@ public class GetWarrantyClaimsListQueryHandler(IWarrantyClaimReadRepository read
             VehicleId = c.VehicleId,
             VehicleInfo = vehicleInfo,
             VehiclePlate = vehicle?.LicensePlate,
-            CustomerName = lead?.FullName,
-            CustomerPhone = lead?.PhoneNumber,
+            CustomerName = lead != null ? lead.FullName : user?.FullName,
+            CustomerPhone = lead != null ? lead.PhoneNumber : user?.PhoneNumber,
             CustomerAddress = leadAddress,
             StatusText = WarrantyClaimStatus.GetLabel(c.Status),
             VehicleVin = vehicle?.VinNumber,

@@ -21,7 +21,7 @@ public class GetRepairOrdersListQueryHandler(
         if (paged.Items?.Any() == true)
         {
             var vehicleIds = paged.Items.Select(x => x.VehicleId).Distinct().ToList();
-            var vehicles = await vehicleRepo.GetByIdsAsync(vehicleIds, ct);
+            var vehicles = await vehicleRepo.GetByIdsWithLeadAsync(vehicleIds, ct);
             var vehicleDict = vehicles.ToDictionary(v => v.Id, v => v);
             var employees = await employeeRepo.GetAllWithUsersAsync(ct);
             var empDict = employees.ToDictionary(e => e.Id, e => e.User?.FullName);

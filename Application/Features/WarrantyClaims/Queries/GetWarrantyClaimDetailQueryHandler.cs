@@ -29,6 +29,7 @@ public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository rep
         var variantColor = vehicle?.ProductVariantColor;
         string? vehicleColor = variantColor?.ColorName ?? variantColor?.ColorCode;
         string? vehicleYear = vehicle?.PurchaseDate.Year.ToString();
+        var user = vehicle?.User;
         var response = new WarrantyClaimDetailResponse
         {
             Id = claim.Id,
@@ -36,8 +37,8 @@ public class GetWarrantyClaimDetailQueryHandler(IWarrantyClaimReadRepository rep
             VehicleId = claim.VehicleId,
             VehicleInfo = vehicleInfo,
             VehiclePlate = vehicle?.LicensePlate,
-            CustomerName = lead?.FullName,
-            CustomerPhone = lead?.PhoneNumber,
+            CustomerName = lead != null ? lead.FullName : user?.FullName,
+            CustomerPhone = lead != null ? lead.PhoneNumber : user?.PhoneNumber,
             CustomerAddress = lead?.Address,
             StatusText = WarrantyClaimStatus.GetLabel(claim.Status),
             VehicleVin = vehicle?.VinNumber,

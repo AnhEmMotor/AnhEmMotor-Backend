@@ -26,8 +26,12 @@ public class GetVoucherByIdQueryHandler(IVoucherReadRepository readRepository) :
             DiscountType = voucher.DiscountType,
             DiscountValue = voucher.DiscountValue,
             MaxDiscountAmount = voucher.MaxDiscountAmount,
+            MinOrderValue = voucher.MinOrderValue,
             ValidFrom = voucher.ValidFrom,
             ValidTo = voucher.ValidTo,
+            UsageLimitPerUser = voucher.UsageLimitPerUser,
+            TotalUsageLimit = voucher.TotalUsageLimit,
+            UsedCount = voucher.UsedCount,
             AssignedCustomerIds = voucher.VoucherLeads?.Select(l => l.LeadId).ToList() ?? new List<int>()
         };
         return Result<VoucherResponse>.Success(response);

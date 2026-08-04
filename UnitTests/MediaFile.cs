@@ -16,7 +16,9 @@ using Domain.Constants;
 using FluentAssertions;
 using Infrastructure.Configurations.Options;
 using Infrastructure.Repositories.MediaFile.File;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Moq;
 using SixLabors.ImageSharp;
@@ -32,6 +34,7 @@ public class MediaFile
     private readonly Mock<IFileReadService> _fileReadServiceMock;
     private readonly Mock<IFileInsertService> _fileInsertServiceMock;
     private readonly Mock<IFileUpdateService> _fileUpdateServiceMock;
+private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly Mock<IFileDeleteService> _fileDeleteServiceMock;
     private readonly Mock<IMediaFileInsertRepository> _insertRepositoryMock;
     private readonly Mock<IMediaFileReadRepository> _readRepositoryMock;
@@ -44,7 +47,8 @@ public class MediaFile
         _fileReadServiceMock = new Mock<IFileReadService>();
         _fileInsertServiceMock = new Mock<IFileInsertService>();
         _fileUpdateServiceMock = new Mock<IFileUpdateService>();
-        _fileDeleteServiceMock = new Mock<IFileDeleteService>();
+_httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+_fileDeleteServiceMock = new Mock<IFileDeleteService>();
         _insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         _readRepositoryMock = new Mock<IMediaFileReadRepository>();
         _updateRepositoryMock = new Mock<IMediaFileUpdateRepository>();
@@ -54,7 +58,7 @@ public class MediaFile
 
     #pragma warning disable IDE0079
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "MF_001 - Tải lên ảnh thành công với định dạng WEBP hợp lệ")]
+    [Fact(DisplayName = "MF_001 - Táº£i lÃªn áº£nh thÃ nh cÃ´ng vá»›i Ä‘á»‹nh dáº¡ng WEBP há»£p lá»‡")]
     public async Task UploadImage_ValidWebp_Success()
     {
         var expectedStoragePath = "test-guid-123.webp";
@@ -80,7 +84,7 @@ public class MediaFile
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once());
     }
 
-    [Fact(DisplayName = "MF_003 - Tải lên ảnh thất bại với định dạng không được hỗ trợ")]
+    [Fact(DisplayName = "MF_003 - Táº£i lÃªn áº£nh tháº¥t báº¡i vá»›i Ä‘á»‹nh dáº¡ng khÃ´ng Ä‘Æ°á»£c há»— trá»£")]
     public async Task UploadImage_UnsupportedFormat_Fail()
     {
         _fileInsertServiceMock
@@ -105,7 +109,7 @@ public class MediaFile
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_004 - Tải lên ảnh thất bại khi kích thước file vượt quá giới hạn")]
+    [Fact(DisplayName = "MF_004 - Táº£i lÃªn áº£nh tháº¥t báº¡i khi kÃ­ch thÆ°á»›c file vÆ°á»£t quÃ¡ giá»›i háº¡n")]
     public async Task UploadImage_FileSizeExceedsLimit_Fail()
     {
         var handler = new UploadProductImageCommandHandler(
@@ -119,7 +123,7 @@ public class MediaFile
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_008 - Tải lên nhiều ảnh thất bại khi có 1 file không hợp lệ (Bulk Request Rule)")]
+    [Fact(DisplayName = "MF_008 - Táº£i lÃªn nhiá»u áº£nh tháº¥t báº¡i khi cÃ³ 1 file khÃ´ng há»£p lá»‡ (Bulk Request Rule)")]
     public async Task UploadManyImages_OneInvalidFile_FailAll()
     {
         var handler = new UploadManyProductImagesCommandHandler(
@@ -141,7 +145,7 @@ public class MediaFile
             Times.Never());
     }
 
-    [Fact(DisplayName = "MF_010 - Xoá file thất bại khi file không tồn tại")]
+    [Fact(DisplayName = "MF_010 - XoÃ¡ file tháº¥t báº¡i khi file khÃ´ng tá»“n táº¡i")]
     public async Task DeleteFile_FileNotFound_Fail()
     {
         _readRepositoryMock.Setup(
@@ -161,7 +165,7 @@ public class MediaFile
         _deleteRepositoryMock.Verify(x => x.Delete(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
-    [Fact(DisplayName = "MF_011 - Xoá file thất bại khi file đã bị xoá trước đó")]
+    [Fact(DisplayName = "MF_011 - XoÃ¡ file tháº¥t báº¡i khi file Ä‘Ã£ bá»‹ xoÃ¡ trÆ°á»›c Ä‘Ã³")]
     public async Task DeleteFile_AlreadyDeleted_Fail()
     {
         _readRepositoryMock.Setup(
@@ -181,7 +185,7 @@ public class MediaFile
         _deleteRepositoryMock.Verify(x => x.Delete(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
-    [Fact(DisplayName = "MF_014 - Xoá nhiều file thất bại khi có 1 file không tồn tại (Bulk Request Rule)")]
+    [Fact(DisplayName = "MF_014 - XoÃ¡ nhiá»u file tháº¥t báº¡i khi cÃ³ 1 file khÃ´ng tá»“n táº¡i (Bulk Request Rule)")]
     public async Task DeleteManyFiles_OneNotFound_FailAll()
     {
         var existingFiles = new List<MediaFileEntity>
@@ -205,7 +209,7 @@ public class MediaFile
         _deleteRepositoryMock.Verify(x => x.Delete(It.IsAny<IEnumerable<MediaFileEntity>>()), Times.Never());
     }
 
-    [Fact(DisplayName = "MF_016 - Khôi phục file thất bại khi file không tồn tại")]
+    [Fact(DisplayName = "MF_016 - KhÃ´i phá»¥c file tháº¥t báº¡i khi file khÃ´ng tá»“n táº¡i")]
     public async Task RestoreFile_FileNotFound_Fail()
     {
         _readRepositoryMock.Setup(
@@ -225,7 +229,7 @@ public class MediaFile
         _updateRepositoryMock.Verify(x => x.Update(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
-    [Fact(DisplayName = "MF_017 - Khôi phục file thất bại khi file chưa bị xoá")]
+    [Fact(DisplayName = "MF_017 - KhÃ´i phá»¥c file tháº¥t báº¡i khi file chÆ°a bá»‹ xoÃ¡")]
     public async Task RestoreFile_FileNotDeleted_Fail()
     {
         _readRepositoryMock.Setup(
@@ -242,7 +246,7 @@ public class MediaFile
         _updateRepositoryMock.Verify(x => x.Update(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
-    [Fact(DisplayName = "MF_020 - Khôi phục nhiều file thất bại khi có 1 file không tồn tại (Bulk Request Rule)")]
+    [Fact(DisplayName = "MF_020 - KhÃ´i phá»¥c nhiá»u file tháº¥t báº¡i khi cÃ³ 1 file khÃ´ng tá»“n táº¡i (Bulk Request Rule)")]
     public async Task RestoreManyFiles_OneNotFound_FailAll()
     {
         var deletedFiles = new List<MediaFileEntity>
@@ -270,7 +274,7 @@ public class MediaFile
         _updateRepositoryMock.Verify(x => x.Restore(It.IsAny<IEnumerable<MediaFileEntity>>()), Times.Never());
     }
 
-    [Fact(DisplayName = "MF_023 - Xem ảnh thất bại khi file không tồn tại")]
+    [Fact(DisplayName = "MF_023 - Xem áº£nh tháº¥t báº¡i khi file khÃ´ng tá»“n táº¡i")]
     public async Task ViewImage_FileNotFound_Fail()
     {
         _fileReadServiceMock.Setup(x => x.GetFileAsync("nonexistent.webp", It.IsAny<CancellationToken>()))
@@ -281,7 +285,7 @@ public class MediaFile
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_024 - Xem ảnh thất bại khi file đã bị xoá")]
+    [Fact(DisplayName = "MF_024 - Xem áº£nh tháº¥t báº¡i khi file Ä‘Ã£ bá»‹ xoÃ¡")]
     public async Task ViewImage_FileDeleted_Fail()
     {
         _fileReadServiceMock.Setup(x => x.GetFileAsync("deleted-image.webp", It.IsAny<CancellationToken>()))
@@ -292,7 +296,7 @@ public class MediaFile
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_025 - Xem ảnh thất bại khi width là số âm")]
+    [Fact(DisplayName = "MF_025 - Xem áº£nh tháº¥t báº¡i khi width lÃ  sá»‘ Ã¢m")]
     public async Task ViewImage_NegativeWidth_Fail()
     {
         var handler = new ViewImageQueryHandler(_fileReadServiceMock.Object);
@@ -301,7 +305,7 @@ public class MediaFile
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_026 - Xem ảnh thất bại khi width vượt quá giới hạn cho phép")]
+    [Fact(DisplayName = "MF_026 - Xem áº£nh tháº¥t báº¡i khi width vÆ°á»£t quÃ¡ giá»›i háº¡n cho phÃ©p")]
     public async Task ViewImage_WidthExceedsLimit_Fail()
     {
         var handler = new ViewImageQueryHandler(_fileReadServiceMock.Object);
@@ -310,7 +314,7 @@ public class MediaFile
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_026_NonImage - Xem tệp không phải là ảnh (PDF) trả về trực tiếp luồng dữ liệu thô")]
+    [Fact(DisplayName = "MF_026_NonImage - Xem tá»‡p khÃ´ng pháº£i lÃ  áº£nh (PDF) tráº£ vá» trá»±c tiáº¿p luá»“ng dá»¯ liá»‡u thÃ´")]
     public async Task ViewImage_NonImageFile_ReturnsRawStream()
     {
         var rawBytes = new byte[] { 1, 2, 3, 4 };
@@ -331,7 +335,7 @@ public class MediaFile
             Times.Never);
     }
 
-    [Fact(DisplayName = "MF_026_Fallback - Xem ảnh lỗi định dạng trả về trực tiếp luồng dữ liệu thô của file")]
+    [Fact(DisplayName = "MF_026_Fallback - Xem áº£nh lá»—i Ä‘á»‹nh dáº¡ng tráº£ vá» trá»±c tiáº¿p luá»“ng dá»¯ liá»‡u thÃ´ cá»§a file")]
     public async Task ViewImage_UnknownImageFormat_ReturnsRawStreamFallback()
     {
         var rawBytes = new byte[] { 5, 6, 7, 8 };
@@ -352,7 +356,7 @@ public class MediaFile
         outputBytes.Should().Equal(rawBytes);
     }
 
-    [Fact(DisplayName = "MF_027 - Validate: Tên file gốc chứa ký tự đặc biệt")]
+    [Fact(DisplayName = "MF_027 - Validate: TÃªn file gá»‘c chá»©a kÃ½ tá»± Ä‘áº·c biá»‡t")]
     public async Task UploadImage_FileNameWithSpecialChars_Success()
     {
         var expectedStoragePath = "test-guid-456.webp";
@@ -375,7 +379,7 @@ public class MediaFile
             Times.Once());
     }
 
-    [Fact(DisplayName = "MF_028 - Validate: Tên file gốc có khoảng trắng đầu cuối")]
+    [Fact(DisplayName = "MF_028 - Validate: TÃªn file gá»‘c cÃ³ khoáº£ng tráº¯ng Ä‘áº§u cuá»‘i")]
     public async Task UploadImage_FileNameWithWhitespace_Success()
     {
         var expectedStoragePath = "test-guid-789.webp";
@@ -398,7 +402,7 @@ public class MediaFile
             Times.Once());
     }
 
-    [Fact(DisplayName = "MF_029 - Security: File signature không khớp với extension (webp fake)")]
+    [Fact(DisplayName = "MF_029 - Security: File signature khÃ´ng khá»›p vá»›i extension (webp fake)")]
     public async Task UploadImage_WebpFakeSignature_Fail()
     {
         _fileInsertServiceMock
@@ -419,7 +423,7 @@ public class MediaFile
         _insertRepositoryMock.Verify(x => x.Add(It.IsAny<MediaFileEntity>()), Times.Never);
     }
 
-    [Fact(DisplayName = "MF_030 - Security: File signature không khớp với extension (jpg fake)")]
+    [Fact(DisplayName = "MF_030 - Security: File signature khÃ´ng khá»›p vá»›i extension (jpg fake)")]
     public async Task UploadImage_JpgFakeSignature_Fail()
     {
         _fileInsertServiceMock
@@ -440,7 +444,7 @@ public class MediaFile
         _insertRepositoryMock.Verify(x => x.Add(It.IsAny<MediaFileEntity>()), Times.Never);
     }
 
-    [Fact(DisplayName = "MF_032 - Lấy thông tin file theo ID thất bại khi file không tồn tại")]
+    [Fact(DisplayName = "MF_032 - Láº¥y thÃ´ng tin file theo ID tháº¥t báº¡i khi file khÃ´ng tá»“n táº¡i")]
     public async Task GetFileById_FileNotFound_Fail()
     {
         _readRepositoryMock.Setup(x => x.GetByIdAsync(999999, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
@@ -451,7 +455,7 @@ public class MediaFile
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_033 - Lấy thông tin file theo ID thất bại khi file đã bị xoá")]
+    [Fact(DisplayName = "MF_033 - Láº¥y thÃ´ng tin file theo ID tháº¥t báº¡i khi file Ä‘Ã£ bá»‹ xoÃ¡")]
     public async Task GetFileById_FileDeleted_Fail()
     {
         _readRepositoryMock.Setup(x => x.GetByIdAsync(456, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
@@ -462,7 +466,7 @@ public class MediaFile
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_040 - StorageType validation: Kiểm tra giá trị hợp lệ")]
+    [Fact(DisplayName = "MF_040 - StorageType validation: Kiá»ƒm tra giÃ¡ trá»‹ há»£p lá»‡")]
     public async Task UploadImage_ValidStorageType_Success()
     {
         var expectedStoragePath = "test-guid-999.webp";
@@ -537,7 +541,7 @@ public class MediaFile
             Times.Once());
     }
 
-    [Fact(DisplayName = "MF_048 - Upload file với null stream")]
+    [Fact(DisplayName = "MF_048 - Upload file vá»›i null stream")]
     public async Task UploadImage_NullStream_Fail()
     {
         var handler = new UploadProductImageCommandHandler(
@@ -551,7 +555,7 @@ public class MediaFile
         result.Error?.Message.Should().Be("File is empty or required");
     }
 
-    [Fact(DisplayName = "MF_049 - Upload file với empty stream")]
+    [Fact(DisplayName = "MF_049 - Upload file vá»›i empty stream")]
     public async Task UploadImage_EmptyStream_Fail()
     {
         var handler = new UploadProductImageCommandHandler(
@@ -566,7 +570,7 @@ public class MediaFile
         result.Error?.Message.Should().Contain("empty");
     }
 
-    [Fact(DisplayName = "MF_050 - Upload file với FileName rỗng")]
+    [Fact(DisplayName = "MF_050 - Upload file vá»›i FileName rá»—ng")]
     public async Task UploadImage_EmptyFileName_Fail()
     {
         var handler = new UploadProductImageCommandHandler(
@@ -581,7 +585,7 @@ public class MediaFile
         result.Error?.Message.Should().Contain("Filename");
     }
 
-    [Fact(DisplayName = "MF_051 - URL file công khai không gắn cứng host lúc upload")]
+    [Fact(DisplayName = "MF_051 - URL file cÃ´ng khai khÃ´ng gáº¯n cá»©ng host lÃºc upload")]
     public void GetPublicUrl_ShouldReturnHostIndependentApiPath()
     {
         var environment = new Mock<IWebHostEnvironment>();
@@ -595,12 +599,16 @@ var service = new FileReadService(
             _fileUpdateServiceMock.Object,
   httpContextAccessor.Object);
 
+  var service = new FileReadService(environment.Object,
+    Options.Create(new LocalFileStorageOptions()),
+    _fileUpdateServiceMock.Object,
+    _httpContextAccessorMock.Object);
         var publicUrl = service.GetPublicUrl("banners/banner.webp");
 
         publicUrl.Should().Be("/api/v1/MediaFile/view-image/banners/banner.webp");
     }
 
-    [Fact(DisplayName = "MF_052 - Đường dẫn tương đối luôn nằm dưới content root của WebAPI")]
+    [Fact(DisplayName = "MF_052 - ÄÆ°á»ng dáº«n tÆ°Æ¡ng Ä‘á»‘i luÃ´n náº±m dÆ°á»›i content root cá»§a WebAPI")]
     public async Task SaveFile_RelativeUploadPath_ShouldResolveFromContentRoot()
     {
         var contentRoot = Path.Combine(Path.GetTempPath(), $"anhem-banner-{Guid.NewGuid():N}");
@@ -612,10 +620,6 @@ var service = new FileReadService(
             var environment = new Mock<IWebHostEnvironment>();
             environment.SetupGet(x => x.ContentRootPath).Returns(contentRoot);
             environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(contentRoot, "wwwroot"));
-            var service = new FileInsertService(
-                environment.Object,
-                Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
-                _fileUpdateServiceMock.Object);
             await using var imageStream = new MemoryStream();
             using (var image = new Image<Rgba32>(2, 2))
             {
@@ -637,6 +641,9 @@ var service = new FileReadService(
                         return new MemoryStream(imageStream.ToArray());
                     });
 
+  var service = new FileInsertService(environment.Object,
+    Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
+    _fileUpdateServiceMock.Object);
             var result = await service.SaveFileAsync(
                     imageStream,
                     TestContext.Current.CancellationToken,

@@ -103,12 +103,7 @@ if (app.Environment.IsDevelopment())
             }
             options.DocExpansion(DocExpansion.None);
         });
-    var originalColor = Console.ForegroundColor;
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("\n=======================================================");
-    Console.WriteLine(" Swagger is available at: http://localhost:5000/swagger ");
-    Console.WriteLine("=======================================================\n");
-    Console.ForegroundColor = originalColor;
+app.Logger.LogInformation("Swagger is available at: http://localhost:5000/swagger");
 }
 app.UseStaticFiles();
 app.UseRouting();

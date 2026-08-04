@@ -7,12 +7,17 @@ using Application.Features.Contacts.Commands.CreateContactReply;
 using Application.Features.Contacts.Commands.CreateFeedback;
 using Application.Features.Contacts.Commands.CreateJobApplication;
 using Application.Features.Contacts.Commands.CreateSupportRequest;
+using Application.Features.Contacts.Commands.RateSupportCustomer;
+using Application.Features.Contacts.Commands.RateSupportEmployee;
 using Application.Features.Contacts.Commands.UpdateContactStatus;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
 using Application.Features.Contacts.Commands.UploadCv;
 using Application.Features.Contacts.Queries.GetContacts;
 using Application.Features.Contacts.Queries.GetPaginatedContacts;
+using Application.Features.Contacts.Queries.GetSupportRequestTracking;
 using Asp.Versioning;
+using Domain.Constants.Permission;
+using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -54,13 +59,49 @@ public class ContactsController(ISender sender) : ApiController
     /// <returns>Kết quả tạo yêu cầu hỗ trợ.</returns>
     [HttpPost("support-request")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(Result<SupportRequestResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<CreateSupportRequestResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateSupportRequestAsync(
         CreateSupportRequestCommand command,
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Theo dõi tiến độ một yêu cầu hỗ trợ bằng mã bí mật được cấp lúc tạo yêu cầu.
+    /// </summary>
+    [HttpGet("support-request/{id:int}/tracking")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(SupportRequestTrackingResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetSupportRequestTrackingAsync(
+        int id,
+        [FromQuery] Guid token,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender
+            .Send(new GetSupportRequestTrackingQuery(id, token), cancellationToken)
+            .ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Khách hàng đánh giá nhân viên được phân công sau khi yêu cầu hoàn tất.
+    /// </summary>
+    [HttpPost("support-request/{id:int}/customer-rating")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RateSupportEmployeeAsync(
+        int id,
+        CustomerSupportRatingRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender
+            .Send(new RateSupportEmployeeCommand(id, request), cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -203,6 +244,24 @@ public class ContactsController(ISender sender) : ApiController
     {
         var cmd = command with { SupportRequestId = id };
         var result = await sender.Send(cmd, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Nhân viên được phân công đánh giá mức độ hợp tác của khách hàng sau khi hỗ trợ hoàn tất.
+    /// </summary>
+    [HttpPost("support-request/{id:int}/employee-rating")]
+    [HasPermission(Permissions.Marketing.ContactManagement.Edit)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RateSupportCustomerAsync(
+        int id,
+        SupportRatingRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender
+            .Send(new RateSupportCustomerCommand(id, request), cancellationToken)
+            .ConfigureAwait(false);
         return HandleResult(result);
     }
 

@@ -45,4 +45,28 @@ public class NewsCommentsController(IMediator mediator) : ApiController
         var result = await mediator.Send(new GetNewsCommentsQuery(newsId), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
+
+    /// <summary>
+    /// Lấy danh sách bình luận công khai theo loại và slug (dành cho Store).
+    /// </summary>
+    [HttpGet("public")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    [ProducesResponseType(typeof(List<NewsCommentResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPublicComments([FromQuery] string? articleType, [FromQuery] string? articleSlug, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetNewsCommentsQuery(null, articleType, articleSlug), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tạo mới một bình luận công khai (dành cho Store).
+    /// </summary>
+    [HttpPost("public")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> CreatePublicComment([FromBody] Application.Features.NewsComments.Commands.CreateNewsComment.CreateNewsCommentCommand command, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
 }

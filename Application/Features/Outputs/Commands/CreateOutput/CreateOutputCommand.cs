@@ -38,5 +38,7 @@ public sealed record CreateOutputCommand : IRequest<Result<OrderDetailResponse>>
 
     [JsonPropertyName("products")]
     public List<CreateOutputInfoRequest> OutputInfos { get; init; } = [];
+
+    public string? VoucherCode { get; init; }
 }
 
