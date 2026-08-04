@@ -25,6 +25,8 @@ public class FileReadService : IFileReadService
 
    public string GetPublicUrl(string storagePath)
    {
+      if (string.IsNullOrWhiteSpace(storagePath)) return string.Empty;
+      if (storagePath.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return storagePath;
       storagePath = storagePath.TrimStart('/', '\\');
       var request = _httpContextAccessor.HttpContext?.Request;
       if (request is null)
