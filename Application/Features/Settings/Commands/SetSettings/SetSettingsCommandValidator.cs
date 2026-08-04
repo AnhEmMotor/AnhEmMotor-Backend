@@ -1,5 +1,6 @@
 using Domain.Constants;
 using FluentValidation;
+using System.Globalization;
 
 namespace Application.Features.Settings.Commands.SetSettings;
 
@@ -31,7 +32,7 @@ public class SetSettingsCommandValidator : AbstractValidator<SetSettingsCommand>
 
 				if (lowerKey.EndsWith("deposit_ratio"))
 				{
-					if (!decimal.TryParse(value, out var dValue))
+					if (!decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var dValue))
 					{
 						context.AddFailure("All numeric fields must contain valid numbers");
 						continue;
@@ -54,7 +55,7 @@ public class SetSettingsCommandValidator : AbstractValidator<SetSettingsCommand>
 					{
 						context.AddFailure("Integer fields cannot have decimal values");
 					}
-					else if (!decimal.TryParse(value, out _))
+					else if (!decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out _))
 					{
 						context.AddFailure("All numeric fields must contain valid numbers");
 					}
@@ -74,7 +75,7 @@ public class SetSettingsCommandValidator : AbstractValidator<SetSettingsCommand>
 					{
 						context.AddFailure("Fixed deposit amount cannot have decimal values");
 					}
-					else if (!decimal.TryParse(value, out var parsedAmount) || parsedAmount < 0)
+					else if (!decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var parsedAmount) || parsedAmount < 0)
 					{
 						context.AddFailure("Fixed deposit amount must be a non-negative number");
 					}

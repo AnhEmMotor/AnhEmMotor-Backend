@@ -20,12 +20,32 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         string to,
         CancellationToken cancellationToken)
     {
-        var fromDate = DateTimeOffset.Parse(from).ToUniversalTime();
-        var toDate = DateTimeOffset.Parse(to).ToUniversalTime();
+        DateTimeOffset fromDate;
+        if (!DateTimeOffset.TryParse(from, out fromDate))
+        {
+            fromDate = DateTimeOffset.UtcNow.AddDays(-30);
+        }
+        else
+        {
+            fromDate = fromDate.ToUniversalTime();
+        }
+
+        DateTimeOffset toDate;
+        if (!DateTimeOffset.TryParse(to, out toDate))
+        {
+            toDate = DateTimeOffset.UtcNow;
+        }
+        else
+        {
+            toDate = toDate.ToUniversalTime();
+        }
         var repairOrders = await context.MaintenanceHistory
             .Where(m => m.CreatedAt >= fromDate && m.CreatedAt <= toDate)
             .ToListAsync(cancellationToken);
-        var inProgressCount = repairOrders.Count(r => r.TotalCost == 0);
+        var activeRepairOrders = await context.MaintenanceHistory
+            .Where(m => m.TotalCost == 0)
+            .ToListAsync(cancellationToken);
+        var inProgressCount = activeRepairOrders.Count;
         var completedOrders = repairOrders.Where(r => r.TotalCost > 0).ToList();
         double avgHours = 0;
         if (completedOrders.Any())
@@ -96,8 +116,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 .SumAsync(x => (x.oi.Price ?? 0) * (x.oi.Count ?? 0), cancellationToken);
             revenueTrend.RetailRevenue.Add(monthRetail);
         }
-        var overdueCutoff = fromDate.AddHours(-48);
-        var overdueInProgress = repairOrders.Where(r => r.TotalCost == 0 && r.CreatedAt <= overdueCutoff).ToList();
+        var overdueCutoff = DateTimeOffset.UtcNow.AddHours(-48);
+        var overdueInProgress = activeRepairOrders.Where(r => r.CreatedAt <= overdueCutoff).ToList();
         var vehicleIdsForOverdue = overdueInProgress.Select(r => r.VehicleId).Distinct().ToList();
         var vehicleOverdueDict = new Dictionary<int, string>();
         if (vehicleIdsForOverdue.Any())
@@ -118,7 +138,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             })
             .ToList();
         var partShortages = new List<PartShortageDto>();
-        foreach (var order in repairOrders.Where(r => !string.IsNullOrEmpty(r.PartsJson)))
+        foreach (var order in activeRepairOrders.Where(r => !string.IsNullOrEmpty(r.PartsJson)))
         {
             try
             {

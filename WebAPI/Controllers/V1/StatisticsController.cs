@@ -516,8 +516,21 @@ public class StatisticsController(
         [FromQuery] string endDate,
         CancellationToken cancellationToken = default)
     {
-        var start = DateTimeOffset.Parse(startDate);
-        var end = DateTimeOffset.Parse(endDate).AddDays(1).AddTicks(-1);
+        DateTimeOffset start;
+        if (!DateTimeOffset.TryParse(startDate, out start))
+        {
+            start = DateTimeOffset.UtcNow.AddDays(-30);
+        }
+
+        DateTimeOffset end;
+        if (!DateTimeOffset.TryParse(endDate, out end))
+        {
+            end = DateTimeOffset.UtcNow;
+        }
+        else
+        {
+            end = end.AddDays(1).AddTicks(-1);
+        }
         var ordersQuery = dbContext.OutputOrders
             .IgnoreQueryFilters()
             .Include(o => o.OutputInfos)
