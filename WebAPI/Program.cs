@@ -53,7 +53,11 @@ builder.Services
                     var allowedOrigins = configuration["Cors:AllowedOrigins"]?
                         .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries) ??
                         Array.Empty<string>();
-                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
+                if (!allowedOrigins.Contains("*"))
+                {
+                    policy.AllowCredentials();
+                }
                 }
 );
         }
