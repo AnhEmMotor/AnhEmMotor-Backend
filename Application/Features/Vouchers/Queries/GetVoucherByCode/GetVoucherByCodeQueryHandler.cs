@@ -8,7 +8,9 @@ namespace Application.Features.Vouchers.Queries.GetVoucherByCode;
 
 public class GetVoucherByCodeQueryHandler(IVoucherReadRepository readRepository) : IRequestHandler<GetVoucherByCodeQuery, Result<VoucherResponse>>
 {
-    public async Task<Result<VoucherResponse>> Handle(GetVoucherByCodeQuery request, CancellationToken cancellationToken)
+    public async Task<Result<VoucherResponse>> Handle(
+        GetVoucherByCodeQuery request,
+        CancellationToken cancellationToken)
     {
         var voucher = await readRepository.GetByCodeAsync(request.Code, cancellationToken);
         if (voucher == null)

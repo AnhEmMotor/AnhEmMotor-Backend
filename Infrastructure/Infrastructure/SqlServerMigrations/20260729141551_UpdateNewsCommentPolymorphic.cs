@@ -17,13 +17,11 @@ namespace Infrastructure.Infrastructure.SqlServerMigrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
-
             migrationBuilder.AddColumn<string>(
                 name: "ArticleSlug",
                 table: "NewsComments",
                 type: "nvarchar(255)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "ArticleType",
                 table: "NewsComments",
@@ -34,14 +32,8 @@ namespace Infrastructure.Infrastructure.SqlServerMigrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ArticleSlug",
-                table: "NewsComments");
-
-            migrationBuilder.DropColumn(
-                name: "ArticleType",
-                table: "NewsComments");
-
+            migrationBuilder.DropColumn(name: "ArticleSlug", table: "NewsComments");
+            migrationBuilder.DropColumn(name: "ArticleType", table: "NewsComments");
             migrationBuilder.AlterColumn<int>(
                 name: "NewsId",
                 table: "NewsComments",

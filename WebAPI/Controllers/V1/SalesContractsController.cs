@@ -10,6 +10,7 @@ using Application.Features.SalesContracts.Queries.GetSalesContractById;
 using Application.Features.SalesContracts.Queries.GetSalesContractsList;
 using Application.Features.SalesContracts.Queries.GetSalesContractStatistics;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
@@ -136,11 +137,9 @@ public class SalesContractsController(IMediator mediator) : ApiController
     [HasPermission(Permissions.Order.ContractManagement.Edit)]
     [ProducesResponseType(typeof(SalesContractResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> SubmitSalesContractForApprovalAsync(
-        Guid id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> SubmitSalesContractForApprovalAsync(Guid id, CancellationToken cancellationToken)
     {
-        var command = new UpdateSalesContractStatusCommand(id, Domain.Constants.SalesContractStatus.PendingApproval);
+        var command = new UpdateSalesContractStatusCommand(id, SalesContractStatus.PendingApproval);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -152,14 +151,9 @@ public class SalesContractsController(IMediator mediator) : ApiController
     [HasPermission(Permissions.Admin.ContractManagement.Edit)]
     [ProducesResponseType(typeof(SalesContractResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ApproveSalesContractAsync(
-        Guid id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> ApproveSalesContractAsync(Guid id, CancellationToken cancellationToken)
     {
-        var command = new UpdateSalesContractStatusCommand(
-            id,
-            Domain.Constants.SalesContractStatus.Approved,
-            IsAdminApproval: true);
+        var command = new UpdateSalesContractStatusCommand(id, SalesContractStatus.Approved, IsAdminApproval: true);
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
@@ -172,7 +166,7 @@ public class SalesContractsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadSalesContractScanAsync(
         Guid id,
-        [FromForm] IFormFile? file,
+        IFormFile? file,
         CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0)

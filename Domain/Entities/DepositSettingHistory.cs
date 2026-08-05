@@ -9,6 +9,7 @@ namespace Domain.Entities
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
+
         [Required]
         [MaxLength(50)]
         public string OrderType { get; set; } = string.Empty;

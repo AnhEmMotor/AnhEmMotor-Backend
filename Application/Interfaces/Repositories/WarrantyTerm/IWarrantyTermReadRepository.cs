@@ -15,13 +15,13 @@ public interface IWarrantyTermReadRepository
 
     public Task<IEnumerable<global::Domain.Entities.WarrantyTerm>> GetAllAsync(
         CancellationToken cancellationToken,
-        Func<IQueryable<global::Domain.Entities.WarrantyTerm>, IQueryable<global::Domain.Entities.WarrantyTerm>>? include = null,
+        bool includeBrand = false,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
     public Task<global::Domain.Entities.WarrantyTerm?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,
-        Func<IQueryable<global::Domain.Entities.WarrantyTerm>, IQueryable<global::Domain.Entities.WarrantyTerm>>? include = null,
+        bool includeBrand = false,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
     public Task<WarrantyTermStatisticsResponse> GetStatisticsAsync(CancellationToken cancellationToken);

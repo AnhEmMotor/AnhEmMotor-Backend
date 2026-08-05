@@ -35,14 +35,14 @@ public sealed class EmployeeKpiRepository(ApplicationDBContext context) : IEmplo
         CancellationToken cancellationToken = default)
     {
         var normalizedMetricName = metricName.Trim();
-        return context.KPIs.AnyAsync(
-            kpi =>
-                kpi.EmployeeProfileId == employeeProfileId &&
-                kpi.MetricName == normalizedMetricName &&
-                kpi.PeriodStart == periodStart &&
-                kpi.PeriodEnd == periodEnd &&
-                (!excludeId.HasValue || kpi.Id != excludeId.Value),
-            cancellationToken);
+        return context.KPIs
+            .AnyAsync(
+                kpi => kpi.EmployeeProfileId == employeeProfileId &&
+                    kpi.MetricName == normalizedMetricName &&
+                    kpi.PeriodStart == periodStart &&
+                    kpi.PeriodEnd == periodEnd &&
+                    (!excludeId.HasValue || kpi.Id != excludeId.Value),
+                cancellationToken);
     }
 
     public Task AddAsync(KPI kpi, CancellationToken cancellationToken = default)

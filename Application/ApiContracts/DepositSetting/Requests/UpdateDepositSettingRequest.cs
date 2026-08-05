@@ -8,6 +8,8 @@ public class UpdateDepositSettingRequest
 public class DepositSettingItemDto
 {
     public string OrderType { get; set; } = string.Empty;
+
     public decimal OrderThreshold { get; set; }
+
     public int DepositRatio { get; set; }
 }

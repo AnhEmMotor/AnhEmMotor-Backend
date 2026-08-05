@@ -207,7 +207,7 @@ async def fill_slots(template: dict, question: str, server_date: str) -> dict:
                     question=question,
                     slots=json.dumps(template["slots"], ensure_ascii=False),
                     today=server_date)          # server_date từ backend — Stage 16.2
-    llm = get_llm(model=settings.fast_model, temperature=0, max_output_tokens=200)
+    llm = get_llm(model=settings.model, temperature=0, max_output_tokens=200)
     return await (llm.with_structured_output(schema)).ainvoke(prompt)
 ```
 
@@ -235,7 +235,7 @@ Tra cache: IntentHash → Qdrant
    ↓
 ┌─ HIT ──────────────────────────────────────┐
 │ 1. Kiểm tra hiệu lực (19.6)                │
-│ 2. Điền slot bằng FastModel               │
+│ 2. Điền slot bằng Model (max_tokens thấp)  │
 │ 3. Hiện plan card, ghi nhãn "kế hoạch có sẵn"│
 │ 4. User duyệt / sửa / huỷ  ← VẪN BẮT BUỘC  │
 │ 5. Thực thi                                │
@@ -358,32 +358,60 @@ Ghi `planCacheHit: bool` và `templateId` vào metadata LangSmith (Stage 6.6) v�
 | Template lỗi thời sau khi đổi tool | **Cao** | 6 điều kiện vô hiệu ở 19.6, gắn với fingerprint của Stage 17 |
 | Template chứa dữ liệu của user khác | **Cao** | Tham số hoá + test bắt buộc (19.8) |
 | Plan cứng nhắc, không thích nghi ngữ cảnh mới | Trung bình | User sửa được; học từ sửa đổi (19.7) |
-| Tăng độ phức tạp hệ thống | Trung bình | Cờ `AISetup:PlanCacheEnabled` để tắt hoàn toàn |
+| Tăng độ phức tạp hệ thống | Trung bình | Mặc định bật; tắt bằng env `PLAN_CACHE_ENABLED=false` khi cần |
 | Chuẩn hoá quá mạnh → gộp hai ý định khác nhau | Trung bình | Review thủ công template có `UseCount` cao; eval riêng |
 
-**Cờ tắt khẩn cấp** giống Stage 16.8:
-```jsonc
-"AISetup": { "PlanCacheEnabled": false }
-```
+**Cờ tắt khẩn cấp:** đặt env `PLAN_CACHE_ENABLED=false` trên sidecar.
+Mặc định bật khi feature có mặt — không cần khai trong `appsettings.json`.
 Tắt → về đúng hành vi Stage 10, không mất tính năng gì.
 
 ---
 
 ## Definition of Done — Stage 19
 
-- [ ] Migration `ChatPlanTemplate` chạy được trên **cả** MySQL và PostgreSQL.
-- [ ] Collection Qdrant `plan_templates` tạo được, có payload index theo `module` và `status`.
-- [ ] `intent_hash` chuẩn hoá đúng: "doanh thu tháng 7" và "doanh thu tháng 6" cho **cùng** hash.
-- [ ] Hỏi cùng một loại câu hỏi lần 2 → cache hit, thời gian lập plan < 0.5s.
-- [ ] Slot được điền đúng bằng `FastModel`, dùng `server_date` từ backend (không tự tính).
-- [ ] Plan tái dùng **vẫn hiện ra và vẫn cần duyệt**, có nhãn "kế hoạch có sẵn".
-- [ ] Chế độ tự duyệt chỉ áp cho template đủ điều kiện **và toàn bộ tool chỉ-đọc**.
-- [ ] Gỡ một tool → template dùng tool đó chuyển `stale`, lần hỏi sau lập plan mới.
-- [ ] Đổi `GLOSSARY.md` → template liên quan chuyển `stale`.
-- [ ] User thiếu quyền → bỏ qua template, **không** xoá template.
-- [ ] **Test: `StepsTemplate` không chứa tên riêng, mã đơn, hay số tiền cụ thể.**
-- [ ] Plan bị user huỷ hoặc run thất bại → **không** được lưu thành template.
-- [ ] Cùng một sửa đổi lặp 3 lần từ ≥ 2 user → sinh template phiên bản mới.
-- [ ] `planCacheHit` và `templateId` ghi vào log và LangSmith.
-- [ ] `PlanCacheEnabled=false` → hệ thống về đúng hành vi Stage 10.
-- [ ] Hit rate ≥ 40% sau 1 tháng chạy thật.
+> **Trạng thái (2026-08-04):** Đường ĐỌC (tra cache, validate, điền slot, render bước, hiện plan
+> để duyệt) đã xong và có test. Đường GHI (tự học template mới sau khi run thành công, học từ sửa
+> đổi lặp lại, chế độ tự duyệt) **chưa làm** — xem lý do ở mục cuối.
+
+- [x] Migration `ChatPlanTemplate` chạy được trên **cả 3 provider** (SqlServer/MySQL/PostgreSQL —
+      `add-migration.ps1` tạo cả 3, không chỉ 2 như bản nháp đầu của tài liệu này).
+- [x] Collection Qdrant `plan_templates` tạo được (`qdrant_client.py::ensure_collections`).
+      **Chưa thêm payload index riêng cho `module`/`status`** (lọc vẫn đúng qua `Filter`, chỉ chưa
+      tối ưu tốc độ lọc — nên làm khi số template đủ lớn để cần).
+- [x] `intent_hash` chuẩn hoá đúng: "doanh thu tháng 7" và "doanh thu tháng 6" cho **cùng** hash
+      (`test_intent_hash_thang_khac_nhau_cho_cung_hash`).
+- [x] Hỏi cùng một loại câu hỏi lần 2 → cache hit, **bỏ qua hoàn toàn bước gọi LLM sinh plan**
+      (`test_plan_node_cache_hit_bo_qua_llm_sinh_plan`). Chưa đo mốc "< 0.5s" trên môi trường thật.
+- [x] Slot được điền bằng `Model` với `max_output_tokens=200`, dùng `server_date` từ state (backend
+      cấp qua `ChatRequest.server_date`, sidecar không tự tính — `plan_cache.fill_slots`).
+- [x] Plan tái dùng **vẫn hiện ra và vẫn cần duyệt** — luồng cache-hit vẫn gọi `add_plan_step` +
+      `mark_plan_ready` y hệt luồng thường, không có bước tự động chuyển `Approved`.
+- [ ] Chế độ tự duyệt cho template đủ điều kiện (toàn tool chỉ-đọc) — **chưa làm**, xem ghi chú cuối.
+- [x] Gỡ một tool / đổi fingerprint → `validate_plan_template()` kiểm tra lại từng tool trong
+      `requiredTools`, coi cache miss nếu tool không còn active
+      (`test_validate_plan_template_chan_khi_tool_bi_go`).
+- [ ] Đổi `GLOSSARY.md` → template liên quan chuyển `stale` — **chưa làm** (chưa có cơ chế hash
+      glossary gắn vào template).
+- [x] User thiếu quyền → `validate_plan_template()` trả `False` (bỏ qua template, không xoá)
+      (`test_validate_plan_template_chan_khi_thieu_quyen`).
+- [x] **Test: `contains_hardcoded_data()` chặn mã đơn/SĐT/số tiền cụ thể trong `StepsTemplate`**
+      (`test_contains_hardcoded_data_*`, 4 test). **Guard đã có nhưng chưa có nơi gọi nó** — vì
+      bước "tự lưu template mới sau khi lập plan thành công" chưa được xây (xem ghi chú cuối).
+- [ ] Plan bị user huỷ hoặc run thất bại → không được lưu thành template — **chưa áp dụng được**,
+      vì chưa có luồng lưu template nào cả.
+- [ ] Cùng một sửa đổi lặp 3 lần từ ≥ 2 user → sinh template phiên bản mới — **chưa làm**.
+- [x] `planCacheHit`/`templateId` phát ra qua event `plan_cache_hit` (chưa nối vào LangSmith
+      metadata riêng — Stage 6.6 chưa làm phần đó).
+- [x] Cờ `PLAN_CACHE_ENABLED` (`plan_cache_enabled` trong config) → khi `false`,
+      `plan_node` bỏ qua toàn bộ khối tra cache, về đúng hành vi Stage 10.
+- [ ] Hit rate ≥ 40% sau 1 tháng chạy thật — cần dữ liệu thật để đo, không đo được ở giai đoạn này.
+
+### Vì sao đường GHI chưa làm
+
+Tự động tham số hoá (biến bước đã render cụ thể — ví dụ "báo cáo từ 1/6 đến 30/6" — ngược lại
+thành template có `{{from_date}}`/`{{to_date}}`) là bài toán tách biệt, khó hơn chiều ngược lại
+(điền slot vào template có sẵn) mà tài liệu Stage 19 không nêu thuật toán cụ thể. Một bản làm vội
+có rủi ro thật: parameterize sai có thể để lọt dữ liệu cụ thể của một user (tên khách, mã đơn) vào
+template dùng chung cho user khác — đúng rủi ro nghiêm trọng nhất mà mục 19.8 cảnh báo. Thay vì
+làm ẩu, đã dừng ở: có sẵn `contains_hardcoded_data()` làm lưới an toàn, cần nối vào khi ai đó xây
+bước tự học (hoặc một công cụ admin tạo template thủ công).

@@ -1,0 +1,69 @@
+[
+  {
+    "name": "search_products",
+    "path": "products/search",
+    "label": "Tìm sản phẩm",
+    "module": "product",
+    "is_write": false,
+    "description": "Tìm kiếm sản phẩm trong cửa hàng theo từ khóa (có thể gồm tên thương hiệu/danh mục trong từ khóa). DÙNG KHI khách hỏi 'có xe nào...', 'tìm giúp tôi...', 'shop có bán... không'. KHÔNG dùng để tra tồn kho hay giá của MỘT sản phẩm cụ thể đã biết ID — dùng get_product_stock/get_product_detail cho việc đó (kết quả search_products trả về product_id để dùng tiếp). Ví dụ: 'Shop có Wave Alpha không?', 'Tìm xe tay ga Honda'.",
+    "args": [
+      { "name": "keyword", "type": "string", "required": false, "default": "", "label": "Từ khóa", "description": "Từ khóa tìm kiếm tên sản phẩm dạng CHUỖI VĂN BẢN đơn giản, có thể gồm cả tên thương hiệu/danh mục trong câu, ví dụ 'wave alpha', 'sh 2024'. Tự trích từ câu tự do/sai chính tả của khách. Để trống '' nếu không lọc theo từ khóa." },
+      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng kết quả tối đa muốn trả về." }
+    ]
+  },
+  {
+    "name": "get_product_detail",
+    "path": "products/detail",
+    "label": "Chi tiết sản phẩm",
+    "module": "product",
+    "is_write": false,
+    "description": "DÙNG KHI khách hỏi chi tiết MỘT sản phẩm cụ thể đã biết mã (product_id) — ví dụ để xem có mấy biến thể màu. KHÔNG DÙNG KHI khách muốn tìm kiếm hoặc liệt kê nhiều sản phẩm theo từ khóa/danh mục (dùng search_products cho trường hợp đó).",
+    "args": [
+      { "name": "product_id", "type": "integer", "required": true, "label": "Mã sản phẩm", "description": "ID sản phẩm cần xem chi tiết, lấy từ kết quả search_products." }
+    ]
+  },
+  {
+    "name": "get_product_stock",
+    "path": "products/stock",
+    "label": "Tra tồn kho",
+    "module": "inventory",
+    "is_write": false,
+    "description": "Tra trạng thái tồn kho (còn hàng / sắp hết / hết hàng) của một sản phẩm cụ thể, theo product_id — KHÔNG trả số lượng tồn kho chính xác (đó là dữ liệu vận hành nội bộ). DÙNG KHI khách hỏi 'còn hàng không', 'còn xe không' VÀ đã biết product_id (nếu chưa biết, gọi search_products trước). KHÔNG dùng để tìm danh sách nhiều sản phẩm — dùng search_products cho việc đó.",
+    "args": [
+      { "name": "product_id", "type": "integer", "required": true, "label": "Mã sản phẩm", "description": "ID sản phẩm cần tra tồn kho. Nếu chưa biết ID, gọi search_products trước." },
+      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số biến thể tối đa muốn trả về." }
+    ]
+  },
+  {
+    "name": "get_product_price_list",
+    "path": "products/price-list",
+    "label": "Danh sách giá sản phẩm",
+    "module": "product",
+    "is_write": false,
+    "description": "Lấy danh sách sản phẩm kèm giá bán hiện tại, có thể lọc theo từ khóa tên sản phẩm. DÙNG KHI khách hỏi 'giá bao nhiêu', 'liệt kê giá xe Honda', 'bảng giá'. KHÔNG dùng để tra tồn kho một sản phẩm cụ thể — dùng get_product_stock cho việc đó.",
+    "args": [
+      { "name": "keyword", "type": "string", "required": false, "default": "", "label": "Từ khóa", "description": "Từ khóa lọc theo tên sản phẩm. Để trống '' nếu không lọc." },
+      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng sản phẩm tối đa trả về." }
+    ]
+  },
+  {
+    "name": "list_brands",
+    "path": "products/brands",
+    "label": "Danh sách thương hiệu",
+    "module": "product",
+    "is_write": false,
+    "description": "Lấy danh sách các thương hiệu sản phẩm hiện có trong cửa hàng. DÙNG KHI khách hỏi 'shop bán những hãng nào', 'có hãng nào'. KHÔNG dùng để tìm sản phẩm cụ thể của một hãng — dùng search_products cho việc đó.",
+    "args": [
+      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượng thương hiệu tối đa trả về." }
+    ]
+  },
+  {
+    "name": "escalate_to_staff",
+    "path": "handoff/escalate",
+    "label": "Chuyển nhân viên hỗ trợ",
+    "module": "handoff",
+    "is_write": true,
+    "description": "Chuyển phiên chat này sang hàng đợi để một nhân viên thật tiếp nhận trực tiếp — sau khi gọi, AI sẽ NGỪNG trả lời các tin nhắn tiếp theo của khách trong phiên này cho tới khi nhân viên xử lý xong. CHỈ gọi khi câu hỏi VƯỢT NGOÀI khả năng: khiếu nại, đàm phán giá, yêu cầu CSKH phức tạp không có trong nội dung CSKH đã cung cấp. KHÔNG gọi cho câu hỏi tra cứu sản phẩm/tồn kho/giá bình thường. Tool này không cần tham số và không trả về dữ liệu nghiệp vụ nào khác ngoài việc xác nhận đã chuyển.",
+    "args": []
+  }
+]

@@ -1,6 +1,10 @@
+using Application.ApiContracts.InventoryReport.Responses;
+using Application.Features.InventoryReports.Queries.ExportInventoryReport;
 using Application.Features.InventoryReports.Queries.GetInventoryReportDetail;
+using Application.Interfaces.Repositories.InventoryOnHand;
 using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Services.Excel;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
@@ -12,6 +16,8 @@ namespace UnitTests
     {
         private readonly Mock<IProductReadRepository> _productRepoMock;
         private readonly Mock<IInventoryReceiptReadRepository> _receiptRepoMock;
+        private readonly Mock<IInventoryOnHandReadRepository> _inventoryOnHandRepoMock;
+        private readonly Mock<IInventoryReportExcelService> _excelServiceMock;
 
         public InventoryReports()
         {
@@ -20,6 +26,8 @@ namespace UnitTests
             _receiptRepoMock.Setup(
                 x => x.GetInfosByVariantAsync(It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync([]);
+            _inventoryOnHandRepoMock = new Mock<IInventoryOnHandReadRepository>();
+            _excelServiceMock = new Mock<IInventoryReportExcelService>();
         }
 
         [Fact(DisplayName = "IRP_004 - Ngăn chặn lấy chi tiết biến thể có màu sắc nhưng thiếu tham số colorId")]
@@ -68,6 +76,27 @@ namespace UnitTests
             var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
             result.IsFailure.Should().BeTrue();
             result.Error?.Code.Should().Be("NotFound");
+        }
+
+        [Fact(DisplayName = "IRP_007 - Unit: ExportInventoryReportQueryHandler - Success")]
+        public async Task IRP_007_ExportInventoryReport_Success()
+        {
+            var handler = new ExportInventoryReportQueryHandler(_inventoryOnHandRepoMock.Object, _excelServiceMock.Object);
+            var items = new List<InventoryReportSummaryRowResponse> { new() };
+            _inventoryOnHandRepoMock.Setup(
+                x => x.GetInventoryReportSummaryRowsAsync(
+                    It.IsAny<string?>(),
+                    It.IsAny<int?>(),
+                    It.IsAny<int?>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(items);
+            var expectedBytes = new byte[] { 1, 2, 3 };
+            _excelServiceMock.Setup(x => x.ExportInventoryReport(items, It.IsAny<int>(), It.IsAny<int>()))
+                .Returns(expectedBytes);
+            var result = await handler.Handle(new ExportInventoryReportQuery(), CancellationToken.None)
+                .ConfigureAwait(true);
+            result.IsSuccess.Should().BeTrue();
+            result.Value!.FileContents.Should().BeSameAs(expectedBytes);
         }
     }
 }

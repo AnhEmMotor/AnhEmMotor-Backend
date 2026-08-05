@@ -541,6 +541,32 @@ public static class PermissionsList
                         }
             }, new PermissionFeatureMetadata
             {
+                Id = "Permissions.Marketing.StoreChatManagement",
+                Name = "Chat AI Store",
+                Permissions =
+                    new()
+                        {
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.StoreChatManagement.View,
+                                Name = "Xem",
+                                Description = "Xem hàng đợi chat store"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.StoreChatManagement.Claim,
+                                Name = "Nhận phiên",
+                                Description = "Nhận phiên chat store"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.StoreChatManagement.Delete,
+                                Name = "Xóa",
+                                Description = "Xóa phiên chat store"
+                            },
+                        }
+            }, new PermissionFeatureMetadata
+            {
                 Id = "Permissions.Marketing.CustomerVoucherManagement",
                 Name = "Quản lý voucher",
                 Permissions =

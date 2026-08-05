@@ -5,75 +5,75 @@ using SieveModel = global::Sieve.Models.SieveModel;
 
 namespace Application.Interfaces.Repositories.Vehicle
 {
-public interface IVehicleReadRepository
-{
-    public IQueryable<Domain.Entities.Vehicle> GetQueryable();
+    public interface IVehicleReadRepository
+    {
+        public IQueryable<Domain.Entities.Vehicle> GetQueryable();
 
-    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
-        SieveModel sieveModel,
-        DataFetchMode mode = DataFetchMode.ActiveOnly,
-        Expression<Func<Domain.Entities.Vehicle, bool>>? filter = null,
-        CancellationToken cancellationToken = default);
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            Expression<Func<Domain.Entities.Vehicle, bool>>? filter = null,
+            CancellationToken cancellationToken = default);
 
-    public Task<List<Domain.Entities.Vehicle>> GetVehiclesAsync(
-        string? search,
-        CancellationToken cancellationToken = default);
+        public Task<List<Domain.Entities.Vehicle>> GetVehiclesAsync(
+            string? search,
+            CancellationToken cancellationToken = default);
 
-    public Task<Domain.Entities.Vehicle?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        public Task<Domain.Entities.Vehicle?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
-    public Task<List<Domain.Entities.Vehicle>> GetByIdsAsync(
-        IEnumerable<int> ids,
-        CancellationToken cancellationToken = default);
+        public Task<List<Domain.Entities.Vehicle>> GetByIdsAsync(
+            IEnumerable<int> ids,
+            CancellationToken cancellationToken = default);
 
-    public Task<List<Domain.Entities.Vehicle>> GetVehiclesForAssignmentAsync(
-        IEnumerable<int> productVariantIds,
-        CancellationToken cancellationToken = default);
+        public Task<List<Domain.Entities.Vehicle>> GetVehiclesForAssignmentAsync(
+            IEnumerable<int> productVariantIds,
+            CancellationToken cancellationToken = default);
 
-    public Task<bool> ExistsByVinAsync(string vin, CancellationToken cancellationToken = default);
+        public Task<bool> ExistsByVinAsync(string vin, CancellationToken cancellationToken = default);
 
-    public Task<bool> ExistsByEngineNumberAsync(string engineNumber, CancellationToken cancellationToken = default);
+        public Task<bool> ExistsByEngineNumberAsync(string engineNumber, CancellationToken cancellationToken = default);
 
-    public Task<bool> ExistsByVinAsync(
-        string vin,
-        int productVariantId,
-        int? productVariantColorId,
-        CancellationToken cancellationToken = default);
+        public Task<bool> ExistsByVinAsync(
+            string vin,
+            int productVariantId,
+            int? productVariantColorId,
+            CancellationToken cancellationToken = default);
 
-    public Task<bool> ExistsByEngineNumberAsync(
-        string engineNumber,
-        int productVariantId,
-        int? productVariantColorId,
-        CancellationToken cancellationToken = default);
+        public Task<bool> ExistsByEngineNumberAsync(
+            string engineNumber,
+            int productVariantId,
+            int? productVariantColorId,
+            CancellationToken cancellationToken = default);
 
-    public Task<List<Domain.Entities.Vehicle>> GetVehiclesByReceiptInfoIdAsync(
-        int receiptInfoId,
-        CancellationToken cancellationToken = default);
+        public Task<List<Domain.Entities.Vehicle>> GetVehiclesByReceiptInfoIdAsync(
+            int receiptInfoId,
+            CancellationToken cancellationToken = default);
 
-    public Task<Domain.Entities.Vehicle?> GetByVinAsync(string vin, CancellationToken cancellationToken = default);
+        public Task<Domain.Entities.Vehicle?> GetByVinAsync(string vin, CancellationToken cancellationToken = default);
 
-    public Task<List<Domain.Entities.Vehicle>> GetByUserIdAsync(
-        string userId,
-        CancellationToken cancellationToken = default);
+        public Task<List<Domain.Entities.Vehicle>> GetByUserIdAsync(
+            string userId,
+            CancellationToken cancellationToken = default);
 
-    public Task<List<Domain.Entities.Vehicle>> GetByLeadIdAsync(
-        int leadId,
-        CancellationToken cancellationToken = default);
+        public Task<List<Domain.Entities.Vehicle>> GetByLeadIdAsync(
+            int leadId,
+            CancellationToken cancellationToken = default);
 
-    public Task<Domain.Entities.Vehicle?> GetByLicensePlateAsync(
-        string licensePlate,
-        CancellationToken cancellationToken = default);
+        public Task<Domain.Entities.Vehicle?> GetByLicensePlateAsync(
+            string licensePlate,
+            CancellationToken cancellationToken = default);
 
-    public Task<Domain.Entities.Vehicle?> GetVehicleForPortfolioAsync(
-        string query,
-        string queryType,
-        CancellationToken cancellationToken = default);
+        public Task<Domain.Entities.Vehicle?> GetVehicleForPortfolioAsync(
+            string query,
+            string queryType,
+            CancellationToken cancellationToken = default);
 
-    public Task<List<Domain.Entities.Vehicle>> GetByIdsWithLeadAsync(
-        IEnumerable<int> ids,
-        CancellationToken cancellationToken = default);
+        public Task<List<Domain.Entities.Vehicle>> GetByIdsWithLeadAsync(
+            IEnumerable<int> ids,
+            CancellationToken cancellationToken = default);
 
-    public Task<Domain.Entities.Vehicle?> GetByIdWithLeadAsync(
-        int id,
-        CancellationToken cancellationToken = default);
-}
+        public Task<Domain.Entities.Vehicle?> GetByIdWithLeadAsync(
+            int id,
+            CancellationToken cancellationToken = default);
+    }
 }

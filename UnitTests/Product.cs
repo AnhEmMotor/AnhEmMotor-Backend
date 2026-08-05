@@ -1,5 +1,6 @@
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -14,6 +15,7 @@ using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Mappings;
 using Application.Features.Products.Queries.CheckSlugAvailability;
+using Application.Features.Products.Queries.ExportProducts;
 using Application.Features.Products.Queries.GetProductAttributeLabels;
 using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Interfaces.Repositories;
@@ -27,6 +29,7 @@ using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Technology;
 using Application.Interfaces.Repositories.Technology.Technology;
 using Application.Interfaces.Repositories.VariantOptionValue;
+using Application.Interfaces.Services.Excel;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
@@ -58,6 +61,7 @@ public class Product
     private readonly Mock<IVariantOptionValueDeleteRepository> _variantOptionValueDeleteRepoMock;
     private readonly Mock<IProductTechnologyRepository> _productTechnologyRepoMock;
     private readonly Mock<ITechnologyReadRepository> _technologyReadRepoMock;
+    private readonly Mock<IProductExcelService> _excelServiceMock;
 
     public Product()
     {
@@ -90,6 +94,7 @@ public class Product
         _technologyReadRepoMock = new Mock<ITechnologyReadRepository>();
         _technologyReadRepoMock.Setup(x => x.GetByIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
+        _excelServiceMock = new Mock<IProductExcelService>();
         new ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
@@ -1972,6 +1977,34 @@ public class Product
         var validator = new CreateProductVariantCommandValidator();
         var result = validator.Validate(request);
         result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_201 - Unit: ExportProductsQueryHandler - Success")]
+    public async Task PRODUCT_201_ExportProducts_Success()
+    {
+        var handler = new ExportProductsQueryHandler(_productReadRepoMock.Object, _excelServiceMock.Object);
+        _productReadRepoMock.Setup(
+            x => x.GetPagedProductsAsync(
+                It.IsAny<string?>(),
+                It.IsAny<List<string>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<List<int>>(),
+                It.IsAny<decimal?>(),
+                It.IsAny<decimal?>(),
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((new List<ProductEntity>(), 0, new List<FilterGroup>()));
+        var expectedBytes = new byte[] { 1, 2, 3 };
+        _excelServiceMock.Setup(x => x.ExportProducts(It.IsAny<IReadOnlyList<ProductDetailForManagerResponse>>()))
+            .Returns(expectedBytes);
+        var result = await handler.Handle(new ExportProductsQuery(), CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.FileContents.Should().BeSameAs(expectedBytes);
+        result.Value.FileName.Should().Be("Danh_sach_san_pham.xlsx");
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

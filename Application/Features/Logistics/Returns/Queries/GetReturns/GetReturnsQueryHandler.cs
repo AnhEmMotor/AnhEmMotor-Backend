@@ -20,10 +20,8 @@ namespace Application.Features.Logistics.Returns.Queries.GetReturns
                     x => x.InspectedAt == null && string.IsNullOrWhiteSpace(x.ReturnAction))],
                 ReturnOrderStatus.Inspecting => [.. returns.Where(
                     x => x.InspectedAt != null && string.IsNullOrWhiteSpace(x.ReturnAction))],
-                ReturnOrderStatus.Completed => [.. returns.Where(
-                    x => GetReturnStatus(x) == ReturnOrderStatus.Completed)],
-                ReturnOrderStatus.Rejected => [.. returns.Where(
-                    x => GetReturnStatus(x) == ReturnOrderStatus.Rejected)],
+                ReturnOrderStatus.Completed => [.. returns.Where(x => GetReturnStatus(x) == ReturnOrderStatus.Completed)],
+                ReturnOrderStatus.Rejected => [.. returns.Where(x => GetReturnStatus(x) == ReturnOrderStatus.Rejected)],
                 _ => returns
             };
             return[.. filtered

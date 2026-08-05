@@ -126,6 +126,9 @@ Khi nhận `{"type":"tool_start","name":"get_sales_summary"}` → hiện dòng n
 
 Map tên tool → nhãn tiếng Việt trong một object constant ở FE.
 
+> Khi Stage 22 (Multi-Agent) xong: sự kiện `subagent_started` hiện thêm dòng lồng một cấp, dạng
+> "🧩 Đang phân việc cho N nhánh...", tái dùng cùng cơ chế indicator này — không thiết kế mới.
+
 ---
 
 ## 4.6. Các cải thiện UX khác

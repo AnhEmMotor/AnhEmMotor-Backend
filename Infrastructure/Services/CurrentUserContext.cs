@@ -24,6 +24,13 @@ namespace Infrastructure.Services
             return Guid.Parse(userIdClaim);
         }
 
+        public Guid? GetUserIdOrNull()
+        {
+            var userIdClaim = httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
+            return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
+        }
+
         public string GetAccessToken()
         {
             var authHeader = GetAuthorizationHeader();

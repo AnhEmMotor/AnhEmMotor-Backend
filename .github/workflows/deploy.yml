@@ -59,6 +59,9 @@ jobs:
           MODEL: ${{ secrets.GEMINI_MODEL }}
           LANGSMITH_TRACING: ${{ secrets.LANGSMITH_TRACING || 'false' }}
           LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+          EMBEDDING_MODEL: ${{ secrets.EMBEDDING_MODEL }}
+          QDRANT_URL: ${{ secrets.QDRANT_URL }}
+          QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
         run: >
           jq '
             .Provider = "PostgreSql" |
@@ -97,7 +100,10 @@ jobs:
             .AISetup.ApiKey = env.API_KEY |
             .AISetup.Model = (if env.MODEL == "" then .AISetup.Model else env.MODEL end) |
             .AISetup.LangSmithTracing = (env.LANGSMITH_TRACING | fromjson) |
-            .AISetup.LangSmithApiKey = env.LANGSMITH_API_KEY
+            .AISetup.LangSmithApiKey = env.LANGSMITH_API_KEY |
+            .AISetup.EmbeddingModel = (if env.EMBEDDING_MODEL == "" then .AISetup.EmbeddingModel else env.EMBEDDING_MODEL end) |
+            .AISetup.QdrantUrl = env.QDRANT_URL |
+            .AISetup.QdrantApiKey = env.QDRANT_API_KEY
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
       - name: Restore dependencies
         run: dotnet restore

@@ -170,6 +170,7 @@ logger.LogInformation(
 | Tỉ lệ lỗi gọi sidecar | Phát hiện sidecar chết |
 | Token in/out per ngày | Kiểm soát chi phí |
 | Tỉ lệ tool call thất bại (403 / 5xx) | Phát hiện lệch permission |
+| Số sub-agent / lượt (`subagent_count`, chờ Stage 22) | Phát hiện agent cha lạm dụng `delegate_to_subagent`, kiểm soát chi phí phụ trội |
 
 ---
 
@@ -192,7 +193,7 @@ logger.LogInformation(
    subscribe `OutputDataReceived` / `ErrorDataReceived` nếu chưa có).
 6. **Kiểm tra sidecar không chạy code cũ.** Health check phải so `BUILD_ID` của sidecar với
    `EXPECTED_BUILD_ID` do .NET truyền xuống; lệch → trả cờ `stale`. Xem
-   [17-STAGE-TOOL-LIFECYCLE.md](17-STAGE-TOOL-LIFECYCLE.md) mục 17.5.
+   [17-STAGE-TOOL-LIFECYCLE.md](done/17-STAGE-TOOL-LIFECYCLE.md) mục 17.5.
 7. **Kiểm tra hợp đồng tool** lúc khởi động: tool nào thiếu endpoint ở backend thì tự vô hiệu
    thay vì để AI gọi rồi nhận 404. Xem 17.5.
 

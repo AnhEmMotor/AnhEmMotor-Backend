@@ -1,8 +1,12 @@
 import pytest
 
 PROTECTED_ENDPOINTS = [
-    ("/manager-chat", {"session_id": "s1", "message": "xin chào"}),
+    ("/manager-chat", {"run_id": "r1", "session_id": "s1", "message": "xin chào"}),
     ("/manager-chat/generate-title", {"message": "xin chào"}),
+    ("/internal/index/products", {"items": []}),
+    ("/internal/index/products/delete", {"productIds": []}),
+    ("/internal/index/knowledge", {"documents": []}),
+    ("/internal/index/rebuild", {"collection": "product_catalog", "items": []}),
 ]
 
 
@@ -32,7 +36,7 @@ def test_internal_secret_rong_tra_403(client, path, payload):
 
 def test_thieu_authorization_tra_401(client, internal_secret):
     resp = client.post("/manager-chat",
-                       json={"session_id": "s1", "message": "xin chào"},
+                       json={"run_id": "r1", "session_id": "s1", "message": "xin chào"},
                        headers={"X-Internal-Secret": internal_secret})
     assert resp.status_code == 401
 
@@ -50,8 +54,8 @@ def test_env_secret_vang_mat_van_chan(client, monkeypatch, path, payload):
     monkeypatch.delenv("BACKEND_INTERNAL_SECRET", raising=False)
 
     for headers in (
-        {"Authorization": "Bearer fake"},                                
-        {"Authorization": "Bearer fake", "X-Internal-Secret": ""},       
+        {"Authorization": "Bearer fake"},
+        {"Authorization": "Bearer fake", "X-Internal-Secret": ""},
     ):
         resp = client.post(path, json=payload, headers=headers)
         assert resp.status_code == 403, f"{path} với headers={headers} phải bị chặn"

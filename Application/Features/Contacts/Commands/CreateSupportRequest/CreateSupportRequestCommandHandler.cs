@@ -43,10 +43,6 @@ public class CreateSupportRequestCommandHandler(
         await supportRequestRepository.AddAsync(supportRequest, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<CreateSupportRequestResponse>.Success(
-            new CreateSupportRequestResponse
-            {
-                Id = supportRequest.Id,
-                TrackingToken = trackingToken
-            });
+            new CreateSupportRequestResponse { Id = supportRequest.Id, TrackingToken = trackingToken });
     }
 }

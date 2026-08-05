@@ -62,16 +62,17 @@ public static class AuthenticationExtensions
                     };
                     options.Events = new JwtBearerEvents
                     {
-                        OnMessageReceived = context =>
-                        {
-                            var accessToken = context.Request.Query["access_token"];
-                            var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                        OnMessageReceived =
+                            context =>
                             {
-                                context.Token = accessToken;
-                            }
-                            return Task.CompletedTask;
-                        },
+                                var accessToken = context.Request.Query["access_token"];
+                                var path = context.HttpContext.Request.Path;
+                                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                                {
+                                    context.Token = accessToken;
+                                }
+                                return Task.CompletedTask;
+                            },
                         OnTokenValidated =
                             async context =>
                             {

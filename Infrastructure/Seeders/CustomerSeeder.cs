@@ -2,9 +2,6 @@ using Domain.Constants;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Seeders;
 
@@ -20,7 +17,6 @@ public static class CustomerSeeder
             ("kimngan@gmail.com", "123456"),
             ("minhuyen@gmail.com", "123456")
         };
-        
         foreach (var (Email, Password) in customersToSeed)
         {
             var user = await userManager.FindByEmailAsync(Email).ConfigureAwait(false);
@@ -34,7 +30,6 @@ public static class CustomerSeeder
                     Status = UserStatus.Active,
                     EmailConfirmed = true
                 };
-                
                 var result = await userManager.CreateAsync(user, Password).ConfigureAwait(false);
                 if (result.Succeeded)
                 {

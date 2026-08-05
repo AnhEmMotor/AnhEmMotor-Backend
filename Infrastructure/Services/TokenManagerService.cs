@@ -80,6 +80,23 @@ public class TokenManagerService : ITokenManagerService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    public string RefreshAccessToken(string oldToken, DateTimeOffset expiryTime)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jwt = handler.ReadJwtToken(oldToken);
+        var claims = jwt.Claims
+            .Where(c => c.Type != JwtRegisteredClaimNames.Jti && c.Type != JwtRegisteredClaimNames.Exp)
+            .Append(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()))
+            .ToList();
+        var token = new JwtSecurityToken(
+            issuer: _issuer,
+            audience: _audience,
+            expires: expiryTime.UtcDateTime,
+            claims: claims,
+            signingCredentials: new SigningCredentials(_authSigningKey, SecurityAlgorithms.HmacSha256));
+        return handler.WriteToken(token);
+    }
+
     public string CreateRefreshToken()
     {
         var randomNumber = new byte[32];

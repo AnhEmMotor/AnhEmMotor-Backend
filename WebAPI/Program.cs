@@ -4,9 +4,7 @@ using Infrastructure;
 using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
-using System.Diagnostics;
 using System.Globalization;
-using System.Net;
 using WebAPI.BackgroundServices;
 using WebAPI.Extensions;
 using WebAPI.Hubs;
@@ -107,7 +105,7 @@ if (app.Environment.IsDevelopment())
             }
             options.DocExpansion(DocExpansion.None);
         });
-app.Logger.LogInformation("Swagger is available at: http://localhost:5000/swagger");
+    app.Logger.LogInformation("Swagger is available at: http://localhost:5000/swagger");
 }
 app.UseStaticFiles();
 app.UseRouting();
@@ -132,6 +130,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ManagerChatHub>("/hubs/manager-chat");
+app.MapHub<StoreChatHub>("/hubs/store-chat");
 if (!app.Environment.IsEnvironment("Test"))
 {
     await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);

@@ -24,7 +24,6 @@ public class RateSupportEmployeeCommandHandler(
             return Result<bool>.Failure("Điểm đánh giá phải từ 1 đến 5.");
         if (supportRequest.Status != SupportRequestStatus.Closed || supportRequest.AssignedUserId is null)
             return Result<bool>.Failure("Chỉ có thể đánh giá nhân viên sau khi yêu cầu hoàn tất.");
-
         supportRequest.CustomerRatingOfEmployee = request.Request.Rating;
         supportRequest.CustomerRatingComment = request.Request.Comment?.Trim();
         supportRequest.CustomerRatedAt = DateTimeOffset.UtcNow;

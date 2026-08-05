@@ -3,6 +3,17 @@
 > Yêu cầu #5 (phần tốc độ) · Ưu tiên: 🟠 Trung bình · Ước lượng: 2–3 ngày · Phụ thuộc: **Stage 3, 13**
 > Mục tiêu: giảm thời gian chờ và giảm số vòng lặp của agent — vừa nhanh hơn vừa rẻ hơn.
 
+> **⚠️ Nợ từ Stage 18 (Consistency) — làm kèm khi xong Stage này:**
+> - **14.5 (Cache nhiều tầng):** thay TTL 60s bằng `RunSnapshot` (đã có ở
+>   `AISidecar/app/services/run_snapshot.py`, Stage 18.2) cho các tool đọc trong cùng một run —
+>   nhất quán hơn mà vẫn tiết kiệm y như cũ. Cache theo run tự động thoả điều kiện "key theo user"
+>   vì run đã gắn 1 user.
+> - **14.6 (Tóm tắt lịch sử hội thoại):** áp 3 quy tắc của Stage 18.9 — không tóm tắt số liệu,
+>   giữ nguyên văn 15 tin gần nhất, lưu `SummarizedUpToMessageId` vào `ChatSession` (cần migration
+>   MySQL + PostgreSQL).
+>
+> Xem chi tiết: [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md), mục 18.2, 18.9.
+
 ---
 
 ## 14.1. Đo trước, tối ưu sau
@@ -75,6 +86,11 @@ trong CÙNG một lượt thay vì gọi lần lượt.
 
 3 tool tuần tự (4.5s) → 3 tool song song (1.8s).
 
+> 📌 **Không nhầm với Stage 22 (Multi-Agent).** `asyncio.gather` ở trên là cơ chế chạy song song
+> nhiều **tool call trong cùng một lượt của một agent**. Stage 22 tái dùng nguyên vẹn cơ chế này để
+> chạy nhiều lệnh gọi `delegate_to_subagent` song song — không phải một cơ chế fan-out mới, và
+> không phải nhiều agent chạy độc lập ngoài vòng lặp này.
+
 ### d) Trần cứng số vòng
 
 Đã đặt ở Stage 13.6: 6 vòng thường, 12 vòng plan mode. Theo dõi phân bố thực tế —
@@ -117,7 +133,7 @@ async def get_context_cached(session_id: str, ...) -> dict:
 > ⚠️ **Cách xử lý dứt điểm:** key cache theo `session_id:run_id` thay vì chỉ `session_id`.
 > Cache tự hết hiệu lực khi run kết thúc → cửa sổ rủi ro bằng đúng thời lượng một run (≤ 5 phút)
 > và không cần TTL. Kèm invalidate chủ động và revalidate ở backend.
-> Ba lớp đầy đủ ở [17-STAGE-TOOL-LIFECYCLE.md](17-STAGE-TOOL-LIFECYCLE.md) mục 17.7.
+> Ba lớp đầy đủ ở [17-STAGE-TOOL-LIFECYCLE.md](done/17-STAGE-TOOL-LIFECYCLE.md) mục 17.7.
 
 Lịch sử hội thoại thì **không cache** (đổi mỗi lượt) — tách thành request riêng, hoặc lấy
 kèm nhưng phần user/permissions dùng cache.
@@ -159,26 +175,20 @@ System prompt được gửi lại **mỗi lượt**. Prompt 2000 token × 20 l�
 
 ## 14.4. Chọn model theo việc
 
-Hiện chỉ có một khoá `AISetup:Model`. Tách thành:
+Dùng **một** khoá `AISetup:Model` cho mọi tác vụ. Tối ưu bằng **tham số gọi**, không tách model:
 
-```jsonc
-"AISetup": {
-    "Model": "gemini-3.5-flash",        // agent chính — GIỮ NGUYÊN
-    "FastModel": "gemini-3.5-flash",    // router, phân loại steering, sinh title
-    "EmbeddingModel": "text-embedding-004"
-}
-```
-
-| Việc | Model | Cấu hình |
-|---|---|---|
-| Router phân nhóm (13.3) | `FastModel` | `temperature=0`, `max_output_tokens=16` |
-| Phân loại steering (9.4) | `FastModel` | `temperature=0`, `max_output_tokens=8` |
-| Sinh tiêu đề (Stage 4.1) | `FastModel` | `temperature=0.3`, `max_output_tokens=32` |
-| Agent chính | `Model` | `temperature=0.7` |
-| Tổng hợp cuối | `Model` | `temperature=0.5` |
+| Việc | Cấu hình gọi |
+|---|---|
+| Router phân nhóm (13.3) | `temperature=0`, `max_output_tokens=16` |
+| Phân loại steering (9.4) | `temperature=0`, `max_output_tokens=8` |
+| Sinh tiêu đề (Stage 4.1) | `temperature=0.3`, `max_output_tokens=32` |
+| Agent chính | `temperature=0.7` |
+| Tổng hợp cuối | `temperature=0.5` |
 
 **`max_output_tokens` thấp cho tác vụ phân loại là tối ưu bị bỏ quên nhiều nhất** — model
 dừng sớm thay vì sinh giải thích dài dòng không ai đọc.
+
+> Nếu sau này muốn tách model riêng (ví dụ model rẻ cho routing), thêm khoá lúc đó — không khai trước.
 
 ### Prompt caching
 Nếu provider hỗ trợ, đánh dấu phần tĩnh của system prompt (hướng dẫn chung, mô tả tool) là
@@ -244,7 +254,11 @@ var permsTask   = GetPermissionsAsync(...);
 await Task.WhenAll(contextTask, historyTask, permsTask);
 ```
 
-Và ghi `ChatRunEvent` không được chặn stream — dùng batching như Stage 8.4 đã nêu.
+Và ghi `ChatRunEvent` không được chặn stream. **Không dùng batching** (Stage 8.4 đã bỏ —
+quyết định 2026-07-29: batching làm chữ hiện "nhảy cục", ưu tiên tự nhiên hơn số lần ghi DB).
+Nếu tần suất ghi DB thật sự thành nút thắt, tối ưu đúng hướng là giảm chi phí mỗi lần ghi
+(batch insert phía driver, async fire-and-forget có kiểm soát...), **không phải** gộp nhiều
+`text_delta` thành một trước khi hiển thị cho user.
 
 ---
 
@@ -292,5 +306,5 @@ Và ghi `ChatRunEvent` không được chặn stream — dùng batching như Sta
 - [ ] Context được cache và **có cơ chế invalidate khi đổi permission** (có test).
 - [ ] Cache kết quả tool key theo `user_id` (có test chứng minh user A không thấy dữ liệu user B).
 - [ ] `httpx.AsyncClient` dùng chung theo vòng đời app.
-- [ ] Router dùng `FastModel` với `max_output_tokens` thấp.
+- [ ] Router dùng `Model` với `max_output_tokens` thấp.
 - [ ] Bộ eval ở Stage 13 vẫn pass sau tối ưu — **tốc độ không được đổi bằng độ chính xác**.

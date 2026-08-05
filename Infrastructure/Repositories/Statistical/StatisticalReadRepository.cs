@@ -24,18 +24,15 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         if (!DateTimeOffset.TryParse(from, out fromDate))
         {
             fromDate = DateTimeOffset.UtcNow.AddDays(-30);
-        }
-        else
+        } else
         {
             fromDate = fromDate.ToUniversalTime();
         }
-
         DateTimeOffset toDate;
         if (!DateTimeOffset.TryParse(to, out toDate))
         {
             toDate = DateTimeOffset.UtcNow;
-        }
-        else
+        } else
         {
             toDate = toDate.ToUniversalTime();
         }
@@ -479,7 +476,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var days = (int)(end - start).TotalDays + 1;
         if (days <= 0)
             days = 1;
-        var startDate = DateOnly.FromDateTime(start.Date);
+        var startDate = DateOnly.FromDateTime(start.ToOffset(TimeSpan.FromHours(7)).DateTime);
         var startDateTimeOffset = start;
         var endDateTimeOffset = end;
         var dateSeries = Enumerable.Range(0, days).Select(i => startDate.AddDays(i)).ToList();
@@ -496,7 +493,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var revenueData = rawData
-            .GroupBy(x => DateOnly.FromDateTime(x.CreatedAt.DateTime))
+            .GroupBy(x => DateOnly.FromDateTime(x.CreatedAt.ToOffset(TimeSpan.FromHours(7)).DateTime))
             .Select(g => new { Day = g.Key, Revenue = g.Sum(x => x.Price * x.Count) })
             .ToList();
         return dateSeries.Select(

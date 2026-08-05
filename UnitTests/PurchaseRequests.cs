@@ -1,19 +1,30 @@
 using Application.ApiContracts.PurchaseRequest.Requests;
+using Application.ApiContracts.PurchaseRequest.Responses;
 using Application.Features.PurchaseRequests.Commands.ApproveRejectPurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest;
+using Application.Features.PurchaseRequests.Commands.ImportPurchaseRequests;
 using Application.Features.PurchaseRequests.Commands.SendPurchaseRequest;
 using Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
+using Application.Features.PurchaseRequests.Queries.ExportPurchaseRequests;
+using Application.Features.PurchaseRequests.Queries.GetImportPurchaseRequestTemplate;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
+using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.PurchaseRequest;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Excel;
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Primitives;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Moq;
+using Sieve.Models;
 using PurchaseRequestEntity = Domain.Entities.PurchaseRequest;
 
 namespace UnitTests;
@@ -29,6 +40,10 @@ public class PurchaseRequests
     private readonly Mock<IPermissionReadRepository> _permissionRepoMock;
     private readonly Mock<ICurrentUserContext> _currentUserContextMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IProductReadRepository> _productReadRepoMock;
+    private readonly Mock<IProductQuotationReadRepository> _quotationRepoMock;
+    private readonly Mock<IPurchaseRequestExcelService> _excelServiceMock;
+    private readonly Mock<IConfiguration> _configurationMock;
 
     public PurchaseRequests()
     {
@@ -41,9 +56,22 @@ public class PurchaseRequests
         _permissionRepoMock = new Mock<IPermissionReadRepository>();
         _currentUserContextMock = new Mock<ICurrentUserContext>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _productReadRepoMock = new Mock<IProductReadRepository>();
+        _quotationRepoMock = new Mock<IProductQuotationReadRepository>();
+        _excelServiceMock = new Mock<IPurchaseRequestExcelService>();
+        _configurationMock = new Mock<IConfiguration>();
         _supplierRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);
+    }
+
+    private static IFormFile CreateFormFile(byte[] content)
+    {
+        var mock = new Mock<IFormFile>();
+        mock.Setup(f => f.Length).Returns(content.Length);
+        mock.Setup(f => f.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .Returns<Stream, CancellationToken>((s, ct) => s.WriteAsync(content, 0, content.Length, ct));
+        return mock.Object;
     }
 
     #pragma warning disable IDE0079 
@@ -733,6 +761,140 @@ public class PurchaseRequests
         existingPR.RejectedBy.Should().Be(currentUserId);
         existingPR.ApprovedBy.Should().BeNull();
         _updateRepoMock.Verify(x => x.Update(existingPR), Times.Once);
+    }
+
+    [Fact(DisplayName = "PR_046 - Unit: ExportPurchaseRequestsQueryHandler - Success")]
+    public async Task PR_046_ExportPurchaseRequests_Success()
+    {
+        var handler = new ExportPurchaseRequestsQueryHandler(
+            _readRepoMock.Object,
+            _supplierRepoMock.Object,
+            _excelServiceMock.Object);
+        var requests = new List<PurchaseRequestListResponse> { new() { Id = 1, Status = "draft" } };
+        _readRepoMock.Setup(
+            x => x.GetPagedAsync<PurchaseRequestListResponse>(
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<PurchaseRequestListResponse>(requests, 1, 1, 100000));
+        var items = new List<PurchaseRequestItem> { new() { Id = 1, PurchaseRequestId = 1 } };
+        _readRepoMock.Setup(
+            x => x.GetItemsByPurchaseRequestIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(items);
+        var suppliers = new List<Domain.Entities.Supplier> { new() { Id = 1, Name = "Supplier A" } };
+        _supplierRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(suppliers);
+        var expectedBytes = new byte[] { 1, 2, 3 };
+        _excelServiceMock.Setup(
+            x => x.ExportPurchaseRequests(
+                requests,
+                items,
+                It.Is<IReadOnlyDictionary<int, string>>(d => d[1] == "Supplier A")))
+            .Returns(expectedBytes);
+        var result = await handler.Handle(new ExportPurchaseRequestsQuery(), CancellationToken.None)
+            .ConfigureAwait(true);
+        result.Should().BeSameAs(expectedBytes);
+    }
+
+    [Fact(DisplayName = "PR_047 - Unit: GetImportPurchaseRequestTemplateQueryHandler - Success")]
+    public async Task PR_047_GetImportPurchaseRequestTemplate_Success()
+    {
+        var handler = new GetImportPurchaseRequestTemplateQueryHandler(_excelServiceMock.Object);
+        var expectedBytes = new byte[] { 4, 5, 6 };
+        _excelServiceMock.Setup(x => x.BuildImportTemplate()).Returns(expectedBytes);
+        var result = await handler.Handle(new GetImportPurchaseRequestTemplateQuery(), CancellationToken.None)
+            .ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().BeSameAs(expectedBytes);
+    }
+
+    [Fact(DisplayName = "PR_048 - Unit: ImportPurchaseRequestsCommandHandler - Success")]
+    public async Task PR_048_ImportPurchaseRequests_Success()
+    {
+        var handler = new ImportPurchaseRequestsCommandHandler(
+            _insertRepoMock.Object,
+            _productReadRepoMock.Object,
+            _variantRepoMock.Object,
+            _supplierRepoMock.Object,
+            _quotationRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _configurationMock.Object,
+            _excelServiceMock.Object);
+        var importRows = new List<PurchaseRequestImportRow>
+        {
+            new("TEMP-1", "Note", "Honda Wave", "Variant 1", string.Empty, "10", "Supplier A")
+        };
+        _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>())).Returns(importRows);
+        var product = new Domain.Entities.Product { Id = 1, Name = "Honda Wave" };
+        _productReadRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([product]);
+        var variant = new ProductVariant { Id = 10, ProductId = 1, VariantName = "Variant 1", ProductVariantColors = [] };
+        _variantRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([variant]);
+        var supplier = new Domain.Entities.Supplier { Id = 100, Name = "Supplier A" };
+        _supplierRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([supplier]);
+        var quotation = new ProductQuotation
+        {
+            Id = 5,
+            ProductVariantId = 10,
+            ProductVariantColorId = null,
+            SupplierId = 100,
+            QuotePrice = 15000000
+        };
+        _quotationRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([quotation]);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var command = new ImportPurchaseRequestsCommand { File = CreateFormFile([1, 2, 3]) };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.SuccessCount.Should().Be(1);
+        result.Value.FailedCount.Should().Be(0);
+        _insertRepoMock.Verify(x => x.Add(It.IsAny<PurchaseRequestEntity>()), Times.Once);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(
+        DisplayName = "PR_049 - ImportPurchaseRequestsCommandHandler thất bại khi file không có worksheet (ParseImportRows trả về null)")]
+    public async Task PR_049_ImportPurchaseRequests_NoWorksheet_ReturnsFailure()
+    {
+        var handler = new ImportPurchaseRequestsCommandHandler(
+            _insertRepoMock.Object,
+            _productReadRepoMock.Object,
+            _variantRepoMock.Object,
+            _supplierRepoMock.Object,
+            _quotationRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _configurationMock.Object,
+            _excelServiceMock.Object);
+        _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>()))
+            .Returns((IReadOnlyList<PurchaseRequestImportRow>?)null);
+        var command = new ImportPurchaseRequestsCommand { File = CreateFormFile([1, 2, 3]) };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsFailure.Should().BeTrue();
+        _productReadRepoMock.Verify(x => x.GetAllAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact(
+        DisplayName = "PR_050 - ImportPurchaseRequestsCommandHandler thành công sớm với 0 dòng, không truy vấn dữ liệu phụ")]
+    public async Task PR_050_ImportPurchaseRequests_EmptyRows_ShortCircuitsSuccess()
+    {
+        var handler = new ImportPurchaseRequestsCommandHandler(
+            _insertRepoMock.Object,
+            _productReadRepoMock.Object,
+            _variantRepoMock.Object,
+            _supplierRepoMock.Object,
+            _quotationRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _configurationMock.Object,
+            _excelServiceMock.Object);
+        _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>()))
+            .Returns(new List<PurchaseRequestImportRow>());
+        var command = new ImportPurchaseRequestsCommand { File = CreateFormFile([1, 2, 3]) };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.SuccessCount.Should().Be(0);
+        result.Value.FailedCount.Should().Be(0);
+        _productReadRepoMock.Verify(x => x.GetAllAsync(It.IsAny<CancellationToken>()), Times.Never);
+        _insertRepoMock.Verify(x => x.Add(It.IsAny<PurchaseRequestEntity>()), Times.Never);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

@@ -191,7 +191,7 @@ public class ProductReadRepository(
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder);
-dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt).ThenBy(p => p.Id);
+        dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt).ThenBy(p => p.Id);
         var items = await dbQuery
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)

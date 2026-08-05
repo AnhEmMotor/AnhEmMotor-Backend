@@ -13,6 +13,13 @@ def _clean_env(monkeypatch):
         monkeypatch.delenv(key, raising=False)
     monkeypatch.setenv("BACKEND_INTERNAL_SECRET", INTERNAL_SECRET)
 
+@pytest.fixture(autouse=True)
+def _clear_settings_cache():
+    from app.config import get_settings
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
 @pytest.fixture
 def internal_secret() -> str:
     return INTERNAL_SECRET
@@ -20,8 +27,8 @@ def internal_secret() -> str:
 @pytest.fixture
 def client():
     from fastapi.testclient import TestClient
-    import main
-    return TestClient(main.app)
+    from app.main import app
+    return TestClient(app)
 
 @pytest.fixture
 def backend_root() -> Path:

@@ -1,11 +1,15 @@
 using Application.ApiContracts.InventoryReceipt.Requests;
+using Application.ApiContracts.InventoryReceipt.Responses;
 using Application.Features.InventoryOnHand.Notifications;
 
 using Application.Features.InventoryReceipts.Commands.CreateInventoryReceipt;
+using Application.Features.InventoryReceipts.Commands.ImportInventoryReceipts;
 using Application.Features.InventoryReceipts.Commands.SendInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceipt;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptNotes;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
+using Application.Features.InventoryReceipts.Queries.ExportInventoryReceipts;
+using Application.Features.InventoryReceipts.Queries.GetImportInventoryReceiptTemplate;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.InventoryOnHand;
@@ -18,13 +22,19 @@ using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.SupplierDebt;
 using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Excel;
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Primitives;
 using FluentAssertions;
 using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.Linq;
+using System.Linq.Expressions;
+using Sieve.Models;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
 using ProductVariant = Domain.Entities.ProductVariant;
 
@@ -48,6 +58,8 @@ public class InventoryReceipts
     private readonly Mock<ISupplierDebtInsertRepository> _supplierDebtRepoMock;
     private readonly Mock<IVehicleUpdateRepository> _vehicleUpdateRepoMock;
     private readonly Mock<IProductQuotationReadRepository> _ProductQuotationRepoMock;
+    private readonly Mock<IInventoryReceiptExcelService> _excelServiceMock;
+    private readonly Mock<IConfiguration> _configurationMock;
 
     public InventoryReceipts()
     {
@@ -67,6 +79,17 @@ public class InventoryReceipts
         _supplierDebtRepoMock = new Mock<ISupplierDebtInsertRepository>();
         _vehicleUpdateRepoMock = new Mock<IVehicleUpdateRepository>();
         _ProductQuotationRepoMock = new Mock<IProductQuotationReadRepository>();
+        _excelServiceMock = new Mock<IInventoryReceiptExcelService>();
+        _configurationMock = new Mock<IConfiguration>();
+    }
+
+    private static IFormFile CreateFormFile(byte[] content)
+    {
+        var mock = new Mock<IFormFile>();
+        mock.Setup(f => f.Length).Returns(content.Length);
+        mock.Setup(f => f.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .Returns<Stream, CancellationToken>((s, ct) => s.WriteAsync(content, 0, content.Length, ct));
+        return mock.Object;
     }
 
     #pragma warning disable IDE0079 
@@ -601,6 +624,125 @@ public class InventoryReceipts
         await handler.Handle(notification, CancellationToken.None).ConfigureAwait(true);
         repoMock.Verify(r => r.RecalculateAsync(1, null, It.IsAny<CancellationToken>()), Times.Once);
         repoMock.Verify(r => r.RecalculateAsync(2, 5, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = "IR_030 - Unit: ExportInventoryReceiptsQueryHandler - Success")]
+    public async Task IR_030_ExportInventoryReceipts_Success()
+    {
+        var handler = new ExportInventoryReceiptsQueryHandler(_readRepoMock.Object, _excelServiceMock.Object);
+        var receipts = new List<InventoryReceiptListResponse> { new() { Id = 1, StatusId = "draft" } };
+        _readRepoMock.Setup(
+            x => x.GetPagedAsync<InventoryReceiptListResponse>(
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode>(),
+                It.IsAny<Expression<Func<InventoryReceiptEntity, bool>>?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<InventoryReceiptListResponse>(receipts, 1, 1, 100000));
+        var items = new List<InventoryReceiptInfo> { new() { Id = 1 } };
+        _readRepoMock.Setup(
+            x => x.GetInfosByInventoryReceiptIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(items);
+        var expectedBytes = new byte[] { 1, 2, 3 };
+        _excelServiceMock.Setup(x => x.ExportInventoryReceipts(receipts, items)).Returns(expectedBytes);
+        var result = await handler.Handle(new ExportInventoryReceiptsQuery(), CancellationToken.None)
+            .ConfigureAwait(true);
+        result.Should().BeSameAs(expectedBytes);
+    }
+
+    [Fact(DisplayName = "IR_031 - Unit: GetImportInventoryReceiptTemplateQueryHandler - Success")]
+    public async Task IR_031_GetImportInventoryReceiptTemplate_Success()
+    {
+        var handler = new GetImportInventoryReceiptTemplateQueryHandler(
+            _prReadRepoMock.Object,
+            _excelServiceMock.Object);
+        var items = new List<PurchaseRequestItem> { new() { Id = 1, PurchaseRequestId = 7 } };
+        _prReadRepoMock.Setup(
+            x => x.GetItemsByPurchaseRequestIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(items);
+        var expectedBytes = new byte[] { 4, 5, 6 };
+        _excelServiceMock.Setup(x => x.BuildImportTemplate(items)).Returns(expectedBytes);
+        var query = new GetImportInventoryReceiptTemplateQuery { PurchaseRequestId = 7 };
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().BeSameAs(expectedBytes);
+    }
+
+    [Fact(DisplayName = "IR_032 - Unit: ImportInventoryReceiptsCommandHandler - Success")]
+    public async Task IR_032_ImportInventoryReceipts_Success()
+    {
+        var handler = new ImportInventoryReceiptsCommandHandler(
+            _insertRepoMock.Object,
+            _prReadRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _configurationMock.Object,
+            _excelServiceMock.Object);
+        var importRows = new List<InventoryReceiptImportRow>
+        {
+            new("7", "Honda Wave", "Variant 1", string.Empty, "0", "5", "VIN001", "ENG001", "Note")
+        };
+        _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>())).Returns(importRows);
+        var prItem = new PurchaseRequestItem
+        {
+            Id = 20,
+            PurchaseRequestId = 7,
+            ProductVariant =
+                new ProductVariant { VariantName = "Variant 1", Product = new Domain.Entities.Product { Name = "Honda Wave" } },
+            ProductVariantColor = null
+        };
+        _prReadRepoMock.Setup(
+            x => x.GetItemsByPurchaseRequestIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([prItem]);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var command = new ImportInventoryReceiptsCommand { File = CreateFormFile([1, 2, 3]) };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.SuccessCount.Should().Be(1);
+        result.Value.FailedCount.Should().Be(0);
+        _insertRepoMock.Verify(x => x.Add(It.IsAny<InventoryReceiptEntity>()), Times.Once);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(
+        DisplayName = "IR_033 - ImportInventoryReceiptsCommandHandler thất bại khi file không có worksheet (ParseImportRows trả về null)")]
+    public async Task IR_033_ImportInventoryReceipts_NoWorksheet_ReturnsFailure()
+    {
+        var handler = new ImportInventoryReceiptsCommandHandler(
+            _insertRepoMock.Object,
+            _prReadRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _configurationMock.Object,
+            _excelServiceMock.Object);
+        _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>()))
+            .Returns((IReadOnlyList<InventoryReceiptImportRow>?)null);
+        var command = new ImportInventoryReceiptsCommand { File = CreateFormFile([1, 2, 3]) };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsFailure.Should().BeTrue();
+        _prReadRepoMock.Verify(
+            x => x.GetItemsByPurchaseRequestIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact(
+        DisplayName = "IR_034 - ImportInventoryReceiptsCommandHandler thành công sớm với 0 dòng, không truy vấn dữ liệu phụ")]
+    public async Task IR_034_ImportInventoryReceipts_EmptyRows_ShortCircuitsSuccess()
+    {
+        var handler = new ImportInventoryReceiptsCommandHandler(
+            _insertRepoMock.Object,
+            _prReadRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _configurationMock.Object,
+            _excelServiceMock.Object);
+        _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>()))
+            .Returns(new List<InventoryReceiptImportRow>());
+        var command = new ImportInventoryReceiptsCommand { File = CreateFormFile([1, 2, 3]) };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.SuccessCount.Should().Be(0);
+        result.Value.FailedCount.Should().Be(0);
+        _prReadRepoMock.Verify(
+            x => x.GetItemsByPurchaseRequestIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+        _insertRepoMock.Verify(x => x.Add(It.IsAny<InventoryReceiptEntity>()), Times.Never);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

@@ -28,6 +28,15 @@ namespace Application.Interfaces.Repositories.PurchaseRequest
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
+        /// <summary>
+        /// Tìm Id các yêu cầu mua hàng có ít nhất 1 dòng hàng khớp tên nhà cung cấp (contains, không phân biệt
+        /// hoa/thường), mới nhất trước.
+        /// </summary>
+        public Task<List<int>> SearchIdsBySupplierNameAsync(
+            string keyword,
+            int limit,
+            CancellationToken cancellationToken);
+
         public Task<List<PurchaseRequestItem>> GetItemsByIdsAsync(
             IEnumerable<int> ids,
             CancellationToken cancellationToken);

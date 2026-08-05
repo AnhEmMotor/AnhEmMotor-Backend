@@ -17,21 +17,17 @@ public class GetMyVehiclesQueryHandler(IVehicleReadRepository vehicleRepository)
         CancellationToken cancellationToken)
     {
         var sieveModel = request.SieveModel ?? new SieveModel();
-        
         if (string.IsNullOrWhiteSpace(sieveModel.Sorts))
         {
             sieveModel.Sorts = $"-{nameof(Vehicle.PurchaseDate)}";
         }
-        
         Expression<Func<Vehicle, bool>> filter = v => v.UserId == request.UserId;
-
         var result = await vehicleRepository.GetPagedAsync<VehicleResponse>(
             sieveModel,
             DataFetchMode.ActiveOnly,
             filter,
             cancellationToken)
             .ConfigureAwait(false);
-            
         return result;
     }
 }

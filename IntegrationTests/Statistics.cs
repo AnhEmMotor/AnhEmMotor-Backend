@@ -197,7 +197,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         content!.Last().TotalRevenue.Should().Be(2000000);
     }
 
-    [Fact(DisplayName = "STAT_023 - Lấy doanh thu với múi giờ UTC")]
+    [Fact(DisplayName = "STAT_023 - Lấy doanh thu nhóm theo ngày giờ Việt Nam, không phải ngày UTC trần")]
     public async Task GetDailyRevenue_Timezone_UTC()
     {
         var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
@@ -226,7 +226,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response!.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        var targetDay = DateOnly.FromDateTime(yest);
+        var targetDay = DateOnly.FromDateTime(yest.AddHours(7));
         content!.FirstOrDefault(x => x.ReportDay == targetDay)?.TotalRevenue.Should().Be(500000);
     }
 

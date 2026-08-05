@@ -4,6 +4,4 @@ using MediatR;
 
 namespace Application.Features.Contacts.Commands.RateSupportEmployee;
 
-public record RateSupportEmployeeCommand(
-    int SupportRequestId,
-    CustomerSupportRatingRequest Request) : IRequest<Result<bool>>;
+public record RateSupportEmployeeCommand(int SupportRequestId, CustomerSupportRatingRequest Request) : IRequest<Result<bool>>;

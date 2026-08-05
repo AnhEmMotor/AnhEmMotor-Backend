@@ -3,9 +3,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
-using Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Auth.Commands.LoginForManager;
 
@@ -13,9 +11,8 @@ public class LoginForManagerCommandHandler(
     IIdentityService identityService,
     ITokenManagerService tokenManagerService,
     ICookieTokenManager cookieTokenManager,
+    IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,
-    UserManager<ApplicationUser> userManager,
-    RoleManager<ApplicationRole> roleManager,
     IRoleReadRepository roleReadRepository) : IRequestHandler<LoginForManagerCommand, Result<LoginResponse>>
 {
     public async Task<Result<LoginResponse>> Handle(LoginForManagerCommand request, CancellationToken cancellationToken)
@@ -30,14 +27,13 @@ public class LoginForManagerCommandHandler(
             return authResult.Error!;
         }
         var userDto = authResult.Value;
-        var user = await userManager.FindByIdAsync(userDto.Id.ToString()).ConfigureAwait(false);
+        var user = await userReadRepository.FindUserByIdAsync(userDto.Id, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {
             return Error.Unauthorized("User not found.");
         }
-        var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-        var roleIds = roleManager.Roles
-            .Where(r => r.Name != null && userRoles.Contains(r.Name))
+        var userRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
+        var roleIds = (await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken).ConfigureAwait(false))
             .Select(r => r.Id)
             .ToList();
         var hasAnyPermission = await roleReadRepository.HasAnyPermissionAsync(roleIds, cancellationToken)

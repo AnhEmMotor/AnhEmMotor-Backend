@@ -64,9 +64,8 @@ grep -rn "gemini-" --include="*.py" --include="*.json" --include="*.cs" . \
   | grep -v node_modules | grep -v ".venv"
 ```
 
-Nếu sau này cần tách model theo mục đích (model rẻ cho routing, model mạnh cho tổng hợp),
-xem [14-STAGE-PERFORMANCE.md](14-STAGE-PERFORMANCE.md) mục 14.4 — khi đó `AISetup` sẽ có
-`Model`, `FastModel`, `EmbeddingModel` thay vì một khoá duy nhất.
+Dùng **một** khoá `Model` cho mọi tác vụ LLM (agent, router, phân loại, sinh title). Nếu sau này
+cần tách model theo mục đích, thêm khoá riêng lúc đó — không khai báo trước.
 
 ---
 

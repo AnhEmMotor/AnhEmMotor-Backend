@@ -139,11 +139,12 @@ namespace Infrastructure.Repositories
                                         o.StatusId == OrderStatus.Completed)
                             .SelectMany(o => o.OutputInfos)
                             .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
-                        HasSalesData = _context.OutputOrders.Any(
-                            o => o.FinishedBy == e.User.Id &&
-                                o.CreatedAt >= start &&
-                                o.CreatedAt < endExclusive &&
-                                o.StatusId == OrderStatus.Completed)
+                        HasSalesData = _context.OutputOrders
+                            .Any(
+                                o => o.FinishedBy == e.User.Id &&
+                                        o.CreatedAt >= start &&
+                                        o.CreatedAt < endExclusive &&
+                                        o.StatusId == OrderStatus.Completed)
                     })
                 .ToListAsync();
             var employeeIds = staffSales.Select(s => s.Id).ToList();
@@ -168,12 +169,9 @@ namespace Infrastructure.Repositories
                     .Where(cr => cr.EmployeeProfileId == s.Id)
                     .ToList();
                 var commissionPaid = employeeCommissions
-                    .Where(
-                        cr => cr.Status is CommissionStatus.Confirmed or CommissionStatus.Paid)
+                    .Where(cr => cr.Status is CommissionStatus.Confirmed or CommissionStatus.Paid)
                     .Sum(cr => cr.Amount);
-                var totalSales = s.HasSalesData
-                    ? s.Sales
-                    : kpi?.ActualValue ?? 0;
+                var totalSales = s.HasSalesData ? s.Sales : kpi?.ActualValue ?? 0;
                 result.Add(
                     new StaffPerformanceDto
                     {
@@ -182,17 +180,14 @@ namespace Infrastructure.Repositories
                         TotalSales = totalSales,
                         TargetSales = kpi?.TargetValue ?? 0,
                         CommissionPaid = commissionPaid,
-                        KpiStatus = kpi == null
-                            ? "Chưa đặt KPI"
-                            : GetKpiStatus(totalSales, kpi.TargetValue),
+                        KpiStatus = kpi == null ? "Chưa đặt KPI" : GetKpiStatus(totalSales, kpi.TargetValue),
                         HasSalesData = s.HasSalesData,
                         HasKpiData = kpi != null,
                         HasCommissionData = employeeCommissions.Count > 0,
-                        SalesSource = s.HasSalesData
-                            ? "Đơn hàng đã hoàn tất"
-                            : kpi != null
-                                ? "Giá trị thực tế từ KPI"
-                                : "Chưa có dữ liệu nguồn",
+                        SalesSource =
+                            s.HasSalesData
+                                    ? "Đơn hàng đã hoàn tất"
+                                    : kpi != null ? "Giá trị thực tế từ KPI" : "Chưa có dữ liệu nguồn",
                         IsTopSeller = false
                     });
             }

@@ -1,0 +1,226 @@
+import asyncio
+import json
+import logging
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi.responses import StreamingResponse
+from langchain_core.messages import HumanMessage
+
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.prompts import PromptTemplate
+
+from app.agents.manager_agent import get_graph
+from app.api.deps import verify_internal_secret
+from app.config import get_settings
+from app.core.llm import get_llm
+from app.prompts.loader import render
+from app.schemas.chat import ChatRequest, GenerateTitleRequest, PlanChatInterpretRequest, RevalidatePlanRequest
+from app.schemas.plan_chat import PlanChatIntent
+from app.services.backend_client import BackendClient
+from app.services.prompt_builder import build_system_message, build_history_messages
+from app.services.routing import expire_if_stale, extract_entities
+from app.tools.registry import infer_step_tools, load_tool_specs, registry_fingerprint
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter()
+
+_cancel_events: dict[str, asyncio.Event] = {}
+
+
+@router.post("/manager-chat/generate-title")
+async def generate_title(req: GenerateTitleRequest, _: str = Depends(verify_internal_secret)):
+    title = req.message[:30].strip() + ("..." if len(req.message) > 30 else "")
+    return {"title": title}
+
+
+@router.post("/manager-chat/{run_id}/cancel")
+async def cancel_chat(run_id: str, _: str = Depends(verify_internal_secret)):
+    event = _cancel_events.get(run_id)
+    if event:
+        event.set()
+    return {"cancelled": True}
+
+
+@router.post("/plan/revalidate")
+async def revalidate_plan(req: RevalidatePlanRequest, _: str = Depends(verify_internal_secret)):
+    current_fp = registry_fingerprint()
+    if not req.fingerprint or req.fingerprint == current_fp:
+        return {"ok": True, "unavailable_tools": []}
+
+    specs = load_tool_specs()
+    unavailable = [
+        name for name in req.expected_tools
+        if name not in specs or specs[name].status != "active"
+    ]
+    return {"ok": len(unavailable) == 0, "unavailable_tools": unavailable}
+
+
+def _steps_text(steps: list[dict]) -> str:
+    lines = [
+        f"- id={s.get('id')} (order {s.get('order')}, status={s.get('status')}): "
+        f"{s.get('title')} — {s.get('detail')}"
+        for s in steps
+    ]
+    return "\n".join(lines) or "(chưa có bước nào)"
+
+
+def _get_plan_chat_structured_llm():
+    llm = get_llm(temperature=0.1)
+    try:
+        return llm.with_structured_output(PlanChatIntent)
+    except (NotImplementedError, AttributeError):
+        return None
+
+
+@router.post("/plan/interpret")
+async def interpret_plan_chat(req: PlanChatInterpretRequest, _: str = Depends(verify_internal_secret)):
+    target_hint = (
+        f"\nNgười dùng đang bình luận trực tiếp vào bước id={req.target_step_id}.\n"
+        if req.target_step_id else ""
+    )
+    prompt_text = render(
+        "plan_chat_intent",
+        steps_text=_steps_text(req.steps),
+        target_step_hint=target_hint,
+        message=req.message,
+    )
+
+    try:
+        structured_llm = _get_plan_chat_structured_llm()
+        if structured_llm is not None:
+            result = await structured_llm.ainvoke(prompt_text)
+        else:
+            parser = PydanticOutputParser(pydantic_object=PlanChatIntent)
+            template = PromptTemplate(
+                template=prompt_text + "\n{format_instructions}",
+                input_variables=[],
+                partial_variables={"format_instructions": parser.get_format_instructions()},
+            )
+            chain = template | get_llm(temperature=0.1) | parser
+            result = await chain.ainvoke({})
+    except Exception:
+        logger.exception("Lỗi khi diễn giải chat sửa plan cho run %s", req.run_id)
+        return {
+            "intent": "unclear", "operations": [],
+            "reply": "Xin lỗi, tôi chưa hiểu rõ yêu cầu. Bạn có thể nói cụ thể hơn không?",
+        }
+
+    allowed_specs = [s for s in load_tool_specs().values() if s.status == "active"]
+    operations = []
+    for op in result.operations:
+        op_dict = op.model_dump()
+        if op.type == "edit" and (op.title or op.detail):
+            step_text = f"{op.title or ''} {op.detail or ''}".strip()
+            op_dict["expected_tools"] = await infer_step_tools(step_text, allowed_specs)
+        operations.append(op_dict)
+
+    return {"intent": result.intent, "operations": operations, "reply": result.reply}
+
+
+def _event(type_: str, payload: str = "") -> str:
+    return json.dumps({"type": type_, "payload": payload}) + "\n"
+
+
+@router.post("/manager-chat")
+async def handle_chat(request: Request, chat_req: ChatRequest, _: str = Depends(verify_internal_secret)):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Missing Authorization header")
+
+    context = None
+    client = BackendClient(auth_header)
+    try:
+        context = await client.get_context(chat_req.session_id, chat_req.message)
+    except Exception:
+        logger.warning("Failed to fetch context for session %s", chat_req.session_id, exc_info=True)
+
+    routing_context = {}
+    if context:
+        try:
+            routing_context = json.loads(context.get("routingContext") or "{}")
+        except ValueError:
+            routing_context = {}
+        routing_context = expire_if_stale(routing_context, now=datetime.now().isoformat())
+
+    plan_id = None
+    try:
+        existing_plan = await client.get_plan(chat_req.run_id)
+        if existing_plan.get("status") == "Executing":
+            plan_id = existing_plan.get("planId")
+    except Exception:
+        pass
+
+    initial_state = {
+        "messages": [
+            build_system_message(context, chat_req.server_date),
+            *build_history_messages(context, chat_req.message),
+            HumanMessage(content=chat_req.message),
+        ],
+        "run_id": chat_req.run_id,
+        "auth_header": auth_header,
+        "turns": 0,
+        "absorbed_count": 0,
+        "carried_steering": [],
+        "cancelled": False,
+        "tool_turns": 0,
+        "permissions": (context or {}).get("permissions") or [],
+        "history": (context or {}).get("history") or [],
+        "routing_context": routing_context,
+        "tool_flags_snapshot": dict(get_settings().tool_flags),
+        "plan_id": plan_id,
+        "server_date": chat_req.server_date,
+    }
+
+    cancel_event = asyncio.Event()
+    _cancel_events[chat_req.run_id] = cancel_event
+
+    graph = get_graph()
+    config = {"configurable": {"thread_id": chat_req.run_id, "cancel_event": cancel_event}}
+
+    async def stream_generator():
+        try:
+            if plan_id:
+                yield _event("turn_boundary", "")
+            async for type_, payload in graph.astream(initial_state, config=config, stream_mode="custom"):
+                yield _event(type_, payload)
+            final_state = (await graph.aget_state(config)).values
+            run_meta = {
+                "toolRegistryFingerprint": registry_fingerprint(),
+                "modelUsed": final_state.get("model_used"),
+            }
+            yield _event("run_meta", json.dumps(run_meta, ensure_ascii=False))
+            yield _event("done")
+        except Exception as e:
+            logger.error("LLM streaming error for run %s: %s", chat_req.run_id, str(e))
+            yield _event("error", "Đã có lỗi xảy ra khi kết nối tới AI. Vui lòng thử lại.")
+        finally:
+            _cancel_events.pop(chat_req.run_id, None)
+            await _persist_routing_context(client, graph, config, chat_req.session_id, routing_context)
+
+    return StreamingResponse(stream_generator(), media_type="application/x-ndjson")
+
+
+async def _persist_routing_context(client: BackendClient, graph, config, session_id: str, previous: dict) -> None:
+    try:
+        final = (await graph.aget_state(config)).values
+    except Exception:
+        return
+    tool_calls_made = [
+        tc for m in (final.get("messages") or [])
+        for tc in (getattr(m, "tool_calls", None) or [])
+    ]
+    if not tool_calls_made and not final.get("scoped_modules"):
+        return
+    entities = {**(previous.get("entities") or {}), **extract_entities(tool_calls_made)}
+    updated = {
+        "entities": entities,
+        "lastModules": final.get("scoped_modules") or previous.get("lastModules") or [],
+        "updatedAt": datetime.now().isoformat(),
+        "turnCount": (previous.get("turnCount") or 0) + 1,
+    }
+    try:
+        await client.update_routing_context(session_id, updated)
+    except Exception:
+        logger.warning("Failed to persist routing context for session %s", session_id, exc_info=True)

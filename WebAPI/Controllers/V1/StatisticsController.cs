@@ -521,13 +521,11 @@ public class StatisticsController(
         {
             start = DateTimeOffset.UtcNow.AddDays(-30);
         }
-
         DateTimeOffset end;
         if (!DateTimeOffset.TryParse(endDate, out end))
         {
             end = DateTimeOffset.UtcNow;
-        }
-        else
+        } else
         {
             end = end.AddDays(1).AddTicks(-1);
         }

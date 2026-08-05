@@ -25,7 +25,6 @@ public class RateSupportCustomerCommandHandler(
             return Result<bool>.Failure("Chỉ có thể đánh giá sau khi yêu cầu hoàn tất.");
         if (supportRequest.AssignedUserId != currentUserContext.GetUserId())
             return Result<bool>.Failure("Chỉ nhân viên được phân công mới có thể đánh giá khách hàng.");
-
         supportRequest.EmployeeRatingOfCustomer = request.Request.Rating;
         supportRequest.EmployeeRatingComment = request.Request.Comment?.Trim();
         supportRequest.EmployeeRatedAt = DateTimeOffset.UtcNow;

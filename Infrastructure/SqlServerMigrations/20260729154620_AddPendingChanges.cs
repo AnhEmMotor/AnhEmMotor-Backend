@@ -20,9 +20,7 @@ namespace Infrastructure.SqlServerMigrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ServiceType",
-                table: "MaintenanceHistory");
+            migrationBuilder.DropColumn(name: "ServiceType", table: "MaintenanceHistory");
         }
     }
 }

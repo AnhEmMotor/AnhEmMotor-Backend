@@ -40,15 +40,13 @@ public class UpdateContactStatusCommandHandler(
             return false;
         if (entity.AssignedUserId is null || entity.AssignedUserId != currentUserContext.GetUserId())
             return false;
-
-        var normalizedStatus = SupportRequestStatus.All.First(
-            value => value.Equals(status, StringComparison.OrdinalIgnoreCase));
+        var normalizedStatus = SupportRequestStatus.All
+            .First(value => value.Equals(status, StringComparison.OrdinalIgnoreCase));
         var isAllowedTransition =
             (entity.Status == SupportRequestStatus.Assigned && normalizedStatus == SupportRequestStatus.InProgress) ||
             (entity.Status == SupportRequestStatus.InProgress && normalizedStatus == SupportRequestStatus.Closed);
         if (!isAllowedTransition)
             return false;
-
         var now = DateTimeOffset.UtcNow;
         if (normalizedStatus == SupportRequestStatus.InProgress)
             entity.StartedAt ??= now;

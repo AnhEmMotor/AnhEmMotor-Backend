@@ -64,7 +64,8 @@ public class EmployeeCrud : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
             },
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        if (createResponse.StatusCode != HttpStatusCode.OK) {
+        if (createResponse.StatusCode != HttpStatusCode.OK)
+        {
             var body = await createResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
             throw new Exception("500 Error details: " + body);
         }

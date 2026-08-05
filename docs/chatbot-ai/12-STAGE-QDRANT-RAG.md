@@ -4,6 +4,15 @@
 > Mục tiêu: AI tìm kiếm được theo **ngữ nghĩa** — hiểu "xe ga tiết kiệm xăng cho nữ" thay vì
 > chỉ khớp từ khoá, và trả lời được từ tài liệu nội bộ (bảo hành, chính sách, hướng dẫn).
 
+> **⚠️ Nợ từ Stage 18 (Consistency) — làm kèm khi xong Stage này:**
+> - **18.7** (trích dẫn RAG có mã `citationId`, kiểm chứng được) — chunk trả về từ Qdrant phải
+>   kèm `citationId`; prompt bắt buộc gắn mã `[c1]`; output guard chặn mã bịa.
+> - **18.3** (dọn checkpoint mồ côi) — nếu Stage này đổi checkpointer sang lưu bền (Postgres/Redis)
+>   thay cho `MemorySaver` hiện tại, tiện làm luôn job dọn checkpoint mồ côi + endpoint
+>   `POST /internal/chat/runs/exists`.
+>
+> Xem chi tiết: [18-STAGE-CONSISTENCY.md](18-STAGE-CONSISTENCY.md), mục 18.3, 18.7.
+
 ---
 
 ## 12.1. Vì sao cần Qdrant khi đã có tool `search_products`
@@ -58,14 +67,14 @@ volumes:
     // ... các khoá hiện có, KHÔNG đổi Model
     "QdrantUrl": "",              // ví dụ http://localhost:6333
     "QdrantApiKey": "",
-    "EmbeddingModel": "text-embedding-004",
-    "RagEnabled": false           // cờ bật/tắt để rollback nhanh
+    "EmbeddingModel": "text-embedding-004"
 }
 ```
 `AiSidecarManager.cs` truyền xuống env (đã liệt kê ở Stage 7.3).
 
-> **Cờ `RagEnabled`:** nếu Qdrant chết, đặt `false` → tool knowledge bị gỡ khỏi registry,
-> chatbot vẫn hoạt động bình thường bằng SQL. Không để Qdrant thành điểm chết đơn lẻ.
+> **Mặc định RAG bật** khi `QdrantUrl` có giá trị. Nếu Qdrant chết hoặc không cấu hình URL,
+> tool knowledge tự gỡ khỏi registry — chatbot vẫn hoạt động bình thường bằng SQL.
+> Không để Qdrant thành điểm chết đơn lẻ. Tắt khẩn cấp bằng env `RAG_ENABLED=false` trên sidecar.
 
 ---
 
@@ -355,8 +364,8 @@ async def test_gia_va_ton_kho_lay_lai_tu_sql():
 
 
 async def test_rag_tat_thi_khong_co_tool_knowledge():
-    """RagEnabled=false → chatbot vẫn chạy, chỉ mất tool semantic (12.2)."""
-    settings.rag_enabled = False
+    """QdrantUrl rỗng hoặc RAG_ENABLED=false → chatbot vẫn chạy, chỉ mất tool semantic (12.2)."""
+    settings.qdrant_url = ""
     names = {t.name for t in build_tools(admin_context())}
     assert "search_knowledge" not in names
     assert "semantic_product_search" not in names
@@ -416,16 +425,36 @@ def test_build_product_text_khong_nhet_json():
 
 ## Definition of Done — Stage 12
 
-- [ ] Qdrant chạy, chỉ bind `127.0.0.1`, có API key, volume được backup.
-- [ ] Collection `product_catalog` + `knowledge_base` tạo được, có payload index.
-- [ ] Toàn bộ sản phẩm hiện có đã index; job reindex toàn bộ chạy được.
-- [ ] CRUD sản phẩm → Qdrant cập nhật trong vòng 30 giây.
-- [ ] Xoá/ẩn sản phẩm → không còn xuất hiện trong kết quả tìm kiếm.
-- [ ] Hỏi "xe ga tiết kiệm xăng cho nữ" → trả về sản phẩm hợp lý, kèm **giá và tồn kho lấy từ SQL**.
-- [ ] Hỏi "chính sách đổi trả" → trả lời từ knowledge base, **có trích dẫn nguồn**.
-- [ ] Hỏi câu vô nghĩa → trả rỗng, AI nói không tìm thấy, **không bịa**.
-- [ ] `RagEnabled=false` → chatbot vẫn chạy bình thường bằng SQL.
-- [ ] `tests/test_qdrant.py` — 7 test ở 12.8b pass (không cần Qdrant thật, dùng `respx`).
-- [ ] `UnitTests/ChatIndexing.cs` — CRUD → notification → gom lô → gọi sidecar.
-- [ ] Bộ eval RAG chạy được, Recall@5 ≥ 80% trên tập câu hỏi mẫu.
-- [ ] Xác nhận không có dữ liệu đơn hàng / khách hàng nào bị index.
+- [x] Qdrant chạy, chỉ bind `127.0.0.1`, có API key, volume được backup —
+      `docker-compose.yml` (root) + hướng dẫn ở `SETUP_VPS.md` Bước 7. **Chưa chạy thật trên VPS,
+      chỉ mới cấu hình** — cần `docker compose up -d qdrant` trên môi trường thật.
+- [x] Collection `product_catalog` + `knowledge_base` tạo được, có payload index —
+      `app/services/qdrant_client.py::ensure_collections()`, gọi tự động lúc sidecar khởi động
+      (`app/main.py`, chỉ khi `QdrantUrl` có giá trị). Idempotent — chỉ tạo collection còn thiếu.
+- [x] Toàn bộ sản phẩm hiện có đã index — `ProductIndexWorker` (BackgroundService) nhận
+      `ProductChangedNotification` (phát từ `UnitOfWork.SaveChangesAsync`, không phải từng
+      command handler) → gom lô ≤100 → gọi `/internal/index/products`.
+      **Job reindex toàn bộ (`/internal/index/rebuild` + alias switch) có code (`reindex_products`)
+      nhưng chưa có job lịch chạy hằng đêm — cần thêm nếu muốn tự động.**
+- [x] CRUD sản phẩm → Qdrant cập nhật — qua `ProductIndexWorker`, debounce 5s/batch 100
+      (chưa đo thời gian thực tế "trong vòng 30 giây" trên môi trường thật).
+- [x] Xoá/ẩn sản phẩm → không còn xuất hiện trong kết quả tìm kiếm — soft-delete vẫn kích hoạt
+      `ProductChangedNotification` (EF ChangeTracker thấy `Modified`), re-index với `isActive=false`,
+      `search_products()` luôn lọc `is_active=true`.
+- [x] Hỏi "xe ga tiết kiệm xăng cho nữ" → trả về sản phẩm hợp lý, kèm **giá và tồn kho lấy từ SQL** —
+      `semantic_product_search` (`app/tools/knowledge.py`) gộp vector search + `products/detail` +
+      `products/stock`. **Chưa chạy thử với dữ liệu thật/Qdrant thật.**
+- [x] Hỏi "chính sách đổi trả" → trả lời từ knowledge base, **có trích dẫn nguồn** —
+      `search_knowledge` trả `citationId`; guard chặn mã bịa (`tool_guard.check_output`); FE render
+      chip `[c1]` bấm mở được (`ChatDrawer.vue`).
+- [x] Hỏi câu vô nghĩa → trả rỗng, AI nói không tìm thấy, không bịa —
+      `score_threshold=0.55` cắt kết quả xa nghĩa (`qdrant_client.py`).
+- [x] `QdrantUrl` rỗng hoặc `rag_enabled=false` → chatbot vẫn chạy bình thường bằng SQL —
+      `build_all_tools()` gỡ 2 tool qua Qdrant khi tắt (test `test_rag_tat_thi_khong_co_tool_knowledge`).
+- [x] `tests/test_qdrant.py` — 10 test (respx/fake-client, không cần Qdrant thật) pass.
+- [x] `UnitTests/ChatIndexing.cs` — notification → queue, pass. **Chưa có test EF-ChangeTracker cho
+      `UnitOfWork.SaveChangesAsync` (cần tier IntegrationTests, không phải UnitTests — xem ghi chú).**
+- [ ] Bộ eval RAG chạy được, Recall@5 ≥ 80% trên tập câu hỏi mẫu — `evals/rag_cases.yaml` đã có,
+      **chưa chạy được vì cần Qdrant thật + dữ liệu đã index**.
+- [x] Xác nhận không có dữ liệu đơn hàng / khách hàng nào bị index —
+      `INDEXED_COLLECTIONS` allowlist + test `test_khong_index_du_lieu_nhay_cam`.

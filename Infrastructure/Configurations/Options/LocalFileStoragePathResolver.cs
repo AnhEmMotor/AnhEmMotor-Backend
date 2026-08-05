@@ -5,9 +5,7 @@ namespace Infrastructure.Configurations.Options;
 
 public static class LocalFileStoragePathResolver
 {
-    public static string Resolve(
-        IWebHostEnvironment environment,
-        IOptions<LocalFileStorageOptions> options)
+    public static string Resolve(IWebHostEnvironment environment, IOptions<LocalFileStorageOptions> options)
     {
         var configuredPath = options.Value.UploadPath?.Trim();
         if (!string.IsNullOrWhiteSpace(configuredPath))
@@ -17,7 +15,6 @@ public static class LocalFileStoragePathResolver
                 : Path.Combine(environment.ContentRootPath, configuredPath);
             return Path.GetFullPath(absolutePath);
         }
-
         var webRootPath = string.IsNullOrWhiteSpace(environment.WebRootPath)
             ? Path.Combine(environment.ContentRootPath, "wwwroot")
             : environment.WebRootPath;

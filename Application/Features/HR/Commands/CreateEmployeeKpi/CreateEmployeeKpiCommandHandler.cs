@@ -12,9 +12,7 @@ public sealed class CreateEmployeeKpiCommandHandler(
     IEmployeeKpiRepository kpiRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateEmployeeKpiCommand, Result<int>>
 {
-    public async Task<Result<int>> Handle(
-        CreateEmployeeKpiCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(CreateEmployeeKpiCommand request, CancellationToken cancellationToken)
     {
         var employee = await employeeReadRepository
             .GetByIdAsync(request.EmployeeProfileId, cancellationToken)
@@ -44,9 +42,7 @@ public sealed class CreateEmployeeKpiCommandHandler(
             ActualValue = request.ActualValue,
             PeriodStart = request.PeriodStart,
             PeriodEnd = request.PeriodEnd,
-            Description = string.IsNullOrWhiteSpace(request.Description)
-                ? null
-                : request.Description.Trim()
+            Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim()
         };
         await kpiRepository.AddAsync(kpi, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

@@ -2,17 +2,25 @@ using Application.ApiContracts.Brand.Responses;
 using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteBrand;
 using Application.Features.Brands.Commands.DeleteManyBrands;
+using Application.Features.Brands.Commands.ImportBrands;
 using Application.Features.Brands.Commands.RestoreBrand;
 using Application.Features.Brands.Commands.RestoreManyBrands;
 using Application.Features.Brands.Commands.UpdateBrand;
+using Application.Features.Brands.Queries.ExportBrands;
 using Application.Features.Brands.Queries.GetBrandById;
 using Application.Features.Brands.Queries.GetBrandStatistics;
+using Application.Features.Brands.Queries.GetImportTemplate;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
+using Application.Interfaces.Services.Excel;
 using Domain.Constants;
 using FluentAssertions;
 using FluentValidation.TestHelper;
+using Infrastructure.Services.Excel;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Moq;
+using Sieve.Models;
 using BrandEntities = Domain.Entities.Brand;
 
 namespace UnitTests;
@@ -24,6 +32,8 @@ public class Brand
     private readonly Mock<IBrandDeleteRepository> _deleteRepoMock;
     private readonly Mock<IBrandReadRepository> _readRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IBrandExcelService> _excelServiceMock;
+    private readonly Mock<IConfiguration> _configurationMock;
 
     public Brand()
     {
@@ -32,6 +42,17 @@ public class Brand
         _deleteRepoMock = new Mock<IBrandDeleteRepository>();
         _readRepoMock = new Mock<IBrandReadRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _excelServiceMock = new Mock<IBrandExcelService>();
+        _configurationMock = new Mock<IConfiguration>();
+    }
+
+    private static IFormFile CreateFormFile(byte[] content)
+    {
+        var mock = new Mock<IFormFile>();
+        mock.Setup(f => f.Length).Returns(content.Length);
+        mock.Setup(f => f.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .Returns<Stream, CancellationToken>((s, ct) => s.WriteAsync(content, 0, content.Length, ct));
+        return mock.Object;
     }
 
     #pragma warning disable IDE0079 
@@ -330,6 +351,69 @@ public class Brand
         result.Value.TotalBrands.Should().Be(5);
         string.Compare(result.Value.PopularOrigin, "Japan").Should().Be(0);
         string.Compare(result.Value.LatestUpdatedBrandName, "Honda").Should().Be(0);
+    }
+    [Fact(DisplayName = "BRAND_052 - Unit: ExportBrandsQueryHandler - Success")]
+    public async Task BRAND_052_ExportBrands_Success()
+    {
+        var handler = new ExportBrandsQueryHandler(_readRepoMock.Object, _excelServiceMock.Object);
+        var brands = new List<BrandEntities> { new() { Id = 1, Name = "Honda" } };
+        _readRepoMock.Setup(
+            x => x.GetFilteredListAsync(It.IsAny<SieveModel>(), It.IsAny<DataFetchMode>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(brands);
+        var expectedBytes = new byte[] { 1, 2, 3 };
+        _excelServiceMock.Setup(x => x.ExportBrands(brands)).Returns(expectedBytes);
+        var result = await handler.Handle(new ExportBrandsQuery(), CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.FileContents.Should().BeSameAs(expectedBytes);
+        result.Value.FileName.Should().Be("Danh_sach_thuong_hieu.xlsx");
+    }
+
+    [Fact(DisplayName = "BRAND_053 - Unit: GetBrandImportTemplateQueryHandler - Success")]
+    public async Task BRAND_053_GetBrandImportTemplate_Success()
+    {
+        var handler = new GetBrandImportTemplateQueryHandler(_excelServiceMock.Object);
+        var expectedBytes = new byte[] { 4, 5, 6 };
+        _excelServiceMock.Setup(x => x.BuildImportTemplate()).Returns(expectedBytes);
+        var result = await handler.Handle(new GetBrandImportTemplateQuery(), CancellationToken.None)
+            .ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.FileContents.Should().BeSameAs(expectedBytes);
+        result.Value.FileName.Should().Be("Mau_nhap_thuong_hieu.xlsx");
+    }
+
+    [Fact(DisplayName = "BRAND_054 - Unit: ImportBrandsCommandHandler - Success")]
+    public async Task BRAND_054_ImportBrands_Success()
+    {
+        var handler = new ImportBrandsCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _configurationMock.Object,
+            _excelServiceMock.Object);
+        var importRows = new List<BrandImportRow> { new("https://logo.png", "Yamaha", "Japan", "Desc") };
+        _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>())).Returns(importRows);
+        _readRepoMock.Setup(
+            x => x.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([]);
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var command = new ImportBrandsCommand { File = CreateFormFile([1, 2, 3]) };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.SuccessCount.Should().Be(1);
+        result.Value.FailedCount.Should().Be(0);
+        _insertRepoMock.Verify(x => x.Add(It.Is<BrandEntities>(b => b.Name == "Yamaha")), Times.Once);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = "BRAND_055 - Infrastructure: BrandExcelService.ParseImportRows round-trips BuildImportTemplate")]
+    public void BRAND_055_BrandExcelService_ParseImportRows_RoundTripsTemplate()
+    {
+        var service = new BrandExcelService();
+        var templateBytes = service.BuildImportTemplate();
+        var rows = service.ParseImportRows(templateBytes);
+        rows.Should().HaveCount(1);
+        rows[0].Name.Should().Be("Tên mẫu (Vui lòng xóa dòng này)");
+        rows[0].Origin.Should().Be("Việt Nam");
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
