@@ -29,6 +29,8 @@ public class VehicleMappingConfig : IRegister
             .Map(dest => dest.WarrantyPeriod, src => src.Product != null ? src.Product.WarrantyPeriod : null)
             .Map(
                 dest => dest.ImageUrl,
-                src => src.ProductVariantColor != null ? src.ProductVariantColor.CoverImageUrl : null);
+                src => src.ProductVariantColor != null && !string.IsNullOrEmpty(src.ProductVariantColor.CoverImageUrl)
+                    ? src.ProductVariantColor.CoverImageUrl
+                    : (src.ProductVariant != null ? src.ProductVariant.CoverImageUrl : null));
     }
 }
