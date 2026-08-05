@@ -61,6 +61,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// <response code="200">Đăng nhập thành công.</response>
     /// <response code="401">Thông tin đăng nhập không chính xác.</response>
     [HttpPost("login")]
+    [AllowAnonymous]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -114,6 +115,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// <response code="200">Đăng nhập Google thành công.</response>
     /// <response code="401">Token Google không hợp lệ.</response>
     [HttpPost("google")]
+    [AllowAnonymous]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -134,6 +136,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// <response code="200">Đăng nhập Facebook thành công.</response>
     /// <response code="401">Token Facebook không hợp lệ.</response>
     [HttpPost("facebook")]
+    [AllowAnonymous]
     [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
@@ -155,6 +158,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// <response code="401">Thông tin đăng nhập không chính xác.</response>
     /// <response code="403">Người dùng không có quyền truy cập hệ thống quản lý.</response>
     [HttpPost("login/for-manager")]
+    [AllowAnonymous]
     [EnableRateLimiting("public_api")]
     [SwaggerOperation(
         Summary = "Đăng nhập cho quản lý",

@@ -37,7 +37,9 @@ public class VehicleDetailResponse
     public int? WarrantyRemainingDays { get; set; }
 
     public object? NextService { get; set; }
-
+  
+    public object? OperatingSpecs { get; set; }
+  
     public List<object> Timeline { get; set; } = new();
 
     public string ImageUrl { get; set; } = string.Empty;
