@@ -62,7 +62,7 @@ async def embed(text: str) -> list[float]:
         return cached
     settings = get_settings()
     embedder = GoogleGenerativeAIEmbeddings(
-        model=f"models/{settings.embedding_model}", google_api_key=settings.api_key)
+        model=f"models/{settings.embedding_model}", google_api_key=settings.ai_api_key)
     vector = await embedder.aembed_query(text)
     _embedding_cache[key] = vector
     return vector

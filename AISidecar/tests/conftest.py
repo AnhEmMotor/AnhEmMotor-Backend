@@ -9,7 +9,7 @@ INTERNAL_SECRET = "test-internal-secret-abc123"
 
 @pytest.fixture(autouse=True)
 def _clean_env(monkeypatch):
-    for key in ("API_KEY", "AI_PROVIDER", "MODEL", "AI_API_ENDPOINT", "BACKEND_URL"):
+    for key in ("AI_API_KEY", "AI_PROVIDER", "AI_MODEL", "AI_API_ENDPOINT", "BACKEND_URL"):
         monkeypatch.delenv(key, raising=False)
     monkeypatch.setenv("BACKEND_INTERNAL_SECRET", INTERNAL_SECRET)
 

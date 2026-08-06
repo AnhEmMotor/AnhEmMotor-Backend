@@ -55,8 +55,8 @@ jobs:
           GHN_BASE_URL: ${{ secrets.GHN_BASE_URL }}
           AI_PROVIDER: ${{ secrets.AI_PROVIDER }}
           AI_API_ENDPOINT: ${{ secrets.AI_API_ENDPOINT }}
-          API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          MODEL: ${{ secrets.GEMINI_MODEL }}
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          AI_MODEL: ${{ secrets.AI_MODEL }}
           LANGSMITH_TRACING: ${{ secrets.LANGSMITH_TRACING || 'false' }}
           LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
           EMBEDDING_MODEL: ${{ secrets.EMBEDDING_MODEL }}
@@ -97,8 +97,8 @@ jobs:
             .GhnSettings.BaseUrl = env.GHN_BASE_URL |
             .AISetup.Provider = (if env.AI_PROVIDER == "" then .AISetup.Provider else env.AI_PROVIDER end) |
             .AISetup.ApiEndpoint = env.AI_API_ENDPOINT |
-            .AISetup.ApiKey = env.API_KEY |
-            .AISetup.Model = (if env.MODEL == "" then .AISetup.Model else env.MODEL end) |
+            .AISetup.ApiKey = env.AI_API_KEY |
+            .AISetup.Model = (if env.AI_MODEL == "" then .AISetup.Model else env.AI_MODEL end) |
             .AISetup.LangSmithTracing = (env.LANGSMITH_TRACING | fromjson) |
             .AISetup.LangSmithApiKey = env.LANGSMITH_API_KEY |
             .AISetup.EmbeddingModel = (if env.EMBEDDING_MODEL == "" then .AISetup.EmbeddingModel else env.EMBEDDING_MODEL end) |

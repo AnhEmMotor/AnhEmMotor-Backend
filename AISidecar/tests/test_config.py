@@ -4,7 +4,7 @@ from app.config import Settings
 
 def test_settings_doc_dung_env(monkeypatch):
     monkeypatch.setenv("BACKEND_URL", "http://example.com/api")
-    monkeypatch.setenv("API_KEY", "test-key")
+    monkeypatch.setenv("AI_API_KEY", "test-key")
     monkeypatch.setenv("PORT", "9999")
     s = Settings()
     assert s.backend_url == "http://example.com/api"
