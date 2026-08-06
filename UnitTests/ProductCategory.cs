@@ -3,10 +3,12 @@ using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.RestoreProductCategory;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
+using Application.Features.ProductCategories.Queries.ExportProductCategories;
 using Application.Features.ProductCategories.Queries.GetProductCategoryStats;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Excel;
 using Domain.Constants;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -23,6 +25,7 @@ public class ProductCategory
     private readonly Mock<IProductCategoryReadRepository> _readRepoMock;
     private readonly Mock<IProtectedProductCategoryService> _protectedCategoryServiceMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IProductCategoryExcelService> _excelServiceMock;
 
     public ProductCategory()
     {
@@ -32,6 +35,7 @@ public class ProductCategory
         _readRepoMock = new Mock<IProductCategoryReadRepository>();
         _protectedCategoryServiceMock = new Mock<IProtectedProductCategoryService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _excelServiceMock = new Mock<IProductCategoryExcelService>();
     }
 
     [Fact(DisplayName = "PC_001 - Tạo danh mục sản phẩm thành công (Happy Path)")]
@@ -418,6 +422,21 @@ public class ProductCategory
         resultObj.Value.TotalCategories.Should().Be(2);
         resultObj.Value.ProductCategoriesCount.Should().Be(2);
         resultObj.Value.LatestUpdatedCategoryName.Should().Be("Danh mục 2");
+    }
+
+    [Fact(DisplayName = "PC_072 - Unit: ExportProductCategoriesQueryHandler - Success")]
+    public async Task PC_072_ExportProductCategories_Success()
+    {
+        var handler = new ExportProductCategoriesQueryHandler(_readRepoMock.Object, _excelServiceMock.Object);
+        var categories = new List<ProductCategoryEntity> { new() { Id = 1, Name = "Xe ga" } };
+        _readRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(categories);
+        var expectedBytes = new byte[] { 1, 2, 3 };
+        _excelServiceMock.Setup(x => x.ExportProductCategories(categories, categories)).Returns(expectedBytes);
+        var result = await handler.Handle(new ExportProductCategoriesQuery(), CancellationToken.None)
+            .ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.FileContents.Should().BeSameAs(expectedBytes);
+        result.Value.FileName.Should().Be("Danh_sach_the_loai.xlsx");
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

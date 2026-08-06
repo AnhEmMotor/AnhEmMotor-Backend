@@ -29,10 +29,11 @@ public class InvoiceReadRepository(ApplicationDBContext context, ISievePaginator
             .FirstOrDefaultAsync(x => x.Id == id && !x.DeletedAt.HasValue, cancellationToken);
     }
 
-    public Task<List<InvoiceEntity>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public Task<List<InvoiceEntity>> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default)
     {
+        var guid = Guid.Parse(userId);
         return context.Set<InvoiceEntity>()
-            .Where(x => x.UserId == userId && !x.DeletedAt.HasValue)
+            .Where(x => x.UserId == guid && !x.DeletedAt.HasValue)
             .OrderByDescending(x => x.IssueDate)
             .ToListAsync(cancellationToken);
     }

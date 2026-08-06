@@ -1,4 +1,5 @@
 using Application.DTOs.Analytics;
+using Domain.Constants.Order;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.DBContexts;
@@ -121,6 +122,7 @@ namespace Infrastructure.Repositories
 
         public async Task<List<StaffPerformanceDto>> GetStaffPerformanceAsync(DateTime start, DateTime end)
         {
+            var endExclusive = end.Date.AddDays(1);
             var staffSales = await _context.EmployeeProfiles
                 .Include(e => e.User)
                 .Select(
@@ -133,36 +135,59 @@ namespace Infrastructure.Repositories
                             .Where(
                                 o => o.FinishedBy == e.User.Id &&
                                         o.CreatedAt >= start &&
-                                        o.CreatedAt <= end &&
-                                        o.StatusId == "Completed")
+                                        o.CreatedAt < endExclusive &&
+                                        o.StatusId == OrderStatus.Completed)
                             .SelectMany(o => o.OutputInfos)
-                            .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0))
+                            .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0)),
+                        HasSalesData = _context.OutputOrders
+                            .Any(
+                                o => o.FinishedBy == e.User.Id &&
+                                        o.CreatedAt >= start &&
+                                        o.CreatedAt < endExclusive &&
+                                        o.StatusId == OrderStatus.Completed)
                     })
+                .ToListAsync();
+            var employeeIds = staffSales.Select(s => s.Id).ToList();
+            var kpis = await _context.KPIs
+                .Where(
+                    k => employeeIds.Contains(k.EmployeeProfileId) &&
+                        k.PeriodStart < endExclusive &&
+                        k.PeriodEnd >= start)
+                .OrderByDescending(k => k.PeriodStart)
+                .ToListAsync();
+            var commissions = await _context.CommissionRecords
+                .Where(
+                    cr => employeeIds.Contains(cr.EmployeeProfileId) &&
+                        cr.DateEarned >= start &&
+                        cr.DateEarned < endExclusive)
                 .ToListAsync();
             var result = new List<StaffPerformanceDto>();
             foreach (var s in staffSales)
             {
-                var targetSales = await _context.KPIs
-                    .Where(k => k.EmployeeProfileId == s.Id && k.PeriodStart <= end && k.PeriodEnd >= start)
-                    .OrderByDescending(k => k.PeriodStart)
-                    .Select(k => k.TargetValue)
-                    .FirstOrDefaultAsync();
-                var commissionPaid = await _context.CommissionRecords
-                    .Where(
-                        cr => cr.EmployeeProfileId == s.Id &&
-                            cr.DateEarned >= start &&
-                            cr.DateEarned <= end &&
-                            cr.Status == CommissionStatus.Confirmed)
-                    .SumAsync(cr => cr.Amount);
+                var kpi = kpis.FirstOrDefault(k => k.EmployeeProfileId == s.Id);
+                var employeeCommissions = commissions
+                    .Where(cr => cr.EmployeeProfileId == s.Id)
+                    .ToList();
+                var commissionPaid = employeeCommissions
+                    .Where(cr => cr.Status is CommissionStatus.Confirmed or CommissionStatus.Paid)
+                    .Sum(cr => cr.Amount);
+                var totalSales = s.HasSalesData ? s.Sales : kpi?.ActualValue ?? 0;
                 result.Add(
                     new StaffPerformanceDto
                     {
                         EmployeeName = s.FullName ?? string.Empty,
                         Role = s.Role ?? string.Empty,
-                        TotalSales = s.Sales,
-                        TargetSales = targetSales,
+                        TotalSales = totalSales,
+                        TargetSales = kpi?.TargetValue ?? 0,
                         CommissionPaid = commissionPaid,
-                        KpiStatus = GetKpiStatus(s.Sales, targetSales),
+                        KpiStatus = kpi == null ? "Chưa đặt KPI" : GetKpiStatus(totalSales, kpi.TargetValue),
+                        HasSalesData = s.HasSalesData,
+                        HasKpiData = kpi != null,
+                        HasCommissionData = employeeCommissions.Count > 0,
+                        SalesSource =
+                            s.HasSalesData
+                                    ? "Đơn hàng đã hoàn tất"
+                                    : kpi != null ? "Giá trị thực tế từ KPI" : "Chưa có dữ liệu nguồn",
                         IsTopSeller = false
                     });
             }

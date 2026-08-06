@@ -91,29 +91,69 @@ public class CreateOutputByManagerCommandHandler(
             }
         }
         var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
+        bool hasVehicle = false;
+        bool hasPart = false;
+        bool hasAccessory = false;
+        foreach (var info in output.OutputInfos)
+        {
+            var variant = variantsList.FirstOrDefault(v => v.Id == info.ProductVariantId);
+            var managementType = variant?.Product?.ProductCategory?.ManagementType;
+            var categoryName = variant?.Product?.ProductCategory?.Name ?? string.Empty;
+            if (string.Equals(managementType, "vin_number", StringComparison.OrdinalIgnoreCase))
+            {
+                hasVehicle = true;
+            } else if (categoryName.Contains("Phụ kiện", StringComparison.OrdinalIgnoreCase))
+            {
+                hasAccessory = true;
+            } else
+            {
+                hasPart = true;
+            }
+        }
+        string orderType = "Xe máy";
+        if (hasVehicle && (hasPart || hasAccessory))
+        {
+            orderType = "Phụ tùng & xe máy";
+        } else if (hasVehicle)
+        {
+            orderType = "Xe máy";
+        } else if (hasPart)
+        {
+            orderType = "Chỉ có phụ tùng";
+        } else if (hasAccessory)
+        {
+            orderType = "Chỉ có phụ kiện";
+        }
+        var thresholdKey = $"Deposit_{orderType}_Threshold";
+        var ratioKey = $"Deposit_{orderType}_Ratio";
+        var thresholdSetting = settings.FirstOrDefault(
+            s => string.Equals(s.Key, thresholdKey, StringComparison.OrdinalIgnoreCase));
+        decimal threshold = 100000000;
+        if (thresholdSetting != null && decimal.TryParse(thresholdSetting.Value, out var parsedThreshold))
+        {
+            threshold = parsedThreshold;
+        }
+        var ratioSetting = settings.FirstOrDefault(
+            s => string.Equals(s.Key, ratioKey, StringComparison.OrdinalIgnoreCase));
+        int ratio = 20;
+        if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+        {
+            ratio = parsedRatio;
+        }
         if (request.DepositRatio.HasValue)
         {
             output.DepositRatio = request.DepositRatio.Value;
+        } else if (totalPrice >= threshold)
+        {
+            output.DepositRatio = ratio;
         } else
         {
-            var ratioSetting = settings.FirstOrDefault(
-                s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
-            if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
-            {
-                output.DepositRatio = parsedRatio;
-            }
+            output.DepositRatio = 0;
         }
         if (string.IsNullOrWhiteSpace(output.StatusId))
         {
-            var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
-            var thresholdSetting = settings.FirstOrDefault(
-                s => string.Equals(s.Key, SettingKeys.OrderValueExceeds, StringComparison.OrdinalIgnoreCase));
-            decimal threshold = 100000000;
-            if (thresholdSetting != null && decimal.TryParse(thresholdSetting.Value, out var parsedThreshold))
-            {
-                threshold = parsedThreshold;
-            }
-            output.StatusId = totalPrice >= threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
+            output.StatusId = totalPrice > threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
         }
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

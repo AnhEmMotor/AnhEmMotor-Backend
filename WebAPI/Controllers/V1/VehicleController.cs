@@ -2,6 +2,7 @@ using Application.ApiContracts.Vehicle.Responses;
 using Application.Common.Models;
 using Application.Features.Vehicles.Commands.CreateVehicle;
 using Application.Features.Vehicles.Commands.TransferOwnership;
+using Application.Features.Vehicles.Commands.UpdateLicensePlate;
 using Application.Features.Vehicles.Queries.GetVehiclePortfolio;
 using Application.Features.Vehicles.Queries.GetVehicles;
 using Asp.Versioning;
@@ -86,6 +87,34 @@ public class VehicleController(IMediator mediator) : ApiController
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleCreated(result);
+    }
+
+    /// <summary>
+    /// Cập nhật biển số xe của khách hàng.
+    /// </summary>
+    /// <param name="id">ID của xe cần cập nhật.</param>
+    /// <param name="command">Thông tin biển số xe cần cập nhật.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả cập nhật thành công hay thất bại.</returns>
+    /// <response code="200">Cập nhật thành công.</response>
+    /// <response code="400">Dữ liệu không hợp lệ.</response>
+    /// <response code="404">Không tìm thấy xe.</response>
+    /// <response code="401">Chưa đăng nhập hoặc token không hợp lệ.</response>
+    [HttpPatch("{id:int}/license-plate")]
+    [Authorize]
+    [SwaggerOperation(Summary = "Cập nhật biển số xe")]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> UpdateLicensePlateAsync(
+        int id,
+        [FromBody] UpdateLicensePlateCommand command,
+        CancellationToken cancellationToken)
+    {
+        command.Id = id;
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 
     /// <summary>

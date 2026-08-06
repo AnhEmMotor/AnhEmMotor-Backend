@@ -90,6 +90,25 @@ namespace Infrastructure.Repositories.PurchaseRequest
             return query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
+        public Task<List<int>> SearchIdsBySupplierNameAsync(
+            string keyword,
+            int limit,
+            CancellationToken cancellationToken)
+        {
+            return GetQueryable()
+                .Where(
+                    x => x.PurchaseRequestItems
+                        .Any(
+                            item => item.DeletedAt == null &&
+                                    item.Supplier != null &&
+                                    item.Supplier.Name != null &&
+                                    item.Supplier.Name.Contains(keyword)))
+                .OrderByDescending(x => x.CreatedAt)
+                .Select(x => x.Id)
+                .Take(limit)
+                .ToListAsync(cancellationToken);
+        }
+
         private IQueryable<PurchaseRequestEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             var query = context.PurchaseRequests.IgnoreQueryFilters();

@@ -32,7 +32,14 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
 
     public IQueryable<Domain.Entities.Vehicle> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<Domain.Entities.Vehicle>(mode).Include(v => v.Lead);
+        return context.GetQuery<Domain.Entities.Vehicle>(mode)
+            .Include(v => v.Lead)
+            .Include(v => v.Product)
+            .ThenInclude(p => p!.ProductCategory)
+            .Include(v => v.Product)
+            .ThenInclude(p => p!.Brand)
+            .Include(v => v.ProductVariant)
+            .Include(v => v.ProductVariantColor);
     }
 
     public Task<List<Domain.Entities.Vehicle>> GetVehiclesAsync(
@@ -54,7 +61,15 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
 
     public Task<Domain.Entities.Vehicle?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return context.Vehicles.Include(v => v.Lead).FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+        return context.Vehicles
+            .Include(v => v.Lead)
+            .Include(v => v.Product)
+            .ThenInclude(p => p!.ProductCategory)
+            .Include(v => v.Product)
+            .ThenInclude(p => p!.Brand)
+            .Include(v => v.ProductVariant)
+            .Include(v => v.ProductVariantColor)
+            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
     }
 
     public Task<List<Domain.Entities.Vehicle>> GetByIdsAsync(
@@ -67,6 +82,27 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
             .Include(v => v.OutputInfo)
             .Where(v => ids.Contains(v.Id))
             .ToListAsync(cancellationToken);
+    }
+
+    public Task<List<Domain.Entities.Vehicle>> GetByIdsWithLeadAsync(
+        IEnumerable<int> ids,
+        CancellationToken cancellationToken = default)
+    {
+        return context.Vehicles
+            .IgnoreQueryFilters()
+            .Include(v => v.Lead)
+            .Where(v => ids.Contains(v.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Domain.Entities.Vehicle?> GetByIdWithLeadAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        return await context.Vehicles
+            .IgnoreQueryFilters()
+            .Include(v => v.Lead)
+            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
     }
 
     public Task<List<Domain.Entities.Vehicle>> GetVehiclesForAssignmentAsync(

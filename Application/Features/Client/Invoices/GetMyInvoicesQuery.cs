@@ -23,7 +23,7 @@ namespace Application.Features.Client.Invoices
             GetMyInvoicesQuery request,
             CancellationToken cancellationToken)
         {
-            var invoices = await _repository.GetByUserIdAsync(request.UserId, cancellationToken);
+            var invoices = await _repository.GetByUserIdAsync(request.UserId.ToString(), cancellationToken);
             return invoices.Select(
                 inv => new InvoiceSummaryResponse(inv.Id, inv.InvoiceNumber, inv.IssueDate, inv.TotalAmount, inv.Type))
                 .ToList();

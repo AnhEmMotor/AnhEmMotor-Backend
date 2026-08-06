@@ -1,3 +1,4 @@
+using Application.Features.InventoryLedgers.Queries.ExportInventoryLedger;
 using Application.Features.InventoryReceipts.Commands.UpdateInventoryReceiptStatus;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.InventoryLedger;
@@ -5,6 +6,7 @@ using Application.Interfaces.Repositories.InventoryReceipt;
 using Application.Interfaces.Repositories.ProductQuotations;
 using Application.Interfaces.Repositories.SupplierDebt;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Excel;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
@@ -25,6 +27,7 @@ namespace UnitTests
         private readonly Mock<ISupplierDebtInsertRepository> _supplierDebtRepoMock;
         private readonly Mock<IProductQuotationReadRepository> _ProductQuotationRepoMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+        private readonly Mock<IInventoryLedgerExcelService> _excelServiceMock;
 
         public InventoryLedgers()
         {
@@ -35,6 +38,7 @@ namespace UnitTests
             _supplierDebtRepoMock = new Mock<ISupplierDebtInsertRepository>();
             _ProductQuotationRepoMock = new Mock<IProductQuotationReadRepository>();
             _unitOfWorkMock = new Mock<IUnitOfWork>();
+            _excelServiceMock = new Mock<IInventoryLedgerExcelService>();
         }
 
         [Fact(DisplayName = "IL_001 - Tính toán tồn lũy kế chính xác cho giao dịch đầu tiên")]
@@ -184,6 +188,25 @@ namespace UnitTests
             savedLedger.ExportQty.Should().Be(0);
             savedLedger.UnitPrice.Should().Be(150000);
             savedLedger.TotalAmount.Should().Be(450000);
+        }
+
+        [Fact(DisplayName = "IL_004 - Unit: ExportInventoryLedgerQueryHandler - Success")]
+        public async Task IL_004_ExportInventoryLedger_Success()
+        {
+            var handler = new ExportInventoryLedgerQueryHandler(_ledgerRepoMock.Object, _excelServiceMock.Object);
+            var entries = new List<InventoryLedger>
+            {
+                new() { Id = 1, TransactionDate = DateTimeOffset.UtcNow, ImportQty = 5, ExportQty = 0 }
+            };
+            _ledgerRepoMock.Setup(x => x.GetAllWithDetailsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(entries);
+            var expectedBytes = new byte[] { 1, 2, 3 };
+            _excelServiceMock.Setup(
+                x => x.ExportInventoryLedger(It.IsAny<IReadOnlyList<InventoryLedger>>(), null, null))
+                .Returns(expectedBytes);
+            var result = await handler.Handle(new ExportInventoryLedgerQuery(), CancellationToken.None)
+                .ConfigureAwait(true);
+            result.IsSuccess.Should().BeTrue();
+            result.Value!.FileContents.Should().BeSameAs(expectedBytes);
         }
     }
 }

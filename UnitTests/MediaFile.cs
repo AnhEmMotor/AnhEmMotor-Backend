@@ -13,8 +13,14 @@ using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.MediaFile.MediaFile;
 using Domain.Constants;
 using FluentAssertions;
+using Infrastructure.Configurations.Options;
+using Infrastructure.Repositories.MediaFile.File;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using Moq;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace UnitTests;
@@ -26,6 +32,7 @@ public class MediaFile
     private readonly Mock<IFileReadService> _fileReadServiceMock;
     private readonly Mock<IFileInsertService> _fileInsertServiceMock;
     private readonly Mock<IFileUpdateService> _fileUpdateServiceMock;
+    private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly Mock<IFileDeleteService> _fileDeleteServiceMock;
     private readonly Mock<IMediaFileInsertRepository> _insertRepositoryMock;
     private readonly Mock<IMediaFileReadRepository> _readRepositoryMock;
@@ -38,6 +45,7 @@ public class MediaFile
         _fileReadServiceMock = new Mock<IFileReadService>();
         _fileInsertServiceMock = new Mock<IFileInsertService>();
         _fileUpdateServiceMock = new Mock<IFileUpdateService>();
+        _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
         _fileDeleteServiceMock = new Mock<IFileDeleteService>();
         _insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         _readRepositoryMock = new Mock<IMediaFileReadRepository>();
@@ -123,9 +131,9 @@ public class MediaFile
             _unitOfWorkMock.Object);
         var files = new List<FileParameter>
         {
-            new FileParameter { Content = new MemoryStream(new byte[51200]), FileName = "valid1.webp" },
-            new FileParameter { Content = new MemoryStream(new byte[102400]), FileName = "invalid.pdf" },
-            new FileParameter { Content = new MemoryStream(new byte[61440]), FileName = "valid2.jpg" }
+            new() { Content = new MemoryStream(new byte[51200]), FileName = "valid1.webp" },
+            new() { Content = new MemoryStream(new byte[102400]), FileName = "invalid.pdf" },
+            new() { Content = new MemoryStream(new byte[61440]), FileName = "valid2.jpg" }
         };
         var command = new UploadManyProductImagesCommand { Files = files };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -573,6 +581,74 @@ public class MediaFile
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Contain("Filename");
+    }
+
+    [Fact(DisplayName = "MF_051 - URL file công khai không gắn cứng host lúc upload")]
+    public void GetPublicUrl_ShouldReturnHostIndependentApiPath()
+    {
+        var environment = new Mock<IWebHostEnvironment>();
+        environment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
+        environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(Path.GetTempPath(), "wwwroot"));
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        httpContextAccessor.Setup(x => x.HttpContext).Returns((HttpContext?)null);
+        var service = new FileReadService(
+            environment.Object,
+            Options.Create(new LocalFileStorageOptions()),
+            _fileUpdateServiceMock.Object,
+            httpContextAccessor.Object);
+        var publicUrl = service.GetPublicUrl("banners/banner.webp");
+        publicUrl.Should().Be("/api/v1/MediaFile/view-image/banners/banner.webp");
+    }
+
+    [Fact(DisplayName = "MF_052 - Đường dẫn tương đối luôn nằm dưới content root của WebAPI")]
+    public async Task SaveFile_RelativeUploadPath_ShouldResolveFromContentRoot()
+    {
+        var contentRoot = Path.Combine(Path.GetTempPath(), $"anhem-banner-{Guid.NewGuid():N}");
+        var configuredUploadPath = Path.Combine("wwwroot", "uploads");
+        var expectedUploadRoot = Path.Combine(contentRoot, configuredUploadPath);
+        Directory.CreateDirectory(contentRoot);
+        try
+        {
+            var environment = new Mock<IWebHostEnvironment>();
+            environment.SetupGet(x => x.ContentRootPath).Returns(contentRoot);
+            environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(contentRoot, "wwwroot"));
+            await using var imageStream = new MemoryStream();
+            using (var image = new Image<Rgba32>(2, 2))
+            {
+                await image.SaveAsPngAsync(imageStream, TestContext.Current.CancellationToken).ConfigureAwait(true);
+            }
+            imageStream.Position = 0;
+            _fileUpdateServiceMock
+                .Setup(
+                    x => x.CompressImageAsync(
+                        It.IsAny<Stream>(),
+                        It.IsAny<int>(),
+                        It.IsAny<int?>(),
+                        It.IsAny<CancellationToken>()))
+                .ReturnsAsync(
+                    () =>
+                    {
+                        imageStream.Position = 0;
+                        return new MemoryStream(imageStream.ToArray());
+                    });
+            var service = new FileInsertService(
+                environment.Object,
+                Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
+                _fileUpdateServiceMock.Object);
+            var result = await service.SaveFileAsync(imageStream, TestContext.Current.CancellationToken, "banners")
+                .ConfigureAwait(true);
+            result.IsSuccess.Should().BeTrue();
+            var expectedFile = Path.Combine(
+                expectedUploadRoot,
+                result.Value.StoragePath.Replace('/', Path.DirectorySeparatorChar));
+            File.Exists(expectedFile).Should().BeTrue();
+        } finally
+        {
+            if (Directory.Exists(contentRoot))
+            {
+                Directory.Delete(contentRoot, true);
+            }
+        }
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

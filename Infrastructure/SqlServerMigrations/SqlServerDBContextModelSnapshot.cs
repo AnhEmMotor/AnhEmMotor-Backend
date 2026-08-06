@@ -204,6 +204,183 @@ namespace Infrastructure.SqlServerMigrations
                     b.ToTable("Brand");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.ChatFeedback",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("ChatRunId").HasColumnType("uniqueidentifier").HasColumnName("ChatRunId");
+                    b.Property<string>("Comment").HasColumnType("nvarchar(max)").HasColumnName("Comment");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<Guid>("ReportedBy").HasColumnType("uniqueidentifier").HasColumnName("ReportedBy");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.HasKey("Id");
+                    b.HasIndex("ChatRunId");
+                    b.HasIndex("ReportedBy");
+                    b.ToTable("ChatFeedback");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatMessage",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<bool>("IsSteering").HasColumnType("bit");
+                    b.Property<string>("Message").IsRequired().HasColumnType("nvarchar(max)").HasColumnName("Message");
+                    b.Property<double?>("ReasoningElapsedSeconds").HasColumnType("float");
+                    b.Property<string>("ReasoningStepsJson")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ReasoningStepsJson");
+                    b.Property<string>("Role").IsRequired().HasColumnType("nvarchar(50)").HasColumnName("Role");
+                    b.Property<Guid?>("RunId").HasColumnType("uniqueidentifier").HasColumnName("RunId");
+                    b.Property<Guid>("SessionId").HasColumnType("uniqueidentifier").HasColumnName("SessionId");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.HasKey("Id");
+                    b.HasIndex("CreatedAt");
+                    b.HasIndex("RunId");
+                    b.HasIndex("SessionId");
+                    b.ToTable("ChatMessage");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatPlan",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<DateTime?>("ApprovedAt").HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("LastEditedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("LastEditedBy");
+                    b.Property<Guid>("RunId").HasColumnType("uniqueidentifier").HasColumnName("RunId");
+                    b.Property<Guid>("SessionId").HasColumnType("uniqueidentifier").HasColumnName("SessionId");
+                    b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(30)").HasColumnName("Status");
+                    b.Property<string>("Steps").IsRequired().HasColumnType("nvarchar(max)").HasColumnName("Steps");
+                    b.Property<string>("ToolRegistryFingerprint")
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("ToolRegistryFingerprint");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<int>("Version").HasColumnType("int");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId").IsUnique();
+                    b.ToTable("ChatPlan");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatPlanTemplate",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<string>("CanonicalQuestion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("CanonicalQuestion");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("IntentHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(64)")
+                        .HasColumnName("IntentHash");
+                    b.Property<DateTimeOffset?>("LastUsedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("Module").IsRequired().HasColumnType("nvarchar(50)").HasColumnName("Module");
+                    b.Property<int>("RejectCount").HasColumnType("int");
+                    b.Property<string>("RequiredPermissions")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("RequiredPermissions");
+                    b.Property<string>("RequiredTools")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("RequiredTools");
+                    b.Property<string>("Slots").IsRequired().HasColumnType("nvarchar(max)").HasColumnName("Slots");
+                    b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(20)").HasColumnName("Status");
+                    b.Property<string>("StepsTemplate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("StepsTemplate");
+                    b.Property<int>("SuccessCount").HasColumnType("int");
+                    b.Property<string>("ToolRegistryFingerprint")
+                        .HasColumnType("nvarchar(32)")
+                        .HasColumnName("ToolRegistryFingerprint");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<int>("UseCount").HasColumnType("int");
+                    b.Property<int>("UserEditCount").HasColumnType("int");
+                    b.HasKey("Id");
+                    b.ToTable("ChatPlanTemplate");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatRun",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<DateTime?>("CompletedAt").HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("ErrorCode").HasColumnType("nvarchar(100)").HasColumnName("ErrorCode");
+                    b.Property<DateTime?>("HeartbeatAt").HasColumnType("datetime2");
+                    b.Property<long>("LastSeq").HasColumnType("bigint");
+                    b.Property<string>("ModelUsed").HasColumnType("nvarchar(100)").HasColumnName("ModelUsed");
+                    b.Property<string>("OwnerInstanceId")
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("OwnerInstanceId");
+                    b.Property<string>("PartialOutput")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("PartialOutput");
+                    b.Property<string>("PendingSteering")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("PendingSteering");
+                    b.Property<Guid>("SessionId").HasColumnType("uniqueidentifier").HasColumnName("SessionId");
+                    b.Property<DateTime?>("StartedAt").HasColumnType("datetime2");
+                    b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(30)").HasColumnName("Status");
+                    b.Property<string>("ToolRegistryFingerprint")
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("ToolRegistryFingerprint");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("UserMessage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("UserMessage");
+                    b.HasKey("Id");
+                    b.HasIndex("SessionId", "Status");
+                    b.ToTable("ChatRun");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatRunEvent",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("datetime2");
+                    b.Property<string>("Payload").IsRequired().HasColumnType("nvarchar(max)").HasColumnName("Payload");
+                    b.Property<Guid>("RunId").HasColumnType("uniqueidentifier").HasColumnName("RunId");
+                    b.Property<long>("Seq").HasColumnType("bigint");
+                    b.Property<string>("Type").IsRequired().HasColumnType("nvarchar(40)").HasColumnName("Type");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "Seq").IsUnique();
+                    b.ToTable("ChatRunEvent");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatSession",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("RoutingContext")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("RoutingContext");
+                    b.Property<string>("Title").IsRequired().HasColumnType("nvarchar(255)").HasColumnName("Title");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<Guid>("UserId").HasColumnType("uniqueidentifier").HasColumnName("UserId");
+                    b.HasKey("Id");
+                    b.HasIndex("UpdatedAt");
+                    b.HasIndex("UserId");
+                    b.ToTable("ChatSession");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.CommissionPolicy",
                 b =>
                 {
@@ -415,6 +592,20 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasKey("Id");
                     b.HasIndex("ContactId");
                     b.ToTable("CustomerFeedback");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.DepositSettingHistory",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<int>("DepositRatio").HasColumnType("int");
+                    b.Property<decimal>("OrderThreshold").HasColumnType("decimal(18,2)");
+                    b.Property<string>("OrderType").IsRequired().HasMaxLength(50).HasColumnType("nvarchar(50)");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.HasKey("Id");
+                    b.ToTable("DepositSettingHistory");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.EmployeeProfile",
@@ -977,6 +1168,7 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<int?>("NextMaintenanceOdo").HasColumnType("int");
                     b.Property<decimal>("PartsCost").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
                     b.Property<string>("PartsJson").HasColumnType("nvarchar(max)");
+                    b.Property<string>("ServiceType").HasColumnType("nvarchar(max)");
                     b.Property<int?>("TechnicianId").HasColumnType("int");
                     b.Property<decimal>("TotalCost").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
@@ -1087,13 +1279,15 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("ArticleSlug").HasColumnType("nvarchar(255)").HasColumnName("ArticleSlug");
+                    b.Property<string>("ArticleType").HasColumnType("nvarchar(50)").HasColumnName("ArticleType");
                     b.Property<string>("AuthorEmail").HasColumnType("nvarchar(100)").HasColumnName("AuthorEmail");
                     b.Property<string>("AuthorName").HasColumnType("nvarchar(100)").HasColumnName("AuthorName");
                     b.Property<string>("Content").IsRequired().HasColumnType("nvarchar(max)").HasColumnName("Content");
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
                     b.Property<bool>("IsApproved").HasColumnType("bit").HasColumnName("IsApproved");
-                    b.Property<int>("NewsId").HasColumnType("int").HasColumnName("NewsId");
+                    b.Property<int?>("NewsId").HasColumnType("int").HasColumnName("NewsId");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.Property<Guid?>("UserId").HasColumnType("uniqueidentifier").HasColumnName("UserId");
                     b.HasKey("Id");
@@ -1650,6 +1844,26 @@ namespace Infrastructure.SqlServerMigrations
                     b.ToTable("ProductVariantColor");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.ProductView",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<Guid?>("CustomerUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CustomerUserId");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<int>("DwellTimeMs").HasColumnType("int");
+                    b.Property<int>("ProductId").HasColumnType("int").HasColumnName("ProductId");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("VisitorKey").HasColumnType("nvarchar(64)").HasColumnName("VisitorKey");
+                    b.HasKey("Id");
+                    b.HasIndex("ProductId");
+                    b.HasIndex("CustomerUserId", "CreatedAt");
+                    b.HasIndex("VisitorKey", "CreatedAt");
+                    b.ToTable("ProductView");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.PromotionBanner",
                 b =>
                 {
@@ -2040,6 +2254,53 @@ namespace Infrastructure.SqlServerMigrations
                     b.ToTable("Setting");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.StoreChatMessage",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<string>("CardsJson").HasColumnType("nvarchar(max)").HasColumnName("CardsJson");
+                    b.Property<string>("Content").IsRequired().HasColumnType("nvarchar(max)").HasColumnName("Content");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("Sender").IsRequired().HasColumnType("nvarchar(20)").HasColumnName("Sender");
+                    b.Property<Guid>("SessionId").HasColumnType("uniqueidentifier").HasColumnName("SessionId");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.HasKey("Id");
+                    b.HasIndex("SessionId");
+                    b.ToTable("StoreChatMessage");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.StoreChatSession",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<Guid?>("AssignedStaffId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("AssignedStaffId");
+                    b.Property<string>("ContactName").HasColumnType("nvarchar(100)").HasColumnName("ContactName");
+                    b.Property<string>("ContactPhone").HasColumnType("nvarchar(20)").HasColumnName("ContactPhone");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<Guid?>("CustomerUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CustomerUserId");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("LastMessageAt").HasColumnType("datetime2");
+                    b.Property<string>("Mode").IsRequired().HasColumnType("nvarchar(20)").HasColumnName("Mode");
+                    b.Property<Guid?>("PreviousSessionId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("PreviousSessionId");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+                    b.Property<string>("VisitorKey")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(64)")
+                        .HasColumnName("VisitorKey");
+                    b.HasKey("Id");
+                    b.HasIndex("CustomerUserId");
+                    b.HasIndex("Mode");
+                    b.HasIndex("VisitorKey").IsUnique();
+                    b.ToTable("StoreChatSession");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.Supplier",
                 b =>
                 {
@@ -2243,16 +2504,42 @@ namespace Infrastructure.SqlServerMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<DateTimeOffset?>("AssignedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("AssignedAt");
                     b.Property<Guid?>("AssignedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("AssignedUserId");
                     b.Property<string>("Category").IsRequired().HasColumnType("nvarchar(50)").HasColumnName("Category");
+                    b.Property<DateTimeOffset?>("ClosedAt").HasColumnType("datetimeoffset").HasColumnName("ClosedAt");
                     b.Property<int>("ContactId").HasColumnType("int").HasColumnName("ContactId");
                     b.Property<string>("Content").IsRequired().HasColumnType("nvarchar(MAX)").HasColumnName("Content");
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("CustomerRatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("CustomerRatedAt");
+                    b.Property<string>("CustomerRatingComment")
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("CustomerRatingComment");
+                    b.Property<int?>("CustomerRatingOfEmployee")
+                        .HasColumnType("int")
+                        .HasColumnName("CustomerRatingOfEmployee");
+                    b.Property<Guid?>("CustomerTrackingToken")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CustomerTrackingToken");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
                     b.Property<string>("Email").IsRequired().HasColumnType("nvarchar(100)").HasColumnName("Email");
+                    b.Property<DateTimeOffset?>("EmployeeRatedAt")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("EmployeeRatedAt");
+                    b.Property<string>("EmployeeRatingComment")
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("EmployeeRatingComment");
+                    b.Property<int?>("EmployeeRatingOfCustomer")
+                        .HasColumnType("int")
+                        .HasColumnName("EmployeeRatingOfCustomer");
                     b.Property<string>("OrderCode").HasColumnType("nvarchar(50)").HasColumnName("OrderCode");
+                    b.Property<DateTimeOffset?>("StartedAt").HasColumnType("datetimeoffset").HasColumnName("StartedAt");
                     b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(20)").HasColumnName("Status");
                     b.Property<string>("Subject").IsRequired().HasColumnType("nvarchar(200)").HasColumnName("Subject");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
@@ -2704,6 +2991,80 @@ namespace Infrastructure.SqlServerMigrations
                     b.Navigation("ProductVariant");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.ChatFeedback",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ChatRun", "ChatRun")
+                        .WithMany()
+                        .HasForeignKey("ChatRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.HasOne("Domain.Entities.ApplicationUser", "ReportedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReportedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                    b.Navigation("ChatRun");
+                    b.Navigation("ReportedByUser");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatMessage",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ChatRun", "Run").WithMany().HasForeignKey("RunId");
+                    b.HasOne("Domain.Entities.ChatSession", "Session")
+                        .WithMany("Messages")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Run");
+                    b.Navigation("Session");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatPlan",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ChatRun", "Run")
+                        .WithOne("Plan")
+                        .HasForeignKey("Domain.Entities.ChatPlan", "RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Run");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatRun",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ChatSession", "Session")
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Session");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatRunEvent",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ChatRun", "Run")
+                        .WithMany("Events")
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Run");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatSession",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("User");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.CommissionPolicy",
                 b =>
                 {
@@ -3064,8 +3425,7 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasOne("Domain.Entities.News", "News")
                         .WithMany("Comments")
                         .HasForeignKey("NewsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
                     b.HasOne("Domain.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -3315,6 +3675,21 @@ namespace Infrastructure.SqlServerMigrations
                     b.Navigation("ProductVariant");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.ProductView",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "CustomerUser")
+                        .WithMany()
+                        .HasForeignKey("CustomerUserId");
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("CustomerUser");
+                    b.Navigation("Product");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.PromotionBanner",
                 b =>
                 {
@@ -3501,6 +3876,26 @@ namespace Infrastructure.SqlServerMigrations
                     b.Navigation("Service");
                     b.Navigation("Technician");
                     b.Navigation("Vehicle");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.StoreChatMessage",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.StoreChatSession", "Session")
+                        .WithMany("Messages")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Session");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.StoreChatSession",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "CustomerUser")
+                        .WithMany()
+                        .HasForeignKey("CustomerUserId");
+                    b.Navigation("CustomerUser");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Supplier",
@@ -3891,6 +4286,19 @@ namespace Infrastructure.SqlServerMigrations
                     b.Navigation("Products");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.ChatRun",
+                b =>
+                {
+                    b.Navigation("Events");
+                    b.Navigation("Plan");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatSession",
+                b =>
+                {
+                    b.Navigation("Messages");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.Contact",
                 b =>
                 {
@@ -4069,6 +4477,12 @@ namespace Infrastructure.SqlServerMigrations
                 b =>
                 {
                     b.Navigation("Services");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.StoreChatSession",
+                b =>
+                {
+                    b.Navigation("Messages");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Supplier",

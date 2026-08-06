@@ -1,3 +1,4 @@
+using Application.Common.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Services;
@@ -10,6 +11,8 @@ using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.MediaFile.File;
 using Infrastructure.Services;
+using Infrastructure.Services.Ai;
+using Infrastructure.Services.Product;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -36,12 +39,50 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         .WithReuse(true)
         .Build();
 
+    private const string TemplateDbName = "test_template";
+    private static readonly SemaphoreSlim _templateLock = new(1, 1);
+    private static bool _templateReady;
+
     private string _dbName = default!;
     private Respawner _respawner = default!;
     private DbConnection _connection = default!;
     private string _fullConnectionString = default!;
 
-    #pragma warning disable IDE0079 
+    private static async Task EnsureTemplateDatabaseAsync(string baseConnectionString)
+    {
+        if (_templateReady)
+            return;
+        await _templateLock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            if (_templateReady)
+                return;
+            var builder = new NpgsqlConnectionStringBuilder(baseConnectionString) { Database = "postgres" };
+            using (var masterConn = new NpgsqlConnection(builder.ConnectionString))
+            {
+                await masterConn.OpenAsync().ConfigureAwait(false);
+                using var drop = masterConn.CreateCommand();
+                drop.CommandText = $"DROP DATABASE IF EXISTS \"{TemplateDbName}\" WITH (FORCE);";
+                await drop.ExecuteNonQueryAsync().ConfigureAwait(false);
+                using var create = masterConn.CreateCommand();
+                create.CommandText = $"CREATE DATABASE \"{TemplateDbName}\";";
+                await create.ExecuteNonQueryAsync().ConfigureAwait(false);
+            }
+            builder.Database = TemplateDbName;
+            var options = new DbContextOptionsBuilder<ApplicationDBContext>()
+                .UseNpgsql(builder.ConnectionString)
+                .Options;
+            using (var context = new ApplicationDBContext(options))
+                await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
+            NpgsqlConnection.ClearAllPools();
+            _templateReady = true;
+        } finally
+        {
+            _templateLock.Release();
+        }
+    }
+
+    #pragma warning disable IDE0079
     #pragma warning disable CRR0035
     #pragma warning disable CRR0039
     public async ValueTask InitializeAsync()
@@ -49,23 +90,19 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         await _postgreSqlContainer.StartAsync().ConfigureAwait(false);
         _dbName = $"Test_{Guid.NewGuid():N}";
         var baseConn = _postgreSqlContainer.GetConnectionString();
+        await EnsureTemplateDatabaseAsync(baseConn).ConfigureAwait(false);
         var builder = new NpgsqlConnectionStringBuilder(baseConn) { Database = "postgres" };
         using (var masterConn = new NpgsqlConnection(builder.ConnectionString))
         {
             await masterConn.OpenAsync().ConfigureAwait(false);
             using var cmd = masterConn.CreateCommand();
-            cmd.CommandText = $"CREATE DATABASE \"{_dbName}\";";
+            cmd.CommandText = $"CREATE DATABASE \"{_dbName}\" TEMPLATE \"{TemplateDbName}\";";
             await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
         builder.Database = _dbName;
         _fullConnectionString = builder.ConnectionString;
         _connection = new NpgsqlConnection(_fullConnectionString);
         await _connection.OpenAsync().ConfigureAwait(false);
-        var options = new DbContextOptionsBuilder<ApplicationDBContext>()
-            .UseNpgsql(_fullConnectionString)
-            .Options;
-        using var context = new ApplicationDBContext(options);
-        await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
         _respawner = await Respawner.CreateAsync(
             _connection,
             new RespawnerOptions
@@ -213,12 +250,17 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IFileDeleteService, FileDeleteService>();
                 services.AddScoped<ISievePaginator, SievePaginator>();
                 services.AddScoped<IUnitOfWork, UnitOfWork>();
+                services.AddSingleton<IProductIndexQueue, ProductIndexQueue>();
                 services.AddSingleton<INotificationService, NotificationService>();
                 services.AddScoped<IEmailService, EmailService>();
                 services.AddScoped<IExternalAuthService, ExternalAuthService>();
                 services.AddScoped<IVNPayService, VNPayService>();
                 services.AddScoped<IPayOSService, PayOSService>();
                 services.AddSingleton<IShippingService>(new FakeShippingService());
+                services.AddSingleton<IAiSidecarUrlProvider>(new FakeAiSidecarUrlProvider());
+                services.AddSingleton<IServerDateProvider, SystemServerDateProvider>();
+                services.AddSingleton<IChatToolCatalogProvider, ChatToolCatalogProvider>();
+                services.AddHttpClient();
                 services.Scan(
                     scan => scan
                         .FromAssemblies(typeof(DependencyInjection).Assembly)

@@ -37,7 +37,7 @@ public class DeleteRoleCommandHandler(
         var result = await roleDeleteRepository.DeleteAsync(role, cancellationToken).ConfigureAwait(false);
         if (!result.Succeeded)
         {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            var errors = string.Join(", ", result.Errors);
             return Error.BadRequest(errors);
         }
         return new RoleDeleteResponse() { Message = $"Role '{roleName}' deleted successfully." };

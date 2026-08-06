@@ -67,5 +67,13 @@ namespace Application.Interfaces.Repositories.Vehicle
             string query,
             string queryType,
             CancellationToken cancellationToken = default);
+
+        public Task<List<Domain.Entities.Vehicle>> GetByIdsWithLeadAsync(
+            IEnumerable<int> ids,
+            CancellationToken cancellationToken = default);
+
+        public Task<Domain.Entities.Vehicle?> GetByIdWithLeadAsync(
+            int id,
+            CancellationToken cancellationToken = default);
     }
 }

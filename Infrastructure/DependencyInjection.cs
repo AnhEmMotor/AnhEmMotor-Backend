@@ -1,9 +1,11 @@
+using Application.Common.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Ai;
 using Application.Interfaces.Repositories.LogisticsDashboard;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Statistical;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Excel;
 using Application.Interfaces.Services.Logistics;
 using Application.Interfaces.Services.Shipping;
 using Domain.Entities;
@@ -19,11 +21,16 @@ using Infrastructure.Repositories.Statistical;
 using Infrastructure.Services;
 using Infrastructure.Services.Ai;
 using Infrastructure.Services.Ai.Clients;
+using Infrastructure.Services.Ai.Runs;
+using Infrastructure.Services.Excel;
 using Infrastructure.Services.Logistics;
+using Infrastructure.Services.Product;
+using Infrastructure.Services.StoreChat;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -111,6 +118,14 @@ public static class DependencyInjection
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IBrandExcelService, BrandExcelService>();
+        services.AddScoped<IProductExcelService, ProductExcelService>();
+        services.AddScoped<IProductCategoryExcelService, ProductCategoryExcelService>();
+        services.AddScoped<ISupplierExcelService, SupplierExcelService>();
+        services.AddScoped<IPurchaseRequestExcelService, PurchaseRequestExcelService>();
+        services.AddScoped<IInventoryReceiptExcelService, InventoryReceiptExcelService>();
+        services.AddScoped<IInventoryLedgerExcelService, InventoryLedgerExcelService>();
+        services.AddScoped<IInventoryReportExcelService, InventoryReportExcelService>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient<IShippingService, ShippingService>(
             client =>
@@ -121,10 +136,31 @@ public static class DependencyInjection
         services.AddHttpClient<IGeocodingService, GeocodingService>();
         services.AddSingleton<IPythonEnvService, PythonEnvService>();
         services.AddSingleton<AiSidecarManager>();
-        services.AddSingleton<IAiSidecarManager>(provider => provider.GetRequiredService<AiSidecarManager>());
+        services.AddSingleton<IAiSidecarUrlProvider>(provider => provider.GetRequiredService<AiSidecarManager>());
         services.AddHostedService(provider => provider.GetRequiredService<AiSidecarManager>());
-        services.AddHttpClient<IAiSearchClient, AiSearchClient>();
+        services.AddHttpClient<AiSearchClient>();
+        services.AddScoped<IAiSearchClient>(
+            provider => new CachedAiSearchClient(
+                provider.GetRequiredService<AiSearchClient>(),
+                provider.GetRequiredService<IMemoryCache>()));
         services.AddHttpClient<IAiTestRoleClient, AiTestRoleClient>();
+        services.AddSingleton<IChatRunQueue, ChatRunQueue>();
+        services.AddSingleton<IProductIndexQueue, ProductIndexQueue>();
+        services.AddHttpClient<ProductIndexWorker>();
+        services.AddHostedService(provider => provider.GetRequiredService<ProductIndexWorker>());
+        services.AddSingleton<IChatRunEventBus, ChatRunEventBus>();
+        services.AddSingleton<IChatRunCancellationRegistry, ChatRunCancellationRegistry>();
+        services.AddSingleton<IChatRunTokenStore, ChatRunTokenStore>();
+        services.AddSingleton<IChatToolCatalogProvider, ChatToolCatalogProvider>();
+        services.AddSingleton<IServerDateProvider, SystemServerDateProvider>();
+        services.AddScoped<IChatRunWriter, ChatRunWriter>();
+        services.AddScoped<ISidecarStreamClient, SidecarStreamClient>();
+        services.AddScoped<IStoreChatAiClient, StoreChatAiClient>();
+        services.AddHostedService<ChatRunExecutor>();
+        services.AddHostedService<OrphanedRunCleaner>();
+        services.AddHostedService<ChatRunEventCleanupJob>();
+        services.AddHostedService<ProductViewCleanupJob>();
+        services.AddHostedService<StaleWaitingSessionMonitor>();
         services.Scan(
             scan => scan
                 .FromAssemblies(Assembly.GetExecutingAssembly())

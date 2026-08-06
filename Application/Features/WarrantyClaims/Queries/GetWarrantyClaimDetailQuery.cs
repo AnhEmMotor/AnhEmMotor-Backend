@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.WarrantyClaims.Queries;
 
-public class GetWarrantyClaimDetailQuery : IRequest<Result<WarrantyClaimResponse?>>
+public class GetWarrantyClaimDetailQuery : IRequest<Result<WarrantyClaimDetailResponse?>>
 {
     public int Id { get; set; }
 }

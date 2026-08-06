@@ -53,10 +53,15 @@ jobs:
           GHN_TOKEN: ${{ secrets.GHN_TOKEN }}
           GHN_SHOP_ID: ${{ secrets.GHN_SHOP_ID }}
           GHN_BASE_URL: ${{ secrets.GHN_BASE_URL }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-3.5-flash' }}
+          AI_PROVIDER: ${{ secrets.AI_PROVIDER }}
+          AI_API_ENDPOINT: ${{ secrets.AI_API_ENDPOINT }}
+          API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          MODEL: ${{ secrets.GEMINI_MODEL }}
           LANGSMITH_TRACING: ${{ secrets.LANGSMITH_TRACING || 'false' }}
           LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+          EMBEDDING_MODEL: ${{ secrets.EMBEDDING_MODEL }}
+          QDRANT_URL: ${{ secrets.QDRANT_URL }}
+          QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
         run: >
           jq '
             .Provider = "PostgreSql" |
@@ -90,10 +95,15 @@ jobs:
             .GhnSettings.Token = env.GHN_TOKEN |
             .GhnSettings.ShopId = env.GHN_SHOP_ID |
             .GhnSettings.BaseUrl = env.GHN_BASE_URL |
-            .AISetup.GeminiApiKey = env.GEMINI_API_KEY |
-            .AISetup.GeminiModel = env.GEMINI_MODEL |
+            .AISetup.Provider = (if env.AI_PROVIDER == "" then .AISetup.Provider else env.AI_PROVIDER end) |
+            .AISetup.ApiEndpoint = env.AI_API_ENDPOINT |
+            .AISetup.ApiKey = env.API_KEY |
+            .AISetup.Model = (if env.MODEL == "" then .AISetup.Model else env.MODEL end) |
             .AISetup.LangSmithTracing = (env.LANGSMITH_TRACING | fromjson) |
-            .AISetup.LangSmithApiKey = env.LANGSMITH_API_KEY
+            .AISetup.LangSmithApiKey = env.LANGSMITH_API_KEY |
+            .AISetup.EmbeddingModel = (if env.EMBEDDING_MODEL == "" then .AISetup.EmbeddingModel else env.EMBEDDING_MODEL end) |
+            .AISetup.QdrantUrl = env.QDRANT_URL |
+            .AISetup.QdrantApiKey = env.QDRANT_API_KEY
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
       - name: Restore dependencies
         run: dotnet restore
@@ -110,9 +120,12 @@ jobs:
           cd ..
         continue-on-error: true
       - name: Publish
-        run:
-          dotnet publish WebAPI/WebAPI.csproj --configuration Release --no-build
-          --output ./publish
+        run: |
+          dotnet publish WebAPI/WebAPI.csproj --configuration Release --no-build --output ./publish
+          mkdir -p ./publish/wwwroot
+          cp -r AISidecar ./publish/
+          rm -rf ./publish/AISidecar/.venv ./publish/AISidecar/__pycache__
+          cp -r SeedUploads ./publish/
       - name: Move AppSettings to Publish Folder
         run: cp appsettings.Production.json ./publish/
       - name: Move Migration Bundle to Publish Folder
@@ -155,7 +168,20 @@ jobs:
               rm /var/www/anhemmotor/backend/postgres_bundle
             fi
 
+            cd /var/www/anhemmotor/backend
+
+            UPLOAD_PATH=$(jq -r '.LocalFileStorage.UploadPath // ""' appsettings.Production.json)
+
+            if [ -z "$UPLOAD_PATH" ]; then
+              TARGET="/var/www/anhemmotor/backend/wwwroot/uploads"
+            elif [[ "$UPLOAD_PATH" = /* ]]; then
+              TARGET="$UPLOAD_PATH"
+            else
+              TARGET="/var/www/anhemmotor/backend/$UPLOAD_PATH"
+            fi
+
+            mkdir -p "$TARGET"
+            cp -rn SeedUploads/. "$TARGET/"
+            rm -rf SeedUploads
+
             sudo systemctl restart anhemmotor.service
-
-
-

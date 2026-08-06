@@ -17,14 +17,14 @@ namespace Application.Features.Logistics.Returns.Commands.InspectReturn
                 .ConfigureAwait(false);
             if (order == null || order.Status != ParcelDeliveryStatus.Returned)
                 return false;
-            order.InspectedAt = DateTime.UtcNow;
+            order.InspectedAt ??= DateTime.UtcNow;
             order.BoxCondition = request.BoxCondition;
             order.ProductCondition = request.ProductCondition;
             order.ReturnProofImage = request.ReturnProofImage;
             order.ReturnInternalNote = request.ReturnInternalNote;
             order.ReturnAction = string.IsNullOrWhiteSpace(request.Action) ? null : request.Action;
-            order.RefundAmount = request.RefundAmount;
-            order.ReturnShippingCost = request.ReturnShippingCost;
+            order.RefundAmount = request.RefundAmount ?? order.RefundAmount;
+            order.ReturnShippingCost = request.ReturnShippingCost ?? order.ReturnShippingCost;
             parcelDeliveryOrderUpdateRepository.Update(order);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return true;

@@ -5,6 +5,7 @@ using Application.Features.Vouchers.Commands.CreateVoucher;
 using Application.Features.Vouchers.Commands.DeleteVoucher;
 using Application.Features.Vouchers.Commands.RemoveVoucher;
 using Application.Features.Vouchers.Commands.UpdateVoucher;
+using Application.Features.Vouchers.Queries.GetVoucherByCode;
 using Application.Features.Vouchers.Queries.GetVoucherById;
 using Application.Features.Vouchers.Queries.GetVoucherList;
 using Application.Features.Vouchers.Queries.ValidateVoucher;
@@ -67,6 +68,23 @@ public class VoucherController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetVoucherById(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetVoucherByIdQuery(id), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy chi tiết một voucher theo mã (code).
+    /// </summary>
+    /// <param name="code">Mã của voucher cần lấy.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Thông tin chi tiết voucher.</returns>
+    /// <response code="200">Trả về chi tiết voucher thành công.</response>
+    /// <response code="404">Không tìm thấy voucher.</response>
+    [HttpGet("code/{code}")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetVoucherByCode(string code, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetVoucherByCodeQuery(code), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -159,7 +177,7 @@ public class VoucherController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(
-            new VoucherValidateQuery(request.VoucherId, request.OutputId),
+            new VoucherValidateQuery(request.VoucherId, request.OutputId, request.OrderTotal),
             cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);

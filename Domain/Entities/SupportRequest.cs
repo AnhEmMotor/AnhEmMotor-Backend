@@ -38,4 +38,34 @@ public class SupportRequest : BaseEntity
     public Guid? AssignedUserId { get; set; }
 
     public ApplicationUser? AssignedUser { get; set; }
+
+    [Column("CustomerTrackingToken")]
+    public Guid? CustomerTrackingToken { get; set; }
+
+    [Column("AssignedAt")]
+    public DateTimeOffset? AssignedAt { get; set; }
+
+    [Column("StartedAt")]
+    public DateTimeOffset? StartedAt { get; set; }
+
+    [Column("ClosedAt")]
+    public DateTimeOffset? ClosedAt { get; set; }
+
+    [Column("EmployeeRatingOfCustomer")]
+    public int? EmployeeRatingOfCustomer { get; set; }
+
+    [Column("EmployeeRatingComment", TypeName = "nvarchar(1000)")]
+    public string? EmployeeRatingComment { get; set; }
+
+    [Column("EmployeeRatedAt")]
+    public DateTimeOffset? EmployeeRatedAt { get; set; }
+
+    [Column("CustomerRatingOfEmployee")]
+    public int? CustomerRatingOfEmployee { get; set; }
+
+    [Column("CustomerRatingComment", TypeName = "nvarchar(1000)")]
+    public string? CustomerRatingComment { get; set; }
+
+    [Column("CustomerRatedAt")]
+    public DateTimeOffset? CustomerRatedAt { get; set; }
 }

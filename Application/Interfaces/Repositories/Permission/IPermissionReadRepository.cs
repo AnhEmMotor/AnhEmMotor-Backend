@@ -18,6 +18,8 @@ namespace Application.Interfaces.Repositories.Permission
             Guid userId,
             IEnumerable<string> permissionNames,
             CancellationToken cancellationToken = default);
+
+        public Task<bool> HasAnyPermissionAsync(Guid userId, CancellationToken cancellationToken = default);
     }
 }
 

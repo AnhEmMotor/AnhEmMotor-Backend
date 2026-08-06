@@ -18,7 +18,7 @@ public class GetRepairOrderDetailQueryHandler(
         if (entity is null)
             return Result<RepairOrderResponse>.Failure(
                 [Error.NotFound($"Không tìm thấy lệnh sửa chữa id={req.Id}", "Id")]);
-        var vehicle = await vehicleRepo.GetByIdAsync(entity.VehicleId, ct);
+        var vehicle = await vehicleRepo.GetByIdWithLeadAsync(entity.VehicleId, ct);
         string? vehicleInfo = vehicle != null
             ? (!string.IsNullOrEmpty(vehicle.LicensePlate) ? vehicle.LicensePlate : vehicle.VinNumber)
             : null;
@@ -50,6 +50,7 @@ public class GetRepairOrderDetailQueryHandler(
                 PartsJson = entity.PartsJson,
                 NextMaintenanceDate = entity.NextMaintenanceDate,
                 NextMaintenanceOdo = entity.NextMaintenanceOdo,
+                ServiceType = entity.ServiceType,
                 CreatedAt = entity.CreatedAt,
                 UpdatedAt = entity.UpdatedAt
             });

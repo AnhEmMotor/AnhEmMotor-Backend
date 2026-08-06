@@ -62,6 +62,12 @@ appsettings.*.json
 **/wwwroot/uploads
 tree.txt
 
+# Python virtual environment
+.venv/
+venv/
+ENV/
+env/
+
 # Auto Claude data directory
 .auto-claude/
 
@@ -214,4 +220,5 @@ Spec
 nul
 *.txt
 !requirements.txt
+!requirements-dev.txt
 api.xml

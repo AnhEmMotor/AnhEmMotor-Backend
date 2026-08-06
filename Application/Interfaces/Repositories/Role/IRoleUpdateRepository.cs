@@ -10,6 +10,8 @@ namespace Application.Interfaces.Repositories.Role
             CancellationToken cancellationToken = default);
 
         public void RemovePermissionsFromRole(IEnumerable<RolePermission> rolePermissions);
+
+        public Task RenameRoleAsync(ApplicationRole role, string newName, CancellationToken cancellationToken = default);
     }
 }
 

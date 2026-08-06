@@ -1,0 +1,25 @@
+{
+  "Items": [
+    {
+      "OrderId": 123,
+      "StatusId": "completed",
+      "CustomerName": null,
+      "PaymentMethod": null,
+      "PaymentStatus": null,
+      "Total": 5000000,
+      "PaidAmount": null,
+      "Currency": "VND",
+      "CreatedAt": null,
+      "LastStatusChangedAt": null
+    }
+  ],
+  "TotalCount": 1,
+  "Truncated": false,
+  "AsOf": "2026-07-26T09:15:00+07:00",
+  "Timezone": "Asia/Ho_Chi_Minh",
+  "Source": "IOutputReadRepository.GetByIdWithDetailsAsync",
+  "FiltersApplied": {},
+  "Definition": "so-don-hang",
+  "Currency": "VND",
+  "Warnings": []
+}

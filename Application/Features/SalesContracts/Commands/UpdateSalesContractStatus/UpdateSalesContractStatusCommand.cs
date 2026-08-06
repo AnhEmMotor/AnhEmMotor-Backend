@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Features.SalesContracts.Commands.UpdateSalesContractStatus;
 
-public sealed record UpdateSalesContractStatusCommand(Guid ContractId, string Status) : IRequest<Result<SalesContractResponse>>;
+public sealed record UpdateSalesContractStatusCommand(Guid ContractId, string Status, bool IsAdminApproval = false) : IRequest<Result<SalesContractResponse>>;

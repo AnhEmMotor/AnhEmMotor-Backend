@@ -22,6 +22,24 @@ public record SupportRequestResponse
 
     public string? AssignedUserName { get; set; }
 
+    public DateTimeOffset? AssignedAt { get; set; }
+
+    public DateTimeOffset? StartedAt { get; set; }
+
+    public DateTimeOffset? ClosedAt { get; set; }
+
+    public int? EmployeeRatingOfCustomer { get; set; }
+
+    public string? EmployeeRatingComment { get; set; }
+
+    public DateTimeOffset? EmployeeRatedAt { get; set; }
+
+    public int? CustomerRatingOfEmployee { get; set; }
+
+    public string? CustomerRatingComment { get; set; }
+
+    public DateTimeOffset? CustomerRatedAt { get; set; }
+
     public ContactBasicResponse? Contact { get; set; }
 
     public DateTimeOffset? CreatedAt { get; set; }

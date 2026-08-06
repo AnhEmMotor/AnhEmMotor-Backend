@@ -4,40 +4,14 @@ using Infrastructure;
 using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
-using System.Diagnostics;
 using System.Globalization;
-using System.Net;
 using WebAPI.BackgroundServices;
 using WebAPI.Extensions;
+using WebAPI.Hubs;
 using WebAPI.Middleware;
 using WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
-if (builder.Environment.IsDevelopment())
-{
-    try
-    {
-        using var httpListener = new HttpListener();
-        httpListener.Prefixes.Add("http://127.0.0.1:5000/");
-        httpListener.Start();
-        httpListener.Stop();
-    } catch (HttpListenerException)
-    {
-        try
-        {
-            Process.GetProcessesByName("dotnet").ToList().ForEach(p => p.Kill(true));
-        } catch
-        {
-        }
-        try
-        {
-            Process.GetProcessesByName("WebAPI").ToList().ForEach(p => p.Kill(true));
-        } catch
-        {
-        }
-        Thread.Sleep(500);
-    }
-}
 builder.Host.UseSerilog();
 builder.Host
     .ConfigureHostOptions(opts => opts.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore);
@@ -77,7 +51,11 @@ builder.Services
                     var allowedOrigins = configuration["Cors:AllowedOrigins"]?
                         .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries) ??
                         Array.Empty<string>();
-                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
+                    if (!allowedOrigins.Contains("*"))
+                    {
+                        policy.AllowCredentials();
+                    }
                 }
 );
         }
@@ -95,6 +73,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 builder.Services.AddHostedService<GhnStatusPollingWorker>();
+builder.Services.AddSignalR();
 var app = builder.Build();
 app.UseMiddleware<LogContextMiddleware>();
 app.UseSerilogRequestLogging(
@@ -126,12 +105,7 @@ if (app.Environment.IsDevelopment())
             }
             options.DocExpansion(DocExpansion.None);
         });
-    var originalColor = Console.ForegroundColor;
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("\n=======================================================");
-    Console.WriteLine(" Swagger is available at: http://localhost:5000/swagger ");
-    Console.WriteLine("=======================================================\n");
-    Console.ForegroundColor = originalColor;
+    app.Logger.LogInformation("Swagger is available at: http://localhost:5000/swagger");
 }
 app.UseStaticFiles();
 app.UseRouting();
@@ -155,6 +129,8 @@ if (!app.Environment.IsEnvironment("Test"))
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ManagerChatHub>("/hubs/manager-chat");
+app.MapHub<StoreChatHub>("/hubs/store-chat");
 if (!app.Environment.IsEnvironment("Test"))
 {
     await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(false);

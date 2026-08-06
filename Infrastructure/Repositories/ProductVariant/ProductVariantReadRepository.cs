@@ -167,10 +167,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 .ThenInclude(ii => ii.InventoryReceipt)
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
                 .ThenInclude(oi => oi.OutputOrder);
-            if (string.IsNullOrWhiteSpace(sorts))
-            {
-                dbQuery = dbQuery.OrderByDescending(v => v.Id);
-            }
+            dbQuery = dbQuery.OrderByDescending(v => v.Id);
             var items = await dbQuery
                 .Skip((normalizedPage - 1) * normalizedPageSize)
                 .Take(normalizedPageSize)

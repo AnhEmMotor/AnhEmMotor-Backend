@@ -1,0 +1,23 @@
+using Application.Interfaces.Repositories.Chat;
+using Domain.Entities;
+using Infrastructure.DBContexts;
+
+namespace Infrastructure.Repositories.Chat;
+
+public class ChatUpdateRepository(ApplicationDBContext context) : IChatUpdateRepository
+{
+    public void UpdateSession(ChatSession session)
+    {
+        context.ChatSessions.Update(session);
+    }
+
+    public void UpdatePlan(ChatPlan plan)
+    {
+        context.ChatPlans.Update(plan);
+    }
+
+    public void UpdateTemplate(ChatPlanTemplate template)
+    {
+        context.ChatPlanTemplates.Update(template);
+    }
+}

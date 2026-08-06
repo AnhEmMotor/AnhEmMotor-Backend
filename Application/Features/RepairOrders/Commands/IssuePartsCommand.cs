@@ -7,6 +7,8 @@ public class IssuePartsCommand : IRequest<Result<bool>>
 {
     public int RepairOrderId { get; set; }
 
+    public int? TechnicianId { get; set; }
+
     public List<PartItemDto> Parts { get; set; } = [];
 
     public List<ServiceItemDto> Services { get; set; } = [];

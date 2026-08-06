@@ -187,6 +187,170 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("Brand");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.ChatFeedback",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<Guid>("ChatRunId").HasColumnType("uuid").HasColumnName("ChatRunId");
+                    b.Property<string>("Comment").HasColumnType("text").HasColumnName("Comment");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<Guid>("ReportedBy").HasColumnType("uuid").HasColumnName("ReportedBy");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("ChatRunId");
+                    b.HasIndex("ReportedBy");
+                    b.ToTable("ChatFeedback");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatMessage",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<bool>("IsSteering").HasColumnType("boolean");
+                    b.Property<string>("Message").IsRequired().HasColumnType("text").HasColumnName("Message");
+                    b.Property<double?>("ReasoningElapsedSeconds").HasColumnType("double precision");
+                    b.Property<string>("ReasoningStepsJson").HasColumnType("text").HasColumnName("ReasoningStepsJson");
+                    b.Property<string>("Role").IsRequired().HasColumnType("text").HasColumnName("Role");
+                    b.Property<Guid?>("RunId").HasColumnType("uuid").HasColumnName("RunId");
+                    b.Property<Guid>("SessionId").HasColumnType("uuid").HasColumnName("SessionId");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("CreatedAt");
+                    b.HasIndex("RunId");
+                    b.HasIndex("SessionId");
+                    b.ToTable("ChatMessage");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatPlan",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<DateTime?>("ApprovedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("LastEditedBy").IsRequired().HasColumnType("text").HasColumnName("LastEditedBy");
+                    b.Property<Guid>("RunId").HasColumnType("uuid").HasColumnName("RunId");
+                    b.Property<Guid>("SessionId").HasColumnType("uuid").HasColumnName("SessionId");
+                    b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("Status");
+                    b.Property<string>("Steps").IsRequired().HasColumnType("text").HasColumnName("Steps");
+                    b.Property<string>("ToolRegistryFingerprint")
+                        .HasColumnType("text")
+                        .HasColumnName("ToolRegistryFingerprint");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<int>("Version").HasColumnType("integer");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId").IsUnique();
+                    b.ToTable("ChatPlan");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatPlanTemplate",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<string>("CanonicalQuestion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("CanonicalQuestion");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("IntentHash").IsRequired().HasColumnType("text").HasColumnName("IntentHash");
+                    b.Property<DateTimeOffset?>("LastUsedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("Module").IsRequired().HasColumnType("text").HasColumnName("Module");
+                    b.Property<int>("RejectCount").HasColumnType("integer");
+                    b.Property<string>("RequiredPermissions")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("RequiredPermissions");
+                    b.Property<string>("RequiredTools")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("RequiredTools");
+                    b.Property<string>("Slots").IsRequired().HasColumnType("text").HasColumnName("Slots");
+                    b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("Status");
+                    b.Property<string>("StepsTemplate")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("StepsTemplate");
+                    b.Property<int>("SuccessCount").HasColumnType("integer");
+                    b.Property<string>("ToolRegistryFingerprint")
+                        .HasColumnType("text")
+                        .HasColumnName("ToolRegistryFingerprint");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<int>("UseCount").HasColumnType("integer");
+                    b.Property<int>("UserEditCount").HasColumnType("integer");
+                    b.HasKey("Id");
+                    b.ToTable("ChatPlanTemplate");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatRun",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<DateTime?>("CompletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("ErrorCode").HasColumnType("text").HasColumnName("ErrorCode");
+                    b.Property<DateTime?>("HeartbeatAt").HasColumnType("timestamp with time zone");
+                    b.Property<long>("LastSeq").HasColumnType("bigint");
+                    b.Property<string>("ModelUsed").HasColumnType("text").HasColumnName("ModelUsed");
+                    b.Property<string>("OwnerInstanceId").HasColumnType("text").HasColumnName("OwnerInstanceId");
+                    b.Property<string>("PartialOutput")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("PartialOutput");
+                    b.Property<string>("PendingSteering")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("PendingSteering");
+                    b.Property<Guid>("SessionId").HasColumnType("uuid").HasColumnName("SessionId");
+                    b.Property<DateTime?>("StartedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("Status");
+                    b.Property<string>("ToolRegistryFingerprint")
+                        .HasColumnType("text")
+                        .HasColumnName("ToolRegistryFingerprint");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("UserMessage").IsRequired().HasColumnType("text").HasColumnName("UserMessage");
+                    b.HasKey("Id");
+                    b.HasIndex("SessionId", "Status");
+                    b.ToTable("ChatRun");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatRunEvent",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("Payload").IsRequired().HasColumnType("text").HasColumnName("Payload");
+                    b.Property<Guid>("RunId").HasColumnType("uuid").HasColumnName("RunId");
+                    b.Property<long>("Seq").HasColumnType("bigint");
+                    b.Property<string>("Type").IsRequired().HasColumnType("text").HasColumnName("Type");
+                    b.HasKey("Id");
+                    b.HasIndex("RunId", "Seq").IsUnique();
+                    b.ToTable("ChatRunEvent");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatSession",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("RoutingContext")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("RoutingContext");
+                    b.Property<string>("Title").IsRequired().HasColumnType("text").HasColumnName("Title");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<Guid>("UserId").HasColumnType("uuid").HasColumnName("UserId");
+                    b.HasKey("Id");
+                    b.HasIndex("UpdatedAt");
+                    b.HasIndex("UserId");
+                    b.ToTable("ChatSession");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.CommissionPolicy",
                 b =>
                 {
@@ -387,6 +551,20 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasKey("Id");
                     b.HasIndex("ContactId");
                     b.ToTable("CustomerFeedback");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.DepositSettingHistory",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<int>("DepositRatio").HasColumnType("integer");
+                    b.Property<decimal>("OrderThreshold").HasColumnType("decimal(18,2)");
+                    b.Property<string>("OrderType").IsRequired().HasMaxLength(50).HasColumnType("character varying(50)");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.ToTable("DepositSettingHistory");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.EmployeeProfile",
@@ -931,6 +1109,7 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<int?>("NextMaintenanceOdo").HasColumnType("integer");
                     b.Property<decimal>("PartsCost").HasPrecision(18, 2).HasColumnType("numeric(18,2)");
                     b.Property<string>("PartsJson").HasColumnType("text");
+                    b.Property<string>("ServiceType").HasColumnType("text");
                     b.Property<int?>("TechnicianId").HasColumnType("integer");
                     b.Property<decimal>("TotalCost").HasPrecision(18, 2).HasColumnType("numeric(18,2)");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
@@ -1042,13 +1221,15 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("Id");
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<string>("ArticleSlug").HasColumnType("text").HasColumnName("ArticleSlug");
+                    b.Property<string>("ArticleType").HasColumnType("text").HasColumnName("ArticleType");
                     b.Property<string>("AuthorEmail").HasColumnType("text").HasColumnName("AuthorEmail");
                     b.Property<string>("AuthorName").HasColumnType("text").HasColumnName("AuthorName");
                     b.Property<string>("Content").IsRequired().HasColumnType("text").HasColumnName("Content");
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
                     b.Property<bool>("IsApproved").HasColumnType("boolean").HasColumnName("IsApproved");
-                    b.Property<int>("NewsId").HasColumnType("integer").HasColumnName("NewsId");
+                    b.Property<int?>("NewsId").HasColumnType("integer").HasColumnName("NewsId");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
                     b.Property<Guid?>("UserId").HasColumnType("uuid").HasColumnName("UserId");
                     b.HasKey("Id");
@@ -1590,6 +1771,24 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("ProductVariantColor");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.ProductView",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<Guid?>("CustomerUserId").HasColumnType("uuid").HasColumnName("CustomerUserId");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<int>("DwellTimeMs").HasColumnType("integer");
+                    b.Property<int>("ProductId").HasColumnType("integer").HasColumnName("ProductId");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("VisitorKey").HasColumnType("text").HasColumnName("VisitorKey");
+                    b.HasKey("Id");
+                    b.HasIndex("ProductId");
+                    b.HasIndex("CustomerUserId", "CreatedAt");
+                    b.HasIndex("VisitorKey", "CreatedAt");
+                    b.ToTable("ProductView");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.PromotionBanner",
                 b =>
                 {
@@ -1981,6 +2180,44 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.ToTable("Setting");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.StoreChatMessage",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<string>("CardsJson").HasColumnType("text").HasColumnName("CardsJson");
+                    b.Property<string>("Content").IsRequired().HasColumnType("text").HasColumnName("Content");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("Sender").IsRequired().HasColumnType("text").HasColumnName("Sender");
+                    b.Property<Guid>("SessionId").HasColumnType("uuid").HasColumnName("SessionId");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
+                    b.HasIndex("SessionId");
+                    b.ToTable("StoreChatMessage");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.StoreChatSession",
+                b =>
+                {
+                    b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uuid");
+                    b.Property<Guid?>("AssignedStaffId").HasColumnType("uuid").HasColumnName("AssignedStaffId");
+                    b.Property<string>("ContactName").HasColumnType("text").HasColumnName("ContactName");
+                    b.Property<string>("ContactPhone").HasColumnType("text").HasColumnName("ContactPhone");
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<Guid?>("CustomerUserId").HasColumnType("uuid").HasColumnName("CustomerUserId");
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTime>("LastMessageAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("Mode").IsRequired().HasColumnType("text").HasColumnName("Mode");
+                    b.Property<Guid?>("PreviousSessionId").HasColumnType("uuid").HasColumnName("PreviousSessionId");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("VisitorKey").IsRequired().HasColumnType("text").HasColumnName("VisitorKey");
+                    b.HasKey("Id");
+                    b.HasIndex("CustomerUserId");
+                    b.HasIndex("Mode");
+                    b.HasIndex("VisitorKey").IsUnique();
+                    b.ToTable("StoreChatSession");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.Supplier",
                 b =>
                 {
@@ -2190,14 +2427,44 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("Id");
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTimeOffset?>("AssignedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("AssignedAt");
                     b.Property<Guid?>("AssignedUserId").HasColumnType("uuid").HasColumnName("AssignedUserId");
                     b.Property<string>("Category").IsRequired().HasColumnType("text").HasColumnName("Category");
+                    b.Property<DateTimeOffset?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ClosedAt");
                     b.Property<int>("ContactId").HasColumnType("integer").HasColumnName("ContactId");
                     b.Property<string>("Content").IsRequired().HasColumnType("text").HasColumnName("Content");
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("CustomerRatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CustomerRatedAt");
+                    b.Property<string>("CustomerRatingComment")
+                        .HasColumnType("text")
+                        .HasColumnName("CustomerRatingComment");
+                    b.Property<int?>("CustomerRatingOfEmployee")
+                        .HasColumnType("integer")
+                        .HasColumnName("CustomerRatingOfEmployee");
+                    b.Property<Guid?>("CustomerTrackingToken")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CustomerTrackingToken");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
                     b.Property<string>("Email").IsRequired().HasColumnType("text").HasColumnName("Email");
+                    b.Property<DateTimeOffset?>("EmployeeRatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("EmployeeRatedAt");
+                    b.Property<string>("EmployeeRatingComment")
+                        .HasColumnType("text")
+                        .HasColumnName("EmployeeRatingComment");
+                    b.Property<int?>("EmployeeRatingOfCustomer")
+                        .HasColumnType("integer")
+                        .HasColumnName("EmployeeRatingOfCustomer");
                     b.Property<string>("OrderCode").HasColumnType("text").HasColumnName("OrderCode");
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("StartedAt");
                     b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("Status");
                     b.Property<string>("Subject").IsRequired().HasColumnType("text").HasColumnName("Subject");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
@@ -2628,6 +2895,80 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("ProductVariant");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.ChatFeedback",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ChatRun", "ChatRun")
+                        .WithMany()
+                        .HasForeignKey("ChatRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.HasOne("Domain.Entities.ApplicationUser", "ReportedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReportedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                    b.Navigation("ChatRun");
+                    b.Navigation("ReportedByUser");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatMessage",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ChatRun", "Run").WithMany().HasForeignKey("RunId");
+                    b.HasOne("Domain.Entities.ChatSession", "Session")
+                        .WithMany("Messages")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Run");
+                    b.Navigation("Session");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatPlan",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ChatRun", "Run")
+                        .WithOne("Plan")
+                        .HasForeignKey("Domain.Entities.ChatPlan", "RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Run");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatRun",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ChatSession", "Session")
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Session");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatRunEvent",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ChatRun", "Run")
+                        .WithMany("Events")
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Run");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatSession",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("User");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.CommissionPolicy",
                 b =>
                 {
@@ -2988,8 +3329,7 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasOne("Domain.Entities.News", "News")
                         .WithMany("Comments")
                         .HasForeignKey("NewsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
                     b.HasOne("Domain.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -3239,6 +3579,21 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("ProductVariant");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.ProductView",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "CustomerUser")
+                        .WithMany()
+                        .HasForeignKey("CustomerUserId");
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("CustomerUser");
+                    b.Navigation("Product");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.PromotionBanner",
                 b =>
                 {
@@ -3425,6 +3780,26 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("Service");
                     b.Navigation("Technician");
                     b.Navigation("Vehicle");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.StoreChatMessage",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.StoreChatSession", "Session")
+                        .WithMany("Messages")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Session");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.StoreChatSession",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.ApplicationUser", "CustomerUser")
+                        .WithMany()
+                        .HasForeignKey("CustomerUserId");
+                    b.Navigation("CustomerUser");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Supplier",
@@ -3815,6 +4190,19 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Navigation("Products");
                 });
             modelBuilder.Entity(
+                "Domain.Entities.ChatRun",
+                b =>
+                {
+                    b.Navigation("Events");
+                    b.Navigation("Plan");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.ChatSession",
+                b =>
+                {
+                    b.Navigation("Messages");
+                });
+            modelBuilder.Entity(
                 "Domain.Entities.Contact",
                 b =>
                 {
@@ -3993,6 +4381,12 @@ namespace Infrastructure.PostgreSqlMigrations
                 b =>
                 {
                     b.Navigation("Services");
+                });
+            modelBuilder.Entity(
+                "Domain.Entities.StoreChatSession",
+                b =>
+                {
+                    b.Navigation("Messages");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Supplier",

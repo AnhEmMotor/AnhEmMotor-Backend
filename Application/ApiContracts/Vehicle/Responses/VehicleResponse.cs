@@ -28,9 +28,15 @@ namespace Application.ApiContracts.Vehicle.Responses
 
         public string? ColorName { get; set; }
 
+        public string? CategoryName { get; set; }
+
+        public string? ProductName { get; set; }
+
         public string? BrandName { get; set; }
 
         public string? WarrantyPeriod { get; set; }
+
+        public string? ImageUrl { get; set; }
 
         public bool IsActive { get; set; }
 

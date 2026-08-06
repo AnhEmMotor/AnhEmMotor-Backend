@@ -516,8 +516,19 @@ public class StatisticsController(
         [FromQuery] string endDate,
         CancellationToken cancellationToken = default)
     {
-        var start = DateTimeOffset.Parse(startDate);
-        var end = DateTimeOffset.Parse(endDate).AddDays(1).AddTicks(-1);
+        DateTimeOffset start;
+        if (!DateTimeOffset.TryParse(startDate, out start))
+        {
+            start = DateTimeOffset.UtcNow.AddDays(-30);
+        }
+        DateTimeOffset end;
+        if (!DateTimeOffset.TryParse(endDate, out end))
+        {
+            end = DateTimeOffset.UtcNow;
+        } else
+        {
+            end = end.AddDays(1).AddTicks(-1);
+        }
         var ordersQuery = dbContext.OutputOrders
             .IgnoreQueryFilters()
             .Include(o => o.OutputInfos)
@@ -651,17 +662,28 @@ public class StatisticsController(
         [FromQuery] string endDate,
         CancellationToken cancellationToken = default)
     {
-        var start = DateTimeOffset.Parse(startDate);
-        var end = DateTimeOffset.Parse(endDate).AddDays(1).AddTicks(-1);
+        if (!DateTimeOffset.TryParse(startDate, out var parsedStart) ||
+            !DateTimeOffset.TryParse(endDate, out var parsedEnd))
+        {
+            return BadRequest("Khoảng thời gian báo cáo không hợp lệ.");
+        }
+        if (parsedStart.Date > parsedEnd.Date)
+        {
+            return BadRequest("Ngày bắt đầu không được lớn hơn ngày kết thúc.");
+        }
+        var start = parsedStart.Date;
+        var end = parsedEnd.Date.AddDays(1).AddTicks(-1);
         var salesContracts = await dbContext.SalesContracts
             .IgnoreQueryFilters()
             .Where(c => c.CreatedAt >= start && c.CreatedAt <= end)
+            .AsNoTracking()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var supplierContracts = await dbContext.SupplierContracts
             .IgnoreQueryFilters()
             .Include(c => c.Supplier)
-            .Where(c => c.CreatedAt >= start && c.CreatedAt <= end)
+            .Where(c => c.EffectiveDate >= start && c.EffectiveDate <= end)
+            .AsNoTracking()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         int totalSalesCount = salesContracts.Count;
@@ -701,7 +723,7 @@ public class StatisticsController(
         }
         foreach (var supc in supplierContracts)
         {
-            var dayStr = supc.CreatedAt?.ToString("dd/MM") ?? start.ToString("dd/MM");
+            var dayStr = supc.EffectiveDate.ToString("dd/MM");
             if (trendDataDict.ContainsKey(dayStr))
             {
                 var cur = trendDataDict[dayStr];
@@ -725,7 +747,7 @@ public class StatisticsController(
                     supplierName,
                     supc.ContractValue,
                     statusName,
-                    supc.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? string.Empty));
+                    supc.EffectiveDate.ToString("dd/MM/yyyy")));
         }
         var trendDataList = trendDataDict
             .Select(kvp => new ContractTrendData(kvp.Key, kvp.Value.Sales, kvp.Value.Supplier))

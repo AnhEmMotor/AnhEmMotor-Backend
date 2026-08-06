@@ -1,3 +1,4 @@
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
@@ -6,24 +7,22 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 
 namespace Infrastructure.Services.Ai;
-
-public interface IAiSidecarManager
-{
-    public string SidecarUrl { get; }
-}
 
 public class AiSidecarManager(
     IPythonEnvService pythonEnv,
     IConfiguration config,
     ILogger<AiSidecarManager> logger,
     IServer server,
-    IHostApplicationLifetime lifetime) : IHostedService, IAiSidecarManager
+    IHostApplicationLifetime lifetime) : IHostedService, IAiSidecarUrlProvider
 {
     private Process? _sidecarProcess;
 
-    public string SidecarUrl { get; private set; } = "http://localhost:8000";
+    private string _sidecarUrl = "http://127.0.0.1:8000";
+
+    public string GetSidecarUrl() => _sidecarUrl;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -34,7 +33,7 @@ public class AiSidecarManager(
     private async Task StartSidecarProcessAsync()
     {
         var port = GetFreePort();
-        SidecarUrl = $"http://localhost:{port}";
+        _sidecarUrl = $"http://127.0.0.1:{port}";
         var searchPaths = new[] { AppContext.BaseDirectory, Directory.GetCurrentDirectory() };
         string? sidecarDir = null;
         foreach (var startPath in searchPaths)
@@ -64,16 +63,16 @@ public class AiSidecarManager(
             return;
         }
         var pythonExe = await pythonEnv.GetPythonPathAsync(sidecarDir);
-        var mainPy = Path.Combine(sidecarDir, "main.py");
-        if (!File.Exists(mainPy))
+        var appDir = Path.Combine(sidecarDir, "app");
+        if (!Directory.Exists(appDir))
         {
-            logger.LogError("[AiSidecar] Không tìm thấy file main.py tại {Path}", mainPy);
+            logger.LogError("[AiSidecar] Không tìm thấy thư mục app tại {Path}", appDir);
             return;
         }
         var startInfo = new ProcessStartInfo
         {
             FileName = pythonExe,
-            Arguments = $"-m uvicorn main:app --host 0.0.0.0 --port {port} --log-level warning",
+            Arguments = $"-m uvicorn app.main:app --host 127.0.0.1 --port {port} --log-level warning",
             WorkingDirectory = sidecarDir,
             UseShellExecute = false,
             CreateNoWindow = true,
@@ -82,9 +81,12 @@ public class AiSidecarManager(
         };
         var backendUrl = GetInternalBackendUrl();
         startInfo.EnvironmentVariables["BACKEND_URL"] = $"{backendUrl}/api";
-        startInfo.EnvironmentVariables["BACKEND_INTERNAL_SECRET"] = config["Jwt:Key"];
+        startInfo.EnvironmentVariables["BACKEND_INTERNAL_SECRET"] = config["Jwt:Key"] ?? string.Empty;
+        startInfo.EnvironmentVariables["EXPECTED_BUILD_ID"] =
+            typeof(AiSidecarManager).Assembly.GetName().Version?.ToString() ?? "dev";
         startInfo.EnvironmentVariables["PORT"] = port.ToString();
         startInfo.EnvironmentVariables["PYTHONPATH"] = sidecarDir;
+        startInfo.EnvironmentVariables["PYTHONUNBUFFERED"] = "1";
         var isLangSmithEnabled = config.GetValue<bool>("AISetup:LangSmithTracing");
         if (isLangSmithEnabled)
         {
@@ -93,15 +95,24 @@ public class AiSidecarManager(
             startInfo.EnvironmentVariables["LANGCHAIN_PROJECT"] = "AnhEmMotor";
             startInfo.EnvironmentVariables["LANGCHAIN_API_KEY"] = config["AISetup:LangSmithApiKey"] ?? string.Empty;
         }
-        startInfo.EnvironmentVariables["GEMINI_API_KEY"] = config["AISetup:GeminiApiKey"] ?? string.Empty;
-        startInfo.EnvironmentVariables["GEMINI_MODEL"] = config["AISetup:GeminiModel"] ?? "gemini-3.5-flash";
+        startInfo.EnvironmentVariables["AI_PROVIDER"] = config["AISetup:Provider"] ?? "Gemini";
+        startInfo.EnvironmentVariables["AI_API_ENDPOINT"] = config["AISetup:ApiEndpoint"] ?? string.Empty;
+        startInfo.EnvironmentVariables["API_KEY"] = config["AISetup:ApiKey"] ?? string.Empty;
+        startInfo.EnvironmentVariables["MODEL"] = config["AISetup:Model"] ?? string.Empty;
+        startInfo.EnvironmentVariables["QDRANT_URL"] = config["AISetup:QdrantUrl"] ?? string.Empty;
+        startInfo.EnvironmentVariables["QDRANT_API_KEY"] = config["AISetup:QdrantApiKey"] ?? string.Empty;
+        startInfo.EnvironmentVariables["POSTGRES_URL"] = config.GetConnectionString("PostgreSql") ?? string.Empty;
+        var toolFlags = config.GetSection("AISetup:ToolFlags")
+            .GetChildren()
+            .ToDictionary(s => s.Key, s => s.Value ?? "full");
+        startInfo.EnvironmentVariables["TOOL_FLAGS"] = JsonSerializer.Serialize(toolFlags);
         try
         {
             _sidecarProcess = new Process { StartInfo = startInfo };
             _sidecarProcess.OutputDataReceived += (s, e) =>
             {
-                if (e.Data != null && e.Data.Contains("ERROR", StringComparison.OrdinalIgnoreCase))
-                    logger.LogWarning("[Python-Sidecar] {Msg}", e.Data);
+                if (e.Data != null)
+                    logger.LogInformation("[Python-Sidecar] {Msg}", e.Data);
             };
             _sidecarProcess.ErrorDataReceived += (s, e) =>
             {

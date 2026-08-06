@@ -11,17 +11,7 @@ public class FileDeleteService : IFileDeleteService
 
     public FileDeleteService(IWebHostEnvironment environment, IOptions<LocalFileStorageOptions> options)
     {
-        var configPath = options.Value.UploadPath;
-        if (!string.IsNullOrEmpty(configPath))
-        {
-            _uploadFolder = configPath;
-        } else if (string.IsNullOrEmpty(environment.WebRootPath))
-        {
-            _uploadFolder = Path.Combine(Path.GetTempPath(), "AnhEmMotor_Uploads");
-        } else
-        {
-            _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
-        }
+        _uploadFolder = LocalFileStoragePathResolver.Resolve(environment, options);
     }
 
     public bool DeleteFile(string storagePath)

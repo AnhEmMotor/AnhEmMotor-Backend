@@ -3,7 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.WarrantyTerm;
 using Domain.Primitives;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.WarrantyTerms.Queries.GetWarrantyTermsList;
 
@@ -13,8 +12,7 @@ public class GetWarrantyTermsListQueryHandler(IWarrantyTermReadRepository readRe
         GetWarrantyTermsListQuery request,
         CancellationToken cancellationToken)
     {
-        var terms = await readRepository.GetAllAsync(cancellationToken, q => q.Include(t => t.Brand))
-            .ConfigureAwait(false);
+        var terms = await readRepository.GetAllAsync(cancellationToken, includeBrand: true).ConfigureAwait(false);
         var totalCount = terms.Count();
         var query = terms.AsQueryable();
         query = query.OrderByDescending(t => t.Id);
@@ -82,11 +80,11 @@ public class GetWarrantyTermsListQueryHandler(IWarrantyTermReadRepository readRe
                 BrandId = t.BrandId,
                 BrandName = t.Brand?.Name ?? string.Empty,
                 TermName = t.TermName,
-                TermNameJson = t.TermNameJson,
+                TermNameJson = t.TermNameJson ?? string.Empty,
                 VehicleType = t.VehicleType,
                 ErrorCategory = t.ErrorCategory,
                 Description = t.Description,
-                DescriptionJson = t.DescriptionJson,
+                DescriptionJson = t.DescriptionJson ?? string.Empty,
                 DurationMonths = t.DurationMonths,
                 DurationKm = t.DurationKm,
                 Coverage = t.Coverage,

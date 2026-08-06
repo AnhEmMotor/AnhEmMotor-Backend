@@ -16,6 +16,8 @@ public class IssuePartsCommandHandler(
         var history = await readRepo.GetByIdAsync(req.RepairOrderId, ct);
         if (history is null)
             return Result<bool>.Failure([Error.NotFound("Không tìm thấy phiếu sửa chữa.", "RepairOrderId")]);
+        if (req.TechnicianId.HasValue)
+            history.TechnicianId = req.TechnicianId.Value;
         var partsCost = req.Parts.Sum(p => p.Price * p.Count);
         var laborCost = req.Services.Sum(s => s.LaborCost);
         history.PartsCost = partsCost;

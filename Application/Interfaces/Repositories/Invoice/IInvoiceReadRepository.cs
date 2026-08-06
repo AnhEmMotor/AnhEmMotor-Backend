@@ -13,5 +13,5 @@ public interface IInvoiceReadRepository
 
     public Task<InvoiceEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
-    public Task<List<InvoiceEntity>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
+    public Task<List<InvoiceEntity>> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default);
 }

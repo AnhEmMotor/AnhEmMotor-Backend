@@ -17,10 +17,15 @@ public class AssignSupportRequestCommandHandler(
             .ConfigureAwait(false);
         if (supportRequest == null)
             return Result<int>.Failure("Không tìm thấy yêu cầu hỗ trợ.");
+        if (supportRequest.Status == SupportRequestStatus.Closed)
+            return Result<int>.Failure("Yêu cầu đã hoàn tất nên không thể phân công lại.");
         supportRequest.AssignedUserId = request.AssignedUserId;
         supportRequest.Status = request.AssignedUserId == null
             ? SupportRequestStatus.New
             : SupportRequestStatus.Assigned;
+        supportRequest.AssignedAt = request.AssignedUserId == null ? null : DateTimeOffset.UtcNow;
+        supportRequest.StartedAt = null;
+        supportRequest.ClosedAt = null;
         await supportRequestRepository.UpdateAsync(supportRequest, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(supportRequest.Id);

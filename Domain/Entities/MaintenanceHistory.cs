@@ -27,4 +27,6 @@ public class MaintenanceHistory : BaseEntity
     public DateTimeOffset? NextMaintenanceDate { get; set; }
 
     public int? NextMaintenanceOdo { get; set; }
+
+    public string? ServiceType { get; set; }
 }

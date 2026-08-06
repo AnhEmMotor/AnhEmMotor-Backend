@@ -98,6 +98,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<RoleSelectResponse>(p => p.ID).CanSort().CanFilter();
         mapper.Property<RoleSelectResponse>(p => p.Name).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.Id).CanSort().CanFilter();
+        mapper.Property<Vehicle>(v => v.LeadId).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.VinNumber).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.EngineNumber).CanSort().CanFilter();
         mapper.Property<Vehicle>(v => v.LicensePlate).CanSort().CanFilter();

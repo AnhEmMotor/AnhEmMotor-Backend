@@ -4,9 +4,11 @@ using MediatR;
 
 namespace Application.Features.Vouchers.Queries.ValidateVoucher;
 
-public class VoucherValidateQuery(int voucherId, int outputId) : IRequest<Result<VoucherValidateResponse>>
+public class VoucherValidateQuery(int voucherId, int? outputId, decimal? orderTotal) : IRequest<Result<VoucherValidateResponse>>
 {
     public int VoucherId { get; } = voucherId;
 
-    public int OutputId { get; } = outputId;
+    public int? OutputId { get; } = outputId;
+
+    public decimal? OrderTotal { get; } = orderTotal;
 }

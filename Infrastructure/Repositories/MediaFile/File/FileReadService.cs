@@ -9,32 +9,26 @@ namespace Infrastructure.Repositories.MediaFile.File;
 public class FileReadService : IFileReadService
 {
     private readonly string _uploadFolder;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IFileUpdateService _fileUpdateService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public FileReadService(
         IWebHostEnvironment environment,
-        IHttpContextAccessor httpContextAccessor,
         IOptions<LocalFileStorageOptions> options,
-        IFileUpdateService fileUpdateService)
+        IFileUpdateService fileUpdateService,
+        IHttpContextAccessor httpContextAccessor)
     {
-        _httpContextAccessor = httpContextAccessor;
         _fileUpdateService = fileUpdateService;
-        var configPath = options.Value.UploadPath;
-        if (!string.IsNullOrEmpty(configPath))
-        {
-            _uploadFolder = configPath;
-        } else if (string.IsNullOrEmpty(environment.WebRootPath))
-        {
-            _uploadFolder = Path.Combine(Path.GetTempPath(), "AnhEmMotor_Uploads");
-        } else
-        {
-            _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
-        }
+        _httpContextAccessor = httpContextAccessor;
+        _uploadFolder = LocalFileStoragePathResolver.Resolve(environment, options);
     }
 
     public string GetPublicUrl(string storagePath)
     {
+        if (string.IsNullOrWhiteSpace(storagePath))
+            return string.Empty;
+        if (storagePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            return storagePath;
         storagePath = storagePath.TrimStart('/', '\\');
         var request = _httpContextAccessor.HttpContext?.Request;
         if (request is null)
@@ -60,7 +54,7 @@ public class FileReadService : IFileReadService
             } else
             {
                 var fallbackPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", storagePath);
-                if (System.IO.File.Exists(fallbackPath))
+                if (!System.IO.File.Exists(fallbackPath))
                 {
                     fullPath = fallbackPath;
                 } else

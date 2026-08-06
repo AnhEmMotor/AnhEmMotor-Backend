@@ -18,7 +18,7 @@ public class RejectReturnCommandHandler(
             return false;
         order.RejectionReason = request.RejectionReason;
         order.ReturnAction = "rejected";
-        order.InspectedAt = DateTime.UtcNow;
+        order.InspectedAt ??= DateTime.UtcNow;
         updateRepo.Update(order);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return true;

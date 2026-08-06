@@ -8,5 +8,7 @@ public interface ICurrentUserContext
 
     public Guid GetUserId();
 
+    public Guid? GetUserIdOrNull();
+
     public string GetAccessToken();
 }

@@ -3,13 +3,14 @@ namespace Domain.Constants;
 public static class SalesContractStatus
 {
     public const string Draft = "Draft";
+    public const string PendingApproval = "PendingApproval";
     public const string Approved = "Approved";
     public const string Signed = "Signed";
     public const string Fulfilled = "Fulfilled";
 
-    public static readonly string[] AllowedValues = [Draft, Approved, Signed, Fulfilled];
+    public static readonly string[] AllowedValues = [Draft, PendingApproval, Approved, Signed, Fulfilled];
 
-    public static readonly List<string> All = [Draft, Approved, Signed, Fulfilled];
+    public static readonly List<string> All = [Draft, PendingApproval, Approved, Signed, Fulfilled];
 
     public static bool IsValid(string? value)
     {

@@ -12,9 +12,17 @@ public class GetStoreSettingsQueryHandler(ISettingRepository settingRepository) 
         CancellationToken cancellationToken)
     {
         var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        var publicKeys = new[] { SettingKeys.OrderValueExceeds, SettingKeys.DepositRatio };
+        var publicKeys = new[]
+        {
+            SettingKeys.OrderValueExceeds,
+            SettingKeys.DepositRatio,
+            SettingKeys.DepositType,
+            SettingKeys.FixedDepositAmount
+        };
         var filtered = settings
-            .Where(s => publicKeys.Contains(s.Key, StringComparer.OrdinalIgnoreCase))
+            .Where(
+                s => publicKeys.Contains(s.Key, StringComparer.OrdinalIgnoreCase) ||
+                    s.Key.StartsWith("Deposit_", StringComparison.OrdinalIgnoreCase))
             .ToDictionary(s => s.Key, s => s.Value);
         return filtered;
     }

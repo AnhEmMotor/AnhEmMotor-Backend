@@ -39,4 +39,9 @@ public class VoucherReadRepository(ApplicationDBContext context, ISievePaginator
     {
         return context.Vouchers.AnyAsync(v => v.Code == code && v.Id != excludeId, cancellationToken);
     }
+
+    public Task<Domain.Entities.Voucher?> GetByCodeAsync(string code, CancellationToken cancellationToken)
+    {
+        return context.Vouchers.Include(v => v.VoucherLeads).FirstOrDefaultAsync(v => v.Code == code, cancellationToken);
+    }
 }

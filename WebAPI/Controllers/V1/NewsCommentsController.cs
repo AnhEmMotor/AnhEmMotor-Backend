@@ -1,9 +1,11 @@
 using Application.Common.Models;
+using Application.Features.NewsComments.Commands.CreateNewsComment;
 using Application.Features.NewsComments.Queries.GetNewsComments;
 using Asp.Versioning;
 using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
@@ -43,6 +45,36 @@ public class NewsCommentsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetByNewsId(int newsId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetNewsCommentsQuery(newsId), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách bình luận công khai theo loại và slug (dành cho Store).
+    /// </summary>
+    [HttpGet("public")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<NewsCommentResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPublicComments(
+        [FromQuery] string? articleType,
+        [FromQuery] string? articleSlug,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetNewsCommentsQuery(null, articleType, articleSlug), cancellationToken)
+            .ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tạo mới một bình luận công khai (dành cho Store).
+    /// </summary>
+    [HttpPost("public")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> CreatePublicComment(
+        [FromBody] CreateNewsCommentCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

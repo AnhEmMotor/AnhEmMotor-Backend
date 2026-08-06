@@ -3,8 +3,10 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.Vehicle;
+using Domain.Constants;
 using FluentAssertions;
 using Moq;
+using ProductEntity = Domain.Entities.Product;
 
 namespace UnitTests;
 
@@ -30,7 +32,8 @@ public class VehicleAsset
     {
         var engineNumber = "ENG999";
         _leadReadRepoMock.Setup(x => x.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        _productReadRepoMock.Setup(x => x.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(new ProductEntity { Id = 1 });
         _readRepoMock.Setup(x => x.ExistsByVinAsync("VIN001", It.IsAny<CancellationToken>())).ReturnsAsync(false);
         _readRepoMock.Setup(x => x.ExistsByEngineNumberAsync(engineNumber, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
@@ -56,7 +59,8 @@ public class VehicleAsset
     public async Task CreateVehicle_EmptyVin_ReturnsBadRequest()
     {
         _leadReadRepoMock.Setup(x => x.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        _productReadRepoMock.Setup(x => x.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(new ProductEntity { Id = 1 });
         var handler = new CreateVehicleCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
