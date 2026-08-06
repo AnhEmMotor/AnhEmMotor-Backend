@@ -12,7 +12,7 @@ public static class SalesContractSeeder
         if (await context.SalesContracts.AnyAsync(cancellationToken).ConfigureAwait(false))
             return;
         var customers = await context.Users
-            .Where(u => u.Email == "kimngan@gmail.com" || u.Email == "minhuyen@gmail.com")
+            .Where(u => u.Email == "nam.nguyen@gmail.com" || u.Email == "nguyenvana@gmail.com")
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var outputs = await context.OutputOrders
@@ -40,7 +40,6 @@ public static class SalesContractSeeder
         var contracts = new List<SalesContract>();
         foreach (var output in outputs.Take(40))
         {
-            var customer = customers[random.Next(customers.Count)];
             var info = output.OutputInfos.First();
             var variant = info.ProductVariant;
             var product = variant?.Product;
@@ -57,15 +56,15 @@ public static class SalesContractSeeder
                 Id = Guid.NewGuid(),
                 ContractNumber = $"HDXC-{now.Year}-{contracts.Count + 1:D4}",
                 OutputId = output.Id,
-                CustomerId = customer.Id,
+                CustomerId = output.BuyerId,
                 ShowroomName = "Anh Em Motor Showroom",
                 ShowroomTaxCode = $"0{random.Next(10000, 99999)}{random.Next(10000, 99999)}",
                 ShowroomAddress = "123 Nguyễn Trãi, Thanh Xuân, Hà Nội",
                 ShowroomRepresentative = "Nguyễn Văn A",
-                CustomerFullName = customer.FullName ?? customer.Email,
+                CustomerFullName = output.CustomerName ?? "Khách Hàng",
                 CustomerCCCD = $"0{random.Next(100000, 999999)}{random.Next(100000, 999999)}",
-                CustomerAddress = customer.Email!.Split('@')[0] + " Address",
-                CustomerPhone = $"+84{random.Next(900000000, 999999999)}",
+                CustomerAddress = output.CustomerAddress ?? "Hà Nội",
+                CustomerPhone = output.CustomerPhone ?? $"+84{random.Next(900000000, 999999999)}",
                 VehicleModel = product?.Name ?? brand?.Name ?? "Xe máy",
                 VehicleVersion = variant?.VariantName ?? "Tiêu chuẩn",
                 VehicleColor = info.ProductVariantColorId.HasValue ? "Đen" : "Trắng",
