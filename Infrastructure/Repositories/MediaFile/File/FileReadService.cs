@@ -54,7 +54,7 @@ public class FileReadService : IFileReadService
             } else
             {
                 var fallbackPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", storagePath);
-                if (!System.IO.File.Exists(fallbackPath))
+                if (System.IO.File.Exists(fallbackPath))
                 {
                     fullPath = fallbackPath;
                 } else

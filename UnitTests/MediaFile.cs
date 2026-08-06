@@ -650,6 +650,40 @@ public class MediaFile
             }
         }
     }
+    [Fact(DisplayName = "MF_053 - GetFileAsync tìm được file khi chỉ tồn tại ở fallback wwwroot path")]
+    public async Task GetFileAsync_FileOnlyInWwwrootFallback_Found()
+    {
+        var storagePath = $"mf053-{Guid.NewGuid():N}.webp";
+        var fallbackDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var fallbackFile = Path.Combine(fallbackDir, storagePath);
+        var missingUploadFolder = Path.Combine(Path.GetTempPath(), $"mf053-missing-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(fallbackDir);
+        await File.WriteAllBytesAsync(
+            fallbackFile,
+            [1, 2, 3, 4],
+            TestContext.Current.CancellationToken).ConfigureAwait(true);
+        try
+        {
+            var environment = new Mock<IWebHostEnvironment>();
+            environment.SetupGet(x => x.ContentRootPath).Returns(missingUploadFolder);
+            environment.SetupGet(x => x.WebRootPath)
+                .Returns(Path.Combine(Path.GetTempPath(), $"mf053-missing-webroot-{Guid.NewGuid():N}"));
+            var httpContextAccessor = new Mock<IHttpContextAccessor>();
+            httpContextAccessor.Setup(x => x.HttpContext).Returns((HttpContext?)null);
+            var service = new FileReadService(
+                environment.Object,
+                Options.Create(new LocalFileStorageOptions { UploadPath = missingUploadFolder }),
+                _fileUpdateServiceMock.Object,
+                httpContextAccessor.Object);
+            var result = await service.GetFileAsync(storagePath, TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
+            result.Should().NotBeNull();
+            result!.Value.FileBytes.Should().Equal([1, 2, 3, 4]);
+        } finally
+        {
+            File.Delete(fallbackFile);
+        }
+    }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
