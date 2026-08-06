@@ -23,9 +23,9 @@ async def lifespan(application: FastAPI):
     if rag_enabled():
         try:
             await qc.ensure_collections()
-        except Exception:
-            logger.exception("Không kết nối được Qdrant lúc khởi động — RAG sẽ lỗi khi dùng, "
-                              "nhưng sidecar vẫn chạy bình thường bằng SQL.")
+        except Exception as exc:
+            logger.warning("Không kết nối được Qdrant lúc khởi động (%s) — RAG sẽ lỗi khi dùng, "
+                            "nhưng sidecar vẫn chạy bình thường bằng SQL.", exc)
     yield
     logger.info("AI Sidecar shutting down")
 
