@@ -41,32 +41,30 @@ namespace Application.Features.Leads.Commands.CreateLead
                 Gender = request.Gender
             };
             await leadInsertRepository.AddAsync(lead, cancellationToken).ConfigureAwait(false);
-
-            // Create user account automatically
-            string email = string.IsNullOrWhiteSpace(request.Email) ? "" : request.Email.Trim();
-            string phone = string.IsNullOrWhiteSpace(request.PhoneNumber) ? "" : request.PhoneNumber.Trim();
+            string email = string.IsNullOrWhiteSpace(request.Email) ? string.Empty : request.Email.Trim();
+            string phone = string.IsNullOrWhiteSpace(request.PhoneNumber) ? string.Empty : request.PhoneNumber.Trim();
             string username = string.IsNullOrEmpty(phone) ? email : phone;
             if (!string.IsNullOrEmpty(username))
             {
-                username = Regex.Replace(username, @"[^a-zA-Z0-9_\-\.@]", "");
+                username = Regex.Replace(username, @"[^a-zA-Z0-9_\-\.@]", string.Empty);
             }
             if (string.IsNullOrEmpty(username))
             {
                 username = $"customer_{lead.Id}";
             }
-
-            var existingUser = await userReadRepository.FindUserByUsernameAsync(username, cancellationToken).ConfigureAwait(false);
+            var existingUser = await userReadRepository.FindUserByUsernameAsync(username, cancellationToken)
+                .ConfigureAwait(false);
             if (existingUser == null && !string.IsNullOrEmpty(email))
             {
-                existingUser = await userReadRepository.FindUserByEmailAsync(email, cancellationToken).ConfigureAwait(false);
+                existingUser = await userReadRepository.FindUserByEmailAsync(email, cancellationToken)
+                    .ConfigureAwait(false);
             }
-            
             var customerRole = "Customer";
             if (!await roleReadRepository.IsRoleExistAsync(customerRole, cancellationToken).ConfigureAwait(false))
             {
-                await roleInsertRepository.CreateAsync(new ApplicationRole { Name = customerRole }, cancellationToken).ConfigureAwait(false);
+                await roleInsertRepository.CreateAsync(new ApplicationRole { Name = customerRole }, cancellationToken)
+                    .ConfigureAwait(false);
             }
-
             if (existingUser == null)
             {
                 var newUser = new ApplicationUser
@@ -78,22 +76,26 @@ namespace Application.Features.Leads.Commands.CreateLead
                     Status = UserStatus.Active,
                     Gender = request.Gender ?? GenderStatus.Other
                 };
-
-                var (succeeded, _) = await userCreateRepository.CreateUserAsync(newUser, "Khachhang@123", cancellationToken).ConfigureAwait(false);
+                var (succeeded, _) = await userCreateRepository.CreateUserAsync(
+                    newUser,
+                    "Khachhang@123",
+                    cancellationToken)
+                    .ConfigureAwait(false);
                 if (succeeded)
                 {
-                    await userCreateRepository.AddUserToRoleAsync(newUser, customerRole, cancellationToken).ConfigureAwait(false);
+                    await userCreateRepository.AddUserToRoleAsync(newUser, customerRole, cancellationToken)
+                        .ConfigureAwait(false);
                 }
-            }
-            else
+            } else
             {
-                var roles = await userReadRepository.GetUserRolesAsync(existingUser, cancellationToken).ConfigureAwait(false);
+                var roles = await userReadRepository.GetUserRolesAsync(existingUser, cancellationToken)
+                    .ConfigureAwait(false);
                 if (!roles.Contains(customerRole))
                 {
-                    await userCreateRepository.AddUserToRoleAsync(existingUser, customerRole, cancellationToken).ConfigureAwait(false);
+                    await userCreateRepository.AddUserToRoleAsync(existingUser, customerRole, cancellationToken)
+                        .ConfigureAwait(false);
                 }
             }
-
             return lead.Id;
         }
     }

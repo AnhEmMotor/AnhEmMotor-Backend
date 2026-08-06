@@ -13,7 +13,6 @@ public class AiSearchRuleParserTests
     public void TryParse_BrandAndMaxPrice_ReturnsResult()
     {
         var result = AiSearchRuleParser.TryParse("Honda dưới 40 triệu", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.Brand.Should().Be("Honda");
         result.PriceMax.Should().Be(40_000_000);
@@ -23,7 +22,6 @@ public class AiSearchRuleParserTests
     public void TryParse_TypoBrand_StillMatchesViaFuzzy()
     {
         var result = AiSearchRuleParser.TryParse("Hnoda xe ga", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.Brand.Should().Be("Honda");
         result.VehicleType.Should().Be("Xe ga");
@@ -33,7 +31,6 @@ public class AiSearchRuleParserTests
     public void TryParse_PriceRange_ReturnsMinAndMax()
     {
         var result = AiSearchRuleParser.TryParse("xe số từ 20 đến 30 triệu", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.VehicleType.Should().Be("Xe số");
         result.PriceMin.Should().Be(20_000_000);
@@ -44,7 +41,6 @@ public class AiSearchRuleParserTests
     public void TryParse_ShortPlainKeyword_ReturnsPassthrough()
     {
         var result = AiSearchRuleParser.TryParse("SH 150i", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.Keyword.Should().Be("SH 150i");
         result.Brand.Should().BeEmpty();
@@ -58,7 +54,6 @@ public class AiSearchRuleParserTests
             Brands,
             Categories,
             VehicleTypes);
-
         result.Should().BeNull();
     }
 
@@ -66,7 +61,6 @@ public class AiSearchRuleParserTests
     public void TryParse_Color_AddsToColorsList()
     {
         var result = AiSearchRuleParser.TryParse("Yamaha màu đỏ", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.Brand.Should().Be("Yamaha");
         result.Colors.Should().Contain("đỏ");
@@ -76,7 +70,6 @@ public class AiSearchRuleParserTests
     public void TryParse_MinPriceOnly_ReturnsPriceMin()
     {
         var result = AiSearchRuleParser.TryParse("Suzuki trên 25 triệu", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.Brand.Should().Be("Suzuki");
         result.PriceMin.Should().Be(25_000_000);
@@ -86,7 +79,6 @@ public class AiSearchRuleParserTests
     public void TryParse_ThousandUnit_ConvertsCorrectly()
     {
         var result = AiSearchRuleParser.TryParse("mũ bảo hiểm dưới 500k", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.PriceMax.Should().Be(500_000);
     }
@@ -95,7 +87,6 @@ public class AiSearchRuleParserTests
     public void TryParse_MultipleColors_AddsAllToColorsList()
     {
         var result = AiSearchRuleParser.TryParse("Honda đỏ đen", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.Brand.Should().Be("Honda");
         result.Colors.Should().BeEquivalentTo(["đỏ", "đen"]);
@@ -105,7 +96,6 @@ public class AiSearchRuleParserTests
     public void TryParse_ExactlyThreeUnmatchedWords_ReturnsPassthrough()
     {
         var result = AiSearchRuleParser.TryParse("áo mưa xịn", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.Keyword.Should().Be("áo mưa xịn");
     }
@@ -114,7 +104,6 @@ public class AiSearchRuleParserTests
     public void TryParse_FourUnmatchedWords_ReturnsNullForLlmFallback()
     {
         var result = AiSearchRuleParser.TryParse("áo mưa xịn đẹp", Brands, Categories, VehicleTypes);
-
         result.Should().BeNull();
     }
 
@@ -122,7 +111,6 @@ public class AiSearchRuleParserTests
     public void TryParse_UpperCaseInput_StillMatchesBrand()
     {
         var result = AiSearchRuleParser.TryParse("HONDA DƯỚI 30 TRIỆU", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.Brand.Should().Be("Honda");
         result.PriceMax.Should().Be(30_000_000);
@@ -132,7 +120,6 @@ public class AiSearchRuleParserTests
     public void TryParse_ColorDenWithoutRangeContext_StillMatchesAsColor()
     {
         var result = AiSearchRuleParser.TryParse("Honda màu đen", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.Brand.Should().Be("Honda");
         result.Colors.Should().Contain("đen");
@@ -143,7 +130,6 @@ public class AiSearchRuleParserTests
     public void TryParse_XeTayGaColloquialism_MatchesVehicleTypeXeGa()
     {
         var result = AiSearchRuleParser.TryParse("xe tay ga nữ dưới 40 triệu", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.VehicleType.Should().Be("Xe ga");
         result.Category.Should().BeEmpty();
@@ -151,11 +137,11 @@ public class AiSearchRuleParserTests
         result.Keyword.Should().Be("nữ");
     }
 
-    [Fact(DisplayName = "AISEARCH_15 - 'xe tay' (không có 'ga' theo sau) không bị nhận nhầm thành category 'Xe máy' (regression)")]
+    [Fact(
+        DisplayName = "AISEARCH_15 - 'xe tay' (không có 'ga' theo sau) không bị nhận nhầm thành category 'Xe máy' (regression)")]
     public void TryParse_XeTayWithoutGa_DoesNotFalselyMatchCategory()
     {
         var result = AiSearchRuleParser.TryParse("xe tay đẹp", Brands, Categories, VehicleTypes);
-
         result.Should().NotBeNull();
         result!.Category.Should().BeEmpty();
         result.Keyword.Should().Be("xe tay đẹp");

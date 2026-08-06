@@ -10,7 +10,6 @@ public class ServerDateProvider
     [Fact(DisplayName = "SERVERDATE_01 - Unit - VietnamDayRangeUtc trả đúng biên UTC cho 1 ngày giờ VN")]
     public void VietnamDayRangeUtc_ReturnsCorrectUtcBoundaries()
     {
-        // 2026-07-26 (giờ VN) bắt đầu lúc 2026-07-25 17:00 UTC (VN = UTC+7) và kết thúc lúc 2026-07-26 17:00 UTC.
         var (start, end) = _provider.VietnamDayRangeUtc(new DateOnly(2026, 7, 26));
         start.Should().Be(new DateTime(2026, 7, 25, 17, 0, 0, DateTimeKind.Utc));
         end.Should().Be(new DateTime(2026, 7, 26, 17, 0, 0, DateTimeKind.Utc));
@@ -25,12 +24,10 @@ public class ServerDateProvider
         vietnam.Offset.Should().Be(TimeSpan.FromHours(7));
     }
 
-    // Đúng ca biên gây lệch ngày mô tả ở Stage 16.2 mục #2: UTC 17:00 hôm trước = 00:00 giờ VN hôm sau.
     [Fact(DisplayName = "SERVERDATE_03 - Unit - VietnamToday không lệch ngày trong khung 00:00-07:00 giờ VN")]
     public void VietnamToday_DoesNotLagBehindDuringEarlyMorningVietnamHours()
     {
         var (_, endOfJuly25Utc) = _provider.VietnamDayRangeUtc(new DateOnly(2026, 7, 25));
-        // endOfJuly25Utc = 2026-07-25T17:00:00Z = 2026-07-26T00:00:00+07:00 → đầu ngày 26/07 giờ VN.
         var vietnamNowAtBoundary = new DateTimeOffset(endOfJuly25Utc, TimeSpan.Zero).ToOffset(TimeSpan.FromHours(7));
         DateOnly.FromDateTime(vietnamNowAtBoundary.Date).Should().Be(new DateOnly(2026, 7, 26));
     }

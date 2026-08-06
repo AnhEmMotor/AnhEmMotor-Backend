@@ -1,15 +1,15 @@
-using System.Text.Json;
 using Application.Features.ChatTools.Common;
 using Application.Features.ChatTools.Queries.GetOrderStatusForChat;
 using Application.Features.ChatTools.Queries.GetSalesSummaryForChat;
 using FluentAssertions;
+using System.Text.Json;
 
 namespace UnitTests.Snapshots;
 
 /// <summary>
-/// Stage 16.7 — chống DTO trôi. Không thêm package snapshot mới (Verify.Xunit) chỉ cho việc này;
-/// so trực tiếp JSON serialize với file .json commit sẵn bằng FluentAssertions đã có sẵn trong dự án.
-/// Field bị đổi tên/xoá mà quên cập nhật tool → test đỏ ngay.
+/// Stage 16.7 — chống DTO trôi. Không thêm package snapshot mới (Verify.Xunit) chỉ cho việc này; so trực tiếp JSON
+/// serialize với file .json commit sẵn bằng FluentAssertions đã có sẵn trong dự án. Field bị đổi tên/xoá mà quên cập
+/// nhật tool → test đỏ ngay.
 /// </summary>
 public class ChatToolEnvelopeContract
 {
@@ -40,7 +40,6 @@ public class ChatToolEnvelopeContract
             1,
             false);
         var envelope = ChatToolEnvelope<ChatDailyRevenueDto>.Wrap(inner, meta);
-
         AssertMatchesSnapshot(envelope, "chat-tool-envelope-list.json");
     }
 
@@ -55,7 +54,6 @@ public class ChatToolEnvelopeContract
             "VND");
         var dto = new ChatOrderStatusDto { OrderId = 123, StatusId = "completed", Total = 5000000 };
         var envelope = ChatToolEnvelope<ChatOrderStatusDto>.WrapSingle(dto, meta);
-
         AssertMatchesSnapshot(envelope, "chat-tool-envelope-single.json");
     }
 
@@ -63,7 +61,6 @@ public class ChatToolEnvelopeContract
     {
         var actual = JsonSerializer.Serialize(value, Options);
         var path = Path.Combine(SnapshotDir(), fileName);
-
         if (!File.Exists(path))
         {
             Directory.CreateDirectory(SnapshotDir());
@@ -71,9 +68,11 @@ public class ChatToolEnvelopeContract
             throw new InvalidOperationException(
                 $"Chưa có snapshot {fileName} — đã tạo mới, hãy review rồi commit file này.");
         }
-
         var expected = File.ReadAllText(path);
-        actual.Should().Be(expected, $"shape của envelope đã đổi so với snapshot commit sẵn {fileName} — nếu đây là" +
-            " thay đổi có chủ đích, xoá file snapshot và chạy lại test để tạo bản mới rồi commit.");
+        actual.Should()
+            .Be(
+                expected,
+                $"shape của envelope đã đổi so với snapshot commit sẵn {fileName} — nếu đây là" +
+                    " thay đổi có chủ đích, xoá file snapshot và chạy lại test để tạo bản mới rồi commit.");
     }
 }

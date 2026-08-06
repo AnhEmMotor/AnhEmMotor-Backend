@@ -1,8 +1,8 @@
 using Application.ApiContracts.SalesContracts.Requests;
 using Application.Common.Models;
 using Application.Features.SalesContracts.Commands.CreateSalesContract;
-using Application.Features.SalesContracts.Commands.UploadSalesContractScan;
 using Application.Features.SalesContracts.Commands.UpdateSalesContractStatus;
+using Application.Features.SalesContracts.Commands.UploadSalesContractScan;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile.File;
 using Application.Interfaces.Repositories.Output;
@@ -109,14 +109,11 @@ public class SalesContractScan
         var contract = new SalesContract { Id = contractId, Status = SalesContractStatus.Draft };
         _readRepository.Setup(repository => repository.GetByIdAsync(contractId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(contract);
-        var handler = new UpdateSalesContractStatusCommandHandler(
-            _readRepository.Object,
-            _unitOfWork.Object);
-
+        var handler = new UpdateSalesContractStatusCommandHandler(_readRepository.Object, _unitOfWork.Object);
         var result = await handler.Handle(
             new UpdateSalesContractStatusCommand(contractId, SalesContractStatus.PendingApproval),
-            CancellationToken.None).ConfigureAwait(true);
-
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         contract.Status.Should().Be(SalesContractStatus.PendingApproval);
         contract.SignedDate.Should().BeNull();
@@ -130,17 +127,11 @@ public class SalesContractScan
         var contract = new SalesContract { Id = contractId, Status = SalesContractStatus.PendingApproval };
         _readRepository.Setup(repository => repository.GetByIdAsync(contractId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(contract);
-        var handler = new UpdateSalesContractStatusCommandHandler(
-            _readRepository.Object,
-            _unitOfWork.Object);
-
+        var handler = new UpdateSalesContractStatusCommandHandler(_readRepository.Object, _unitOfWork.Object);
         var result = await handler.Handle(
-            new UpdateSalesContractStatusCommand(
-                contractId,
-                SalesContractStatus.Approved,
-                IsAdminApproval: true),
-            CancellationToken.None).ConfigureAwait(true);
-
+            new UpdateSalesContractStatusCommand(contractId, SalesContractStatus.Approved, IsAdminApproval: true),
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         contract.Status.Should().Be(SalesContractStatus.Approved);
         contract.SignedDate.Should().BeNull();
@@ -154,14 +145,11 @@ public class SalesContractScan
         var contract = new SalesContract { Id = contractId, Status = SalesContractStatus.PendingApproval };
         _readRepository.Setup(repository => repository.GetByIdAsync(contractId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(contract);
-        var handler = new UpdateSalesContractStatusCommandHandler(
-            _readRepository.Object,
-            _unitOfWork.Object);
-
+        var handler = new UpdateSalesContractStatusCommandHandler(_readRepository.Object, _unitOfWork.Object);
         var result = await handler.Handle(
             new UpdateSalesContractStatusCommand(contractId, SalesContractStatus.Approved),
-            CancellationToken.None).ConfigureAwait(true);
-
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         contract.Status.Should().Be(SalesContractStatus.PendingApproval);
         _unitOfWork.VerifyNoOtherCalls();
@@ -179,7 +167,6 @@ public class SalesContractScan
             new UpdateSalesContractStatusCommand(contractId, SalesContractStatus.Approved),
             CancellationToken.None)
             .ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         contract.Status.Should().Be(SalesContractStatus.Draft);
         _unitOfWork.VerifyNoOtherCalls();
@@ -214,11 +201,10 @@ public class SalesContractScan
             _insertRepository.Object,
             _orderReadRepository.Object,
             _unitOfWork.Object);
-
         var result = await handler.Handle(
             new CreateSalesContractCommand(new CreateSalesContractRequest { OrderId = orderId }),
-            CancellationToken.None).ConfigureAwait(true);
-
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Contain("đã được xác nhận");
         _insertRepository.VerifyNoOtherCalls();
@@ -234,21 +220,16 @@ public class SalesContractScan
             .ReturnsAsync(new Output { Id = orderId, StatusId = OrderStatus.ConfirmedCod });
         _readRepository
             .Setup(repository => repository.GetByOrderIdAsync(orderId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new SalesContract
-            {
-                OutputId = orderId,
-                ContractNumber = "HDMB-EXISTING",
-            });
+            .ReturnsAsync(new SalesContract { OutputId = orderId, ContractNumber = "HDMB-EXISTING", });
         var handler = new CreateSalesContractCommandHandler(
             _readRepository.Object,
             _insertRepository.Object,
             _orderReadRepository.Object,
             _unitOfWork.Object);
-
         var result = await handler.Handle(
             new CreateSalesContractCommand(new CreateSalesContractRequest { OrderId = orderId }),
-            CancellationToken.None).ConfigureAwait(true);
-
+            CancellationToken.None)
+            .ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Contain("đã được liên kết");
         _insertRepository.VerifyNoOtherCalls();

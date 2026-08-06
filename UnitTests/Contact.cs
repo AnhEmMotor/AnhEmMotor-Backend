@@ -64,17 +64,14 @@ public class Contact
             supportRequestRepoMock.Object,
             _contactInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler
             .Handle(new CreateSupportRequestCommand(request), CancellationToken.None)
             .ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         _contactInsertRepoMock.Verify(
             repository => repository.Add(
                 It.Is<Domain.Entities.Contact>(
-                    contact =>
-                        contact.FullName == request.FullName &&
+                    contact => contact.FullName == request.FullName &&
                         contact.PhoneNumber == request.PhoneNumber &&
                         contact.Email == request.Email)),
             Times.Once);

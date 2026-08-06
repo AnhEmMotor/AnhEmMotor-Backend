@@ -6,8 +6,8 @@ using Application.Features.Leads.Commands.AssignLead;
 using Application.Features.Leads.Commands.CreateLead;
 using Application.Features.Leads.Commands.DeleteLead;
 using Application.Features.Leads.Commands.ResetLeads;
-using Application.Features.Leads.Commands.UpdateLead;
 using Application.Features.Leads.Commands.SyncLeadsToUsers;
+using Application.Features.Leads.Commands.UpdateLead;
 using Application.Features.Leads.Queries.GetLeadById;
 using Application.Features.Leads.Queries.GetLeadPipeline;
 using Application.Features.Leads.Queries.GetLeads;
@@ -174,7 +174,7 @@ public class LeadController(IMediator mediator) : ApiController
         var result = await mediator.Send(new ResetLeadsCommand(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
-    
+
     /// <summary>
     /// Đồng bộ khách hàng tiềm năng sang tài khoản người dùng
     /// </summary>

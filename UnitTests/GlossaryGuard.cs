@@ -4,15 +4,7 @@ namespace UnitTests;
 
 public class GlossaryGuard
 {
-    private static readonly string[] RequiredHeadings =
-    [
-        "## Doanh thu",
-        "## Số đơn hàng",
-        "## Lợi nhuận",
-        "## Tồn kho",
-        "## Khách hàng mới",
-        "## \"Tháng này\""
-    ];
+    private static readonly string[] RequiredHeadings =["## Doanh thu", "## Số đơn hàng", "## Lợi nhuận", "## Tồn kho", "## Khách hàng mới", "## \"Tháng này\""];
 
     private static string RepoRoot()
     {
@@ -28,7 +20,6 @@ public class GlossaryGuard
     {
         var path = Path.Combine(RepoRoot(), "docs", "chatbot-ai", "GLOSSARY.md");
         File.Exists(path).Should().BeTrue("GLOSSARY.md phải tồn tại trước khi viết tool tài chính, xem Stage 16.4");
-
         var content = File.ReadAllText(path);
         foreach (var heading in RequiredHeadings)
         {

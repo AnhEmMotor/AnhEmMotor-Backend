@@ -81,7 +81,9 @@ namespace UnitTests
         [Fact(DisplayName = "IRP_007 - Unit: ExportInventoryReportQueryHandler - Success")]
         public async Task IRP_007_ExportInventoryReport_Success()
         {
-            var handler = new ExportInventoryReportQueryHandler(_inventoryOnHandRepoMock.Object, _excelServiceMock.Object);
+            var handler = new ExportInventoryReportQueryHandler(
+                _inventoryOnHandRepoMock.Object,
+                _excelServiceMock.Object);
             var items = new List<InventoryReportSummaryRowResponse> { new() };
             _inventoryOnHandRepoMock.Setup(
                 x => x.GetInventoryReportSummaryRowsAsync(

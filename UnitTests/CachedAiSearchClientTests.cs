@@ -22,10 +22,8 @@ public class CachedAiSearchClientTests
         innerMock.Setup(x => x.ChatSearchAsync("xe ga êm ái dễ lái", null)).ReturnsAsync(SuccessResponse("xe ga"));
         var cache = new MemoryCache(new MemoryCacheOptions());
         var sut = new CachedAiSearchClient(innerMock.Object, cache);
-
         var first = await sut.ChatSearchAsync("xe ga êm ái dễ lái", null);
         var second = await sut.ChatSearchAsync("xe ga êm ái dễ lái", null);
-
         first.Result!.Keyword.Should().Be("xe ga");
         second.Result!.Keyword.Should().Be("xe ga");
         innerMock.Verify(x => x.ChatSearchAsync(It.IsAny<string>(), It.IsAny<string?>()), Times.Once);
@@ -38,10 +36,8 @@ public class CachedAiSearchClientTests
         innerMock.Setup(x => x.ChatSearchAsync(It.IsAny<string>(), null)).ReturnsAsync(SuccessResponse("xe ga"));
         var cache = new MemoryCache(new MemoryCacheOptions());
         var sut = new CachedAiSearchClient(innerMock.Object, cache);
-
         await sut.ChatSearchAsync("Xe Ga êm ái", null);
         await sut.ChatSearchAsync("  xe ga êm ái  ", null);
-
         innerMock.Verify(x => x.ChatSearchAsync(It.IsAny<string>(), It.IsAny<string?>()), Times.Once);
     }
 
@@ -49,13 +45,12 @@ public class CachedAiSearchClientTests
     public async Task ChatSearchAsync_DifferentKeywords_CallsInnerForEach()
     {
         var innerMock = new Mock<IAiSearchClient>();
-        innerMock.Setup(x => x.ChatSearchAsync(It.IsAny<string>(), null)).ReturnsAsync((string k, string? _) => SuccessResponse(k));
+        innerMock.Setup(x => x.ChatSearchAsync(It.IsAny<string>(), null))
+            .ReturnsAsync((string k, string? _) => SuccessResponse(k));
         var cache = new MemoryCache(new MemoryCacheOptions());
         var sut = new CachedAiSearchClient(innerMock.Object, cache);
-
         await sut.ChatSearchAsync("xe ga êm ái", null);
         await sut.ChatSearchAsync("xe số bền", null);
-
         innerMock.Verify(x => x.ChatSearchAsync(It.IsAny<string>(), It.IsAny<string?>()), Times.Exactly(2));
     }
 
@@ -67,10 +62,8 @@ public class CachedAiSearchClientTests
             .ReturnsAsync(new AiAgentResponse<AiSearchResult> { Status = "error", Result = null });
         var cache = new MemoryCache(new MemoryCacheOptions());
         var sut = new CachedAiSearchClient(innerMock.Object, cache);
-
         await sut.ChatSearchAsync("xe khó tả quá trời luôn á", null);
         await sut.ChatSearchAsync("xe khó tả quá trời luôn á", null);
-
         innerMock.Verify(x => x.ChatSearchAsync(It.IsAny<string>(), It.IsAny<string?>()), Times.Exactly(2));
     }
 }

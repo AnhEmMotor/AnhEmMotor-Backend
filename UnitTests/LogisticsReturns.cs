@@ -20,17 +20,14 @@ public class LogisticsReturns
         order.ReturnAction = "rejected";
         order.RejectionReason = "Không đủ điều kiện hoàn tiền";
         order.InspectedAt = DateTime.UtcNow.AddHours(-1);
-
         var readRepository = new Mock<IParcelDeliveryOrderReadRepository>();
         readRepository
             .Setup(repository => repository.GetReturnedAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([order]);
         var handler = new GetReturnsQueryHandler(readRepository.Object);
-
         var result = await handler.Handle(
             new GetReturnsQuery { Status = ReturnOrderStatus.Rejected },
             CancellationToken.None);
-
         result.Should().ContainSingle();
         result[0].Status.Should().Be(ReturnOrderStatus.Rejected);
     }
@@ -41,17 +38,12 @@ public class LogisticsReturns
         var order = CreateReturnedOrder();
         order.ReturnAction = "rejected";
         order.RejectionReason = "Không đủ điều kiện hoàn tiền";
-
         var readRepository = new Mock<IParcelDeliveryOrderReadRepository>();
         readRepository
             .Setup(repository => repository.GetByIdAsync(order.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
         var handler = new GetReturnDetailQueryHandler(readRepository.Object);
-
-        var result = await handler.Handle(
-            new GetReturnDetailQuery { Id = order.Id },
-            CancellationToken.None);
-
+        var result = await handler.Handle(new GetReturnDetailQuery { Id = order.Id }, CancellationToken.None);
         result.Should().NotBeNull();
         result!.Status.Should().Be("rejected");
         result.RejectionReason.Should().Be(order.RejectionReason);
@@ -66,18 +58,13 @@ public class LogisticsReturns
         order.InspectedAt = inspectedAt;
         order.RefundAmount = 500_000m;
         order.ReturnShippingCost = 30_000m;
-
         var readRepository = new Mock<IParcelDeliveryOrderReadRepository>();
         readRepository
             .Setup(repository => repository.GetByIdAsync(order.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
         var updateRepository = new Mock<IParcelDeliveryOrderUpdateRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
-        var handler = new InspectReturnCommandHandler(
-            readRepository.Object,
-            updateRepository.Object,
-            unitOfWork.Object);
-
+        var handler = new InspectReturnCommandHandler(readRepository.Object, updateRepository.Object, unitOfWork.Object);
         var result = await handler.Handle(
             new InspectReturnCommand
             {
@@ -89,16 +76,13 @@ public class LogisticsReturns
                 ReturnInternalNote = order.ReturnInternalNote
             },
             CancellationToken.None);
-
         result.Should().BeTrue();
         order.ReturnAction.Should().Be("refund");
         order.InspectedAt.Should().Be(inspectedAt);
         order.RefundAmount.Should().Be(500_000m);
         order.ReturnShippingCost.Should().Be(30_000m);
         updateRepository.Verify(repository => repository.Update(order), Times.Once);
-        unitOfWork.Verify(
-            repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()),
-            Times.Once);
+        unitOfWork.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     private static ParcelDeliveryOrder CreateReturnedOrder()

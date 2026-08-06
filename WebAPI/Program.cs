@@ -52,10 +52,10 @@ builder.Services
                         .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries) ??
                         Array.Empty<string>();
                     policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader();
-                if (!allowedOrigins.Contains("*"))
-                {
-                    policy.AllowCredentials();
-                }
+                    if (!allowedOrigins.Contains("*"))
+                    {
+                        policy.AllowCredentials();
+                    }
                 }
 );
         }

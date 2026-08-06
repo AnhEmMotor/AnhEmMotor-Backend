@@ -22,15 +22,13 @@ public class ChatToolsSoftDeleteGuard
                 f =>
                 {
                     var content = File.ReadAllText(f);
-                    return content.Contains("IgnoreQueryFilters")
-                        || content.Contains(".All<")
-                        || content.Contains("DataFetchMode.All")
-                        || content.Contains("DataFetchMode.DeletedOnly");
+                    return content.Contains("IgnoreQueryFilters") ||
+                        content.Contains(".All<") ||
+                        content.Contains("DataFetchMode.All") ||
+                        content.Contains("DataFetchMode.DeletedOnly");
                 })
             .Select(f => Path.GetRelativePath(RepoRoot(), f))
             .ToList();
-
-        offenders.Should().BeEmpty(
-            "tool chat phải tôn trọng global query filter DeletedAt == null, xem mục 16.2");
+        offenders.Should().BeEmpty("tool chat phải tôn trọng global query filter DeletedAt == null, xem mục 16.2");
     }
 }

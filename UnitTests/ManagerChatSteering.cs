@@ -15,8 +15,6 @@ namespace UnitTests;
 
 public class ManagerChatSteering
 {
-    // ---- SteeringClassifier (Tầng 1 - luật) ----
-
     [Theory(DisplayName = "CLASSIFY_01 - Bảng phân loại theo luật")]
     [InlineData("À nhầm, tháng trước cơ", ChatSteeringMode.Interrupt)]
     [InlineData("thêm cả số đơn hàng nữa", null)]
@@ -29,8 +27,6 @@ public class ManagerChatSteering
         SteeringClassifier.Classify(text).Should().Be(expected);
     }
 
-    // ---- SendSteeringMessageCommandHandler ----
-
     private readonly Mock<IChatReadRepository> _chatRead = new();
     private readonly Mock<IChatInsertRepository> _chatInsert = new();
     private readonly Mock<IPermissionReadRepository> _permissions = new();
@@ -40,21 +36,28 @@ public class ManagerChatSteering
     private readonly Mock<ISender> _sender = new();
     private readonly Mock<IUnitOfWork> _unitOfWork = new();
 
-    private SendSteeringMessageCommandHandler CreateHandler() =>
-        new(_chatRead.Object, _chatInsert.Object, _permissions.Object, _writer.Object,
-            _cancellationRegistry.Object, _sidecarStreamClient.Object, _sender.Object, _unitOfWork.Object);
+    private SendSteeringMessageCommandHandler CreateHandler() => new(
+        _chatRead.Object,
+        _chatInsert.Object,
+        _permissions.Object,
+        _writer.Object,
+        _cancellationRegistry.Object,
+        _sidecarStreamClient.Object,
+        _sender.Object,
+        _unitOfWork.Object);
 
     private void GivenActiveRun(Guid userId, Guid runId, Guid sessionId, string status = ChatRunStatus.Running)
     {
         _permissions.Setup(x => x.HasAnyPermissionAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _chatRead.Setup(x => x.GetRunByIdAsync(runId, It.IsAny<CancellationToken>()))
-                 .ReturnsAsync(new ChatRun
-                 {
-                     Id = runId,
-                     SessionId = sessionId,
-                     Status = status,
-                     Session = new ChatSession { Id = sessionId, UserId = userId },
-                 });
+            .ReturnsAsync(
+                new ChatRun
+                {
+                    Id = runId,
+                    SessionId = sessionId,
+                    Status = status,
+                    Session = new ChatSession { Id = sessionId, UserId = userId },
+                });
         _chatRead.Setup(x => x.CountSteeringMessagesAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(0);
     }
 
@@ -63,10 +66,10 @@ public class ManagerChatSteering
     {
         var userId = Guid.NewGuid();
         _permissions.Setup(x => x.HasAnyPermissionAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
-
         var handler = CreateHandler();
-        var result = await handler.Handle(new SendSteeringMessageCommand(Guid.NewGuid(), "à nhầm", userId, "token"), CancellationToken.None);
-
+        var result = await handler.Handle(
+            new SendSteeringMessageCommand(Guid.NewGuid(), "à nhầm", userId, "token"),
+            CancellationToken.None);
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Forbidden");
     }
@@ -78,11 +81,12 @@ public class ManagerChatSteering
         var runId = Guid.NewGuid();
         _permissions.Setup(x => x.HasAnyPermissionAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _chatRead.Setup(x => x.GetRunByIdAsync(runId, It.IsAny<CancellationToken>()))
-                 .ReturnsAsync(new ChatRun { Id = runId, Session = new ChatSession { Id = Guid.NewGuid(), UserId = Guid.NewGuid() } });
-
+            .ReturnsAsync(
+                new ChatRun { Id = runId, Session = new ChatSession { Id = Guid.NewGuid(), UserId = Guid.NewGuid() } });
         var handler = CreateHandler();
-        var result = await handler.Handle(new SendSteeringMessageCommand(runId, "à nhầm", userId, "token"), CancellationToken.None);
-
+        var result = await handler.Handle(
+            new SendSteeringMessageCommand(runId, "à nhầm", userId, "token"),
+            CancellationToken.None);
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("NotFound");
     }
@@ -96,22 +100,26 @@ public class ManagerChatSteering
         var newRunId = Guid.NewGuid();
         _permissions.Setup(x => x.HasAnyPermissionAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _chatRead.Setup(x => x.GetRunByIdAsync(runId, It.IsAny<CancellationToken>()))
-                 .ReturnsAsync(new ChatRun
-                 {
-                     Id = runId,
-                     SessionId = sessionId,
-                     Status = ChatRunStatus.Completed,
-                     Session = new ChatSession { Id = sessionId, UserId = userId },
-                 });
-        _sender.Setup(x => x.Send(It.IsAny<StartChatRunCommand>(), It.IsAny<CancellationToken>())).ReturnsAsync(newRunId);
-
+            .ReturnsAsync(
+                new ChatRun
+                {
+                    Id = runId,
+                    SessionId = sessionId,
+                    Status = ChatRunStatus.Completed,
+                    Session = new ChatSession { Id = sessionId, UserId = userId },
+                });
+        _sender.Setup(x => x.Send(It.IsAny<StartChatRunCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(newRunId);
         var handler = CreateHandler();
-        var result = await handler.Handle(new SendSteeringMessageCommand(runId, "tháng trước", userId, "token"), CancellationToken.None);
-
+        var result = await handler.Handle(
+            new SendSteeringMessageCommand(runId, "tháng trước", userId, "token"),
+            CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
         result.Value!.RunId.Should().Be(newRunId);
         result.Value.Mode.Should().Be(ChatSteeringMode.Restart);
-        _writer.Verify(x => x.AppendPendingSteeringAsync(It.IsAny<Guid>(), It.IsAny<SteeringQueueItem>(), It.IsAny<int>()), Times.Never);
+        _writer.Verify(
+            x => x.AppendPendingSteeringAsync(It.IsAny<Guid>(), It.IsAny<SteeringQueueItem>(), It.IsAny<int>()),
+            Times.Never);
     }
 
     [Fact(DisplayName = "STEER_04 - Đã gửi đủ 5 steering thì từ chối, không lưu tin nhắn mới")]
@@ -122,10 +130,10 @@ public class ManagerChatSteering
         var sessionId = Guid.NewGuid();
         GivenActiveRun(userId, runId, sessionId);
         _chatRead.Setup(x => x.CountSteeringMessagesAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(5);
-
         var handler = CreateHandler();
-        var result = await handler.Handle(new SendSteeringMessageCommand(runId, "thêm nữa", userId, "token"), CancellationToken.None);
-
+        var result = await handler.Handle(
+            new SendSteeringMessageCommand(runId, "thêm nữa", userId, "token"),
+            CancellationToken.None);
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Validation");
         _chatInsert.Verify(x => x.AddMessage(It.IsAny<ChatMessage>()), Times.Never);
@@ -139,18 +147,16 @@ public class ManagerChatSteering
         var sessionId = Guid.NewGuid();
         GivenActiveRun(userId, runId, sessionId);
         _writer.Setup(x => x.AppendPendingSteeringAsync(runId, It.IsAny<SteeringQueueItem>(), It.IsAny<int>()))
-               .ReturnsAsync(PendingSteeringAppendResult.Appended);
-
+            .ReturnsAsync(PendingSteeringAppendResult.Appended);
         ChatMessage? saved = null;
         _chatInsert.Setup(x => x.AddMessage(It.IsAny<ChatMessage>())).Callback<ChatMessage>(m => saved = m);
-
         var handler = CreateHandler();
-        var result = await handler.Handle(new SendSteeringMessageCommand(runId, "à nhầm, tháng trước cơ", userId, "token"), CancellationToken.None);
-
+        var result = await handler.Handle(
+            new SendSteeringMessageCommand(runId, "à nhầm, tháng trước cơ", userId, "token"),
+            CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
         result.Value!.Mode.Should().Be(ChatSteeringMode.Interrupt);
         result.Value.RunId.Should().Be(runId);
-
         saved.Should().NotBeNull();
         saved!.IsSteering.Should().BeTrue();
         saved.RunId.Should().Be(runId);
@@ -167,12 +173,13 @@ public class ManagerChatSteering
         var newRunId = Guid.NewGuid();
         GivenActiveRun(userId, runId, sessionId);
         _writer.Setup(x => x.AppendPendingSteeringAsync(runId, It.IsAny<SteeringQueueItem>(), It.IsAny<int>()))
-               .ReturnsAsync(PendingSteeringAppendResult.RunNotActive);
-        _sender.Setup(x => x.Send(It.IsAny<StartChatRunCommand>(), It.IsAny<CancellationToken>())).ReturnsAsync(newRunId);
-
+            .ReturnsAsync(PendingSteeringAppendResult.RunNotActive);
+        _sender.Setup(x => x.Send(It.IsAny<StartChatRunCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(newRunId);
         var handler = CreateHandler();
-        var result = await handler.Handle(new SendSteeringMessageCommand(runId, "thêm nữa", userId, "token"), CancellationToken.None);
-
+        var result = await handler.Handle(
+            new SendSteeringMessageCommand(runId, "thêm nữa", userId, "token"),
+            CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
         result.Value!.RunId.Should().Be(newRunId);
         result.Value.Mode.Should().Be(ChatSteeringMode.Restart);
@@ -186,11 +193,11 @@ public class ManagerChatSteering
         var sessionId = Guid.NewGuid();
         GivenActiveRun(userId, runId, sessionId);
         _writer.Setup(x => x.AppendPendingSteeringAsync(runId, It.IsAny<SteeringQueueItem>(), It.IsAny<int>()))
-               .ReturnsAsync(PendingSteeringAppendResult.TooMany);
-
+            .ReturnsAsync(PendingSteeringAppendResult.TooMany);
         var handler = CreateHandler();
-        var result = await handler.Handle(new SendSteeringMessageCommand(runId, "thêm nữa", userId, "token"), CancellationToken.None);
-
+        var result = await handler.Handle(
+            new SendSteeringMessageCommand(runId, "thêm nữa", userId, "token"),
+            CancellationToken.None);
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Validation");
     }
@@ -203,17 +210,20 @@ public class ManagerChatSteering
         var sessionId = Guid.NewGuid();
         var newRunId = Guid.NewGuid();
         GivenActiveRun(userId, runId, sessionId);
-        _sender.Setup(x => x.Send(It.IsAny<StartChatRunCommand>(), It.IsAny<CancellationToken>())).ReturnsAsync(newRunId);
-
+        _sender.Setup(x => x.Send(It.IsAny<StartChatRunCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(newRunId);
         var handler = CreateHandler();
-        var result = await handler.Handle(new SendSteeringMessageCommand(runId, "dừng", userId, "token"), CancellationToken.None);
-
+        var result = await handler.Handle(
+            new SendSteeringMessageCommand(runId, "dừng", userId, "token"),
+            CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
         result.Value!.RunId.Should().Be(newRunId);
         result.Value.Mode.Should().Be(ChatSteeringMode.Restart);
         _sidecarStreamClient.Verify(x => x.CancelAsync(runId, It.IsAny<CancellationToken>()), Times.Once);
         _cancellationRegistry.Verify(x => x.TryCancel(runId), Times.Once);
-        _writer.Verify(x => x.AppendPendingSteeringAsync(It.IsAny<Guid>(), It.IsAny<SteeringQueueItem>(), It.IsAny<int>()), Times.Never);
+        _writer.Verify(
+            x => x.AppendPendingSteeringAsync(It.IsAny<Guid>(), It.IsAny<SteeringQueueItem>(), It.IsAny<int>()),
+            Times.Never);
     }
 
     [Fact(DisplayName = "STEER_09 - Restart: run cũ chưa kịp huỷ thì thử lại đến khi thành công")]
@@ -224,19 +234,20 @@ public class ManagerChatSteering
         var sessionId = Guid.NewGuid();
         var newRunId = Guid.NewGuid();
         GivenActiveRun(userId, runId, sessionId);
-
         var callCount = 0;
         _sender.Setup(x => x.Send(It.IsAny<StartChatRunCommand>(), It.IsAny<CancellationToken>()))
-               .Returns(() =>
-               {
-                   callCount++;
-                   if (callCount < 3) throw new InvalidOperationException("Đang có một tiến trình AI khác đang chạy.");
-                   return Task.FromResult(newRunId);
-               });
-
+            .Returns(
+                () =>
+                {
+                    callCount++;
+                    if (callCount < 3)
+                        throw new InvalidOperationException("Đang có một tiến trình AI khác đang chạy.");
+                    return Task.FromResult(newRunId);
+                });
         var handler = CreateHandler();
-        var result = await handler.Handle(new SendSteeringMessageCommand(runId, "huỷ", userId, "token"), CancellationToken.None);
-
+        var result = await handler.Handle(
+            new SendSteeringMessageCommand(runId, "huỷ", userId, "token"),
+            CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
         result.Value!.RunId.Should().Be(newRunId);
         callCount.Should().Be(3);

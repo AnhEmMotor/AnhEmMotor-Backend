@@ -352,13 +352,17 @@ public class Brand
         string.Compare(result.Value.PopularOrigin, "Japan").Should().Be(0);
         string.Compare(result.Value.LatestUpdatedBrandName, "Honda").Should().Be(0);
     }
+
     [Fact(DisplayName = "BRAND_052 - Unit: ExportBrandsQueryHandler - Success")]
     public async Task BRAND_052_ExportBrands_Success()
     {
         var handler = new ExportBrandsQueryHandler(_readRepoMock.Object, _excelServiceMock.Object);
         var brands = new List<BrandEntities> { new() { Id = 1, Name = "Honda" } };
         _readRepoMock.Setup(
-            x => x.GetFilteredListAsync(It.IsAny<SieveModel>(), It.IsAny<DataFetchMode>(), It.IsAny<CancellationToken>()))
+            x => x.GetFilteredListAsync(
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(brands);
         var expectedBytes = new byte[] { 1, 2, 3 };
         _excelServiceMock.Setup(x => x.ExportBrands(brands)).Returns(expectedBytes);

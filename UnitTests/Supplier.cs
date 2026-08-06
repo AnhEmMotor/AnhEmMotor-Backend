@@ -735,7 +735,10 @@ public class Supplier
         var handler = new ExportSuppliersQueryHandler(_readRepoMock.Object, _excelServiceMock.Object);
         var suppliers = new List<SupplierEntity> { new() { Id = 1, Name = "Supplier A" } };
         _readRepoMock.Setup(
-            x => x.GetFilteredListAsync(It.IsAny<SieveModel>(), It.IsAny<DataFetchMode>(), It.IsAny<CancellationToken>()))
+            x => x.GetFilteredListAsync(
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(suppliers);
         var expectedBytes = new byte[] { 1, 2, 3 };
         _excelServiceMock.Setup(x => x.ExportSuppliers(suppliers)).Returns(expectedBytes);
@@ -772,7 +775,8 @@ public class Supplier
             new("Nhà cung cấp", "Supplier Import", "0912345678", "import@test.com", "0123456789", "Address", "Notes")
         };
         _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>())).Returns(importRows);
-        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(
+            x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var command = new ImportSuppliersCommand { File = CreateFormFile([1, 2, 3]) };
@@ -801,8 +805,7 @@ public class Supplier
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
     }
 
-    [Fact(
-        DisplayName = "SUP_070 - ImportSuppliersCommandHandler thành công với 0 dòng khi worksheet không có dữ liệu")]
+    [Fact(DisplayName = "SUP_070 - ImportSuppliersCommandHandler thành công với 0 dòng khi worksheet không có dữ liệu")]
     public async Task SUP_070_ImportSuppliers_EmptyRows_ReturnsSuccessWithZeroCounts()
     {
         var handler = new ImportSuppliersCommandHandler(

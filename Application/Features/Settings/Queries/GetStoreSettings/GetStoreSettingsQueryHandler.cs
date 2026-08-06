@@ -20,8 +20,9 @@ public class GetStoreSettingsQueryHandler(ISettingRepository settingRepository) 
             SettingKeys.FixedDepositAmount
         };
         var filtered = settings
-            .Where(s => publicKeys.Contains(s.Key, StringComparer.OrdinalIgnoreCase) || 
-                        s.Key.StartsWith("Deposit_", StringComparison.OrdinalIgnoreCase))
+            .Where(
+                s => publicKeys.Contains(s.Key, StringComparer.OrdinalIgnoreCase) ||
+                    s.Key.StartsWith("Deposit_", StringComparison.OrdinalIgnoreCase))
             .ToDictionary(s => s.Key, s => s.Value);
         return filtered;
     }

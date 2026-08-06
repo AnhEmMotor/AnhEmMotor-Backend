@@ -509,7 +509,8 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([role]);
         roleReadRepoMock.Setup(x => x.GetUsersInRoleAsync("OldRole", CancellationToken.None)).ReturnsAsync([]);
-        roleDeleteRepoMock.Setup(x => x.DeleteAsync(role, CancellationToken.None)).ReturnsAsync(IdentityOperationResult.Success());
+        roleDeleteRepoMock.Setup(x => x.DeleteAsync(role, CancellationToken.None))
+            .ReturnsAsync(IdentityOperationResult.Success());
         var handler = new DeleteRoleCommandHandler(
             roleReadRepoMock.Object,
             roleDeleteRepoMock.Object,

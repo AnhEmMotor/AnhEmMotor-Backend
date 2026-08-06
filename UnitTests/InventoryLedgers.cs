@@ -200,7 +200,8 @@ namespace UnitTests
             };
             _ledgerRepoMock.Setup(x => x.GetAllWithDetailsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(entries);
             var expectedBytes = new byte[] { 1, 2, 3 };
-            _excelServiceMock.Setup(x => x.ExportInventoryLedger(It.IsAny<IReadOnlyList<InventoryLedger>>(), null, null))
+            _excelServiceMock.Setup(
+                x => x.ExportInventoryLedger(It.IsAny<IReadOnlyList<InventoryLedger>>(), null, null))
                 .Returns(expectedBytes);
             var result = await handler.Handle(new ExportInventoryLedgerQuery(), CancellationToken.None)
                 .ConfigureAwait(true);

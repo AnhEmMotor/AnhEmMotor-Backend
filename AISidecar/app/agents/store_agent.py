@@ -243,6 +243,7 @@ async def call_tools_node(state: StoreAgentState) -> dict:
             "tool_budget": DEFAULT_TOOL_BUDGET,
             "call_signatures": call_signatures,
             "is_write": IS_WRITE_BY_NAME.get(name, False),
+            "plan_approved": True,
         })
         if guard.action != "allow":
             result_messages.append(ToolMessage(

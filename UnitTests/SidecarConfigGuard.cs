@@ -1,5 +1,5 @@
-using System.Text.RegularExpressions;
 using FluentAssertions;
+using System.Text.RegularExpressions;
 
 namespace UnitTests;
 
@@ -19,14 +19,10 @@ public class SidecarConfigGuard
     {
         var path = Path.Combine(RepoRoot(), "Infrastructure", "Services", "Ai", "AiSidecarManager.cs");
         var content = File.ReadAllText(path);
-
-        content.Should().NotContain("--host 0.0.0.0",
-            "sidecar chỉ được gọi nội bộ");
+        content.Should().NotContain("--host 0.0.0.0", "sidecar chỉ được gọi nội bộ");
         content.Should().Contain("--host 127.0.0.1");
-
         var mainPy = File.ReadAllText(Path.Combine(RepoRoot(), "AISidecar", "main.py"));
-        mainPy.Should().NotContain("\"0.0.0.0\"",
-            "nhánh __main__ của sidecar cũng chỉ được bind loopback");
+        mainPy.Should().NotContain("\"0.0.0.0\"", "nhánh __main__ của sidecar cũng chỉ được bind loopback");
         mainPy.Should().Contain("host=\"127.0.0.1\"");
     }
 
@@ -35,9 +31,7 @@ public class SidecarConfigGuard
     {
         var path = Path.Combine(RepoRoot(), "Infrastructure", "Services", "Ai", "AiSidecarManager.cs");
         var content = File.ReadAllText(path);
-
-        content.Should().Contain("app.main:app",
-            "sau Stage 7, entrypoint là app/main.py chứ không phải main.py ở gốc");
+        content.Should().Contain("app.main:app", "sau Stage 7, entrypoint là app/main.py chứ không phải main.py ở gốc");
         content.Should().NotContain("uvicorn main:app");
     }
 
@@ -49,16 +43,12 @@ public class SidecarConfigGuard
             .Where(f => !Path.GetFileName(f).Equals("appsettings.Development.json", StringComparison.OrdinalIgnoreCase))
             .Where(f => !Path.GetFileName(f).Equals("appsettings.Production.json", StringComparison.OrdinalIgnoreCase))
             .ToList();
-
         files.Should().NotBeEmpty("phải có ít nhất appsettings.Template.json trong repo");
-
         var realKey = new Regex(@"lsv2_pt_[0-9a-f]{32,}");
         var offenders = files
             .Where(f => realKey.IsMatch(File.ReadAllText(f)))
             .Select(Path.GetFileName)
             .ToList();
-
-        offenders.Should().BeEmpty(
-            "chuyển LangSmithApiKey sang env/user-secrets, xem mục 1.5");
+        offenders.Should().BeEmpty("chuyển LangSmithApiKey sang env/user-secrets, xem mục 1.5");
     }
 }

@@ -17,8 +17,10 @@ public class ProductRecommendation
     private readonly Mock<ICurrentUserContext> _currentUserContextMock = new();
     private readonly Mock<ISender> _senderMock = new();
 
-    private GetPersonalizedRecommendationsQueryHandler CreateHandler() =>
-        new(_productViewRepoMock.Object, _currentUserContextMock.Object, _senderMock.Object);
+    private GetPersonalizedRecommendationsQueryHandler CreateHandler() => new(
+        _productViewRepoMock.Object,
+        _currentUserContextMock.Object,
+        _senderMock.Object);
 
     private void SetupSenderCapture(Action<GetProductsListQuery> onSend)
     {
@@ -26,7 +28,9 @@ public class ProductRecommendation
             .Setup(s => s.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()))
             .Callback<IRequest<Result<PagedResult<ProductListStoreResponse>>>, CancellationToken>(
                 (req, _) => onSend((GetProductsListQuery)req))
-            .ReturnsAsync(Result<PagedResult<ProductListStoreResponse>>.Success(new PagedResult<ProductListStoreResponse>([], 0, 1, 4)));
+            .ReturnsAsync(
+                Result<PagedResult<ProductListStoreResponse>>.Success(
+                    new PagedResult<ProductListStoreResponse>([], 0, 1, 4)));
     }
 
     [Fact(DisplayName = "RECO_01 - Có lịch sử xem lệch hẳn về 1 category -> ưu tiên đúng category đó")]
@@ -34,7 +38,6 @@ public class ProductRecommendation
     {
         var customerId = Guid.NewGuid();
         _currentUserContextMock.Setup(c => c.GetUserIdOrNull()).Returns(customerId);
-
         var now = DateTimeOffset.UtcNow;
         _productViewRepoMock
             .Setup(
@@ -45,35 +48,30 @@ public class ProductRecommendation
                     It.IsAny<int>(),
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(
-                [
-                    new ProductViewSample(5, 120_000, now.AddDays(-1)),
-                    new ProductViewSample(5, 90_000, now.AddDays(-2)),
-                    new ProductViewSample(8, 5_000, now.AddDays(-60))
-                ]);
-
+                [new ProductViewSample(5, 120_000, now.AddDays(-1)), new ProductViewSample(5, 90_000, now.AddDays(-2)), new ProductViewSample(
+                    8,
+                    5_000,
+                    now.AddDays(-60))]);
         GetProductsListQuery? capturedQuery = null;
         SetupSenderCapture(q => capturedQuery = q);
-
         var handler = CreateHandler();
         var result = await handler.Handle(new GetPersonalizedRecommendationsQuery(4, null), CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         capturedQuery.Should().NotBeNull();
         capturedQuery!.CategoryIds.Should().NotBeEmpty();
-        capturedQuery.CategoryIds[0].Should().Be(5, "category 5 có 2 lượt xem gần đây với dwell time cao hơn hẳn category 8 (1 lượt, xem lâu trước đó)");
+        capturedQuery.CategoryIds[0].Should()
+            .Be(5, "category 5 có 2 lượt xem gần đây với dwell time cao hơn hẳn category 8 (1 lượt, xem lâu trước đó)");
     }
 
-    [Fact(DisplayName = "RECO_02 - Không có định danh nào (chưa đăng nhập, không có visitorKey) -> fallback CategoryIds rỗng")]
+    [Fact(
+        DisplayName = "RECO_02 - Không có định danh nào (chưa đăng nhập, không có visitorKey) -> fallback CategoryIds rỗng")]
     public async Task Handler_WithNoIdentity_FallsBackToEmptyCategoryFilter()
     {
         _currentUserContextMock.Setup(c => c.GetUserIdOrNull()).Returns((Guid?)null);
-
         GetProductsListQuery? capturedQuery = null;
         SetupSenderCapture(q => capturedQuery = q);
-
         var handler = CreateHandler();
         var result = await handler.Handle(new GetPersonalizedRecommendationsQuery(4, null), CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         capturedQuery.Should().NotBeNull();
         capturedQuery!.CategoryIds.Should().BeEmpty();

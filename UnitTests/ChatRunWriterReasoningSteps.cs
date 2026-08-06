@@ -6,10 +6,7 @@ namespace UnitTests;
 
 public class ChatRunWriterReasoningSteps
 {
-    private static readonly Dictionary<string, string> Labels = new()
-    {
-        ["get_sales_summary"] = "Tra doanh thu",
-    };
+    private static readonly Dictionary<string, string> Labels = new() { ["get_sales_summary"] = "Tra doanh thu", };
 
     [Fact(DisplayName = "REASONING_01 - Gộp đúng thinking + tool_start/tool_end theo thứ tự")]
     public void BuildReasoningSteps_GopDungThinkingVaToolTheoThuTu()
@@ -20,9 +17,7 @@ public class ChatRunWriterReasoningSteps
             (ChatRunEventType.ToolStart, """{"name":"get_sales_summary","summary":"Đang tra doanh thu"}"""),
             (ChatRunEventType.ToolEnd, """{"name":"get_sales_summary","durationMs":120,"summary":"Doanh thu 10 triệu","truncated":false}"""),
         };
-
         var steps = ChatRunWriter.BuildReasoningSteps(events, Labels);
-
         steps.Should().HaveCount(2);
         steps[0].Kind.Should().Be("thinking");
         steps[0].Text.Should().Be("Tôi sẽ tra doanh thu.");
@@ -41,9 +36,7 @@ public class ChatRunWriterReasoningSteps
         {
             (ChatRunEventType.ToolEnd, """{"name":"khong_ton_tai","durationMs":50}"""),
         };
-
         var steps = ChatRunWriter.BuildReasoningSteps(events, Labels);
-
         steps.Should().BeEmpty();
     }
 
@@ -51,7 +44,6 @@ public class ChatRunWriterReasoningSteps
     public void BuildReasoningSteps_KhongCoEventThiRong()
     {
         var steps = ChatRunWriter.BuildReasoningSteps([], Labels);
-
         steps.Should().BeEmpty();
     }
 
@@ -62,9 +54,7 @@ public class ChatRunWriterReasoningSteps
         {
             (ChatRunEventType.ToolStart, """{"name":"tool_moi_chua_co_label"}"""),
         };
-
         var steps = ChatRunWriter.BuildReasoningSteps(events, Labels);
-
         steps.Should().ContainSingle();
         steps[0].Label.Should().Be("tool_moi_chua_co_label");
         steps[0].Status.Should().Be("running");

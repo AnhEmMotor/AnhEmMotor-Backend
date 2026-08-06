@@ -28,7 +28,8 @@ public class CreateVehicleCommandHandler(
             return Result<VehicleResponse?>.Failure(
                 Error.NotFound($"Lead with ID {request.LeadId} not found.", "LeadId"));
         }
-        var product = await productReadRepository.GetByIdAsync(request.ProductId, cancellationToken).ConfigureAwait(false);
+        var product = await productReadRepository.GetByIdAsync(request.ProductId, cancellationToken)
+            .ConfigureAwait(false);
         if (product == null)
         {
             return Result<VehicleResponse?>.Failure(
@@ -52,10 +53,8 @@ public class CreateVehicleCommandHandler(
         {
             return Result<VehicleResponse?>.Failure(Error.BadRequest("Engine number already exists.", "EngineNumber"));
         }
-        
         var firstVariant = product.ProductVariants?.FirstOrDefault();
         var firstColor = firstVariant?.ProductVariantColors?.FirstOrDefault();
-
         var vehicle = new Vehicle
         {
             LeadId = request.LeadId,

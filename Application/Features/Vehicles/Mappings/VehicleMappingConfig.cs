@@ -15,17 +15,19 @@ public class VehicleMappingConfig : IRegister
             .Map(dest => dest.ProductVariantColorId, src => src.ProductVariantColorId)
             .Map(
                 dest => dest.ColorName,
-                src => src.ProductVariantColor != null 
-                    ? src.ProductVariantColor.ColorName 
-                    : (src.Product != null && src.Product.ProductVariants.Any() && src.Product.ProductVariants.FirstOrDefault()!.ProductVariantColors.Any() 
-                        ? src.Product.ProductVariants.FirstOrDefault()!.ProductVariantColors.FirstOrDefault()!.ColorName 
+                src => src.ProductVariantColor != null
+                    ? src.ProductVariantColor.ColorName
+                    : (src.Product != null &&
+                            src.Product.ProductVariants.Any() &&
+                            src.Product.ProductVariants.FirstOrDefault()!.ProductVariantColors.Any()
+                        ? src.Product.ProductVariants.FirstOrDefault()!.ProductVariantColors.FirstOrDefault()!.ColorName
                         : null))
             .Map(
-                dest => dest.VariantName, 
-                src => src.ProductVariant != null 
-                    ? src.ProductVariant.VariantName 
-                    : (src.Product != null && src.Product.ProductVariants.Any() 
-                        ? src.Product.ProductVariants.FirstOrDefault()!.VariantName 
+                dest => dest.VariantName,
+                src => src.ProductVariant != null
+                    ? src.ProductVariant.VariantName
+                    : (src.Product != null && src.Product.ProductVariants.Any()
+                        ? src.Product.ProductVariants.FirstOrDefault()!.VariantName
                         : null))
             .Map(
                 dest => dest.BrandName,
@@ -39,12 +41,14 @@ public class VehicleMappingConfig : IRegister
             .Map(dest => dest.WarrantyPeriod, src => src.Product != null ? src.Product.WarrantyPeriod : null)
             .Map(
                 dest => dest.ImageUrl,
-                src => src.ProductVariantColor != null 
-                    ? src.ProductVariantColor.CoverImageUrl 
-                    : (src.Product != null && src.Product.ProductVariants.Any() && src.Product.ProductVariants.FirstOrDefault()!.ProductVariantColors.Any() 
-                        ? src.Product.ProductVariants.FirstOrDefault()!.ProductVariantColors.FirstOrDefault()!.CoverImageUrl 
-                        : (src.Product != null && src.Product.ProductVariants.Any() 
-                            ? src.Product.ProductVariants.FirstOrDefault()!.CoverImageUrl 
+                src => src.ProductVariantColor != null
+                    ? src.ProductVariantColor.CoverImageUrl
+                    : (src.Product != null &&
+                            src.Product.ProductVariants.Any() &&
+                            src.Product.ProductVariants.FirstOrDefault()!.ProductVariantColors.Any()
+                        ? src.Product.ProductVariants.FirstOrDefault()!.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
+                        : (src.Product != null && src.Product.ProductVariants.Any()
+                            ? src.Product.ProductVariants.FirstOrDefault()!.CoverImageUrl
                             : null)));
     }
 }

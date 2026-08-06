@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Application.ApiContracts.ManagerChat.Requests;
 using Application.Common.Models;
 using Application.DTOs.Chat;
@@ -15,6 +14,7 @@ using Domain.Entities;
 using FluentAssertions;
 using MediatR;
 using Moq;
+using System.Text.Json;
 
 namespace UnitTests;
 
@@ -32,25 +32,39 @@ public class ManagerChatPlan
     private readonly Mock<IChatInsertRepository> _chatInsert = new();
     private readonly Mock<ISender> _sender = new();
 
-    private static ChatPlan GivenPlan(Guid runId, Guid userId, string status, List<PlanStepDto> steps, int version = 1) =>
-        new()
-        {
-            Id = Guid.NewGuid(),
-            RunId = runId,
-            SessionId = Guid.NewGuid(),
-            Version = version,
-            Status = status,
-            Steps = JsonSerializer.Serialize(steps),
-            Run = new ChatRun { Id = runId, Session = new ChatSession { Id = Guid.NewGuid(), UserId = userId } },
-        };
+    private static ChatPlan GivenPlan(Guid runId, Guid userId, string status, List<PlanStepDto> steps, int version = 1) => new(
+        )
+    {
+        Id = Guid.NewGuid(),
+        RunId = runId,
+        SessionId = Guid.NewGuid(),
+        Version = version,
+        Status = status,
+        Steps = JsonSerializer.Serialize(steps),
+        Run = new ChatRun { Id = runId, Session = new ChatSession { Id = Guid.NewGuid(), UserId = userId } },
+    };
 
-    private static PlanStepDto Step(string id, int order, string status = PlanStepStatus.Pending, bool editedByUser = false, List<string>? tools = null) =>
-        new(id, order, $"Bước {order}", "chi tiết", tools ?? [], status, editedByUser, null);
+    private static PlanStepDto Step(
+        string id,
+        int order,
+        string status = PlanStepStatus.Pending,
+        bool editedByUser = false,
+        List<string>? tools = null) => new(
+        id,
+        order,
+        $"Bước {order}",
+        "chi tiết",
+        tools ?? [],
+        status,
+        editedByUser,
+        null);
 
-    // ---- UpdateChatPlanCommandHandler ----
-
-    private UpdateChatPlanCommandHandler CreateUpdateHandler() =>
-        new(_chatRead.Object, _chatUpdate.Object, _writer.Object, _currentUser.Object, _unitOfWork.Object);
+    private UpdateChatPlanCommandHandler CreateUpdateHandler() => new(
+        _chatRead.Object,
+        _chatUpdate.Object,
+        _writer.Object,
+        _currentUser.Object,
+        _unitOfWork.Object);
 
     [Fact(DisplayName = "PLAN_UPDATE_01 - Version lệch thì trả Conflict, plan không đổi")]
     public async Task Update_ReturnsConflict_WhenVersionMismatch()
@@ -60,12 +74,13 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Drafting, [Step("s1", 1)], version: 3);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateUpdateHandler();
         var result = await handler.Handle(
-            new UpdateChatPlanCommand(runId, 1, [new UpdatePlanStepOperation { Type = "edit", StepId = "s1", Title = "Sửa" }]),
+            new UpdateChatPlanCommand(
+                runId,
+                1,
+                [new UpdatePlanStepOperation { Type = "edit", StepId = "s1", Title = "Sửa" }]),
             CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Conflict");
         plan.Version.Should().Be(3);
@@ -80,12 +95,10 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Ready, [Step("s1", 1), Step("s2", 2)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateUpdateHandler();
         var result = await handler.Handle(
             new UpdateChatPlanCommand(runId, 1, [new UpdatePlanStepOperation { Type = "remove", StepId = "s1" }]),
             CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Steps.Should().HaveCount(2);
         var removed = result.Value.Steps.Single(s => s.Id == "s1");
@@ -102,14 +115,13 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Executing, [Step("s1", 1, status: PlanStepStatus.Running)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateUpdateHandler();
         var result = await handler.Handle(
-            new UpdateChatPlanCommand(runId, 1, [new UpdatePlanStepOperation { Type = "edit", StepId = "s1", Title = "x" }]),
+            new UpdateChatPlanCommand(
+                runId,
+                1,
+                [new UpdatePlanStepOperation { Type = "edit", StepId = "s1", Title = "x" }]),
             CancellationToken.None);
-
-        // Status Executing đã bị chặn từ trước (không nằm trong Drafting/Ready) — xác nhận thoả DoD
-        // "sửa bước đang running -> bị từ chối" ở mức plan-status luôn, không cần đi tới bước kiểm tra step.
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Validation");
     }
@@ -123,12 +135,13 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Drafting, steps);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateUpdateHandler();
         var result = await handler.Handle(
-            new UpdateChatPlanCommand(runId, 1, [new UpdatePlanStepOperation { Type = "add", Title = "Bước 9", Detail = "d" }]),
+            new UpdateChatPlanCommand(
+                runId,
+                1,
+                [new UpdatePlanStepOperation { Type = "add", Title = "Bước 9", Detail = "d" }]),
             CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Validation");
     }
@@ -141,12 +154,13 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Ready, [Step("s1", 1, status: PlanStepStatus.Running)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateUpdateHandler();
         var result = await handler.Handle(
-            new UpdateChatPlanCommand(runId, 1, [new UpdatePlanStepOperation { Type = "edit", StepId = "s1", Title = "x" }]),
+            new UpdateChatPlanCommand(
+                runId,
+                1,
+                [new UpdatePlanStepOperation { Type = "edit", StepId = "s1", Title = "x" }]),
             CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Validation");
         _chatUpdate.Verify(x => x.UpdatePlan(It.IsAny<ChatPlan>()), Times.Never);
@@ -160,12 +174,10 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Ready, [Step("s1", 1, status: PlanStepStatus.Done)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateUpdateHandler();
         var result = await handler.Handle(
             new UpdateChatPlanCommand(runId, 1, [new UpdatePlanStepOperation { Type = "remove", StepId = "s1" }]),
             CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Validation");
         _chatUpdate.Verify(x => x.UpdatePlan(It.IsAny<ChatPlan>()), Times.Never);
@@ -179,22 +191,23 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Ready, [Step("s1", 1)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateUpdateHandler();
         var result = await handler.Handle(
-            new UpdateChatPlanCommand(runId, 1, [new UpdatePlanStepOperation { Type = "comment", StepId = "s1", Comment = "Bình luận 1" }]),
+            new UpdateChatPlanCommand(
+                runId,
+                1,
+                [new UpdatePlanStepOperation { Type = "comment", StepId = "s1", Comment = "Bình luận 1" }]),
             CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         var step = result.Value.Steps.Single(s => s.Id == "s1");
         step.Comments.Should().ContainSingle(c => c.Text == "Bình luận 1");
         step.EditedByUser.Should().BeTrue();
-
-        // Bình luận thứ 2 lên cùng plan (version đã tăng lên 2) phải cộng dồn, không ghi đè.
         var result2 = await handler.Handle(
-            new UpdateChatPlanCommand(runId, 2, [new UpdatePlanStepOperation { Type = "comment", StepId = "s1", Comment = "Bình luận 2" }]),
+            new UpdateChatPlanCommand(
+                runId,
+                2,
+                [new UpdatePlanStepOperation { Type = "comment", StepId = "s1", Comment = "Bình luận 2" }]),
             CancellationToken.None);
-
         result2.IsSuccess.Should().BeTrue();
         result2.Value.Steps.Single(s => s.Id == "s1").Comments.Should().HaveCount(2);
     }
@@ -207,21 +220,27 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Ready, [Step("s1", 1)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateUpdateHandler();
         var result = await handler.Handle(
-            new UpdateChatPlanCommand(runId, 1, [new UpdatePlanStepOperation { Type = "comment", StepId = "s1", Comment = "   " }]),
+            new UpdateChatPlanCommand(
+                runId,
+                1,
+                [new UpdatePlanStepOperation { Type = "comment", StepId = "s1", Comment = "   " }]),
             CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Validation");
     }
 
-    // ---- ApproveChatPlanCommandHandler ----
-
-    private ApproveChatPlanCommandHandler CreateApproveHandler() =>
-        new(_chatRead.Object, _chatUpdate.Object, _permissions.Object, _writer.Object,
-            _tokenStore.Object, _runQueue.Object, _sidecarStreamClient.Object, _currentUser.Object, _unitOfWork.Object);
+    private ApproveChatPlanCommandHandler CreateApproveHandler() => new(
+        _chatRead.Object,
+        _chatUpdate.Object,
+        _permissions.Object,
+        _writer.Object,
+        _tokenStore.Object,
+        _runQueue.Object,
+        _sidecarStreamClient.Object,
+        _currentUser.Object,
+        _unitOfWork.Object);
 
     [Fact(DisplayName = "PLAN_APPROVE_01 - Duyệt plan của người khác thì NotFound")]
     public async Task Approve_ReturnsNotFound_WhenPlanBelongsToAnotherUser()
@@ -230,10 +249,8 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, Guid.NewGuid(), ChatPlanStatus.Ready, [Step("s1", 1)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(Guid.NewGuid());
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateApproveHandler();
         var result = await handler.Handle(new ApproveChatPlanCommand(runId, 1), CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("NotFound");
     }
@@ -246,32 +263,37 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Drafting, [Step("s1", 1)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateApproveHandler();
         var result = await handler.Handle(new ApproveChatPlanCommand(runId, 1), CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Validation");
         _runQueue.Verify(x => x.EnqueueAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    [Fact(DisplayName = "PLAN_APPROVE_03 - Tool trong plan đã bị gỡ: quay về Drafting, đánh dấu Invalid, không thực thi")]
+    [Fact(
+        DisplayName = "PLAN_APPROVE_03 - Tool trong plan đã bị gỡ: quay về Drafting, đánh dấu Invalid, không thực thi")]
     public async Task Approve_InvalidatesPlan_WhenToolRemoved()
     {
         var userId = Guid.NewGuid();
         var runId = Guid.NewGuid();
-        var plan = GivenPlan(runId, userId, ChatPlanStatus.Ready,
+        var plan = GivenPlan(
+            runId,
+            userId,
+            ChatPlanStatus.Ready,
             [Step("s1", 1, tools: ["get_stock"]), Step("s2", 2, tools: ["get_orders"])]);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _currentUser.Setup(x => x.GetAccessToken()).Returns("fresh-token");
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
         _permissions.Setup(x => x.HasAnyPermissionAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        _sidecarStreamClient.Setup(x => x.RevalidatePlanAsync(runId, It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+        _sidecarStreamClient.Setup(
+            x => x.RevalidatePlanAsync(
+                runId,
+                It.IsAny<IReadOnlyList<string>>(),
+                It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PlanRevalidationResult(false, ["get_stock"]));
-
         var handler = CreateApproveHandler();
         var result = await handler.Handle(new ApproveChatPlanCommand(runId, 1), CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         plan.Status.Should().Be(ChatPlanStatus.Drafting);
         var steps = JsonSerializer.Deserialize<List<PlanStepDto>>(plan.Steps)!;
@@ -292,12 +314,15 @@ public class ManagerChatPlan
         _currentUser.Setup(x => x.GetAccessToken()).Returns("fresh-token");
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
         _permissions.Setup(x => x.HasAnyPermissionAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        _sidecarStreamClient.Setup(x => x.RevalidatePlanAsync(runId, It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+        _sidecarStreamClient.Setup(
+            x => x.RevalidatePlanAsync(
+                runId,
+                It.IsAny<IReadOnlyList<string>>(),
+                It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PlanRevalidationResult(true, []));
-
         var handler = CreateApproveHandler();
         var result = await handler.Handle(new ApproveChatPlanCommand(runId, 1), CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         plan.Status.Should().Be(ChatPlanStatus.Executing);
         _tokenStore.Verify(x => x.Store(runId, "fresh-token"), Times.Once);
@@ -305,7 +330,8 @@ public class ManagerChatPlan
         _writer.Verify(x => x.AppendAsync(runId, ChatRunEventType.PlanApproved, It.IsAny<object>()), Times.Once);
     }
 
-    [Fact(DisplayName = "PLAN_APPROVE_05 - Không còn permission tại thời điểm duyệt thì Forbidden, không dùng bản chụp cũ")]
+    [Fact(
+        DisplayName = "PLAN_APPROVE_05 - Không còn permission tại thời điểm duyệt thì Forbidden, không dùng bản chụp cũ")]
     public async Task Approve_ReturnsForbidden_WhenPermissionRevokedSinceCreated()
     {
         var userId = Guid.NewGuid();
@@ -314,20 +340,25 @@ public class ManagerChatPlan
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
         _permissions.Setup(x => x.HasAnyPermissionAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
-
         var handler = CreateApproveHandler();
         var result = await handler.Handle(new ApproveChatPlanCommand(runId, 1), CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Forbidden");
-        _sidecarStreamClient.Verify(x => x.RevalidatePlanAsync(
-            It.IsAny<Guid>(), It.IsAny<IReadOnlyList<string>>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        _sidecarStreamClient.Verify(
+            x => x.RevalidatePlanAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<IReadOnlyList<string>>(),
+                It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
-    // ---- RejectChatPlanCommandHandler ----
-
-    private RejectChatPlanCommandHandler CreateRejectHandler() =>
-        new(_chatRead.Object, _chatUpdate.Object, _writer.Object, _currentUser.Object, _unitOfWork.Object);
+    private RejectChatPlanCommandHandler CreateRejectHandler() => new(
+        _chatRead.Object,
+        _chatUpdate.Object,
+        _writer.Object,
+        _currentUser.Object,
+        _unitOfWork.Object);
 
     [Fact(DisplayName = "PLAN_REJECT_01 - Huỷ plan của người khác thì NotFound")]
     public async Task Reject_ReturnsNotFound_WhenPlanBelongsToAnotherUser()
@@ -336,10 +367,8 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, Guid.NewGuid(), ChatPlanStatus.Ready, [Step("s1", 1)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(Guid.NewGuid());
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateRejectHandler();
         var result = await handler.Handle(new RejectChatPlanCommand(runId), CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("NotFound");
     }
@@ -352,10 +381,8 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Executing, [Step("s1", 1)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateRejectHandler();
         var result = await handler.Handle(new RejectChatPlanCommand(runId), CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Validation");
     }
@@ -368,23 +395,25 @@ public class ManagerChatPlan
         var plan = GivenPlan(runId, userId, ChatPlanStatus.Ready, [Step("s1", 1)]);
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateRejectHandler();
         var result = await handler.Handle(new RejectChatPlanCommand(runId), CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         plan.Status.Should().Be(ChatPlanStatus.Rejected);
         _writer.Verify(x => x.CancelAsync(runId, string.Empty, It.IsAny<DateTime>()), Times.Once);
     }
 
-    // ---- SendPlanChatMessageCommandHandler ----
+    private SendPlanChatMessageCommandHandler CreateSendPlanChatHandler() => new(
+        _chatRead.Object,
+        _chatInsert.Object,
+        _permissions.Object,
+        _sidecarStreamClient.Object,
+        _currentUser.Object,
+        _unitOfWork.Object,
+        _sender.Object);
 
-    private SendPlanChatMessageCommandHandler CreateSendPlanChatHandler() =>
-        new(_chatRead.Object, _chatInsert.Object, _permissions.Object, _sidecarStreamClient.Object,
-            _currentUser.Object, _unitOfWork.Object, _sender.Object);
-
-    private void GivenHasPermission(Guid userId) =>
-        _permissions.Setup(x => x.HasAnyPermissionAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+    private void GivenHasPermission(Guid userId) => _permissions.Setup(
+        x => x.HasAnyPermissionAsync(userId, It.IsAny<CancellationToken>()))
+        .ReturnsAsync(true);
 
     [Fact(DisplayName = "PLAN_CHAT_01 - Gõ 'duyệt' thì gọi ApproveChatPlanCommand, không cần LLM")]
     public async Task SendPlanChat_RoutesToApprove_WhenTextMatchesApproveKeyword()
@@ -397,16 +426,22 @@ public class ManagerChatPlan
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
         _sender.Setup(x => x.Send(It.IsAny<ApproveChatPlanCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
-
         var handler = CreateSendPlanChatHandler();
         var result = await handler.Handle(new SendPlanChatMessageCommand(runId, "duyệt", null), CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Action.Should().Be("approved");
-        _sender.Verify(x => x.Send(It.Is<ApproveChatPlanCommand>(c => c.RunId == runId && c.Version == plan.Version),
-            It.IsAny<CancellationToken>()), Times.Once);
-        _sidecarStreamClient.Verify(x => x.InterpretPlanChatAsync(
-            It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<List<PlanStepDto>>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()),
+        _sender.Verify(
+            x => x.Send(
+                It.Is<ApproveChatPlanCommand>(c => c.RunId == runId && c.Version == plan.Version),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+        _sidecarStreamClient.Verify(
+            x => x.InterpretPlanChatAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<string>(),
+                It.IsAny<List<PlanStepDto>>(),
+                It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -421,16 +456,17 @@ public class ManagerChatPlan
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
         _sender.Setup(x => x.Send(It.IsAny<RejectChatPlanCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
-
         var handler = CreateSendPlanChatHandler();
         var result = await handler.Handle(new SendPlanChatMessageCommand(runId, "Huỷ đi", null), CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Action.Should().Be("rejected");
-        _sender.Verify(x => x.Send(It.Is<RejectChatPlanCommand>(c => c.RunId == runId), It.IsAny<CancellationToken>()), Times.Once);
+        _sender.Verify(
+            x => x.Send(It.Is<RejectChatPlanCommand>(c => c.RunId == runId), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
-    [Fact(DisplayName = "PLAN_CHAT_03 - Gõ vào ô bình luận riêng của 1 bước: ghép thẳng operation comment, không gọi sidecar")]
+    [Fact(
+        DisplayName = "PLAN_CHAT_03 - Gõ vào ô bình luận riêng của 1 bước: ghép thẳng operation comment, không gọi sidecar")]
     public async Task SendPlanChat_BuildsCommentOperationDirectly_WhenTargetStepIdProvided()
     {
         var userId = Guid.NewGuid();
@@ -440,26 +476,35 @@ public class ManagerChatPlan
         GivenHasPermission(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
         _sender.Setup(x => x.Send(It.IsAny<UpdateChatPlanCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ChatPlanDto>.Success(new ChatPlanDto(runId, 2, ChatPlanStatus.Ready, [], "user", null)));
-
+            .ReturnsAsync(
+                Result<ChatPlanDto>.Success(new ChatPlanDto(runId, 2, ChatPlanStatus.Ready, [], "user", null)));
         var handler = CreateSendPlanChatHandler();
         var result = await handler.Handle(
-            new SendPlanChatMessageCommand(runId, "Bước này thiếu ngày cụ thể", "s1"), CancellationToken.None);
-
+            new SendPlanChatMessageCommand(runId, "Bước này thiếu ngày cụ thể", "s1"),
+            CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
         result.Value.Action.Should().Be("edited");
-        _sidecarStreamClient.Verify(x => x.InterpretPlanChatAsync(
-            It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<List<PlanStepDto>>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()),
+        _sidecarStreamClient.Verify(
+            x => x.InterpretPlanChatAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<string>(),
+                It.IsAny<List<PlanStepDto>>(),
+                It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
-        _sender.Verify(x => x.Send(
-            It.Is<UpdateChatPlanCommand>(c => c.Operations.Count == 1
-                && c.Operations[0].Type == "comment"
-                && c.Operations[0].StepId == "s1"
-                && c.Operations[0].Comment == "Bước này thiếu ngày cụ thể"),
-            It.IsAny<CancellationToken>()), Times.Once);
+        _sender.Verify(
+            x => x.Send(
+                It.Is<UpdateChatPlanCommand>(
+                    c => c.Operations.Count == 1 &&
+                        c.Operations[0].Type == "comment" &&
+                        c.Operations[0].StepId == "s1" &&
+                        c.Operations[0].Comment == "Bước này thiếu ngày cụ thể"),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
-    [Fact(DisplayName = "PLAN_CHAT_04 - Free-text chung chung không khớp keyword: gọi sidecar diễn giải rồi UpdateChatPlanCommand")]
+    [Fact(
+        DisplayName = "PLAN_CHAT_04 - Free-text chung chung không khớp keyword: gọi sidecar diễn giải rồi UpdateChatPlanCommand")]
     public async Task SendPlanChat_CallsSidecarInterpret_WhenFreeTextDoesNotMatchKeywords()
     {
         var userId = Guid.NewGuid();
@@ -469,27 +514,43 @@ public class ManagerChatPlan
         GivenHasPermission(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
         _sidecarStreamClient
-            .Setup(x => x.InterpretPlanChatAsync(runId, "sửa bước 1 thành lấy doanh thu tháng này",
-                It.IsAny<List<PlanStepDto>>(), null, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PlanChatInterpretationDto("edit_plan",
-                [new PlanChatInterpretedOperationDto("edit", "s1", "Lấy doanh thu", "chi tiết mới", null, null, ["get_sales_summary"])],
-                "Đã sửa bước 1."));
+            .Setup(
+                x => x.InterpretPlanChatAsync(
+                    runId,
+                    "sửa bước 1 thành lấy doanh thu tháng này",
+                    It.IsAny<List<PlanStepDto>>(),
+                    null,
+                    It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                new PlanChatInterpretationDto(
+                    "edit_plan",
+                    [new PlanChatInterpretedOperationDto(
+                        "edit",
+                        "s1",
+                        "Lấy doanh thu",
+                        "chi tiết mới",
+                        null,
+                        null,
+                        ["get_sales_summary"])],
+                    "Đã sửa bước 1."));
         _sender.Setup(x => x.Send(It.IsAny<UpdateChatPlanCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ChatPlanDto>.Success(new ChatPlanDto(runId, 2, ChatPlanStatus.Ready, [], "ai", null)));
-
         var handler = CreateSendPlanChatHandler();
         var result = await handler.Handle(
-            new SendPlanChatMessageCommand(runId, "sửa bước 1 thành lấy doanh thu tháng này", null), CancellationToken.None);
-
+            new SendPlanChatMessageCommand(runId, "sửa bước 1 thành lấy doanh thu tháng này", null),
+            CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
         result.Value.Action.Should().Be("edited");
         result.Value.Reply.Should().Be("Đã sửa bước 1.");
-        _sender.Verify(x => x.Send(
-            It.Is<UpdateChatPlanCommand>(c => c.Operations.Count == 1
-                && c.Operations[0].Type == "edit"
-                && c.Operations[0].StepId == "s1"
-                && c.Operations[0].ExpectedTools!.Contains("get_sales_summary")),
-            It.IsAny<CancellationToken>()), Times.Once);
+        _sender.Verify(
+            x => x.Send(
+                It.Is<UpdateChatPlanCommand>(
+                    c => c.Operations.Count == 1 &&
+                        c.Operations[0].Type == "edit" &&
+                        c.Operations[0].StepId == "s1" &&
+                        c.Operations[0].ExpectedTools!.Contains("get_sales_summary")),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact(DisplayName = "PLAN_CHAT_05 - Sidecar trả unclear thì không gọi UpdateChatPlanCommand")]
@@ -502,12 +563,16 @@ public class ManagerChatPlan
         GivenHasPermission(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
         _sidecarStreamClient
-            .Setup(x => x.InterpretPlanChatAsync(runId, "ừm", It.IsAny<List<PlanStepDto>>(), null, It.IsAny<CancellationToken>()))
+            .Setup(
+                x => x.InterpretPlanChatAsync(
+                    runId,
+                    "ừm",
+                    It.IsAny<List<PlanStepDto>>(),
+                    null,
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PlanChatInterpretationDto("unclear", [], "Bạn muốn sửa gì cụ thể vậy?"));
-
         var handler = CreateSendPlanChatHandler();
         var result = await handler.Handle(new SendPlanChatMessageCommand(runId, "ừm", null), CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Action.Should().Be("unclear");
         _sender.Verify(x => x.Send(It.IsAny<UpdateChatPlanCommand>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -520,10 +585,8 @@ public class ManagerChatPlan
         var runId = Guid.NewGuid();
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         _permissions.Setup(x => x.HasAnyPermissionAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
-
         var handler = CreateSendPlanChatHandler();
         var result = await handler.Handle(new SendPlanChatMessageCommand(runId, "duyệt", null), CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Forbidden");
         _chatInsert.Verify(x => x.AddMessage(It.IsAny<ChatMessage>()), Times.Never);
@@ -538,10 +601,8 @@ public class ManagerChatPlan
         _currentUser.Setup(x => x.GetUserId()).Returns(userId);
         GivenHasPermission(userId);
         _chatRead.Setup(x => x.GetPlanByRunIdAsync(runId, It.IsAny<CancellationToken>())).ReturnsAsync(plan);
-
         var handler = CreateSendPlanChatHandler();
         var result = await handler.Handle(new SendPlanChatMessageCommand(runId, "duyệt", null), CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         result.Error!.Code.Should().Be("Validation");
     }

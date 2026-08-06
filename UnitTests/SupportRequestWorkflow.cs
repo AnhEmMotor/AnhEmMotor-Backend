@@ -33,7 +33,6 @@ public class SupportRequestWorkflow
             _supportRequests.Object,
             _contacts.Object,
             _unitOfWork.Object);
-
         var result = await handler.Handle(
             new CreateSupportRequestCommand(
                 new CreateSupportRequestRequest
@@ -46,7 +45,6 @@ public class SupportRequestWorkflow
                     Content = "Nội dung"
                 }),
             CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.TrackingToken.Should().NotBe(Guid.Empty);
         persisted.Should().NotBeNull();
@@ -61,9 +59,7 @@ public class SupportRequestWorkflow
         _supportRequests.Setup(repository => repository.GetByIdAsync(10, It.IsAny<CancellationToken>()))
             .ReturnsAsync(request);
         var handler = new AssignSupportRequestCommandHandler(_supportRequests.Object, _unitOfWork.Object);
-
         var result = await handler.Handle(new AssignSupportRequestCommand(10, employeeId), CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         request.AssignedUserId.Should().Be(employeeId);
         request.Status.Should().Be(SupportRequestStatus.Assigned);
@@ -89,14 +85,12 @@ public class SupportRequestWorkflow
             Mock.Of<IJobApplicationRepository>(),
             _unitOfWork.Object,
             _currentUser.Object);
-
         var result = await handler.Handle(
             new UpdateContactStatusCommand(
                 "support",
                 11,
                 new UpdateContactStatusRequest { Status = SupportRequestStatus.InProgress }),
             CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         request.Status.Should().Be(SupportRequestStatus.Assigned);
     }
@@ -105,12 +99,7 @@ public class SupportRequestWorkflow
     public async Task RateCustomer_AssignedEmployeeRatesClosedRequest()
     {
         var employeeId = Guid.NewGuid();
-        var request = new SupportRequest
-        {
-            Id = 12,
-            Status = SupportRequestStatus.Closed,
-            AssignedUserId = employeeId
-        };
+        var request = new SupportRequest { Id = 12, Status = SupportRequestStatus.Closed, AssignedUserId = employeeId };
         _supportRequests.Setup(repository => repository.GetByIdAsync(12, It.IsAny<CancellationToken>()))
             .ReturnsAsync(request);
         _currentUser.Setup(context => context.GetUserId()).Returns(employeeId);
@@ -118,11 +107,9 @@ public class SupportRequestWorkflow
             _supportRequests.Object,
             _unitOfWork.Object,
             _currentUser.Object);
-
         var result = await handler.Handle(
             new RateSupportCustomerCommand(12, new SupportRatingRequest { Rating = 4, Comment = "Hợp tác tốt" }),
             CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         request.EmployeeRatingOfCustomer.Should().Be(4);
         request.EmployeeRatingComment.Should().Be("Hợp tác tốt");
@@ -142,18 +129,11 @@ public class SupportRequestWorkflow
         _supportRequests.Setup(repository => repository.GetByIdAsync(13, It.IsAny<CancellationToken>()))
             .ReturnsAsync(request);
         var handler = new RateSupportEmployeeCommandHandler(_supportRequests.Object, _unitOfWork.Object);
-
         var result = await handler.Handle(
             new RateSupportEmployeeCommand(
                 13,
-                new CustomerSupportRatingRequest
-                {
-                    TrackingToken = Guid.NewGuid(),
-                    Rating = 5,
-                    Comment = "Rất tận tâm"
-                }),
+                new CustomerSupportRatingRequest { TrackingToken = Guid.NewGuid(), Rating = 5, Comment = "Rất tận tâm" }),
             CancellationToken.None);
-
         result.IsFailure.Should().BeTrue();
         request.CustomerRatingOfEmployee.Should().BeNull();
     }
@@ -177,7 +157,6 @@ public class SupportRequestWorkflow
             Mock.Of<IJobApplicationRepository>(),
             _unitOfWork.Object,
             _currentUser.Object);
-
         var started = await handler.Handle(
             new UpdateContactStatusCommand(
                 "support",
@@ -190,7 +169,6 @@ public class SupportRequestWorkflow
                 14,
                 new UpdateContactStatusRequest { Status = SupportRequestStatus.Closed }),
             CancellationToken.None);
-
         started.IsSuccess.Should().BeTrue();
         closed.IsSuccess.Should().BeTrue();
         request.StartedAt.Should().NotBeNull();
@@ -212,7 +190,6 @@ public class SupportRequestWorkflow
         _supportRequests.Setup(repository => repository.GetByIdAsync(15, It.IsAny<CancellationToken>()))
             .ReturnsAsync(request);
         var handler = new RateSupportEmployeeCommandHandler(_supportRequests.Object, _unitOfWork.Object);
-
         var result = await handler.Handle(
             new RateSupportEmployeeCommand(
                 15,
@@ -223,7 +200,6 @@ public class SupportRequestWorkflow
                     Comment = "Tư vấn rõ ràng"
                 }),
             CancellationToken.None);
-
         result.IsSuccess.Should().BeTrue();
         request.CustomerRatingOfEmployee.Should().Be(5);
         request.CustomerRatingComment.Should().Be("Tư vấn rõ ràng");

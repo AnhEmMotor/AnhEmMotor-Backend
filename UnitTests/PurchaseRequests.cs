@@ -827,7 +827,13 @@ public class PurchaseRequests
         _excelServiceMock.Setup(x => x.ParseImportRows(It.IsAny<byte[]>())).Returns(importRows);
         var product = new Domain.Entities.Product { Id = 1, Name = "Honda Wave" };
         _productReadRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([product]);
-        var variant = new ProductVariant { Id = 10, ProductId = 1, VariantName = "Variant 1", ProductVariantColors = [] };
+        var variant = new ProductVariant
+        {
+            Id = 10,
+            ProductId = 1,
+            VariantName = "Variant 1",
+            ProductVariantColors = []
+        };
         _variantRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([variant]);
         var supplier = new Domain.Entities.Supplier { Id = 100, Name = "Supplier A" };

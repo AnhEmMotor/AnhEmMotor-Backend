@@ -144,9 +144,7 @@ public class AnalyticsController(IMediator mediator, ApplicationDBContext db) : 
                 .ConfigureAwait(false);
             logs.AddRange(expenseLogs);
         }
-        var result = logs.OrderByDescending(l => ((dynamic)l).timestamp)
-            .Take(limit)
-            .ToList();
+        var result = logs.OrderByDescending(l => ((dynamic)l).timestamp).Take(limit).ToList();
         return Ok(result);
     }
 }

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Application.ApiContracts.File.Requests;
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
@@ -17,6 +16,7 @@ using FluentAssertions;
 using Infrastructure.Configurations.Options;
 using Infrastructure.Repositories.MediaFile.File;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Moq;
 using SixLabors.ImageSharp;
@@ -32,7 +32,7 @@ public class MediaFile
     private readonly Mock<IFileReadService> _fileReadServiceMock;
     private readonly Mock<IFileInsertService> _fileInsertServiceMock;
     private readonly Mock<IFileUpdateService> _fileUpdateServiceMock;
-private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
+    private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly Mock<IFileDeleteService> _fileDeleteServiceMock;
     private readonly Mock<IMediaFileInsertRepository> _insertRepositoryMock;
     private readonly Mock<IMediaFileReadRepository> _readRepositoryMock;
@@ -45,8 +45,8 @@ private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
         _fileReadServiceMock = new Mock<IFileReadService>();
         _fileInsertServiceMock = new Mock<IFileInsertService>();
         _fileUpdateServiceMock = new Mock<IFileUpdateService>();
-_httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-_fileDeleteServiceMock = new Mock<IFileDeleteService>();
+        _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+        _fileDeleteServiceMock = new Mock<IFileDeleteService>();
         _insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         _readRepositoryMock = new Mock<IMediaFileReadRepository>();
         _updateRepositoryMock = new Mock<IMediaFileUpdateRepository>();
@@ -590,14 +590,13 @@ _fileDeleteServiceMock = new Mock<IFileDeleteService>();
         environment.SetupGet(x => x.ContentRootPath).Returns(Path.GetTempPath());
         environment.SetupGet(x => x.WebRootPath).Returns(Path.Combine(Path.GetTempPath(), "wwwroot"));
         var httpContextAccessor = new Mock<IHttpContextAccessor>();
-httpContextAccessor.Setup(x => x.HttpContext).Returns((HttpContext?)null);
-var service = new FileReadService(
+        httpContextAccessor.Setup(x => x.HttpContext).Returns((HttpContext?)null);
+        var service = new FileReadService(
             environment.Object,
             Options.Create(new LocalFileStorageOptions()),
             _fileUpdateServiceMock.Object,
-  httpContextAccessor.Object);
+            httpContextAccessor.Object);
         var publicUrl = service.GetPublicUrl("banners/banner.webp");
-
         publicUrl.Should().Be("/api/v1/MediaFile/view-image/banners/banner.webp");
     }
 
@@ -616,8 +615,7 @@ var service = new FileReadService(
             await using var imageStream = new MemoryStream();
             using (var image = new Image<Rgba32>(2, 2))
             {
-                await image.SaveAsPngAsync(imageStream, TestContext.Current.CancellationToken)
-                    .ConfigureAwait(true);
+                await image.SaveAsPngAsync(imageStream, TestContext.Current.CancellationToken).ConfigureAwait(true);
             }
             imageStream.Position = 0;
             _fileUpdateServiceMock
@@ -633,21 +631,17 @@ var service = new FileReadService(
                         imageStream.Position = 0;
                         return new MemoryStream(imageStream.ToArray());
                     });
-
-  var service = new FileInsertService(environment.Object,
-    Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
-    _fileUpdateServiceMock.Object);
-            var result = await service.SaveFileAsync(
-                    imageStream,
-                    TestContext.Current.CancellationToken,
-                    "banners")
+            var service = new FileInsertService(
+                environment.Object,
+                Options.Create(new LocalFileStorageOptions { UploadPath = configuredUploadPath }),
+                _fileUpdateServiceMock.Object);
+            var result = await service.SaveFileAsync(imageStream, TestContext.Current.CancellationToken, "banners")
                 .ConfigureAwait(true);
-
             result.IsSuccess.Should().BeTrue();
             var expectedFile = Path.Combine(
                 expectedUploadRoot,
                 result.Value.StoragePath.Replace('/', Path.DirectorySeparatorChar));
-            System.IO.File.Exists(expectedFile).Should().BeTrue();
+            File.Exists(expectedFile).Should().BeTrue();
         } finally
         {
             if (Directory.Exists(contentRoot))

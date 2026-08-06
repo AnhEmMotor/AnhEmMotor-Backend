@@ -14,7 +14,7 @@ public static class AiSearchRuleParser
     private const double SimilarityThreshold = 0.75;
     private const int MaxUnmatchedWords = 3;
 
-    private static readonly string[] Colors =["đỏ", "đen", "trắng", "xanh", "vàng", "bạc", "xám", "cam", "tím", "hồng", "nâu"];
+    private static readonly string[] Colors = ["đỏ", "đen", "trắng", "xanh", "vàng", "bạc", "xám", "cam", "tím", "hồng", "nâu"];
 
     private static readonly Dictionary<string, long> UnitMultipliers = new(StringComparer.OrdinalIgnoreCase)
     {

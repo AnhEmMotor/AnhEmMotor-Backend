@@ -1,4 +1,3 @@
-using SixLabors.ImageSharp;
 using Application.ApiContracts.File.Requests;
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
@@ -22,6 +21,7 @@ using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
+using SixLabors.ImageSharp;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
@@ -305,7 +305,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     public async Task<IActionResult> UploadManualImageAsync(
         IFormFile file,
         [FromQuery] string targetFileName,
-        [FromServices] Microsoft.AspNetCore.Hosting.IWebHostEnvironment environment,
+        [FromServices] IWebHostEnvironment environment,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
@@ -313,37 +313,29 @@ public class MediaFileController(IMediator mediator) : ApiController
         {
             return BadRequest(new ErrorResponse("Target file name is required."));
         }
-
         var webRoot = string.IsNullOrWhiteSpace(environment.WebRootPath)
             ? Path.Combine(environment.ContentRootPath, "wwwroot")
             : environment.WebRootPath;
-
         var manualsDir = Path.Combine(webRoot, "uploads", "manuals");
         if (!Directory.Exists(manualsDir))
         {
             Directory.CreateDirectory(manualsDir);
         }
-
         var ext = Path.GetExtension(file.FileName).ToLower();
         if (ext != ".png" && ext != ".jpg" && ext != ".jpeg" && ext != ".webp")
         {
             return BadRequest(new ErrorResponse("Only image files (.png, .jpg, .jpeg, .webp) are allowed."));
         }
-
-        // Force target file extension to always be .png
         var targetFile = Path.Combine(manualsDir, $"{targetFileName}.png");
-
         try
         {
             using (var fileStream = new FileStream(targetFile, FileMode.Create))
             {
                 await file.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
             }
-
             var publicUrl = $"/api/v1/MediaFile/view-image/manuals/{targetFileName}.png";
             return Ok(new { PublicUrl = publicUrl });
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return BadRequest(new ErrorResponse(ex.Message));
         }

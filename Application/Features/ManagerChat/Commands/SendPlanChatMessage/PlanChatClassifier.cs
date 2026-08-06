@@ -7,9 +7,9 @@ namespace Application.Features.ManagerChat.Commands.SendPlanChatMessage;
 /// </summary>
 public static class PlanChatClassifier
 {
-    private static readonly HashSet<string> ApproveExact =["duyệt", "đồng ý", "ok", "được", "duyệt đi", "duyệt luôn", "chạy đi", "chạy luôn"];
+    private static readonly HashSet<string> ApproveExact = ["duyệt", "đồng ý", "ok", "được", "duyệt đi", "duyệt luôn", "chạy đi", "chạy luôn"];
 
-    private static readonly HashSet<string> RejectExact =["huỷ", "hủy", "không", "thôi", "bỏ", "huỷ đi", "hủy đi", "huỷ luôn", "hủy luôn"];
+    private static readonly HashSet<string> RejectExact = ["huỷ", "hủy", "không", "thôi", "bỏ", "huỷ đi", "hủy đi", "huỷ luôn", "hủy luôn"];
 
     public static string? Classify(string text)
     {

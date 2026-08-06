@@ -7,7 +7,7 @@ namespace Application.Features.ManagerChat.Commands.SendSteeringMessage;
 /// </summary>
 public static class SteeringClassifier
 {
-    private static readonly string[] CorrectionMarkers =["à nhầm", "à quên", "nhầm rồi", "sai rồi", "không phải", "ý tôi là", "ý mình là", "sửa lại", "đổi thành", "thay vì", "khoan", "dừng lại", "bỏ qua", ];
+    private static readonly string[] CorrectionMarkers = ["à nhầm", "à quên", "nhầm rồi", "sai rồi", "không phải", "ý tôi là", "ý mình là", "sửa lại", "đổi thành", "thay vì", "khoan", "dừng lại", "bỏ qua", ];
 
     private static readonly HashSet<string> RestartExact = ["dừng", "stop", "thôi", "huỷ"];
 

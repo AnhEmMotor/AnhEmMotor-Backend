@@ -1,4 +1,3 @@
-using Application.Interfaces.Repositories.Voucher;
 using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
@@ -25,6 +24,7 @@ using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Repositories.Voucher;
 using Application.Interfaces.Services.Shipping;
 using Domain.Constants;
 using Domain.Constants.Order;

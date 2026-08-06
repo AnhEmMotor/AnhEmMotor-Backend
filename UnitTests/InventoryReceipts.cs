@@ -31,10 +31,10 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Moq;
+using Sieve.Models;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Sieve.Models;
 using InventoryReceiptEntity = Domain.Entities.InventoryReceipt;
 using ProductVariant = Domain.Entities.ProductVariant;
 
@@ -686,7 +686,11 @@ public class InventoryReceipts
             Id = 20,
             PurchaseRequestId = 7,
             ProductVariant =
-                new ProductVariant { VariantName = "Variant 1", Product = new Domain.Entities.Product { Name = "Honda Wave" } },
+                new ProductVariant
+                {
+                    VariantName = "Variant 1",
+                    Product = new Domain.Entities.Product { Name = "Honda Wave" }
+                },
             ProductVariantColor = null
         };
         _prReadRepoMock.Setup(

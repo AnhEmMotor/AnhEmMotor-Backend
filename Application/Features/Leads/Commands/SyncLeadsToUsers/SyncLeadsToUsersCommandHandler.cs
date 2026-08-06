@@ -19,36 +19,33 @@ public class SyncLeadsToUsersCommandHandler(
     public async Task<Result<int>> Handle(SyncLeadsToUsersCommand request, CancellationToken cancellationToken)
     {
         int count = 0;
-        
         var customerRole = "Customer";
         if (!await roleReadRepository.IsRoleExistAsync(customerRole, cancellationToken).ConfigureAwait(false))
         {
-            await roleInsertRepository.CreateAsync(new ApplicationRole { Name = customerRole }, cancellationToken).ConfigureAwait(false);
+            await roleInsertRepository.CreateAsync(new ApplicationRole { Name = customerRole }, cancellationToken)
+                .ConfigureAwait(false);
         }
-
         var leads = await leadReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-
         foreach (var lead in leads)
         {
-            string email = string.IsNullOrWhiteSpace(lead.Email) ? "" : lead.Email.Trim();
-            string phone = string.IsNullOrWhiteSpace(lead.PhoneNumber) ? "" : lead.PhoneNumber.Trim();
-
+            string email = string.IsNullOrWhiteSpace(lead.Email) ? string.Empty : lead.Email.Trim();
+            string phone = string.IsNullOrWhiteSpace(lead.PhoneNumber) ? string.Empty : lead.PhoneNumber.Trim();
             string username = string.IsNullOrEmpty(phone) ? email : phone;
             if (!string.IsNullOrEmpty(username))
             {
-                username = Regex.Replace(username, @"[^a-zA-Z0-9_\-\.@]", "");
+                username = Regex.Replace(username, @"[^a-zA-Z0-9_\-\.@]", string.Empty);
             }
             if (string.IsNullOrEmpty(username))
             {
                 username = $"customer_{lead.Id}";
             }
-
-            var existingUser = await userReadRepository.FindUserByUsernameAsync(username, cancellationToken).ConfigureAwait(false);
+            var existingUser = await userReadRepository.FindUserByUsernameAsync(username, cancellationToken)
+                .ConfigureAwait(false);
             if (existingUser == null && !string.IsNullOrEmpty(email))
             {
-                existingUser = await userReadRepository.FindUserByEmailAsync(email, cancellationToken).ConfigureAwait(false);
+                existingUser = await userReadRepository.FindUserByEmailAsync(email, cancellationToken)
+                    .ConfigureAwait(false);
             }
-
             if (existingUser == null)
             {
                 var newUser = new ApplicationUser
@@ -60,24 +57,28 @@ public class SyncLeadsToUsersCommandHandler(
                     Status = UserStatus.Active,
                     Gender = lead.Gender ?? GenderStatus.Other
                 };
-
-                var (succeeded, _) = await userCreateRepository.CreateUserAsync(newUser, "Khachhang@123", cancellationToken).ConfigureAwait(false);
+                var (succeeded, _) = await userCreateRepository.CreateUserAsync(
+                    newUser,
+                    "Khachhang@123",
+                    cancellationToken)
+                    .ConfigureAwait(false);
                 if (succeeded)
                 {
-                    await userCreateRepository.AddUserToRoleAsync(newUser, customerRole, cancellationToken).ConfigureAwait(false);
+                    await userCreateRepository.AddUserToRoleAsync(newUser, customerRole, cancellationToken)
+                        .ConfigureAwait(false);
                     count++;
                 }
-            }
-            else
+            } else
             {
-                var roles = await userReadRepository.GetUserRolesAsync(existingUser, cancellationToken).ConfigureAwait(false);
+                var roles = await userReadRepository.GetUserRolesAsync(existingUser, cancellationToken)
+                    .ConfigureAwait(false);
                 if (!roles.Contains(customerRole))
                 {
-                    await userCreateRepository.AddUserToRoleAsync(existingUser, customerRole, cancellationToken).ConfigureAwait(false);
+                    await userCreateRepository.AddUserToRoleAsync(existingUser, customerRole, cancellationToken)
+                        .ConfigureAwait(false);
                 }
             }
         }
-
         return Result<int>.Success(count);
     }
 }

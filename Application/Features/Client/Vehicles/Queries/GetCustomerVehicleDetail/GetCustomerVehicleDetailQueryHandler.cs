@@ -1,13 +1,14 @@
 using Application.ApiContracts.Vehicle.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Vehicle;
 using MediatR;
-using System;
 
 namespace Application.Features.Client.Vehicles.Queries.GetCustomerVehicleDetail;
 
-public class GetCustomerVehicleDetailQueryHandler(IVehicleReadRepository vehicleRepository) : IRequestHandler<GetCustomerVehicleDetailQuery, Result<VehicleDetailResponse>>
+public class GetCustomerVehicleDetailQueryHandler(
+    IVehicleReadRepository vehicleRepository,
+    IMaintenanceHistoryReadRepository maintenanceRepository) : IRequestHandler<GetCustomerVehicleDetailQuery, Result<VehicleDetailResponse>>
 {
     public async Task<Result<VehicleDetailResponse>> Handle(
         GetCustomerVehicleDetailQuery request,
@@ -28,18 +29,21 @@ public class GetCustomerVehicleDetailQueryHandler(IVehicleReadRepository vehicle
             ColorName = vehicle.ProductVariantColor?.ColorName ?? string.Empty,
             Type = vehicle.Product?.ProductCategory?.Name ?? "Xe máy",
             VariantName = vehicle.ProductVariant?.VariantName ?? string.Empty,
-            Capacity = vehicle.Product?.Displacement?.ToString() ?? "",
+            Capacity = vehicle.Product?.Displacement?.ToString() ?? string.Empty,
             PurchaseDate = vehicle.PurchaseDate,
             Status = vehicle.Status,
             CurrentOdo = vehicle.CurrentOdo,
             WarrantyFrom = vehicle.PurchaseDate,
             WarrantyUntil = vehicle.PurchaseDate.AddMonths(GetMonths(vehicle.Product?.WarrantyPeriod)),
             ImageUrl = vehicle.ProductVariantColor?.CoverImageUrl ?? string.Empty,
-            OperatingSpecs = new
-            {
-                oil = vehicle.Product?.OilCapacity > 0 ? $"10W-40 - {vehicle.Product.OilCapacity} L" : "10W-40 - 1.2 L",
-                tirePressure = "Trước: 2.0 kg/cm2, Sau: 2.25 kg/cm2"
-            }
+            OperatingSpecs =
+                new
+                {
+                    oil = vehicle.Product?.OilCapacity > 0
+                        ? $"10W-40 - {vehicle.Product.OilCapacity} L"
+                        : "10W-40 - 1.2 L",
+                    tirePressure = "Trước: 2.0 kg/cm2, Sau: 2.25 kg/cm2"
+                }
         };
         if (response.WarrantyUntil.HasValue)
         {
@@ -47,30 +51,28 @@ public class GetCustomerVehicleDetailQueryHandler(IVehicleReadRepository vehicle
             if (response.WarrantyRemainingDays < 0)
                 response.WarrantyRemainingDays = 0;
         }
-
         var histories = await maintenanceRepository.GetByVehicleIdAsync(vehicle.Id, cancellationToken);
         var orderedHistories = histories.OrderByDescending(h => h.MaintenanceDate).ToList();
-
-        response.Timeline = orderedHistories.Select(h => (object)new
-        {
-            id = h.Id.ToString(),
-            date = h.MaintenanceDate.ToString("yyyy-MM-dd"),
-            title = h.ServiceType ?? "Bảo dưỡng",
-            items = new[] { $"Số km: {h.Mileage} km", $"Chi phí: {h.TotalCost} đ", h.Description },
-            status = "completed"
-        }).ToList();
-
+        response.Timeline = [.. orderedHistories.Select(
+            h => (object)new
+            {
+                id = h.Id.ToString(),
+                date = h.MaintenanceDate.ToString("yyyy-MM-dd"),
+                title = h.ServiceType ?? "Bảo dưỡng",
+                items = new[] { $"Số km: {h.Mileage} km", $"Chi phí: {h.TotalCost} đ", h.Description },
+                status = "completed"
+            })];
         var lastMaintenance = orderedHistories.FirstOrDefault();
         if (lastMaintenance != null)
         {
             response.NextService = new
             {
                 odo = lastMaintenance.NextMaintenanceOdo?.ToString() ?? (lastMaintenance.Mileage + 3000).ToString(),
-                date = lastMaintenance.NextMaintenanceDate?.ToString("yyyy-MM-dd") ?? lastMaintenance.MaintenanceDate.AddMonths(3).ToString("yyyy-MM-dd"),
+                date = lastMaintenance.NextMaintenanceDate?.ToString("yyyy-MM-dd") ??
+                    lastMaintenance.MaintenanceDate.AddMonths(3).ToString("yyyy-MM-dd"),
                 items = new[] { "Thay nhớt định kỳ", "Kiểm tra phanh" }
             };
-        }
-        else
+        } else
         {
             response.NextService = new
             {
@@ -79,11 +81,10 @@ public class GetCustomerVehicleDetailQueryHandler(IVehicleReadRepository vehicle
                 items = new[] { "Kiểm tra tổng quát lần 1" }
             };
         }
-
         return Result<VehicleDetailResponse>.Success(response);
     }
 
-    private int GetMonths(string? warrantyPeriod)
+    private static int GetMonths(string? warrantyPeriod)
     {
         if (string.IsNullOrWhiteSpace(warrantyPeriod))
             return 36;

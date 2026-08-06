@@ -59,8 +59,7 @@ public class EmployeeKpi
         _kpiRepository.Verify(
             repository => repository.AddAsync(
                 It.Is<KPI>(
-                    kpi =>
-                        kpi.MetricName == "Doanh số tháng" &&
+                    kpi => kpi.MetricName == "Doanh số tháng" &&
                         kpi.Description == "Số xe bàn giao" &&
                         kpi.EmployeeProfileId == employee.Id),
                 CancellationToken.None),
@@ -103,9 +102,7 @@ public class EmployeeKpi
         _kpiRepository.Verify(
             repository => repository.AddAsync(It.IsAny<KPI>(), It.IsAny<CancellationToken>()),
             Times.Never);
-        _unitOfWork.Verify(
-            repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()),
-            Times.Never);
+        _unitOfWork.Verify(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -162,12 +159,8 @@ public class EmployeeKpi
         _kpiRepository
             .Setup(repository => repository.GetByIdAsync(kpi.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(kpi);
-        var handler = new DeleteEmployeeKpiCommandHandler(
-            _kpiRepository.Object,
-            _unitOfWork.Object);
-        var result = await handler.Handle(
-            new DeleteEmployeeKpiCommand(kpi.Id),
-            CancellationToken.None);
+        var handler = new DeleteEmployeeKpiCommandHandler(_kpiRepository.Object, _unitOfWork.Object);
+        var result = await handler.Handle(new DeleteEmployeeKpiCommand(kpi.Id), CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
         _kpiRepository.Verify(repository => repository.Delete(kpi), Times.Once);
         _unitOfWork.Verify(repository => repository.SaveChangesAsync(CancellationToken.None), Times.Once);
@@ -198,12 +191,13 @@ public class EmployeeKpi
         {
             Id = 7,
             UserId = Guid.NewGuid(),
-            User = new ApplicationUser
-            {
-                FullName = "Nguyễn Minh An",
-                Email = "an@anhemmotor.com",
-                UserName = "an@anhemmotor.com"
-            },
+            User =
+                new ApplicationUser
+                {
+                    FullName = "Nguyễn Minh An",
+                    Email = "an@anhemmotor.com",
+                    UserName = "an@anhemmotor.com"
+                },
             JobTitle = "Nhân viên kinh doanh"
         };
     }
