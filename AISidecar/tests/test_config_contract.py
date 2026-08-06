@@ -67,7 +67,7 @@ def test_ten_model_khop_giua_appsettings_va_settings(backend_root):
     from app.config import Settings
 
     appsettings_model = _read_appsettings_model(backend_root)
-    default_model = Settings.model_fields["model"].default
+    default_model = Settings.model_fields["ai_model"].default
 
     assert appsettings_model == default_model, (
         f"appsettings.json có Model='{appsettings_model}' nhưng "
@@ -91,8 +91,8 @@ def test_moi_file_appsettings_khai_cung_mot_model(backend_root):
 AISETUP_TO_SETTINGS = {
     "Provider": "ai_provider",
     "ApiEndpoint": "ai_api_endpoint",
-    "ApiKey": "api_key",
-    "Model": "model",
+    "ApiKey": "ai_api_key",
+    "Model": "ai_model",
     "EmbeddingModel": "embedding_model",
     "QdrantUrl": "qdrant_url",
     "QdrantApiKey": "qdrant_api_key",

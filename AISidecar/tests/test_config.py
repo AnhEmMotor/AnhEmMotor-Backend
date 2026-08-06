@@ -8,7 +8,7 @@ def test_settings_doc_dung_env(monkeypatch):
     monkeypatch.setenv("PORT", "9999")
     s = Settings()
     assert s.backend_url == "http://example.com/api"
-    assert s.api_key == "test-key"
+    assert s.ai_api_key == "test-key"
     assert s.port == 9999
 
 
@@ -31,7 +31,7 @@ def test_ai_provider_validate():
 
 def test_default_values():
     s = Settings()
-    assert s.model == "gemini-3.5-flash"
+    assert s.ai_model == "gemini-3.5-flash"
     assert s.port == 8000
     assert s.rag_enabled is True
     assert s.plan_cache_enabled is True
