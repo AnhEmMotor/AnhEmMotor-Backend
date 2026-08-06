@@ -1,10 +1,14 @@
 import hashlib
+import warnings
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.http import models as qm
 
 from app.config import get_settings
+
+warnings.filterwarnings(
+    "ignore", message="Api key is used with an insecure connection.", category=UserWarning)
 
 PRODUCT_COLLECTION = "product_catalog"
 KNOWLEDGE_COLLECTION = "knowledge_base"
