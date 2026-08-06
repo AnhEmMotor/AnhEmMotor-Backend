@@ -52,7 +52,10 @@ public static class DependencyInjection
             services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
                 options =>
                 {
-                    options.UseMySql(connectionString, serverVersion);
+                    options.UseMySql(
+                        connectionString,
+                        serverVersion,
+                        b => b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
                     options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 });
         } else if (string.Compare(provider, "PostgreSql", StringComparison.OrdinalIgnoreCase) == 0)
@@ -61,7 +64,9 @@ public static class DependencyInjection
             services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
                 options =>
                 {
-                    options.UseNpgsql(connectionString);
+                    options.UseNpgsql(
+                        connectionString,
+                        b => b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
                     options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 });
         } else

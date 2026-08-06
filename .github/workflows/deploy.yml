@@ -126,6 +126,7 @@ jobs:
           cp -r AISidecar ./publish/
           rm -rf ./publish/AISidecar/.venv ./publish/AISidecar/__pycache__
           cp -r SeedUploads ./publish/
+          cp -r SharedConfig ./publish/
       - name: Move AppSettings to Publish Folder
         run: cp appsettings.Production.json ./publish/
       - name: Move Migration Bundle to Publish Folder
@@ -170,18 +171,16 @@ jobs:
 
             cd /var/www/anhemmotor/backend
 
-            UPLOAD_PATH=$(jq -r '.LocalFileStorage.UploadPath // ""' appsettings.Production.json)
+            UPLOAD_PATH=$(python3 -c "import json; d=json.load(open('appsettings.Production.json')); print(d.get('LocalFileStorage',{}).get('UploadPath') or '')" 2>/dev/null || echo "")
 
             if [ -z "$UPLOAD_PATH" ]; then
-              TARGET="/var/www/anhemmotor/backend/wwwroot/uploads"
+              TARGET="/var/www/anhemmotor/backend/wwwroot/uploads";
             elif [[ "$UPLOAD_PATH" = /* ]]; then
-              TARGET="$UPLOAD_PATH"
+              TARGET="$UPLOAD_PATH";
             else
-              TARGET="/var/www/anhemmotor/backend/$UPLOAD_PATH"
+              TARGET="/var/www/anhemmotor/backend/$UPLOAD_PATH";
             fi
 
-            mkdir -p "$TARGET"
-            cp -rn SeedUploads/. "$TARGET/"
-            rm -rf SeedUploads
+            mkdir -p "$TARGET"; cp -rn SeedUploads/. "$TARGET/"; rm -rf SeedUploads
 
             sudo systemctl restart anhemmotor.service

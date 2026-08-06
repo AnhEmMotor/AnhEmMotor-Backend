@@ -13,7 +13,6 @@ from app.tools.knowledge import KNOWLEDGE_TOOL_NAMES, build_knowledge_tools
 
 logger = logging.getLogger(__name__)
 
-SOLUTION_FILE_NAME = "AnhEmMotor-Backend.sln"
 CATALOG_RELATIVE_PATH = Path("SharedConfig") / "chat-tools-catalog.json"
 
 _ARG_TYPES = {"string": str, "integer": int}
@@ -23,10 +22,10 @@ _SUMMARY_EXCLUDED_ARGS = {"from_date", "to_date"}
 def _find_repo_root() -> Path:
     directory = Path(__file__).resolve().parent
     while directory != directory.parent:
-        if (directory / SOLUTION_FILE_NAME).exists():
+        if (directory / CATALOG_RELATIVE_PATH).exists():
             return directory
         directory = directory.parent
-    raise FileNotFoundError(f"Không tìm thấy {SOLUTION_FILE_NAME} ở thư mục cha nào của {__file__}.")
+    raise FileNotFoundError(f"Không tìm thấy {CATALOG_RELATIVE_PATH} ở thư mục cha nào của {__file__}.")
 
 
 def load_catalog() -> list[dict]:

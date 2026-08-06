@@ -7,7 +7,6 @@ namespace Infrastructure.Services.Ai;
 
 public class ChatToolCatalogProvider(ILogger<ChatToolCatalogProvider> logger) : IChatToolCatalogProvider
 {
-    private const string SolutionFileName = "AnhEmMotor-Backend.sln";
     private const string CatalogRelativePath = "SharedConfig/chat-tools-catalog.json";
     private IReadOnlyList<ChatToolCatalogEntry>? _cache;
 
@@ -36,16 +35,11 @@ public class ChatToolCatalogProvider(ILogger<ChatToolCatalogProvider> logger) : 
     private static string? FindCatalogFile()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, SolutionFileName)))
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, CatalogRelativePath)))
         {
             dir = dir.Parent;
         }
-        if (dir is null)
-        {
-            return null;
-        }
-        var path = Path.Combine(dir.FullName, CatalogRelativePath);
-        return File.Exists(path) ? path : null;
+        return dir is null ? null : Path.Combine(dir.FullName, CatalogRelativePath);
     }
 
     private record RawEntry(
