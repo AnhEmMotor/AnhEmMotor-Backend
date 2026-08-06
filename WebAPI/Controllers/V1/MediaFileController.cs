@@ -326,14 +326,14 @@ public class MediaFileController(IMediator mediator) : ApiController
         {
             return BadRequest(new ErrorResponse("Only image files (.png, .jpg, .jpeg, .webp) are allowed."));
         }
-        var targetFile = Path.Combine(manualsDir, $"{targetFileName}.png");
+        var targetFile = Path.Combine(manualsDir, $"{targetFileName}.webp");
         try
         {
             using (var fileStream = new FileStream(targetFile, FileMode.Create))
             {
                 await file.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
             }
-            var publicUrl = $"/api/v1/MediaFile/view-image/manuals/{targetFileName}.png";
+            var publicUrl = $"/api/v1/MediaFile/view-image/manuals/{targetFileName}.webp";
             return Ok(new { PublicUrl = publicUrl });
         } catch (Exception ex)
         {
