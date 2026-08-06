@@ -1,10 +1,14 @@
 import hashlib
+import warnings
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.http import models as qm
 
 from app.config import get_settings
+
+warnings.filterwarnings(
+    "ignore", message="Api key is used with an insecure connection.", category=UserWarning)
 
 PRODUCT_COLLECTION = "product_catalog"
 KNOWLEDGE_COLLECTION = "knowledge_base"
@@ -58,7 +62,7 @@ async def embed(text: str) -> list[float]:
         return cached
     settings = get_settings()
     embedder = GoogleGenerativeAIEmbeddings(
-        model=f"models/{settings.embedding_model}", google_api_key=settings.api_key)
+        model=f"models/{settings.embedding_model}", google_api_key=settings.ai_api_key)
     vector = await embedder.aembed_query(text)
     _embedding_cache[key] = vector
     return vector

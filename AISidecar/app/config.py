@@ -10,12 +10,12 @@ class Settings(BaseSettings):
     backend_url: str = "http://localhost:5000/api"
     backend_internal_secret: str = ""
     ai_provider: Literal["gemini", "apiendpoint"] = "gemini"
-    api_key: str = ""
+    ai_api_key: str = ""
     ai_api_endpoint: str = ""
-    model: str = "gemini-3.5-flash"
+    ai_model: str = "gemini-3.5-flash"
     ollama_num_ctx: int = 8192
 
-    @field_validator("model", mode="before")
+    @field_validator("ai_model", mode="before")
     @classmethod
     def _empty_model_uses_default(cls, v):
         return v or "gemini-3.5-flash"

@@ -97,8 +97,8 @@ public class AiSidecarManager(
         }
         startInfo.EnvironmentVariables["AI_PROVIDER"] = config["AISetup:Provider"] ?? "Gemini";
         startInfo.EnvironmentVariables["AI_API_ENDPOINT"] = config["AISetup:ApiEndpoint"] ?? string.Empty;
-        startInfo.EnvironmentVariables["API_KEY"] = config["AISetup:ApiKey"] ?? string.Empty;
-        startInfo.EnvironmentVariables["MODEL"] = config["AISetup:Model"] ?? string.Empty;
+        startInfo.EnvironmentVariables["AI_API_KEY"] = config["AISetup:ApiKey"] ?? string.Empty;
+        startInfo.EnvironmentVariables["AI_MODEL"] = config["AISetup:Model"] ?? string.Empty;
         startInfo.EnvironmentVariables["QDRANT_URL"] = config["AISetup:QdrantUrl"] ?? string.Empty;
         startInfo.EnvironmentVariables["QDRANT_API_KEY"] = config["AISetup:QdrantApiKey"] ?? string.Empty;
         startInfo.EnvironmentVariables["POSTGRES_URL"] = config.GetConnectionString("PostgreSql") ?? string.Empty;

@@ -575,8 +575,8 @@ The following secrets need to be set up in the GitHub repository:
 | `GHN_SHOP_ID`                      | GHN Shop ID                              | `012345`                                                                                                 |
 | `GHN_BASE_URL`                     | GHN API Base URL                         | `https://dev-online-gateway.ghn.vn`                                                                      |
 | `AI_PROVIDER`                      | AI Provider (`Gemini` or `ApiEndpoint`)  | `Gemini`                                                                                                 |
-| `API_KEY` (`GEMINI_API_KEY`)       | AI Provider API Key (Gemini only)        | `AIzaSyB...`                                                                                             |
-| `MODEL` (`GEMINI_MODEL`)           | AI Model Name                            | `gemini-3.5-flash` / `qwen2.5:7b`                                                                        |
+| `AI_API_KEY`                   | AI Provider API Key (Gemini only)        | `AIzaSyB...`                                                                                             |
+| `AI_MODEL`                     | AI Model Name                            | `gemini-3.5-flash` / `qwen2.5:7b`                                                                        |
 | `AI_API_ENDPOINT`                  | Ollama base URL (no `/v1`)               | `http://127.0.0.1:11434`                                                                                 |
 | `LANGSMITH_TRACING`                | Enable LangSmith tracing (true/false)    | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                        | `lsv2_pt_...`                                                                                            |
@@ -1344,8 +1344,8 @@ Cần setup các secrets sau trong GitHub repository:
 | `GHN_SHOP_ID`                      | Mã cửa hàng (Shop ID) trên GHN            | `012345`                                                                                                 |
 | `GHN_BASE_URL`                     | Địa chỉ API của GHN                       | `https://dev-online-gateway.ghn.vn`                                                                      |
 | `AI_PROVIDER`                      | Nhà cung cấp AI (`Gemini` hoặc `ApiEndpoint`) | `Gemini`                                                                                             |
-| `API_KEY` (`GEMINI_API_KEY`)       | API Key AI Provider (chỉ dùng cho Gemini) | `AIzaSyB...`                                                                                             |
-| `MODEL` (`GEMINI_MODEL`)           | Tên mô hình AI                            | `gemini-3.5-flash` / `qwen2.5:7b`                                                                        |
+| `AI_API_KEY`                   | API Key AI Provider (chỉ dùng cho Gemini) | `AIzaSyB...`                                                                                             |
+| `AI_MODEL`                     | Tên mô hình AI                            | `gemini-3.5-flash` / `qwen2.5:7b`                                                                        |
 | `AI_API_ENDPOINT`                  | Base URL Ollama (không kèm `/v1`)         | `http://127.0.0.1:11434`                                                                                 |
 | `LANGSMITH_TRACING`                | Bật LangSmith tracing (true/false)        | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                         | `lsv2_pt_...`                                                                                            |

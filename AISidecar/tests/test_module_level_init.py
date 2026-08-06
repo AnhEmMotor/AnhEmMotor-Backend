@@ -9,7 +9,7 @@ DEPS_SRC = SIDECAR_ROOT / "app" / "api" / "deps.py"
 
 
 def test_import_app_khong_can_env(monkeypatch):
-    for key in ("API_KEY", "BACKEND_URL", "BACKEND_INTERNAL_SECRET", "QDRANT_URL"):
+    for key in ("AI_API_KEY", "BACKEND_URL", "BACKEND_INTERNAL_SECRET", "QDRANT_URL"):
         monkeypatch.delenv(key, raising=False)
 
     for name in [m for m in sys.modules if m.startswith("app.")]:
