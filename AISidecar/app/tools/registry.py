@@ -188,7 +188,7 @@ async def infer_step_tools(step_text: str, allowed: list[ToolSpec]) -> list[str]
     )
     llm = get_llm(temperature=0)
     response = await llm.ainvoke(prompt)
-    text = response if isinstance(response, str) else getattr(response, "content", "")
+    text = response if isinstance(response, str) else getattr(response, "text", "")
     try:
         names = json.loads(text)
     except (ValueError, TypeError):

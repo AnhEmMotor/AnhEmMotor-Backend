@@ -47,7 +47,7 @@ class StoreAgentState(TypedDict):
 def _latest_human_text(messages) -> str:
     for msg in reversed(messages or []):
         if isinstance(msg, HumanMessage):
-            return msg.content
+            return msg.text
     return ""
 
 
@@ -76,7 +76,7 @@ def _last_message_is_escalation_nudge(messages) -> bool:
     if not messages:
         return False
     last = messages[-1]
-    content = getattr(last, "content", "") or ""
+    content = getattr(last, "text", "") or ""
     return isinstance(last, HumanMessage) and content.startswith("[Hệ thống]") and "escalate_to_staff" in content
 
 
@@ -137,7 +137,7 @@ async def call_model_node(state: StoreAgentState) -> dict:
 
     full = None
     async for chunk in llm.astream(state["messages"]):
-        content = chunk if isinstance(chunk, str) else (getattr(chunk, "content", "") or "")
+        content = chunk if isinstance(chunk, str) else (getattr(chunk, "text", "") or "")
         if content and not is_risky_turn:
             writer(("text_delta", content))
         full = chunk if full is None else full + chunk
@@ -148,6 +148,8 @@ async def call_model_node(state: StoreAgentState) -> dict:
         result_message = AIMessage(content=full)
     else:
         result_message = full
+        if not isinstance(result_message.content, str):
+            result_message.content = result_message.text
 
     tool_calls = getattr(result_message, "tool_calls", None) or []
     if any(call.get("name") == "escalate_to_staff" for call in tool_calls):

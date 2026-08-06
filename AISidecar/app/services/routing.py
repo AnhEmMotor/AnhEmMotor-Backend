@@ -106,7 +106,7 @@ async def route_question(query: str, digest: str) -> list[str]:
         response = await llm.ainvoke(ROUTER_PROMPT.format(digest=digest, query=query))
     except Exception as exc:
         raise LlmError(str(exc)) from exc
-    text = response if isinstance(response, str) else getattr(response, "content", "")
+    text = response if isinstance(response, str) else getattr(response, "text", "")
     modules = [m.strip() for m in text.split(",") if m.strip() in MODULES]
     return modules[:2]
 

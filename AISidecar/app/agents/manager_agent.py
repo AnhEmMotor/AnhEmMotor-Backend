@@ -141,7 +141,7 @@ class AgentState(TypedDict):
 def _latest_human_text(messages) -> str:
     for msg in reversed(messages or []):
         if isinstance(msg, HumanMessage):
-            return msg.content
+            return msg.text
     return ""
 
 
@@ -342,7 +342,7 @@ async def plan_node(state: AgentState) -> dict:
     budget = MAX_PLAN_STEPS - existing_count
 
     async for chunk in llm.astream(prompt):
-        content = chunk if isinstance(chunk, str) else (getattr(chunk, "content", "") or "")
+        content = chunk if isinstance(chunk, str) else (getattr(chunk, "text", "") or "")
         full_text += content
         blocks = _split_plan_blocks(full_text)
         while parsed_count < len(blocks) and parsed_count < budget:
@@ -405,7 +405,7 @@ async def step_completed_node(state: AgentState) -> dict:
     step = state["current_plan_step"]
 
     last_message = state["messages"][-1]
-    summary = (getattr(last_message, "content", "") or "").strip()
+    summary = (getattr(last_message, "text", "") or "").strip()
 
     await client.update_plan_step_status(run_id, step["id"], "done", result=summary[:500])
     writer(("plan_step_completed", json.dumps(
@@ -433,7 +433,7 @@ async def summarize_node(state: AgentState) -> dict:
 
     full = ""
     async for chunk in llm.astream(prompt):
-        content = chunk if isinstance(chunk, str) else (getattr(chunk, "content", "") or "")
+        content = chunk if isinstance(chunk, str) else (getattr(chunk, "text", "") or "")
         if content:
             full += content
             writer(("text_delta", content))
@@ -478,7 +478,7 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         if cancel_event is not None and cancel_event.is_set():
             return {"turns": state.get("turns", 0) + 1, "cancelled": True, "carried_steering": []}
 
-        content = chunk if isinstance(chunk, str) else (getattr(chunk, "content", "") or "")
+        content = chunk if isinstance(chunk, str) else (getattr(chunk, "text", "") or "")
         if content:
             visible = thinking_parser.feed(content)
             if visible:
@@ -501,6 +501,8 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         result_message = AIMessage(content=full)
     else:
         result_message = full
+        if not isinstance(result_message.content, str):
+            result_message.content = result_message.text
         metadata = getattr(full, "response_metadata", None) or {}
         model_used = metadata.get("model_name") or metadata.get("model")
         if model_used:

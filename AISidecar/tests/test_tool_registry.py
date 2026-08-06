@@ -98,10 +98,24 @@ def test_build_tool_scope_gioi_han_theo_plan_step():
 async def test_infer_step_tools_loc_ten_bia(monkeypatch):
     class FakeResponse:
         content = '["tool_a", "made_up_tool"]'
+        text = content
 
     class FakeLLM:
         async def ainvoke(self, prompt):
             return FakeResponse()
+
+    monkeypatch.setattr(registry, "get_llm", lambda **kwargs: FakeLLM())
+    allowed = [_spec("tool_a", "product"), _spec("tool_b", "product")]
+    result = await registry.infer_step_tools("Lấy dữ liệu abcxyz", allowed)
+    assert result == ["tool_a"]
+
+
+async def test_infer_step_tools_khong_crash_khi_gemini_tra_content_dang_list(monkeypatch):
+    from langchain_core.messages import AIMessage
+
+    class FakeLLM:
+        async def ainvoke(self, prompt):
+            return AIMessage(content=[{"type": "text", "text": '["tool_a"]'}])
 
     monkeypatch.setattr(registry, "get_llm", lambda **kwargs: FakeLLM())
     allowed = [_spec("tool_a", "product"), _spec("tool_b", "product")]

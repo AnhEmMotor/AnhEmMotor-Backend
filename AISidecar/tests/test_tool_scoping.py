@@ -109,6 +109,7 @@ def test_plan_step_gioi_han_scope():
 async def test_infer_step_tools_loc_ten_bia(monkeypatch):
     class FakeResponse:
         content = '["tool_a", "made_up_tool"]'
+        text = content
 
     class FakeLLM:
         async def ainvoke(self, prompt):
