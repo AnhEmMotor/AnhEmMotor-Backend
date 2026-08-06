@@ -4,15 +4,10 @@ using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Repositories;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Linq;
 
 namespace Application.Features.Client.Vehicles.Queries.GetCustomerVehicleDetail;
 
-public class GetCustomerVehicleDetailQueryHandler(
-    IVehicleReadRepository vehicleRepository,
-    IMaintenanceHistoryReadRepository maintenanceRepository) : IRequestHandler<GetCustomerVehicleDetailQuery, Result<VehicleDetailResponse>>
+public class GetCustomerVehicleDetailQueryHandler(IVehicleReadRepository vehicleRepository) : IRequestHandler<GetCustomerVehicleDetailQuery, Result<VehicleDetailResponse>>
 {
     public async Task<Result<VehicleDetailResponse>> Handle(
         GetCustomerVehicleDetailQuery request,
@@ -23,7 +18,6 @@ public class GetCustomerVehicleDetailQueryHandler(
         {
             return Result<VehicleDetailResponse>.Failure(Error.NotFound("Không tìm thấy thông tin xe.", "VehicleId"));
         }
-
         var response = new VehicleDetailResponse
         {
             Id = vehicle.Id,
@@ -47,11 +41,11 @@ public class GetCustomerVehicleDetailQueryHandler(
                 tirePressure = "Trước: 2.0 kg/cm2, Sau: 2.25 kg/cm2"
             }
         };
-
         if (response.WarrantyUntil.HasValue)
         {
             response.WarrantyRemainingDays = (int)(response.WarrantyUntil.Value - DateTimeOffset.UtcNow).TotalDays;
-            if (response.WarrantyRemainingDays < 0) response.WarrantyRemainingDays = 0;
+            if (response.WarrantyRemainingDays < 0)
+                response.WarrantyRemainingDays = 0;
         }
 
         var histories = await maintenanceRepository.GetByVehicleIdAsync(vehicle.Id, cancellationToken);
@@ -91,10 +85,14 @@ public class GetCustomerVehicleDetailQueryHandler(
 
     private int GetMonths(string? warrantyPeriod)
     {
-        if (string.IsNullOrWhiteSpace(warrantyPeriod)) return 36;
-        if (warrantyPeriod.Contains("36")) return 36;
-        if (warrantyPeriod.Contains("24")) return 24;
-        if (warrantyPeriod.Contains("12")) return 12;
+        if (string.IsNullOrWhiteSpace(warrantyPeriod))
+            return 36;
+        if (warrantyPeriod.Contains("36"))
+            return 36;
+        if (warrantyPeriod.Contains("24"))
+            return 24;
+        if (warrantyPeriod.Contains("12"))
+            return 12;
         return 36;
     }
 }
