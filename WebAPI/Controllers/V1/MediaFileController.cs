@@ -1,3 +1,4 @@
+using SixLabors.ImageSharp;
 using Application.ApiContracts.File.Requests;
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
@@ -289,6 +290,63 @@ public class MediaFileController(IMediator mediator) : ApiController
     {
         var result = await mediator.Send(request, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tải lên ảnh hướng dẫn sử dụng (User Manual) với tên file cố định để ghi đè.
+    /// </summary>
+    /// <param name="file">Tệp ảnh cần tải lên.</param>
+    /// <param name="targetFileName">Tên file mong muốn (ví dụ: customer-data).</param>
+    /// <param name="environment">Môi trường ứng dụng.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    [HttpPost("manual/upload")]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadManualImageAsync(
+        IFormFile file,
+        [FromQuery] string targetFileName,
+        [FromServices] Microsoft.AspNetCore.Hosting.IWebHostEnvironment environment,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+        if (string.IsNullOrWhiteSpace(targetFileName))
+        {
+            return BadRequest(new ErrorResponse("Target file name is required."));
+        }
+
+        var webRoot = string.IsNullOrWhiteSpace(environment.WebRootPath)
+            ? Path.Combine(environment.ContentRootPath, "wwwroot")
+            : environment.WebRootPath;
+
+        var manualsDir = Path.Combine(webRoot, "uploads", "manuals");
+        if (!Directory.Exists(manualsDir))
+        {
+            Directory.CreateDirectory(manualsDir);
+        }
+
+        var ext = Path.GetExtension(file.FileName).ToLower();
+        if (ext != ".png" && ext != ".jpg" && ext != ".jpeg" && ext != ".webp")
+        {
+            return BadRequest(new ErrorResponse("Only image files (.png, .jpg, .jpeg, .webp) are allowed."));
+        }
+
+        // Force target file extension to always be .png
+        var targetFile = Path.Combine(manualsDir, $"{targetFileName}.png");
+
+        try
+        {
+            using (var fileStream = new FileStream(targetFile, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
+            }
+
+            var publicUrl = $"/api/v1/MediaFile/view-image/manuals/{targetFileName}.png";
+            return Ok(new { PublicUrl = publicUrl });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new ErrorResponse(ex.Message));
+        }
     }
 
     /// <summary>
