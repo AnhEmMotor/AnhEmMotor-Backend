@@ -422,6 +422,30 @@ async def test_call_model_node_chan_cu_phap_goi_tool_gia(monkeypatch):
     assert "function_call" not in result["messages"][0].content
 
 
+class _FakeListContentLlm:
+    def bind_tools(self, _tools):
+        return self
+
+    async def astream(self, _messages):
+        yield AIMessageChunk(content=[{"type": "text", "text": "Để tôi kiểm tra giúp bạn nhé."}])
+
+
+async def test_call_model_node_khong_crash_khi_llm_tra_content_dang_list(monkeypatch):
+    monkeypatch.setattr(store_agent, "get_llm", lambda temperature=0.3: _FakeListContentLlm())
+    monkeypatch.setattr(store_agent, "BackendClient", lambda auth_header="": FakeStoreBackendClient())
+    events = []
+    monkeypatch.setattr(store_agent, "get_stream_writer", lambda: events.append)
+
+    state = _base_state({
+        "messages": [HumanMessage(content="Giờ mở cửa của shop thế nào?")],
+    })
+    result = await store_agent.call_model_node(state)
+
+    assert isinstance(result["messages"][0].content, str)
+    corrections = [e[1] for e in events if e[0] == "message_correction"]
+    assert corrections, "check_output phải phát message_correction khi model chỉ hứa tra cứu"
+
+
 class _FakePromptLeakLlm:
     def bind_tools(self, _tools):
         return self
