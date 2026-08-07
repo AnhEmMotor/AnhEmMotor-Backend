@@ -64,10 +64,13 @@ public static class CustomerSeeder
                         LeadId = lead.Id,
                         UserId = userId,
                         ProductId = 68,
+                        ProductVariantId = 1,
+                        ProductVariantColorId = 1,
                         VinNumber = "VIN-MINHUYEN-001",
                         EngineNumber = "ENG-MINHUYEN-001",
                         LicensePlate = "59A1-999.99",
                         CurrentOdo = 1200,
+                        Status = "ACTIVE",
                         PurchaseDate = DateTimeOffset.UtcNow
                     };
                     context.Set<Vehicle>().Add(vehicle);
