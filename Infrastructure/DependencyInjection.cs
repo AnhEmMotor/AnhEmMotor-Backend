@@ -131,6 +131,7 @@ public static class DependencyInjection
         services.AddScoped<IInventoryReceiptExcelService, InventoryReceiptExcelService>();
         services.AddScoped<IInventoryLedgerExcelService, InventoryLedgerExcelService>();
         services.AddScoped<IInventoryReportExcelService, InventoryReportExcelService>();
+        services.AddScoped<ISupplierDebtExcelService, SupplierDebtExcelService>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient<IShippingService, ShippingService>(
             client =>

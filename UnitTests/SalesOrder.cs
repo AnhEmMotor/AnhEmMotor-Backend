@@ -2,6 +2,7 @@ using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Common.Payments;
+using Application.Features.InventoryOnHand.Notifications;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
@@ -20,6 +21,7 @@ using Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Commission;
+using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
@@ -33,6 +35,7 @@ using Domain.Primitives;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Mapster;
+using MediatR;
 using Moq;
 using Sieve.Models;
 using System.Linq.Expressions;
@@ -1852,6 +1855,105 @@ public class SalesOrder
         };
         var depositAmount = OrderPaymentAmountCalculator.GetDepositAmount(order);
         depositAmount.Should().Be(1000000m);
+    }
+
+    [Fact(DisplayName = "SO_117 - UpdateOutputStatus ghi sổ cái xuất kho khi Completed")]
+    public async Task UpdateOutputStatus_ToCompleted_ShouldWriteExportLedgerEntry()
+    {
+        var ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
+        ledgerRepoMock.Setup(x => x.GetLastEntryAsync(10, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new InventoryLedger { StockAfter = 20 });
+        InventoryLedger? savedLedger = null;
+        ledgerRepoMock.Setup(x => x.AddAsync(It.IsAny<InventoryLedger>(), It.IsAny<CancellationToken>()))
+            .Callback<InventoryLedger, CancellationToken>((l, _) => savedLedger = l)
+            .Returns(Task.CompletedTask);
+        var existingOutput = new Output
+        {
+            Id = 1,
+            StatusId = "delivering",
+            CustomerName = "Nguyễn Văn A",
+            OutputInfos =
+                new List<OutputInfo> { new() { ProductVariantId = 10, Count = 3, CostPrice = 50000m, Price = 60000m } }
+        };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingOutput);
+        var handler = new UpdateOutputStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _commissionUpdateRepositoryMock.Object,
+            _unitOfWorkMock.Object,
+            ledgerRepository: ledgerRepoMock.Object);
+        var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "completed", CurrentUserId = Guid.NewGuid() };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        savedLedger.Should().NotBeNull();
+        savedLedger!.TransactionType.Should().Be("Xuất kho");
+        savedLedger.ExportQty.Should().Be(3);
+        savedLedger.ImportQty.Should().Be(0);
+        savedLedger.StockAfter.Should().Be(17);
+        savedLedger.UnitPrice.Should().Be(50000m);
+        savedLedger.TotalAmount.Should().Be(150000m);
+        savedLedger.PartnerName.Should().Be("Nguyễn Văn A");
+    }
+
+    [Fact(
+        DisplayName = "SO_118 - UpdateOutputStatus publish InventoryChangedNotification khi Completed để tính lại báo cáo xuất nhập tồn")]
+    public async Task UpdateOutputStatus_ToCompleted_ShouldPublishInventoryChangedNotification()
+    {
+        var ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
+        ledgerRepoMock.Setup(x => x.GetLastEntryAsync(10, 5, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((InventoryLedger?)null);
+        var publisherMock = new Mock<IPublisher>();
+        var existingOutput = new Output
+        {
+            Id = 2,
+            StatusId = "delivering",
+            OutputInfos =
+                new List<OutputInfo>
+                {
+                    new() { ProductVariantId = 10, ProductVariantColorId = 5, Count = 2, CostPrice = 40000m }
+                }
+        };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(2, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingOutput);
+        var handler = new UpdateOutputStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _commissionUpdateRepositoryMock.Object,
+            _unitOfWorkMock.Object,
+            ledgerRepository: ledgerRepoMock.Object,
+            publisher: publisherMock.Object);
+        var command = new UpdateOutputStatusCommand { Id = 2, StatusId = "completed", CurrentUserId = Guid.NewGuid() };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        publisherMock.Verify(
+            x => x.Publish(
+                It.Is<InventoryChangedNotification>(n => n.Combos.Any(c => c.VariantId == 10 && c.ColorId == 5)),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact(
+        DisplayName = "SO_119 - UpdateOutputStatus vẫn hoàn tất khi không có ledgerRepository/publisher (tương thích ngược)")]
+    public async Task UpdateOutputStatus_ToCompleted_WithoutLedgerRepository_ShouldStillSucceed()
+    {
+        var existingOutput = new Output
+        {
+            Id = 3,
+            StatusId = "delivering",
+            OutputInfos = new List<OutputInfo> { new() { ProductVariantId = 10, Count = 1, CostPrice = 30000m } }
+        };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(3, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingOutput);
+        var handler = new UpdateOutputStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _commissionUpdateRepositoryMock.Object,
+            _unitOfWorkMock.Object);
+        var command = new UpdateOutputStatusCommand { Id = 3, StatusId = "completed", CurrentUserId = Guid.NewGuid() };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        existingOutput.StatusId.Should().Be("completed");
     }
 }
 

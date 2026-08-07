@@ -1,7 +1,9 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
+using Application.Features.InventoryOnHand.Notifications;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Commission;
+using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.Lead.Lead;
 using Application.Interfaces.Repositories.Logistics.Shipment;
 using Application.Interfaces.Repositories.Output;
@@ -34,7 +36,9 @@ public class UpdateOutputStatusCommandHandler(
     ILeadInsertRepository? leadInsertRepository = null,
     IShippingService? shippingService = null,
     IShipmentInsertRepository? shipmentInsertRepository = null,
-    IGeocodingService? geocodingService = null) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
+    IGeocodingService? geocodingService = null,
+    IInventoryLedgerRepository? ledgerRepository = null,
+    IPublisher? publisher = null) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
         UpdateOutputStatusCommand request,
@@ -70,6 +74,7 @@ public class UpdateOutputStatusCommandHandler(
             }
         }
         bool isCompleting = false;
+        var exportedCombos = new HashSet<(int VariantId, int? ColorId)>();
         switch (request.StatusId)
         {
             case OrderStatus.Completed:
@@ -88,6 +93,39 @@ public class UpdateOutputStatusCommandHandler(
                 if (deductionResult.IsFailure)
                 {
                     return Result<OrderDetailResponse>.Failure(deductionResult.Errors!);
+                }
+                if (ledgerRepository != null)
+                {
+                    foreach (var outputInfo in output.OutputInfos)
+                    {
+                        if (outputInfo.ProductVariantId is null || outputInfo.Count is null || outputInfo.Count <= 0)
+                        {
+                            continue;
+                        }
+                        var variantId = outputInfo.ProductVariantId.Value;
+                        var colorId = outputInfo.ProductVariantColorId;
+                        var lastEntry = await ledgerRepository.GetLastEntryAsync(variantId, colorId, cancellationToken)
+                            .ConfigureAwait(false);
+                        var currentStock = lastEntry?.StockAfter ?? 0;
+                        var exportQty = outputInfo.Count.Value;
+                        var unitPrice = outputInfo.CostPrice ?? outputInfo.Price ?? 0;
+                        var ledger = new InventoryLedger
+                        {
+                            TransactionDate = DateTimeOffset.UtcNow,
+                            DocumentCode = $"OUT-{output.Id}",
+                            TransactionType = "Xuất kho",
+                            ProductVariantId = variantId,
+                            ProductVariantColorId = colorId,
+                            PartnerName = output.CustomerName,
+                            ImportQty = 0,
+                            ExportQty = exportQty,
+                            UnitPrice = unitPrice,
+                            TotalAmount = exportQty * unitPrice,
+                            StockAfter = currentStock - exportQty
+                        };
+                        await ledgerRepository.AddAsync(ledger, cancellationToken).ConfigureAwait(false);
+                        exportedCombos.Add((variantId, colorId));
+                    }
                 }
                 break;
             case OrderStatus.Delivering:
@@ -198,6 +236,11 @@ public class UpdateOutputStatusCommandHandler(
         {
             await commissionUpdateRepository.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
                 .ConfigureAwait(false);
+            if (publisher != null && exportedCombos.Count > 0)
+            {
+                await publisher.Publish(new InventoryChangedNotification(exportedCombos), cancellationToken)
+                    .ConfigureAwait(false);
+            }
         }
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);

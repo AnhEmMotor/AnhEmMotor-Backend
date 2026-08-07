@@ -128,14 +128,7 @@ public class OutputMappingConfig : IRegister
 
     private static string? MapProductName(OutputInfo src)
     {
-        if (src.ProductVariant?.Product is null)
-            return null;
-        var productName = src.ProductVariant.Product.Name;
-        var optionValues = src.ProductVariant.VariantOptionValues?
-            .Select(vov => vov.OptionValue?.Name).Where(name => !string.IsNullOrWhiteSpace(name)).ToList();
-        if (optionValues is null || optionValues.Count == 0)
-            return productName;
-        return $"{productName} ({string.Join(" - ", optionValues)})";
+        return src.ProductVariant?.Product?.Name;
     }
 
     private static string? MapCoverImageUrl(OutputInfo src)
