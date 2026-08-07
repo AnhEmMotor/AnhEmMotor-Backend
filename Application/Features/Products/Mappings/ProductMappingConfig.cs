@@ -481,16 +481,28 @@ public class ProductMappingConfig : IRegister
             ProductId = variant.ProductId,
             DisplayName = displayName,
             Price = variant.Price,
-            CoverImageUrl =
-                variant.ProductVariantColors != null &&
-                        variant.ProductVariantColors.FirstOrDefault() != null &&
-                        !string.IsNullOrWhiteSpace(variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl)
-                    ? variant.ProductVariantColors.FirstOrDefault()!.CoverImageUrl
-                    : variant.CoverImageUrl,
+            CoverImageUrl = ResolveVariantCoverImageUrl(variant),
             CategoryId = variant.Product?.CategoryId,
             ManagementType = variant.Product?.ProductCategory?.ManagementType,
             Colors = MapVariantColors(variant)
         };
+    }
+
+    private static string? ResolveVariantCoverImageUrl(ProductVariantEntity variant)
+    {
+        var colorCover = variant.ProductVariantColors?.FirstOrDefault()?.CoverImageUrl;
+        if (!string.IsNullOrWhiteSpace(colorCover))
+        {
+            return colorCover;
+        }
+        if (!string.IsNullOrWhiteSpace(variant.CoverImageUrl))
+        {
+            return variant.CoverImageUrl;
+        }
+        return variant.ProductCollectionPhotos
+            .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
+            .Select(p => p.ImageUrl)
+            .FirstOrDefault();
     }
 
     public static List<ProductVariantColorLiteResponse> MapVariantColors(ProductVariantEntity variant)

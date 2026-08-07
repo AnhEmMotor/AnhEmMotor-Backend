@@ -2006,6 +2006,42 @@ public class Product
         result.Value!.FileContents.Should().BeSameAs(expectedBytes);
         result.Value.FileName.Should().Be("Danh_sach_san_pham.xlsx");
     }
+
+    [Fact(
+        DisplayName = "PRODUCT_202 - BuildVariantLiteResponseForInventoryReceipt lấy ảnh từ ProductCollectionPhotos khi biến thể và màu không có CoverImageUrl")]
+    public void PRODUCT_202_BuildVariantLiteResponseForInventoryReceipt_FallsBackToCollectionPhoto()
+    {
+        var variant = new ProductVariant
+        {
+            Id = 1,
+            ProductId = 1,
+            Product = new ProductEntity { Id = 1, Name = "Đèn trợ sáng L4X" },
+            CoverImageUrl = null,
+            ProductVariantColors =
+                [new ProductVariantColor { Id = 1, ColorName = "Trắng ngọc trai", CoverImageUrl = null }],
+            ProductCollectionPhotos = [new ProductCollectionPhoto { Id = 1, ImageUrl = "https://cdn/photo.jpg" }]
+        };
+        var response = ProductMappingConfig.BuildVariantLiteResponseForInventoryReceipt(variant, null);
+        response.CoverImageUrl.Should().Be("https://cdn/photo.jpg");
+    }
+
+    [Fact(
+        DisplayName = "PRODUCT_203 - BuildVariantLiteResponseForInventoryReceipt ưu tiên CoverImageUrl của màu đầu tiên")]
+    public void PRODUCT_203_BuildVariantLiteResponseForInventoryReceipt_PrefersFirstColorCover()
+    {
+        var variant = new ProductVariant
+        {
+            Id = 1,
+            ProductId = 1,
+            Product = new ProductEntity { Id = 1, Name = "Đèn trợ sáng L4X" },
+            CoverImageUrl = null,
+            ProductVariantColors =
+                [new ProductVariantColor { Id = 1, ColorName = "Đen nhám", CoverImageUrl = "https://cdn/color.jpg" }],
+            ProductCollectionPhotos = [new ProductCollectionPhoto { Id = 1, ImageUrl = "https://cdn/photo.jpg" }]
+        };
+        var response = ProductMappingConfig.BuildVariantLiteResponseForInventoryReceipt(variant, null);
+        response.CoverImageUrl.Should().Be("https://cdn/color.jpg");
+    }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }

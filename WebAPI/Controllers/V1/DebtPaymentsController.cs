@@ -4,6 +4,7 @@ using Application.Common.Models;
 using Application.Features.DebtPayments.Commands.PaySupplierDebt;
 using Application.Features.DebtPayments.Commands.UpdateDebtProofImages;
 using Application.Features.DebtPayments.Commands.UploadDebtProofImage;
+using Application.Features.DebtPayments.Queries.ExportSupplierDebts;
 using Application.Features.DebtPayments.Queries.GetDebtLogProofImages;
 using Application.Features.DebtPayments.Queries.GetDebtLogsMissingProofs;
 using Application.Features.DebtPayments.Queries.GetReceiptsWithDebtBySupplierId;
@@ -47,6 +48,22 @@ public class DebtPaymentsController(IMediator mediator) : ApiController
     {
         var query = new GetSuppliersWithDebtQuery { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Xuất danh sách công nợ nhà cung cấp ra file Excel.
+    /// </summary>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>File Excel chứa danh sách công nợ nhà cung cấp.</returns>
+    [HttpGet("suppliers/export")]
+    [RequiresAnyPermissions(
+        Permissions.Warehouse.DebtPaymentManagement.View,
+        Permissions.Accountant.DebtPaymentManagement.View)]
+    [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ExportSupplierDebtsAsync(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new ExportSupplierDebtsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
