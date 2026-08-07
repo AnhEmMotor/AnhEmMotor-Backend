@@ -7,7 +7,9 @@ using System;
 
 namespace Application.Features.Client.Vehicles.Queries.GetCustomerVehicleDetail;
 
-public class GetCustomerVehicleDetailQueryHandler(IVehicleReadRepository vehicleRepository) : IRequestHandler<GetCustomerVehicleDetailQuery, Result<VehicleDetailResponse>>
+public class GetCustomerVehicleDetailQueryHandler(
+    IVehicleReadRepository vehicleRepository,
+    IMaintenanceHistoryReadRepository maintenanceRepository) : IRequestHandler<GetCustomerVehicleDetailQuery, Result<VehicleDetailResponse>>
 {
     public async Task<Result<VehicleDetailResponse>> Handle(
         GetCustomerVehicleDetailQuery request,
@@ -26,7 +28,7 @@ public class GetCustomerVehicleDetailQueryHandler(IVehicleReadRepository vehicle
             VinNumber = vehicle.VinNumber,
             EngineNumber = vehicle.EngineNumber,
             ColorName = vehicle.ProductVariantColor?.ColorName ?? string.Empty,
-            Type = vehicle.Product?.ProductCategory?.Name ?? "Xe máy",
+            Type = GetVehicleType(vehicle.Product?.Name ?? string.Empty),
             VariantName = vehicle.ProductVariant?.VariantName ?? string.Empty,
             Capacity = vehicle.Product?.Displacement?.ToString() ?? "",
             PurchaseDate = vehicle.PurchaseDate,
@@ -37,8 +39,8 @@ public class GetCustomerVehicleDetailQueryHandler(IVehicleReadRepository vehicle
             ImageUrl = vehicle.ProductVariantColor?.CoverImageUrl ?? string.Empty,
             OperatingSpecs = new
             {
-                oil = vehicle.Product?.OilCapacity > 0 ? $"10W-40 - {vehicle.Product.OilCapacity} L" : "10W-40 - 1.2 L",
-                tirePressure = "Trước: 2.0 kg/cm2, Sau: 2.25 kg/cm2"
+                oil = vehicle.Product?.OilCapacity > 0 ? $"10W-30 Full Synthetic - {vehicle.Product.OilCapacity} L" : "10W-30 Full Synthetic",
+                tirePressure = "2.0 bar (Trước) / 2.25 bar (Sau)"
             }
         };
         if (response.WarrantyUntil.HasValue)
@@ -94,5 +96,18 @@ public class GetCustomerVehicleDetailQueryHandler(IVehicleReadRepository vehicle
         if (warrantyPeriod.Contains("12"))
             return 12;
         return 36;
+    }
+
+    private string GetVehicleType(string productName)
+    {
+        var name = productName.ToLower();
+        if (name.Contains("sh") || name.Contains("vario") || name.Contains("scooter") || name.Contains("vespa") || name.Contains("vision") || name.Contains("lead") || name.Contains("air blade") || name.Contains("grande"))
+            return "Xe ga";
+        if (name.Contains("exciter") || name.Contains("winner") || name.Contains("raider") || name.Contains("côn tay"))
+            return "Xe côn tay";
+        if (name.Contains("z900") || name.Contains("cbr") || name.Contains("ninja") || name.Contains("moto") || name.Contains("phân khối lớn"))
+            return "Moto phân khối lớn";
+        
+        return "Xe số";
     }
 }
