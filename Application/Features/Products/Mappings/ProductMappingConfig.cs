@@ -705,13 +705,9 @@ public class ProductMappingConfig : IRegister
 
     private static string BuildStoreVariantDisplayName(ProductVariantEntity variant, bool isOtherVariant = false)
     {
-        var colorName = variant.ProductVariantColors?.FirstOrDefault()?.ColorName;
-        if (!string.IsNullOrWhiteSpace(variant.VariantName) && !string.IsNullOrWhiteSpace(colorName))
-        {
-            return $"{variant.VariantName} - {colorName}";
-        }
         if (!string.IsNullOrWhiteSpace(variant.VariantName))
             return variant.VariantName;
+        var colorName = variant.ProductVariantColors?.FirstOrDefault()?.ColorName;
         if (!string.IsNullOrWhiteSpace(colorName))
             return colorName;
         if (!isOtherVariant && variant.VariantOptionValues.Count > 0)

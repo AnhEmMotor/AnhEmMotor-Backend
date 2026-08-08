@@ -88,22 +88,19 @@ async def test_steering_interrupt_thay_the_scope(monkeypatch):
     assert "hr" in result["scoped_modules"]
 
 
-def test_plan_step_gioi_han_scope():
+def test_plan_step_gioi_han_scope(monkeypatch):
     allowed_spec = registry.ToolSpec(name="get_low_stock_products", module="inventory")
-    pinned_spec = registry.ToolSpec(name="search_knowledge", module="knowledge")
+    pinned_spec = registry.ToolSpec(name="some_pinned_tool", module="knowledge")
     state = {
         "current_plan_step": {"expectedTools": ["get_low_stock_products"]},
         "scoped_modules": [], "expanded_modules": set(),
         "permissions": [],
     }
     monkeypatched = {allowed_spec.name: allowed_spec, pinned_spec.name: pinned_spec}
-    original = registry.load_tool_specs
-    registry.load_tool_specs = lambda: monkeypatched
-    try:
-        scope = registry.build_tool_scope(state)
-    finally:
-        registry.load_tool_specs = original
-    assert {t.name for t in scope} == {"get_low_stock_products", "search_knowledge"}
+    monkeypatch.setattr(registry, "load_tool_specs", lambda: monkeypatched)
+    monkeypatch.setattr(registry, "PINNED_TOOLS", frozenset({"some_pinned_tool"}))
+    scope = registry.build_tool_scope(state)
+    assert {t.name for t in scope} == {"get_low_stock_products", "some_pinned_tool"}
 
 
 async def test_infer_step_tools_loc_ten_bia(monkeypatch):

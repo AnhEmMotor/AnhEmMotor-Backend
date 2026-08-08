@@ -55,7 +55,7 @@ public static class MigrationExtensions
             cancellationToken)
             .ConfigureAwait(false);
         await EmployeeSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
-        await CustomerSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
+        await CustomerSeeder.SeedAsync(dbContext2, userManager, roleManager, cancellationToken).ConfigureAwait(false);
         await LeadSeeder.SeedAsync(dbContext2, userManager, cancellationToken).ConfigureAwait(false);
         await CommissionPolicySeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);
         await SupplierContractSeeder.SeedAsync(dbContext2, cancellationToken).ConfigureAwait(false);

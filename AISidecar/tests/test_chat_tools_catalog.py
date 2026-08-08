@@ -1,6 +1,5 @@
 from app.services.backend_client import BackendClient
 from app.services.chat_tools import build_all_tools, build_tools, load_catalog
-from app.tools.knowledge import KNOWLEDGE_TOOL_NAMES
 
 GENERIC_NAMES = {
     "search_products", "get_product_stock", "get_low_stock_products",
@@ -27,13 +26,10 @@ GENERIC_NAMES = {
     "get_payroll_summary", "get_commission_records", "get_store_settings", "list_users_and_roles",
 }
 
-EXPECTED_NAMES = GENERIC_NAMES | KNOWLEDGE_TOOL_NAMES
-
-
 def test_load_catalog_doc_dung_file_chung_voi_dotnet():
     catalog = load_catalog()
     names = {entry["name"] for entry in catalog}
-    assert names == EXPECTED_NAMES
+    assert names == GENERIC_NAMES
     assert all(entry.get("label") for entry in catalog)
     assert all(entry.get("path") for entry in catalog)
 
@@ -44,8 +40,7 @@ def test_build_tools_khong_bi_le_catalog():
     assert {t.name for t in tools} == GENERIC_NAMES
 
 
-def test_build_all_tools_gom_ca_tool_qdrant_khi_bat_rag(monkeypatch):
-    monkeypatch.setenv("QDRANT_URL", "http://localhost:6333")
+def test_build_all_tools_bang_build_tools(monkeypatch):
     client = BackendClient("Bearer x")
     tools = build_all_tools(client)
-    assert {t.name for t in tools} == EXPECTED_NAMES
+    assert {t.name for t in tools} == GENERIC_NAMES

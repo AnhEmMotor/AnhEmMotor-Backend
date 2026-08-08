@@ -57,5 +57,21 @@ namespace Infrastructure.Repositories.Permission
                 .AnyAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
+
+        public Task<List<ApplicationUser>> GetUsersWithPermissionAsync(
+            string permissionName,
+            CancellationToken cancellationToken = default)
+        {
+            var roleIdsWithPermission = context.RolePermissions
+                .Where(rp => rp.Permission != null && rp.Permission.Name == permissionName)
+                .Select(rp => rp.RoleId);
+            var userIdsWithPermission = context.UserRoles
+                .Where(ur => roleIdsWithPermission.Contains(ur.RoleId))
+                .Select(ur => ur.UserId)
+                .Distinct();
+            return context.Users
+                .Where(u => userIdsWithPermission.Contains(u.Id))
+                .ToListAsync(cancellationToken);
+        }
     }
 }

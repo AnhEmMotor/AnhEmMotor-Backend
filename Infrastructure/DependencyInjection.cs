@@ -151,9 +151,6 @@ public static class DependencyInjection
                 provider.GetRequiredService<IMemoryCache>()));
         services.AddHttpClient<IAiTestRoleClient, AiTestRoleClient>();
         services.AddSingleton<IChatRunQueue, ChatRunQueue>();
-        services.AddSingleton<IProductIndexQueue, ProductIndexQueue>();
-        services.AddHttpClient<ProductIndexWorker>();
-        services.AddHostedService(provider => provider.GetRequiredService<ProductIndexWorker>());
         services.AddSingleton<IChatRunEventBus, ChatRunEventBus>();
         services.AddSingleton<IChatRunCancellationRegistry, ChatRunCancellationRegistry>();
         services.AddSingleton<IChatRunTokenStore, ChatRunTokenStore>();

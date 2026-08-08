@@ -3,6 +3,7 @@ from langchain_core.messages import HumanMessage
 
 from app.agents import manager_agent
 from app.services import plan_cache
+from app.services import qdrant_client as qc
 from app.tools import registry
 
 
@@ -87,7 +88,7 @@ async def test_plan_node_cache_miss_van_sinh_plan_bang_llm(monkeypatch):
     monkeypatch.setattr(manager_agent, "get_stream_writer", lambda: (lambda *_: None))
     monkeypatch.setattr(manager_agent, "build_plan_prompt", lambda *a, **k: "PROMPT")
     monkeypatch.setattr(manager_agent, "load_tool_specs", _active_specs)
-    monkeypatch.setattr(manager_agent, "rag_enabled", lambda: False)
+    monkeypatch.setattr(qc, "rag_enabled", lambda: False)
 
     fake_llm = FakeListLLM(responses=[
         "### BƯỚC 1: Lấy doanh thu\nGọi get_sales_summary\nTOOLS: get_sales_summary",

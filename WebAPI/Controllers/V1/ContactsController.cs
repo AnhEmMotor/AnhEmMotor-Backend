@@ -12,6 +12,7 @@ using Application.Features.Contacts.Commands.RateSupportEmployee;
 using Application.Features.Contacts.Commands.UpdateContactStatus;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
 using Application.Features.Contacts.Commands.UploadCv;
+using Application.Features.Contacts.Queries.GetAssignableUsers;
 using Application.Features.Contacts.Queries.GetContacts;
 using Application.Features.Contacts.Queries.GetPaginatedContacts;
 using Application.Features.Contacts.Queries.GetSupportRequestTracking;
@@ -234,7 +235,7 @@ public class ContactsController(ISender sender) : ApiController
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Kết quả phân công.</returns>
     [HttpPatch("{id:int}/assign")]
-    [Authorize]
+    [HasPermission(Permissions.Marketing.ContactManagement.Edit)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> AssignAsync(
@@ -244,6 +245,18 @@ public class ContactsController(ISender sender) : ApiController
     {
         var cmd = command with { SupportRequestId = id };
         var result = await sender.Send(cmd, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách nhân viên có quyền xử lý liên hệ, dùng để hiển thị trong danh sách phân công.
+    /// </summary>
+    [HttpGet("assignable-users")]
+    [HasPermission(Permissions.Marketing.ContactManagement.Edit)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAssignableUsersAsync(CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetAssignableUsersQuery(), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 

@@ -17,6 +17,7 @@ public static class ChatRunEventType
     public const string MessageCorrection = "message_correction";
     public const string RunMeta = "run_meta";
     public const string Thinking = "thinking";
+    public const string SuggestedPrompt = "suggested_prompt";
 
     public const string PlanStarted = "plan_started";
     public const string PlanStepAdded = "plan_step_added";
