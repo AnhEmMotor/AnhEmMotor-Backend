@@ -37,6 +37,11 @@ public class GetRepairOrdersListQueryHandler(
                         item.CustomerName = vehicle.Lead.FullName;
                         item.CustomerPhone = vehicle.Lead.PhoneNumber;
                     }
+                    else if (vehicle.User != null)
+                    {
+                        item.CustomerName = vehicle.User.FullName;
+                        item.CustomerPhone = vehicle.User.PhoneNumber;
+                    }
                 }
                 if (item.TechnicianId.HasValue && empDict.TryGetValue(item.TechnicianId.Value, out var tName))
                     item.TechnicianName = tName;

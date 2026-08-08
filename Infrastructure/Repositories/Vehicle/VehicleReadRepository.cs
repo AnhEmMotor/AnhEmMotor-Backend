@@ -91,6 +91,7 @@ public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator
         return context.Vehicles
             .IgnoreQueryFilters()
             .Include(v => v.Lead)
+            .Include(v => v.User)
             .Where(v => ids.Contains(v.Id))
             .ToListAsync(cancellationToken);
     }
