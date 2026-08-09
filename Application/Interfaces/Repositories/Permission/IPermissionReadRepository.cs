@@ -20,6 +20,10 @@ namespace Application.Interfaces.Repositories.Permission
             CancellationToken cancellationToken = default);
 
         public Task<bool> HasAnyPermissionAsync(Guid userId, CancellationToken cancellationToken = default);
+
+        public Task<List<ApplicationUser>> GetUsersWithPermissionAsync(
+            string permissionName,
+            CancellationToken cancellationToken = default);
     }
 }
 

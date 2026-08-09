@@ -474,6 +474,12 @@ public static class PermissionsList
                                 Name = "Xóa",
                                 Description = "Xóa quản lý liên hệ"
                             },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Marketing.ContactManagement.Assign,
+                                Name = "Được phân công xử lý",
+                                Description = "Hiển thị trong danh sách nhân viên có thể được phân công xử lý liên hệ"
+                            },
                         }
             }, new PermissionFeatureMetadata
             {
@@ -645,6 +651,38 @@ public static class PermissionsList
                                 Id = Permissions.Warehouse.ProductManagement.ChangeStatus,
                                 Name = "Đổi trạng thái",
                                 Description = "Đổi trạng thái quản lý sản phẩm"
+                            },
+                        }
+            }, new PermissionFeatureMetadata
+            {
+                Id = "Permissions.Warehouse.BrandManagement",
+                Name = "Quản lý thương hiệu",
+                Permissions =
+                    new()
+                        {
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Warehouse.BrandManagement.View,
+                                Name = "Xem",
+                                Description = "Xem quản lý thương hiệu"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Warehouse.BrandManagement.Create,
+                                Name = "Tạo mới",
+                                Description = "Tạo mới quản lý thương hiệu"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Warehouse.BrandManagement.Edit,
+                                Name = "Chỉnh sửa",
+                                Description = "Chỉnh sửa quản lý thương hiệu"
+                            },
+                            new PermissionActionMetadata
+                            {
+                                Id = Permissions.Warehouse.BrandManagement.Delete,
+                                Name = "Xóa",
+                                Description = "Xóa quản lý thương hiệu"
                             },
                         }
             }, new PermissionFeatureMetadata

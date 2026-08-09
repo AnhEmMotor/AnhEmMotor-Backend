@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field, ValidationError, create_model
 from app.config import get_settings
 from app.services.backend_client import BackendClient
 from app.schemas.tool_envelope import ChatToolEnvelope
-from app.tools.knowledge import KNOWLEDGE_TOOL_NAMES, build_knowledge_tools
 
 logger = logging.getLogger(__name__)
 
@@ -103,8 +102,6 @@ def summarize_result(name: str, result: dict) -> str:
 def build_tools(backend_client: BackendClient, allowed_names: set[str] | None = None) -> list[StructuredTool]:
     tools = []
     for entry in load_catalog():
-        if entry["name"] in KNOWLEDGE_TOOL_NAMES:
-            continue
         if allowed_names is not None and entry["name"] not in allowed_names:
             continue
         path = entry["path"]
@@ -133,4 +130,4 @@ def build_tools(backend_client: BackendClient, allowed_names: set[str] | None = 
 
 
 def build_all_tools(backend_client: BackendClient, allowed_names: set[str] | None = None) -> list[StructuredTool]:
-    return build_tools(backend_client, allowed_names) + build_knowledge_tools(backend_client, allowed_names)
+    return build_tools(backend_client, allowed_names)

@@ -33,7 +33,6 @@ from app.services.backend_client import BackendClient
 from app.services.chat_tools import build_all_tools, describe_args, summarize_result
 from app.services.prompt_builder import build_plan_prompt
 from app.services.routing import resolve_modules
-from app.tools.knowledge import rag_enabled
 from app.tools.registry import build_tool_scope, load_tool_specs, registry_fingerprint, resolve_tool_call_error
 
 logger = logging.getLogger(__name__)
@@ -50,9 +49,14 @@ GUARDRAIL_STATE_KEY = "permissions"
 THINKING_OPEN = "<suy_nghi>"
 THINKING_CLOSE = "</suy_nghi>"
 
+SUGGESTION_OPEN = "<goi_y>"
+SUGGESTION_CLOSE = "</goi_y>"
+
 
 class ThinkingParser:
-    def __init__(self):
+    def __init__(self, open_tag: str = THINKING_OPEN, close_tag: str = THINKING_CLOSE):
+        self._open = open_tag
+        self._close = close_tag
         self._buffer = ""
         self._resolved = False
         self._inside = False
@@ -64,26 +68,26 @@ class ThinkingParser:
             return content
         self._buffer += content
         if not self._resolved:
-            if len(self._buffer) < len(THINKING_OPEN):
-                if THINKING_OPEN.startswith(self._buffer):
+            if len(self._buffer) < len(self._open):
+                if self._open.startswith(self._buffer):
                     return ""
                 self._resolved = True
                 out, self._buffer = self._buffer, ""
                 return out
             self._resolved = True
-            if self._buffer.startswith(THINKING_OPEN):
+            if self._buffer.startswith(self._open):
                 self._inside = True
-                self._buffer = self._buffer[len(THINKING_OPEN):]
+                self._buffer = self._buffer[len(self._open):]
             else:
                 out, self._buffer = self._buffer, ""
                 return out
         if self._inside:
-            idx = self._buffer.find(THINKING_CLOSE)
+            idx = self._buffer.find(self._close)
             if idx == -1:
                 return ""
             self.thinking_text = self._buffer[:idx]
             self.tag_closed = True
-            rest = self._buffer[idx + len(THINKING_CLOSE):]
+            rest = self._buffer[idx + len(self._close):]
             self._inside, self._buffer = False, ""
             return rest
         return ""
@@ -266,7 +270,7 @@ async def _find_cached_plan_template(client: BackendClient, request_text: str, m
     tpl = await client.find_plan_template(intent_hash, module)
     if tpl is not None:
         return tpl
-    if not rag_enabled():
+    if not qc.rag_enabled():
         return None
     try:
         match = await qc.find_similar_plan_template(request_text, module)
@@ -466,6 +470,7 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
     carried = []
     last_poll = time.monotonic()
     thinking_parser = ThinkingParser()
+    suggestion_parser = ThinkingParser(SUGGESTION_OPEN, SUGGESTION_CLOSE)
     in_plan_step = bool(state.get("current_plan_step"))
 
     def emit_answer(event_type: str, payload: str) -> None:
@@ -481,6 +486,7 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         content = chunk if isinstance(chunk, str) else (getattr(chunk, "text", "") or "")
         if content:
             visible = thinking_parser.feed(content)
+            visible = suggestion_parser.feed(visible) if visible else ""
             if visible:
                 emit_answer("text_delta", visible)
 
@@ -525,6 +531,14 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         if result_message.content:
             emit_answer("text_delta", result_message.content)
 
+    suggested_prompt_text = None
+    if suggestion_parser.tag_closed and isinstance(result_message.content, str):
+        suggested_prompt_text = suggestion_parser.thinking_text.strip()
+        tagged = SUGGESTION_OPEN + suggestion_parser.thinking_text + SUGGESTION_CLOSE
+        cleaned = result_message.content.replace(tagged, " ", 1)
+        result_message.content = re.sub(r"\s{2,}", " ", cleaned).strip()
+
+    answer_replaced = False
     tool_calls = getattr(result_message, "tool_calls", None)
     if scoping and tool_calls and (result_message.content or "").strip():
         leaked_text = _scrub_text(result_message.content.strip())
@@ -533,19 +547,24 @@ async def call_model_node(state: AgentState, config: RunnableConfig) -> dict:
         writer(("guardrail_blocked", json.dumps(
             {"tool": "", "reason": "text_kem_tool_call_chuyen_thanh_thinking"}, ensure_ascii=False)))
         result_message = AIMessage(content="", tool_calls=tool_calls)
+        answer_replaced = True
     elif scoping and not tool_calls:
         guard = check_output(result_message.content or "", {
             "had_forbidden_tool": state.get("had_forbidden_tool", False),
             "tool_call_count": state.get("tool_call_count", 0),
             "has_tools_bound": bool(tools),
-            "available_citations": state.get("available_citations") or set(),
         })
         if guard.action == "block":
             result_message = AIMessage(content="Không thể trả lời yêu cầu này.")
             emit_answer("message_correction", result_message.content)
+            answer_replaced = True
         elif guard.action == "rewrite":
             result_message = AIMessage(content=REWRITE_MESSAGES.get(guard.kind, REWRITE_MESSAGES["no_permission"]))
             emit_answer("message_correction", result_message.content)
+            answer_replaced = True
+
+    if suggested_prompt_text and not answer_replaced:
+        emit_answer("suggested_prompt", json.dumps({"text": suggested_prompt_text}, ensure_ascii=False))
 
     return {
         "turns": state.get("turns", 0) + 1,
@@ -559,14 +578,7 @@ def _envelope_summary(result) -> dict:
     if not isinstance(result, dict):
         return {}
     keys = ("truncated", "totalCount", "asOf", "warnings", "filtersApplied", "periodLabel")
-    summary = {k: result[k] for k in keys if k in result}
-    if result.get("source") == "knowledge_base":
-        summary["citations"] = [
-            {"citationId": i.get("citationId"), "sourceFile": i.get("sourceFile"),
-             "heading": i.get("heading"), "content": i.get("content")}
-            for i in (result.get("items") or []) if i.get("citationId")
-        ]
-    return summary
+    return {k: result[k] for k in keys if k in result}
 
 
 async def call_tools_node(state: AgentState) -> dict:
@@ -596,7 +608,6 @@ async def call_tools_node(state: AgentState) -> dict:
     tool_not_found_counts = dict(state.get("tool_not_found_counts") or {})
     tools_disabled = state.get("tools_disabled", False)
     known_ids = set(state.get("known_ids") or set())
-    available_citations = set(state.get("available_citations") or set())
     user_text = _latest_human_text(state.get("messages"))
     specs = load_tool_specs() if guarding else {}
 
@@ -682,11 +693,6 @@ async def call_tools_node(state: AgentState) -> dict:
             result = await tool.ainvoke(args)
             if guarding:
                 known_ids.update(extract_produced_ids(name, result))
-                if name == "search_knowledge" and isinstance(result, dict):
-                    available_citations.update(
-                        item.get("citationId") for item in (result.get("items") or [])
-                        if item.get("citationId")
-                    )
                 result, flagged = sanitize_tool_result(result)
                 if flagged:
                     writer(("guardrail_blocked", json.dumps(
@@ -726,7 +732,6 @@ async def call_tools_node(state: AgentState) -> dict:
         updates["tool_not_found_counts"] = tool_not_found_counts
         updates["tools_disabled"] = tools_disabled
         updates["known_ids"] = known_ids
-        updates["available_citations"] = available_citations
     return updates
 
 

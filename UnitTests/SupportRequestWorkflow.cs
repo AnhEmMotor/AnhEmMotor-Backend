@@ -6,6 +6,7 @@ using Application.Features.Contacts.Commands.RateSupportEmployee;
 using Application.Features.Contacts.Commands.UpdateContactStatus;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Contact;
+using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Enums;
@@ -58,7 +59,14 @@ public class SupportRequestWorkflow
         var employeeId = Guid.NewGuid();
         _supportRequests.Setup(repository => repository.GetByIdAsync(10, It.IsAny<CancellationToken>()))
             .ReturnsAsync(request);
-        var handler = new AssignSupportRequestCommandHandler(_supportRequests.Object, _unitOfWork.Object);
+        var permissionReadRepository = new Mock<IPermissionReadRepository>();
+        permissionReadRepository
+            .Setup(x => x.CheckUserPermissionsAsync(employeeId, It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        var handler = new AssignSupportRequestCommandHandler(
+            _supportRequests.Object,
+            permissionReadRepository.Object,
+            _unitOfWork.Object);
         var result = await handler.Handle(new AssignSupportRequestCommand(10, employeeId), CancellationToken.None);
         result.IsSuccess.Should().BeTrue();
         request.AssignedUserId.Should().Be(employeeId);

@@ -31,7 +31,6 @@ CURRENCY_UNIT_MARKERS = ["đồng", "vnđ", "₫", "vnd"]
 
 CURRENCY_MENTION_PATTERN = re.compile(
     r"\d[\d.,]*\s*(?:triệu|tỷ|nghìn)?\s*(?:đồng|vnđ|₫|vnd)\b", re.IGNORECASE)
-CITATION_PATTERN = re.compile(r"\[(c\d+)\]")
 PERIOD_MARKERS = [
     "tháng", "quý", "năm", "kỳ", "ngày", "tuần", "hôm nay", "hôm qua", "hiện tại", "trước", "này",
 ]
@@ -165,14 +164,6 @@ def check_output(answer: str, state: dict) -> GuardResult:
 
     if any(marker in answer for marker in PROMPT_LEAK_MARKERS):
         return GuardResult.block("Không thể trả lời yêu cầu này.")
-
-    cited = set(CITATION_PATTERN.findall(answer))
-    invalid_citations = cited - (state.get("available_citations") or set())
-    if invalid_citations:
-        return GuardResult.rewrite(
-            f"Mã trích dẫn không tồn tại: {sorted(invalid_citations)}. Chỉ dùng mã trích dẫn đã có "
-            "trong kết quả search_knowledge, không tự bịa mã.",
-            kind="no_permission")
 
     if state.get("tool_call_count", 0) > 0 and contains_unlabeled_period_comparison(answer):
         return GuardResult.rewrite(

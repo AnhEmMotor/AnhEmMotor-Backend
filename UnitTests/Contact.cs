@@ -6,6 +6,7 @@ using Application.Features.Contacts.Commands.CreateSupportRequest;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Contact;
+using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Enums;
@@ -153,7 +154,14 @@ public class Contact
         supportRequestRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(supportRequest);
         var userId = Guid.NewGuid();
         var command = new AssignSupportRequestCommand(1, userId);
-        var handler = new AssignSupportRequestCommandHandler(supportRequestRepoMock.Object, _unitOfWorkMock.Object);
+        var permissionReadRepoMock = new Mock<IPermissionReadRepository>();
+        permissionReadRepoMock
+            .Setup(x => x.CheckUserPermissionsAsync(userId, It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        var handler = new AssignSupportRequestCommandHandler(
+            supportRequestRepoMock.Object,
+            permissionReadRepoMock.Object,
+            _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         supportRequest.AssignedUserId.Should().Be(userId);
@@ -174,7 +182,10 @@ public class Contact
         var supportRequestRepoMock = new Mock<ISupportRequestRepository>();
         supportRequestRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(supportRequest);
         var command = new AssignSupportRequestCommand(1, null);
-        var handler = new AssignSupportRequestCommandHandler(supportRequestRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new AssignSupportRequestCommandHandler(
+            supportRequestRepoMock.Object,
+            new Mock<IPermissionReadRepository>().Object,
+            _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         supportRequest.AssignedUserId.Should().BeNull();
@@ -190,7 +201,10 @@ public class Contact
         supportRequestRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((SupportRequest?)null);
         var command = new AssignSupportRequestCommand(999, Guid.NewGuid());
-        var handler = new AssignSupportRequestCommandHandler(supportRequestRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new AssignSupportRequestCommandHandler(
+            supportRequestRepoMock.Object,
+            new Mock<IPermissionReadRepository>().Object,
+            _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().Contain(e => e.Message == "Không tìm thấy yêu cầu hỗ trợ.");

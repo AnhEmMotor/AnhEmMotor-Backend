@@ -13,8 +13,13 @@ public static class CustomerSeeder
     public static async Task SeedAsync(
         ApplicationDBContext context,
         UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager,
         CancellationToken cancellationToken)
     {
+        if (!await roleManager.RoleExistsAsync("Customer").ConfigureAwait(false))
+        {
+            await roleManager.CreateAsync(new ApplicationRole { Name = "Customer" }).ConfigureAwait(false);
+        }
         var customersToSeed = new List<(string Email, string Password)>
         {
             ("kimngan@gmail.com", "Customer@123456"),

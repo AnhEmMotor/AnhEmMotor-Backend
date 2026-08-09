@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 MAX_TOOLS_PER_MODULE = 10
 MAX_TOOLS_PER_REQUEST = 20
-PINNED_TOOLS = frozenset({"search_knowledge"})
+PINNED_TOOLS = frozenset()
 
 DEFAULT_MODULES_ON_ROUTER_FAILURE = ["product", "sales"]
 

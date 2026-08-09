@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Contact;
+using Application.Interfaces.Repositories.Permission;
 using Domain.Enums;
 using MediatR;
 using System;
@@ -9,6 +10,7 @@ namespace Application.Features.Contacts.Commands.AssignSupportRequest;
 
 public class AssignSupportRequestCommandHandler(
     ISupportRequestRepository supportRequestRepository,
+    IPermissionReadRepository permissionReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<AssignSupportRequestCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(AssignSupportRequestCommand request, CancellationToken cancellationToken)
@@ -19,6 +21,17 @@ public class AssignSupportRequestCommandHandler(
             return Result<int>.Failure("Không tìm thấy yêu cầu hỗ trợ.");
         if (supportRequest.Status == SupportRequestStatus.Closed)
             return Result<int>.Failure("Yêu cầu đã hoàn tất nên không thể phân công lại.");
+        if (request.AssignedUserId != null)
+        {
+            var assigneeHasPermission = await permissionReadRepository
+                .CheckUserPermissionsAsync(
+                    request.AssignedUserId.Value,
+                    [Domain.Constants.Permission.Permissions.Marketing.ContactManagement.Assign],
+                    cancellationToken)
+                .ConfigureAwait(false);
+            if (!assigneeHasPermission)
+                return Result<int>.Failure("Tài khoản được chọn không có quyền xử lý liên hệ.");
+        }
         supportRequest.AssignedUserId = request.AssignedUserId;
         supportRequest.Status = request.AssignedUserId == null
             ? SupportRequestStatus.New

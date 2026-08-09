@@ -10,6 +10,7 @@ public static partial class Permissions
             public const string Create = "Permissions.Marketing.ContactManagement.Create";
             public const string Edit = "Permissions.Marketing.ContactManagement.Edit";
             public const string Delete = "Permissions.Marketing.ContactManagement.Delete";
+            public const string Assign = "Permissions.Marketing.ContactManagement.Assign";
         }
     }
 }
