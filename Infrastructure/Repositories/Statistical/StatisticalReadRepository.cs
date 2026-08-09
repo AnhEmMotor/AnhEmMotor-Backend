@@ -1339,6 +1339,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 {
                     Id = l.Id,
                     CustomerName = l.FullName,
+                    PhoneNumber = l.PhoneNumber,
                     Source =
                         l.Source switch
                             {
@@ -1354,8 +1355,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                                 "New" => "Mới",
                                 "Consulting" => "Đang theo dõi",
                                 "Converted" => "Đã chuyển đổi",
+                                "Won" => "Đã chuyển đổi",
                                 "Lost" => "Không quan tâm",
                                 "TestDriving" => "Đang theo dõi",
+                                "Negotiating" => "Đang đàm phán",
                                 _ => l.Status
                             },
                     LastContact = l.UpdatedAt ?? l.CreatedAt
