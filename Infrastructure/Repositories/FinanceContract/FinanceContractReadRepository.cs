@@ -33,4 +33,14 @@ public class FinanceContractReadRepository(ApplicationDBContext context, ISieveP
     {
         return context.FinanceContracts.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
+
+    public Task<List<Domain.Entities.FinanceContract>> GetByCustomerIdAsync(
+        Guid customerId,
+        CancellationToken cancellationToken = default)
+    {
+        return context.FinanceContracts
+            .Where(x => x.CustomerId == customerId && x.DeletedAt == null)
+            .OrderByDescending(x => x.SignedDate)
+            .ToListAsync(cancellationToken);
+    }
 }

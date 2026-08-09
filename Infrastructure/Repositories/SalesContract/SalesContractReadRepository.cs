@@ -75,4 +75,14 @@ public class SalesContractReadRepository(ApplicationDBContext context, ISievePag
                     x.FinalPaymentDeadline.Value < DateTimeOffset.UtcNow,
                 cancellationToken);
     }
+
+    public Task<List<Domain.Entities.SalesContract>> GetByCustomerIdAsync(
+        Guid customerId,
+        CancellationToken cancellationToken = default)
+    {
+        return GetQueryable()
+            .Where(x => x.CustomerId == customerId && x.DeletedAt == null)
+            .OrderByDescending(x => x.SignedDate)
+            .ToListAsync(cancellationToken);
+    }
 }

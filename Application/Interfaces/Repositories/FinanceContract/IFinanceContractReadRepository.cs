@@ -16,4 +16,8 @@ public interface IFinanceContractReadRepository
         Guid id,
         CancellationToken cancellationToken = default,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<List<Domain.Entities.FinanceContract>> GetByCustomerIdAsync(
+        Guid customerId,
+        CancellationToken cancellationToken = default);
 }
