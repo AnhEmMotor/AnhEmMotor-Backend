@@ -40,9 +40,7 @@ public static class TechnologySeeder
             .ConfigureAwait(false);
         if (piaggio == null)
         {
-            piaggio = new Brand { Name = "Piaggio" };
-            context.Brands.Add(piaggio);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            piaggio = await context.Brands.FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         }
         var techData = new List<(string Name, string Description, string Category, Brand? Brand)>
         {
