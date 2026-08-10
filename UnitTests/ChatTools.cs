@@ -461,6 +461,7 @@ public class ChatTools
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
                 It.IsAny<Expression<Func<DomainOutput, bool>>>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<OutputItemResponse>([new OutputItemResponse { Id = 123 }], 1, 1, 5));
         _outputReadRepositoryMock.Setup(
@@ -485,6 +486,7 @@ public class ChatTools
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
                 It.IsAny<Expression<Func<DomainOutput, bool>>>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 5));
         var handler = new GetOrderStatusForChatQueryHandler(_outputReadRepositoryMock.Object, _dateProvider);

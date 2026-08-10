@@ -650,6 +650,7 @@ public class MediaFile
             }
         }
     }
+
     [Fact(DisplayName = "MF_053 - GetFileAsync tìm được file khi chỉ tồn tại ở fallback wwwroot path")]
     public async Task GetFileAsync_FileOnlyInWwwrootFallback_Found()
     {
@@ -658,10 +659,8 @@ public class MediaFile
         var fallbackFile = Path.Combine(fallbackDir, storagePath);
         var missingUploadFolder = Path.Combine(Path.GetTempPath(), $"mf053-missing-{Guid.NewGuid():N}");
         Directory.CreateDirectory(fallbackDir);
-        await File.WriteAllBytesAsync(
-            fallbackFile,
-            [1, 2, 3, 4],
-            TestContext.Current.CancellationToken).ConfigureAwait(true);
+        await File.WriteAllBytesAsync(fallbackFile, [1, 2, 3, 4], TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         try
         {
             var environment = new Mock<IWebHostEnvironment>();

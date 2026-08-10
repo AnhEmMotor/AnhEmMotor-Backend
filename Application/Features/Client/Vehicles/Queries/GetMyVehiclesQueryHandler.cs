@@ -28,6 +28,28 @@ public class GetMyVehiclesQueryHandler(IVehicleReadRepository vehicleRepository)
             filter,
             cancellationToken)
             .ConfigureAwait(false);
-        return result;
+
+        if (result?.Items != null)
+        {
+            foreach (var item in result.Items)
+            {
+                item.CategoryName = GetVehicleType(item.ProductName ?? string.Empty);
+            }
+        }
+
+        return Result<PagedResult<VehicleResponse>>.Success(result!);
+    }
+
+    private string GetVehicleType(string productName)
+    {
+        var name = productName.ToLower();
+        if (name.Contains("sh") || name.Contains("vario") || name.Contains("scooter") || name.Contains("vespa") || name.Contains("vision") || name.Contains("lead") || name.Contains("air blade") || name.Contains("grande"))
+            return "Xe ga";
+        if (name.Contains("exciter") || name.Contains("winner") || name.Contains("raider") || name.Contains("côn tay"))
+            return "Xe côn tay";
+        if (name.Contains("z900") || name.Contains("cbr") || name.Contains("ninja") || name.Contains("moto") || name.Contains("phân khối lớn"))
+            return "Moto phân khối lớn";
+        
+        return "Xe số";
     }
 }

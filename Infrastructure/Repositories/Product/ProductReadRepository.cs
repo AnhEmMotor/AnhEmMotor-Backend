@@ -409,10 +409,13 @@ public class ProductReadRepository(
                                 (!minPrice.HasValue || v.Price >= minPrice.Value) &&
                                 (!maxPrice.HasValue || v.Price <= maxPrice.Value)));
         }
+        var trimmedSorts = sorts?.Trim();
+        var isPriceAsc = trimmedSorts == "price";
+        var isPriceDesc = trimmedSorts == "-price";
         var sieveModel = new SieveModel
         {
             Filters = cleanFilters,
-            Sorts = sorts,
+            Sorts = isPriceAsc || isPriceDesc ? null : sorts,
             Page = normalizedPage,
             PageSize = normalizedPageSize
         };
@@ -430,7 +433,15 @@ public class ProductReadRepository(
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option);
-        if (string.IsNullOrWhiteSpace(sorts))
+        if (isPriceAsc)
+        {
+            dbQuery = dbQuery.OrderBy(
+                p => p.ProductVariants.Where(v => v.DeletedAt == null).Min(v => (decimal?)v.Price) ?? decimal.MaxValue);
+        } else if (isPriceDesc)
+        {
+            dbQuery = dbQuery.OrderByDescending(
+                p => p.ProductVariants.Where(v => v.DeletedAt == null).Max(v => (decimal?)v.Price) ?? decimal.MinValue);
+        } else if (string.IsNullOrWhiteSpace(sorts))
         {
             dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt).ThenBy(p => p.Id);
         }

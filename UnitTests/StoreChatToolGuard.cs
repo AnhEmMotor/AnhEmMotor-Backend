@@ -5,7 +5,7 @@ namespace UnitTests;
 
 public class StoreChatToolGuard
 {
-    private static readonly string[] ApprovedToolNames =["search_products", "get_product_detail", "get_product_stock", "get_product_price_list", "list_brands", "escalate_to_staff", ];
+    private static readonly string[] ApprovedToolNames = ["search_products", "get_product_detail", "get_product_stock", "get_product_price_list", "list_brands", "escalate_to_staff", ];
 
     private static string RepoRoot()
     {

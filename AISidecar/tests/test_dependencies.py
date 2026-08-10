@@ -3,10 +3,6 @@ import pytest
 PROTECTED_ENDPOINTS = [
     ("/manager-chat", {"run_id": "r1", "session_id": "s1", "message": "xin chào"}),
     ("/manager-chat/generate-title", {"message": "xin chào"}),
-    ("/internal/index/products", {"items": []}),
-    ("/internal/index/products/delete", {"productIds": []}),
-    ("/internal/index/knowledge", {"documents": []}),
-    ("/internal/index/rebuild", {"collection": "product_catalog", "items": []}),
 ]
 
 

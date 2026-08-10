@@ -21,7 +21,8 @@ public class ChatRunWriter(
                 e => e.RunId == runId &&
                     (e.Type == ChatRunEventType.Thinking ||
                         e.Type == ChatRunEventType.ToolStart ||
-                        e.Type == ChatRunEventType.ToolEnd) &&
+                        e.Type == ChatRunEventType.ToolEnd ||
+                        e.Type == ChatRunEventType.SuggestedPrompt) &&
                     e.CreatedAt >= segmentStartedAt &&
                     e.CreatedAt <= segmentEndedAt)
             .OrderBy(e => e.Seq)
@@ -52,6 +53,13 @@ public class ChatRunWriter(
                 if (!string.IsNullOrEmpty(text))
                 {
                     steps.Add(new ChatReasoningStepDto("thinking", Text: text));
+                }
+            } else if (type == ChatRunEventType.SuggestedPrompt)
+            {
+                var text = ParseThinkingPayload(payload);
+                if (!string.IsNullOrEmpty(text))
+                {
+                    steps.Add(new ChatReasoningStepDto("suggestion", Text: text));
                 }
             } else if (type == ChatRunEventType.ToolStart)
             {

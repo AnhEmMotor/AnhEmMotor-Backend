@@ -3,11 +3,13 @@ using Application.Common.Models;
 using Application.Features.RepairOrders.Commands;
 using Application.Features.RepairOrders.Queries;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Constants.Permission;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
@@ -23,9 +25,11 @@ public class RepairOrdersController(ISender sender) : ApiController
     [HasPermission(Permissions.Factory.RepairOrderManagement.View)]
     [ProducesResponseType(typeof(PagedResult<RepairOrderResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetListAsync(
-        [FromQuery] GetRepairOrdersListQuery query,
+        [FromQuery] SieveModel sieve,
+        [FromQuery] DataFetchMode mode,
         CancellationToken cancellationToken)
     {
+        var query = new GetRepairOrdersListQuery { Sieve = sieve, Mode = mode };
         var result = await sender.Send(query, cancellationToken);
         return HandleResult(result);
     }

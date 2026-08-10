@@ -30,5 +30,9 @@ public interface ISalesContractReadRepository
     public Task<int> CountByStatusAsync(string status, CancellationToken cancellationToken = default);
 
     public Task<int> CountOverdueAsync(CancellationToken cancellationToken = default);
+
+    public Task<List<global::Domain.Entities.SalesContract>> GetByCustomerIdAsync(
+        Guid customerId,
+        CancellationToken cancellationToken = default);
 }
 

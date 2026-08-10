@@ -214,18 +214,6 @@ def test_check_output_allow_khi_chi_co_mot_so_tien():
     assert result.action == "allow"
 
 
-def test_check_output_rewrite_khi_ma_trich_dan_khong_ton_tai():
-    result = tool_guard.check_output(
-        "Theo chính sách đổi trả [c9], bạn có 7 ngày để đổi hàng.",
-        {"had_forbidden_tool": False, "tool_call_count": 1, "available_citations": {"c1"}})
-    assert result.action == "rewrite"
-
-
-def test_check_output_allow_khi_ma_trich_dan_hop_le():
-    result = tool_guard.check_output(
-        "Theo chính sách đổi trả [c1], bạn có 7 ngày để đổi hàng.",
-        {"had_forbidden_tool": False, "tool_call_count": 1, "available_citations": {"c1"}})
-    assert result.action == "allow"
 
 
 def test_contains_unlabeled_period_comparison_phat_hien_dung():

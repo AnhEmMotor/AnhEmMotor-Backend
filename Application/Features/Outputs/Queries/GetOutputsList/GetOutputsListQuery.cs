@@ -13,4 +13,6 @@ public sealed record GetOutputsListQuery : IRequest<Result<PagedResult<OutputIte
     public string? Search { get; init; }
 
     public IReadOnlyCollection<string> StatusIds { get; init; } = [];
+
+    public bool WithoutContract { get; init; } = false;
 }

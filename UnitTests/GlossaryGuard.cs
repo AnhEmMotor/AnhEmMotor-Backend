@@ -4,7 +4,7 @@ namespace UnitTests;
 
 public class GlossaryGuard
 {
-    private static readonly string[] RequiredHeadings =["## Doanh thu", "## Số đơn hàng", "## Lợi nhuận", "## Tồn kho", "## Khách hàng mới", "## \"Tháng này\""];
+    private static readonly string[] RequiredHeadings = ["## Doanh thu", "## Số đơn hàng", "## Lợi nhuận", "## Tồn kho", "## Khách hàng mới", "## \"Tháng này\""];
 
     private static string RepoRoot()
     {

@@ -34,9 +34,7 @@ public class VehicleMappingConfig : IRegister
                 src => src.Product != null && src.Product.Brand != null ? src.Product.Brand.Name : null)
             .Map(
                 dest => dest.CategoryName,
-                src => src.Product != null && src.Product.ProductCategory != null
-                    ? src.Product.ProductCategory.Name
-                    : null)
+                src => src.Product != null ? GetVehicleType(src.Product.Name ?? string.Empty) : null)
             .Map(dest => dest.ProductName, src => src.Product != null ? src.Product.Name : null)
             .Map(dest => dest.WarrantyPeriod, src => src.Product != null ? src.Product.WarrantyPeriod : null)
             .Map(
@@ -50,5 +48,18 @@ public class VehicleMappingConfig : IRegister
                         : (src.Product != null && src.Product.ProductVariants.Any()
                             ? src.Product.ProductVariants.FirstOrDefault()!.CoverImageUrl
                             : null)));
+    }
+
+    private static string GetVehicleType(string productName)
+    {
+        var name = productName.ToLower();
+        if (name.Contains("sh") || name.Contains("vario") || name.Contains("scooter") || name.Contains("vespa") || name.Contains("vision") || name.Contains("lead") || name.Contains("air blade") || name.Contains("grande"))
+            return "Xe ga";
+        if (name.Contains("exciter") || name.Contains("winner") || name.Contains("raider") || name.Contains("côn tay"))
+            return "Xe côn tay";
+        if (name.Contains("z900") || name.Contains("cbr") || name.Contains("ninja") || name.Contains("moto") || name.Contains("phân khối lớn"))
+            return "Moto phân khối lớn";
+        
+        return "Xe số";
     }
 }

@@ -2,6 +2,7 @@ using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Common.Payments;
+using Application.Features.InventoryOnHand.Notifications;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
@@ -20,6 +21,7 @@ using Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR.Commission;
+using Application.Interfaces.Repositories.InventoryLedger;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
@@ -33,6 +35,7 @@ using Domain.Primitives;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Mapster;
+using MediatR;
 using Moq;
 using Sieve.Models;
 using System.Linq.Expressions;
@@ -72,14 +75,14 @@ public class SalesOrder
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
                 It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()))
+                It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 10));
         _readRepoMock.Setup(
             x => x.GetPagedAsync<MyOrderResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
                 It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()))
+                It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<MyOrderResponse>([], 0, 1, 10));
         _updateRepoMock.Setup(
             x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
@@ -103,7 +106,7 @@ public class SalesOrder
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([mockVariant]);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new Output { Id = 100 });
         var handler = new CreateOutputCommandHandler(
             _readRepoMock.Object,
@@ -135,7 +138,7 @@ public class SalesOrder
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([variant]);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new Output { Id = 99 });
         var handler = new CreateOutputCommandHandler(
             _readRepoMock.Object,
@@ -177,7 +180,7 @@ public class SalesOrder
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([product1, product2]);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new Output());
         var handler = new CreateOutputCommandHandler(
             _readRepoMock.Object,
@@ -240,7 +243,7 @@ public class SalesOrder
         };
         Output? capturedOutput = null;
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>())).Callback<Output>((output) => capturedOutput = output);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new Output());
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -470,7 +473,7 @@ public class SalesOrder
         _readRepoMock.Setup(
             x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
@@ -498,7 +501,7 @@ public class SalesOrder
         _readRepoMock.Setup(
             x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
@@ -529,7 +532,7 @@ public class SalesOrder
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(variants);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new Output { Id = 99 });
         var handler = new CreateOutputByManagerCommandHandler(
             _readRepoMock.Object,
@@ -567,7 +570,7 @@ public class SalesOrder
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(variants);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new Output { Id = 1, BuyerId = customBuyerId });
         var handler = new CreateOutputByManagerCommandHandler(
             _readRepoMock.Object,
@@ -901,8 +904,7 @@ public class SalesOrder
             x => x.GetPagedAsync<MyOrderResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<Expression<Func<Output, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -917,8 +919,7 @@ public class SalesOrder
             x => x.GetPagedAsync<OutputItemResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<Expression<Func<Output, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -933,8 +934,7 @@ public class SalesOrder
             x => x.GetPagedAsync<OutputItemResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<Expression<Func<Output, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -953,9 +953,9 @@ public class SalesOrder
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
                 It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()))
-            .Callback<SieveModel, DataFetchMode, Expression<Func<Output, bool>>?, CancellationToken>(
-                (_, _, filter, _) => capturedFilter = filter)
+                It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Callback<SieveModel, DataFetchMode, Expression<Func<Output, bool>>?, bool, CancellationToken>(
+                (_, _, filter, _, _) => capturedFilter = filter)
             .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 10));
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -995,8 +995,7 @@ public class SalesOrder
             x => x.GetPagedAsync<OutputItemResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<Expression<Func<Output, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -1011,8 +1010,7 @@ public class SalesOrder
             x => x.GetPagedAsync<OutputItemResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<Expression<Func<Output, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -1304,8 +1302,7 @@ public class SalesOrder
             x => x.ApplyAsync<Output, OutputItemResponse>(
                 It.IsAny<IQueryable<Output>>(),
                 It.IsAny<SieveModel>(),
-                It.IsAny<DataFetchMode?>(),
-                It.IsAny<CancellationToken>()))
+                It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 10));
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -1421,8 +1418,7 @@ public class SalesOrder
             x => x.GetPagedAsync<MyOrderResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<Expression<Func<Output, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -1438,8 +1434,7 @@ public class SalesOrder
             x => x.GetPagedAsync<OutputItemResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<Expression<Func<Output, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -1599,7 +1594,7 @@ public class SalesOrder
         _variantRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(variants);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -1618,8 +1613,7 @@ public class SalesOrder
             x => x.GetPagedAsync<OutputItemResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<Expression<Func<Output, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -1637,8 +1631,7 @@ public class SalesOrder
             x => x.GetPagedAsync<OutputItemResponse>(
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode>(),
-                It.IsAny<Expression<Func<Output, bool>>>(),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<Expression<Func<Output, bool>>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -1681,7 +1674,7 @@ public class SalesOrder
                 }]);
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" }]);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.Pending });
         var handler = new CreateOutputCommandHandler(
             _readRepoMock.Object,
@@ -1715,7 +1708,7 @@ public class SalesOrder
                 }]);
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" }]);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.WaitingDeposit });
         var handler = new CreateOutputCommandHandler(
             _readRepoMock.Object,
@@ -1748,7 +1741,7 @@ public class SalesOrder
                     Product = new ProductEntity { StatusId = ProductStatus.ForSale }
                 }]);
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.WaitingDeposit });
         var handler = new CreateOutputCommandHandler(
             _readRepoMock.Object,
@@ -1789,7 +1782,7 @@ public class SalesOrder
                 }]);
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync([new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" }]);
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.WaitingDeposit });
         var handler = new CreateOutputByManagerCommandHandler(
             _readRepoMock.Object,
@@ -1852,6 +1845,105 @@ public class SalesOrder
         };
         var depositAmount = OrderPaymentAmountCalculator.GetDepositAmount(order);
         depositAmount.Should().Be(1000000m);
+    }
+
+    [Fact(DisplayName = "SO_117 - UpdateOutputStatus ghi sổ cái xuất kho khi Completed")]
+    public async Task UpdateOutputStatus_ToCompleted_ShouldWriteExportLedgerEntry()
+    {
+        var ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
+        ledgerRepoMock.Setup(x => x.GetLastEntryAsync(10, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new InventoryLedger { StockAfter = 20 });
+        InventoryLedger? savedLedger = null;
+        ledgerRepoMock.Setup(x => x.AddAsync(It.IsAny<InventoryLedger>(), It.IsAny<CancellationToken>()))
+            .Callback<InventoryLedger, CancellationToken>((l, _) => savedLedger = l)
+            .Returns(Task.CompletedTask);
+        var existingOutput = new Output
+        {
+            Id = 1,
+            StatusId = "delivering",
+            CustomerName = "Nguyễn Văn A",
+            OutputInfos =
+                new List<OutputInfo> { new() { ProductVariantId = 10, Count = 3, CostPrice = 50000m, Price = 60000m } }
+        };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingOutput);
+        var handler = new UpdateOutputStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _commissionUpdateRepositoryMock.Object,
+            _unitOfWorkMock.Object,
+            ledgerRepository: ledgerRepoMock.Object);
+        var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "completed", CurrentUserId = Guid.NewGuid() };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        savedLedger.Should().NotBeNull();
+        savedLedger!.TransactionType.Should().Be("Xuất kho");
+        savedLedger.ExportQty.Should().Be(3);
+        savedLedger.ImportQty.Should().Be(0);
+        savedLedger.StockAfter.Should().Be(17);
+        savedLedger.UnitPrice.Should().Be(50000m);
+        savedLedger.TotalAmount.Should().Be(150000m);
+        savedLedger.PartnerName.Should().Be("Nguyễn Văn A");
+    }
+
+    [Fact(
+        DisplayName = "SO_118 - UpdateOutputStatus publish InventoryChangedNotification khi Completed để tính lại báo cáo xuất nhập tồn")]
+    public async Task UpdateOutputStatus_ToCompleted_ShouldPublishInventoryChangedNotification()
+    {
+        var ledgerRepoMock = new Mock<IInventoryLedgerRepository>();
+        ledgerRepoMock.Setup(x => x.GetLastEntryAsync(10, 5, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((InventoryLedger?)null);
+        var publisherMock = new Mock<IPublisher>();
+        var existingOutput = new Output
+        {
+            Id = 2,
+            StatusId = "delivering",
+            OutputInfos =
+                new List<OutputInfo>
+                {
+                    new() { ProductVariantId = 10, ProductVariantColorId = 5, Count = 2, CostPrice = 40000m }
+                }
+        };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(2, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingOutput);
+        var handler = new UpdateOutputStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _commissionUpdateRepositoryMock.Object,
+            _unitOfWorkMock.Object,
+            ledgerRepository: ledgerRepoMock.Object,
+            publisher: publisherMock.Object);
+        var command = new UpdateOutputStatusCommand { Id = 2, StatusId = "completed", CurrentUserId = Guid.NewGuid() };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        publisherMock.Verify(
+            x => x.Publish(
+                It.Is<InventoryChangedNotification>(n => n.Combos.Any(c => c.VariantId == 10 && c.ColorId == 5)),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact(
+        DisplayName = "SO_119 - UpdateOutputStatus vẫn hoàn tất khi không có ledgerRepository/publisher (tương thích ngược)")]
+    public async Task UpdateOutputStatus_ToCompleted_WithoutLedgerRepository_ShouldStillSucceed()
+    {
+        var existingOutput = new Output
+        {
+            Id = 3,
+            StatusId = "delivering",
+            OutputInfos = new List<OutputInfo> { new() { ProductVariantId = 10, Count = 1, CostPrice = 30000m } }
+        };
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(3, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingOutput);
+        var handler = new UpdateOutputStatusCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _commissionUpdateRepositoryMock.Object,
+            _unitOfWorkMock.Object);
+        var command = new UpdateOutputStatusCommand { Id = 3, StatusId = "completed", CurrentUserId = Guid.NewGuid() };
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        existingOutput.StatusId.Should().Be("completed");
     }
 }
 

@@ -131,6 +131,7 @@ public static class DependencyInjection
         services.AddScoped<IInventoryReceiptExcelService, InventoryReceiptExcelService>();
         services.AddScoped<IInventoryLedgerExcelService, InventoryLedgerExcelService>();
         services.AddScoped<IInventoryReportExcelService, InventoryReportExcelService>();
+        services.AddScoped<ISupplierDebtExcelService, SupplierDebtExcelService>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient<IShippingService, ShippingService>(
             client =>
@@ -150,9 +151,6 @@ public static class DependencyInjection
                 provider.GetRequiredService<IMemoryCache>()));
         services.AddHttpClient<IAiTestRoleClient, AiTestRoleClient>();
         services.AddSingleton<IChatRunQueue, ChatRunQueue>();
-        services.AddSingleton<IProductIndexQueue, ProductIndexQueue>();
-        services.AddHttpClient<ProductIndexWorker>();
-        services.AddHostedService(provider => provider.GetRequiredService<ProductIndexWorker>());
         services.AddSingleton<IChatRunEventBus, ChatRunEventBus>();
         services.AddSingleton<IChatRunCancellationRegistry, ChatRunCancellationRegistry>();
         services.AddSingleton<IChatRunTokenStore, ChatRunTokenStore>();
@@ -161,11 +159,11 @@ public static class DependencyInjection
         services.AddScoped<IChatRunWriter, ChatRunWriter>();
         services.AddScoped<ISidecarStreamClient, SidecarStreamClient>();
         services.AddScoped<IStoreChatAiClient, StoreChatAiClient>();
-        services.AddHostedService<ChatRunExecutor>();
-        services.AddHostedService<OrphanedRunCleaner>();
-        services.AddHostedService<ChatRunEventCleanupJob>();
-        services.AddHostedService<ProductViewCleanupJob>();
-        services.AddHostedService<StaleWaitingSessionMonitor>();
+        // services.AddHostedService<ChatRunExecutor>();
+        // services.AddHostedService<OrphanedRunCleaner>();
+        // services.AddHostedService<ChatRunEventCleanupJob>();
+        // services.AddHostedService<ProductViewCleanupJob>();
+        // services.AddHostedService<StaleWaitingSessionMonitor>();
         services.Scan(
             scan => scan
                 .FromAssemblies(Assembly.GetExecutingAssembly())

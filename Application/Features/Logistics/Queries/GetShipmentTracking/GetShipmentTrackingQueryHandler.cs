@@ -38,6 +38,16 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                 dto.OriginLongitude = order.OriginLongitude;
                 dto.DestinationLatitude = order.DestinationLatitude;
                 dto.DestinationLongitude = order.DestinationLongitude;
+                if (dto.OriginLatitude == 0 && dto.OriginLongitude == 0)
+                {
+                    dto.OriginLatitude = 10.9576;
+                    dto.OriginLongitude = 106.8427;
+                }
+                if (dto.DestinationLatitude == 0 && dto.DestinationLongitude == 0)
+                {
+                    dto.DestinationLatitude = 10.7626;
+                    dto.DestinationLongitude = 106.6602;
+                }
                 if (order.Items != null)
                 {
                     foreach (var item in order.Items)
@@ -66,7 +76,9 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                         Timestamp = baseDate,
                         Location = "Showroom AnhEmMotor Biên Hòa",
                         Status = "Đã lấy hàng",
-                        IsCurrent = false
+                        IsCurrent = false,
+                        Latitude = dto.OriginLatitude,
+                        Longitude = dto.OriginLongitude
                     });
                 if (order.Status == ParcelDeliveryStatus.Shipping || order.Status == ParcelDeliveryStatus.Completed)
                 {
@@ -76,7 +88,9 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                             Timestamp = baseDate.AddHours(4),
                             Location = "Bưu cục trung chuyển Đồng Nai",
                             Status = "Đã đến bưu cục trung chuyển",
-                            IsCurrent = order.Status == ParcelDeliveryStatus.Shipping
+                            IsCurrent = order.Status == ParcelDeliveryStatus.Shipping,
+                            Latitude = (dto.OriginLatitude + dto.DestinationLatitude) / 2,
+                            Longitude = (dto.OriginLongitude + dto.DestinationLongitude) / 2
                         });
                 }
                 if (order.Status == ParcelDeliveryStatus.Completed && order.DeliveredAt.HasValue)
@@ -87,20 +101,12 @@ namespace Application.Features.Logistics.Queries.GetShipmentTracking
                             Timestamp = order.DeliveredAt.Value.UtcDateTime,
                             Location = order.DestinationAddress ?? "Địa chỉ người nhận",
                             Status = "Giao hàng thành công",
-                            IsCurrent = true
+                            IsCurrent = true,
+                            Latitude = dto.DestinationLatitude,
+                            Longitude = dto.DestinationLongitude
                         });
                 }
                 dto.Milestones = milestones;
-                if (dto.OriginLatitude == 0 && dto.OriginLongitude == 0)
-                {
-                    dto.OriginLatitude = 10.9576;
-                    dto.OriginLongitude = 106.8427;
-                }
-                if (dto.DestinationLatitude == 0 && dto.DestinationLongitude == 0)
-                {
-                    dto.DestinationLatitude = 10.7626;
-                    dto.DestinationLongitude = 106.6602;
-                }
             }
             return dto;
         }

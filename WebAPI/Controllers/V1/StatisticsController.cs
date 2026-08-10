@@ -537,6 +537,12 @@ public class StatisticsController(
             .ThenInclude(p => p!.ProductCategory)
             .Where(o => o.CreatedAt >= start && o.CreatedAt <= end);
         var orders = await ordersQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
+        var orderIds = orders.Select(o => o.Id).ToList();
+        var shipments = await dbContext.Set<Domain.Entities.Logistics.Shipment>()
+            .Where(s => s.OutputId.HasValue && orderIds.Contains(s.OutputId.Value))
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        var shipmentDict = shipments.GroupBy(s => s.OutputId!.Value).ToDictionary(g => g.Key, g => g.FirstOrDefault());
+
         decimal totalInvoiced = 0;
         decimal collectedCash = 0;
         decimal pendingTransit = 0;
@@ -611,6 +617,7 @@ public class StatisticsController(
                     }
                 }
             }
+            var shipment = shipmentDict.GetValueOrDefault(o.Id);
             invoicesData.Add(
                 new InvoiceListItem(
                     $"HD{o.Id:D5}",
@@ -628,8 +635,8 @@ public class StatisticsController(
                         vName,
                         vVin,
                         vEngine,
-                        "Nội bộ",
-                        "-",
+                        shipment?.Carrier ?? "Nội bộ",
+                        string.IsNullOrEmpty(shipment?.TrackingNumber) ? "-" : shipment.TrackingNumber,
                         items)));
         }
         var trendDataList = trendDataDict

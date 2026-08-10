@@ -45,7 +45,7 @@ public class AdminInvoicesController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy chi tiết một hóa đơn bán hàng.
     /// </summary>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = nameof(GetInvoiceDetailAsync))]
     [HasPermission(Permissions.Order.OrderManagement.View)]
     [ProducesResponseType(typeof(AdminInvoiceDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
