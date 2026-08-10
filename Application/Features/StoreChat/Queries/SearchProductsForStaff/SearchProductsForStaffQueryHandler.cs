@@ -31,7 +31,8 @@ public class SearchProductsForStaffQueryHandler(IProductReadRepository productRe
             {
                 ProductId = p.Id,
                 ProductName = p.Name ?? string.Empty,
-                ImageUrl = p.ProductVariants.FirstOrDefault()?.CoverImageUrl,
+                ImageUrl = p.ProductVariants.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v.CoverImageUrl))?.CoverImageUrl 
+                           ?? p.ProductVariants.SelectMany(v => v.ProductVariantColors).FirstOrDefault(c => !string.IsNullOrWhiteSpace(c.CoverImageUrl))?.CoverImageUrl,
                 PriceFrom = p.ProductVariants.Count > 0 ? p.ProductVariants.Min(v => v.Price) : null,
                 PriceTo = p.ProductVariants.Count > 0 ? p.ProductVariants.Max(v => v.Price) : null
             })
