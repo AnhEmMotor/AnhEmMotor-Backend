@@ -144,9 +144,9 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
 
     public async Task<ProductDetailResponse> Handle(GetProductDetailQuery request, CancellationToken cancellationToken)
     {
-        var variant = await _readRepo.GetVariantByIdWithDetailsAsync(request.Id, cancellationToken)
+        var product = await _readRepo.GetByIdWithDetailsAsync(request.Id, cancellationToken)
             .ConfigureAwait(false);
-        if (variant is null || variant.Product is null)
+        if (product is null)
         {
             return new ProductDetailResponse
             {
@@ -159,9 +159,14 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
                 CompatibilityNote = string.Empty
             };
         }
-        var product = variant.Product;
-        string ResolveImgUrl(ProductVariant v)
+        
+        var sortedVariants = product.ProductVariants.ToList();
+        sortedVariants.Sort((a, b) => (a.Price ?? decimal.MaxValue).CompareTo(b.Price ?? decimal.MaxValue));
+        var firstVariant = sortedVariants.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v.VariantName) || v.ProductVariantColors.Count > 0) ?? sortedVariants.FirstOrDefault();
+
+        string ResolveImgUrl(Domain.Entities.ProductVariant? v)
         {
+            if (v == null) return string.Empty;
             var cover = v.ProductVariantColors
                 .Where(c => !string.IsNullOrEmpty(c.CoverImageUrl) && !c.CoverImageUrl.Contains("dummyimage"))
                 .Select(c => c.CoverImageUrl!)
@@ -180,8 +185,8 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
             return string.Empty;
         }
 
-        string mainImage = ResolveImgUrl(variant);
-        var techList = (product.ProductTechnologies ?? new List<ProductTechnology>())
+        string mainImage = ResolveImgUrl(firstVariant);
+        var techList = (product.ProductTechnologies ?? new List<Domain.Entities.ProductTechnology>())
             .OrderBy(t => t.DisplayOrder)
             .Select(
                 t =>
@@ -200,10 +205,26 @@ public class GetProductDetailHandler : IRequestHandler<GetProductDetailQuery, Pr
             Id = product.Id,
             Name = product.Name,
             Description = product.Description ?? string.Empty,
-            ReferencePrice = variant.Price ?? 0,
+            ImageUrl = mainImage,
+            ReferencePrice = firstVariant?.Price ?? 0,
             Features = techList,
             IsCompatibleWithMyVehicle = IsCompatible,
-            CompatibilityNote = IsCompatible ? "Liên hệ để kiểm tra tương thích với xe của bạn" : string.Empty
+            CompatibilityNote = IsCompatible ? "Liên hệ để kiểm tra tương thích với xe của bạn" : string.Empty,
+            Variants = product.ProductVariants.Select(v => new ProductVariantSummaryResponse
+            {
+                Id = v.Id,
+                VariantName = v.VariantName,
+                Price = v.Price,
+                CoverImageUrl = _fileReadService.GetPublicUrl(v.CoverImageUrl ?? string.Empty),
+                Colors = v.ProductVariantColors.Select(c => new ProductColorSummaryResponse
+                {
+                    Id = c.Id,
+                    ColorName = c.ColorName,
+                    ColorCode = c.ColorCode,
+                    CoverImageUrl = _fileReadService.GetPublicUrl(c.CoverImageUrl ?? string.Empty),
+                    MaxPurchaseQuantity = c.MaxPurchaseQuantity
+                }).ToList()
+            }).ToList()
         };
     }
 }
