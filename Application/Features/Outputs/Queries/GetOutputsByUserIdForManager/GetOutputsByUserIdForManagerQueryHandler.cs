@@ -17,7 +17,7 @@ public sealed class GetOutputsByUserIdForManagerQueryHandler(IOutputReadReposito
             request.SieveModel!,
             DataFetchMode.ActiveOnly,
             x => x.BuyerId == request.BuyerId,
-            cancellationToken)
+            cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         return result;
     }

@@ -12,6 +12,7 @@ public interface IOutputReadRepository
         SieveModel sieveModel,
         DataFetchMode mode = DataFetchMode.ActiveOnly,
         Expression<Func<OutputEntity, bool>>? filter = null,
+        bool withoutContract = false,
         CancellationToken cancellationToken = default);
 
     public Task<IEnumerable<OutputEntity>> GetAllAsync(

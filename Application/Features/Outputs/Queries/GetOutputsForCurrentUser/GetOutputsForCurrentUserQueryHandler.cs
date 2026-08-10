@@ -24,7 +24,7 @@ public sealed class GetOutputsForCurrentUserQueryHandler(
             request.SieveModel!,
             DataFetchMode.ActiveOnly,
             o => o.BuyerId == buyerId,
-            cancellationToken)
+            cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         if (pagedResult.Items?.Any(i => i.DepositRatio == null) == true)
         {

@@ -46,6 +46,7 @@ public class GetOutputsListQueryHandler(IOutputReadRepository repository, ISetti
         var result = await repository.GetPagedAsync<OutputItemResponse>(
             request.SieveModel!,
             filter: filter,
+            withoutContract: request.WithoutContract,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
         if (result.Items?.Any(i => i.DepositRatio == null) == true)

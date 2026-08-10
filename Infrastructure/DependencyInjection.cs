@@ -162,11 +162,11 @@ public static class DependencyInjection
         services.AddScoped<IChatRunWriter, ChatRunWriter>();
         services.AddScoped<ISidecarStreamClient, SidecarStreamClient>();
         services.AddScoped<IStoreChatAiClient, StoreChatAiClient>();
-        services.AddHostedService<ChatRunExecutor>();
-        services.AddHostedService<OrphanedRunCleaner>();
-        services.AddHostedService<ChatRunEventCleanupJob>();
-        services.AddHostedService<ProductViewCleanupJob>();
-        services.AddHostedService<StaleWaitingSessionMonitor>();
+        // services.AddHostedService<ChatRunExecutor>();
+        // services.AddHostedService<OrphanedRunCleaner>();
+        // services.AddHostedService<ChatRunEventCleanupJob>();
+        // services.AddHostedService<ProductViewCleanupJob>();
+        // services.AddHostedService<StaleWaitingSessionMonitor>();
         services.Scan(
             scan => scan
                 .FromAssemblies(Assembly.GetExecutingAssembly())
