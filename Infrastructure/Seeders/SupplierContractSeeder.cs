@@ -40,8 +40,8 @@ public static class SupplierContractSeeder
                     Id = Guid.NewGuid(),
                     SupplierId = supplierHonda.Id,
                     ContractNumber = contractNumber,
-                    EffectiveDate = new DateTime(2024, 1, 1),
-                    ExpirationDate = new DateTime(2025, 12, 31, 23, 59, 59),
+                    EffectiveDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    ExpirationDate = new DateTime(2025, 12, 31, 23, 59, 59, DateTimeKind.Utc),
                     ContractValue = 15000000000,
                     Status = SupplierContractStatus.Active,
                     Terms =
@@ -96,8 +96,8 @@ public static class SupplierContractSeeder
                     Id = Guid.NewGuid(),
                     SupplierId = supplierYamaha.Id,
                     ContractNumber = contractNumber,
-                    EffectiveDate = new DateTime(2024, 3, 1),
-                    ExpirationDate = new DateTime(2025, 3, 1, 0, 0, 0),
+                    EffectiveDate = new DateTime(2024, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+                    ExpirationDate = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc),
                     ContractValue = 12000000000,
                     Status = SupplierContractStatus.Active,
                     Terms =
@@ -152,7 +152,7 @@ public static class SupplierContractSeeder
                     Id = Guid.NewGuid(),
                     SupplierId = supplierSuzuki.Id,
                     ContractNumber = contractNumber,
-                    EffectiveDate = new DateTime(2024, 6, 1),
+                    EffectiveDate = new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc),
                     ExpirationDate = null,
                     ContractValue = 8000000000,
                     Status = SupplierContractStatus.PendingApproval,
@@ -202,7 +202,7 @@ public static class SupplierContractSeeder
         var fallbackSupplier = allSuppliers.FirstOrDefault();
         var extraContracts = new (string ContractNumber, int SupplierId, DateTime EffectiveDate, DateTime? ExpirationDate, decimal Value, string Status, string Terms, string Note, decimal? CreditLimit, int? PaymentDays, string? BankName, string? BankAccount, int? MinVolume, decimal? Discount, DateTimeOffset CreatedAt)[]
         {
-            ("HD-DRAFT-2024-004", supplierHonda?.Id ?? 0, new DateTime(2024, 7, 1), null, 5000000000, SupplierContractStatus.Draft, "Nhap hop dong bo sung phu kien Honda. Chua hoan thien.", "Dang soan thao", 1000000000, 30, "Vietcombank", "1111222233", 20, 1.0m, new DateTimeOffset(
+            ("HD-DRAFT-2024-004", supplierHonda?.Id ?? 0, new DateTime(2024, 7, 1, 0, 0, 0, DateTimeKind.Utc), null, 5000000000, SupplierContractStatus.Draft, "Nhap hop dong bo sung phu kien Honda. Chua hoan thien.", "Dang soan thao", 1000000000, 30, "Vietcombank", "1111222233", 20, 1.0m, new DateTimeOffset(
             2024,
             7,
             1,
@@ -210,13 +210,14 @@ public static class SupplierContractSeeder
             0,
             0,
             TimeSpan.Zero)),
-            ("HD-YAMAHA-EXPIRED-2023-001", supplierYamaha?.Id ?? 0, new DateTime(2023, 1, 1), new DateTime(
+            ("HD-YAMAHA-EXPIRED-2023-001", supplierYamaha?.Id ?? 0, new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(
             2024,
             1,
             1,
             0,
             0,
-            0), 10000000000, SupplierContractStatus.Expired, "Hop dong cu da het han.", "Hop dong cu da het han", 2000000000, 30, "Techcombank", "7777888899", 60, 2.0m, new DateTimeOffset(
+            0,
+            DateTimeKind.Utc), 10000000000, SupplierContractStatus.Expired, "Hop dong cu da het han.", "Hop dong cu da het han", 2000000000, 30, "Techcombank", "7777888899", 60, 2.0m, new DateTimeOffset(
             2023,
             1,
             1,
@@ -224,13 +225,14 @@ public static class SupplierContractSeeder
             0,
             0,
             TimeSpan.Zero)),
-            ("HD-HONDA-COMPLETED-2022-001", supplierHonda?.Id ?? 0, new DateTime(2022, 1, 1), new DateTime(
+            ("HD-HONDA-COMPLETED-2022-001", supplierHonda?.Id ?? 0, new DateTime(2022, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(
             2023,
             12,
             31,
             0,
             0,
-            0), 20000000000, SupplierContractStatus.Completed, "Hop dong da hoan thanh.", "Da hoan thanh toan bo giao dich", 5000000000, 30, "Vietcombank", "1234567890", 150, 4.0m, new DateTimeOffset(
+            0,
+            DateTimeKind.Utc), 20000000000, SupplierContractStatus.Completed, "Hop dong da hoan thanh.", "Da hoan thanh toan bo giao dich", 5000000000, 30, "Vietcombank", "1234567890", 150, 4.0m, new DateTimeOffset(
             2022,
             1,
             1,
@@ -238,13 +240,14 @@ public static class SupplierContractSeeder
             0,
             0,
             TimeSpan.Zero)),
-            ("HD-TERMINATED-2023-002", fallbackSupplier?.Id ?? 0, new DateTime(2023, 4, 1), new DateTime(
+            ("HD-TERMINATED-2023-002", fallbackSupplier?.Id ?? 0, new DateTime(2023, 4, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(
             2024,
             4,
             1,
             0,
             0,
-            0), 6000000000, SupplierContractStatus.Terminated, "Hop dong da thanh ly do vi pham dieu khoan.", "Thanh ly som", 1500000000, 45, "ACB", "5555666677", 40, 1.0m, new DateTimeOffset(
+            0,
+            DateTimeKind.Utc), 6000000000, SupplierContractStatus.Terminated, "Hop dong da thanh ly do vi pham dieu khoan.", "Thanh ly som", 1500000000, 45, "ACB", "5555666677", 40, 1.0m, new DateTimeOffset(
             2023,
             4,
             1,
