@@ -153,6 +153,8 @@ namespace Application.ApiContracts.Client.Catalog
 
         public string? Description { get; set; }
 
+        public string? ImageUrl { get; set; }
+
         public decimal ReferencePrice { get; set; }
 
         public List<string> Features { get; set; } = new();
@@ -160,6 +162,8 @@ namespace Application.ApiContracts.Client.Catalog
         public bool IsCompatibleWithMyVehicle { get; set; }
 
         public string? CompatibilityNote { get; set; }
+
+        public List<ProductVariantSummaryResponse> Variants { get; set; } = new();
     }
 
     public class ConsultationRequest
