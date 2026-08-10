@@ -9,4 +9,6 @@ public class WarrantyTermStatisticsResponse
     public int InactiveTerms { get; set; }
 
     public int BrandsCovered { get; set; }
+
+    public List<int> CoveredBrandIds { get; set; } = new();
 }

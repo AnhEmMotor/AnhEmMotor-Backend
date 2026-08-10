@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
 using Domain.Constants.InventoryReceipt;
@@ -18,6 +18,7 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         SieveModel sieveModel,
         DataFetchMode mode = DataFetchMode.ActiveOnly,
         Expression<Func<OutputEntity, bool>>? filter = null,
+        bool withoutContract = false,
         CancellationToken cancellationToken = default)
     {
         var query = GetQueryable(mode);
@@ -25,6 +26,11 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
         {
             query = query.Where(filter);
         }
+        if (withoutContract)
+        {
+            query = query.Where(o => !context.Set<global::Domain.Entities.SalesContract>().Any(c => c.OutputId == o.Id));
+        }
+
         return paginator.ApplyAsync<OutputEntity, TResponse>(query, sieveModel, mode, cancellationToken);
     }
 

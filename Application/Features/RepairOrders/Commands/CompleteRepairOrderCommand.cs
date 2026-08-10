@@ -12,4 +12,8 @@ public class CompleteRepairOrderCommand : IRequest<Result<bool>>
     public string PaymentStatus { get; set; } = string.Empty;
 
     public string? Notes { get; set; }
+
+    public int? VoucherId { get; set; }
+
+    public decimal? DiscountAmount { get; set; }
 }

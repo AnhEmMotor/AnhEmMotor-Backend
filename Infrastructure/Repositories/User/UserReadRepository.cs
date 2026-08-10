@@ -23,7 +23,7 @@ namespace Infrastructure.Repositories.User
             SieveModel sieveModel,
             CancellationToken cancellationToken)
         {
-            var query = userManager.Users.AsNoTracking();
+            var query = userManager.Users.AsNoTracking().Where(u => u.DeletedAt == null);
             SieveHelper.ApplyDefaultSorting(sieveModel);
             var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
             var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);
@@ -63,7 +63,7 @@ namespace Infrastructure.Repositories.User
             SieveModel sieveModel,
             CancellationToken cancellationToken)
         {
-            var query = userManager.Users.AsNoTracking();
+            var query = userManager.Users.AsNoTracking().Where(u => u.DeletedAt == null);
             SieveHelper.ApplyDefaultSorting(sieveModel);
             var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
             var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);

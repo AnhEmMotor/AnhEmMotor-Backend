@@ -19,21 +19,21 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
         var totalRevenue = await context.OutputOrders
             .Where(o => o.CreatedAt >= start && o.CreatedAt <= end && o.StatusId == "Completed")
             .SelectMany(o => o.OutputInfos)
-            .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0), cancellationToken)
-            .ConfigureAwait(false);
+            .SumAsync(oi => (decimal?)((oi.Price ?? 0) * (oi.Count ?? 0)), cancellationToken)
+            .ConfigureAwait(false) ?? 0;
         var prevRevenue = await context.OutputOrders
             .Where(o => o.CreatedAt >= prevStart && o.CreatedAt <= prevEnd && o.StatusId == "Completed")
             .SelectMany(o => o.OutputInfos)
-            .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0), cancellationToken)
-            .ConfigureAwait(false);
+            .SumAsync(oi => (decimal?)((oi.Price ?? 0) * (oi.Count ?? 0)), cancellationToken)
+            .ConfigureAwait(false) ?? 0;
         var totalExpenses = await context.Expenses
             .Where(e => e.ExpenseDate >= start && e.ExpenseDate <= end)
-            .SumAsync(e => e.Amount, cancellationToken)
-            .ConfigureAwait(false);
+            .SumAsync(e => (decimal?)e.Amount, cancellationToken)
+            .ConfigureAwait(false) ?? 0;
         var prevExpenses = await context.Expenses
             .Where(e => e.ExpenseDate >= prevStart && e.ExpenseDate <= prevEnd)
-            .SumAsync(e => e.Amount, cancellationToken)
-            .ConfigureAwait(false);
+            .SumAsync(e => (decimal?)e.Amount, cancellationToken)
+            .ConfigureAwait(false) ?? 0;
         var cogs = totalRevenue * 0.7m;
         var grossProfit = totalRevenue - cogs;
         var netProfit = grossProfit - totalExpenses;
@@ -49,8 +49,8 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
         var pendingAmount = await context.OutputOrders
             .Where(o => o.StatusId == "Pending" || o.StatusId == "WaitingForPayment")
             .SelectMany(o => o.OutputInfos)
-            .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0), cancellationToken)
-            .ConfigureAwait(false);
+            .SumAsync(oi => (decimal?)((oi.Price ?? 0) * (oi.Count ?? 0)), cancellationToken)
+            .ConfigureAwait(false) ?? 0;
         var newComplaintsCount = await context.SupportTickets
             .CountAsync(t => t.Status == "Open" || t.Status == "New", cancellationToken)
             .ConfigureAwait(false);
@@ -90,8 +90,8 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
         var revenue = await context.OutputOrders
             .Where(o => o.CreatedAt >= start && o.CreatedAt <= end && o.StatusId == "Completed")
             .SelectMany(o => o.OutputInfos)
-            .SumAsync(oi => (oi.Price ?? 0) * (oi.Count ?? 0), cancellationToken)
-            .ConfigureAwait(false);
+            .SumAsync(oi => (decimal?)((oi.Price ?? 0) * (oi.Count ?? 0)), cancellationToken)
+            .ConfigureAwait(false) ?? 0;
         var expenses = await context.Expenses
             .Where(e => e.ExpenseDate >= start && e.ExpenseDate <= end)
             .ToListAsync(cancellationToken)
@@ -137,7 +137,7 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
                                     o.CreatedAt <= endOfDay &&
                                     o.StatusId == "Completed")
                         .SelectMany(o => o.OutputInfos)
-                        .Sum(oi => (oi.Price ?? 0) * (oi.Count ?? 0))
+                        .Sum(oi => (decimal?)((oi.Price ?? 0) * (oi.Count ?? 0))) ?? 0
                 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

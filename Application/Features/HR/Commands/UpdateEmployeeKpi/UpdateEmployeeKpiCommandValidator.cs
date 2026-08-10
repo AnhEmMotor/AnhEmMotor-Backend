@@ -6,7 +6,6 @@ public sealed class UpdateEmployeeKpiCommandValidator : AbstractValidator<Update
 {
     public UpdateEmployeeKpiCommandValidator()
     {
-        RuleFor(command => command.Id).GreaterThan(0);
         RuleFor(command => command.EmployeeProfileId).GreaterThan(0);
         RuleFor(command => command.MetricName).NotEmpty().MaximumLength(100);
         RuleFor(command => command.TargetValue).GreaterThan(0);

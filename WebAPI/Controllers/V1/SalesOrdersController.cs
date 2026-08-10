@@ -109,9 +109,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
     public Task<IActionResult> GetConfirmedOutputsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken,
-        [FromQuery] string? search = null)
+        [FromQuery] string? search = null,
+        [FromQuery] bool withoutContract = false)
     {
-        return GetOutputsByStatusesAsync(sieveModel, search, OrderStatus.ConfirmedOrderStatuses, cancellationToken);
+        return GetOutputsByStatusesAsync(sieveModel, search, OrderStatus.ConfirmedOrderStatuses, withoutContract, cancellationToken);
     }
 
     /// <summary>
@@ -125,7 +126,7 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
         CancellationToken cancellationToken,
         [FromQuery] string? search = null)
     {
-        return GetOutputsByStatusesAsync(sieveModel, search, OrderStatus.UnconfirmedOrderStatuses, cancellationToken);
+        return GetOutputsByStatusesAsync(sieveModel, search, OrderStatus.UnconfirmedOrderStatuses, false, cancellationToken);
     }
 
     /// <summary>
@@ -471,9 +472,10 @@ public class SalesOrdersController(IMediator mediator, ICurrentUserContext curre
         SieveModel sieveModel,
         string? search,
         IReadOnlyCollection<string> statusIds,
+        bool withoutContract,
         CancellationToken cancellationToken)
     {
-        var query = new GetOutputsListQuery { SieveModel = sieveModel, Search = search, StatusIds = statusIds };
+        var query = new GetOutputsListQuery { SieveModel = sieveModel, Search = search, StatusIds = statusIds, WithoutContract = withoutContract };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }

@@ -14,13 +14,13 @@ public static class ProductDataSeeder
         if (bikeCategory == null)
             return;
         var hondaBrand = await context.Brands
-            .FirstOrDefaultAsync(b => string.Compare(b.Name, "Honda") == 0, cancellationToken)
+            .FirstOrDefaultAsync(b => b.Name != null && b.Name.Contains("Honda"), cancellationToken)
             .ConfigureAwait(false);
         var yamahaBrand = await context.Brands
-            .FirstOrDefaultAsync(b => string.Compare(b.Name, "Yamaha") == 0, cancellationToken)
+            .FirstOrDefaultAsync(b => b.Name != null && b.Name.Contains("Yamaha"), cancellationToken)
             .ConfigureAwait(false);
         var suzukiBrand = await context.Brands
-            .FirstOrDefaultAsync(b => string.Compare(b.Name, "Suzuki") == 0, cancellationToken)
+            .FirstOrDefaultAsync(b => b.Name != null && b.Name.Contains("Suzuki"), cancellationToken)
             .ConfigureAwait(false);
         var productsToSeed = new List<Product>
         {

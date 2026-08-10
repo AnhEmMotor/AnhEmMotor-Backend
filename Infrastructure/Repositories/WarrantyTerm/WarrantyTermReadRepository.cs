@@ -71,17 +71,19 @@ public class WarrantyTermReadRepository(ApplicationDBContext context, ISievePagi
         var activeTerms = await query.CountAsync(t => t.Status == "Active", cancellationToken).ConfigureAwait(false);
         var inactiveTerms = await query.CountAsync(t => t.Status == "Inactive", cancellationToken).ConfigureAwait(false);
         var expiredTerms = await query.CountAsync(t => t.Status == "Expired", cancellationToken).ConfigureAwait(false);
-        var brandsCovered = await query
-			.Select(t => t.BrandId)
+        var coveredBrandIds = await query
+            .Select(t => t.BrandId)
             .Distinct()
-            .CountAsync(cancellationToken)
+            .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
+        var brandsCovered = coveredBrandIds.Count;
         return new global::Application.ApiContracts.Admin.Warranty.WarrantyTermStatisticsResponse
         {
             TotalTerms = totalTerms,
             ActiveTerms = activeTerms,
             InactiveTerms = inactiveTerms + expiredTerms,
-            BrandsCovered = brandsCovered
+            BrandsCovered = brandsCovered,
+            CoveredBrandIds = coveredBrandIds
         };
     }
 }
