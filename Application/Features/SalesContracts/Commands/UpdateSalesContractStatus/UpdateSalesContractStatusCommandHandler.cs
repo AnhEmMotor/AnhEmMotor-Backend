@@ -29,6 +29,8 @@ public class UpdateSalesContractStatusCommandHandler(ISalesContractReadRepositor
             (request.IsAdminApproval &&
                 string.Equals(contract.Status, SalesContractStatus.PendingApproval, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(normalizedStatus, SalesContractStatus.Approved, StringComparison.OrdinalIgnoreCase)) ||
+            (string.Equals(contract.Status, SalesContractStatus.Approved, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(normalizedStatus, SalesContractStatus.Signed, StringComparison.OrdinalIgnoreCase)) ||
             (string.Equals(contract.Status, SalesContractStatus.Signed, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(normalizedStatus, SalesContractStatus.Fulfilled, StringComparison.OrdinalIgnoreCase));
         if (!isAllowedTransition)
