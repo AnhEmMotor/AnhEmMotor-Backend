@@ -31,8 +31,8 @@ namespace WebAPI.Controllers
             [FromQuery] DateTime? end,
             CancellationToken cancellationToken)
         {
-            var startDate = start ?? DateTime.Today;
-            var endDate = end ?? DateTime.Today.AddDays(1).AddTicks(-1);
+            var startDate = (start ?? DateTime.Today).ToUniversalTime();
+            var endDate = (end ?? DateTime.Today.AddDays(1).AddTicks(-1)).ToUniversalTime();
             var result = await mediator.Send(new GetDashboardSummaryQuery(startDate, endDate), cancellationToken);
             return HandleResult(result);
         }
@@ -67,8 +67,8 @@ namespace WebAPI.Controllers
             [FromQuery] DateTime? end,
             CancellationToken cancellationToken)
         {
-            var startDate = start ?? DateTime.Today.AddDays(-30);
-            var endDate = end ?? DateTime.Today;
+            var startDate = (start ?? DateTime.Today.AddDays(-30)).ToUniversalTime();
+            var endDate = (end ?? DateTime.Today).ToUniversalTime();
             var result = await mediator.Send(new GetStaffPerformanceQuery(startDate, endDate), cancellationToken);
             return HandleResult(result);
         }
