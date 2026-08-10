@@ -60,7 +60,77 @@ public static class CustomerSeeder
                     await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
+                // Tìm động sản phẩm SH để gán xe tránh lỗi hardcode ID
+                var shProduct = await context.Set<Product>()
+                    .Include(p => p.ProductVariants)
+                    .ThenInclude(pv => pv.ProductVariantColors)
+                    .FirstOrDefaultAsync(p => p.Name != null && p.Name.Contains("Honda SH"), cancellationToken);
 
+                if (shProduct != null && shProduct.ProductVariants.Any())
+                {
+                    var variant = shProduct.ProductVariants.First();
+                    var color = variant.ProductVariantColors.FirstOrDefault();
+                    
+                    if (color != null)
+                    {
+                        var hasVehicle = await context.Set<Vehicle>().AnyAsync(v => v.UserId == user.Id, cancellationToken);
+                        if (!hasVehicle)
+                        {
+                            var vehicle = new Vehicle
+                            {
+                                UserId = user.Id,
+                                LeadId = lead.Id,
+                                ProductId = shProduct.Id,
+                                ProductVariantId = variant.Id,
+                                ProductVariantColorId = color.Id,
+                                Status = "ACTIVE",
+                                PurchaseDate = DateTimeOffset.UtcNow.AddMonths(-5),
+                                IsActive = true,
+                                LicensePlate = "59P1-123.45",
+                                CurrentOdo = 5234,
+                                LastMaintenanceDate = DateTime.UtcNow.AddMonths(-2),
+                                NextMaintenanceDate = DateTime.UtcNow.AddMonths(1),
+                                NextMaintenanceOdo = 6000,
+                                ElectronicWarrantyQrCode = "AEMOTO-WARRANTY-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper()
+                            };
+                            context.Set<Vehicle>().Add(vehicle);
+                            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                            // Thêm Lịch sử bảo dưỡng
+                            var maintenance = new MaintenanceHistory
+                            {
+                                VehicleId = vehicle.Id,
+                                MaintenanceNumber = "BD-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                                MaintenanceDate = DateTimeOffset.UtcNow.AddMonths(-2),
+                                Description = "Bảo dưỡng định kỳ 5000km",
+                                Mileage = 5000,
+                                PartsCost = 150000,
+                                LaborCost = 50000,
+                                TotalCost = 200000,
+                                ServiceType = "Bảo dưỡng",
+                                NextMaintenanceDate = DateTimeOffset.UtcNow.AddMonths(1),
+                                NextMaintenanceOdo = 6000
+                            };
+                            context.Set<MaintenanceHistory>().Add(maintenance);
+
+                            // Thêm Hợp đồng TC
+                            var finance = new FinanceContract
+                            {
+                                ContractNumber = "HDTC-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                                CustomerId = user.Id,
+                                BankName = "FE Credit",
+                                LoanAmount = 25000000,
+                                TermMonths = 12,
+                                InterestRate = 1.5m,
+                                DisbursementStatus = "Đã giải ngân",
+                                CavetLocation = "FE Credit giữ bản gốc",
+                                SignedDate = DateTime.UtcNow.AddMonths(-5)
+                            };
+                            context.Set<FinanceContract>().Add(finance);
+                            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        }
+                    }
+                }
             }
         }
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
