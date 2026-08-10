@@ -164,9 +164,10 @@ public class ProductReadRepository(
         var query = context.DeletedOnly<ProductEntity>();
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Max(pageSize, 1);
+        var sanitizedFilters = SanitizeSieveFilters(filters);
         var sieveModel = new SieveModel
         {
-            Filters = filters,
+            Filters = sanitizedFilters,
             Sorts = sorts,
             Page = normalizedPage,
             PageSize = normalizedPageSize
@@ -232,9 +233,10 @@ public class ProductReadRepository(
         var cleanFiltersList = new List<string>();
         var versionFilters = new List<string>();
         var colorFilters = new List<string>();
-        if (!string.IsNullOrWhiteSpace(filters))
+        var sanitizedFiltersStr = SanitizeSieveFilters(filters);
+        if (!string.IsNullOrWhiteSpace(sanitizedFiltersStr))
         {
-            var parts = filters.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var parts = sanitizedFiltersStr.Split(',', StringSplitOptions.RemoveEmptyEntries);
             foreach (var part in parts)
             {
                 var trimmed = part.Trim();
@@ -465,9 +467,10 @@ public class ProductReadRepository(
         var normalizedPageSize = Math.Max(pageSize, 1);
         var query = context.Products.Where(p => p.DeletedAt == null).AsNoTracking();
         var effectiveSorts = string.IsNullOrWhiteSpace(sorts) ? "-CreatedAt,id" : sorts;
+        var sanitizedFilters = SanitizeSieveFilters(filters);
         var sieveModel = new SieveModel
         {
-            Filters = filters,
+            Filters = sanitizedFilters,
             Sorts = effectiveSorts,
             Page = normalizedPage,
             PageSize = normalizedPageSize
@@ -574,6 +577,30 @@ public class ProductReadRepository(
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
             .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    private string? SanitizeSieveFilters(string? filters)
+    {
+        if (string.IsNullOrWhiteSpace(filters)) return filters;
+        
+        var parts = filters.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var sanitizedParts = new List<string>();
+        
+        foreach (var part in parts)
+        {
+            var trimmed = part.Trim();
+            if (trimmed.Contains("@=") && !trimmed.Contains("@=*"))
+            {
+                trimmed = trimmed.Replace("@=", "@=*");
+            }
+            if (trimmed.Contains("_=") && !trimmed.Contains("_=*"))
+            {
+                trimmed = trimmed.Replace("_=", "_=*");
+            }
+            sanitizedParts.Add(trimmed);
+        }
+        
+        return string.Join(",", sanitizedParts);
     }
 }
 

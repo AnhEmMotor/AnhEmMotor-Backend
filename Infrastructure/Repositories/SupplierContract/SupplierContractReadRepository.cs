@@ -55,7 +55,7 @@ public class SupplierContractReadRepository(ApplicationDBContext context, ISieve
             .FirstOrDefaultAsync(
                 x => x.SupplierId == supplierId &&
                     string.Compare(x.Status, SupplierContractStatus.Active) == 0 &&
-                    (!x.ExpirationDate.HasValue || x.ExpirationDate.Value > DateTime.Now),
+                    (!x.ExpirationDate.HasValue || x.ExpirationDate.Value > DateTime.UtcNow),
                 cancellationToken);
     }
 
@@ -95,13 +95,13 @@ public class SupplierContractReadRepository(ApplicationDBContext context, ISieve
 
     public Task<int> CountExpiringAsync(int daysThreshold, CancellationToken cancellationToken = default)
     {
-        var thresholdDate = DateTime.Now.AddDays(daysThreshold);
+        var thresholdDate = DateTime.UtcNow.AddDays(daysThreshold);
         return GetQueryable(DataFetchMode.ActiveOnly)
             .CountAsync(
                 x => string.Compare(x.Status, SupplierContractStatus.Active) == 0 &&
                     x.ExpirationDate.HasValue &&
                     x.ExpirationDate.Value <= thresholdDate &&
-                    x.ExpirationDate.Value >= DateTime.Now,
+                    x.ExpirationDate.Value >= DateTime.UtcNow,
                 cancellationToken);
     }
 }

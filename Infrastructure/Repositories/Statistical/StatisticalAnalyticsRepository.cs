@@ -85,8 +85,8 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
 
     public async Task<PnlReportResponse> GetPnlReportAsync(int month, int year, CancellationToken cancellationToken)
     {
-        var start = new DateTime(year, month, 1);
-        var end = start.AddMonths(1).AddDays(-1);
+        var start = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var end = start.AddMonths(1).AddTicks(-1);
         var revenue = await context.OutputOrders
             .Where(o => o.CreatedAt >= start && o.CreatedAt <= end && o.StatusId == "Completed")
             .SelectMany(o => o.OutputInfos)
