@@ -678,8 +678,8 @@ public class StatisticsController(
         {
             return BadRequest("Ngày bắt đầu không được lớn hơn ngày kết thúc.");
         }
-        var start = parsedStart.Date;
-        var end = parsedEnd.Date.AddDays(1).AddTicks(-1);
+        var start = DateTime.SpecifyKind(parsedStart.Date, DateTimeKind.Utc);
+        var end = DateTime.SpecifyKind(parsedEnd.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
         var salesContracts = await dbContext.SalesContracts
             .IgnoreQueryFilters()
             .Where(c => c.CreatedAt >= start && c.CreatedAt <= end)

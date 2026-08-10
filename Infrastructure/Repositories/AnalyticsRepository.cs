@@ -90,8 +90,8 @@ namespace Infrastructure.Repositories
 
         public async Task<PnlReportDto> GetPnlReportAsync(int month, int year)
         {
-            var start = new DateTime(year, month, 1);
-            var end = start.AddMonths(1).AddDays(-1);
+            var start = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var end = start.AddMonths(1).AddTicks(-1);
             var revenue = await _context.OutputOrders
                 .Where(o => o.CreatedAt >= start && o.CreatedAt <= end && o.StatusId == "Completed")
                 .SelectMany(o => o.OutputInfos)
