@@ -101,7 +101,11 @@ public class GetProductsHandler : IRequestHandler<GetProductsQuery, List<Product
                     Name = e.Name,
                     ImageUrl = coverUrl,
                     ReferencePrice = minPrice ?? 0,
-                    PromotionText = promotionText
+                    PromotionText = promotionText,
+                    CategoryId = e.CategoryId,
+                    Category = e.ProductCategory?.Name,
+                    BrandId = e.BrandId,
+                    Brand = e.Brand?.Name
                 };
             })
             .ToList();
