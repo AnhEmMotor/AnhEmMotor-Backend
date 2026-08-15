@@ -55,4 +55,42 @@ public class ReturnsController : ControllerBase
         }
         return NotFound(result.Error);
     }
+
+    /// <summary>
+    /// Tạo yêu cầu đổi trả hàng mới.
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> CreateReturnRequest(
+        [FromBody] Application.Features.Sales.Returns.Commands.CreateReturnRequest.CreateReturnRequestCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(command, cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Xử lý/phê duyệt yêu cầu đổi trả.
+    /// </summary>
+    [HttpPut("{id}/process")]
+    public async Task<IActionResult> ProcessReturnRequest(
+        int id,
+        [FromBody] Application.Features.Sales.Returns.Commands.ProcessReturnRequest.ProcessReturnRequestCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.ReturnRequestId)
+        {
+            return BadRequest("ID mismatch");
+        }
+
+        var result = await _mediator.Send(command, cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
+    }
 }

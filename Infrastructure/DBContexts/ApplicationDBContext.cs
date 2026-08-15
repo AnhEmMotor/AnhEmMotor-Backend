@@ -780,8 +780,17 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     break;
             }
         }
-        var result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return result;
+        try
+        {
+            var result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return result;
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException ex)
+        {
+            var entryTypes = string.Join(", ", ex.Entries.Select(e => e.Entity.GetType().Name));
+            Console.WriteLine($"[CONCURRENCY ERROR] Exception for entity types: {entryTypes}");
+            throw;
+        }
     }
 
     public IQueryable<T> All<T>() where T : class => Set<T>().IgnoreQueryFilters();
