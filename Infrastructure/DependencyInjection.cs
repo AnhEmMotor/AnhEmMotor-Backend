@@ -123,6 +123,7 @@ public static class DependencyInjection
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<Application.Interfaces.Services.Marketing.IGoogleAdsService, Infrastructure.Services.Marketing.GoogleAdsService>();
         services.AddScoped<IBrandExcelService, BrandExcelService>();
         services.AddScoped<IProductExcelService, ProductExcelService>();
         services.AddScoped<IProductCategoryExcelService, ProductCategoryExcelService>();

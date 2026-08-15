@@ -26,7 +26,7 @@ public class OrphanedRunCleaner(IServiceProvider serviceProvider, ILogger<Orphan
             {
                 await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken);
                 await ProcessTimeoutOrphansAsync(stoppingToken);
-                await ProcessExpiredPlansAsync(stoppingToken);
+                
             } catch (OperationCanceledException)
             {
                 break;
@@ -106,31 +106,4 @@ public class OrphanedRunCleaner(IServiceProvider serviceProvider, ILogger<Orphan
         }
     }
 
-    private async Task ProcessExpiredPlansAsync(CancellationToken stoppingToken)
-    {
-        using var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var writer = scope.ServiceProvider.GetRequiredService<IChatRunWriter>();
-        var threshold = DateTime.UtcNow.AddHours(-24);
-        var expired = await context.ChatRuns
-            .Include(r => r.Plan)
-            .Where(r => r.Status == ChatRunStatus.AwaitingApproval && r.HeartbeatAt < threshold)
-            .ToListAsync(stoppingToken);
-        foreach (var run in expired)
-        {
-            run.Status = ChatRunStatus.Cancelled;
-            run.CompletedAt = DateTime.UtcNow;
-            run.ErrorCode = "plan_approval_timeout";
-            if (run.Plan != null)
-            {
-                run.Plan.Status = ChatPlanStatus.Rejected;
-            }
-            await writer.AppendAsync(run.Id, ChatRunEventType.RunCancelled, "plan_approval_timeout");
-        }
-        if (expired.Count > 0)
-        {
-            await context.SaveChangesAsync(stoppingToken);
-            logger.LogInformation("Đã tự huỷ {Count} plan chờ duyệt quá 24 giờ", expired.Count);
-        }
-    }
 }

@@ -1025,6 +1025,19 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
             .ConfigureAwait(false);
         return HandleResult(result);
     }
+
+    [HttpPost("marketing/product-view-history")]
+    [HasPermission(Permissions.Marketing.CustomerCareManagement.View)]
+    public async Task<IActionResult> GetProductViewHistory(
+        [FromBody] Application.Features.Marketing.Queries.GetProductViewHistoryForChat.GetProductViewHistoryForChatRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new Application.Features.Marketing.Queries.GetProductViewHistoryForChat.GetProductViewHistoryForChatQuery(request.VisitorKey, request.CustomerId, request.Limit),
+            cancellationToken)
+            .ConfigureAwait(false);
+        return HandleResult(result);
+    }
 }
 
 public record CreatePurchaseRequestForChatRequest

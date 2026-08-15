@@ -63,7 +63,8 @@ See the [LICENSE](LICENSE) file for details.
 - [8. Online Payment Configuration (English)](#8-online-payment-configuration-english)
 - [9. GHN (Giao Hàng Nhanh) Configuration (English)](#9-GHN-giao-hàng-tiết-kiệm-configuration-english)
 - [10. AI Sidecar Configuration (AI Provider & LangSmith)](#10-ai-sidecar-configuration-ai-provider--langsmith)
-- [11. Troubleshooting](#11-troubleshooting)
+- [11. Google Ads Configuration (English)](#11-google-ads-configuration-english)
+- [12. Troubleshooting](#12-troubleshooting)
 
 # 1. System Requirements
 
@@ -581,8 +582,8 @@ The following secrets need to be set up in the GitHub repository:
 | `LANGSMITH_TRACING`                | Enable LangSmith tracing (true/false)    | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                        | `lsv2_pt_...`                                                                                            |
 | `EMBEDDING_MODEL`                  | AI Embedding Model Name                  | `text-embedding-004` / `nomic-embed-text`                                                                |
-| `QDRANT_URL`                       | Qdrant Database URL                      | `https://xyz.qdrant.tech:6333`                                                                           |
-| `QDRANT_API_KEY`                   | Qdrant API Key                           | `your-qdrant-api-key`                                                                                    |
+
+
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -708,7 +709,52 @@ The sidecar uses `ChatOllama` from `langchain-ollama` and calls Ollama's native 
 4. Click "+ API Key", give it a name, and copy the key.
 5. In your `appsettings.json`, set `AISetup -> LangSmithTracing` to `true` and paste the key into `LangSmithApiKey`.
 
-# 11. Troubleshooting
+# 11. Google Ads Configuration (English)
+
+This project integrates the Google Ads API to sync campaign data. To enable this, you need to provide the following 5 credentials.
+
+### How to get the Credentials
+
+1. **Login Customer ID**: 
+   - Log into your Google Ads account (MCC - Manager account, or direct account).
+   - In the top right corner, you will see an ID formatted as `XXX-XXX-XXXX`. Remove the hyphens (keep only the digits) to get your `LoginCustomerId`.
+
+2. **Developer Token**:
+   - Log into your MCC (Manager) account.
+   - Go to **Tools & Settings** > **API Center**.
+   - Here you will find your **Developer Token**. If you don't have one, fill out the form to apply for API access.
+
+3. **OAuth2 Client ID & Client Secret**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/).
+   - Create a new project (or select an existing one).
+   - Enable the **Google Ads API** under "APIs & Services" > "Library".
+   - Go to "APIs & Services" > "Credentials".
+   - Click **Create Credentials** > **OAuth client ID**. Choose "Desktop app" or "Web application".
+   - You will receive your **Client ID** and **Client Secret**.
+
+4. **OAuth2 Refresh Token**:
+   - To get a Refresh Token, you need to run a Google OAuth2 script or use the [OAuth2 Playground](https://developers.google.com/oauthplayground/).
+   - Grant access for the Google Ads API with the scope: `https://www.googleapis.com/auth/adwords`.
+   - Exchange the Authorization Code for a **Refresh Token**.
+
+### Local Configuration
+Put the credentials in your `appsettings.json` or `appsettings.Development.json`:
+
+```json
+"GoogleAds": {
+    "DeveloperToken": "YOUR_DEVELOPER_TOKEN",
+    "OAuth2Mode": "APPLICATION",
+    "OAuth2ClientId": "YOUR_CLIENT_ID",
+    "OAuth2ClientSecret": "YOUR_CLIENT_SECRET",
+    "OAuth2RefreshToken": "YOUR_REFRESH_TOKEN",
+    "LoginCustomerId": "YOUR_LOGIN_CUSTOMER_ID"
+}
+```
+
+### CI/CD Configuration (GitHub Actions)
+Add these 5 variables to your GitHub Secrets (refer to the table in Section 7). The CI/CD pipeline (`.github/workflows/deploy.yml`) is already configured to map these to .NET Core environment variables like `GoogleAds__DeveloperToken`.
+
+# 12. Troubleshooting
 
 ## Error: "Docker is not running"
 
@@ -826,7 +872,8 @@ Xem tệp [LICENSE](LICENSE) để biết chi tiết.
 - [8. Hướng dẫn Cấu hình Thanh toán Online](#8-hướng-dẫn-cấu-hình-thanh-toán-online)
 - [9. Hướng dẫn Cấu hình Giao Hàng Nhanh (GHN)](#9-hướng-dẫn-cấu-hình-giao-hàng-tiết-kiệm-GHN)
 - [10. Hướng dẫn Cấu hình AI Sidecar (AI Provider & LangSmith)](#10-hướng-dẫn-cấu-hình-ai-sidecar-ai-provider--langsmith)
-- [11. Troubleshooting](#11-troubleshooting-1)
+- [11. Hướng dẫn Cấu hình Google Ads API](#11-huong-dan-cau-hinh-google-ads-api)
+- [12. Troubleshooting](#12-troubleshooting-1)
 
 # 1. Yêu cầu hệ thống
 
@@ -1350,8 +1397,8 @@ Cần setup các secrets sau trong GitHub repository:
 | `LANGSMITH_TRACING`                | Bật LangSmith tracing (true/false)        | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                         | `lsv2_pt_...`                                                                                            |
 | `EMBEDDING_MODEL`                  | Tên mô hình AI Embedding                  | `text-embedding-004` / `nomic-embed-text`                                                                |
-| `QDRANT_URL`                       | Qdrant Database URL                       | `https://xyz.qdrant.tech:6333`                                                                           |
-| `QDRANT_API_KEY`                   | Qdrant API Key                            | `your-qdrant-api-key`                                                                                    |
+
+
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -1476,7 +1523,52 @@ Sidecar dùng `ChatOllama` từ `langchain-ollama`, gọi API native của Ollam
 4. Nhấn "+ API Key", đặt tên và copy key.
 5. Vào file `appsettings.json`, đặt `AISetup -> LangSmithTracing` thành `true` và dán key vào `LangSmithApiKey`.
 
-# 11. Troubleshooting
+# 11. Hướng dẫn Cấu hình Google Ads API
+
+Dự án này tích hợp Google Ads API để đồng bộ dữ liệu chiến dịch. Để kích hoạt, bạn cần cung cấp 5 thông tin xác thực sau.
+
+### Cách lấy thông tin xác thực (Credentials)
+
+1. **Login Customer ID (Mã khách hàng đăng nhập)**: 
+   - Đăng nhập vào tài khoản Google Ads của bạn (tài khoản MCC - Người quản lý, hoặc tài khoản trực tiếp).
+   - Nhìn lên góc trên cùng bên phải, bạn sẽ thấy mã số định dạng `XXX-XXX-XXXX`. Hãy bỏ các dấu gạch ngang (chỉ giữ lại số) để có `LoginCustomerId`.
+
+2. **Developer Token (Mã thông báo nhà phát triển)**:
+   - Đăng nhập vào tài khoản MCC (Tài khoản người quản lý).
+   - Đi tới **Công cụ và cài đặt** > **Trung tâm API** (API Center).
+   - Tại đây bạn sẽ tìm thấy **Developer Token**. Nếu chưa có, bạn cần điền form đăng ký cấp quyền truy cập API.
+
+3. **OAuth2 Client ID & Client Secret**:
+   - Truy cập [Google Cloud Console](https://console.cloud.google.com/).
+   - Tạo một dự án mới (hoặc chọn dự án hiện có).
+   - Bật **Google Ads API** trong phần "APIs & Services" > "Library".
+   - Đi tới "APIs & Services" > "Credentials".
+   - Nhấn **Create Credentials** > **OAuth client ID**. Chọn Application type là "Desktop app" hoặc "Web application".
+   - Sau khi tạo, bạn sẽ nhận được **Client ID** và **Client Secret**.
+
+4. **OAuth2 Refresh Token**:
+   - Để lấy Refresh Token, bạn cần chạy script xác thực OAuth2 của Google hoặc sử dụng [OAuth2 Playground](https://developers.google.com/oauthplayground/).
+   - Cấp quyền truy cập cho Google Ads API với scope: `https://www.googleapis.com/auth/adwords`.
+   - Trao đổi Authorization Code để lấy **Refresh Token**.
+
+### Cấu hình môi trường Local
+Điền các thông tin đã lấy được vào `appsettings.json` hoặc `appsettings.Development.json`:
+
+```json
+"GoogleAds": {
+    "DeveloperToken": "YOUR_DEVELOPER_TOKEN",
+    "OAuth2Mode": "APPLICATION",
+    "OAuth2ClientId": "YOUR_CLIENT_ID",
+    "OAuth2ClientSecret": "YOUR_CLIENT_SECRET",
+    "OAuth2RefreshToken": "YOUR_REFRESH_TOKEN",
+    "LoginCustomerId": "YOUR_LOGIN_CUSTOMER_ID"
+}
+```
+
+### Cấu hình trên CI/CD (GitHub Actions)
+Bạn cần thêm 5 biến này vào GitHub Secrets (tham khảo bảng ở mục 7). File CI/CD `.github/workflows/deploy.yml` đã tự động ánh xạ các Secret này thành biến môi trường `GoogleAds__...` tương thích với .NET Core.
+
+# 12. Troubleshooting
 
 ## Lỗi: "Docker is not running"
 
@@ -1533,3 +1625,14 @@ Nếu không được, thay đổi port trong file `WebAPI/Properties/launchSett
 ```json
 "applicationUrl": "https://localhost:7002;http://localhost:5001"
 ```
+
+
+## Google Ads Integration
+Dự án này đã được tích hợp với Google Ads API. Để kích hoạt và sử dụng dữ liệu thực tế, bạn cần cấu hình các biến môi trường sau trong Github Actions Secrets hoặc file .env:
+- GOOGLE_ADS_DEVELOPER_TOKEN
+- GOOGLE_ADS_CLIENT_ID
+- GOOGLE_ADS_CLIENT_SECRET
+- GOOGLE_ADS_REFRESH_TOKEN
+- GOOGLE_ADS_LOGIN_CUSTOMER_ID
+
+Xem file .github/workflows/deploy.yml để biết chi tiết.
