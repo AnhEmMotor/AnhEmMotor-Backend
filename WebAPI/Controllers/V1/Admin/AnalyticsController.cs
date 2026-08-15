@@ -28,14 +28,17 @@ public class AnalyticsController(IMediator mediator, ApplicationDBContext db) : 
     /// <summary>
     /// Lấy các chỉ số KPI tổng quan cho bảng điều khiển (Dashboard) của Quản trị viên.
     /// </summary>
+    /// <param name="period">Khoảng thời gian (ví dụ: month, week, year).</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách các chỉ số KPI (số đơn hàng, doanh thu, v.v.).</returns>
     /// <response code="200">Trả về danh sách KPI thành công.</response>
     [HttpGet("dashboard-kpis")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetKpis(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetKpis(
+        [FromQuery] string period = "month",
+        CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(new GetDashboardKpisQuery(), cancellationToken);
+        var result = await mediator.Send(new GetDashboardKpisQuery(period), cancellationToken);
         return Ok(result);
     }
 
@@ -88,10 +91,10 @@ public class AnalyticsController(IMediator mediator, ApplicationDBContext db) : 
                     {
                         timestamp = h.ChangedAt,
                         category = "order",
-                        action = "updated",
+                        action = "cập nhật",
                         actorId = h.ChangedBy,
-                        actorName = h.ChangedByUser != null ? h.ChangedByUser.FullName : "System",
-                        targetType = "Order",
+                        actorName = h.ChangedByUser != null ? h.ChangedByUser.FullName : "Hệ thống",
+                        targetType = "đơn hàng",
                         targetId = (int?)h.OutputId,
                         targetName = string.Empty,
                         details = h.Note ?? string.Empty
@@ -111,13 +114,13 @@ public class AnalyticsController(IMediator mediator, ApplicationDBContext db) : 
                     {
                         timestamp = o.CreatedAt,
                         category = "order",
-                        action = "created",
+                        action = "tạo",
                         actorId = o.CreatedBy,
-                        actorName = o.CreatedByUser != null ? o.CreatedByUser.FullName : "System",
-                        targetType = "Order",
+                        actorName = o.CreatedByUser != null ? o.CreatedByUser.FullName : "Hệ thống",
+                        targetType = "đơn hàng",
                         targetId = (int?)o.Id,
                         targetName = o.CustomerName ?? string.Empty,
-                        details = $"Don hang moi - {o.CustomerName ?? "N/A"}"
+                        details = $"Đơn hàng mới - {o.CustomerName ?? "N/A"}"
                     })
                 .ToListAsync(ct);
             logs.AddRange(newOrders);
@@ -132,13 +135,13 @@ public class AnalyticsController(IMediator mediator, ApplicationDBContext db) : 
                     {
                         timestamp = (DateTimeOffset?)e.ExpenseDate,
                         category = "finance",
-                        action = "expense",
+                        action = "phát sinh",
                         actorId = (Guid?)null,
-                        actorName = "System",
-                        targetType = "Expense",
+                        actorName = "Hệ thống",
+                        targetType = "chi phí",
                         targetId = (int?)e.Id,
                         targetName = e.Name ?? string.Empty,
-                        details = $"Chi phi: {e.Name} - {e.Amount:N0} VND"
+                        details = $"Chi phí: {e.Name} - {e.Amount:N0} VNĐ"
                     })
                 .ToListAsync(ct)
                 .ConfigureAwait(false);
