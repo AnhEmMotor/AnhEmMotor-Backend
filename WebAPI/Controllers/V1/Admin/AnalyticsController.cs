@@ -28,6 +28,7 @@ public class AnalyticsController(IMediator mediator, ApplicationDBContext db) : 
     /// <summary>
     /// Lấy các chỉ số KPI tổng quan cho bảng điều khiển (Dashboard) của Quản trị viên.
     /// </summary>
+    /// <param name="period">Khoảng thời gian (ví dụ: month, week, year).</param>
     /// <param name="cancellationToken">Token hủy bỏ.</param>
     /// <returns>Danh sách các chỉ số KPI (số đơn hàng, doanh thu, v.v.).</returns>
     /// <response code="200">Trả về danh sách KPI thành công.</response>
