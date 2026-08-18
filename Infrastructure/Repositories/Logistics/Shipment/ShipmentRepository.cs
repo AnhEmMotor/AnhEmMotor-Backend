@@ -68,14 +68,15 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
     public async Task<List<Domain.Entities.Logistics.Shipment>> GetActiveDeliveryShipmentsAsync(
         CancellationToken cancellationToken = default)
     {
-        return await _context.Shipments
+        var shipments = await _context.Shipments
             .Where(
                 s => s.Status == ParcelDeliveryStatus.Shipping &&
                     s.DeliveredAt == null &&
                     s.Type == ShipmentType.OrderDelivery &&
                     s.TrackingNumber != null &&
-                    !s.TrackingNumber.StartsWith("GHN-") &&
                     s.OutputId != null)
             .ToListAsync(cancellationToken);
+
+        return shipments.Where(s => !s.TrackingNumber!.StartsWith("GHN-")).ToList();
     }
 }
