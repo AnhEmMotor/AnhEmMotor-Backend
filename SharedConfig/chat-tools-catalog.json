@@ -533,6 +533,20 @@
     ]
   },
   {
+    "name": "get_product_view_history",
+    "path": "marketing/product-view-history",
+    "label": "Lịch sử xem sản phẩm",
+    "module": "customer",
+    "required_permissions": ["Permissions.Marketing.CustomerCareManagement.View"],
+    "is_write": false,
+    "description": "Lấy danh sách sản phẩm/biến thể mà MỘT khách hàng đã ĐĂNG NHẬP tài khoản cụ thể đã XEM gần đây trên website (khác với sản phẩm đã MUA). DÙNG KHI người dùng hỏi 'khách này đang xem/quan tâm sản phẩm nào', 'khách hay xem gì trên web'. KHÔNG DÙNG cho lịch sử đơn hàng/mua sắm — dùng get_order_status/get_customer_profile cho việc đó. LƯU Ý: customer_keyword tra trên TÀI KHOẢN ĐĂNG NHẬP của khách hàng (email/SĐT đăng ký), KHÔNG PHẢI customer_id lấy từ search_customers/get_customer_profile (đó là mã lead/CRM khác, KHÔNG dùng được ở đây) — truyền thẳng email hoặc số điện thoại người dùng cung cấp, không cần tra cứu ID trước. Cần MỘT trong hai: customer_keyword (khách đã đăng nhập) hoặc visitor_key (khách vãng lai chưa đăng nhập, thường không có sẵn trừ khi được cung cấp). Nếu thiếu cả hai hoặc không tìm thấy tài khoản khớp, tool trả về danh sách rỗng kèm cảnh báo.",
+    "args": [
+      { "name": "customer_keyword", "type": "string", "required": false, "default": "", "label": "Email/SĐT khách hàng", "description": "Email hoặc số điện thoại tài khoản đăng nhập của khách hàng. Để trống '' nếu tra theo visitor_key thay vì customer_keyword." },
+      { "name": "visitor_key", "type": "string", "required": false, "default": "", "label": "Mã khách vãng lai", "description": "Khóa định danh khách vãng lai chưa đăng nhập. Để trống '' nếu tra theo customer_keyword thay vì visitor_key." },
+      { "name": "limit", "type": "integer", "required": false, "default": 10, "label": "Số lượng tối đa", "description": "Số lượt xem sản phẩm tối đa muốn trả về, mặc định 10, tối đa 25." }
+    ]
+  },
+  {
     "name": "get_warranty_claim_detail",
     "path": "warranty/claims/detail",
     "label": "Chi tiết yêu cầu bảo hành",

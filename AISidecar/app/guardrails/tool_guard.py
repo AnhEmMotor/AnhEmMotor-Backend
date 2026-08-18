@@ -149,12 +149,6 @@ def check_output(answer: str, state: dict) -> GuardResult:
             "nói rõ bạn không truy cập được dữ liệu đó và KHÔNG nêu bất kỳ con số nào.",
             kind="no_permission")
 
-    if contains_business_metric(answer) and state.get("tool_call_count", 0) == 0:
-        return GuardResult.rewrite(
-            "Bạn nêu số liệu mà chưa tra cứu dữ liệu. Hãy gọi tool phù hợp "
-            "hoặc nói rõ là bạn không có số liệu.",
-            kind="no_permission" if no_tools_bound else "unverified_metric")
-
     lowered = answer.lower()
     if state.get("tool_call_count", 0) == 0 and any(marker in lowered for marker in STALL_MARKERS):
         return GuardResult.rewrite(

@@ -1033,7 +1033,7 @@ public class InternalChatToolsController(ISender sender, IChatToolCatalogProvide
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new Application.Features.Marketing.Queries.GetProductViewHistoryForChat.GetProductViewHistoryForChatQuery(request.VisitorKey, request.CustomerId, request.Limit),
+            new Application.Features.Marketing.Queries.GetProductViewHistoryForChat.GetProductViewHistoryForChatQuery(request.VisitorKey, request.CustomerKeyword, request.Limit),
             cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);

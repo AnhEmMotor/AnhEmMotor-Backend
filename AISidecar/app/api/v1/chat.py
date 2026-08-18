@@ -28,6 +28,10 @@ router = APIRouter()
 _cancel_events: dict[str, asyncio.Event] = {}
 
 
+def _event(type_: str, payload: str = "") -> str:
+    return json.dumps({"type": type_, "payload": payload}) + "\n"
+
+
 @router.post("/manager-chat/generate-title")
 async def generate_title(req: GenerateTitleRequest, _: str = Depends(verify_internal_secret)):
     title = req.message[:30].strip() + ("..." if len(req.message) > 30 else "")

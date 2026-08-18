@@ -28,11 +28,11 @@ public class ProductViewHistoryResponse
             VisitorKey = entity.VisitorKey,
             ProductId = entity.ProductId,
             ProductName = entity.Product?.Name ?? string.Empty,
-            ProductImageUrl = entity.VariantColor?.CoverImageUrl ?? entity.Variant?.CoverImageUrl,
+            ProductImageUrl = entity.VariantColor?.CoverImageUrl ?? entity.Variant?.CoverImageUrl ?? entity.Product?.ProductVariants?.FirstOrDefault(v => !string.IsNullOrEmpty(v.CoverImageUrl))?.CoverImageUrl,
             VariantId = entity.VariantId,
-            VariantName = entity.Variant?.VariantName,
+            VariantName = entity.Variant?.VariantName ?? entity.Product?.ProductVariants?.FirstOrDefault()?.VariantName,
             VariantColorId = entity.VariantColorId,
-            VariantColorName = entity.VariantColor?.ColorName,
+            VariantColorName = entity.VariantColor?.ColorName ?? entity.Product?.ProductVariants?.FirstOrDefault()?.ProductVariantColors?.FirstOrDefault()?.ColorName,
             DwellTimeMs = entity.DwellTimeMs,
             ViewedAt = entity.ViewedAt
         };
