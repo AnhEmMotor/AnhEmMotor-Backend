@@ -75,6 +75,7 @@ public class ShipmentRepository : IShipmentInsertRepository, IShipmentUpdateRepo
                     s.Type == ShipmentType.OrderDelivery &&
                     s.TrackingNumber != null &&
                     s.OutputId != null)
+            .Take(50)
             .ToListAsync(cancellationToken);
 
         return shipments.Where(s => !s.TrackingNumber!.StartsWith("GHN-")).ToList();
