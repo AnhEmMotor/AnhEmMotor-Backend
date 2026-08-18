@@ -49,4 +49,18 @@ public class RepairOrderResponse
     public decimal? VoucherDiscount { get; set; }
 
     public decimal? VoucherFinalTotal { get; set; }
+
+    public string? ProductImage { get; set; }
+
+    public string? VehicleName { get; set; }
+    
+    public string? CategoryName { get; set; }
+    
+    public string? VariantName { get; set; }
+    
+    public string? ColorName { get; set; }
+    
+    public string? VinNumber { get; set; }
+
+    public DateTimeOffset? ExpectedCompletionDate { get; set; }
 }

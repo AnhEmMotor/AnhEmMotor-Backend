@@ -40,7 +40,11 @@ public class OutputMappingConfig : IRegister
                 src => src.StatusId != null &&
                     src.StatusId != "pending" &&
                     src.StatusId != "waiting_deposit" &&
-                    src.StatusId != "waiting_installment");
+                    src.StatusId != "waiting_installment")
+            .Map(dest => dest.ExpectedDeliveryDate, src => src.CreatedAt.HasValue ? src.CreatedAt.Value.AddDays(3) : (DateTimeOffset?)null)
+            .Map(dest => dest.Quantity, src => src.OutputInfos != null ? src.OutputInfos.Sum(oi => oi.Count ?? 0) : 0)
+            .Map(dest => dest.ProductName, src => src.OutputInfos != null ? MapProductName(src.OutputInfos.FirstOrDefault()) : null)
+            .Map(dest => dest.ProductImage, src => src.OutputInfos != null ? MapCoverImageUrl(src.OutputInfos.FirstOrDefault()) : null);
         config.NewConfig<Output, MyOrderResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(dest => dest.OutputInfos, src => src.OutputInfos)
@@ -126,13 +130,15 @@ public class OutputMappingConfig : IRegister
         return total - deposit;
     }
 
-    private static string? MapProductName(OutputInfo src)
+    private static string? MapProductName(OutputInfo? src)
     {
+        if (src == null) return null;
         return src.ProductVariant?.Product?.Name;
     }
 
-    private static string? MapCoverImageUrl(OutputInfo src)
+    private static string? MapCoverImageUrl(OutputInfo? src)
     {
+        if (src == null) return null;
         if (src.ProductVariantColor != null && !string.IsNullOrWhiteSpace(src.ProductVariantColor.CoverImageUrl))
         {
             return src.ProductVariantColor.CoverImageUrl;

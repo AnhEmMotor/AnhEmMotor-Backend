@@ -1,8 +1,10 @@
 using Application.ApiContracts.Client.Support;
 using Application.Features.Client.Support;
+using Application.Features.Contacts.Queries.GetMyFeedbacks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers.V1.Client;
 
@@ -49,5 +51,20 @@ public class SupportController : ControllerBase
     {
         var result = await _mediator.Send(new SubmitFeedbackCommand(request));
         return result ? Ok() : BadRequest();
+    }
+
+    /// <summary>
+    /// Lấy danh sách ý kiến đóng góp của khách hàng. Nếu chưa có sẽ tự tạo data mẫu để test.
+    /// </summary>
+    [HttpGet("my-feedbacks")]
+    [Authorize]
+    public async Task<IActionResult> GetMyFeedbacks()
+    {
+        var phone = User.FindFirst(ClaimTypes.MobilePhone)?.Value ?? User.FindFirst("phone_number")?.Value ?? string.Empty;
+        var name = User.Identity?.Name ?? "Khách hàng";
+        var email = User.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
+
+        var result = await _mediator.Send(new GetMyFeedbacksQuery(phone, name, email));
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 }

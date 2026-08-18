@@ -31,7 +31,13 @@ public class ClientVoucherController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetPersonalVouchers(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetPersonalVouchersQuery(), cancellationToken);
+        var result = await _mediator.Send(new GetPersonalVouchersQuery(GetCurrentUserId()), cancellationToken);
         return Ok(new { value = result });
+    }
+
+    private System.Guid GetCurrentUserId()
+    {
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return string.IsNullOrEmpty(userIdStr) ? System.Guid.Empty : System.Guid.Parse(userIdStr);
     }
 }

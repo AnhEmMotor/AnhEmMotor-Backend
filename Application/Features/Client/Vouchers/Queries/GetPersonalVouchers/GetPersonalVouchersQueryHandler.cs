@@ -1,8 +1,13 @@
 using Application.ApiContracts.Voucher.Responses;
+using Application.Interfaces.Repositories.Lead.Lead;
+using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Repositories.Voucher;
 using Domain.Enums;
 using MediatR;
+using Sieve.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,65 +15,42 @@ namespace Application.Features.Client.Vouchers.Queries.GetPersonalVouchers;
 
 public class GetPersonalVouchersQueryHandler : IRequestHandler<GetPersonalVouchersQuery, List<VoucherResponse>>
 {
-    public Task<List<VoucherResponse>> Handle(GetPersonalVouchersQuery request, CancellationToken cancellationToken)
-    {
-        // Trả về mock data cho các voucher định danh cá nhân để app mobile có thể bind dữ liệu ở trang chủ
-        var mockPersonalVouchers = new List<VoucherResponse>
-        {
-            new VoucherResponse
-            {
-                Id = 1,
-                Code = "PRIVATE_OIL_20",
-                Name = "Giảm 20% Dầu Nhớt",
-                Type = VoucherType.Private,
-                DiscountType = DiscountType.Percent,
-                DiscountValue = 20,
-                MaxDiscountAmount = 100000,
-                MinOrderValue = 0,
-                ValidFrom = DateTime.Now.AddDays(-1),
-                ValidTo = DateTime.Now.AddDays(30),
-            },
-            new VoucherResponse
-            {
-                Id = 2,
-                Code = "PRIVATE_HELMET",
-                Name = "Tặng Nón Bảo Hiểm",
-                Type = VoucherType.Private,
-                DiscountType = DiscountType.Amount,
-                DiscountValue = 500000,
-                MaxDiscountAmount = 500000,
-                MinOrderValue = 1000000,
-                ValidFrom = DateTime.Now.AddDays(-1),
-                ValidTo = DateTime.Now.AddDays(15),
-            },
-            new VoucherResponse
-            {
-                Id = 3,
-                Code = "PRIVATE_WASH_50",
-                Name = "Giảm 50% Rửa Xe",
-                Type = VoucherType.Private,
-                DiscountType = DiscountType.Percent,
-                DiscountValue = 50,
-                MaxDiscountAmount = 50000,
-                MinOrderValue = 0,
-                ValidFrom = DateTime.Now.AddDays(-5),
-                ValidTo = DateTime.Now.AddDays(10),
-            },
-            new VoucherResponse
-            {
-                Id = 4,
-                Code = "PRIVATE_ACCESSORY_200",
-                Name = "Voucher Phụ Kiện 200K",
-                Type = VoucherType.Private,
-                DiscountType = DiscountType.Amount,
-                DiscountValue = 200000,
-                MaxDiscountAmount = 200000,
-                MinOrderValue = 1500000,
-                ValidFrom = DateTime.Now.AddDays(-1),
-                ValidTo = DateTime.Now.AddDays(7),
-            }
-        };
+    private readonly IUserReadRepository _userReadRepository;
+    private readonly ILeadReadRepository _leadReadRepository;
+    private readonly IVoucherReadRepository _voucherReadRepository;
 
-        return Task.FromResult(mockPersonalVouchers);
+    public GetPersonalVouchersQueryHandler(
+        IUserReadRepository userReadRepository,
+        ILeadReadRepository leadReadRepository,
+        IVoucherReadRepository voucherReadRepository)
+    {
+        _userReadRepository = userReadRepository;
+        _leadReadRepository = leadReadRepository;
+        _voucherReadRepository = voucherReadRepository;
+    }
+
+    public async Task<List<VoucherResponse>> Handle(GetPersonalVouchersQuery request, CancellationToken cancellationToken)
+    {
+        var user = await _userReadRepository.FindUserByIdAsync(request.CurrentUserId, cancellationToken);
+        if (user == null || string.IsNullOrEmpty(user.Email))
+            return new List<VoucherResponse>();
+
+        var leads = await _leadReadRepository.GetPagedAsync<Domain.Entities.Lead>(
+            new SieveModel { PageSize = 1, Page = 1 },
+            Domain.Constants.DataFetchMode.ActiveOnly,
+            l => l.Email == user.Email,
+            cancellationToken);
+
+        var lead = leads.Items.FirstOrDefault();
+        if (lead == null)
+            return new List<VoucherResponse>();
+
+        var vouchersPage = await _voucherReadRepository.GetPagedAsync<VoucherResponse>(
+            new SieveModel { PageSize = 100, Page = 1, Sorts = "ValidTo" },
+            Domain.Constants.DataFetchMode.ActiveOnly,
+            v => v.VoucherLeads.Any(vl => vl.LeadId == lead.Id) && v.ValidTo >= DateTime.UtcNow.Date,
+            cancellationToken);
+
+        return vouchersPage.Items.ToList();
     }
 }

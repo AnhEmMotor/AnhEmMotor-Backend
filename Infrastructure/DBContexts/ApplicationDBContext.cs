@@ -282,6 +282,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<CarrierPartner>().Property(e => e.MaxParcelWeightKg).HasPrecision(18, 2);
         modelBuilder.Entity<Shipment>().Property(e => e.CodAmount).HasPrecision(18, 2);
         modelBuilder.Entity<Shipment>().Property(e => e.ShippingCost).HasPrecision(18, 2);
+        modelBuilder.Entity<Shipment>().HasIndex(e => new { e.DeletedAt, e.Status, e.DeliveredAt, e.Type, e.OutputId });
         modelBuilder.Entity<SupplierDebtLog>().Property(l => l.AmountPaid).HasPrecision(18, 2);
         modelBuilder.Entity<SupplierDebtLog>().Property(l => l.RemainingDebt).HasPrecision(18, 2);
         modelBuilder.Entity<Voucher>().Property(v => v.DiscountValue).HasPrecision(18, 2);

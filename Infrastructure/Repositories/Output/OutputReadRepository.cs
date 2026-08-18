@@ -162,6 +162,7 @@ public class OutputReadRepository(ApplicationDBContext context, ISievePaginator 
                     (o.PaymentExpiredAt.HasValue
                         ? o.PaymentExpiredAt.Value < DateTimeOffset.UtcNow
                         : o.CreatedAt < expirationThreshold))
+            .OrderBy(o => o.Id)
             .ToListAsync(cancellationToken);
     }
 
