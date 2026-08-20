@@ -102,15 +102,11 @@ public class ChatRunExecutor(
             var stream = streamClient.StreamAsync(runId, run.SessionId, run.UserMessage, token, runCts.Token);
             var lastHeartbeat = DateTime.UtcNow;
             segmentStartedAt = DateTime.UtcNow;
-            var isAwaitingApproval = false;
             await foreach (var evt in stream.WithCancellation(runCts.Token))
             {
                 if (runCts.Token.IsCancellationRequested)
                     break;
-                if (evt.Type == ChatRunEventType.PlanReady)
-                {
-                    isAwaitingApproval = true;
-                }
+                
                 if (evt.Type == ChatRunEventType.TextDelta)
                 {
                     fullOutput.Append(evt.Payload);
@@ -159,10 +155,7 @@ public class ChatRunExecutor(
             if (runCts.Token.IsCancellationRequested)
             {
                 await writer.CancelAsync(runId, fullOutput.ToString(), segmentStartedAt);
-            } else if (isAwaitingApproval)
-            {
-                await writer.AwaitingApprovalAsync(runId, fullOutput.ToString(), segmentStartedAt);
-            } else
+            }  else
             {
                 await writer.CompleteAsync(runId, fullOutput.ToString(), segmentStartedAt);
             }
@@ -179,3 +172,4 @@ public class ChatRunExecutor(
         }
     }
 }
+

@@ -24,7 +24,10 @@ public class TrackProductViewCommandHandler(
                 ProductId = request.ProductId,
                 CustomerUserId = currentUserContext.GetUserIdOrNull(),
                 VisitorKey = string.IsNullOrWhiteSpace(request.VisitorKey) ? null : request.VisitorKey,
-                DwellTimeMs = Math.Max(0, request.DwellTimeMs)
+                DwellTimeMs = Math.Max(0, request.DwellTimeMs),
+                VariantId = request.VariantId,
+                VariantColorId = request.VariantColorId,
+                ViewedAt = DateTime.UtcNow
             });
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();

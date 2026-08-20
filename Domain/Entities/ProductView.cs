@@ -15,6 +15,18 @@ public class ProductView : BaseEntity
 
     public Product? Product { get; set; }
 
+    [Column("VariantId")]
+    [ForeignKey("Variant")]
+    public int? VariantId { get; set; }
+
+    public ProductVariant? Variant { get; set; }
+
+    [Column("VariantColorId")]
+    [ForeignKey("VariantColor")]
+    public int? VariantColorId { get; set; }
+
+    public ProductVariantColor? VariantColor { get; set; }
+
     [Column("CustomerUserId")]
     [ForeignKey("CustomerUser")]
     public Guid? CustomerUserId { get; set; }
@@ -26,4 +38,7 @@ public class ProductView : BaseEntity
 
     [Required]
     public int DwellTimeMs { get; set; }
+
+    [Required]
+    public DateTime ViewedAt { get; set; } = DateTime.UtcNow;
 }

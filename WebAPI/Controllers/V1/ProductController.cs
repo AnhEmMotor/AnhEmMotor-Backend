@@ -113,7 +113,7 @@ public class ProductController(ISender sender) : ApiController
         [FromBody] TrackProductViewRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new TrackProductViewCommand(id, request.DwellTimeMs, request.VisitorKey);
+        var command = new TrackProductViewCommand(id, request.DwellTimeMs, request.VisitorKey, request.VariantId, request.VariantColorId);
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }

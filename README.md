@@ -63,7 +63,8 @@ See the [LICENSE](LICENSE) file for details.
 - [8. Online Payment Configuration (English)](#8-online-payment-configuration-english)
 - [9. GHN (Giao Hàng Nhanh) Configuration (English)](#9-GHN-giao-hàng-tiết-kiệm-configuration-english)
 - [10. AI Sidecar Configuration (AI Provider & LangSmith)](#10-ai-sidecar-configuration-ai-provider--langsmith)
-- [11. Troubleshooting](#11-troubleshooting)
+- [11. Google Ads Configuration (English)](#11-google-ads-configuration-english)
+- [12. Troubleshooting](#12-troubleshooting)
 
 # 1. System Requirements
 
@@ -575,14 +576,12 @@ The following secrets need to be set up in the GitHub repository:
 | `GHN_SHOP_ID`                      | GHN Shop ID                              | `012345`                                                                                                 |
 | `GHN_BASE_URL`                     | GHN API Base URL                         | `https://dev-online-gateway.ghn.vn`                                                                      |
 | `AI_PROVIDER`                      | AI Provider (`Gemini` or `ApiEndpoint`)  | `Gemini`                                                                                                 |
-| `AI_API_KEY`                   | AI Provider API Key (Gemini only)        | `AIzaSyB...`                                                                                             |
-| `AI_MODEL`                     | AI Model Name                            | `gemini-3.5-flash` / `qwen2.5:7b`                                                                        |
+| `AI_API_KEY`                       | AI Provider API Key (Gemini only)        | `AIzaSyB...`                                                                                             |
+| `AI_MODEL`                         | AI Model Name                            | `gemini-3.5-flash` / `qwen2.5:7b`                                                                        |
 | `AI_API_ENDPOINT`                  | Ollama base URL (no `/v1`)               | `http://127.0.0.1:11434`                                                                                 |
 | `LANGSMITH_TRACING`                | Enable LangSmith tracing (true/false)    | `true`                                                                                                   |
 | `LANGSMITH_API_KEY`                | LangSmith API Key                        | `lsv2_pt_...`                                                                                            |
 | `EMBEDDING_MODEL`                  | AI Embedding Model Name                  | `text-embedding-004` / `nomic-embed-text`                                                                |
-| `QDRANT_URL`                       | Qdrant Database URL                      | `https://xyz.qdrant.tech:6333`                                                                           |
-| `QDRANT_API_KEY`                   | Qdrant API Key                           | `your-qdrant-api-key`                                                                                    |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -708,7 +707,54 @@ The sidecar uses `ChatOllama` from `langchain-ollama` and calls Ollama's native 
 4. Click "+ API Key", give it a name, and copy the key.
 5. In your `appsettings.json`, set `AISetup -> LangSmithTracing` to `true` and paste the key into `LangSmithApiKey`.
 
-# 11. Troubleshooting
+# 11. Google Ads Configuration (English)
+
+This project integrates the Google Ads API to sync campaign data. To enable this, you need to provide the following 5 credentials.
+
+### How to get the Credentials
+
+1. **Login Customer ID**:
+   - Log into your Google Ads account (MCC - Manager account, or direct account).
+   - In the top right corner, you will see an ID formatted as `XXX-XXX-XXXX`. Remove the hyphens (keep only the digits) to get your `LoginCustomerId`.
+
+2. **Developer Token**:
+   - Log into your MCC (Manager) account.
+   - Go to **Tools & Settings** > **API Center**.
+   - Here you will find your **Developer Token**. If you don't have one, fill out the form to apply for API access.
+
+3. **OAuth2 Client ID & Client Secret**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/).
+   - Create a new project (or select an existing one).
+   - Enable the **Google Ads API** under "APIs & Services" > "Library".
+   - Go to "APIs & Services" > "Credentials".
+   - Click **Create Credentials** > **OAuth client ID**. Choose "Desktop app" or "Web application".
+   - You will receive your **Client ID** and **Client Secret**.
+
+4. **OAuth2 Refresh Token**:
+   - To get a Refresh Token, you need to run a Google OAuth2 script or use the [OAuth2 Playground](https://developers.google.com/oauthplayground/).
+   - Grant access for the Google Ads API with the scope: `https://www.googleapis.com/auth/adwords`.
+   - Exchange the Authorization Code for a **Refresh Token**.
+
+### Local Configuration
+
+Put the credentials in your `appsettings.json` or `appsettings.Development.json`:
+
+```json
+"GoogleAds": {
+    "DeveloperToken": "YOUR_DEVELOPER_TOKEN",
+    "OAuth2Mode": "APPLICATION",
+    "OAuth2ClientId": "YOUR_CLIENT_ID",
+    "OAuth2ClientSecret": "YOUR_CLIENT_SECRET",
+    "OAuth2RefreshToken": "YOUR_REFRESH_TOKEN",
+    "LoginCustomerId": "YOUR_LOGIN_CUSTOMER_ID"
+}
+```
+
+### CI/CD Configuration (GitHub Actions)
+
+Add these 5 variables to your GitHub Secrets (refer to the table in Section 7). The CI/CD pipeline (`.github/workflows/deploy.yml`) is already configured to map these to .NET Core environment variables like `GoogleAds__DeveloperToken`.
+
+# 12. Troubleshooting
 
 ## Error: "Docker is not running"
 
@@ -826,7 +872,8 @@ Xem tệp [LICENSE](LICENSE) để biết chi tiết.
 - [8. Hướng dẫn Cấu hình Thanh toán Online](#8-hướng-dẫn-cấu-hình-thanh-toán-online)
 - [9. Hướng dẫn Cấu hình Giao Hàng Nhanh (GHN)](#9-hướng-dẫn-cấu-hình-giao-hàng-tiết-kiệm-GHN)
 - [10. Hướng dẫn Cấu hình AI Sidecar (AI Provider & LangSmith)](#10-hướng-dẫn-cấu-hình-ai-sidecar-ai-provider--langsmith)
-- [11. Troubleshooting](#11-troubleshooting-1)
+- [11. Hướng dẫn Cấu hình Google Ads API](#11-huong-dan-cau-hinh-google-ads-api)
+- [12. Troubleshooting](#12-troubleshooting-1)
 
 # 1. Yêu cầu hệ thống
 
@@ -1308,50 +1355,48 @@ Cần setup các secrets sau trong GitHub repository:
 
 ### Required Secrets
 
-| Secret Name                        | Mô Tả                                     | Ví Dụ                                                                                                    |
-| ---------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ALLOWED_HOSTS`                    | Domains được phép                         | `api.yourdomain.com;yourdomain.com` hoặc `*`                                                             |
-| `CORS_ALLOWED_ORIGINS`             | CORS Allowed Origins                      | `https://anhemmotor.online;https://admin.anhemmotor.online;http://localhost:5002`                        |
-| `DB_CONNECTION_STRING`             | PostgreSQL connection string              | `Host=XXXXX;Port=5432;Database=AnhEmMotorDB;Username=postgres;Password=XXXXX;Include Error Detail=true;` |
-| `JWT_SECRET_KEY`                   | JWT secret key (>= 32 chars)              | `Your-Super-Secret-JWT-Key-32-Chars`                                                                     |
-| `JWT_ISSUER`                       | API URL                                   | `https://api.yourdomain.com`                                                                             |
-| `JWT_AUDIENCE`                     | Client URL                                | `https://yourdomain.com`                                                                                 |
-| `PRODUCTION_SERVER_IP`             | VPS IP hoặc domain                        | `*`                                                                                                      |
-| `PRODUCTION_SERVER_USERNAME`       | SSH username                              | `root` hoặc `youruser`                                                                                   |
-| `SERVER_REMOTE_ACCESS_PRIVATE_KEY` | Private SSH key                           | Nội dung file `~/.ssh/id_rsa`                                                                            |
-| `ENABLE_DATABASE_SEEDING`          | Chạy data seeding khi deploy (true/false) | `false` (production) hoặc `true` (lần đầu setup)                                                         |
-| `COOKIE_DOMAIN`                    | Cookie Domain (for refresh tokens)        | `.yourdomain.com` hoặc để trống nếu đang chạy trên Localhost (Your IP)                                   |
-| `SUPER_ROLES_LIST`                 | Danh sách Roles Admin (JSON Array)        | `["Admin", "SuperAdmin"]`                                                                                |
-| `PROTECTED_USERS_LIST`             | Người dùng không thể xóa (JSON Array)     | `["admin@anhem.com:Admin@123456"]`                                                                       |
-| `DEFAULT_ROLES_FOR_NEW_USER_LIST`  | Roles mặc định cho user mới (JSON Array)  | `["User"]`                                                                                               |
-| `OTLP_ENDPOINT`                    | Địa chỉ OpenTelemetry OTLP                | `http://your-otel-collector:4317`                                                                        |
-| `GOOGLE_CLIENT_ID`                 | Google OAuth Client ID                    | `your-google-client-id.apps.googleusercontent.com`                                                       |
-| `GOOGLE_CLIENT_SECRET`             | Google OAuth Client Secret                | `GOCSPX-your-google-secret`                                                                              |
-| `FACEBOOK_APP_ID`                  | Facebook App ID                           | `your-facebook-app-id`                                                                                   |
-| `FACEBOOK_APP_SECRET`              | Facebook App Secret                       | `your-facebook-app-secret`                                                                               |
-| `VNPAY__TMN_CODE`                  | VNPay Terminal Code (TmnCode)             | `XXT7WT32`                                                                                               |
-| `VNPAY__HASH_SECRET`               | VNPay Hash Secret                         | `1ff1b8243e86dd74cd6f4c284b06bb2ad5...`                                                                  |
-| `VNPAY__BASE_URL`                  | VNPay Base URL (Sandbox/Production)       | `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html`                                                     |
-| `VNPAY__CALLBACK_URL`              | VNPay Return/Callback URL                 | `https://api.yourdomain.com/api/payment/vnpay-callback`                                                  |
-| `PAYOS__CLIENT_ID`                 | PayOS Client ID                           | `your-payos-client-id`                                                                                   |
-| `PAYOS__API_KEY`                   | PayOS API Key                             | `your-payos-api-key`                                                                                     |
-| `PAYOS__CHECKSUM_KEY`              | PayOS Checksum Key                        | `your-payos-checksum-key`                                                                                |
-| `PAYOS__BASE_URL`                  | PayOS Base URL                            | `https://api-merchant.payos.vn`                                                                          |
-| `PAYOS__RETURN_URL`                | PayOS Return URL                          | `https://yourdomain.online/payment-processing`                                                           |
-| `PAYOS__CANCEL_URL`                | PayOS Cancel URL                          | `https://yourdomain.online/payment-processing`                                                           |
-| `UPLOAD_PATH`                      | Đường dẫn lưu trữ ảnh vĩnh viễn           | `/var/www/anhemmotor/uploads`                                                                            |
-| `GHN_TOKEN`                        | Mã API Token từ GHN                       | `a1b2c3d4e5f6g7h8...`                                                                                    |
-| `GHN_SHOP_ID`                      | Mã cửa hàng (Shop ID) trên GHN            | `012345`                                                                                                 |
-| `GHN_BASE_URL`                     | Địa chỉ API của GHN                       | `https://dev-online-gateway.ghn.vn`                                                                      |
-| `AI_PROVIDER`                      | Nhà cung cấp AI (`Gemini` hoặc `ApiEndpoint`) | `Gemini`                                                                                             |
-| `AI_API_KEY`                   | API Key AI Provider (chỉ dùng cho Gemini) | `AIzaSyB...`                                                                                             |
-| `AI_MODEL`                     | Tên mô hình AI                            | `gemini-3.5-flash` / `qwen2.5:7b`                                                                        |
-| `AI_API_ENDPOINT`                  | Base URL Ollama (không kèm `/v1`)         | `http://127.0.0.1:11434`                                                                                 |
-| `LANGSMITH_TRACING`                | Bật LangSmith tracing (true/false)        | `true`                                                                                                   |
-| `LANGSMITH_API_KEY`                | LangSmith API Key                         | `lsv2_pt_...`                                                                                            |
-| `EMBEDDING_MODEL`                  | Tên mô hình AI Embedding                  | `text-embedding-004` / `nomic-embed-text`                                                                |
-| `QDRANT_URL`                       | Qdrant Database URL                       | `https://xyz.qdrant.tech:6333`                                                                           |
-| `QDRANT_API_KEY`                   | Qdrant API Key                            | `your-qdrant-api-key`                                                                                    |
+| Secret Name                        | Mô Tả                                         | Ví Dụ                                                                                                    |
+| ---------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `ALLOWED_HOSTS`                    | Domains được phép                             | `api.yourdomain.com;yourdomain.com` hoặc `*`                                                             |
+| `CORS_ALLOWED_ORIGINS`             | CORS Allowed Origins                          | `https://anhemmotor.online;https://admin.anhemmotor.online;http://localhost:5002`                        |
+| `DB_CONNECTION_STRING`             | PostgreSQL connection string                  | `Host=XXXXX;Port=5432;Database=AnhEmMotorDB;Username=postgres;Password=XXXXX;Include Error Detail=true;` |
+| `JWT_SECRET_KEY`                   | JWT secret key (>= 32 chars)                  | `Your-Super-Secret-JWT-Key-32-Chars`                                                                     |
+| `JWT_ISSUER`                       | API URL                                       | `https://api.yourdomain.com`                                                                             |
+| `JWT_AUDIENCE`                     | Client URL                                    | `https://yourdomain.com`                                                                                 |
+| `PRODUCTION_SERVER_IP`             | VPS IP hoặc domain                            | `*`                                                                                                      |
+| `PRODUCTION_SERVER_USERNAME`       | SSH username                                  | `root` hoặc `youruser`                                                                                   |
+| `SERVER_REMOTE_ACCESS_PRIVATE_KEY` | Private SSH key                               | Nội dung file `~/.ssh/id_rsa`                                                                            |
+| `ENABLE_DATABASE_SEEDING`          | Chạy data seeding khi deploy (true/false)     | `false` (production) hoặc `true` (lần đầu setup)                                                         |
+| `COOKIE_DOMAIN`                    | Cookie Domain (for refresh tokens)            | `.yourdomain.com` hoặc để trống nếu đang chạy trên Localhost (Your IP)                                   |
+| `SUPER_ROLES_LIST`                 | Danh sách Roles Admin (JSON Array)            | `["Admin", "SuperAdmin"]`                                                                                |
+| `PROTECTED_USERS_LIST`             | Người dùng không thể xóa (JSON Array)         | `["admin@anhem.com:Admin@123456"]`                                                                       |
+| `DEFAULT_ROLES_FOR_NEW_USER_LIST`  | Roles mặc định cho user mới (JSON Array)      | `["User"]`                                                                                               |
+| `OTLP_ENDPOINT`                    | Địa chỉ OpenTelemetry OTLP                    | `http://your-otel-collector:4317`                                                                        |
+| `GOOGLE_CLIENT_ID`                 | Google OAuth Client ID                        | `your-google-client-id.apps.googleusercontent.com`                                                       |
+| `GOOGLE_CLIENT_SECRET`             | Google OAuth Client Secret                    | `GOCSPX-your-google-secret`                                                                              |
+| `FACEBOOK_APP_ID`                  | Facebook App ID                               | `your-facebook-app-id`                                                                                   |
+| `FACEBOOK_APP_SECRET`              | Facebook App Secret                           | `your-facebook-app-secret`                                                                               |
+| `VNPAY__TMN_CODE`                  | VNPay Terminal Code (TmnCode)                 | `XXT7WT32`                                                                                               |
+| `VNPAY__HASH_SECRET`               | VNPay Hash Secret                             | `1ff1b8243e86dd74cd6f4c284b06bb2ad5...`                                                                  |
+| `VNPAY__BASE_URL`                  | VNPay Base URL (Sandbox/Production)           | `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html`                                                     |
+| `VNPAY__CALLBACK_URL`              | VNPay Return/Callback URL                     | `https://api.yourdomain.com/api/payment/vnpay-callback`                                                  |
+| `PAYOS__CLIENT_ID`                 | PayOS Client ID                               | `your-payos-client-id`                                                                                   |
+| `PAYOS__API_KEY`                   | PayOS API Key                                 | `your-payos-api-key`                                                                                     |
+| `PAYOS__CHECKSUM_KEY`              | PayOS Checksum Key                            | `your-payos-checksum-key`                                                                                |
+| `PAYOS__BASE_URL`                  | PayOS Base URL                                | `https://api-merchant.payos.vn`                                                                          |
+| `PAYOS__RETURN_URL`                | PayOS Return URL                              | `https://yourdomain.online/payment-processing`                                                           |
+| `PAYOS__CANCEL_URL`                | PayOS Cancel URL                              | `https://yourdomain.online/payment-processing`                                                           |
+| `UPLOAD_PATH`                      | Đường dẫn lưu trữ ảnh vĩnh viễn               | `/var/www/anhemmotor/uploads`                                                                            |
+| `GHN_TOKEN`                        | Mã API Token từ GHN                           | `a1b2c3d4e5f6g7h8...`                                                                                    |
+| `GHN_SHOP_ID`                      | Mã cửa hàng (Shop ID) trên GHN                | `012345`                                                                                                 |
+| `GHN_BASE_URL`                     | Địa chỉ API của GHN                           | `https://dev-online-gateway.ghn.vn`                                                                      |
+| `AI_PROVIDER`                      | Nhà cung cấp AI (`Gemini` hoặc `ApiEndpoint`) | `Gemini`                                                                                                 |
+| `AI_API_KEY`                       | API Key AI Provider (chỉ dùng cho Gemini)     | `AIzaSyB...`                                                                                             |
+| `AI_MODEL`                         | Tên mô hình AI                                | `gemini-3.5-flash` / `qwen2.5:7b`                                                                        |
+| `AI_API_ENDPOINT`                  | Base URL Ollama (không kèm `/v1`)             | `http://127.0.0.1:11434`                                                                                 |
+| `LANGSMITH_TRACING`                | Bật LangSmith tracing (true/false)            | `true`                                                                                                   |
+| `LANGSMITH_API_KEY`                | LangSmith API Key                             | `lsv2_pt_...`                                                                                            |
+| `EMBEDDING_MODEL`                  | Tên mô hình AI Embedding                      | `text-embedding-004` / `nomic-embed-text`                                                                |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -1476,7 +1521,56 @@ Sidecar dùng `ChatOllama` từ `langchain-ollama`, gọi API native của Ollam
 4. Nhấn "+ API Key", đặt tên và copy key.
 5. Vào file `appsettings.json`, đặt `AISetup -> LangSmithTracing` thành `true` và dán key vào `LangSmithApiKey`.
 
-# 11. Troubleshooting
+# 11. Hướng dẫn Cấu hình Google Ads API
+
+Dự án này tích hợp Google Ads API để đồng bộ dữ liệu chiến dịch. Để kích hoạt, bạn cần cung cấp 5 thông tin xác thực sau.
+
+### Cách
+
+### Cách lấy thông tin xác thực (Credentials)
+
+1. **Login Customer ID (Mã khách hàng đăng nhập)**:
+   - Đăng nhập vào tài khoản Google Ads của bạn (tài khoản MCC - Người quản lý, hoặc tài khoản trực tiếp).
+   - Nhìn lên góc trên cùng bên phải, bạn sẽ thấy mã số định dạng `XXX-XXX-XXXX`. Hãy bỏ các dấu gạch ngang (chỉ giữ lại số) để có `LoginCustomerId`.
+
+2. **Developer Token (Mã thông báo nhà phát triển)**:
+   - Đăng nhập vào tài khoản MCC (Tài khoản người quản lý).
+   - Đi tới **Công cụ và cài đặt** > **Trung tâm API** (API Center).
+   - Tại đây bạn sẽ tìm thấy **Developer Token**. Nếu chưa có, bạn cần điền form đăng ký cấp quyền truy cập API.
+
+3. **OAuth2 Client ID & Client Secret**:
+   - Truy cập [Google Cloud Console](https://console.cloud.google.com/).
+   - Tạo một dự án mới (hoặc chọn dự án hiện có).
+   - Bật **Google Ads API** trong phần "APIs & Services" > "Library".
+   - Đi tới "APIs & Services" > "Credentials".
+   - Nhấn **Create Credentials** > **OAuth client ID**. Chọn Application type là "Desktop app" hoặc "Web application".
+   - Sau khi tạo, bạn sẽ nhận được **Client ID** và **Client Secret**.
+
+4. **OAuth2 Refresh Token**:
+   - Để lấy Refresh Token, bạn cần chạy script xác thực OAuth2 của Google hoặc sử dụng [OAuth2 Playground](https://developers.google.com/oauthplayground/).
+   - Cấp quyền truy cập cho Google Ads API với scope: `https://www.googleapis.com/auth/adwords`.
+   - Trao đổi Authorization Code để lấy **Refresh Token**.
+
+### Cấu hình môi trường Local
+
+Điền các thông tin đã lấy được vào `appsettings.json` hoặc `appsettings.Development.json`:
+
+```json
+"GoogleAds": {
+    "DeveloperToken": "YOUR_DEVELOPER_TOKEN",
+    "OAuth2Mode": "APPLICATION",
+    "OAuth2ClientId": "YOUR_CLIENT_ID",
+    "OAuth2ClientSecret": "YOUR_CLIENT_SECRET",
+    "OAuth2RefreshToken": "YOUR_REFRESH_TOKEN",
+    "LoginCustomerId": "YOUR_LOGIN_CUSTOMER_ID"
+}
+```
+
+### Cấu hình trên CI/CD (GitHub Actions)
+
+Bạn cần thêm 5 biến này vào GitHub Secrets (tham khảo bảng ở mục 7). File CI/CD `.github/workflows/deploy.yml` đã tự động ánh xạ các Secret này thành biến môi trường `GoogleAds__...` tương thích với .NET Core.
+
+# 12. Troubleshooting
 
 ## Lỗi: "Docker is not running"
 

@@ -17,4 +17,6 @@ public record ChatProductSearchDto
     public string Currency { get; init; } = "VND";
 
     public int VariantCount { get; init; }
+
+    public string? ImageUrl { get; init; }
 }

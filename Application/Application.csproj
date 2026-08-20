@@ -1,35 +1,28 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-<PropertyGroup>
-<TargetFramework>net10.0</TargetFramework>
-<NoWarn>$(NoWarn);1591</NoWarn>
-<Nullable>enable</Nullable>
-<ImplicitUsings>enable</ImplicitUsings>
-<GenerateDocumentationFile>True</GenerateDocumentationFile>
-<DocumentationFile>api.xml</DocumentationFile>
-<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-<NoWarn>$(NoWarn);1591</NoWarn>
-</PropertyGroup>
-
-<ItemGroup>
-<PackageReference Include="MediatR" Version="14.1.0" />
-<PackageReference Include="Mapster" Version="10.0.8" />
-<PackageReference Include="Mapster.DependencyInjection" Version="10.0.8" />
-<PackageReference Include="FluentValidation" Version="12.1.1" />
-<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
-<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.10" />
-<PackageReference Include="Sieve" Version="2.5.5" />
-<PackageReference Include="libphonenumber-csharp" Version="9.0.32" />
-
-</ItemGroup>
-
-<ItemGroup>
-<InternalsVisibleTo Include="IntegrationTests" />
-</ItemGroup>
-
-<ItemGroup>
-<ProjectReference Include="..\Domain\Domain.csproj" />
-</ItemGroup>
-
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+	<NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Google.Ads.GoogleAds" Version="27.0.0" />
+		<PackageReference Include="MediatR" Version="14.2.0" />
+		<PackageReference Include="Mapster" Version="10.0.11" />
+		<PackageReference Include="Mapster.DependencyInjection" Version="10.0.11" />
+		<PackageReference Include="FluentValidation" Version="12.1.1" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.12" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0.11" />
+		<PackageReference Include="Sieve" Version="2.5.5" />
+		<PackageReference Include="libphonenumber-csharp" Version="9.0.37" />
+	</ItemGroup>
+	<ItemGroup>
+		<InternalsVisibleTo Include="IntegrationTests" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Domain\Domain.csproj" />
+	</ItemGroup>
 </Project>
+
