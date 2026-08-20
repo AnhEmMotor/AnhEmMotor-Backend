@@ -46,7 +46,7 @@ public class ProcessReturnRequestCommandHandler : IRequestHandler<ProcessReturnR
             {
                 InventoryReceiptDate = DateTimeOffset.UtcNow,
                 Notes = $"Restock from Return Request #{returnRequest.Id}",
-                StatusId = "approved", 
+                StatusId = Domain.Constants.InventoryReceipt.InventoryReceiptStatus.Approve,
                 SourceOrderId = returnRequest.OrderId,
                 InventoryReceiptInfos = returnRequest.Items.Select(i => new InventoryReceiptInfo
                 {

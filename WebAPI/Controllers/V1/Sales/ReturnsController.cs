@@ -81,10 +81,7 @@ public class ReturnsController : ControllerBase
         [FromBody] Application.Features.Sales.Returns.Commands.ProcessReturnRequest.ProcessReturnRequestCommand command,
         CancellationToken cancellationToken)
     {
-        if (id != command.ReturnRequestId)
-        {
-            return BadRequest("ID mismatch");
-        }
+        command.ReturnRequestId = id;
 
         var result = await _mediator.Send(command, cancellationToken);
         if (result.IsSuccess)
