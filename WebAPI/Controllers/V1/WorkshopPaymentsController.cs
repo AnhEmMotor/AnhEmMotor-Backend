@@ -35,9 +35,21 @@ public class WorkshopPaymentsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(PagedResult<WorkshopPaymentResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetListAsync(
         [FromQuery] SieveModel sieveModel,
+        [FromQuery] string? sourceType,
+        [FromQuery] string? paymentStatus,
+        [FromQuery] string? paymentMethod,
+        [FromQuery] string? search,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetWorkshopPaymentsListQuery { Sieve = sieveModel }, cancellationToken)
+        var query = new GetWorkshopPaymentsListQuery
+        {
+            Sieve = sieveModel,
+            SourceType = sourceType,
+            PaymentStatus = paymentStatus,
+            PaymentMethod = paymentMethod,
+            Search = search
+        };
+        var result = await mediator.Send(query, cancellationToken)
             .ConfigureAwait(false);
         return HandleResult(result);
     }

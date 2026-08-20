@@ -39,18 +39,28 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var repairOrders = await context.MaintenanceHistory
             .Where(m => m.CreatedAt >= fromDate && m.CreatedAt <= toDate)
             .ToListAsync(cancellationToken);
-        var activeRepairOrders = await context.MaintenanceHistory
-            .Where(m => m.TotalCost == 0)
-            .ToListAsync(cancellationToken);
-        var inProgressCount = activeRepairOrders.Count;
         var completedOrders = repairOrders.Where(r => r.TotalCost > 0).ToList();
+
+        var serviceBookings = await context.ServiceBookings
+            .Where(b => b.CreatedAt >= fromDate && b.CreatedAt <= toDate)
+            .ToListAsync(cancellationToken);
+            
+        var activeBookings = await context.ServiceBookings
+            .Where(b => b.Status == Domain.Enums.BookingServiceStatus.InProgress.ToString() || 
+                        b.Status == Domain.Enums.BookingServiceStatus.Pending.ToString() || 
+                        b.Status == Domain.Enums.BookingServiceStatus.Confirmed.ToString())
+            .ToListAsync(cancellationToken);
+            
+        var inProgressCount = activeBookings.Count(b => b.Status == Domain.Enums.BookingServiceStatus.InProgress.ToString());
+
         double avgHours = 0;
-        if (completedOrders.Any())
+        var completedBookings = serviceBookings.Where(b => b.Status == Domain.Enums.BookingServiceStatus.Completed.ToString()).ToList();
+        if (completedBookings.Any())
         {
-            avgHours = completedOrders.Average(
-                r => r.UpdatedAt.HasValue && r.CreatedAt.HasValue
-                    ? (r.UpdatedAt.Value - r.CreatedAt.Value).TotalHours
-                    : 2.5);
+            avgHours = completedBookings.Average(
+                r => r.CompletedDate.HasValue && r.CreatedAt.HasValue
+                    ? (r.CompletedDate.Value - r.CreatedAt.Value).TotalHours
+                    : (r.UpdatedAt.HasValue && r.CreatedAt.HasValue ? (r.UpdatedAt.Value - r.CreatedAt.Value).TotalHours : 2.5));
         }
         var workshopPayments = await context.WorkshopPayments
             .Where(p => p.CreatedAt >= fromDate && p.CreatedAt <= toDate)
@@ -114,26 +124,38 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             revenueTrend.RetailRevenue.Add(monthRetail);
         }
         var overdueCutoff = DateTimeOffset.UtcNow.AddHours(-48);
-        var overdueInProgress = activeRepairOrders.Where(r => r.CreatedAt <= overdueCutoff).ToList();
-        var vehicleIdsForOverdue = overdueInProgress.Select(r => r.VehicleId).Distinct().ToList();
+        var overdueBookings = activeBookings.Where(b => b.Status == Domain.Enums.BookingServiceStatus.InProgress.ToString() && (b.ScheduledDate < overdueCutoff || (b.CreatedAt.HasValue && b.CreatedAt.Value < overdueCutoff))).ToList();
+        
+        var overdueVehicleIds = overdueBookings.Where(b => b.VehicleId.HasValue).Select(b => b.VehicleId!.Value).Distinct().ToList();
         var vehicleOverdueDict = new Dictionary<int, string>();
-        if (vehicleIdsForOverdue.Any())
+        if (overdueVehicleIds.Any())
         {
             var vList = await context.Vehicles
-                .Where(v => vehicleIdsForOverdue.Contains(v.Id))
-                .Select(v => new { v.Id, CustomerName = v.User != null ? v.User.FullName : "-" })
+                .Include(v => v.User)
+                .Include(v => v.Lead)
+                .Where(v => overdueVehicleIds.Contains(v.Id))
+                .Select(v => new { 
+                    v.Id, 
+                    CustomerName = v.User != null ? v.User.FullName : (v.Lead != null ? v.Lead.FullName : "-") 
+                })
                 .ToListAsync(cancellationToken);
             vehicleOverdueDict = vList.ToDictionary(x => x.Id, x => x.CustomerName);
         }
-        var overdueTickets = overdueInProgress.Select(
-            r => new OverdueTicketDto
+        
+        var overdueTickets = overdueBookings.Select(
+            b => new OverdueTicketDto
             {
-                TicketId = r.Id,
-                CustomerName = vehicleOverdueDict.TryGetValue(r.VehicleId, out var cn) ? cn : "-",
-                ExpectedCompletionTime = (r.CreatedAt ?? DateTimeOffset.UtcNow).AddHours(48),
+                TicketId = b.Id,
+                CustomerName = b.Customer != null ? b.Customer.FullName : (b.VehicleId.HasValue && vehicleOverdueDict.TryGetValue(b.VehicleId.Value, out var cn) ? cn : "-"),
+                ExpectedCompletionTime = b.ScheduledDate.AddMinutes(b.EstimatedDurationMinutes ?? 60),
                 Status = "Dang sua chua"
             })
             .ToList();
+            
+        var activeRepairOrders = await context.MaintenanceHistory
+            .Where(m => m.TotalCost == 0)
+            .ToListAsync(cancellationToken);
+
         var partShortages = new List<PartShortageDto>();
         foreach (var order in activeRepairOrders.Where(r => !string.IsNullOrEmpty(r.PartsJson)))
         {
@@ -179,14 +201,23 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             paymentMethodGroups = new List<RevenueSourceDto> { new RevenueSourceDto { Source = "Khac", Amount = 0 } };
         }
         var repairOrderStatusCounts = new List<RepairOrderStatusCountDto>();
-        var pendingCount = repairOrders.Count(r => r.TotalCost == 0);
-        repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Cho sua chua", Count = pendingCount });
-        repairOrderStatusCounts.Add(
-            new RepairOrderStatusCountDto { Status = "Dang sua chua", Count = inProgressCount - pendingCount });
+        var pendingStatusStr = Domain.Enums.BookingServiceStatus.Pending.ToString();
+        var confirmedStatusStr = Domain.Enums.BookingServiceStatus.Confirmed.ToString();
+        var inProgressStatusStr = Domain.Enums.BookingServiceStatus.InProgress.ToString();
+        var completedStatusStr = Domain.Enums.BookingServiceStatus.Completed.ToString();
+        var cancelledStatusStr = Domain.Enums.BookingServiceStatus.Cancelled.ToString();
+        var noShowStatusStr = Domain.Enums.BookingServiceStatus.NoShow.ToString();
+        
+        int pendingBookingCount = serviceBookings.Count(b => b.Status == pendingStatusStr || b.Status == confirmedStatusStr);
+        int inProgressBookingCount = serviceBookings.Count(b => b.Status == inProgressStatusStr);
+        int completedBookingCount = serviceBookings.Count(b => b.Status == completedStatusStr);
+        int cancelledBookingCount = serviceBookings.Count(b => b.Status == cancelledStatusStr || b.Status == noShowStatusStr);
+        
+        repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Cho sua chua", Count = pendingBookingCount });
+        repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Dang sua chua", Count = inProgressBookingCount });
         repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Cho nghiem thu", Count = 0 });
-        repairOrderStatusCounts.Add(
-            new RepairOrderStatusCountDto { Status = "Da hoan thanh", Count = completedOrders.Count });
-        repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Da huy phieu", Count = 0 });
+        repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Da hoan thanh", Count = completedBookingCount });
+        repairOrderStatusCounts.Add(new RepairOrderStatusCountDto { Status = "Da huy phieu", Count = cancelledBookingCount });
         return new WorkshopDashboardResponse
         {
             KpiCards =

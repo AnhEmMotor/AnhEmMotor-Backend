@@ -137,20 +137,38 @@ public class StatisticalAnalyticsRepository(ApplicationDBContext context) : ISta
                                     o.CreatedAt <= endOfDay &&
                                     o.StatusId == "Completed")
                         .SelectMany(o => o.OutputInfos)
-                        .Sum(oi => (decimal?)((oi.Price ?? 0) * (oi.Count ?? 0))) ?? 0
+                        .Sum(oi => (decimal?)((oi.Price ?? 0) * (oi.Count ?? 0))) ?? 0,
+                    TargetSales = context.KPIs
+                        .Where(
+                            k => k.EmployeeProfileId == e.Id &&
+                                    k.PeriodStart <= endOfDay &&
+                                    k.PeriodEnd >= start)
+                        .Sum(k => (decimal?)k.TargetValue) ?? 0,
+                    CommissionPaid = context.CommissionRecords
+                        .Where(
+                            c => c.EmployeeProfileId == e.Id &&
+                                    c.DateEarned >= start &&
+                                    c.DateEarned <= endOfDay &&
+                                    (c.Status == Domain.Entities.CommissionStatus.Confirmed || c.Status == Domain.Entities.CommissionStatus.Paid))
+                        .Sum(c => (decimal?)c.Amount) ?? 0
                 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-        return[.. staffSales.Select(
+
+        var sortedStaffSales = staffSales.OrderByDescending(s => s.Sales).ToList();
+
+        return [.. sortedStaffSales.Select(
             (s, index) => new StaffPerformanceResponse
             {
                 EmployeeName = s.FullName ?? string.Empty,
                 Role = s.Role ?? string.Empty,
                 TotalSales = s.Sales,
-                TargetSales = 120000000m,
-                CommissionPaid = s.Sales * 0.02m,
-                KpiStatus = s.Sales > 100000000 ? "Vượt KPI" : (s.Sales > 50000000 ? "Đạt" : "Cần cải thiện"),
-                IsTopSeller = index == 0
+                TargetSales = s.TargetSales,
+                CommissionPaid = s.CommissionPaid,
+                KpiStatus = s.TargetSales == 0 ? "Chưa đặt KPI" :
+                            (s.Sales >= s.TargetSales * 1.1m ? "Vượt KPI" :
+                            (s.Sales >= s.TargetSales ? "Đạt" : "Cần cải thiện")),
+                IsTopSeller = index == 0 && s.Sales > 0
             })];
     }
 
