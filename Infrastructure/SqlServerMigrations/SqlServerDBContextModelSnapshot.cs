@@ -2073,6 +2073,9 @@ namespace Infrastructure.SqlServerMigrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("VehicleImage")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("VehicleModel")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -2080,6 +2083,12 @@ namespace Infrastructure.SqlServerMigrations
                     b.Property<decimal>("VehiclePrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("VehicleType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VehicleVersion")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -2656,7 +2665,7 @@ namespace Infrastructure.SqlServerMigrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
@@ -2664,6 +2673,8 @@ namespace Infrastructure.SqlServerMigrations
                     b.HasKey("Id");
 
                     b.HasIndex("OutputId");
+
+                    b.HasIndex("DeletedAt", "Status", "DeliveredAt", "Type", "OutputId");
 
                     b.ToTable("Shipments");
                 });

@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 using Application.ApiContracts.Product.Requests;
 using Application.Features.Products.Commands.CreateProduct;
 using FluentValidation;

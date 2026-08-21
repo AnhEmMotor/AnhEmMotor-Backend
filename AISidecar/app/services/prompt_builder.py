@@ -48,7 +48,8 @@ def build_history_messages(context: dict | None, current_message: str) -> list:
             and isinstance(messages[-1], HumanMessage)
             and messages[-1].content == current_message):
         messages.pop()
-    return messages
+    # System prompt alone is ~3000 tokens; keep only the latest turn to stay under num_ctx.
+    return messages[-1:]
 
 
 def build_store_system_message(server_date: str | None = None) -> SystemMessage:

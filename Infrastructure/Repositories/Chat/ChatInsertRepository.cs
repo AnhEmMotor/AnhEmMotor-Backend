@@ -26,13 +26,4 @@ public class ChatInsertRepository(ApplicationDBContext context) : IChatInsertRep
         context.ChatFeedbacks.Add(feedback);
     }
 
-    public void AddPlan(ChatPlan plan)
-    {
-        context.ChatPlans.Add(plan);
-    }
-
-    public void AddTemplate(ChatPlanTemplate template)
-    {
-        context.ChatPlanTemplates.Add(template);
-    }
 }

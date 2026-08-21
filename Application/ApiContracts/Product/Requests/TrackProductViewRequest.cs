@@ -5,5 +5,9 @@ namespace Application.ApiContracts.Product.Requests
         public int DwellTimeMs { get; set; }
 
         public string? VisitorKey { get; set; }
+
+        public int? VariantId { get; set; }
+
+        public int? VariantColorId { get; set; }
     }
 }

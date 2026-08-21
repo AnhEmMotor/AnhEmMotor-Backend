@@ -148,8 +148,28 @@ namespace Infrastructure.Repositories.ProductVariant
                 PageSize = normalizedPageSize
             };
             query = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
+
+            if (string.IsNullOrWhiteSpace(sorts))
+            {
+                query = query.OrderByDescending(v => v.Id);
+            }
+
             var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
-            IQueryable<ProductVariantEntity> dbQuery = query
+
+            var pagedIds = await query
+                .Select(v => v.Id)
+                .Skip((normalizedPage - 1) * normalizedPageSize)
+                .Take(normalizedPageSize)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            if (pagedIds.Count == 0)
+            {
+                return (new List<ProductVariantEntity>(), totalCount);
+            }
+
+            var itemsQuery = context.GetQuery<ProductVariantEntity>(mode)
+                .Where(v => pagedIds.Contains(v.Id))
                 .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
                 .Include(v => v.Product)
@@ -166,15 +186,17 @@ namespace Infrastructure.Repositories.ProductVariant
                         .Where(ii => ii.DeletedAt == null && ii.InventoryReceipt!.DeletedAt == null))
                 .ThenInclude(ii => ii.InventoryReceipt)
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
-                .ThenInclude(oi => oi.OutputOrder);
-            dbQuery = dbQuery.OrderByDescending(v => v.Id);
-            var items = await dbQuery
-                .Skip((normalizedPage - 1) * normalizedPageSize)
-                .Take(normalizedPageSize)
-                .AsSplitQuery()
+                .ThenInclude(oi => oi.OutputOrder)
+                .AsSplitQuery();
+
+            var items = await itemsQuery
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-            return (items, totalCount);
+
+            var itemsDict = items.ToDictionary(i => i.Id);
+            var sortedItems = pagedIds.Select(id => itemsDict[id]).ToList();
+
+            return (sortedItems, totalCount);
         }
 
         public Task<List<string>> GetUrlSlugsAsync(CancellationToken cancellationToken)

@@ -23,11 +23,7 @@ public class InternalChatController(
     UserManager<ApplicationUser> userManager,
     ApplicationDBContext dbContext,
     IConfiguration configuration,
-    IChatRunWriter chatRunWriter,
-    IChatReadRepository chatReadRepository,
-    IChatInsertRepository chatInsertRepository,
-    IChatUpdateRepository chatUpdateRepository,
-    IUnitOfWork unitOfWork) : ControllerBase
+    IChatRunWriter chatRunWriter) : ControllerBase
 {
     [HttpPost("context")]
     public async Task<IActionResult> GetContext([FromBody] ContextRequest request, CancellationToken cancellationToken)
@@ -82,9 +78,9 @@ public class InternalChatController(
                 User = new { user.Id, user.UserName, user.FullName, user.Email },
                 Roles = roles,
                 Permissions = rolePermissions,
-                SessionId = request.SessionId,
+                request.SessionId,
                 History = history,
-                RoutingContext = session.RoutingContext
+                session.RoutingContext
             });
     }
 
@@ -130,213 +126,6 @@ public class InternalChatController(
         return Ok(items);
     }
 
-    private const int MaxPlanSteps = 8;
-
-    private async Task<ChatPlan?> GetOwnedPlanAsync(Guid runId, Guid userId, CancellationToken cancellationToken)
-    {
-        var plan = await dbContext.ChatPlans
-            .Include(p => p.Run!.Session)
-            .FirstOrDefaultAsync(p => p.RunId == runId, cancellationToken);
-        return plan != null && plan.Run?.Session?.UserId == userId ? plan : null;
-    }
-
-    [HttpPost("runs/{runId}/plan/start")]
-    public async Task<IActionResult> StartPlan(
-        Guid runId,
-        [FromBody] StartPlanRequest request,
-        CancellationToken cancellationToken)
-    {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId))
-            return Unauthorized();
-        var run = await dbContext.ChatRuns
-            .Include(r => r.Session)
-            .Include(r => r.Plan)
-            .FirstOrDefaultAsync(r => r.Id == runId, cancellationToken);
-        if (run == null || run.Session?.UserId != userId)
-        {
-            return NotFound("Run không tồn tại hoặc không thuộc quyền sở hữu.");
-        }
-        if (run.Plan != null)
-        {
-            return Ok(new { planId = run.Plan.Id });
-        }
-        var plan = new ChatPlan
-        {
-            RunId = runId,
-            SessionId = run.SessionId,
-            Status = ChatPlanStatus.Drafting,
-            Steps = "[]",
-            ToolRegistryFingerprint = request.Fingerprint,
-        };
-        dbContext.ChatPlans.Add(plan);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return Ok(new { planId = plan.Id });
-    }
-
-    [HttpGet("runs/{runId}/plan")]
-    public async Task<IActionResult> GetPlanForSidecar(Guid runId, CancellationToken cancellationToken)
-    {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId))
-            return Unauthorized();
-        var plan = await GetOwnedPlanAsync(runId, userId, cancellationToken);
-        if (plan == null)
-            return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
-        var steps = JsonSerializer.Deserialize<List<PlanStepDto>>(plan.Steps) ?? [];
-        return Ok(new { planId = plan.Id, version = plan.Version, status = plan.Status, steps });
-    }
-
-    [HttpPost("runs/{runId}/plan/steps")]
-    public async Task<IActionResult> AddPlanStep(
-        Guid runId,
-        [FromBody] AddPlanStepRequest request,
-        CancellationToken cancellationToken)
-    {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId))
-            return Unauthorized();
-        var plan = await GetOwnedPlanAsync(runId, userId, cancellationToken);
-        if (plan == null)
-            return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
-        var steps = JsonSerializer.Deserialize<List<PlanStepDto>>(plan.Steps) ?? [];
-        var activeCount = steps.Count(s => s.Status != PlanStepStatus.Skipped);
-        if (activeCount >= MaxPlanSteps)
-        {
-            return BadRequest("Kế hoạch đã đạt tối đa 8 bước.");
-        }
-        var step = PlanStepDto.NewPending(
-            Guid.NewGuid().ToString("N"),
-            steps.Count == 0 ? 1 : steps.Max(s => s.Order) + 1,
-            request.Title,
-            request.Detail,
-            request.ExpectedTools ?? []);
-        steps.Add(step);
-        plan.Steps = JsonSerializer.Serialize(steps);
-        plan.Version++;
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return Ok(step);
-    }
-
-    [HttpPost("runs/{runId}/plan/ready")]
-    public async Task<IActionResult> MarkPlanReady(Guid runId, CancellationToken cancellationToken)
-    {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId))
-            return Unauthorized();
-        var plan = await GetOwnedPlanAsync(runId, userId, cancellationToken);
-        if (plan == null)
-            return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
-        plan.Status = ChatPlanStatus.Ready;
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return Ok();
-    }
-
-    [HttpPost("runs/{runId}/plan/steps/{stepId}/status")]
-    public async Task<IActionResult> UpdatePlanStepStatus(
-        Guid runId,
-        string stepId,
-        [FromBody] UpdatePlanStepStatusRequest request,
-        CancellationToken cancellationToken)
-    {
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId))
-            return Unauthorized();
-        var plan = await GetOwnedPlanAsync(runId, userId, cancellationToken);
-        if (plan == null)
-            return NotFound("Plan không tồn tại hoặc không thuộc quyền sở hữu.");
-        var steps = JsonSerializer.Deserialize<List<PlanStepDto>>(plan.Steps) ?? [];
-        var idx = steps.FindIndex(s => s.Id == stepId);
-        if (idx < 0)
-            return NotFound("Không tìm thấy bước.");
-        steps[idx] = steps[idx] with { Status = request.Status, Result = request.Result ?? steps[idx].Result };
-        plan.Steps = JsonSerializer.Serialize(steps);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return Ok();
-    }
-
-    [HttpGet("plan-templates/find")]
-    public async Task<IActionResult> FindPlanTemplate(
-        [FromQuery] string intentHash,
-        [FromQuery] string module,
-        CancellationToken cancellationToken)
-    {
-        var template = await chatReadRepository.GetActiveTemplateByIntentHashAsync(
-            intentHash,
-            module,
-            cancellationToken);
-        if (template == null)
-            return NotFound();
-        return Ok(ToPlanTemplateResponse(template));
-    }
-
-    [HttpGet("plan-templates/{id:guid}")]
-    public async Task<IActionResult> GetPlanTemplate(Guid id, CancellationToken cancellationToken)
-    {
-        var template = await chatReadRepository.GetTemplateByIdAsync(id, cancellationToken);
-        if (template == null)
-            return NotFound();
-        return Ok(ToPlanTemplateResponse(template));
-    }
-
-    [HttpPost("plan-templates")]
-    public async Task<IActionResult> CreatePlanTemplate(
-        [FromBody] CreatePlanTemplateRequest request,
-        CancellationToken cancellationToken)
-    {
-        var template = new ChatPlanTemplate
-        {
-            CanonicalQuestion = request.CanonicalQuestion,
-            IntentHash = request.IntentHash,
-            Module = request.Module,
-            StepsTemplate = request.StepsTemplateJson,
-            Slots = request.SlotsJson,
-            RequiredTools = request.RequiredToolsJson,
-            RequiredPermissions = request.RequiredPermissionsJson,
-            ToolRegistryFingerprint = request.ToolRegistryFingerprint,
-        };
-        chatInsertRepository.AddTemplate(template);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Ok(new { templateId = template.Id });
-    }
-
-    [HttpPost("plan-templates/{id:guid}/record-use")]
-    public async Task<IActionResult> RecordPlanTemplateUse(
-        Guid id,
-        [FromBody] RecordPlanTemplateUseRequest request,
-        CancellationToken cancellationToken)
-    {
-        var template = await chatReadRepository.GetTemplateByIdAsync(id, cancellationToken);
-        if (template == null)
-            return NotFound();
-        template.UseCount++;
-        if (request.Success)
-            template.SuccessCount++;
-        if (request.UserEdited)
-            template.UserEditCount++;
-        if (request.Rejected)
-            template.RejectCount++;
-        template.LastUsedAt = DateTimeOffset.UtcNow;
-        chatUpdateRepository.UpdateTemplate(template);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Ok();
-    }
-
-    private static object ToPlanTemplateResponse(ChatPlanTemplate template) => new
-    {
-        templateId = template.Id,
-        canonicalQuestion = template.CanonicalQuestion,
-        module = template.Module,
-        stepsTemplate = JsonSerializer.Deserialize<JsonElement>(template.StepsTemplate),
-        slots = JsonSerializer.Deserialize<JsonElement>(template.Slots),
-        requiredTools = JsonSerializer.Deserialize<List<string>>(template.RequiredTools) ?? [],
-        requiredPermissions = JsonSerializer.Deserialize<List<string>>(template.RequiredPermissions) ?? [],
-        toolRegistryFingerprint = template.ToolRegistryFingerprint,
-        useCount = template.UseCount,
-        successCount = template.SuccessCount,
-        userEditCount = template.UserEditCount,
-        status = template.Status,
-    };
 }
 
 public class ContextRequest
@@ -401,3 +190,4 @@ public class RecordPlanTemplateUseRequest
 
     public bool Rejected { get; set; }
 }
+

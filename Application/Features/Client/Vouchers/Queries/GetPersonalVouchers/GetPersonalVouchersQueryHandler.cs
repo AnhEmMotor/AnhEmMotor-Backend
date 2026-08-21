@@ -36,12 +36,12 @@ public class GetPersonalVouchersQueryHandler : IRequestHandler<GetPersonalVouche
             return new List<VoucherResponse>();
 
         var leads = await _leadReadRepository.GetPagedAsync<Domain.Entities.Lead>(
-            new SieveModel { PageSize = 1, Page = 1 },
+            new SieveModel { PageSize = 1, Page = 1, Sorts = "-Id" },
             Domain.Constants.DataFetchMode.ActiveOnly,
             l => l.Email == user.Email,
             cancellationToken);
 
-        var lead = leads.Items.FirstOrDefault();
+        var lead = leads.Items?.FirstOrDefault();
         if (lead == null)
             return new List<VoucherResponse>();
 
@@ -51,6 +51,6 @@ public class GetPersonalVouchersQueryHandler : IRequestHandler<GetPersonalVouche
             v => v.VoucherLeads.Any(vl => vl.LeadId == lead.Id) && v.ValidTo >= DateTime.UtcNow.Date,
             cancellationToken);
 
-        return vouchersPage.Items.ToList();
+        return vouchersPage.Items?.ToList() ?? new List<VoucherResponse>();
     }
 }

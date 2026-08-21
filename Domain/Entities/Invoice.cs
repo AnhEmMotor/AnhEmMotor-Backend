@@ -33,6 +33,12 @@ namespace Domain.Entities
 
         public string VehicleModel { get; set; } = string.Empty;
 
+        public string? VehicleVersion { get; set; }
+
+        public string? VehicleType { get; set; }
+
+        public string? VehicleImage { get; set; }
+
         public string VehicleColor { get; set; } = string.Empty;
 
         public string ChassisNo { get; set; } = string.Empty;

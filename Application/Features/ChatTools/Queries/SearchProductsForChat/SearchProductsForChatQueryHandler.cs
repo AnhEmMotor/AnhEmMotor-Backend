@@ -48,7 +48,12 @@ public class SearchProductsForChatQueryHandler(
                 CategoryName = p.ProductCategory?.Name,
                 PriceFrom = p.ProductVariants.Count > 0 ? p.ProductVariants.Min(v => v.Price) : null,
                 PriceTo = p.ProductVariants.Count > 0 ? p.ProductVariants.Max(v => v.Price) : null,
-                VariantCount = p.ProductVariants.Count
+                VariantCount = p.ProductVariants.Count,
+                ImageUrl = p.ProductVariants
+                    .SelectMany(v => v.ProductVariantColors)
+                    .Select(c => c.CoverImageUrl)
+                    .FirstOrDefault(url => !string.IsNullOrEmpty(url))
+                    ?? p.ProductVariants.Select(v => v.CoverImageUrl).FirstOrDefault(url => !string.IsNullOrEmpty(url))
             })
             .ToList();
         var inner = new ChatToolResult<ChatProductSearchDto>(dtos, totalCount, totalCount > dtos.Count);

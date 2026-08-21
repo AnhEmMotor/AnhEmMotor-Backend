@@ -26,7 +26,10 @@ public class UpdateAdminInvoiceHandler(
         invoice.CustomerIdCard = req.CustomerIdCard;
         invoice.CustomerAddress = req.CustomerAddress;
         invoice.VehicleModel = req.VehicleModel;
+        invoice.VehicleVersion = req.VehicleVersion;
         invoice.VehicleColor = req.VehicleColor;
+        invoice.VehicleType = req.VehicleType;
+        invoice.VehicleImage = req.VehicleImage;
         invoice.ChassisNo = req.ChassisNo;
         invoice.EngineNo = req.EngineNo;
         invoice.VehiclePrice = req.VehiclePrice;
@@ -54,7 +57,10 @@ public class UpdateAdminInvoiceHandler(
             updated.CustomerIdCard,
             updated.CustomerAddress,
             updated.VehicleModel,
+            updated.VehicleVersion,
             updated.VehicleColor,
+            updated.VehicleType,
+            updated.VehicleImage,
             updated.ChassisNo,
             updated.EngineNo,
             updated.VehiclePrice,

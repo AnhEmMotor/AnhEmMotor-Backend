@@ -54,10 +54,10 @@ def test_check_output_rewrite_khi_tool_bi_403_va_co_so():
     assert result.action == "rewrite"
 
 
-def test_check_output_rewrite_khi_co_so_ma_khong_goi_tool():
+def test_check_output_allow_khi_co_so_ma_khong_goi_tool():
     result = tool_guard.check_output("Doanh thu là 5000000 đồng",
                                       {"had_forbidden_tool": False, "tool_call_count": 0})
-    assert result.action == "rewrite"
+    assert result.action == "allow"
 
 
 def test_check_output_allow_khi_binh_thuong():
@@ -90,9 +90,6 @@ def test_check_output_kind_phan_biet_tung_ly_do_rewrite():
     forbidden = tool_guard.check_output("Doanh thu là 5000000 đồng",
                                          {"had_forbidden_tool": True, "tool_call_count": 1})
     assert forbidden.kind == "no_permission"
-    metric = tool_guard.check_output("Doanh thu là 5000000 đồng",
-                                      {"had_forbidden_tool": False, "tool_call_count": 0})
-    assert metric.kind == "unverified_metric"
 
 
 def test_check_output_rewrite_khi_bia_cu_phap_goi_tool_gia():

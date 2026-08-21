@@ -28,6 +28,8 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<PurchaseRequest>(p => p.Status).CanSort().CanFilter();
         mapper.Property<InventoryReceipt>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Output>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<ReturnRequest>(p => p.OrderCode).CanSort().CanFilter();
+        mapper.Property<ReturnRequest>(p => p.Status).CanSort().CanFilter();
         mapper.Property<Product>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Product>(p => p.Name).CanSort().CanFilter();
         mapper.Property<Product>(p => p.BrandId).CanFilter();
@@ -46,6 +48,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Banner>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Banner>(p => p.Title).CanSort().CanFilter();
         mapper.Property<ProductVariant>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<ProductVariant>(p => p.Product!.ProductCategory!.ManagementType).CanFilter().HasName("managementType");
         mapper.Property<Supplier>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Brand>(b => b.Name).CanSort().CanFilter();
         mapper.Property<Brand>(b => b.Origin).CanSort().CanFilter();
@@ -129,6 +132,10 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Lead>(l => l.PhoneNumber).CanSort().CanFilter();
         mapper.Property<Lead>(l => l.Tier).CanSort().CanFilter();
         mapper.Property<Lead>(l => l.Points).CanSort().CanFilter();
+        mapper.Property<WarrantyTerm>(w => w.Id).CanSort().CanFilter();
+        mapper.Property<WarrantyTerm>(w => w.BrandId).CanSort().CanFilter();
+        mapper.Property<WarrantyTerm>(w => w.TermName).CanSort().CanFilter();
+        mapper.Property<WarrantyTerm>(w => w.Status).CanSort().CanFilter();
         return mapper;
     }
 

@@ -164,10 +164,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<StoreChatMessage> StoreChatMessages { get; set; }
 
-    public virtual DbSet<ChatPlan> ChatPlans { get; set; }
-
-    public virtual DbSet<ChatPlanTemplate> ChatPlanTemplates { get; set; }
-
     public virtual DbSet<Service> Services { get; set; }
 
     public virtual DbSet<Lead> Leads { get; set; }
@@ -739,13 +735,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany()
             .HasForeignKey(f => f.ReportedBy)
             .OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<ChatPlan>().HasIndex(p => p.RunId).IsUnique();
-        modelBuilder.Entity<ChatPlan>()
-            .HasOne(p => p.Run)
-            .WithOne(r => r.Plan)
-            .HasForeignKey<ChatPlan>(p => p.RunId)
-            .OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<ChatPlan>().HasQueryFilter(p => p.Run!.DeletedAt == null);
         modelBuilder.Entity<StoreChatSession>().HasIndex(s => s.VisitorKey).IsUnique();
         modelBuilder.Entity<StoreChatSession>().HasIndex(s => s.Mode);
         modelBuilder.Entity<ProductView>().HasIndex(v => v.ProductId);

@@ -7,9 +7,7 @@ from fastapi.responses import JSONResponse
 from app.core.errors import SidecarError
 from app.core.logging import setup_logging
 from app.api.v1 import health, chat, search_products, admin, store_chat
-from app.services import qdrant_client as qc
 from app.services.backend_client import BackendClient
-from app.services.qdrant_client import rag_enabled
 from app.tools.registry import verify_tool_contract
 
 logger = logging.getLogger(__name__)
@@ -20,12 +18,6 @@ async def lifespan(application: FastAPI):
     setup_logging()
     logger.info("AI Sidecar started")
     await verify_tool_contract(BackendClient(""))
-    if rag_enabled():
-        try:
-            await qc.ensure_collections()
-        except Exception as exc:
-            logger.warning("Không kết nối được Qdrant lúc khởi động (%s) — RAG sẽ lỗi khi dùng, "
-                            "nhưng sidecar vẫn chạy bình thường bằng SQL.", exc)
     yield
     logger.info("AI Sidecar shutting down")
 
@@ -46,3 +38,4 @@ async def sidecar_error_handler(request: Request, exc: SidecarError):
         status_code=500,
         content={"detail": exc.user_message},
     )
+

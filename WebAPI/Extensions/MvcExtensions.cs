@@ -46,6 +46,7 @@ public static class MvcExtensions
                 config.ReportApiVersions = true;
                 config.ApiVersionReader = new UrlSegmentApiVersionReader();
             })
+            .AddMvc()
             .AddApiExplorer(
                 options =>
                 {

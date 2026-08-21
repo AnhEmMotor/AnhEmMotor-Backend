@@ -123,6 +123,7 @@ public static class DependencyInjection
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<Application.Interfaces.Services.Marketing.IGoogleAdsService, Infrastructure.Services.Marketing.GoogleAdsService>();
         services.AddScoped<IBrandExcelService, BrandExcelService>();
         services.AddScoped<IProductExcelService, ProductExcelService>();
         services.AddScoped<IProductCategoryExcelService, ProductCategoryExcelService>();
@@ -159,11 +160,11 @@ public static class DependencyInjection
         services.AddScoped<IChatRunWriter, ChatRunWriter>();
         services.AddScoped<ISidecarStreamClient, SidecarStreamClient>();
         services.AddScoped<IStoreChatAiClient, StoreChatAiClient>();
-        // services.AddHostedService<ChatRunExecutor>();
-        // services.AddHostedService<OrphanedRunCleaner>();
-        // services.AddHostedService<ChatRunEventCleanupJob>();
-        // services.AddHostedService<ProductViewCleanupJob>();
-        // services.AddHostedService<StaleWaitingSessionMonitor>();
+        services.AddHostedService<ChatRunExecutor>();
+        services.AddHostedService<OrphanedRunCleaner>();
+        services.AddHostedService<ChatRunEventCleanupJob>();
+        services.AddHostedService<ProductViewCleanupJob>();
+        services.AddHostedService<StaleWaitingSessionMonitor>();
         services.Scan(
             scan => scan
                 .FromAssemblies(Assembly.GetExecutingAssembly())
