@@ -6,6 +6,10 @@ namespace Application.ApiContracts.Statistical.Responses
 
         public decimal RevenueChangePercentage { get; set; }
 
+        public decimal PeriodRevenue { get; set; }
+
+        public decimal PeriodProfit { get; set; }
+
         public decimal MonthlyRevenue { get; set; }
 
         public decimal TodayProfit { get; set; }
@@ -15,6 +19,14 @@ namespace Application.ApiContracts.Statistical.Responses
         public decimal LastMonthRevenue { get; set; }
 
         public decimal LastMonthProfit { get; set; }
+
+        public decimal YearlyRevenue { get; set; }
+
+        public decimal YearlyProfit { get; set; }
+
+        public decimal LastYearRevenue { get; set; }
+
+        public decimal LastYearProfit { get; set; }
 
         public decimal Total7dRevenue { get; set; }
 
@@ -27,6 +39,8 @@ namespace Application.ApiContracts.Statistical.Responses
         public int OverdueOrdersCount { get; set; }
 
         public int LowStockCount { get; set; }
+
+        public int OutOfStockCount { get; set; }
 
         public int OverstockCount { get; set; }
 
