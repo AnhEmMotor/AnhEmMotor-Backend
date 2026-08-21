@@ -662,7 +662,7 @@ public class StatisticsController(
     /// <returns>Báo cáo hợp đồng gồm KPI, xu hướng, trạng thái, top nhà cung cấp, danh sách hợp đồng.</returns>
     /// <response code="200">Trả về thống kê hợp đồng thành công.</response>
     [HttpGet("contract-overview")]
-    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.DashboardManagement.View)]
+    [RequiresAnyPermissions(Permissions.Admin.DashboardManagement.View, Permissions.Accountant.ContractManagement.View)]
     [ProducesResponseType(typeof(ContractOverviewResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetContractOverviewAsync(
         [FromQuery] string startDate,
