@@ -508,10 +508,12 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             ? end.Date.AddDays(1).AddTicks(-1)
             : end;
         var startDateTimeOffset = start;
-        var days = (int)(endDateTimeOffset.Date - startDateTimeOffset.Date).TotalDays + 1;
+        var vnStart = startDateTimeOffset.ToOffset(TimeSpan.FromHours(7)).Date;
+        var vnEnd = endDateTimeOffset.ToOffset(TimeSpan.FromHours(7)).Date;
+        var days = (int)(vnEnd - vnStart).TotalDays + 1;
         if (days <= 0)
             days = 1;
-        var startDate = DateOnly.FromDateTime(start.ToOffset(TimeSpan.FromHours(7)).DateTime);
+        var startDate = DateOnly.FromDateTime(vnStart);
         var dateSeries = Enumerable.Range(0, days).Select(i => startDate.AddDays(i)).ToList();
         var rawData = await context.OutputInfos
             .IgnoreQueryFilters()
